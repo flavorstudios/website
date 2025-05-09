@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Mona_Sans as FontSans, Content as FontHeading } from "next/font/google"
+import { Mona_Sans } from "next/font/google"
+import { Orbitron } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -8,15 +9,15 @@ import MainNavigation from "@/components/main-navigation"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 
-const fontSans = FontSans({
+const fontSans = Mona_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
 })
 
-const fontHeading = FontHeading({
+const fontHeading = Orbitron({
   subsets: ["latin"],
   variable: "--font-heading",
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["400", "500", "600", "700", "900"],
 })
 
 export const metadata: Metadata = {

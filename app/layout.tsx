@@ -1,8 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Mona_Sans as FontSans } from "next/font/google"
-import localFont from "next/font/local"
-
+import { Mona_Sans as FontSans, Content as FontHeading } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -15,12 +13,10 @@ const fontSans = FontSans({
   variable: "--font-sans",
 })
 
-// Custom anime-inspired heading font
-const fontHeading = localFont({
-  src: "../public/fonts/heading-font.woff2",
+const fontHeading = FontHeading({
+  subsets: ["latin"],
   variable: "--font-heading",
-  display: "swap",
-  weight: "700",
+  weight: ["400", "500", "600", "700", "800", "900"],
 })
 
 export const metadata: Metadata = {

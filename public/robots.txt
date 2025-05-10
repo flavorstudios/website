@@ -1,0 +1,10 @@
+# robots.txt for flavorstudios.in
+
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://flavorstudios.in/sitemap.xml
+
+# Disallow admin areas
+Disallow: /admin/

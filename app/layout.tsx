@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Mona_Sans } from "next/font/google"
+import { Inter } from "next/font/google"
 import { Orbitron } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
@@ -9,7 +9,7 @@ import MainNavigation from "@/components/main-navigation"
 import Footer from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 
-const fontSans = Mona_Sans({
+const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
 })
@@ -22,11 +22,19 @@ const fontHeading = Orbitron({
 
 export const metadata: Metadata = {
   title: {
-    default: "Flavor Studios | Indie Anime Studio",
+    default: "Flavor Studios – Emotional 3D Anime & Life-Lessons",
     template: "%s | Flavor Studios",
   },
-  description: "Indie anime studio creating original animations and stories",
-  keywords: ["anime", "animation", "studio", "indie", "flavor studios"],
+  description:
+    "Official site of Flavor Studios – home of soulful 3D animations made with Blender. Anime-inspired stories on life, legacy, and light.",
+  keywords: [
+    "Flavor Studios",
+    "Anime Studio",
+    "Blender Animation",
+    "Life Lessons",
+    "3D Anime",
+    "Original Anime Series",
+  ],
   authors: [
     {
       name: "Flavor Studios",
@@ -38,14 +46,14 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://flavorstudios.in",
-    title: "Flavor Studios | Indie Anime Studio",
-    description: "Indie anime studio creating original animations and stories",
+    title: "Flavor Studios – Emotional 3D Anime & Life-Lessons",
+    description: "Original 3D animations with deep stories, emotional moments, and anime-inspired visuals.",
     siteName: "Flavor Studios",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flavor Studios | Indie Anime Studio",
-    description: "Indie anime studio creating original animations and stories",
+    title: "Flavor Studios – Emotional 3D Anime & Life-Lessons",
+    description: "Original 3D animations with deep stories, emotional moments, and anime-inspired visuals.",
     creator: "@flavor_studios",
   },
   icons: {
@@ -63,9 +71,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
       <body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable, fontHeading.variable)}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <div className="relative flex min-h-screen flex-col">
             <MainNavigation />
             <div className="flex-1">{children}</div>

@@ -65,23 +65,8 @@
     @apply relative overflow-hidden rounded-lg border border-border/40 bg-card/30 backdrop-blur-sm transition-all duration-300 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/20;
   }
 
-  .anime-glow {
-    @apply relative;
-  }
-
-  .anime-glow::before {
-    content: "";
-    @apply absolute -inset-0.5 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 blur transition duration-1000 group-hover:opacity-100;
-    z-index: -1;
-  }
-
   .section-divider {
     @apply relative my-24 h-px w-full overflow-visible bg-gradient-to-r from-transparent via-border to-transparent;
-  }
-
-  .section-divider::before {
-    content: "";
-    @apply absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-primary;
   }
 }
 
@@ -115,38 +100,52 @@
     linear-gradient(to bottom, hsl(var(--primary) / 0.05) 1px, transparent 1px);
 }
 
-/* Animated gradient background */
-@keyframes gradientAnimation {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+/* Prose styles for content */
+.prose {
+  @apply text-foreground;
 }
 
-.animated-gradient {
-  background: linear-gradient(-45deg, #6e40c9, #a347ff, #e73c7e, #ee7752);
-  background-size: 400% 400%;
-  animation: gradientAnimation 15s ease infinite;
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  @apply text-foreground font-bold;
 }
 
-/* 3D Card Flip Effect */
-.perspective-500 {
-  perspective: 500px;
+.prose p {
+  @apply mb-4 leading-relaxed;
 }
 
-.transform-style-3d {
-  transform-style: preserve-3d;
+.prose ul {
+  @apply list-disc pl-6 mb-4;
 }
 
-.backface-hidden {
-  backface-visibility: hidden;
+.prose ol {
+  @apply list-decimal pl-6 mb-4;
 }
 
-.rotate-y-180 {
-  transform: rotateY(180deg);
+.prose a {
+  @apply text-primary hover:underline;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-primary/50 pl-4 italic;
+}
+
+.prose code {
+  @apply bg-muted px-1 py-0.5 rounded text-sm;
+}
+
+.prose pre {
+  @apply bg-muted p-4 rounded-md overflow-x-auto;
+}
+
+.prose img {
+  @apply rounded-md;
+}
+
+.prose hr {
+  @apply border-border my-8;
 }

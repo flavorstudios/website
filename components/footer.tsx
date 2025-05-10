@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Youtube, Facebook, Instagram, Twitter, AtSign, Send, MessageCircle, Github } from "lucide-react"
+import { Youtube, Facebook, Instagram, Twitter, AtSign, Send, MessageCircle, BookOpen } from "lucide-react"
 
 const socialLinks = [
   {
@@ -38,9 +38,9 @@ const socialLinks = [
     icon: <MessageCircle className="h-5 w-5" />,
   },
   {
-    name: "GitHub",
-    href: "https://github.com/flavorstudios",
-    icon: <Github className="h-5 w-5" />,
+    name: "Reddit",
+    href: "https://www.reddit.com/r/flavorstudios/",
+    icon: <BookOpen className="h-5 w-5" />,
   },
 ]
 
@@ -51,7 +51,7 @@ const footerLinks = [
       { label: "About", href: "/about" },
       { label: "Career", href: "/career" },
       { label: "Contact", href: "/contact" },
-      { label: "Support", href: "/support" },
+      { label: "Support", href: "https://buymeacoffee.com/flavorstudios" },
     ],
   },
   {
@@ -84,10 +84,13 @@ export default function Footer() {
         <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
           <div className="sm:col-span-2 md:col-span-1 lg:col-span-2">
             <Link href="/" className="inline-block">
-              <span className="font-heading text-xl font-bold tracking-tight heading-gradient">Flavor Studios</span>
+              <span className="font-heading text-xl font-bold tracking-tight heading-gradient">
+                <span className="lowercase">f</span>
+                <span className="uppercase">L</span>
+              </span>
             </Link>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-              An indie anime studio creating original animations and stories that inspire and entertain.
+              Creating emotional 3D animations with deep stories and meaningful life lessons.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               {socialLinks.map((link) => (

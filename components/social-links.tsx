@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Youtube, Facebook, Instagram, Twitter, AtSign, Send, MessageCircle, Github } from "lucide-react"
+import { Youtube, Facebook, Instagram, Twitter, AtSign, Send, MessageCircle, BookOpen } from "lucide-react"
 
 const socialLinks = [
   {
@@ -45,10 +45,10 @@ const socialLinks = [
     color: "hover:text-indigo-500",
   },
   {
-    name: "GitHub",
-    href: "https://github.com/flavorstudios",
-    icon: <Github className="h-5 w-5" />,
-    color: "hover:text-gray-400",
+    name: "Reddit",
+    href: "https://www.reddit.com/r/flavorstudios/",
+    icon: <BookOpen className="h-5 w-5" />,
+    color: "hover:text-orange-500",
   },
 ]
 

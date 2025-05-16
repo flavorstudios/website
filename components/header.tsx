@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { Coffee, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -30,9 +29,10 @@ export function Header() {
     >
       <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2 transition-transform duration-200 hover:scale-105">
-          <Image src="/logo.png" alt="Flavor Studios Logo" width={40} height={40} className="w-8 h-8 md:w-10 md:h-10" />
-          <span className="font-orbitron font-bold text-lg md:text-xl">fL</span>
+        <Link href="/" className="flex items-center transition-transform duration-200 hover:scale-105">
+          <span className="font-orbitron font-bold text-2xl md:text-3xl bg-gradient-to-r from-purple-500 via-pink-500 to-primary bg-clip-text text-transparent">
+            fL
+          </span>
         </Link>
 
         {/* Desktop Navigation */}

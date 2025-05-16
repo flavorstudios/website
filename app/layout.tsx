@@ -5,6 +5,9 @@ import "./globals.css"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AnalyticsProvider } from "@/components/analytics-provider"
+import { GTMNoScript } from "@/components/gtm-noscript"
+import { Suspense } from "react"
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -47,10 +50,14 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon.png?v=1" />
       </head>
       <body className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}>
+        <GTMNoScript />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Header />
-          <main className="flex-grow">{children}</main>
+          <Suspense>
+            <main className="flex-grow">{children}</main>
+          </Suspense>
           <Footer />
+          <AnalyticsProvider />
         </ThemeProvider>
       </body>
     </html>

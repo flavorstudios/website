@@ -26,31 +26,31 @@ export default function DisclaimerPage() {
       {/* Content */}
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto prose prose-lg dark:prose-invert">
-            <p>
+          <div className="max-w-4xl mx-auto space-y-6 text-base md:text-lg">
+            <p className="mb-6">
               The information provided by Flavor Studios ("we," "us," or "our") on our website and associated media
               platforms is for general informational and entertainment purposes only. All content provided on the Site
               is presented in good faith; however, we make no representation or warranty regarding the accuracy,
               adequacy, reliability, completeness, or timeliness of any information provided.
             </p>
 
-            <h2>Limitation of Liability</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Limitation of Liability</h2>
+            <p className="mb-6">
               Under no circumstances shall Flavor Studios or its affiliates, employees, directors, or partners be liable
               for any direct, indirect, incidental, special, consequential, or exemplary damages arising out of or in
               connection with your use or reliance on the content presented on the Site. Your use of our Site and
               reliance on any information is entirely at your own risk.
             </p>
 
-            <h2>External Links Disclaimer</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">External Links Disclaimer</h2>
+            <p className="mb-6">
               Our website may contain links to external websites or services that are not affiliated with or controlled
               by Flavor Studios. We do not endorse, guarantee, or assume responsibility for the accuracy, relevance, or
               completeness of any information provided by third-party websites linked to our Site.
             </p>
 
-            <h2>Media and Intellectual Property</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Media and Intellectual Property</h2>
+            <p className="mb-6">
               All media content, including videos, graphics, animations, and images provided by Flavor Studios, is
               protected by copyright and other intellectual property laws. Any use of our media content must comply with
               our{" "}
@@ -60,8 +60,8 @@ export default function DisclaimerPage() {
               .
             </p>
 
-            <h2>Third-Party Content Usage</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Third-Party Content Usage</h2>
+            <p className="mb-6">
               Flavor Studios may feature content, including images and media from external creators and websites. Such
               third-party content is used strictly for informational, educational, reporting, or commentary purposes,
               adhering to fair use guidelines and applicable laws. We make every effort to credit and attribute
@@ -69,42 +69,42 @@ export default function DisclaimerPage() {
               immediately.
             </p>
 
-            <h2>User-Generated Content Disclaimer</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">User-Generated Content Disclaimer</h2>
+            <p className="mb-6">
               Flavor Studios is not responsible or liable for content posted by users or third parties on our website or
               social media platforms. Users are solely responsible for any content they post, and such content does not
               reflect the views or positions of Flavor Studios.
             </p>
 
-            <h2>No Professional Advice</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">No Professional Advice</h2>
+            <p className="mb-6">
               Information provided by Flavor Studios is not intended as professional advice, including but not limited
               to legal, financial, or business advice. Always seek professional advice tailored specifically to your
               individual circumstances.
             </p>
 
-            <h2>Accuracy of Content</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Accuracy of Content</h2>
+            <p className="mb-6">
               While we endeavor to maintain accurate and updated information, Flavor Studios cannot guarantee that all
               content is free of errors or inaccuracies. We reserve the right to make modifications or corrections to
               our content at any time without prior notice.
             </p>
 
-            <h2>Changes to this Disclaimer</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Changes to this Disclaimer</h2>
+            <p className="mb-6">
               We may revise and update this Disclaimer periodically. Changes are effective immediately upon posting the
               revised Disclaimer on this website. Continued use of the Site constitutes your acceptance of any updates.
             </p>
 
-            <h2>Contact Us</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Contact Us</h2>
+            <p className="mb-4">
               If you have any questions or concerns regarding this Disclaimer, please reach out to us through our{" "}
               <Link href="/contact" className="text-primary hover:underline">
                 Contact Page
               </Link>
               .
             </p>
-            <p>
+            <p className="mb-6">
               Flavor Studios
               <br />
               Website:{" "}

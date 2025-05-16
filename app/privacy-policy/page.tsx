@@ -28,8 +28,8 @@ export default function PrivacyPolicyPage() {
       {/* Content */}
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto prose prose-lg dark:prose-invert">
-            <p>
+          <div className="max-w-4xl mx-auto space-y-6 text-base md:text-lg">
+            <p className="mb-6">
               Flavor Studios ("we," "us," or "our") respects your privacy and is committed to protecting your personal
               information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information
               when you visit our website, including any other media form, media channel, mobile website, or mobile
@@ -37,13 +37,13 @@ export default function PrivacyPolicyPage() {
               carefully.
             </p>
 
-            <p>
+            <p className="mb-6">
               By accessing or using our Site, you agree to this Privacy Policy. If you do not agree with the terms,
               please do not access the Site.
             </p>
 
-            <h2>Information We Collect</h2>
-            <ul>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Information We Collect</h2>
+            <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>
                 <strong>Personal Information:</strong> Name, email address, contact details, and other identifiable
                 information provided voluntarily when registering, subscribing, or contacting us.
@@ -58,9 +58,9 @@ export default function PrivacyPolicyPage() {
               </li>
             </ul>
 
-            <h2>How We Use Your Information</h2>
-            <p>We use the information collected for the following purposes:</p>
-            <ul>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">How We Use Your Information</h2>
+            <p className="mb-4">We use the information collected for the following purposes:</p>
+            <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>Provide, operate, and maintain our Site.</li>
               <li>Improve, personalize, and expand our services and content.</li>
               <li>Understand and analyze how you use our Site.</li>
@@ -72,9 +72,9 @@ export default function PrivacyPolicyPage() {
               <li>Protect our Site from fraud, unauthorized activities, and maintain security.</li>
             </ul>
 
-            <h2>Disclosure of Your Information</h2>
-            <p>We may share your information under the following circumstances:</p>
-            <ul>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Disclosure of Your Information</h2>
+            <p className="mb-4">We may share your information under the following circumstances:</p>
+            <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>
                 With third-party service providers who assist us in operating our website and conducting business
                 activities, under strict confidentiality agreements.
@@ -84,49 +84,49 @@ export default function PrivacyPolicyPage() {
               <li>In connection with any merger, sale of company assets, financing, or acquisition.</li>
             </ul>
 
-            <h2>Third-Party Websites</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Third-Party Websites</h2>
+            <p className="mb-6">
               Our Site may contain links to third-party websites. We are not responsible for the privacy practices or
               content of these websites. Please review the privacy policies of third-party sites before providing any
               personal information.
             </p>
 
-            <h2>Security of Your Information</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Security of Your Information</h2>
+            <p className="mb-6">
               We implement reasonable security measures to protect your information. However, no security measures are
               completely secure, and we cannot guarantee absolute security. Please use caution when sharing personal
               information online.
             </p>
 
-            <h2>Retention of Your Information</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Retention of Your Information</h2>
+            <p className="mb-6">
               We retain your personal information only as long as necessary to fulfill the purposes outlined in this
               Privacy Policy unless a longer retention period is required or permitted by law.
             </p>
 
-            <h2>Your Rights</h2>
-            <p>You have the right to:</p>
-            <ul>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Your Rights</h2>
+            <p className="mb-4">You have the right to:</p>
+            <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>Access, update, or delete your personal information.</li>
               <li>Opt-out of receiving promotional communications from us.</li>
               <li>Request restriction of processing or object to processing of your personal information.</li>
             </ul>
-            <p>To exercise these rights, please contact us using the details provided below.</p>
+            <p className="mb-6">To exercise these rights, please contact us using the details provided below.</p>
 
-            <h2>Children's Privacy</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Children's Privacy</h2>
+            <p className="mb-6">
               Our Site is not directed toward children under 13 years old, and we do not knowingly collect information
               from individuals under the age of 13.
             </p>
 
-            <h2>Changes to This Privacy Policy</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Changes to This Privacy Policy</h2>
+            <p className="mb-6">
               We may update this Privacy Policy periodically. Any changes will be posted on this page with an updated
               "Effective Date." We encourage you to review this Privacy Policy regularly.
             </p>
 
-            <h2>Contact Us</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Contact Us</h2>
+            <p className="mb-4">
               If you have any questions, concerns, or requests regarding this Privacy Policy or the handling of your
               personal information, please reach out to us through our{" "}
               <Link href="/contact" className="text-primary hover:underline">
@@ -134,7 +134,7 @@ export default function PrivacyPolicyPage() {
               </Link>
               .
             </p>
-            <p>
+            <p className="mb-6">
               Flavor Studios
               <br />
               Website:{" "}

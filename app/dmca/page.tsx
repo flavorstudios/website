@@ -28,25 +28,28 @@ export default function DMCAPage() {
       {/* Content */}
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto prose prose-lg dark:prose-invert">
-            <p>
+          <div className="max-w-4xl mx-auto space-y-6 text-base md:text-lg">
+            <p className="mb-6">
               Flavor Studios ("we," "us," or "our") respects the intellectual property rights of others and expects its
               users to do the same. It is our policy to respond to clear notices of alleged copyright infringement in
               accordance with the Digital Millennium Copyright Act ("DMCA") and other applicable intellectual property
               laws.
             </p>
-            <p>
+
+            <p className="mb-6">
               This DMCA Notice and Takedown Policy outlines the procedures for reporting claims of copyright
               infringement and how we handle such notices.
             </p>
 
-            <h2>1. Filing a DMCA Notice (Copyright Infringement Notification)</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">
+              1. Filing a DMCA Notice (Copyright Infringement Notification)
+            </h2>
+            <p className="mb-4">
               If you believe that your copyrighted work has been copied in a way that constitutes copyright infringement
               and is accessible on our website, please submit a written DMCA notice to our Designated Agent that
               includes the following:
             </p>
-            <ul>
+            <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>
                 A physical or electronic signature of the copyright owner or a person authorized to act on their behalf.
               </li>
@@ -66,8 +69,8 @@ export default function DMCAPage() {
               </li>
             </ul>
 
-            <p className="font-medium">Submit DMCA Notices to:</p>
-            <p>
+            <p className="font-medium mb-4">Submit DMCA Notices to:</p>
+            <p className="mb-6">
               Designated DMCA Agent
               <br />
               Flavor Studios
@@ -78,12 +81,14 @@ export default function DMCAPage() {
               </a>
             </p>
 
-            <h2>2. Counter Notification (Restoring Removed Content)</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">
+              2. Counter Notification (Restoring Removed Content)
+            </h2>
+            <p className="mb-4">
               If you believe your content was removed (or access to it was disabled) in error or misidentification, you
               may submit a written counter-notification to our Designated Agent that includes:
             </p>
-            <ul>
+            <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>Your physical or electronic signature.</li>
               <li>
                 Identification of the material that has been removed or to which access has been disabled and the
@@ -99,32 +104,32 @@ export default function DMCAPage() {
                 of process from the person who provided the original DMCA notice or their agent.
               </li>
             </ul>
-            <p>
+            <p className="mb-6">
               Upon receipt of a valid counter-notification, we may restore the removed content within 10–14 business
               days unless the original complainant files a court action.
             </p>
 
-            <h2>3. Repeat Infringer Policy</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">3. Repeat Infringer Policy</h2>
+            <p className="mb-6">
               Flavor Studios has a zero-tolerance policy for repeat copyright infringers. If a user is found to
               repeatedly violate copyright laws, we reserve the right to terminate their access to our services.
             </p>
 
-            <h2>4. Misuse of DMCA Notices</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">4. Misuse of DMCA Notices</h2>
+            <p className="mb-6">
               Submitting false or misleading DMCA notices or counter-notices can result in legal liability. We strongly
               recommend that you consult a legal professional before submitting any claim.
             </p>
 
-            <h2>5. Contact Information</h2>
-            <p>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">5. Contact Information</h2>
+            <p className="mb-4">
               If you have any questions regarding this DMCA Policy, please reach out to us through our{" "}
               <Link href="/contact" className="text-primary hover:underline">
                 Contact Page
               </Link>
               .
             </p>
-            <p>
+            <p className="mb-6">
               Flavor Studios
               <br />
               Website:{" "}

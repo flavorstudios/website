@@ -1,6 +1,12 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
+export const metadata = {
+  title: "Cookie Policy – Flavor Studios",
+  description:
+    "Learn about how Flavor Studios uses cookies and similar technologies to enhance your browsing experience.",
+}
+
 export default function CookiePolicyPage() {
   return (
     <div className="flex flex-col min-h-screen">

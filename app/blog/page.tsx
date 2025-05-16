@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 
+export const metadata = {
+  title: "Flavor Blog – Honest Anime Reviews, News & Deep Dives",
+  description:
+    "Read anime insights, story breakdowns, and creative reflections from Flavor Studios. Thoughtful, heartfelt blogs for fans and dreamers.",
+}
+
 export default function BlogPage() {
   const blogCategories = ["All", "Reviews", "Analysis", "News", "Interviews", "Guides", "Behind the Scenes"]
 

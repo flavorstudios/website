@@ -1,13 +1,36 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Calendar, ThumbsUp, Share2, Bookmark, Eye, MessageCircle, Play, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { getEpisodeData } from "@/lib/episodes"
 
 interface VideoPageProps {
   params: {
     slug: string
+  }
+}
+
+export async function generateMetadata({ params }: VideoPageProps): Promise<Metadata> {
+  const episode = await getEpisodeData(params.slug)
+
+  return {
+    title: `${episode.title} – Watch on Flavor Studios`,
+    description: episode.synopsis || "Stream the latest episode from Flavor Studios, crafted with care.",
+    openGraph: {
+      title: `${episode.title} – Watch on Flavor Studios`,
+      description: episode.synopsis || "Stream the latest episode from Flavor Studios, crafted with care.",
+      type: "video",
+      videos: [
+        {
+          url: `https://flavorstudios.in/watch/${params.slug}`,
+          type: "video/mp4",
+        },
+      ],
+      images: [episode.thumbnail],
+    },
   }
 }
 

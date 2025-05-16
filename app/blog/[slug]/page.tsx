@@ -1,12 +1,30 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Calendar, User, Clock, Share2, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { getPostData } from "@/lib/posts"
 
 interface BlogPostPageProps {
   params: {
     slug: string
+  }
+}
+
+export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+  const post = await getPostData(params.slug)
+
+  return {
+    title: `${post.title} – Flavor Studios Blog`,
+    description: post.summary || "A new perspective from the world of Flavor Studios.",
+    openGraph: {
+      title: `${post.title} – Flavor Studios Blog`,
+      description: post.summary || "A new perspective from the world of Flavor Studios.",
+      type: "article",
+      publishedTime: post.date,
+      authors: [post.author],
+    },
   }
 }
 

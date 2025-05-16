@@ -1,6 +1,12 @@
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 
+export const metadata = {
+  title: "About Us – Flavor Studios: Where Anime Meets Emotion",
+  description:
+    "Discover Flavor Studios – an independent animation studio crafting powerful anime and 3D stories with soul. Built in Blender, powered by passion.",
+}
+
 export default function AboutPage() {
   return (
     <div className="flex flex-col min-h-screen">

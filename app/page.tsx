@@ -4,6 +4,12 @@ import { ArrowRight, Play, Clock, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
+export const metadata = {
+  title: "Flavor Studios – Original Anime That Speaks to the Soul",
+  description:
+    "Step into Flavor Studios — where powerful anime and heartfelt 3D stories are crafted frame by frame in Blender. Watch. Play. Feel. Support storytelling that leaves a mark on your soul.",
+}
+
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">

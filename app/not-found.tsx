@@ -4,6 +4,11 @@ import { Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Suspense } from "react"
 
+export const metadata = {
+  title: "Page Not Found – Flavor Studios",
+  description: "Sorry, the page you are looking for does not exist. Return to the Flavor Studios homepage.",
+}
+
 // Separate the search component to wrap it in Suspense
 function SearchComponent() {
   return (

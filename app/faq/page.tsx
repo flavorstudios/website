@@ -3,6 +3,12 @@ import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
+export const metadata = {
+  title: "FAQs – Flavor Studios Help Center",
+  description:
+    "Got questions? We've got answers. Learn more about our projects, support options, and storytelling process.",
+}
+
 export default function FAQPage() {
   const faqCategories = [
     {

@@ -1,6 +1,11 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
+export const metadata = {
+  title: "Privacy Policy – Flavor Studios",
+  description: "See how Flavor Studios collects, protects, and uses your data when you visit our site.",
+}
+
 export default function PrivacyPolicyPage() {
   return (
     <div className="flex flex-col min-h-screen">

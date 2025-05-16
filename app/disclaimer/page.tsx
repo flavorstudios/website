@@ -1,6 +1,11 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
+export const metadata = {
+  title: "Disclaimer – Flavor Studios",
+  description: "Read important disclaimers regarding the content and information provided by Flavor Studios.",
+}
+
 export default function DisclaimerPage() {
   return (
     <div className="flex flex-col min-h-screen">

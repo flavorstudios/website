@@ -4,6 +4,12 @@ import { ArrowRight, Briefcase, Clock, MapPin, Banknote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
+export const metadata = {
+  title: "Join the Team – Work at Flavor Studios",
+  description:
+    "Looking to work in indie anime or 3D storytelling? Explore open positions and help us build stories that last.",
+}
+
 export default function CareerPage() {
   const openPositions = [
     {
@@ -123,13 +129,7 @@ export default function CareerPage() {
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="relative rounded-lg overflow-hidden shadow-xl border border-primary/20 animate-glow">
-                <Image
-                  src="/placeholder-g6l95.png"
-                  alt="Our Team"
-                  width={800}
-                  height={600}
-                  className="object-cover"
-                />
+                <Image src="/placeholder-g6l95.png" alt="Our Team" width={800} height={600} className="object-cover" />
               </div>
               <div>
                 <h2 className="text-3xl font-bold mb-6 font-orbitron gradient-text">Why Work With Us?</h2>

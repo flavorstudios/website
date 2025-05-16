@@ -4,6 +4,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Mail, MessageSquare, Clock } from "lucide-react"
 
+export const metadata = {
+  title: "Contact Flavor Studios – Collaborations & Questions",
+  description:
+    "Reach out for inquiries, ideas, or just to say hi. We're always excited to connect with fellow creators and fans.",
+}
+
 export default function ContactPage() {
   return (
     <div className="flex flex-col min-h-screen">

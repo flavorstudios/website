@@ -4,6 +4,12 @@ import { Coffee, Heart, Star, Users, ArrowRight, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 
+export const metadata = {
+  title: "Support Flavor Studios – Help Us Create Soulful Anime",
+  description:
+    "Love what we create? Support us through Buy Me a Coffee or YouTube Memberships. Every contribution fuels original, independent anime built with heart.",
+}
+
 export default function SupportPage() {
   const supportTiers = [
     {

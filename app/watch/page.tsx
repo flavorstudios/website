@@ -6,6 +6,12 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Youtube } from "lucide-react"
 
+export const metadata = {
+  title: "Watch Original Anime – Blender-Powered Brilliance | Flavor Studios",
+  description:
+    "Stream handcrafted anime series and shorts from Flavor Studios. Each frame is built in Blender, every scene filled with soul.",
+}
+
 export default function WatchPage() {
   const videoCategories = ["All", "Reviews", "Analysis", "Top 10", "Tutorials", "Reactions", "Behind the Scenes"]
 

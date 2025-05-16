@@ -1,6 +1,11 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
+export const metadata = {
+  title: "Terms of Service – Flavor Studios",
+  description: "Read the terms and conditions that govern your use of Flavor Studios website and services.",
+}
+
 export default function TermsOfServicePage() {
   return (
     <div className="flex flex-col min-h-screen">

@@ -1,6 +1,11 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
+export const metadata = {
+  title: "DMCA Policy – Flavor Studios",
+  description: "Understand Flavor Studios' DMCA notice and takedown procedures for copyright protection.",
+}
+
 export default function DMCAPage() {
   return (
     <div className="flex flex-col min-h-screen">

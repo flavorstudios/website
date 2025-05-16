@@ -1,6 +1,11 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
+export const metadata = {
+  title: "Media Usage Policy – Flavor Studios",
+  description: "Learn about the guidelines for using Flavor Studios media assets and content.",
+}
+
 export default function MediaUsagePolicyPage() {
   return (
     <div className="flex flex-col min-h-screen">

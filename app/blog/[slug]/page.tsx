@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     : "https://flavorstudios.in/og-image.jpg"
   const publishedAt = post.date || new Date().toISOString()
   const updatedAt = post.updatedAt || publishedAt
+  const authorName = post.author || "Flavor Studios Team"
 
   return {
     title: `${post.title} – Flavor Studios Blog`,
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       url: `https://flavorstudios.in/blog/${params.slug}`,
       type: "article",
       publishedTime: publishedAt,
-      authors: [post.author || "Flavor Studios Team"],
+      authors: [authorName],
       images: [
         {
           url: coverImage,

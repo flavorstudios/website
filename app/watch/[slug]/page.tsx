@@ -22,7 +22,18 @@ export async function generateMetadata({ params }: VideoPageProps): Promise<Meta
     episode.thumbnail ||
     `/abstract-geometric-shapes.png?key=wjsa5&key=icgf2&height=720&width=1280&query=${params.slug}%20anime%20episode`
   const publishedAt = episode.releaseDate || new Date().toISOString()
-  const duration = episode.duration || "PT00H00M00S"
+
+  // Format duration properly for ISO 8601 duration format
+  // If it's in MM:SS format, convert to ISO 8601 duration format
+  let isoDuration = "PT00H00M00S"
+  if (episode.duration) {
+    const durationParts = episode.duration.split(":")
+    if (durationParts.length === 2) {
+      const minutes = Number.parseInt(durationParts[0], 10)
+      const seconds = Number.parseInt(durationParts[1], 10)
+      isoDuration = `PT${minutes}M${seconds}S`
+    }
+  }
 
   return {
     title: `${episode.title} – Watch on Flavor Studios`,
@@ -61,7 +72,7 @@ export async function generateMetadata({ params }: VideoPageProps): Promise<Meta
         description: synopsis,
         thumbnailUrl: coverImage,
         uploadDate: publishedAt,
-        duration: duration,
+        duration: isoDuration,
         publisher: {
           "@type": "Organization",
           name: "Flavor Studios",

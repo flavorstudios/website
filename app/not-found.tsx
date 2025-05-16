@@ -1,8 +1,24 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Home, Search } from "lucide-react"
+import { Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Suspense } from "react"
+
+// Separate the search component to wrap it in Suspense
+function SearchComponent() {
+  return (
+    <div className="max-w-md mx-auto">
+      <h2 className="text-lg font-bold mb-4 font-orbitron">Looking for something specific?</h2>
+      <div className="relative">
+        <Link href="/search" className="w-full">
+          <Button variant="outline" className="w-full">
+            Search our site
+          </Button>
+        </Link>
+      </div>
+    </div>
+  )
+}
 
 export default function NotFound() {
   return (
@@ -33,13 +49,10 @@ export default function NotFound() {
               </Button>
             </div>
 
-            <div className="max-w-md mx-auto">
-              <h2 className="text-lg font-bold mb-4 font-orbitron">Looking for something specific?</h2>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search our site..." className="pl-10" />
-              </div>
-            </div>
+            {/* Wrap the search component in Suspense */}
+            <Suspense fallback={<div>Loading search...</div>}>
+              <SearchComponent />
+            </Suspense>
 
             <div className="mt-12">
               <h3 className="text-lg font-bold mb-4 font-orbitron">Popular Destinations</h3>

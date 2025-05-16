@@ -53,11 +53,15 @@ export default function RootLayout({
         <GTMNoScript />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Header />
-          <Suspense>
-            <main className="flex-grow">{children}</main>
-          </Suspense>
+          <main className="flex-grow">
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+              {children}
+            </Suspense>
+          </main>
           <Footer />
-          <AnalyticsProvider />
+          <Suspense fallback={null}>
+            <AnalyticsProvider />
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>

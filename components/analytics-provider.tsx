@@ -3,8 +3,10 @@
 import Script from "next/script"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
+import { Suspense } from "react"
 
-export function AnalyticsProvider() {
+// Separate the analytics tracking into its own component
+function AnalyticsTracker() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
@@ -17,6 +19,10 @@ export function AnalyticsProvider() {
     }
   }, [pathname, searchParams])
 
+  return null
+}
+
+export function AnalyticsProvider() {
   return (
     <>
       {/* Google Analytics (GA4) */}
@@ -42,6 +48,11 @@ export function AnalyticsProvider() {
           })(window,document,'script','dataLayer','GTM-WB8X4ZW7');
         `}
       </Script>
+
+      {/* Wrap the analytics tracker in Suspense */}
+      <Suspense fallback={null}>
+        <AnalyticsTracker />
+      </Suspense>
     </>
   )
 }

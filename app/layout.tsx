@@ -26,9 +26,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
-      { url: "/icon.png", type: "image/png", sizes: "32x32" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
     ],
-    apple: { url: "/apple-icon.png", type: "image/png", sizes: "180x180" },
+    apple: { url: "/favicon.png", sizes: "180x180" },
   },
     generator: 'v0.dev'
 }
@@ -40,6 +40,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Force favicon refresh with cache-busting query parameter */}
+        <link rel="icon" href="/favicon.ico?v=1" sizes="any" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1" />
+        <link rel="apple-touch-icon" href="/favicon.png?v=1" />
+      </head>
       <body className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Header />

@@ -1,12 +1,14 @@
 {
   "name": "Flavor Studios",
   "short_name": "FlavorStudios",
+  "id": "/",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#111111",
   "orientation": "portrait",
   "lang": "en",
+  "description": "Original anime-inspired content and creative studio",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -16,6 +18,21 @@
     {
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
+  "screenshots": [
+    {
+      "src": "/screenshots/homepage.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    },
+    {
+      "src": "/screenshots/blog.png",
+      "sizes": "1280x720",
       "type": "image/png"
     }
   ]

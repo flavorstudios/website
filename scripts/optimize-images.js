@@ -25,9 +25,17 @@ async function optimizeImage(filePath) {
   const relativePath = path.relative(inputDir, filePath);
   const outputPath = path.join(outputDir, relativePath).replace(/\.(png|jpg|jpeg)$/i, '.webp');
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  const buffer = fs.readFileSync(filePath);
-  await sharp(buffer).resize({ width: 1280 }).toFormat('webp', { quality: 80 }).toFile(outputPath);
-  console.log(`✅ Optimized: ${relativePath}`);
+
+  try {
+    const buffer = fs.readFileSync(filePath);
+    await sharp(buffer)
+      .resize({ width: 1280 })
+      .toFormat('webp', { quality: 80 })
+      .toFile(outputPath);
+    console.log(`✅ Optimized: ${relativePath}`);
+  } catch (err) {
+    console.warn(`⚠️ Skipped (unsupported or corrupt): ${relativePath}`);
+  }
 }
 
 (async () => {

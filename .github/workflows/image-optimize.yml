@@ -1,0 +1,37 @@
+name: Optimize Images
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install sharp
+
+      - name: Run image optimization script
+        run: node scripts/optimize-images.js
+
+      - name: Commit optimized images
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "flavor-studios-bot"
+          git config --global user.email "bot@flavorstudios.in"
+          git add public/optimized/
+          git diff-index --quiet HEAD || git commit -m "🤖 Auto-optimize images [skip ci]"
+          git push

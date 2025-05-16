@@ -16,20 +16,63 @@ interface VideoPageProps {
 export async function generateMetadata({ params }: VideoPageProps): Promise<Metadata> {
   const episode = await getEpisodeData(params.slug)
 
+  // Fallback values for optional fields
+  const synopsis = episode.synopsis || "Stream the latest episode from Flavor Studios, crafted with care."
+  const coverImage =
+    episode.thumbnail ||
+    `/abstract-geometric-shapes.png?key=wjsa5&key=icgf2&height=720&width=1280&query=${params.slug}%20anime%20episode`
+  const publishedAt = episode.releaseDate || new Date().toISOString()
+  const duration = episode.duration || "PT00H00M00S"
+
   return {
     title: `${episode.title} – Watch on Flavor Studios`,
-    description: episode.synopsis || "Stream the latest episode from Flavor Studios, crafted with care.",
+    description: synopsis,
     openGraph: {
-      title: `${episode.title} – Watch on Flavor Studios`,
-      description: episode.synopsis || "Stream the latest episode from Flavor Studios, crafted with care.",
-      type: "video",
+      title: episode.title,
+      description: synopsis,
+      url: `https://flavorstudios.in/watch/${params.slug}`,
+      type: "video.episode",
+      images: [
+        {
+          url: coverImage,
+          width: 1280,
+          height: 720,
+          alt: episode.title,
+        },
+      ],
       videos: [
         {
           url: `https://flavorstudios.in/watch/${params.slug}`,
           type: "video/mp4",
         },
       ],
-      images: [episode.thumbnail],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: episode.title,
+      description: synopsis,
+      images: [coverImage],
+    },
+    other: {
+      "application/ld+json": JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        name: episode.title,
+        description: synopsis,
+        thumbnailUrl: coverImage,
+        uploadDate: publishedAt,
+        duration: duration,
+        publisher: {
+          "@type": "Organization",
+          name: "Flavor Studios",
+          logo: {
+            "@type": "ImageObject",
+            url: "https://flavorstudios.in/logo.png",
+          },
+        },
+        contentUrl: `https://flavorstudios.in/watch/${params.slug}`,
+        embedUrl: `https://flavorstudios.in/watch/${params.slug}`,
+      }),
     },
   }
 }

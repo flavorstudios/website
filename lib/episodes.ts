@@ -13,5 +13,12 @@ export async function getEpisodeData(slug: string) {
 
 export async function getAllEpisodeSlugs() {
   // In a real implementation, this would fetch all episode slugs from an API or database
-  return ["episode-1", "episode-2", "episode-3"]
+  return [
+    "top-10-anime-openings",
+    "demon-slayer-animation-analysis",
+    "anime-studio-tour",
+    "spring-2023-anime-guide",
+    "animation-techniques-tutorial",
+    "attack-on-titan-finale-reaction",
+  ]
 }

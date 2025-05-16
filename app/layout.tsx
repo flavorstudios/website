@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { AnalyticsProvider } from "@/components/analytics-provider"
 import { GTMNoScript } from "@/components/gtm-noscript"
 import { Suspense } from "react"
+import { FacebookPixel } from "@/components/facebook-pixel"
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -65,6 +66,11 @@ export default function RootLayout({
           {/* Analytics scripts wrapped in Suspense */}
           <Suspense fallback={null}>
             <AnalyticsProvider />
+          </Suspense>
+
+          {/* Facebook Pixel */}
+          <Suspense fallback={null}>
+            <FacebookPixel />
           </Suspense>
         </ThemeProvider>
       </body>

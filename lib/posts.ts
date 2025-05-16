@@ -13,5 +13,12 @@ export async function getPostData(slug: string) {
 
 export async function getAllPostSlugs() {
   // In a real implementation, this would fetch all post slugs from an API or database
-  return ["post-1", "post-2", "post-3"]
+  return [
+    "evolution-of-anime-art-styles",
+    "top-10-anime-of-2023",
+    "interview-voice-actors",
+    "anime-influence-western-cinema",
+    "beginners-guide-to-anime",
+    "studio-ghibli-magic",
+  ]
 }

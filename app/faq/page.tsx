@@ -3,10 +3,67 @@ import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
+// Define FAQ data structure for schema generation
+const faqs = [
+  {
+    question: "What is Flavor Studios?",
+    answer:
+      "Flavor Studios is an independent animation studio that creates original anime and 3D animated stories built in Blender.",
+  },
+  {
+    question: "How can I support Flavor Studios?",
+    answer: "You can support us via Buy Me a Coffee or YouTube Memberships, available on our Support page.",
+  },
+  {
+    question: "How often do you release new content?",
+    answer:
+      "We typically release new videos weekly and blog posts 2-3 times per week. Our schedule may vary during special events or series productions.",
+  },
+  {
+    question: "Do you create original anime?",
+    answer:
+      "While we primarily focus on anime analysis, reviews, and educational content, we do create short-form original animations and are working towards producing longer-form original content in the future.",
+  },
+  {
+    question: "Can I suggest topics for future videos or blog posts?",
+    answer:
+      "We welcome suggestions from our community. You can submit your ideas through our contact form or by commenting on our social media posts.",
+  },
+  {
+    question: "Do you accept guest blog posts or collaborations?",
+    answer:
+      "Yes, we occasionally feature guest writers and collaborate with other creators. Please reach out through our contact page with your proposal and samples of your work.",
+  },
+  {
+    question: "Is my payment information secure?",
+    answer:
+      "Yes, we use industry-standard security measures and trusted payment processors to ensure your payment information is secure. We never store your full credit card information on our servers.",
+  },
+  {
+    question: "The website/video isn't working properly. What should I do?",
+    answer:
+      "First, try refreshing the page or clearing your browser cache. If the issue persists, please report it through our contact form with details about the problem and your device/browser information.",
+  },
+]
+
 export const metadata = {
   title: "FAQs – Flavor Studios Help Center",
   description:
     "Got questions? We've got answers. Learn more about our projects, support options, and storytelling process.",
+  other: {
+    "application/ld+json": JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer,
+        },
+      })),
+    }),
+  },
 }
 
 export default function FAQPage() {

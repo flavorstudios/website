@@ -1,4 +1,4 @@
-import type { NextRequest } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import sharp from "sharp"
 import { promises as fs } from "fs"
 import path from "path"
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
   // Validate required parameters
   if (!image) {
-    return new Response("Missing image query parameter", { status: 400 })
+    return NextResponse.json({ error: "Missing image" }, { status: 400 })
   }
 
   // Ensure the image path is safe and within the public directory
@@ -52,13 +52,9 @@ export async function GET(req: NextRequest) {
 
     // Return appropriate error response
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return new Response(`Image not found: ${normalizedImagePath}`, {
-        status: 404,
-      })
+      return NextResponse.json({ error: "Image not found or unreadable" }, { status: 404 })
     }
 
-    return new Response(`Image processing error: ${(error as Error).message}`, {
-      status: 500,
-    })
+    return NextResponse.json({ error: `Image processing error: ${(error as Error).message}` }, { status: 500 })
   }
 }

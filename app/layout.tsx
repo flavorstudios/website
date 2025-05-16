@@ -50,7 +50,9 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon.png?v=1" />
       </head>
       <body className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}>
+        {/* Google Tag Manager (noscript) - placed immediately after opening body tag */}
         <GTMNoScript />
+
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Header />
           <main className="flex-grow">
@@ -59,6 +61,8 @@ export default function RootLayout({
             </Suspense>
           </main>
           <Footer />
+
+          {/* Analytics scripts wrapped in Suspense */}
           <Suspense fallback={null}>
             <AnalyticsProvider />
           </Suspense>

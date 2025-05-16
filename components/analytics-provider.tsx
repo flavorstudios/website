@@ -25,8 +25,20 @@ function AnalyticsTracker() {
 export function AnalyticsProvider() {
   return (
     <>
+      {/* Google Tag Manager */}
+      <Script id="gtm-script" strategy="afterInteractive">
+        {`
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-W7GC5SVZ');
+        `}
+      </Script>
+      {/* End Google Tag Manager */}
+
       {/* Google Analytics (GA4) */}
-      <Script src={`https://www.googletagmanager.com/gtag/js?id=G-7HRYW7Y7YN`} strategy="afterInteractive" />
+      <Script src="https://www.googletagmanager.com/gtag/js?id=G-7HRYW7Y7YN" strategy="afterInteractive" />
       <Script id="ga4-analytics" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
@@ -37,17 +49,7 @@ export function AnalyticsProvider() {
           });
         `}
       </Script>
-
-      {/* Google Tag Manager - Script */}
-      <Script id="gtm-script" strategy="afterInteractive">
-        {`
-          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-          })(window,document,'script','dataLayer','GTM-WB8X4ZW7');
-        `}
-      </Script>
+      {/* End Google Analytics */}
 
       {/* Wrap the analytics tracker in Suspense */}
       <Suspense fallback={null}>

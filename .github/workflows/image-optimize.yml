@@ -20,8 +20,8 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install dependencies
-        run: npm install sharp
+      - name: Install dependencies (with legacy peer deps)
+        run: npm install sharp --legacy-peer-deps
 
       - name: Run image optimization script
         run: node scripts/optimize-images.js

@@ -88,6 +88,9 @@ export default function RootLayout({
             <FacebookPixel />
           </Suspense>
         </ThemeProvider>
+
+        {/* ✅ Dynamically load the service worker */}
+        <script src="/pwa-register.js" defer></script>
       </body>
     </html>
   )

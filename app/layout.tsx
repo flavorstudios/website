@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     ],
     apple: { url: "/favicon.png", sizes: "180x180" },
   },
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
@@ -45,12 +45,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Force favicon refresh with cache-busting query parameter */}
+        {/* Favicons and Manifest */}
         <link rel="icon" href="/favicon.ico?v=1" sizes="any" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1" />
         <link rel="apple-touch-icon" href="/favicon.png?v=1" />
-
-        {/* PWA meta tags */}
         <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="theme-color" content="#111111" />
@@ -58,7 +56,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
       </head>
       <body className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}>
-        {/* Google Tag Manager (noscript) - placed immediately after opening body tag */}
         <GTMNoScript />
 
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
@@ -70,19 +67,17 @@ export default function RootLayout({
           </main>
           <Footer />
 
-          {/* Analytics scripts wrapped in Suspense */}
+          {/* Analytics scripts */}
           <Suspense fallback={null}>
             <AnalyticsProvider />
           </Suspense>
-
-          {/* Facebook Pixel */}
           <Suspense fallback={null}>
             <FacebookPixel />
           </Suspense>
         </ThemeProvider>
 
-        {/* Service Worker Registration */}
-        <script src="/register-sw.js" defer></script>
+        {/* ✅ Dynamically load Service Worker */}
+        <script src="/pwa-register.js" defer></script>
       </body>
     </html>
   )

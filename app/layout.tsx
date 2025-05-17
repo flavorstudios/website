@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     ],
     apple: { url: "/favicon.png", sizes: "180x180" },
   },
-  generator: "v0.dev",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -45,31 +45,20 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Favicons and Manifest */}
+        {/* Force favicon refresh with cache-busting query parameter */}
         <link rel="icon" href="/favicon.ico?v=1" sizes="any" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1" />
         <link rel="apple-touch-icon" href="/favicon.png?v=1" />
+
+        {/* PWA meta tags */}
         <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="theme-color" content="#111111" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-
-        {/* ✅ Open Graph Meta Tags */}
-        <meta property="og:title" content="Flavor Studios | Anime-Inspired Content" />
-        <meta property="og:description" content="Original anime-inspired animations and creative stories." />
-        <meta property="og:image" content="/screenshots/homepage.png" />
-        <meta property="og:url" content="https://www.flavorstudios.in" />
-        <meta property="og:type" content="website" />
-
-        {/* ✅ Twitter Meta Tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Flavor Studios | Anime-Inspired Content" />
-        <meta name="twitter:description" content="Original anime-inspired animations and creative stories." />
-        <meta name="twitter:image" content="/screenshots/homepage.png" />
-        <meta name="twitter:site" content="@flavor_studios" />
       </head>
       <body className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}>
+        {/* Google Tag Manager (noscript) - placed immediately after opening body tag */}
         <GTMNoScript />
 
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
@@ -81,16 +70,19 @@ export default function RootLayout({
           </main>
           <Footer />
 
+          {/* Analytics scripts wrapped in Suspense */}
           <Suspense fallback={null}>
             <AnalyticsProvider />
           </Suspense>
+
+          {/* Facebook Pixel */}
           <Suspense fallback={null}>
             <FacebookPixel />
           </Suspense>
         </ThemeProvider>
 
-        {/* ✅ Dynamically load the service worker */}
-        <script src="/pwa-register.js" defer></script>
+        {/* Service Worker Registration */}
+        <script src="/register-sw.js" defer></script>
       </body>
     </html>
   )

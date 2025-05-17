@@ -3,6 +3,8 @@ import Image from "next/image"
 import { Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Suspense } from "react"
+// Import the SearchWrapper component
+import { SearchWrapper } from "@/components/search-wrapper"
 
 export const metadata = {
   title: "Page Not Found – Flavor Studios",
@@ -56,7 +58,7 @@ export default function NotFound() {
 
             {/* Wrap the search component in Suspense */}
             <Suspense fallback={<div>Loading search...</div>}>
-              <SearchComponent />
+              <SearchWrapper />
             </Suspense>
 
             <div className="mt-12">

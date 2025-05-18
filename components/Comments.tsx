@@ -53,12 +53,17 @@ export function Comments({ postId }: CommentsProps) {
     return unsubscribe
   }, [])
 
-  // Comments listener
+  // Comments listener (only fetch approved)
   useEffect(() => {
     setLoading(true)
     setError(null)
 
-    const commentsQuery = query(collection(db, "comments"), where("postId", "==", postId), orderBy("createdAt", "desc"))
+    const commentsQuery = query(
+      collection(db, "comments"),
+      where("postId", "==", postId),
+      where("isApproved", "==", true),
+      orderBy("createdAt", "desc")
+    )
 
     const unsubscribe = onSnapshot(
       commentsQuery,
@@ -128,9 +133,11 @@ export function Comments({ postId }: CommentsProps) {
         userName: user.displayName || "Guest User",
         userPhotoURL: user.photoURL,
         postId,
+        isApproved: false, // 🔒 comment needs manual approval now
       })
 
       setNewComment("")
+      setError("Your comment has been submitted and is awaiting moderation.")
       if (commentInputRef.current) {
         commentInputRef.current.focus()
       }

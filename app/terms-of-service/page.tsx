@@ -75,6 +75,25 @@ export default function TermsOfServicePage() {
               <li>You agree not to submit any offensive, unlawful, defamatory, or infringing material.</li>
             </ul>
 
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">
+              Automated Comment Moderation (Perspective API)
+            </h2>
+            <p className="mb-4">
+              We use automated tools to maintain a safe environment, including Google's Perspective API, developed by
+              Jigsaw (a unit of Google), to analyze and score user-generated comments for toxicity, spam, or abuse.
+            </p>
+            <ul className="list-disc pl-6 space-y-3 mb-6">
+              <li>
+                By submitting a comment, you acknowledge that your comment content (not your name or email) may be sent
+                to Google servers for processing.
+              </li>
+              <li>Comments flagged as highly toxic may be blocked or require manual approval.</li>
+              <li>
+                We reserve the right to moderate, edit, or remove comments that violate our guidelines or are flagged by
+                the Perspective API.
+              </li>
+            </ul>
+
             <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Third-Party Links</h2>
             <p className="mb-6">
               Our Site may include links to third-party websites. We do not control and are not responsible for the

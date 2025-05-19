@@ -113,7 +113,16 @@ export default function PrivacyPolicyPage() {
             <p className="mb-6">
               We also use trusted third-party services, such as Google's Perspective API, to moderate user-generated
               content. These services may process limited data according to their own privacy policies. For more
-              information, please review Google's Privacy Policy.
+              information, please review{" "}
+              <a
+                href="https://policies.google.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                Google's Privacy Policy
+              </a>
+              .
             </p>
 
             <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Security of Your Information</h2>

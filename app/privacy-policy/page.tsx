@@ -77,6 +77,21 @@ export default function PrivacyPolicyPage() {
               <li>Protect our Site from fraud, unauthorized activities, and maintain security.</li>
             </ul>
 
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">
+              Automated Comment Moderation (Perspective API)
+            </h2>
+            <p className="mb-4">
+              To maintain a safe and respectful community, we use Google's Perspective API — an AI-powered content
+              moderation tool developed by Jigsaw, a subsidiary of Google. This service helps detect toxic, spammy, or
+              harmful content in comments submitted to our website.
+            </p>
+            <p className="mb-4">Please note:</p>
+            <ul className="list-disc pl-6 space-y-3 mb-6">
+              <li>Only the content of your comment is sent to Google's servers for moderation.</li>
+              <li>No personally identifiable information (like your name or email) is included in that data.</li>
+              <li>This helps us reduce spam and ensure safer interactions on our platform.</li>
+            </ul>
+
             <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Disclosure of Your Information</h2>
             <p className="mb-4">We may share your information under the following circumstances:</p>
             <ul className="list-disc pl-6 space-y-3 mb-6">
@@ -89,11 +104,16 @@ export default function PrivacyPolicyPage() {
               <li>In connection with any merger, sale of company assets, financing, or acquisition.</li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Third-Party Websites</h2>
+            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Third-Party Websites & Services</h2>
             <p className="mb-6">
               Our Site may contain links to third-party websites. We are not responsible for the privacy practices or
               content of these websites. Please review the privacy policies of third-party sites before providing any
               personal information.
+            </p>
+            <p className="mb-6">
+              We also use trusted third-party services, such as Google's Perspective API, to moderate user-generated
+              content. These services may process limited data according to their own privacy policies. For more
+              information, please review Google's Privacy Policy.
             </p>
 
             <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Security of Your Information</h2>

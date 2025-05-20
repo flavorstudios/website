@@ -3,11 +3,10 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Coffee, Menu, X, ChevronDown, ChevronRight } from "lucide-react"
+import { Coffee, Menu, X, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
-import { SearchDropdown } from "@/components/search-dropdown"
 import { CenteredSearch } from "@/components/centered-search"
 import { CategoryDropdown } from "@/components/category-dropdown"
 import { blogCategories } from "@/lib/blogCategories"
@@ -18,14 +17,22 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const pathname = usePathname()
+  const [showMobileSearch, setShowMobileSearch] = useState(false)
 
-  // Handle scroll
+  // Handle scroll with error handling
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
+      try {
+        setIsScrolled(window.scrollY > 10)
+      } catch (error) {
+        console.error("Scroll handling error:", error)
+      }
     }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("scroll", handleScroll)
+      return () => window.removeEventListener("scroll", handleScroll)
+    }
   }, [])
 
   const toggleSection = (section: string) => {
@@ -81,7 +88,7 @@ export function Header() {
 
         {/* Centered Search - Desktop Only */}
         <div className="hidden md:block max-w-md w-full mx-4">
-          <CenteredSearch />
+          <CenteredSearch onResultClick={() => {}} />
         </div>
 
         {/* Right Navigation */}
@@ -116,7 +123,33 @@ export function Header() {
           {/* Mobile Controls */}
           <div className="flex items-center space-x-2 md:hidden">
             {/* Mobile Search Icon */}
-            <SearchDropdown />
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowMobileSearch(!showMobileSearch)}
+                aria-label="Search"
+                className="text-foreground hover:bg-primary/10 hover:text-primary"
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+
+              {/* Mobile Search Overlay */}
+              {showMobileSearch && (
+                <div
+                  className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-16 px-4"
+                  onClick={(e) => {
+                    if (e.target === e.currentTarget) {
+                      setShowMobileSearch(false)
+                    }
+                  }}
+                >
+                  <div className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+                    <CenteredSearch onResultClick={() => setShowMobileSearch(false)} />
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Theme Toggle */}
             <ThemeToggle />
@@ -126,10 +159,9 @@ export function Header() {
               variant="ghost"
               size="icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label="Toggle Menu"
-              className="relative"
+              className="md:hidden"
             >
-              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMobileMenuOpen ? <X /> : <Menu />}
             </Button>
           </div>
         </div>
@@ -138,160 +170,20 @@ export function Header() {
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-background/95 backdrop-blur-md border-b shadow-md">
-          <nav className="container mx-auto py-2">
-            {/* Home Link */}
+          <nav className="container mx-auto py-4">
             <Link
               href="/"
-              className={cn(
-                "flex items-center px-4 py-3 mb-1 rounded-md transition-all",
-                isActive("/") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
-              )}
+              className="block px-4 py-2 hover:bg-muted/50 rounded-md"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Home
             </Link>
-
-            {/* Blog Section */}
-            <div className="mb-1">
-              <div className="flex items-center">
-                <Link
-                  href="/blog"
-                  className={cn(
-                    "flex-1 px-4 py-3 rounded-l-md transition-all",
-                    isActive("/blog") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
-                  )}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Blog
-                </Link>
-                <button
-                  onClick={() => toggleSection("blog")}
-                  className={cn(
-                    "p-3 rounded-r-md transition-all",
-                    isActive("/blog") ? "bg-primary/10 text-primary" : "hover:bg-muted/50",
-                  )}
-                  aria-label="Toggle Blog Categories"
-                >
-                  {expandedSection === "blog" ? (
-                    <ChevronDown className="h-5 w-5" />
-                  ) : (
-                    <ChevronRight className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-
-              {expandedSection === "blog" && (
-                <div className="pl-4 pr-2 py-1 space-y-1 border-l-2 border-muted ml-6 mt-1">
-                  {Object.entries(blogCategories).map(([slug, category]) => {
-                    const categoryUrl = `/blog/category/${slug}`
-                    return (
-                      <Link
-                        key={slug}
-                        href={categoryUrl}
-                        className={cn(
-                          "block px-3 py-2 rounded-md text-sm transition-all",
-                          isCategoryActive(categoryUrl)
-                            ? "text-primary font-medium bg-primary/5"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
-                        )}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        {category.heading}
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Watch Section */}
-            <div className="mb-1">
-              <div className="flex items-center">
-                <Link
-                  href="/watch"
-                  className={cn(
-                    "flex-1 px-4 py-3 rounded-l-md transition-all",
-                    isActive("/watch") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
-                  )}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Watch
-                </Link>
-                <button
-                  onClick={() => toggleSection("watch")}
-                  className={cn(
-                    "p-3 rounded-r-md transition-all",
-                    isActive("/watch") ? "bg-primary/10 text-primary" : "hover:bg-muted/50",
-                  )}
-                  aria-label="Toggle Watch Categories"
-                >
-                  {expandedSection === "watch" ? (
-                    <ChevronDown className="h-5 w-5" />
-                  ) : (
-                    <ChevronRight className="h-5 w-5" />
-                  )}
-                </button>
-              </div>
-
-              {expandedSection === "watch" && (
-                <div className="pl-4 pr-2 py-1 space-y-1 border-l-2 border-muted ml-6 mt-1">
-                  {Object.entries(watchCategories).map(([slug, category]) => {
-                    const categoryUrl = `/watch/category/${slug}`
-                    return (
-                      <Link
-                        key={slug}
-                        href={categoryUrl}
-                        className={cn(
-                          "block px-3 py-2 rounded-md text-sm transition-all",
-                          isCategoryActive(categoryUrl)
-                            ? "text-primary font-medium bg-primary/5"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
-                        )}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        {category.heading}
-                      </Link>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Play Link */}
-            <Link
-              href="/play"
-              className={cn(
-                "flex items-center px-4 py-3 mb-1 rounded-md transition-all",
-                isActive("/play") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
-              )}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Play
-            </Link>
-
-            {/* About Link */}
             <Link
               href="/about"
-              className={cn(
-                "flex items-center px-4 py-3 mb-1 rounded-md transition-all",
-                isActive("/about") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
-              )}
+              className="block px-4 py-2 hover:bg-muted/50 rounded-md"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About
-            </Link>
-
-            {/* Buy Me A Coffee Link */}
-            <Link
-              href="/support"
-              className={cn(
-                "flex items-center px-4 py-3 mb-1 rounded-md transition-all",
-                isActive("/support") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
-              )}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <Coffee className="h-4 w-4 mr-2" />
-              Buy Me A Coffee
             </Link>
           </nav>
         </div>

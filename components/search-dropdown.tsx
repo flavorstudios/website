@@ -14,9 +14,11 @@ export function SearchDropdown() {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResultItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const debouncedQuery = useDebounce(query, 300)
+  const resultsRef = useRef<HTMLDivElement>(null)
+  const debouncedQuery = useDebounce(query, 200) // 200ms debounce as requested
 
   // Handle search
   useEffect(() => {
@@ -30,6 +32,7 @@ export function SearchDropdown() {
       try {
         const searchResults = await searchAll(debouncedQuery)
         setResults(searchResults)
+        setSelectedIndex(-1) // Reset selection when results change
       } catch (error) {
         console.error("Search error:", error)
         setResults([])
@@ -70,6 +73,45 @@ export function SearchDropdown() {
       inputRef.current.focus()
     }
   }, [isOpen])
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isOpen) return
+
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault()
+          setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : prev))
+          break
+        case "ArrowUp":
+          e.preventDefault()
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev))
+          break
+        case "Enter":
+          if (selectedIndex >= 0 && selectedIndex < results.length) {
+            window.location.href = results[selectedIndex].url
+            setIsOpen(false)
+          }
+          break
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+    }
+  }, [isOpen, results, selectedIndex])
+
+  // Scroll selected item into view
+  useEffect(() => {
+    if (selectedIndex >= 0 && resultsRef.current) {
+      const selectedElement = resultsRef.current.children[selectedIndex] as HTMLElement
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ block: "nearest" })
+      }
+    }
+  }, [selectedIndex])
 
   // Get icon based on result type
   const getResultIcon = (type: SearchResultItem["type"]) => {
@@ -160,10 +202,10 @@ export function SearchDropdown() {
               <Input
                 ref={inputRef}
                 type="text"
-                placeholder="Search blogs, videos, categories..."
+                placeholder="Search Flavor Studios..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="flex-1 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 font-poppins"
               />
               {query && (
                 <Button
@@ -188,13 +230,17 @@ export function SearchDropdown() {
                 </div>
               </div>
             ) : results.length > 0 ? (
-              <div className="py-2">
+              <div className="py-2" ref={resultsRef}>
                 {results.map((result, index) => (
                   <Link
                     key={`${result.url}-${index}`}
                     href={result.url}
                     onClick={() => setIsOpen(false)}
-                    className="block px-4 py-3 hover:bg-muted/50 transition-colors"
+                    className={cn(
+                      "block px-4 py-3 hover:bg-muted/50 transition-colors",
+                      selectedIndex === index && "bg-muted/70",
+                    )}
+                    onMouseEnter={() => setSelectedIndex(index)}
                   >
                     <div className="flex items-start">
                       {getResultIcon(result.type)}

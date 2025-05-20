@@ -77,6 +77,7 @@ export function CenteredSearch({ onResultClick = () => {} }: { onResultClick?: (
         case "Enter":
           if (selectedIndex >= 0 && selectedIndex < results.length) {
             window.location.href = results[selectedIndex].url
+            onResultClick()
           }
           break
       }
@@ -86,7 +87,7 @@ export function CenteredSearch({ onResultClick = () => {} }: { onResultClick?: (
     return () => {
       document.removeEventListener("keydown", handleKeyDown)
     }
-  }, [isFocused, results, selectedIndex])
+  }, [isFocused, results, selectedIndex, onResultClick])
 
   // Scroll selected item into view
   useEffect(() => {
@@ -201,7 +202,7 @@ export function CenteredSearch({ onResultClick = () => {} }: { onResultClick?: (
 
       {/* Search Results Dropdown */}
       {isFocused && (query || isLoading) && (
-        <div className="absolute left-0 right-0 mt-2 rounded-md border bg-background/95 backdrop-blur-md shadow-lg z-50 overflow-hidden transition-all duration-200 ease-in-out">
+        <div className="absolute left-0 right-0 mt-2 rounded-md border bg-background/95 backdrop-blur-md shadow-lg z-50 overflow-hidden transition-all duration-200 ease-in-out animate-in slide-in-from-top-5">
           {isLoading ? (
             <div className="p-4 text-center text-muted-foreground">
               <div className="flex items-center justify-center">

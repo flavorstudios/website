@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Coffee, Menu, X } from "lucide-react"
+import { Coffee, Menu, X, ChevronDown, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
@@ -16,6 +16,7 @@ import { watchCategories } from "@/lib/watchCategories"
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const pathname = usePathname()
 
   // Handle scroll
@@ -26,6 +27,14 @@ export function Header() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  const toggleSection = (section: string) => {
+    setExpandedSection(expandedSection === section ? null : section)
+  }
+
+  const isActive = (path: string) => {
+    return pathname === path || pathname?.startsWith(`${path}/`)
+  }
 
   return (
     <header
@@ -46,7 +55,7 @@ export function Header() {
 
           {/* Desktop Left Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            {/* Home Button - Removed icon */}
+            {/* Home Button */}
             <Link href="/" className={cn("nav-link gradient-border", pathname === "/" && "text-primary")}>
               Home
             </Link>
@@ -108,6 +117,7 @@ export function Header() {
               size="icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle Menu"
+              className="relative"
             >
               {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
@@ -117,112 +127,159 @@ export function Header() {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-background/95 backdrop-blur-md border-b">
-          <nav className="container mx-auto px-4 py-4 flex flex-col space-y-3">
-            {/* Home Link - Removed icon */}
+        <div className="md:hidden bg-background/95 backdrop-blur-md border-b shadow-md">
+          <nav className="container mx-auto py-2">
+            {/* Home Link */}
             <Link
               href="/"
               className={cn(
-                "py-2 px-3 hover:bg-primary/10 rounded-md",
-                pathname === "/" && "bg-primary/5 text-primary",
+                "flex items-center px-4 py-3 mb-1 rounded-md transition-all",
+                isActive("/") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
               )}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Home
             </Link>
 
-            {/* Blog Link and Categories in Mobile Menu */}
-            <div className="py-2 px-3">
-              <Link
-                href="/blog"
-                className={cn("font-medium block mb-2 hover:text-primary", pathname === "/blog" && "text-primary")}
-                onClick={() => setIsMobileMenuOpen(false)}
+            {/* Blog Section */}
+            <div className="mb-1">
+              <button
+                onClick={() => toggleSection("blog")}
+                className={cn(
+                  "flex items-center justify-between w-full px-4 py-3 rounded-md transition-all",
+                  isActive("/blog") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
+                )}
               >
-                Blog
-              </Link>
-              <div className="pl-2 space-y-2 mt-2">
-                {Object.entries(blogCategories).map(([slug, category]) => {
-                  const categoryUrl = `/blog/category/${slug}`
-                  return (
-                    <Link
-                      key={slug}
-                      href={categoryUrl}
-                      className={cn(
-                        "block py-1 text-sm hover:text-primary",
-                        pathname === categoryUrl && "text-primary",
-                      )}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {category.heading}
-                    </Link>
-                  )
-                })}
-              </div>
+                <span className="font-medium">Blog</span>
+                {expandedSection === "blog" ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
+
+              {expandedSection === "blog" && (
+                <div className="pl-4 pr-2 py-1 space-y-1 border-l-2 border-muted ml-6 mt-1">
+                  <Link
+                    href="/blog"
+                    className={cn(
+                      "block px-3 py-2 rounded-md text-sm transition-all",
+                      pathname === "/blog" ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground",
+                    )}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    All Blog Posts
+                  </Link>
+                  {Object.entries(blogCategories).map(([slug, category]) => {
+                    const categoryUrl = `/blog/category/${slug}`
+                    return (
+                      <Link
+                        key={slug}
+                        href={categoryUrl}
+                        className={cn(
+                          "block px-3 py-2 rounded-md text-sm transition-all",
+                          pathname === categoryUrl
+                            ? "text-primary font-medium"
+                            : "text-muted-foreground hover:text-foreground",
+                        )}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {category.heading}
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
             </div>
 
-            {/* Watch Link and Categories in Mobile Menu */}
-            <div className="py-2 px-3">
-              <Link
-                href="/watch"
-                className={cn("font-medium block mb-2 hover:text-primary", pathname === "/watch" && "text-primary")}
-                onClick={() => setIsMobileMenuOpen(false)}
+            {/* Watch Section */}
+            <div className="mb-1">
+              <button
+                onClick={() => toggleSection("watch")}
+                className={cn(
+                  "flex items-center justify-between w-full px-4 py-3 rounded-md transition-all",
+                  isActive("/watch") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
+                )}
               >
-                Watch
-              </Link>
-              <div className="pl-2 space-y-2 mt-2">
-                {Object.entries(watchCategories).map(([slug, category]) => {
-                  const categoryUrl = `/watch/category/${slug}`
-                  return (
-                    <Link
-                      key={slug}
-                      href={categoryUrl}
-                      className={cn(
-                        "block py-1 text-sm hover:text-primary",
-                        pathname === categoryUrl && "text-primary",
-                      )}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {category.heading}
-                    </Link>
-                  )
-                })}
-              </div>
+                <span className="font-medium">Watch</span>
+                {expandedSection === "watch" ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </button>
+
+              {expandedSection === "watch" && (
+                <div className="pl-4 pr-2 py-1 space-y-1 border-l-2 border-muted ml-6 mt-1">
+                  <Link
+                    href="/watch"
+                    className={cn(
+                      "block px-3 py-2 rounded-md text-sm transition-all",
+                      pathname === "/watch"
+                        ? "text-primary font-medium"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    All Videos
+                  </Link>
+                  {Object.entries(watchCategories).map(([slug, category]) => {
+                    const categoryUrl = `/watch/category/${slug}`
+                    return (
+                      <Link
+                        key={slug}
+                        href={categoryUrl}
+                        className={cn(
+                          "block px-3 py-2 rounded-md text-sm transition-all",
+                          pathname === categoryUrl
+                            ? "text-primary font-medium"
+                            : "text-muted-foreground hover:text-foreground",
+                        )}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        {category.heading}
+                      </Link>
+                    )
+                  })}
+                </div>
+              )}
             </div>
 
+            {/* Play Link */}
             <Link
               href="/play"
               className={cn(
-                "py-2 px-3 hover:bg-primary/10 rounded-md",
-                pathname === "/play" && "bg-primary/5 text-primary",
+                "flex items-center px-4 py-3 mb-1 rounded-md transition-all",
+                isActive("/play") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
               )}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Play
             </Link>
 
+            {/* About Link */}
             <Link
               href="/about"
               className={cn(
-                "py-2 px-3 hover:bg-primary/10 rounded-md",
-                pathname === "/about" && "bg-primary/5 text-primary",
+                "flex items-center px-4 py-3 mb-1 rounded-md transition-all",
+                isActive("/about") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
               )}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About
             </Link>
 
+            {/* Buy Me A Coffee Link */}
             <Link
               href="/support"
               className={cn(
-                "py-2 px-3 hover:bg-primary/10 rounded-md",
-                pathname === "/support" && "bg-primary/5 text-primary",
+                "flex items-center px-4 py-3 mb-1 rounded-md transition-all",
+                isActive("/support") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
               )}
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <span className="flex items-center">
-                <Coffee className="h-4 w-4 mr-2" />
-                Buy Me A Coffee
-              </span>
+              <Coffee className="h-4 w-4 mr-2" />
+              Buy Me A Coffee
             </Link>
           </nav>
         </div>

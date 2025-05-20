@@ -155,7 +155,7 @@ export function Header() {
 
           {/* Desktop Left Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
-            {/* Home Link - Removed the icon */}
+            {/* Home Link */}
             <Link href="/" className={cn("nav-link gradient-border", pathname === "/" && "text-primary")}>
               Home
             </Link>
@@ -263,7 +263,7 @@ export function Header() {
                       )}
                     >
                       <Coffee className="h-4 w-4 mr-1 animate-bounce-subtle" />
-                      <span>Support</span>
+                      <span>Buy Me A Coffee</span>
                     </Button>
                   </Link>
                 </TooltipTrigger>
@@ -300,7 +300,7 @@ export function Header() {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-background/95 backdrop-blur-md border-b">
           <nav className="container mx-auto px-4 py-4 flex flex-col space-y-3">
-            {/* Removed the Home icon from mobile menu */}
+            {/* Home Link in Mobile Menu */}
             <Link
               href="/"
               className={cn(
@@ -415,7 +415,7 @@ export function Header() {
             >
               <span className="flex items-center">
                 <Coffee className="h-4 w-4 mr-2" />
-                Support
+                Buy Me A Coffee
               </span>
             </Link>
           </nav>

@@ -1,12 +1,29 @@
 "use client"
 
+import { useEffect } from "react"
+
+import { useCallback } from "react"
+
+import { useState } from "react"
+
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, Gamepad2, Trophy, Users, Clock } from "lucide-react"
+import { ArrowRight, Gamepad2, Trophy, Users, Clock, Cpu, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
+type Player = "X" | "O"
+type Cell = Player | null
+type Board = Cell[]
+type GameMode = "pvp" | "pvc"
+
 export default function PlayPageClient() {
+  const [board, setBoard] = useState<Board>(Array(9).fill(null))
+  const [currentPlayer, setCurrentPlayer] = useState<Player>("X")
+  const [winner, setWinner] = useState<Player | null>(null)
+  const [isDraw, setIsDraw] = useState(false)
+  const [gameMode, setGameMode] = useState<GameMode>("pvp")
+
   const games = [
     {
       id: "anime-quiz",
@@ -75,6 +92,143 @@ export default function PlayPageClient() {
       image: "tic-tac-toe-game",
     },
   ]
+
+  // Check for winner
+  const checkWinner = useCallback((board: Board): Player | null => {
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8], // rows
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8], // columns
+      [0, 4, 8],
+      [2, 4, 6], // diagonals
+    ]
+
+    for (const [a, b, c] of lines) {
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+        return board[a] as Player
+      }
+    }
+    return null
+  }, [])
+
+  // Check for draw
+  const checkDraw = useCallback((board: Board): boolean => {
+    return board.every((cell) => cell !== null)
+  }, [])
+
+  // Reset the game
+  const resetGame = useCallback(() => {
+    setBoard(Array(9).fill(null))
+    setCurrentPlayer("X")
+    setWinner(null)
+    setIsDraw(false)
+  }, [])
+
+  // Computer move logic
+  const computerMove = useCallback(() => {
+    // Simple AI: First try to win, then block, then take center, then random
+    const newBoard = [...board]
+
+    // Find empty cells
+    const emptyCells = newBoard.map((cell, index) => (cell === null ? index : -1)).filter((index) => index !== -1)
+
+    if (emptyCells.length === 0) return
+
+    // Try each empty cell to see if computer can win
+    for (const index of emptyCells) {
+      const testBoard = [...newBoard]
+      testBoard[index] = "O"
+      if (checkWinner(testBoard) === "O") {
+        newBoard[index] = "O"
+        setBoard(newBoard)
+        return
+      }
+    }
+
+    // Try to block player from winning
+    for (const index of emptyCells) {
+      const testBoard = [...newBoard]
+      testBoard[index] = "X"
+      if (checkWinner(testBoard) === "X") {
+        newBoard[index] = "O"
+        setBoard(newBoard)
+        return
+      }
+    }
+
+    // Take center if available
+    if (newBoard[4] === null) {
+      newBoard[4] = "O"
+      setBoard(newBoard)
+      return
+    }
+
+    // Take a random empty cell
+    const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)]
+    newBoard[randomIndex] = "O"
+    setBoard(newBoard)
+  }, [board, checkWinner])
+
+  // Make a move
+  const makeMove = useCallback(
+    (index: number) => {
+      if (board[index] !== null || winner || isDraw) return
+
+      const newBoard = [...board]
+      newBoard[index] = currentPlayer
+      setBoard(newBoard)
+
+      const nextPlayer = currentPlayer === "X" ? "O" : "X"
+      setCurrentPlayer(nextPlayer)
+    },
+    [board, currentPlayer, winner, isDraw],
+  )
+
+  // Check for game over after each move
+  useEffect(() => {
+    const gameWinner = checkWinner(board)
+    if (gameWinner) {
+      setWinner(gameWinner)
+      return
+    }
+
+    if (checkDraw(board)) {
+      setIsDraw(true)
+      return
+    }
+
+    // If it's computer's turn in PvC mode
+    if (gameMode === "pvc" && currentPlayer === "O" && !gameWinner && !checkDraw(board)) {
+      // Add a small delay to make it feel more natural
+      const timeoutId = setTimeout(() => {
+        computerMove()
+        setCurrentPlayer("X")
+      }, 500)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [board, currentPlayer, gameMode, checkWinner, checkDraw, computerMove])
+
+  // Auto-reset the board after a game ends
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+    const isGameOver = winner !== null || isDraw
+
+    if (isGameOver) {
+      timeoutId = setTimeout(() => {
+        resetGame()
+      }, 2500)
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [winner, isDraw, resetGame])
+
+  const isGameOver = winner !== null || isDraw
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -253,19 +407,88 @@ export default function PlayPageClient() {
       {/* Tic Tac Toe Game */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="max-w-md mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6 font-orbitron">Tic Tac Toe</h2>
-            <p className="text-muted-foreground mb-8">
-              Take a quick break and enjoy a classic game of Tic Tac Toe with an anime twist.
-            </p>
-            <Button
-              size="lg"
-              className="bg-primary hover:bg-primary/90"
-              onClick={() => window.open("/play/tic-tac-toe", "TicTacToe", "width=500,height=600")}
-            >
-              <Gamepad2 className="mr-2 h-5 w-5" />
-              Play Tic Tac Toe
-            </Button>
+          <div className="max-w-md w-full mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-4xl md:text-5xl font-bold mb-4 font-orbitron tracking-tight">
+                <span className="gradient-text">Tic Tac Toe</span>
+              </h1>
+              <p className="text-lg text-muted-foreground">Challenge a friend or play against the computer</p>
+            </div>
+
+            {/* Game Controls */}
+            <div className="flex flex-col sm:flex-row gap-3 w-full mb-6">
+              <div className="flex gap-2 flex-1">
+                <Button
+                  variant={gameMode === "pvp" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => {
+                    setGameMode("pvp")
+                    resetGame()
+                  }}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  vs Player
+                </Button>
+                <Button
+                  variant={gameMode === "pvc" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => {
+                    setGameMode("pvc")
+                    resetGame()
+                  }}
+                >
+                  <Cpu className="mr-2 h-4 w-4" />
+                  vs Computer
+                </Button>
+              </div>
+              <Button variant="outline" onClick={resetGame}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Reset
+              </Button>
+            </div>
+
+            {/* Game Board */}
+            <div className="relative w-full">
+              <div className="grid grid-cols-3 gap-2 w-full aspect-square">
+                {board.map((cell, index) => (
+                  <button
+                    key={index}
+                    className={`
+                      flex items-center justify-center text-3xl md:text-4xl font-bold
+                      bg-gray-900 rounded-md transition-colors
+                      ${!cell && !isGameOver ? "hover:bg-gray-800" : ""}
+                      ${!cell && !isGameOver ? "cursor-pointer" : "cursor-default"}
+                    `}
+                    onClick={() => makeMove(index)}
+                    disabled={cell !== null || isGameOver}
+                  >
+                    {cell === "X" && <span className="text-blue-400">X</span>}
+                    {cell === "O" && <span className="text-pink-500">O</span>}
+                    {!cell && !isGameOver && <span className="opacity-0 select-none">X</span>}
+                  </button>
+                ))}
+              </div>
+
+              {/* Result Message */}
+              {isGameOver && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div
+                    className={`
+                      ${isDraw ? "bg-yellow-500" : winner === "X" ? "bg-blue-500" : "bg-pink-500"}
+                      text-white font-bold py-3 px-6 rounded-lg text-xl md:text-2xl shadow-lg
+                    `}
+                  >
+                    {isDraw ? "It's a Draw!" : `Player ${winner} Wins!`}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Game Status */}
+            <div className="text-center text-sm text-gray-400 mt-6">
+              {gameMode === "pvp" ? "Player vs Player Mode" : "Player vs Computer Mode"}
+              <p className="mt-1">{!isGameOver && `Current Turn: Player ${currentPlayer}`}</p>
+            </div>
           </div>
         </div>
       </section>

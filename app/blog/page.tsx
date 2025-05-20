@@ -1,59 +1,117 @@
 import Link from "next/link"
+import Image from "next/image"
+import { ArrowRight, Search } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
 
-const categories = ["technology", "travel", "food", "lifestyle", "music"]
+export const metadata = {
+  title: "Flavor Blog – Honest Anime Reviews, News & Deep Dives",
+  description:
+    "Read anime insights, story breakdowns, and creative reflections from Flavor Studios. Thoughtful, heartfelt blogs for fans and dreamers.",
+}
 
 export default function BlogPage() {
+  const blogPosts: any[] = []
+
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-4">Blog</h1>
-      <p className="mb-4">Welcome to our blog! Explore articles on various topics.</p>
-
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Categories</h2>
-        <ul className="flex space-x-4">
-          {categories.map((category) => (
-            <li key={category}>
-              <Link href={`/blog/category/${category}`} className="text-blue-500 hover:underline">
-                {category}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Example blog posts (replace with actual data fetching) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="border p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-2">Post Title 1</h3>
-          <p className="text-gray-700">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
-            dolore magna aliqua.
-          </p>
-          <Link href="/blog/post-1" className="text-blue-500 hover:underline mt-2 block">
-            Read More
-          </Link>
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <section className="relative py-20 md:py-28 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-background to-background z-0"></div>
+        <div className="container relative z-10 mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-orbitron tracking-tight">
+              <span className="gradient-text">Anime Blog</span>
+            </h1>
+            <p className="text-xl max-w-3xl mx-auto mb-8 text-muted-foreground">
+              Dive into our collection of articles, reviews, and insights about the world of anime.
+            </p>
+            <div className="relative max-w-md mx-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search blog posts..." className="pl-10" />
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div className="border p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-2">Post Title 2</h3>
-          <p className="text-gray-700">
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-          </p>
-          <Link href="/blog/post-2" className="text-blue-500 hover:underline mt-2 block">
-            Read More
-          </Link>
-        </div>
+      {/* Blog Posts */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {blogPosts.length > 0 ? (
+              blogPosts.map((post) => (
+                <Card
+                  key={post.id}
+                  className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/50"
+                >
+                  <CardContent className="p-0">
+                    <Link href={`/blog/${post.id}`}>
+                      <div className="relative aspect-[4/3]">
+                        <Image
+                          src={`/abstract-geometric-shapes.png?key=ju60w&height=400&width=600&query=${post.image}`}
+                          alt={post.title}
+                          fill
+                          className="object-cover transition-transform duration-500 hover:scale-105"
+                        />
+                      </div>
+                    </Link>
+                    <div className="p-5">
+                      <div className="mb-3 flex justify-between items-center">
+                        <span className="inline-block bg-primary/10 text-primary text-xs px-3 py-1 rounded-full">
+                          {post.category}
+                        </span>
+                        <span className="text-xs text-muted-foreground">{post.date}</span>
+                      </div>
+                      <Link href={`/blog/${post.id}`} className="hover:text-primary transition-colors">
+                        <h3 className="font-bold text-lg mb-2 font-orbitron">{post.title}</h3>
+                      </Link>
+                      <p className="text-muted-foreground text-sm line-clamp-3 mb-4">{post.excerpt}</p>
+                      <Link
+                        href={`/blog/${post.id}`}
+                        className="text-primary hover:text-primary/80 text-sm font-medium inline-flex items-center"
+                      >
+                        Read More
+                        <ArrowRight className="ml-1 h-3 w-3" />
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
+                <div className="bg-card border border-primary/10 rounded-lg p-8">
+                  <h3 className="text-xl font-bold mb-2 font-orbitron">No posts available</h3>
+                  <p className="text-muted-foreground">Check back soon for new content!</p>
+                </div>
+              </div>
+            )}
+          </div>
 
-        <div className="border p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-2">Post Title 3</h3>
-          <p className="text-gray-700">
-            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-          </p>
-          <Link href="/blog/post-3" className="text-blue-500 hover:underline mt-2 block">
-            Read More
-          </Link>
+          <div className="flex justify-center mt-12">
+            <Button className="bg-primary hover:bg-primary/90" disabled={blogPosts.length === 0}>
+              Load More Posts
+            </Button>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="py-16 md:py-24 bg-primary/5 border-y border-primary/20">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold mb-6 font-orbitron">Stay Updated</h2>
+            <p className="text-lg text-muted-foreground mb-8">
+              Subscribe to our newsletter to receive the latest blog posts, anime news, and exclusive content directly
+              to your inbox.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <Input placeholder="Your email address" className="flex-grow" />
+              <Button className="bg-primary hover:bg-primary/90">Subscribe</Button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }

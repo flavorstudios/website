@@ -124,7 +124,7 @@ export default function SupportPage() {
             >
               <Link href="https://buymeacoffee.com/flavorstudios" target="_blank" rel="noopener noreferrer">
                 <Coffee className="mr-2 h-5 w-5" />
-                Buy Me a Coffee ☕
+                Buy Me a Coffee
               </Link>
             </Button>
 

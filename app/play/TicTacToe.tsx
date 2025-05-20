@@ -17,7 +17,6 @@ export default function TicTacToe() {
   const [winner, setWinner] = useState<Player | null>(null)
   const [isDraw, setIsDraw] = useState(false)
   const [gameMode, setGameMode] = useState<GameMode>("pvp")
-  // Add score state
   const [playerXScore, setPlayerXScore] = useState(0)
   const [playerOScore, setPlayerOScore] = useState(0)
 
@@ -64,10 +63,7 @@ export default function TicTacToe() {
 
   // Computer move logic
   const computerMove = useCallback(() => {
-    // Simple AI: First try to win, then block, then take center, then random
     const newBoard = [...board]
-
-    // Find empty cells
     const emptyCells = newBoard.map((cell, index) => (cell === null ? index : -1)).filter((index) => index !== -1)
 
     if (emptyCells.length === 0) return
@@ -178,11 +174,45 @@ export default function TicTacToe() {
     if (isDraw) return "It's a Draw!"
 
     if (gameMode === "pvp") {
-      return `Player ${winner} Wins!`
+      if (winner === "X") return "Player X Wins!"
+      return "Player O Wins!"
     } else {
-      // PvC mode
-      return winner === "X" ? "Player Wins!" : "Computer Wins!"
+      if (winner === "X") return "Player Wins!"
+      return "Computer Wins!"
     }
+  }
+
+  // Helper function for game status text
+  const getStatusText = () => {
+    if (isGameOver) {
+      if (isDraw) return "Draw"
+      if (winner === "X") return "Player X Wins"
+      if (gameMode === "pvp") return "Player O Wins"
+      return "Computer Wins"
+    } else {
+      if (currentPlayer === "X") return "Player X's Turn"
+      if (gameMode === "pvp") return "Player O's Turn"
+      return "Computer's Turn"
+    }
+  }
+
+  // Helper function for status badge class
+  const getStatusClass = () => {
+    if (isDraw) return "border-yellow-500 text-yellow-500"
+    if (winner === "X") return "bg-blue-500"
+    return "bg-pink-500"
+  }
+
+  // Helper function for current player indicator class
+  const getPlayerIndicatorClass = () => {
+    if (currentPlayer === "X") return "bg-blue-500"
+    return "bg-pink-500"
+  }
+
+  // Helper function for second player name
+  const getSecondPlayerName = () => {
+    if (gameMode === "pvp") return "Player O"
+    return "Computer"
   }
 
   return (
@@ -249,22 +279,13 @@ export default function TicTacToe() {
                 <div className="bg-card/80 p-4 rounded-md border border-border/50">
                   <h3 className="text-sm font-medium text-muted-foreground mb-2">Game Status</h3>
                   {isGameOver ? (
-                    <Badge
-                      variant={isDraw ? "outline" : "default"}
-                      className={`${isDraw ? "border-yellow-500 text-yellow-500" : winner === "X" ? "bg-blue-500" : "bg-pink-500"}`}
-                    >
-                      {isDraw
-                        ? "Draw"
-                        : `${winner === "X" ? "Player X" : gameMode === "pvp" ? "Player O" : "Computer"} Wins`}
+                    <Badge variant={isDraw ? "outline" : "default"} className={getStatusClass()}>
+                      {getStatusText()}
                     </Badge>
                   ) : (
                     <div className="flex items-center">
-                      <div
-                        className={`w-3 h-3 rounded-full mr-2 ${currentPlayer === "X" ? "bg-blue-500" : "bg-pink-500"}`}
-                      ></div>
-                      <span>
-                        {currentPlayer === "X" ? "Player X" : gameMode === "pvp" ? "Player O" : "Computer"}'s Turn
-                      </span>
+                      <div className={`w-3 h-3 rounded-full mr-2 ${getPlayerIndicatorClass()}`}></div>
+                      <span>{getStatusText()}</span>
                     </div>
                   )}
                 </div>
@@ -278,9 +299,7 @@ export default function TicTacToe() {
                       <div className="text-2xl font-bold text-blue-400">{playerXScore}</div>
                     </div>
                     <div className="text-center p-2 bg-pink-500/10 rounded-md border border-pink-500/20">
-                      <div className="text-xs text-muted-foreground mb-1">
-                        {gameMode === "pvp" ? "Player O" : "Computer"}
-                      </div>
+                      <div className="text-xs text-muted-foreground mb-1">{getSecondPlayerName()}</div>
                       <div className="text-2xl font-bold text-pink-400">{playerOScore}</div>
                     </div>
                   </div>

@@ -14,13 +14,10 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-background to-background z-0"></div>
-        <div className="container relative z-10 mx-auto px-4 flex flex-col items-center text-center">
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 font-orbitron tracking-tight">
-            <span className="gradient-text">FLAVOR STUDIOS</span>
-          </h1>
-          <p className="text-xl md:text-2xl max-w-3xl mb-10 text-muted-foreground">
+      <section className="py-24 md:py-32">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">FLAVOR STUDIOS</h1>
+          <p className="text-xl md:text-2xl max-w-3xl mx-auto mb-10">
             Creating original anime-inspired content and sharing our passion with the world
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md justify-center">
@@ -51,7 +48,7 @@ export default function HomePage() {
             {[1, 2, 3].map((item) => (
               <Card
                 key={item}
-                className="overflow-hidden bg-background/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 animate-glow"
+                className="overflow-hidden bg-background/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/50"
               >
                 <CardContent className="p-0">
                   <div className="relative aspect-video group">
@@ -61,6 +58,7 @@ export default function HomePage() {
                       width={640}
                       height={360}
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      priority={item === 1}
                     />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/50">
                       <Button size="icon" className="rounded-full bg-primary hover:bg-primary/90 h-14 w-14">
@@ -121,6 +119,8 @@ export default function HomePage() {
                       alt={`Blog post ${item}`}
                       fill
                       className="object-cover transition-transform duration-300 hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      priority={item === 1}
                     />
                   </div>
                   <div className="p-5">

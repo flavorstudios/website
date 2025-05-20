@@ -38,7 +38,7 @@ export default function NotFound() {
             </div>
 
             <div className="max-w-md mx-auto mb-12 border border-primary/20 rounded-lg p-6 bg-card/50">
-              <h2 className="text-lg font-bold mb-4 font-orbitron">Search Our Site</h2>
+              <h2 className="text-lg font-bold mb-4 font-orbitron">Looking for something specific?</h2>
               <Suspense fallback={<div className="h-10 w-full bg-muted/20 animate-pulse rounded-md"></div>}>
                 <SearchWrapper />
               </Suspense>

@@ -1,65 +1,75 @@
 "use client"
 
 import { useState } from "react"
-import { revalidateBlog, revalidateWatch, revalidateHome } from "@/app/actions/revalidate"
+import { revalidateBlog, revalidateHome, revalidateWatch } from "@/app/actions/revalidate"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Loader2 } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
 
 export default function RevalidateButton() {
-  const [isRevalidating, setIsRevalidating] = useState(false)
-  const [path, setPath] = useState("blog")
-  const [status, setStatus] = useState<null | "success" | "error">(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [selectedPath, setSelectedPath] = useState("blog")
 
   const handleRevalidate = async () => {
-    setIsRevalidating(true)
-    setStatus(null)
-
+    setIsLoading(true)
     try {
-      if (path === "blog") {
+      if (selectedPath === "blog") {
         await revalidateBlog()
-      } else if (path === "watch") {
+      } else if (selectedPath === "watch") {
         await revalidateWatch()
-      } else if (path === "home") {
+      } else if (selectedPath === "home") {
         await revalidateHome()
       }
 
-      setStatus("success")
-      setTimeout(() => setStatus(null), 3000)
+      toast({
+        title: "Cache cleared successfully",
+        description: `The ${selectedPath} page cache has been revalidated.`,
+        variant: "default",
+      })
     } catch (error) {
-      console.error("Revalidation error:", error)
-      setStatus("error")
+      console.error("Failed to revalidate:", error)
+      toast({
+        title: "Failed to clear cache",
+        description: "There was an error revalidating the cache. Please try again.",
+        variant: "destructive",
+      })
     } finally {
-      setIsRevalidating(false)
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 items-start sm:items-center">
-      <Select value={path} onValueChange={setPath}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select path" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="blog">Blog</SelectItem>
-          <SelectItem value="watch">Watch</SelectItem>
-          <SelectItem value="home">Home</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Button
-        variant="default"
-        onClick={handleRevalidate}
-        disabled={isRevalidating}
-        className="bg-yellow-500 hover:bg-yellow-600 text-black"
-      >
-        {isRevalidating
-          ? "Revalidating..."
-          : `Revalidate ${path === "home" ? "Home" : path === "blog" ? "Blog" : "Watch"} Cache`}
-      </Button>
-
-      {status === "success" && <span className="text-green-500 text-sm">Cache cleared successfully!</span>}
-
-      {status === "error" && <span className="text-red-500 text-sm">Failed to clear cache.</span>}
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Select value={selectedPath} onValueChange={setSelectedPath}>
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Select path" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="blog">Blog Page</SelectItem>
+            <SelectItem value="watch">Watch Page</SelectItem>
+            <SelectItem value="home">Home Page</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button onClick={handleRevalidate} disabled={isLoading} className="w-full sm:w-auto">
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Revalidating...
+            </>
+          ) : (
+            `Revalidate ${selectedPath} Cache`
+          )}
+        </Button>
+      </div>
+      <Card className="p-4 bg-muted/50 text-sm">
+        <p>
+          Revalidating will clear the cache for the selected page, ensuring visitors see the most recent content. This
+          is useful after publishing new content or making updates.
+        </p>
+      </Card>
     </div>
   )
 }

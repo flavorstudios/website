@@ -1,4 +1,5 @@
 import { notifyIndexNow } from "@/lib/indexnow"
+import { revalidateBlog, revalidateHome, revalidateWatch } from "@/app/actions/revalidate"
 
 /**
  * Utility to notify IndexNow when a new blog post is published
@@ -10,6 +11,10 @@ export async function notifyBlogPostIndexNow(slug: string): Promise<void> {
 
   // Also notify the blog index page since it will show the new post
   await notifyIndexNow("/blog")
+
+  // Revalidate the blog page and home page to show the new content
+  await revalidateBlog()
+  await revalidateHome()
 }
 
 /**
@@ -21,6 +26,10 @@ export async function notifyWatchEpisodeIndexNow(slug: string): Promise<void> {
 
   // Also notify the watch index page
   await notifyIndexNow("/watch")
+
+  // Revalidate the watch page and home page to show the new content
+  await revalidateWatch()
+  await revalidateHome()
 }
 
 /**
@@ -32,4 +41,7 @@ export async function notifyGameIndexNow(slug: string): Promise<void> {
 
   // Also notify the play index page
   await notifyIndexNow("/play")
+
+  // Revalidate the home page to show the new content
+  await revalidateHome()
 }

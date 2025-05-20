@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { Home, ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
 
 export const metadata = {
   title: "Page Not Found – Flavor Studios",
@@ -24,15 +23,19 @@ export default function NotFound() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button asChild className="bg-primary hover:bg-primary/90">
-                <Link href="/">
-                  <Home className="mr-2 h-4 w-4" />
-                  Return to Homepage
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="hover:bg-primary/10">
-                <Link href="/contact">Report This Issue</Link>
-              </Button>
+              <Link
+                href="/"
+                className="bg-primary hover:bg-primary/90 text-white py-2 px-4 rounded-md flex items-center justify-center"
+              >
+                <Home className="mr-2 h-4 w-4" />
+                Return to Homepage
+              </Link>
+              <Link
+                href="/contact"
+                className="border border-primary/20 hover:bg-primary/10 py-2 px-4 rounded-md flex items-center justify-center"
+              >
+                Report This Issue
+              </Link>
             </div>
 
             <div className="border-t border-primary/10 pt-8 mt-8">
@@ -45,18 +48,14 @@ export default function NotFound() {
                   { name: "About", path: "/about" },
                   { name: "Support", path: "/support" },
                 ].map((item) => (
-                  <Button
+                  <Link
                     key={item.path}
-                    asChild
-                    variant="ghost"
-                    size="sm"
-                    className="hover:bg-primary/10 hover:text-primary"
+                    href={item.path}
+                    className="hover:bg-primary/10 hover:text-primary py-1 px-3 rounded-md text-sm flex items-center"
                   >
-                    <Link href={item.path}>
-                      {item.name}
-                      <ArrowRight className="ml-1 h-3 w-3" />
-                    </Link>
-                  </Button>
+                    {item.name}
+                    <ArrowRight className="ml-1 h-3 w-3" />
+                  </Link>
                 ))}
               </div>
             </div>

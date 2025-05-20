@@ -1,6 +1,6 @@
 import { blogCategories } from "./blogCategories"
 import { watchCategories } from "./watchCategories"
-import type { JSX } from "react" // Import JSX from react
+import type { ReactNode } from "react"
 
 // Define types for search results
 export type SearchResultItem = {
@@ -150,13 +150,13 @@ export async function searchAll(query: string): Promise<SearchResultItem[]> {
 }
 
 // Function to highlight matching text
-export function highlightMatch(text: string, query: string): JSX.Element {
-  if (!query) return <>{text}</>
+export function highlightMatch(text: string, query: string): ReactNode {
+  if (!query) return text
 
   const lowerText = text.toLowerCase()
   const lowerQuery = query.toLowerCase()
 
-  if (!lowerText.includes(lowerQuery)) return <>{text}</>
+  if (!lowerText.includes(lowerQuery)) return text
 
   const parts = []
   let lastIndex = 0

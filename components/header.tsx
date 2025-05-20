@@ -36,6 +36,10 @@ export function Header() {
     return pathname === path || pathname?.startsWith(`${path}/`)
   }
 
+  const isCategoryActive = (categoryUrl: string) => {
+    return pathname === categoryUrl
+  }
+
   return (
     <header
       className={cn(
@@ -56,7 +60,7 @@ export function Header() {
           {/* Desktop Left Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             {/* Home Button */}
-            <Link href="/" className={cn("nav-link gradient-border", pathname === "/" && "text-primary")}>
+            <Link href="/" className={cn("nav-link gradient-border", pathname === "/" && "text-primary font-medium")}>
               Home
             </Link>
 
@@ -66,7 +70,10 @@ export function Header() {
             {/* Watch Dropdown */}
             <CategoryDropdown title="Watch" mainRoute="/watch" categories={watchCategories} baseUrl="/watch/category" />
 
-            <Link href="/play" className={cn("nav-link gradient-border", pathname === "/play" && "text-primary")}>
+            <Link
+              href="/play"
+              className={cn("nav-link gradient-border", pathname === "/play" && "text-primary font-medium")}
+            >
               Play
             </Link>
           </nav>
@@ -81,7 +88,10 @@ export function Header() {
         <div className="flex items-center">
           {/* Desktop Right Navigation */}
           <nav className="hidden md:flex items-center space-x-2">
-            <Link href="/about" className={cn("nav-link gradient-border", pathname === "/about" && "text-primary")}>
+            <Link
+              href="/about"
+              className={cn("nav-link gradient-border", pathname === "/about" && "text-primary font-medium")}
+            >
               About
             </Link>
 
@@ -143,33 +153,35 @@ export function Header() {
 
             {/* Blog Section */}
             <div className="mb-1">
-              <button
-                onClick={() => toggleSection("blog")}
-                className={cn(
-                  "flex items-center justify-between w-full px-4 py-3 rounded-md transition-all",
-                  isActive("/blog") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
-                )}
-              >
-                <span className="font-medium">Blog</span>
-                {expandedSection === "blog" ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </button>
+              <div className="flex items-center">
+                <Link
+                  href="/blog"
+                  className={cn(
+                    "flex-1 px-4 py-3 rounded-l-md transition-all",
+                    isActive("/blog") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
+                  )}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Blog
+                </Link>
+                <button
+                  onClick={() => toggleSection("blog")}
+                  className={cn(
+                    "p-3 rounded-r-md transition-all",
+                    isActive("/blog") ? "bg-primary/10 text-primary" : "hover:bg-muted/50",
+                  )}
+                  aria-label="Toggle Blog Categories"
+                >
+                  {expandedSection === "blog" ? (
+                    <ChevronDown className="h-5 w-5" />
+                  ) : (
+                    <ChevronRight className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
 
               {expandedSection === "blog" && (
                 <div className="pl-4 pr-2 py-1 space-y-1 border-l-2 border-muted ml-6 mt-1">
-                  <Link
-                    href="/blog"
-                    className={cn(
-                      "block px-3 py-2 rounded-md text-sm transition-all",
-                      pathname === "/blog" ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground",
-                    )}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    All Blog Posts
-                  </Link>
                   {Object.entries(blogCategories).map(([slug, category]) => {
                     const categoryUrl = `/blog/category/${slug}`
                     return (
@@ -178,9 +190,9 @@ export function Header() {
                         href={categoryUrl}
                         className={cn(
                           "block px-3 py-2 rounded-md text-sm transition-all",
-                          pathname === categoryUrl
-                            ? "text-primary font-medium"
-                            : "text-muted-foreground hover:text-foreground",
+                          isCategoryActive(categoryUrl)
+                            ? "text-primary font-medium bg-primary/5"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
                         )}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
@@ -194,35 +206,35 @@ export function Header() {
 
             {/* Watch Section */}
             <div className="mb-1">
-              <button
-                onClick={() => toggleSection("watch")}
-                className={cn(
-                  "flex items-center justify-between w-full px-4 py-3 rounded-md transition-all",
-                  isActive("/watch") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
-                )}
-              >
-                <span className="font-medium">Watch</span>
-                {expandedSection === "watch" ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </button>
+              <div className="flex items-center">
+                <Link
+                  href="/watch"
+                  className={cn(
+                    "flex-1 px-4 py-3 rounded-l-md transition-all",
+                    isActive("/watch") ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted/50",
+                  )}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Watch
+                </Link>
+                <button
+                  onClick={() => toggleSection("watch")}
+                  className={cn(
+                    "p-3 rounded-r-md transition-all",
+                    isActive("/watch") ? "bg-primary/10 text-primary" : "hover:bg-muted/50",
+                  )}
+                  aria-label="Toggle Watch Categories"
+                >
+                  {expandedSection === "watch" ? (
+                    <ChevronDown className="h-5 w-5" />
+                  ) : (
+                    <ChevronRight className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
 
               {expandedSection === "watch" && (
                 <div className="pl-4 pr-2 py-1 space-y-1 border-l-2 border-muted ml-6 mt-1">
-                  <Link
-                    href="/watch"
-                    className={cn(
-                      "block px-3 py-2 rounded-md text-sm transition-all",
-                      pathname === "/watch"
-                        ? "text-primary font-medium"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    All Videos
-                  </Link>
                   {Object.entries(watchCategories).map(([slug, category]) => {
                     const categoryUrl = `/watch/category/${slug}`
                     return (
@@ -231,9 +243,9 @@ export function Header() {
                         href={categoryUrl}
                         className={cn(
                           "block px-3 py-2 rounded-md text-sm transition-all",
-                          pathname === categoryUrl
-                            ? "text-primary font-medium"
-                            : "text-muted-foreground hover:text-foreground",
+                          isCategoryActive(categoryUrl)
+                            ? "text-primary font-medium bg-primary/5"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
                         )}
                         onClick={() => setIsMobileMenuOpen(false)}
                       >

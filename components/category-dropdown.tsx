@@ -20,6 +20,7 @@ export function CategoryDropdown({ title, mainRoute, categories, baseUrl, classN
   const pathname = usePathname()
 
   const isActive = pathname === mainRoute || pathname.startsWith(`${baseUrl}/`)
+  const isActiveExact = pathname === mainRoute
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -35,7 +36,7 @@ export function CategoryDropdown({ title, mainRoute, categories, baseUrl, classN
 
   return (
     <div
-      className="relative group"
+      className="relative"
       ref={dropdownRef}
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
@@ -43,13 +44,25 @@ export function CategoryDropdown({ title, mainRoute, categories, baseUrl, classN
       <div className="flex items-center">
         <Link
           href={mainRoute}
-          className={cn("nav-link gradient-border flex items-center", isActive && "text-primary", className)}
-          onClick={(e) => e.stopPropagation()}
+          className={cn(
+            "nav-link gradient-border flex items-center",
+            isActive && "text-primary",
+            isActiveExact && "font-medium",
+            className,
+          )}
+          onClick={(e) => {
+            // Allow the link to navigate normally
+            setIsOpen(false)
+          }}
         >
           {title}
         </Link>
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setIsOpen(!isOpen)
+          }}
           className="ml-1 p-1 focus:outline-none"
           aria-expanded={isOpen}
           aria-haspopup="true"
@@ -70,7 +83,7 @@ export function CategoryDropdown({ title, mainRoute, categories, baseUrl, classN
                 href={categoryUrl}
                 className={cn(
                   "block px-4 py-2 text-sm hover:bg-primary/10 hover:text-primary transition-colors",
-                  isCategoryActive && "bg-primary/5 text-primary",
+                  isCategoryActive && "bg-primary/5 text-primary font-medium",
                 )}
                 onClick={() => setIsOpen(false)}
               >

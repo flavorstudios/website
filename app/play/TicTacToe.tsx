@@ -1,35 +1,34 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useCallback, useEffect } from "react"
+import { Users, RotateCcw, Cpu } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
-// Simple types
 type Player = "X" | "O"
-type Board = Array<Player | null>
+type Cell = Player | null
+type Board = Cell[]
 type GameMode = "pvp" | "pvc"
 
 export default function TicTacToe() {
-  // Basic state
   const [board, setBoard] = useState<Board>(Array(9).fill(null))
   const [currentPlayer, setCurrentPlayer] = useState<Player>("X")
   const [winner, setWinner] = useState<Player | null>(null)
   const [isDraw, setIsDraw] = useState(false)
   const [gameMode, setGameMode] = useState<GameMode>("pvp")
-  const [playerXScore, setPlayerXScore] = useState(0)
-  const [playerOScore, setPlayerOScore] = useState(0)
 
   // Check for winner
-  function checkWinner(board: Board): Player | null {
+  const checkWinner = useCallback((board: Board): Player | null => {
     const lines = [
       [0, 1, 2],
       [3, 4, 5],
-      [6, 7, 8],
+      [6, 7, 8], // rows
       [0, 3, 6],
       [1, 4, 7],
-      [2, 5, 8],
+      [2, 5, 8], // columns
       [0, 4, 8],
-      [2, 4, 6],
+      [2, 4, 6], // diagonals
     ]
 
     for (const [a, b, c] of lines) {
@@ -38,55 +37,32 @@ export default function TicTacToe() {
       }
     }
     return null
-  }
+  }, [])
 
   // Check for draw
-  function checkDraw(board: Board): boolean {
+  const checkDraw = useCallback((board: Board): boolean => {
     return board.every((cell) => cell !== null)
-  }
+  }, [])
 
   // Reset the game
-  function resetGame() {
+  const resetGame = useCallback(() => {
     setBoard(Array(9).fill(null))
     setCurrentPlayer("X")
     setWinner(null)
     setIsDraw(false)
-  }
+  }, [])
 
-  // Reset scores and game
-  function resetScoresAndGame() {
-    resetGame()
-    setPlayerXScore(0)
-    setPlayerOScore(0)
-  }
-
-  // Make a move
-  function makeMove(index: number) {
-    if (board[index] !== null || winner || isDraw) return
-
+  // Computer move logic
+  const computerMove = useCallback(() => {
+    // Simple AI: First try to win, then block, then take center, then random
     const newBoard = [...board]
-    newBoard[index] = currentPlayer
-    setBoard(newBoard)
-
-    const nextPlayer = currentPlayer === "X" ? "O" : "X"
-    setCurrentPlayer(nextPlayer)
-  }
-
-  // Computer move
-  function computerMove() {
-    const newBoard = [...board]
-    const emptyCells = []
 
     // Find empty cells
-    for (let i = 0; i < newBoard.length; i++) {
-      if (newBoard[i] === null) {
-        emptyCells.push(i)
-      }
-    }
+    const emptyCells = newBoard.map((cell, index) => (cell === null ? index : -1)).filter((index) => index !== -1)
 
     if (emptyCells.length === 0) return
 
-    // Try to win
+    // Try each empty cell to see if computer can win
     for (const index of emptyCells) {
       const testBoard = [...newBoard]
       testBoard[index] = "O"
@@ -97,7 +73,7 @@ export default function TicTacToe() {
       }
     }
 
-    // Try to block
+    // Try to block player from winning
     for (const index of emptyCells) {
       const testBoard = [...newBoard]
       testBoard[index] = "X"
@@ -115,24 +91,32 @@ export default function TicTacToe() {
       return
     }
 
-    // Take a random cell
+    // Take a random empty cell
     const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)]
     newBoard[randomIndex] = "O"
     setBoard(newBoard)
-  }
+  }, [board, checkWinner])
+
+  // Make a move
+  const makeMove = useCallback(
+    (index: number) => {
+      if (board[index] !== null || winner || isDraw) return
+
+      const newBoard = [...board]
+      newBoard[index] = currentPlayer
+      setBoard(newBoard)
+
+      const nextPlayer = currentPlayer === "X" ? "O" : "X"
+      setCurrentPlayer(nextPlayer)
+    },
+    [board, currentPlayer, winner, isDraw],
+  )
 
   // Check for game over after each move
   useEffect(() => {
     const gameWinner = checkWinner(board)
-
     if (gameWinner) {
       setWinner(gameWinner)
-
-      if (gameWinner === "X") {
-        setPlayerXScore(playerXScore + 1)
-      } else {
-        setPlayerOScore(playerOScore + 1)
-      }
       return
     }
 
@@ -141,8 +125,9 @@ export default function TicTacToe() {
       return
     }
 
-    // Computer's turn
-    if (gameMode === "pvc" && currentPlayer === "O") {
+    // If it's computer's turn in PvC mode
+    if (gameMode === "pvc" && currentPlayer === "O" && !gameWinner && !checkDraw(board)) {
+      // Add a small delay to make it feel more natural
       const timeoutId = setTimeout(() => {
         computerMove()
         setCurrentPlayer("X")
@@ -150,156 +135,158 @@ export default function TicTacToe() {
 
       return () => clearTimeout(timeoutId)
     }
-  }, [board, currentPlayer, gameMode, playerXScore, playerOScore])
+  }, [board, currentPlayer, gameMode, checkWinner, checkDraw, computerMove])
 
-  // Auto-reset after game ends
+  // Auto-reset the board after a game ends
   useEffect(() => {
-    if (winner || isDraw) {
-      const timeoutId = setTimeout(() => {
+    let timeoutId: NodeJS.Timeout
+    const isGameOver = winner !== null || isDraw
+
+    if (isGameOver) {
+      timeoutId = setTimeout(() => {
         resetGame()
       }, 2500)
-
-      return () => clearTimeout(timeoutId)
-    }
-  }, [winner, isDraw])
-
-  // Get winner message
-  function getWinnerMessage() {
-    if (isDraw) {
-      return "It's a Draw!"
     }
 
-    if (gameMode === "pvp") {
-      if (winner === "X") {
-        return "Player X Wins!"
-      } else {
-        return "Player O Wins!"
-      }
-    } else {
-      if (winner === "X") {
-        return "Player Wins!"
-      } else {
-        return "Computer Wins!"
-      }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId)
     }
-  }
+  }, [winner, isDraw, resetGame])
+
+  const isGameOver = winner !== null || isDraw
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-4xl font-bold text-center mb-8">
-        <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">Tic Tac Toe</span>
-      </h1>
+    <div className="container max-w-4xl mx-auto py-12 px-4">
+      <div className="text-center mb-10">
+        <h1 className="text-4xl md:text-5xl font-bold mb-3 font-orbitron tracking-tight">
+          <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">
+            Tic Tac Toe
+          </span>
+        </h1>
+        <p className="text-muted-foreground max-w-md mx-auto">
+          Challenge a friend or test your skills against the computer in this classic game of strategy.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Controls */}
-        <div className="md:col-span-1">
-          <Card className="p-4">
-            <h2 className="text-xl font-bold mb-4">Game Controls</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* Game Info & Controls */}
+        <div className="lg:order-1 order-2">
+          <Card className="bg-card/50 backdrop-blur-sm border border-primary/20">
+            <CardContent className="pt-6">
+              <h2 className="text-xl font-semibold mb-4 font-orbitron">Game Controls</h2>
 
-            <div className="space-y-3 mb-6">
-              <Button
-                className="w-full"
-                variant={gameMode === "pvp" ? "default" : "outline"}
-                onClick={() => {
-                  setGameMode("pvp")
-                  resetGame()
-                }}
-              >
-                Player vs Player
-              </Button>
+              <div className="space-y-3 mb-6">
+                <Button
+                  variant={gameMode === "pvp" ? "default" : "outline"}
+                  className={`w-full justify-start ${gameMode === "pvp" ? "bg-primary hover:bg-primary/90" : ""}`}
+                  onClick={() => {
+                    setGameMode("pvp")
+                    resetGame()
+                  }}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  Player vs Player
+                </Button>
 
-              <Button
-                className="w-full"
-                variant={gameMode === "pvc" ? "default" : "outline"}
-                onClick={() => {
-                  setGameMode("pvc")
-                  resetGame()
-                }}
-              >
-                Player vs Computer
-              </Button>
+                <Button
+                  variant={gameMode === "pvc" ? "default" : "outline"}
+                  className={`w-full justify-start ${gameMode === "pvc" ? "bg-primary hover:bg-primary/90" : ""}`}
+                  onClick={() => {
+                    setGameMode("pvc")
+                    resetGame()
+                  }}
+                >
+                  <Cpu className="mr-2 h-4 w-4" />
+                  Player vs Computer
+                </Button>
 
-              <Button className="w-full" variant="outline" onClick={resetScoresAndGame}>
-                Reset Game & Scores
-              </Button>
-            </div>
+                <Button variant="outline" className="w-full justify-start hover:bg-primary/10" onClick={resetGame}>
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  Reset Game
+                </Button>
+              </div>
 
-            <div className="mb-4 p-3 border rounded">
-              <h3 className="text-sm font-medium mb-1">Current Mode</h3>
-              <p>{gameMode === "pvp" ? "Player vs Player" : "Player vs Computer"}</p>
-            </div>
-
-            <div className="mb-4 p-3 border rounded">
-              <h3 className="text-sm font-medium mb-1">Game Status</h3>
-              {winner ? (
-                <p className="font-bold">
-                  {winner === "X"
-                    ? gameMode === "pvp"
-                      ? "Player X Wins"
-                      : "Player Wins"
-                    : gameMode === "pvp"
-                      ? "Player O Wins"
-                      : "Computer Wins"}
-                </p>
-              ) : isDraw ? (
-                <p className="font-bold">Draw</p>
-              ) : (
-                <p>
-                  {currentPlayer === "X"
-                    ? "Player X's Turn"
-                    : gameMode === "pvp"
-                      ? "Player O's Turn"
-                      : "Computer's Turn"}
-                </p>
-              )}
-            </div>
-
-            <div className="p-3 border rounded">
-              <h3 className="text-sm font-medium mb-2">Score</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-2 border rounded">
-                  <div className="text-xs mb-1">Player X</div>
-                  <div className="text-2xl font-bold">{playerXScore}</div>
+              <div className="space-y-4">
+                <div className="bg-card/80 p-4 rounded-md border border-border/50">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Current Mode</h3>
+                  <p className="font-medium">{gameMode === "pvp" ? "Player vs Player" : "Player vs Computer"}</p>
                 </div>
-                <div className="text-center p-2 border rounded">
-                  <div className="text-xs mb-1">{gameMode === "pvp" ? "Player O" : "Computer"}</div>
-                  <div className="text-2xl font-bold">{playerOScore}</div>
+
+                <div className="bg-card/80 p-4 rounded-md border border-border/50">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Game Status</h3>
+                  {isGameOver ? (
+                    <Badge
+                      variant={isDraw ? "outline" : "default"}
+                      className={`${isDraw ? "border-yellow-500 text-yellow-500" : winner === "X" ? "bg-blue-500" : "bg-pink-500"}`}
+                    >
+                      {isDraw ? "Draw" : `Player ${winner} Wins`}
+                    </Badge>
+                  ) : (
+                    <div className="flex items-center">
+                      <div
+                        className={`w-3 h-3 rounded-full mr-2 ${currentPlayer === "X" ? "bg-blue-500" : "bg-pink-500"}`}
+                      ></div>
+                      <span>Player {currentPlayer}'s Turn</span>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            </CardContent>
           </Card>
         </div>
 
         {/* Game Board */}
-        <div className="md:col-span-2">
-          <Card className="p-4">
-            <div className="relative max-w-md mx-auto">
-              <div className="grid grid-cols-3 gap-2 aspect-square">
-                {board.map((cell, index) => (
-                  <button
-                    key={index}
-                    className="flex items-center justify-center text-3xl font-bold bg-gray-800 rounded h-full"
-                    onClick={() => makeMove(index)}
-                    disabled={cell !== null || winner !== null || isDraw}
-                  >
-                    {cell === "X" && <span className="text-blue-400">X</span>}
-                    {cell === "O" && <span className="text-pink-500">O</span>}
-                  </button>
-                ))}
-              </div>
-
-              {/* Result Message */}
-              {(winner || isDraw) && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-black bg-opacity-70 text-white font-bold py-3 px-6 rounded-lg text-xl">
-                    {getWinnerMessage()}
-                  </div>
+        <div className="lg:col-span-2 lg:order-2 order-1">
+          <Card className="bg-card/50 backdrop-blur-sm border border-primary/20 overflow-hidden">
+            <CardContent className="p-6">
+              <div className="relative w-full max-w-md mx-auto">
+                <div className="grid grid-cols-3 gap-3 aspect-square">
+                  {board.map((cell, index) => (
+                    <button
+                      key={index}
+                      className={`
+                        flex items-center justify-center text-3xl md:text-4xl font-bold
+                        bg-[#111827] rounded-md transition-all duration-200 h-full
+                        border border-primary/10
+                        ${!cell && !isGameOver ? "hover:bg-[#1a2234] hover:border-primary/30" : ""}
+                        ${!cell && !isGameOver ? "cursor-pointer" : "cursor-default"}
+                      `}
+                      onClick={() => makeMove(index)}
+                      disabled={cell !== null || isGameOver}
+                      aria-label={`Cell ${index + 1}`}
+                    >
+                      {cell === "X" && (
+                        <span className="text-blue-400 flex items-center justify-center w-full h-full">X</span>
+                      )}
+                      {cell === "O" && (
+                        <span className="text-pink-500 flex items-center justify-center w-full h-full">O</span>
+                      )}
+                      {!cell && <span className="opacity-0 select-none">X</span>}
+                    </button>
+                  ))}
                 </div>
-              )}
-            </div>
 
-            <p className="text-center text-sm mt-4">Game will reset automatically after a win or draw.</p>
+                {/* Result Message */}
+                {isGameOver && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div
+                      className={`
+                        ${isDraw ? "bg-yellow-500/90" : winner === "X" ? "bg-blue-500/90" : "bg-pink-500/90"}
+                        text-white font-bold py-3 px-6 rounded-lg text-xl md:text-2xl shadow-lg
+                        backdrop-blur-sm border border-white/20
+                      `}
+                    >
+                      {isDraw ? "It's a Draw!" : `Player ${winner} Wins!`}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
           </Card>
+
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            <p>Game will reset automatically after a win or draw.</p>
+          </div>
         </div>
       </div>
     </div>

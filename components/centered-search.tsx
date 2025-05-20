@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Search, X, FileText, Video, FolderOpen, ArrowUp, ArrowDown } from "lucide-react"
+import { Search, X, FileText, Video, FolderOpen, ArrowUp, ArrowDown, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useDebounce } from "@/hooks/use-debounce"
 import { searchAll, type SearchResultItem } from "@/lib/search"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
-export function CenteredSearch() {
+export function CenteredSearch({ onResultClick = () => {} }: { onResultClick?: () => void }) {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResultItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -191,7 +191,7 @@ export function CenteredSearch() {
               setQuery("")
               inputRef.current?.focus()
             }}
-            className="h-8 w-8 mr-1 flex items-center justify-center hover:bg-muted/50 rounded-full"
+            className="h-8 w-8 mr-1 flex items-center justify-center hover:bg-muted/50 rounded-full transition-colors"
             aria-label="Clear search"
           >
             <X className="h-4 w-4 text-muted-foreground" />
@@ -201,10 +201,13 @@ export function CenteredSearch() {
 
       {/* Search Results Dropdown */}
       {isFocused && (query || isLoading) && (
-        <div className="absolute left-0 right-0 mt-2 rounded-md border bg-background/95 backdrop-blur-md shadow-lg z-50 overflow-hidden">
+        <div className="absolute left-0 right-0 mt-2 rounded-md border bg-background/95 backdrop-blur-md shadow-lg z-50 overflow-hidden transition-all duration-200 ease-in-out">
           {isLoading ? (
             <div className="p-4 text-center text-muted-foreground">
-              <div className="animate-pulse">Searching...</div>
+              <div className="flex items-center justify-center">
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Searching...
+              </div>
             </div>
           ) : results.length > 0 ? (
             <div className="py-2 max-h-[60vh] overflow-y-auto" ref={resultsRef}>
@@ -212,7 +215,10 @@ export function CenteredSearch() {
                 <Link
                   key={`${result.url}-${index}`}
                   href={result.url}
-                  onClick={() => setIsFocused(false)}
+                  onClick={() => {
+                    setIsFocused(false)
+                    onResultClick()
+                  }}
                   className={cn(
                     "block px-4 py-3 hover:bg-muted/50 transition-colors",
                     selectedIndex === index && "bg-muted/70",

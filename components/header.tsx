@@ -3,11 +3,10 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Coffee, Menu, X, ChevronDown, ChevronRight } from "lucide-react"
+import { Coffee, Menu, X, ChevronDown, ChevronRight, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
-import { SearchDropdown } from "@/components/search-dropdown"
 import { CenteredSearch } from "@/components/centered-search"
 import { CategoryDropdown } from "@/components/category-dropdown"
 import { blogCategories } from "@/lib/blogCategories"
@@ -18,6 +17,7 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
   const pathname = usePathname()
+  const [showMobileSearch, setShowMobileSearch] = useState(false)
 
   // Handle scroll
   useEffect(() => {
@@ -81,7 +81,7 @@ export function Header() {
 
         {/* Centered Search - Desktop Only */}
         <div className="hidden md:block max-w-md w-full mx-4">
-          <CenteredSearch />
+          <CenteredSearch onResultClick={() => {}} />
         </div>
 
         {/* Right Navigation */}
@@ -116,7 +116,33 @@ export function Header() {
           {/* Mobile Controls */}
           <div className="flex items-center space-x-2 md:hidden">
             {/* Mobile Search Icon */}
-            <SearchDropdown />
+            <div className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowMobileSearch(!showMobileSearch)}
+                aria-label="Search"
+                className="text-foreground hover:bg-primary/10 hover:text-primary"
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+
+              {/* Mobile Search Overlay */}
+              {showMobileSearch && (
+                <div
+                  className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-16 px-4"
+                  onClick={(e) => {
+                    if (e.target === e.currentTarget) {
+                      setShowMobileSearch(false)
+                    }
+                  }}
+                >
+                  <div className="w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+                    <CenteredSearch onResultClick={() => setShowMobileSearch(false)} />
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Theme Toggle */}
             <ThemeToggle />

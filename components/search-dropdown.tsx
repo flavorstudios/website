@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Search, X, FileText, Video, FolderOpen } from "lucide-react"
+import { Search, X, FileText, Video, FolderOpen, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useDebounce } from "@/hooks/use-debounce"
 import { searchAll, type SearchResultItem } from "@/lib/search"
@@ -153,7 +153,7 @@ export function SearchDropdown() {
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-screen max-w-md rounded-md border bg-background/95 backdrop-blur-md shadow-lg z-50 overflow-hidden transition-all duration-200 ease-in-out">
+        <div className="absolute right-0 mt-2 w-screen max-w-md rounded-md border bg-background/95 backdrop-blur-md shadow-lg z-50 overflow-hidden transition-all duration-200 ease-in-out animate-in slide-in-from-top-5">
           <div className="p-4">
             <div className="flex items-center border rounded-md bg-background">
               <Search className="h-4 w-4 ml-3 text-muted-foreground" />
@@ -182,7 +182,10 @@ export function SearchDropdown() {
           <div className={cn("max-h-[60vh] overflow-y-auto", !results.length && !isLoading && !query && "hidden")}>
             {isLoading ? (
               <div className="p-4 text-center text-muted-foreground">
-                <div className="animate-pulse">Searching...</div>
+                <div className="flex items-center justify-center">
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Searching...
+                </div>
               </div>
             ) : results.length > 0 ? (
               <div className="py-2">

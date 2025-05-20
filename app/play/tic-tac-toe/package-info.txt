@@ -1,0 +1,5 @@
+// Note: This is just for reference, not an actual file
+// The following packages are used in this project:
+// - framer-motion: For animations
+// - lucide-react: For icons
+// These are already available in the project

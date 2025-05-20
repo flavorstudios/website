@@ -185,18 +185,7 @@ export default function TicTacToe() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto py-12 px-4">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl md:text-5xl font-bold mb-3 font-orbitron tracking-tight">
-          <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">
-            Tic Tac Toe
-          </span>
-        </h1>
-        <p className="text-muted-foreground max-w-md mx-auto">
-          Challenge a friend or test your skills against the computer in this classic game of strategy.
-        </p>
-      </div>
-
+    <div className="w-full">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {/* Game Info & Controls */}
         <div className="lg:order-1 order-2">

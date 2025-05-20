@@ -22,3 +22,17 @@ export async function getAllEpisodeSlugs() {
     "attack-on-titan-finale-reaction",
   ]
 }
+
+export async function getEpisodes() {
+  const slugs = await getAllEpisodeSlugs()
+  const episodes = await Promise.all(
+    slugs.map(async (slug) => {
+      const episodeData = await getEpisodeData(slug)
+      return {
+        ...episodeData,
+        slug,
+      }
+    }),
+  )
+  return episodes
+}

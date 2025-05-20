@@ -22,3 +22,17 @@ export async function getAllPostSlugs() {
     "studio-ghibli-magic",
   ]
 }
+
+export async function getPosts() {
+  const slugs = await getAllPostSlugs()
+  const posts = await Promise.all(
+    slugs.map(async (slug) => {
+      const postData = await getPostData(slug)
+      return {
+        ...postData,
+        slug,
+      }
+    }),
+  )
+  return posts
+}

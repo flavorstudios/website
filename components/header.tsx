@@ -10,10 +10,12 @@ import { SearchDropdown } from "@/components/search-dropdown"
 import { CategoryDropdown } from "@/components/category-dropdown"
 import { blogCategories } from "@/lib/blogCategories"
 import { watchCategories } from "@/lib/watchCategories"
+import { usePathname } from "next/navigation"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
 
   // Handle scroll
   useEffect(() => {
@@ -42,28 +44,36 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-1">
           {/* Home Button */}
-          <Link href="/" className="nav-link gradient-border flex items-center">
+          <Link
+            href="/"
+            className={cn("nav-link gradient-border flex items-center", pathname === "/" && "text-primary")}
+          >
             <Home className="h-4 w-4 mr-1" />
             <span>Home</span>
           </Link>
 
-          {/* Blog Dropdown */}
-          <CategoryDropdown title="Blog" categories={blogCategories} baseUrl="/blog/category" />
+          {/* Blog Dropdown with main route */}
+          <CategoryDropdown title="Blog" mainRoute="/blog" categories={blogCategories} baseUrl="/blog/category" />
 
-          {/* Watch Dropdown */}
-          <CategoryDropdown title="Watch" categories={watchCategories} baseUrl="/watch/category" />
+          {/* Watch Dropdown with main route */}
+          <CategoryDropdown title="Watch" mainRoute="/watch" categories={watchCategories} baseUrl="/watch/category" />
 
-          <Link href="/play" className="nav-link gradient-border">
+          <Link href="/play" className={cn("nav-link gradient-border", pathname === "/play" && "text-primary")}>
             Play
           </Link>
-          <Link href="/about" className="nav-link gradient-border">
+
+          <Link href="/about" className={cn("nav-link gradient-border", pathname === "/about" && "text-primary")}>
             About
           </Link>
+
           <Link href="/support" className="ml-2">
             <Button
               size="sm"
               variant="outline"
-              className="flex items-center space-x-1 hover:bg-primary/10 hover:text-primary transition-all duration-200"
+              className={cn(
+                "flex items-center space-x-1 hover:bg-primary/10 hover:text-primary transition-all duration-200",
+                pathname === "/support" && "bg-primary/10 text-primary",
+              )}
             >
               <Coffee className="h-4 w-4 mr-1" />
               <span>Buy Me A Coffee</span>
@@ -101,64 +111,114 @@ export function Header() {
           <nav className="container mx-auto px-4 py-4 flex flex-col space-y-3">
             <Link
               href="/"
-              className="py-2 px-3 hover:bg-primary/10 rounded-md flex items-center"
+              className={cn(
+                "py-2 px-3 hover:bg-primary/10 rounded-md flex items-center",
+                pathname === "/" && "bg-primary/5 text-primary",
+              )}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <Home className="h-4 w-4 mr-2" />
               Home
             </Link>
 
+            {/* Blog Main Link in Mobile Menu */}
+            <Link
+              href="/blog"
+              className={cn(
+                "py-2 px-3 hover:bg-primary/10 rounded-md font-medium",
+                pathname === "/blog" && "bg-primary/5 text-primary",
+              )}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Blog
+            </Link>
+
             {/* Blog Categories in Mobile Menu */}
-            <div className="py-2 px-3">
-              <div className="font-medium mb-1">Blog Categories</div>
-              <div className="pl-2 space-y-2 mt-2">
-                {Object.entries(blogCategories).map(([slug, category]) => (
-                  <Link
-                    key={slug}
-                    href={`/blog/category/${slug}`}
-                    className="block py-1 text-sm hover:text-primary"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {category.heading}
-                  </Link>
-                ))}
+            <div className="py-2 px-3 pl-6">
+              <div className="font-medium mb-1 text-sm text-muted-foreground">Blog Categories</div>
+              <div className="space-y-2 mt-2">
+                {Object.entries(blogCategories).map(([slug, category]) => {
+                  const categoryUrl = `/blog/category/${slug}`
+                  return (
+                    <Link
+                      key={slug}
+                      href={categoryUrl}
+                      className={cn(
+                        "block py-1 text-sm hover:text-primary",
+                        pathname === categoryUrl && "text-primary",
+                      )}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {category.heading}
+                    </Link>
+                  )
+                })}
               </div>
             </div>
 
+            {/* Watch Main Link in Mobile Menu */}
+            <Link
+              href="/watch"
+              className={cn(
+                "py-2 px-3 hover:bg-primary/10 rounded-md font-medium",
+                pathname === "/watch" && "bg-primary/5 text-primary",
+              )}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Watch
+            </Link>
+
             {/* Watch Categories in Mobile Menu */}
-            <div className="py-2 px-3">
-              <div className="font-medium mb-1">Watch Categories</div>
-              <div className="pl-2 space-y-2 mt-2">
-                {Object.entries(watchCategories).map(([slug, category]) => (
-                  <Link
-                    key={slug}
-                    href={`/watch/category/${slug}`}
-                    className="block py-1 text-sm hover:text-primary"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {category.heading}
-                  </Link>
-                ))}
+            <div className="py-2 px-3 pl-6">
+              <div className="font-medium mb-1 text-sm text-muted-foreground">Watch Categories</div>
+              <div className="space-y-2 mt-2">
+                {Object.entries(watchCategories).map(([slug, category]) => {
+                  const categoryUrl = `/watch/category/${slug}`
+                  return (
+                    <Link
+                      key={slug}
+                      href={categoryUrl}
+                      className={cn(
+                        "block py-1 text-sm hover:text-primary",
+                        pathname === categoryUrl && "text-primary",
+                      )}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {category.heading}
+                    </Link>
+                  )
+                })}
               </div>
             </div>
 
             <Link
               href="/play"
-              className="py-2 px-3 hover:bg-primary/10 rounded-md"
+              className={cn(
+                "py-2 px-3 hover:bg-primary/10 rounded-md",
+                pathname === "/play" && "bg-primary/5 text-primary",
+              )}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Play
             </Link>
+
             <Link
               href="/about"
-              className="py-2 px-3 hover:bg-primary/10 rounded-md"
+              className={cn(
+                "py-2 px-3 hover:bg-primary/10 rounded-md",
+                pathname === "/about" && "bg-primary/5 text-primary",
+              )}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About
             </Link>
+
             <Link
               href="/support"
-              className="py-2 px-3 hover:bg-primary/10 rounded-md"
+              className={cn(
+                "py-2 px-3 hover:bg-primary/10 rounded-md",
+                pathname === "/support" && "bg-primary/5 text-primary",
+              )}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <span className="flex items-center">

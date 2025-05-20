@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Coffee, Heart, Star, Users, ArrowRight, Check } from "lucide-react"
+import { Coffee, Heart, Star, Users, ArrowRight, Check, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 
@@ -82,6 +82,65 @@ export default function SupportPage() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Support Message Section - NEW */}
+      <section className="py-12 md:py-16 border-y border-primary/10 bg-card/50">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 font-orbitron">
+            Support Flavor Studios on Our Creative Journey
+          </h2>
+          <div className="prose prose-lg dark:prose-invert mx-auto mb-8">
+            <p className="text-muted-foreground leading-relaxed">
+              At Flavor Studios, we're committed to crafting emotionally powerful anime, original 3D animations, and
+              meaningful storytelling experiences — all built independently using Blender and open-source tools.
+            </p>
+            <p className="text-muted-foreground leading-relaxed">
+              If you believe in the value of independent animation and want to support our work, your contribution can
+              help us continue producing high-quality content, invest in better tools, and grow our creative mission.
+            </p>
+          </div>
+
+          <div className="bg-primary/5 rounded-xl p-6 mb-8 border border-primary/20">
+            <p className="font-medium mb-4">👉 Support us with a coffee:</p>
+            <a
+              href="https://buymeacoffee.com/flavorstudios"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline break-all"
+            >
+              https://buymeacoffee.com/flavorstudios
+            </a>
+
+            <div className="mt-6">
+              <Button
+                className="bg-[#FFDD00] hover:bg-[#FFDD00]/90 text-black font-medium transition-all"
+                size="lg"
+                asChild
+              >
+                <a
+                  href="https://buymeacoffee.com/flavorstudios"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center"
+                >
+                  <Coffee className="mr-2 h-5 w-5" />
+                  Buy Me a Coffee
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </div>
+
+          <p className="text-muted-foreground italic">
+            Every coffee fuels our animation process, keeps us ad-free, and brings us one step closer to turning dreams
+            into visuals.
+          </p>
+          <p className="mt-6 font-medium">
+            Thank you for standing with us.
+            <br />— The Flavor Studios Team
+          </p>
         </div>
       </section>
 

@@ -1,8 +1,6 @@
 import Link from "next/link"
 import { Home, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Suspense } from "react"
-import { SearchWrapper } from "@/components/search-wrapper"
 
 export const metadata = {
   title: "Page Not Found – Flavor Studios",
@@ -35,13 +33,6 @@ export default function NotFound() {
               <Button asChild variant="outline" className="hover:bg-primary/10">
                 <Link href="/contact">Report This Issue</Link>
               </Button>
-            </div>
-
-            <div className="max-w-md mx-auto mb-12 border border-primary/20 rounded-lg p-6 bg-card/50">
-              <h2 className="text-lg font-bold mb-4 font-orbitron">Looking for something specific?</h2>
-              <Suspense fallback={<div className="h-10 w-full bg-muted/20 animate-pulse rounded-md"></div>}>
-                <SearchWrapper />
-              </Suspense>
             </div>
 
             <div className="border-t border-primary/10 pt-8 mt-8">

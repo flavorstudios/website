@@ -1,0 +1,80 @@
+export const blogCategories = {
+  "anime-reviews": {
+    title: "Anime Reviews – Series & Movie Insights",
+    description: "In-depth anime reviews of series, films, and episodes with emotional and storytelling analysis.",
+    heading: "Anime Reviews",
+    intro: "Explore honest reviews of anime that focus on story, emotion, and art.",
+  },
+  "storytelling-themes": {
+    title: "Anime Storytelling & Themes",
+    description: "Breakdowns of character arcs, plot structures, and emotional themes in anime.",
+    heading: "Storytelling & Themes",
+    intro: "Discover deeper meaning in anime plots and characters.",
+  },
+  "anime-news": {
+    title: "Latest Anime News & Updates",
+    description: "Stay up to date with the latest anime announcements, events, and industry updates.",
+    heading: "Anime News",
+    intro: "Daily updates on what's new and upcoming in the anime world.",
+  },
+  "upcoming-anime": {
+    title: "Upcoming Anime Releases",
+    description: "Explore details on new anime movies and series coming soon.",
+    heading: "Upcoming Anime",
+    intro: "Be the first to know about upcoming anime projects.",
+  },
+  "underrated-gems": {
+    title: "Underrated Anime Gems",
+    description: "Hidden or overlooked anime that deserve your attention.",
+    heading: "Underrated Gems",
+    intro: "Discover lesser-known anime worth watching.",
+  },
+  "top-10-lists": {
+    title: "Top 10 Anime Lists",
+    description: "Ranked listicles covering everything from battles to betrayals.",
+    heading: "Top 10 Lists",
+    intro: "Read entertaining rankings about your favorite anime.",
+  },
+  "anime-theories": {
+    title: "Anime Theories & Speculations",
+    description: "Fan theories and predictions about your favorite shows.",
+    heading: "Anime Theories",
+    intro: "Explore creative fan speculation and lore.",
+  },
+  "creator-spotlights": {
+    title: "Anime Creator Spotlights",
+    description: "Stories of directors, studios, and artists shaping anime.",
+    heading: "Creator Spotlights",
+    intro: "Meet the people behind iconic anime productions.",
+  },
+  "behind-the-frames": {
+    title: "Behind the Frames – Blender Workflows",
+    description: "Production insights, workflows, and breakdowns.",
+    heading: "Behind the Frames",
+    intro: "Explore the art of animation using Blender.",
+  },
+  "blender-tutorials": {
+    title: "Blender Tutorials for Anime Creators",
+    description: "Step-by-step Blender guides for animators and creators.",
+    heading: "Blender Tutorials",
+    intro: "Learn how to create stunning anime-style animations.",
+  },
+  "3d-animation-tips": {
+    title: "3D Animation Tips & Techniques",
+    description: "Lighting, rigging, rendering tips for better animation.",
+    heading: "3D Animation Tips",
+    intro: "Improve your animation pipeline with expert tricks.",
+  },
+  "anime-editing": {
+    title: "Anime Editing Tools & Techniques",
+    description: "Best software and workflow guides for anime editing.",
+    heading: "Anime Editing",
+    intro: "From clips to AMVs, master the anime editing space.",
+  },
+  "opinion-editorials": {
+    title: "Anime Opinions & Editorials",
+    description: "Thoughtful takes on anime culture and trends.",
+    heading: "Editorials",
+    intro: "Dive into hot takes and nuanced opinions.",
+  },
+}

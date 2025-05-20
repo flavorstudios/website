@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Coffee, Menu, X } from "lucide-react"
+import { Coffee, Menu, X, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
+import { SearchDropdown } from "@/components/search-dropdown"
+import { CategoryDropdown } from "@/components/category-dropdown"
+import { blogCategories } from "@/lib/blogCategories"
+import { watchCategories } from "@/lib/watchCategories"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -37,12 +41,18 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-1">
-          <Link href="/blog" className="nav-link gradient-border">
-            Blog
+          {/* Home Button */}
+          <Link href="/" className="nav-link gradient-border flex items-center">
+            <Home className="h-4 w-4 mr-1" />
+            <span>Home</span>
           </Link>
-          <Link href="/watch" className="nav-link gradient-border">
-            Watch
-          </Link>
+
+          {/* Blog Dropdown */}
+          <CategoryDropdown title="Blog" categories={blogCategories} baseUrl="/blog/category" />
+
+          {/* Watch Dropdown */}
+          <CategoryDropdown title="Watch" categories={watchCategories} baseUrl="/watch/category" />
+
           <Link href="/play" className="nav-link gradient-border">
             Play
           </Link>
@@ -59,13 +69,20 @@ export function Header() {
               <span>Buy Me A Coffee</span>
             </Button>
           </Link>
+
+          {/* Search Button */}
+          <div className="ml-2">
+            <SearchDropdown />
+          </div>
+
           <div className="ml-2">
             <ThemeToggle />
           </div>
         </nav>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Menu Button and Search */}
         <div className="flex items-center space-x-2 md:hidden">
+          <SearchDropdown />
           <ThemeToggle />
           <Button
             variant="ghost"
@@ -83,19 +100,48 @@ export function Header() {
         <div className="md:hidden bg-background/95 backdrop-blur-md border-b">
           <nav className="container mx-auto px-4 py-4 flex flex-col space-y-3">
             <Link
-              href="/blog"
-              className="py-2 px-3 hover:bg-primary/10 rounded-md"
+              href="/"
+              className="py-2 px-3 hover:bg-primary/10 rounded-md flex items-center"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Blog
+              <Home className="h-4 w-4 mr-2" />
+              Home
             </Link>
-            <Link
-              href="/watch"
-              className="py-2 px-3 hover:bg-primary/10 rounded-md"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Watch
-            </Link>
+
+            {/* Blog Categories in Mobile Menu */}
+            <div className="py-2 px-3">
+              <div className="font-medium mb-1">Blog Categories</div>
+              <div className="pl-2 space-y-2 mt-2">
+                {Object.entries(blogCategories).map(([slug, category]) => (
+                  <Link
+                    key={slug}
+                    href={`/blog/category/${slug}`}
+                    className="block py-1 text-sm hover:text-primary"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {category.heading}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Watch Categories in Mobile Menu */}
+            <div className="py-2 px-3">
+              <div className="font-medium mb-1">Watch Categories</div>
+              <div className="pl-2 space-y-2 mt-2">
+                {Object.entries(watchCategories).map(([slug, category]) => (
+                  <Link
+                    key={slug}
+                    href={`/watch/category/${slug}`}
+                    className="block py-1 text-sm hover:text-primary"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {category.heading}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             <Link
               href="/play"
               className="py-2 px-3 hover:bg-primary/10 rounded-md"

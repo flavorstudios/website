@@ -17,6 +17,9 @@ export default function TicTacToe() {
   const [winner, setWinner] = useState<Player | null>(null)
   const [isDraw, setIsDraw] = useState(false)
   const [gameMode, setGameMode] = useState<GameMode>("pvp")
+  // Add score state
+  const [playerXScore, setPlayerXScore] = useState(0)
+  const [playerOScore, setPlayerOScore] = useState(0)
 
   // Check for winner
   const checkWinner = useCallback((board: Board): Player | null => {
@@ -51,6 +54,13 @@ export default function TicTacToe() {
     setWinner(null)
     setIsDraw(false)
   }, [])
+
+  // Reset scores and game
+  const resetScoresAndGame = useCallback(() => {
+    resetGame()
+    setPlayerXScore(0)
+    setPlayerOScore(0)
+  }, [resetGame])
 
   // Computer move logic
   const computerMove = useCallback(() => {
@@ -117,6 +127,14 @@ export default function TicTacToe() {
     const gameWinner = checkWinner(board)
     if (gameWinner) {
       setWinner(gameWinner)
+
+      // Update scores when there's a winner
+      if (gameWinner === "X") {
+        setPlayerXScore((prev) => prev + 1)
+      } else if (gameWinner === "O") {
+        setPlayerOScore((prev) => prev + 1)
+      }
+
       return
     }
 
@@ -154,6 +172,18 @@ export default function TicTacToe() {
   }, [winner, isDraw, resetGame])
 
   const isGameOver = winner !== null || isDraw
+
+  // Get the appropriate winner message
+  const getWinnerMessage = () => {
+    if (isDraw) return "It's a Draw!"
+
+    if (gameMode === "pvp") {
+      return `Player ${winner} Wins!`
+    } else {
+      // PvC mode
+      return winner === "X" ? "Player Wins!" : "Computer Wins!"
+    }
+  }
 
   return (
     <div className="container max-w-4xl mx-auto py-12 px-4">
@@ -200,9 +230,13 @@ export default function TicTacToe() {
                   Player vs Computer
                 </Button>
 
-                <Button variant="outline" className="w-full justify-start hover:bg-primary/10" onClick={resetGame}>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start hover:bg-primary/10"
+                  onClick={resetScoresAndGame}
+                >
                   <RotateCcw className="mr-2 h-4 w-4" />
-                  Reset Game
+                  Reset Game & Scores
                 </Button>
               </div>
 
@@ -219,16 +253,37 @@ export default function TicTacToe() {
                       variant={isDraw ? "outline" : "default"}
                       className={`${isDraw ? "border-yellow-500 text-yellow-500" : winner === "X" ? "bg-blue-500" : "bg-pink-500"}`}
                     >
-                      {isDraw ? "Draw" : `Player ${winner} Wins`}
+                      {isDraw
+                        ? "Draw"
+                        : `${winner === "X" ? "Player X" : gameMode === "pvp" ? "Player O" : "Computer"} Wins`}
                     </Badge>
                   ) : (
                     <div className="flex items-center">
                       <div
                         className={`w-3 h-3 rounded-full mr-2 ${currentPlayer === "X" ? "bg-blue-500" : "bg-pink-500"}`}
                       ></div>
-                      <span>Player {currentPlayer}'s Turn</span>
+                      <span>
+                        {currentPlayer === "X" ? "Player X" : gameMode === "pvp" ? "Player O" : "Computer"}'s Turn
+                      </span>
                     </div>
                   )}
+                </div>
+
+                {/* Score Tracking */}
+                <div className="bg-card/80 p-4 rounded-md border border-border/50">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">Score</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-2 bg-blue-500/10 rounded-md border border-blue-500/20">
+                      <div className="text-xs text-muted-foreground mb-1">Player X</div>
+                      <div className="text-2xl font-bold text-blue-400">{playerXScore}</div>
+                    </div>
+                    <div className="text-center p-2 bg-pink-500/10 rounded-md border border-pink-500/20">
+                      <div className="text-xs text-muted-foreground mb-1">
+                        {gameMode === "pvp" ? "Player O" : "Computer"}
+                      </div>
+                      <div className="text-2xl font-bold text-pink-400">{playerOScore}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -276,7 +331,7 @@ export default function TicTacToe() {
                         backdrop-blur-sm border border-white/20
                       `}
                     >
-                      {isDraw ? "It's a Draw!" : `Player ${winner} Wins!`}
+                      {getWinnerMessage()}
                     </div>
                   </div>
                 )}

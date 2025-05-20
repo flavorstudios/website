@@ -13,25 +13,25 @@ export default function SupportPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-24 md:py-32 overflow-hidden">
+      <section className="relative py-16 md:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
         <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
         <div className="container relative z-10 mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary mb-8">
+            <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary mb-6">
               <span className="mr-1">✨</span> Independent Animation Studio
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-orbitron tracking-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight">
               Support Our <span className="text-primary">Creative Vision</span>
             </h1>
 
-            <p className="text-xl mb-8 text-muted-foreground leading-relaxed">
+            <p className="text-xl mb-6 text-muted-foreground leading-relaxed">
               At Flavor Studios, we're committed to crafting emotionally powerful anime, original 3D animations, and
               meaningful storytelling experiences — all built independently using Blender and open-source tools.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-16">
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
               <Button
                 asChild
                 size="lg"
@@ -60,12 +60,12 @@ export default function SupportPage() {
       </section>
 
       {/* Impact Section */}
-      <section className="py-16 md:py-24">
+      <section className="py-10 md:py-14">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-12 font-orbitron">Your Support Makes a Difference</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-8 font-orbitron">Your Support Makes a Difference</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {[
                 {
                   title: "Creative Freedom",
@@ -89,8 +89,8 @@ export default function SupportPage() {
                   key={index}
                   className="bg-card/50 border border-primary/10 hover:border-primary/30 transition-all duration-300"
                 >
-                  <CardContent className="pt-6">
-                    <div className="mb-4">{item.icon}</div>
+                  <CardContent className="pt-5 pb-1">
+                    <div className="mb-3">{item.icon}</div>
                     <h3 className="text-lg font-bold mb-2">{item.title}</h3>
                     <p className="text-muted-foreground">{item.description}</p>
                   </CardContent>
@@ -98,7 +98,7 @@ export default function SupportPage() {
               ))}
             </div>
 
-            <div className="border border-primary/10 rounded-lg p-6 bg-primary/5">
+            <div className="border border-primary/10 rounded-lg p-5 bg-primary/5 mb-2">
               <p className="text-lg">
                 "If you believe in the value of independent animation and want to support our work, your contribution
                 can help us continue producing high-quality content and grow our creative mission."
@@ -109,11 +109,11 @@ export default function SupportPage() {
       </section>
 
       {/* Support CTA */}
-      <section className="py-16 md:py-24 bg-gradient-to-b from-background to-primary/5">
+      <section className="py-10 md:py-14 bg-gradient-to-b from-background to-primary/5">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 font-orbitron">Ready to Support Our Journey?</h2>
-            <p className="text-lg mb-8 text-muted-foreground">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 font-orbitron">Ready to Support Our Journey?</h2>
+            <p className="text-lg mb-6 text-muted-foreground">
               Every contribution, no matter the size, helps us bring our creative vision to life.
             </p>
 
@@ -128,7 +128,7 @@ export default function SupportPage() {
               </Link>
             </Button>
 
-            <p className="text-sm text-muted-foreground mt-6">
+            <p className="text-sm text-muted-foreground mt-4">
               Your support is processed securely through Buy Me a Coffee.
             </p>
           </div>

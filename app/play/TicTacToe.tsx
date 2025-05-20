@@ -18,6 +18,10 @@ export default function TicTacToe() {
   const [isDraw, setIsDraw] = useState(false)
   const [gameMode, setGameMode] = useState<GameMode>("pvp")
 
+  // Add score tracking
+  const [playerXScore, setPlayerXScore] = useState(0)
+  const [playerOScore, setPlayerOScore] = useState(0)
+
   // Check for winner
   const checkWinner = useCallback((board: Board): Player | null => {
     const lines = [
@@ -50,6 +54,12 @@ export default function TicTacToe() {
     setCurrentPlayer("X")
     setWinner(null)
     setIsDraw(false)
+  }, [])
+
+  // Reset scores
+  const resetScores = useCallback(() => {
+    setPlayerXScore(0)
+    setPlayerOScore(0)
   }, [])
 
   // Computer move logic
@@ -117,6 +127,13 @@ export default function TicTacToe() {
     const gameWinner = checkWinner(board)
     if (gameWinner) {
       setWinner(gameWinner)
+
+      // Update scores when there's a winner
+      if (gameWinner === "X") {
+        setPlayerXScore((prev) => prev + 1)
+      } else if (gameWinner === "O") {
+        setPlayerOScore((prev) => prev + 1)
+      }
       return
     }
 
@@ -155,6 +172,18 @@ export default function TicTacToe() {
 
   const isGameOver = winner !== null || isDraw
 
+  // Get the appropriate winner message
+  const getWinnerMessage = () => {
+    if (isDraw) return "It's a Draw!"
+
+    if (gameMode === "pvp") {
+      return `Player ${winner} Wins!`
+    } else {
+      // PvC mode
+      return winner === "X" ? "Player Wins!" : "Computer Wins!"
+    }
+  }
+
   return (
     <div className="container max-w-4xl mx-auto py-12 px-4">
       <div className="text-center mb-10">
@@ -182,6 +211,7 @@ export default function TicTacToe() {
                   onClick={() => {
                     setGameMode("pvp")
                     resetGame()
+                    resetScores()
                   }}
                 >
                   <Users className="mr-2 h-4 w-4" />
@@ -194,13 +224,21 @@ export default function TicTacToe() {
                   onClick={() => {
                     setGameMode("pvc")
                     resetGame()
+                    resetScores()
                   }}
                 >
                   <Cpu className="mr-2 h-4 w-4" />
                   Player vs Computer
                 </Button>
 
-                <Button variant="outline" className="w-full justify-start hover:bg-primary/10" onClick={resetGame}>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start hover:bg-primary/10"
+                  onClick={() => {
+                    resetGame()
+                    resetScores()
+                  }}
+                >
                   <RotateCcw className="mr-2 h-4 w-4" />
                   Reset Game
                 </Button>
@@ -229,6 +267,25 @@ export default function TicTacToe() {
                       <span>Player {currentPlayer}'s Turn</span>
                     </div>
                   )}
+                </div>
+
+                {/* Score Tracking */}
+                <div className="bg-card/80 p-4 rounded-md border border-border/50">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">Score</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-sm text-muted-foreground mb-1">
+                        {gameMode === "pvp" ? "Player X" : "Player"}
+                      </div>
+                      <div className="text-2xl font-bold text-blue-500">{playerXScore}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm text-muted-foreground mb-1">
+                        {gameMode === "pvp" ? "Player O" : "Computer"}
+                      </div>
+                      <div className="text-2xl font-bold text-pink-500">{playerOScore}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -276,7 +333,7 @@ export default function TicTacToe() {
                         backdrop-blur-sm border border-white/20
                       `}
                     >
-                      {isDraw ? "It's a Draw!" : `Player ${winner} Wins!`}
+                      {getWinnerMessage()}
                     </div>
                   </div>
                 )}

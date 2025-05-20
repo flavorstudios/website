@@ -5,6 +5,7 @@ import "./globals.css"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
+import { CookieConsent } from "@/components/cookie-consent"
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -23,6 +24,13 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Flavor Studios | Anime-Inspired Content",
   description: "Original anime-inspired content and creative studio",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: { url: "/favicon.png", sizes: "180x180" },
+  },
     generator: 'v0.dev'
 }
 
@@ -42,6 +50,7 @@ export default function RootLayout({
           <Header />
           <main className="flex-grow">{children}</main>
           <Footer />
+          <CookieConsent />
         </ThemeProvider>
       </body>
     </html>

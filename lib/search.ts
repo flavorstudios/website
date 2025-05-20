@@ -1,6 +1,6 @@
 import { blogCategories } from "./blogCategories"
 import { watchCategories } from "./watchCategories"
-import type { ReactNode } from "react"
+import { Fragment, type ReactNode } from "react"
 
 // Define types for search results
 export type SearchResultItem = {
@@ -165,12 +165,12 @@ export function highlightMatch(text: string, query: string): ReactNode {
   while (index !== -1) {
     // Add text before match
     if (index > lastIndex) {
-      parts.push(<span key={`text-${lastIndex}`}>{text.substring(lastIndex, index)}</span>)
+      parts.push(text.substring(lastIndex, index))
     }
 
     // Add highlighted match
     parts.push(
-      <span key={`highlight-${index}`} className="bg-primary/20 text-primary font-medium rounded px-0.5">
+      <span className="bg-primary/20 text-primary font-medium rounded px-0.5" key={`highlight-${index}`}>
         {text.substring(index, index + query.length)}
       </span>,
     )
@@ -181,8 +181,9 @@ export function highlightMatch(text: string, query: string): ReactNode {
 
   // Add remaining text
   if (lastIndex < text.length) {
-    parts.push(<span key={`text-${lastIndex}`}>{text.substring(lastIndex)}</span>)
+    parts.push(text.substring(lastIndex))
   }
 
-  return <>{parts}</>
+  // Return the array of text and highlighted spans
+  return parts.map((part, i) => (typeof part === "string" ? <Fragment key={`text-${i}`}>{part}</Fragment> : part))
 }

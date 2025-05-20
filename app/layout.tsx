@@ -2,7 +2,10 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Orbitron, Poppins } from "next/font/google"
 import "./globals.css"
-import ClientLayout from "./client-layout"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
+import { ThemeProvider } from "@/components/theme-provider"
+import { CookieConsent } from "@/components/cookie-consent"
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -36,5 +39,20 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <ClientLayout>{children}</ClientLayout>
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Basic favicon */}
+        <link rel="icon" href="/favicon.ico" />
+      </head>
+      <body className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <Header />
+          <main className="flex-grow">{children}</main>
+          <Footer />
+          <CookieConsent />
+        </ThemeProvider>
+      </body>
+    </html>
+  )
 }

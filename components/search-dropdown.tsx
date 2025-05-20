@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import { Search, X, FileText, Video, FolderOpen } from "lucide-react"
 import Link from "next/link"
 import { useDebounce } from "@/hooks/use-debounce"
-import { searchAll, highlightMatch, type SearchResultItem } from "@/lib/search"
+import { searchAll, type SearchResultItem } from "@/lib/search"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -102,6 +102,44 @@ export function SearchDropdown() {
     }
   }
 
+  // Client-side highlight function
+  const highlightMatchClient = (text: string, query: string) => {
+    if (!query || !text) return text
+
+    const lowerText = text.toLowerCase()
+    const lowerQuery = query.toLowerCase()
+
+    if (!lowerText.includes(lowerQuery)) return text
+
+    const parts = []
+    let lastIndex = 0
+
+    let index = lowerText.indexOf(lowerQuery)
+    while (index !== -1) {
+      // Add text before match
+      if (index > lastIndex) {
+        parts.push(<span key={`text-${lastIndex}`}>{text.substring(lastIndex, index)}</span>)
+      }
+
+      // Add highlighted match
+      parts.push(
+        <span key={`highlight-${index}`} className="bg-primary/20 text-primary font-medium rounded px-0.5">
+          {text.substring(index, index + query.length)}
+        </span>,
+      )
+
+      lastIndex = index + query.length
+      index = lowerText.indexOf(lowerQuery, lastIndex)
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(<span key={`text-${lastIndex}`}>{text.substring(lastIndex)}</span>)
+    }
+
+    return <>{parts}</>
+  }
+
   return (
     <div className="relative" ref={dropdownRef}>
       <Button
@@ -158,9 +196,9 @@ export function SearchDropdown() {
                     <div className="flex items-start">
                       {getResultIcon(result.type)}
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium">{highlightMatch(result.title, debouncedQuery)}</div>
+                        <div className="font-medium">{highlightMatchClient(result.title, debouncedQuery)}</div>
                         <div className="text-sm text-muted-foreground truncate">
-                          {highlightMatch(result.description, debouncedQuery)}
+                          {highlightMatchClient(result.description, debouncedQuery)}
                         </div>
                         <div className="mt-1 text-xs inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                           {getResultTypeLabel(result.type)}

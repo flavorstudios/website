@@ -1,6 +1,5 @@
 import { blogCategories } from "./blogCategories"
 import { watchCategories } from "./watchCategories"
-import { Fragment, type ReactNode } from "react"
 
 // Define types for search results
 export type SearchResultItem = {
@@ -149,41 +148,10 @@ export async function searchAll(query: string): Promise<SearchResultItem[]> {
   return [...blogResults, ...watchResults, ...categoryResults]
 }
 
-// Function to highlight matching text
-export function highlightMatch(text: string, query: string): ReactNode {
-  if (!query) return text
+// Simple text-only highlight function that doesn't use JSX
+export function highlightMatch(text: string, query: string): string {
+  if (!query || !text) return text
 
-  const lowerText = text.toLowerCase()
-  const lowerQuery = query.toLowerCase()
-
-  if (!lowerText.includes(lowerQuery)) return text
-
-  const parts = []
-  let lastIndex = 0
-
-  let index = lowerText.indexOf(lowerQuery)
-  while (index !== -1) {
-    // Add text before match
-    if (index > lastIndex) {
-      parts.push(text.substring(lastIndex, index))
-    }
-
-    // Add highlighted match
-    parts.push(
-      <span className="bg-primary/20 text-primary font-medium rounded px-0.5" key={`highlight-${index}`}>
-        {text.substring(index, index + query.length)}
-      </span>,
-    )
-
-    lastIndex = index + query.length
-    index = lowerText.indexOf(lowerQuery, lastIndex)
-  }
-
-  // Add remaining text
-  if (lastIndex < text.length) {
-    parts.push(text.substring(lastIndex))
-  }
-
-  // Return the array of text and highlighted spans
-  return parts.map((part, i) => (typeof part === "string" ? <Fragment key={`text-${i}`}>{part}</Fragment> : part))
+  // For server-side rendering safety, return plain text
+  return text
 }

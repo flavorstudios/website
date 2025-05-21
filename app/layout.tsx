@@ -56,10 +56,15 @@ export default function RootLayout({
             })(window,document,'script','dataLayer','GTM-W7GC5SVZ');
           `}
         </Script>
+
+        {/* CookieYes (leave as is, just a script) */}
+        <script
+          id="cookieyes"
+          type="text/javascript"
+          src="https://cdn-cookieyes.com/client_data/a5532f07a3a3cb960fbc8715/script.js"
+        ></script>
       </head>
-      <body
-        className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}
-      >
+      <body className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}>
         {/* Google Tag Manager (noscript fallback) */}
         <noscript>
           <iframe
@@ -67,15 +72,9 @@ export default function RootLayout({
             height="0"
             width="0"
             style={{ display: "none", visibility: "hidden" }}
-          />
+          ></iframe>
         </noscript>
-
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <Header />
           <main className="flex-grow">{children}</main>
           <Footer />

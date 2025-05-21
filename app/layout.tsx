@@ -1,11 +1,13 @@
 import type React from "react"
 import type { Metadata } from "next"
+import Script from "next/script"
 import { Orbitron, Poppins } from "next/font/google"
 import "./globals.css"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import { CookieConsent } from "@/components/cookie-consent"
+import GTMNoScript from "@/components/gtm-noscript" // If not created yet, I’ll give you this next
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -31,7 +33,7 @@ export const metadata: Metadata = {
     ],
     apple: { url: "/favicon.png", sizes: "180x180" },
   },
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
@@ -44,9 +46,42 @@ export default function RootLayout({
       <head>
         {/* Basic favicon */}
         <link rel="icon" href="/favicon.ico" />
+
+        {/* Google Tag Manager (Head) */}
+        <Script id="gtm-script" strategy="afterInteractive">
+          {`
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-W7GC5SVZ');
+          `}
+        </Script>
+
+        {/* Google Analytics (GA4) */}
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-VMSRWF3W8D"
+        />
+        <Script id="ga4-script" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-VMSRWF3W8D');
+          `}
+        </Script>
       </head>
-      <body className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+      <body
+        className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}
+      >
+        <GTMNoScript />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
           <Header />
           <main className="flex-grow">{children}</main>
           <Footer />

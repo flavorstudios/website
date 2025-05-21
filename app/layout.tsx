@@ -7,7 +7,6 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import { CookieConsent } from "@/components/cookie-consent"
-import GTMNoScript from "@/components/gtm-noscript" // If not created yet, I’ll give you this next
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -57,25 +56,20 @@ export default function RootLayout({
             })(window,document,'script','dataLayer','GTM-W7GC5SVZ');
           `}
         </Script>
-
-        {/* Google Analytics (GA4) */}
-        <Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-VMSRWF3W8D"
-        />
-        <Script id="ga4-script" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-VMSRWF3W8D');
-          `}
-        </Script>
       </head>
       <body
         className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}
       >
-        <GTMNoScript />
+        {/* Google Tag Manager (noscript fallback) */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-W7GC5SVZ"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

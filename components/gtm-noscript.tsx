@@ -1,4 +1,4 @@
-export function GTMNoScript() {
+export default function GTMNoScript() {
   return (
     <>
       {/* Google Tag Manager (noscript) */}

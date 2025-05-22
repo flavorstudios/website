@@ -37,7 +37,7 @@ export default function SupportPage() {
                 size="lg"
                 className="bg-primary hover:bg-primary/90 text-white font-medium px-8 h-12 transition-all duration-300"
               >
-                <Link href="https://buymeacoffee.com/flavorstudios" target="_blank" rel="noopener noreferrer">
+                <Link href="https://www.buymeacoffee.com/flavorstudios" target="_blank" rel="noopener noreferrer">
                   <Coffee className="mr-2 h-5 w-5" />
                   Buy Me a Coffee
                 </Link>
@@ -122,7 +122,7 @@ export default function SupportPage() {
               size="lg"
               className="bg-primary hover:bg-primary/90 text-white font-medium px-8 py-6 h-auto transition-all duration-300"
             >
-              <Link href="https://buymeacoffee.com/flavorstudios" target="_blank" rel="noopener noreferrer">
+              <Link href="https://www.buymeacoffee.com/flavorstudios" target="_blank" rel="noopener noreferrer">
                 <Coffee className="mr-2 h-5 w-5" />
                 Buy Me a Coffee
               </Link>

@@ -1,7 +1,6 @@
 import Link from "next/link"
 import type { Metadata } from "next"
 import { ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
 export const metadata: Metadata = {
@@ -390,16 +389,16 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Call-to-Action Section - Styled like Support page */}
+      {/* Call-to-Action Section - INCREASED SIZE FOR BUTTONS */}
       <section className="py-10 md:py-14 bg-gradient-to-b from-background to-primary/5">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-2xl md:text-3xl font-bold mb-4 font-orbitron">Be Part of Our Journey</h2>
-            <p className="text-lg mb-6 text-muted-foreground">
+            <p className="text-lg mb-8 text-muted-foreground">
               Every contribution, no matter the size, helps us bring our creative vision to life.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {[
                 {
                   title: "Join the Team",
@@ -428,20 +427,19 @@ export default function AboutPage() {
               ].map((item, index) => (
                 <Card
                   key={index}
-                  className="bg-card/50 border border-primary/10 hover:border-primary/30 transition-all duration-300"
+                  className="bg-card/50 border border-primary/10 hover:border-primary/30 transition-all duration-300 h-full"
                 >
-                  <CardContent className="pt-5 pb-1">
-                    <h3 className="text-lg font-bold mb-2">{item.title}</h3>
-                    <p className="text-muted-foreground mb-4">{item.description}</p>
-                    <Button asChild className="w-full bg-primary hover:bg-primary/90 text-white">
-                      <Link
-                        href={item.url}
-                        target={item.url.startsWith("http") ? "_blank" : undefined}
-                        rel={item.url.startsWith("http") ? "noopener noreferrer" : undefined}
-                      >
-                        {item.buttonText}
-                      </Link>
-                    </Button>
+                  <CardContent className="pt-6 pb-6 flex flex-col h-full">
+                    <h3 className="text-xl font-bold mb-3 font-orbitron">{item.title}</h3>
+                    <p className="text-muted-foreground mb-6 flex-grow">{item.description}</p>
+                    <Link
+                      href={item.url}
+                      target={item.url.startsWith("http") ? "_blank" : undefined}
+                      rel={item.url.startsWith("http") ? "noopener noreferrer" : undefined}
+                      className="block bg-primary hover:bg-primary/90 text-white rounded-md py-3 px-6 text-center font-medium transition-colors duration-300 h-auto min-h-[48px] flex items-center justify-center text-lg"
+                    >
+                      {item.buttonText}
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
@@ -458,16 +456,13 @@ export default function AboutPage() {
             <p className="text-lg mb-6 text-muted-foreground">
               Have a business inquiry or collaboration opportunity? We'd love to hear from you.
             </p>
-            <Button
-              asChild
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-white font-medium px-8 h-12 transition-all duration-300"
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center bg-primary hover:bg-primary/90 text-white font-medium px-8 py-3 rounded-md transition-colors duration-300"
             >
-              <Link href="/contact">
-                Contact Us
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+              Contact Us
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>

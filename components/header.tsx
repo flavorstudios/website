@@ -79,7 +79,7 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center transition-transform duration-200 hover:scale-105 mr-4">
             <span className="font-orbitron font-bold text-2xl md:text-3xl bg-gradient-to-r from-purple-500 via-pink-500 to-primary bg-clip-text text-transparent">
-              fL
+              fl
             </span>
           </Link>
 

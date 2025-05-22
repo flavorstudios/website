@@ -97,7 +97,7 @@ export function Footer() {
           <div className="lg:col-span-2">
             <Link href="/" className="inline-block mb-4">
               <span className="font-orbitron font-bold text-3xl md:text-4xl bg-gradient-to-r from-purple-500 via-pink-500 to-primary bg-clip-text text-transparent">
-                fL
+                fl
               </span>
             </Link>
             <p className="text-gray-400 mb-4 max-w-md">Crafting soulful stories, one frame at a time.</p>

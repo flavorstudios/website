@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import Script from "next/script" // Needed for safe GTM/GA integration!
+import Script from "next/script"
 import { Orbitron, Poppins } from "next/font/google"
 import "./globals.css"
 import { Header } from "@/components/header"
@@ -65,21 +65,7 @@ export default function RootLayout({
             })(window,document,'script','dataLayer','GTM-W7GC5SVZ');
           `}
         </Script>
-
-        {/* --- Google Analytics (GA4) --- */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-VMSRWF3W8D"
-          strategy="afterInteractive"
-          async
-        />
-        <Script id="ga4-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-VMSRWF3W8D');
-          `}
-        </Script>
+        {/* No direct Google Analytics, CookieYes, or Clarity scripts here! */}
       </head>
       <body className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}>
         {/* --- Google Tag Manager (noscript fallback) --- */}

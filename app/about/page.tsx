@@ -1,7 +1,6 @@
 import Link from "next/link"
 import type { Metadata } from "next"
 import { ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
 export const metadata: Metadata = {
@@ -175,7 +174,7 @@ export default function AboutPage() {
                     position: "right",
                   },
                   {
-                    year: "Jan 2025 – Now",
+                    year: "2025",
                     title: "Studio Launched",
                     description: "Creating original anime and stories.",
                     position: "left",
@@ -247,7 +246,7 @@ export default function AboutPage() {
                     description: "Flavor Studios named. The mission took form.",
                   },
                   {
-                    year: "Jan 2025 – Now",
+                    year: "2025",
                     title: "Studio Launched",
                     description: "Creating original anime and stories.",
                   },
@@ -433,15 +432,14 @@ export default function AboutPage() {
                   <CardContent className="pt-5 pb-1">
                     <h3 className="text-lg font-bold mb-2">{item.title}</h3>
                     <p className="text-muted-foreground mb-4">{item.description}</p>
-                    <Button asChild variant="outline" className="w-full">
-                      <Link
-                        href={item.url}
-                        target={item.url.startsWith("http") ? "_blank" : undefined}
-                        rel={item.url.startsWith("http") ? "noopener noreferrer" : undefined}
-                      >
-                        {item.buttonText}
-                      </Link>
-                    </Button>
+                    <Link
+                      href={item.url}
+                      target={item.url.startsWith("http") ? "_blank" : undefined}
+                      rel={item.url.startsWith("http") ? "noopener noreferrer" : undefined}
+                      className="block bg-primary hover:bg-primary/90 text-white rounded-md py-3 px-4 text-center font-medium transition-colors duration-300 h-auto min-h-[48px] flex items-center justify-center"
+                    >
+                      {item.buttonText}
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
@@ -458,16 +456,13 @@ export default function AboutPage() {
             <p className="text-lg mb-6 text-muted-foreground">
               Have a business inquiry or collaboration opportunity? We'd love to hear from you.
             </p>
-            <Button
-              asChild
-              size="lg"
-              className="bg-primary hover:bg-primary/90 text-white font-medium px-8 h-12 transition-all duration-300"
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center bg-primary hover:bg-primary/90 text-white font-medium px-8 py-3 rounded-md transition-colors duration-300"
             >
-              <Link href="/contact">
-                Contact Us
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+              Contact Us
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </div>
         </div>
       </section>

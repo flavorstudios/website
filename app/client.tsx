@@ -11,7 +11,7 @@ import { GTMNoScript } from "@/components/gtm-noscript"
 import { Suspense } from "react"
 import { FacebookPixel } from "@/components/facebook-pixel"
 import { CookieConsentHandler } from "@/components/cookie-consent-handler"
-import Script from "next/script"
+import { CookieYesLoader } from "@/components/cookie-yes-loader"
 
 const orbitron = Orbitron({
   subsets: ["latin"],
@@ -48,11 +48,7 @@ export default function ClientLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
         {/* Start CookieYes banner */}
-        <Script
-          id="cookieyes"
-          src="https://cdn-cookieyes.com/client_data/a5532f07a3a3cb960fbc8715/script.js"
-          strategy="beforeInteractive"
-        />
+
         {/* End CookieYes banner */}
       </head>
       <body className={`${orbitron.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col`}>
@@ -137,6 +133,7 @@ export default function ClientLayout({
             }
           }
         `}</style>
+        <CookieYesLoader />
       </body>
     </html>
   )

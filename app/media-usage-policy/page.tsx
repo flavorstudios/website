@@ -11,7 +11,8 @@ export default function MediaUsagePolicyPage() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="relative py-16 md:py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-background to-background z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
+        <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
         <div className="container relative z-10 mx-auto px-4">
           <Link
             href="/"
@@ -22,10 +23,10 @@ export default function MediaUsagePolicyPage() {
           </Link>
 
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 font-orbitron tracking-tight">
-              Media Usage Policy
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight">
+              Media Usage <span className="text-primary">Policy</span>
             </h1>
-            <p className="text-lg text-muted-foreground">Effective Date: May 9, 2025</p>
+            <p className="text-xl text-muted-foreground">Effective Date: May 9, 2025</p>
           </div>
         </div>
       </section>
@@ -41,7 +42,7 @@ export default function MediaUsagePolicyPage() {
               website and related platforms.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Permissible Uses</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Permissible Uses</h2>
             <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>
                 Media assets provided by Flavor Studios may be used for personal viewing, education, reviews,
@@ -53,7 +54,7 @@ export default function MediaUsagePolicyPage() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Prohibited Uses</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Prohibited Uses</h2>
             <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>
                 Unauthorized commercial use, distribution, or reproduction of our media assets without prior written
@@ -63,7 +64,7 @@ export default function MediaUsagePolicyPage() {
               <li>Use of our media assets in any defamatory, misleading, offensive, or unlawful context.</li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Third-Party Content Usage</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Third-Party Content Usage</h2>
             <p className="mb-6">
               Flavor Studios may use third-party content (images, videos, graphics) for informational, educational,
               reporting, and commentary purposes under fair use guidelines. Proper credit and attribution are given
@@ -71,7 +72,7 @@ export default function MediaUsagePolicyPage() {
               contact us promptly.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Requesting Permission</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Requesting Permission</h2>
             <p className="mb-4">
               For commercial use, publication, redistribution, or any other uses not explicitly covered by permissible
               uses, please contact us to request prior written approval.
@@ -84,25 +85,25 @@ export default function MediaUsagePolicyPage() {
               <li>Contact information for response.</li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Ownership and Rights</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Ownership and Rights</h2>
             <p className="mb-6">
               All media assets remain the sole property of Flavor Studios and its licensors. We reserve all rights not
               expressly granted by this policy.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Enforcement</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Enforcement</h2>
             <p className="mb-6">
               Flavor Studios actively monitors and enforces its media usage rights. Unauthorized use may result in legal
               action, including claims for damages, injunctions, and removal of infringing content.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Changes to this Policy</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Changes to this Policy</h2>
             <p className="mb-6">
               We reserve the right to update this Media Usage Policy at our discretion. Any modifications will be
               effective immediately upon posting the updated policy on our website.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Contact Us</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Contact Us</h2>
             <p className="mb-4">
               For questions regarding this Media Usage Policy or to request permission for specific media use, please
               reach out to us through our{" "}

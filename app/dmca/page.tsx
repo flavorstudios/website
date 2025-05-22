@@ -11,7 +11,8 @@ export default function DMCAPage() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="relative py-16 md:py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-background to-background z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
+        <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
         <div className="container relative z-10 mx-auto px-4">
           <Link
             href="/"
@@ -22,10 +23,10 @@ export default function DMCAPage() {
           </Link>
 
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 font-orbitron tracking-tight">
-              DMCA Notice and Takedown Policy
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight">
+              DMCA <span className="text-primary">Policy</span>
             </h1>
-            <p className="text-lg text-muted-foreground">Effective Date: May 9, 2025</p>
+            <p className="text-xl text-muted-foreground">Effective Date: May 9, 2025</p>
           </div>
         </div>
       </section>
@@ -46,7 +47,7 @@ export default function DMCAPage() {
               infringement and how we handle such notices.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">
               1. Filing a DMCA Notice (Copyright Infringement Notification)
             </h2>
             <p className="mb-4">
@@ -86,7 +87,7 @@ export default function DMCAPage() {
               </a>
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">
               2. Counter Notification (Restoring Removed Content)
             </h2>
             <p className="mb-4">
@@ -114,19 +115,19 @@ export default function DMCAPage() {
               days unless the original complainant files a court action.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">3. Repeat Infringer Policy</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">3. Repeat Infringer Policy</h2>
             <p className="mb-6">
               Flavor Studios has a zero-tolerance policy for repeat copyright infringers. If a user is found to
               repeatedly violate copyright laws, we reserve the right to terminate their access to our services.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">4. Misuse of DMCA Notices</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">4. Misuse of DMCA Notices</h2>
             <p className="mb-6">
               Submitting false or misleading DMCA notices or counter-notices can result in legal liability. We strongly
               recommend that you consult a legal professional before submitting any claim.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">5. Contact Information</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">5. Contact Information</h2>
             <p className="mb-4">
               If you have any questions regarding this DMCA Policy, please reach out to us through our{" "}
               <Link href="/contact" className="text-primary hover:underline">

@@ -1,9 +1,8 @@
 import Link from "next/link"
-import type { Metadata } from "next"
 import { ArrowRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "About Us – Flavor Studios: Where Anime Meets Emotion",
   description:
     "Discover Flavor Studios – an independent animation studio crafting powerful anime and 3D stories with soul. Built in Blender, powered by passion.",
@@ -17,7 +16,7 @@ export default function AboutPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
         <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
         <div className="container relative z-10 mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl mx-auto text-center">
             <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary mb-6">
               <span className="mr-1">✨</span> Independent Animation Studio
             </div>
@@ -394,7 +393,7 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-2xl md:text-3xl font-bold mb-4 font-orbitron">Be Part of Our Journey</h2>
-            <p className="text-lg mb-8 text-muted-foreground">
+            <p className="text-lg mb-6 text-muted-foreground">
               Every contribution, no matter the size, helps us bring our creative vision to life.
             </p>
 

@@ -11,7 +11,8 @@ export default function PrivacyPolicyPage() {
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
       <section className="relative py-16 md:py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-background to-background z-0"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
+        <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
         <div className="container relative z-10 mx-auto px-4">
           <Link
             href="/"
@@ -22,10 +23,10 @@ export default function PrivacyPolicyPage() {
           </Link>
 
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 font-orbitron tracking-tight">
-              Privacy Policy
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight">
+              Privacy <span className="text-primary">Policy</span>
             </h1>
-            <p className="text-lg text-muted-foreground">Effective Date: May 9, 2025</p>
+            <p className="text-xl text-muted-foreground">Effective Date: May 9, 2025</p>
           </div>
         </div>
       </section>
@@ -47,7 +48,7 @@ export default function PrivacyPolicyPage() {
               please do not access the Site.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Information We Collect</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Information We Collect</h2>
             <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>
                 <strong>Personal Information:</strong> Name, email address, contact details, and other identifiable
@@ -63,7 +64,7 @@ export default function PrivacyPolicyPage() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">How We Use Your Information</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">How We Use Your Information</h2>
             <p className="mb-4">We use the information collected for the following purposes:</p>
             <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>Provide, operate, and maintain our Site.</li>
@@ -77,7 +78,7 @@ export default function PrivacyPolicyPage() {
               <li>Protect our Site from fraud, unauthorized activities, and maintain security.</li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">
               Automated Comment Moderation (Perspective API)
             </h2>
             <p className="mb-4">
@@ -92,7 +93,7 @@ export default function PrivacyPolicyPage() {
               <li>This helps us reduce spam and ensure safer interactions on our platform.</li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Disclosure of Your Information</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Disclosure of Your Information</h2>
             <p className="mb-4">We may share your information under the following circumstances:</p>
             <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>
@@ -104,7 +105,7 @@ export default function PrivacyPolicyPage() {
               <li>In connection with any merger, sale of company assets, financing, or acquisition.</li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Third-Party Websites & Services</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Third-Party Websites & Services</h2>
             <p className="mb-6">
               Our Site may contain links to third-party websites. We are not responsible for the privacy practices or
               content of these websites. Please review the privacy policies of third-party sites before providing any
@@ -125,20 +126,20 @@ export default function PrivacyPolicyPage() {
               .
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Security of Your Information</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Security of Your Information</h2>
             <p className="mb-6">
               We implement reasonable security measures to protect your information. However, no security measures are
               completely secure, and we cannot guarantee absolute security. Please use caution when sharing personal
               information online.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Retention of Your Information</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Retention of Your Information</h2>
             <p className="mb-6">
               We retain your personal information only as long as necessary to fulfill the purposes outlined in this
               Privacy Policy unless a longer retention period is required or permitted by law.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Your Rights</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Your Rights</h2>
             <p className="mb-4">You have the right to:</p>
             <ul className="list-disc pl-6 space-y-3 mb-6">
               <li>Access, update, or delete your personal information.</li>
@@ -147,19 +148,19 @@ export default function PrivacyPolicyPage() {
             </ul>
             <p className="mb-6">To exercise these rights, please contact us using the details provided below.</p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Children's Privacy</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Children's Privacy</h2>
             <p className="mb-6">
               Our Site is not directed toward children under 13 years old, and we do not knowingly collect information
               from individuals under the age of 13.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Changes to This Privacy Policy</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Changes to This Privacy Policy</h2>
             <p className="mb-6">
               We may update this Privacy Policy periodically. Any changes will be posted on this page with an updated
               "Effective Date." We encourage you to review this Privacy Policy regularly.
             </p>
 
-            <h2 className="text-2xl font-bold mt-10 mb-4 font-orbitron">Contact Us</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mt-10 mb-4 font-orbitron">Contact Us</h2>
             <p className="mb-4">
               If you have any questions, concerns, or requests regarding this Privacy Policy or the handling of your
               personal information, please reach out to us through our{" "}

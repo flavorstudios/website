@@ -1,9 +1,6 @@
-import Link from "next/link"
-import Image from "next/image"
-import { ArrowRight, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
 
 export const metadata = {
   title: "Flavor Blog – Honest Anime Reviews, News & Deep Dives",
@@ -12,8 +9,6 @@ export const metadata = {
 }
 
 export default function BlogPage() {
-  const blogPosts: any[] = []
-
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -38,58 +33,15 @@ export default function BlogPage() {
       {/* Blog Posts */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.length > 0 ? (
-              blogPosts.map((post) => (
-                <Card
-                  key={post.id}
-                  className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/50"
-                >
-                  <CardContent className="p-0">
-                    <Link href={`/blog/${post.id}`}>
-                      <div className="relative aspect-[4/3]">
-                        <Image
-                          src={`/abstract-geometric-shapes.png?key=ju60w&height=400&width=600&query=${post.image}`}
-                          alt={post.title}
-                          fill
-                          className="object-cover transition-transform duration-500 hover:scale-105"
-                        />
-                      </div>
-                    </Link>
-                    <div className="p-5">
-                      <div className="mb-3 flex justify-between items-center">
-                        <span className="inline-block bg-primary/10 text-primary text-xs px-3 py-1 rounded-full">
-                          {post.category}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{post.date}</span>
-                      </div>
-                      <Link href={`/blog/${post.id}`} className="hover:text-primary transition-colors">
-                        <h3 className="font-bold text-lg mb-2 font-orbitron">{post.title}</h3>
-                      </Link>
-                      <p className="text-muted-foreground text-sm line-clamp-3 mb-4">{post.excerpt}</p>
-                      <Link
-                        href={`/blog/${post.id}`}
-                        className="text-primary hover:text-primary/80 text-sm font-medium inline-flex items-center"
-                      >
-                        Read More
-                        <ArrowRight className="ml-1 h-3 w-3" />
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
-                <div className="bg-card border border-primary/10 rounded-lg p-8">
-                  <h3 className="text-xl font-bold mb-2 font-orbitron">No posts available</h3>
-                  <p className="text-muted-foreground">Check back soon for new content!</p>
-                </div>
-              </div>
-            )}
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
+            <div className="bg-card border border-primary/10 rounded-lg p-8">
+              <h3 className="text-xl font-bold mb-2 font-orbitron">No posts available</h3>
+              <p className="text-muted-foreground">Check back soon for new content!</p>
+            </div>
           </div>
 
           <div className="flex justify-center mt-12">
-            <Button className="bg-primary hover:bg-primary/90" disabled={blogPosts.length === 0}>
+            <Button className="bg-primary hover:bg-primary/90" disabled={true}>
               Load More Posts
             </Button>
           </div>

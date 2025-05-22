@@ -1,10 +1,7 @@
 import Link from "next/link"
-import Image from "next/image"
-import { Search, Play, Clock } from "lucide-react"
+import { Search, Play, Youtube } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { Youtube } from "lucide-react"
 
 export const metadata = {
   title: "Watch Original Anime – Blender-Powered Brilliance | Flavor Studios",
@@ -13,8 +10,6 @@ export const metadata = {
 }
 
 export default function WatchPage() {
-  const videos: any[] = []
-
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -60,61 +55,15 @@ export default function WatchPage() {
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold mb-10 font-orbitron">Latest Videos</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {videos.length > 0 ? (
-              videos.map((video) => (
-                <Card
-                  key={video.id}
-                  className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/50"
-                >
-                  <CardContent className="p-0">
-                    <Link href={`/watch/${video.id}`}>
-                      <div className="relative aspect-video group">
-                        <Image
-                          src={`/abstract-geometric-shapes.png?key=z8rxl&key=mwj3z&height=360&width=640&query=${video.image}`}
-                          alt={video.title}
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/60">
-                          <Button size="icon" className="rounded-full bg-primary/90 hover:bg-primary h-12 w-12">
-                            <Play className="h-6 w-6 ml-0.5" />
-                          </Button>
-                        </div>
-                        <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {video.duration}
-                        </div>
-                      </div>
-                    </Link>
-                    <div className="p-5">
-                      <div className="mb-3 flex justify-between items-center">
-                        <span className="inline-block bg-primary/10 text-primary text-xs px-3 py-1 rounded-full">
-                          {video.category}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{video.views} views</span>
-                      </div>
-                      <Link href={`/watch/${video.id}`} className="hover:text-primary transition-colors">
-                        <h3 className="font-bold text-lg mb-2 font-orbitron line-clamp-2">{video.title}</h3>
-                      </Link>
-                      <p className="text-muted-foreground text-sm line-clamp-2 mb-2">{video.excerpt}</p>
-                      <div className="text-xs text-muted-foreground">{video.date}</div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            ) : (
-              <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
-                <div className="bg-card border border-primary/10 rounded-lg p-8">
-                  <h3 className="text-xl font-bold mb-2 font-orbitron">No videos available</h3>
-                  <p className="text-muted-foreground">Check back soon for new content!</p>
-                </div>
-              </div>
-            )}
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
+            <div className="bg-card border border-primary/10 rounded-lg p-8">
+              <h3 className="text-xl font-bold mb-2 font-orbitron">No videos available</h3>
+              <p className="text-muted-foreground">Check back soon for new content!</p>
+            </div>
           </div>
 
           <div className="flex justify-center mt-12">
-            <Button className="bg-primary hover:bg-primary/90" disabled={videos.length === 0}>
+            <Button className="bg-primary hover:bg-primary/90" disabled={true}>
               Load More Videos
             </Button>
           </div>

@@ -1,26 +1,27 @@
-import type React from "react"
-import type { Metadata } from "next"
-import Script from "next/script"
-import { Orbitron, Poppins } from "next/font/google"
-import "./globals.css"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { ThemeProvider } from "@/components/theme-provider"
-import { CookieConsent } from "@/components/cookie-consent"
+import type React from "react";
+import type { Metadata } from "next";
+import Script from "next/script";
+import { Orbitron, Poppins } from "next/font/google";
+import "./globals.css";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { ThemeProvider } from "@/components/theme-provider";
+import { CookieConsent } from "@/components/cookie-consent";
+import InstallPWAButton from "@/components/InstallPWAButton"; // <-- Import here
 
 const orbitron = Orbitron({
   subsets: ["latin"],
   variable: "--font-orbitron",
   display: "swap",
   weight: ["400", "500", "600", "700", "800", "900"],
-})
+});
 
 const poppins = Poppins({
   subsets: ["latin"],
   variable: "--font-poppins",
   display: "swap",
   weight: ["300", "400", "500", "600", "700"],
-})
+});
 
 export const metadata: Metadata = {
   title: "Flavor Studios | Anime-Inspired Content",
@@ -33,18 +34,25 @@ export const metadata: Metadata = {
     apple: { url: "/favicon.png", sizes: "180x180" },
   },
   generator: "v0.dev",
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Basic favicon */}
-        <link rel="icon" href="/favicon.ico" />
+        {/* PWA & Favicon */}
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="theme-color" content="#111111" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
         {/* Google Tag Manager (Head) */}
         <Script id="gtm-script" strategy="afterInteractive">
@@ -57,7 +65,23 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* CookieYes (leave as is, just a script) */}
+        {/* Google Analytics (GA4) - G-VMSRWF3W8D */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-VMSRWF3W8D"
+          strategy="afterInteractive"
+        />
+        <Script id="ga-script" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-VMSRWF3W8D', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
+
+        {/* CookieYes */}
         <script
           id="cookieyes"
           type="text/javascript"
@@ -79,8 +103,9 @@ export default function RootLayout({
           <main className="flex-grow">{children}</main>
           <Footer />
           <CookieConsent />
+          <InstallPWAButton /> {/* <-- PWA Install Button */}
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

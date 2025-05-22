@@ -62,7 +62,7 @@ export default function RootLayout({
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','GTM-W7GC5SVZ');
+            })(window,document,'script','dataLayer','GTM-WMTGR7NM');
           `}
         </Script>
         {/* No direct Google Analytics, CookieYes, or Clarity scripts here! */}
@@ -71,7 +71,7 @@ export default function RootLayout({
         {/* --- Google Tag Manager (noscript fallback) --- */}
         <noscript>
           <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-W7GC5SVZ"
+            src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
             height="0"
             width="0"
             style={{ display: "none", visibility: "hidden" }}

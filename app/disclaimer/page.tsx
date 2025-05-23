@@ -23,11 +23,8 @@ export default function DisclaimerPage() {
           </Link>
 
           <div className="max-w-4xl mx-auto">
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight"
-              style={{ fontFamily: "var(--font-orbitron)" }}
-            >
-              <span className="text-white">Disclaimer</span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight font-orbitron text-white">
+              Disclaimer
             </h1>
             <p className="text-xl text-muted-foreground">Effective Date: May 9, 2025</p>
           </div>

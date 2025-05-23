@@ -1,108 +1,71 @@
 import Link from "next/link"
-import Image from "next/image"
-import { ArrowRight, Briefcase, Clock, MapPin, Banknote } from "lucide-react"
+import { ArrowRight, Mail, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 
 export const metadata = {
   title: "Join the Team – Work at Flavor Studios",
   description:
-    "Looking to work in indie anime or 3D storytelling? Explore open positions and help us build stories that last.",
+    "Looking to work in indie anime or 3D storytelling? Explore future opportunities and stay connected with Flavor Studios.",
 }
 
 export default function CareerPage() {
-  const openPositions = [
+  const closedPositions = [
+    {
+      id: "animator",
+      title: "2D Animator",
+      type: "Full-time",
+      location: "Remote",
+    },
+    {
+      id: "scriptwriter",
+      title: "Scriptwriter",
+      type: "Contract",
+      location: "Remote",
+    },
+    {
+      id: "voiceover",
+      title: "Voiceover Artist",
+      type: "Project-based",
+      location: "Remote",
+    },
     {
       id: "content-creator",
       title: "Anime Content Creator",
       type: "Full-time",
       location: "Remote",
-      salary: "Competitive",
-      description:
-        "We're looking for a passionate anime content creator to join our team and help produce high-quality videos and blog posts.",
-      responsibilities: [
-        "Create engaging anime-related video content",
-        "Write in-depth blog posts and analyses",
-        "Stay up-to-date with the latest anime releases and trends",
-        "Engage with our community across social platforms",
-      ],
-      requirements: [
-        "Deep knowledge and passion for anime",
-        "Experience with video editing and production",
-        "Excellent writing and communication skills",
-        "Familiarity with YouTube and content creation best practices",
-      ],
-    },
-    {
-      id: "animator",
-      title: "2D Animator",
-      type: "Part-time",
-      location: "Remote",
-      salary: "Project-based",
-      description:
-        "Join our creative team to help bring our original anime-inspired characters and stories to life through animation.",
-      responsibilities: [
-        "Create fluid and expressive character animations",
-        "Collaborate with our art team on visual storytelling",
-        "Maintain consistent style and quality across projects",
-        "Meet project deadlines and milestones",
-      ],
-      requirements: [
-        "Portfolio demonstrating 2D animation skills",
-        "Experience with animation software (e.g., Adobe Animate, Toon Boom)",
-        "Understanding of animation principles",
-        "Passion for anime and animation styles",
-      ],
     },
     {
       id: "web-developer",
       title: "Web Developer",
       type: "Contract",
       location: "Remote",
-      salary: "Competitive",
-      description:
-        "We're seeking a skilled web developer to help enhance and maintain our website and interactive features.",
-      responsibilities: [
-        "Maintain and improve our website functionality",
-        "Develop new interactive features for our community",
-        "Ensure optimal performance and user experience",
-        "Collaborate with our design team",
-      ],
-      requirements: [
-        "Experience with modern web development (React, Next.js)",
-        "Strong understanding of frontend and backend technologies",
-        "Knowledge of responsive design principles",
-        "Problem-solving skills and attention to detail",
-      ],
-    },
-  ]
-
-  const benefits = [
-    {
-      title: "Flexible Schedule",
-      description: "Work when you're most productive with our flexible scheduling options.",
-      icon: <Clock className="h-6 w-6" />,
     },
     {
-      title: "Remote Work",
-      description: "Join our team from anywhere in the world with our fully remote work environment.",
-      icon: <MapPin className="h-6 w-6" />,
-    },
-    {
-      title: "Competitive Compensation",
-      description: "Receive fair compensation for your skills and contributions to our team.",
-      icon: <Banknote className="h-6 w-6" />,
-    },
-    {
-      title: "Growth Opportunities",
-      description: "Develop your skills and advance your career with our supportive team.",
-      icon: <ArrowRight className="h-6 w-6" />,
+      id: "marketing",
+      title: "Digital Marketing Specialist",
+      type: "Part-time",
+      location: "Remote",
     },
   ]
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Left-aligned like Support page */}
+      {/* Notification Banner */}
+      <div className="w-full bg-[#FFB300] text-[#1A1A1A] py-6 px-4 animate-fade-in">
+        <div className="container mx-auto text-center">
+          <h2 className="text-xl md:text-2xl font-bold mb-2 font-orbitron">
+            We're Grateful for Your Interest – All Roles Are Currently Filled
+          </h2>
+          <p className="text-sm md:text-base font-poppins max-w-2xl mx-auto">
+            Thank you for your interest in joining Flavor Studios. At this time, all positions are filled. We'll notify
+            you when new opportunities become available.
+          </p>
+        </div>
+      </div>
+
+      {/* Hero Section */}
       <section className="relative py-16 md:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
         <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
@@ -113,218 +76,151 @@ export default function CareerPage() {
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight text-left">
-              Join Our <span className="text-primary">Team</span>
+              Join Our <span className="text-primary">Story</span>
             </h1>
 
             <p className="text-xl mb-6 text-muted-foreground leading-relaxed text-left">
-              Help us create amazing anime content and be part of our growing creative studio.
+              Connect with us today and be part of our creative journey tomorrow.
             </p>
-
-            <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
-              <a href="#positions">
-                View Open Positions
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
           </div>
         </div>
       </section>
 
-      {/* About Working Here */}
-      <section className="py-16 md:py-24">
+      {/* About Flavor Studios */}
+      <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="relative rounded-lg overflow-hidden shadow-xl border border-primary/20 animate-glow">
-                <Image src="/placeholder-g6l95.png" alt="Our Team" width={800} height={600} className="object-cover" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold mb-6 font-orbitron gradient-text">Why Work With Us?</h2>
-                <div className="space-y-4">
-                  <p>
-                    At Flavor Studios, we're building a team of passionate creators who love anime and want to share
-                    that passion with the world. We believe in creating a supportive, collaborative environment where
-                    creativity thrives.
-                  </p>
-                  <p>
-                    As a growing creative studio, we offer unique opportunities to make a real impact. Your ideas will
-                    be heard, your work will be seen by our audience, and you'll have the chance to grow alongside us.
-                  </p>
-                  <p>
-                    We value diversity of thought, experience, and perspective. We believe that bringing together people
-                    with different backgrounds and viewpoints leads to more innovative and engaging content.
-                  </p>
-                </div>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-card/50 backdrop-blur-sm border border-primary/10 rounded-xl p-6 md:p-8 shadow-lg hover:shadow-primary/5 transition-all duration-500">
+              <h2 className="text-2xl md:text-3xl font-bold mb-6 font-orbitron text-center">
+                About <span className="text-primary">Flavor Studios</span>
+              </h2>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-                  {benefits.map((benefit, index) => (
-                    <div key={index} className="flex items-start">
-                      <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-                        {benefit.icon}
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold font-orbitron">{benefit.title}</h3>
-                        <p className="text-sm text-muted-foreground">{benefit.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <p className="text-lg md:text-xl text-center leading-relaxed mb-6 animate-fade-in">
+                At Flavor Studios, we bring stories to life through heart-driven animation, meaningful storytelling, and
+                creative passion. Even when we're not actively hiring, we welcome visionary minds and creators to stay
+                in touch for future possibilities.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Open Positions */}
-      <section id="positions" className="py-16 md:py-24 bg-card">
+      {/* Closed Positions */}
+      <section className="py-12 md:py-20 bg-card/30">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold mb-12 font-orbitron text-center">Open Positions</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 font-orbitron text-center">Closed Positions</h2>
+            <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+              These positions are currently filled, but represent the types of roles we typically hire for. Stay
+              connected to be notified when new opportunities become available.
+            </p>
 
-            <div className="grid grid-cols-1 gap-8">
-              {openPositions.map((position, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {closedPositions.map((position) => (
                 <Card
-                  key={index}
-                  className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/50"
+                  key={position.id}
+                  className="overflow-hidden border-primary/10 hover:border-primary/20 transition-all duration-300 group"
                 >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-                      <div>
-                        <h3 className="text-2xl font-bold font-orbitron mb-2">{position.title}</h3>
-                        <div className="flex flex-wrap gap-3">
-                          <span className="inline-flex items-center text-sm text-muted-foreground">
-                            <Briefcase className="h-4 w-4 mr-1" />
-                            {position.type}
-                          </span>
-                          <span className="inline-flex items-center text-sm text-muted-foreground">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            {position.location}
-                          </span>
-                          <span className="inline-flex items-center text-sm text-muted-foreground">
-                            <Banknote className="h-4 w-4 mr-1" />
-                            {position.salary}
-                          </span>
-                        </div>
-                      </div>
-                      <Button asChild className="mt-4 md:mt-0 bg-primary hover:bg-primary/90">
-                        <Link href={`/career/${position.id}`}>
-                          Apply Now
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
+                  <CardContent className="p-6 relative">
+                    <div className="absolute -right-12 top-6 rotate-45 bg-[#FFB300] text-[#1A1A1A] px-10 py-1 text-xs font-medium shadow-md font-orbitron">
+                      Position Filled
                     </div>
 
-                    <p className="mb-6">{position.description}</p>
+                    <h3 className="text-xl font-bold font-orbitron mb-2 pr-6 group-hover:text-primary transition-colors duration-300">
+                      {position.title}
+                    </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="font-bold mb-3 font-orbitron">Responsibilities</h4>
-                        <ul className="space-y-2">
-                          {position.responsibilities.map((item, i) => (
-                            <li key={i} className="flex items-start">
-                              <span className="text-primary mr-2">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="font-bold mb-3 font-orbitron">Requirements</h4>
-                        <ul className="space-y-2">
-                          {position.requirements.map((item, i) => (
-                            <li key={i} className="flex items-start">
-                              <span className="text-primary mr-2">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <Badge variant="outline" className="text-xs bg-background/50">
+                        {position.type}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs bg-background/50">
+                        {position.location}
+                      </Badge>
+                    </div>
+
+                    <div className="pt-2">
+                      <Badge variant="secondary" className="bg-[#FFB300] text-[#1A1A1A] font-orbitron">
+                        Closed
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="mt-12 p-8 bg-primary/5 rounded-lg border border-primary/20 text-center">
-              <h3 className="text-xl font-bold mb-4 font-orbitron">Don't see a position that fits?</h3>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                We're always looking for talented individuals who are passionate about anime and content creation. Send
-                us your resume and tell us how you can contribute to our team.
-              </p>
-              <Button asChild variant="outline" className="hover:bg-primary/10">
-                <Link href="/contact">Contact Us</Link>
+      {/* Stay Connected CTA */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-background/0"></div>
+        <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 font-orbitron">Stay Connected</h2>
+
+            <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
+              Follow our journey, engage with our content, and be the first to know when new opportunities arise.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+              <Button
+                asChild
+                size="lg"
+                className="w-full sm:w-auto bg-primary hover:bg-primary/90 transition-all duration-300"
+              >
+                <Link href="/contact">
+                  <Mail className="mr-2 h-4 w-4" />
+                  Join Our Talent List
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                size="lg"
+                className="w-full sm:w-auto bg-primary hover:bg-primary/90 transition-all duration-300"
+              >
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Follow Us on Instagram
+                </a>
+              </Button>
+
+              <Button
+                asChild
+                size="lg"
+                className="w-full sm:w-auto bg-primary hover:bg-primary/90 transition-all duration-300"
+              >
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Subscribe on YouTube
+                </a>
               </Button>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Testimonials */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-12 font-orbitron">What Our Team Says</h2>
+            <div className="mt-12 p-6 bg-card/50 backdrop-blur-sm border border-primary/10 rounded-xl">
+              <h3 className="text-xl font-bold mb-4 font-orbitron text-center">Have Questions or Want to Connect?</h3>
+              <p className="text-muted-foreground mb-6 text-center max-w-2xl mx-auto">
+                Whether you have questions about our work, want to discuss potential collaborations, or simply want to
+                introduce yourself and your skills, we'd love to hear from you. Reach out and let's start a
+                conversation.
+              </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {[
-                {
-                  quote:
-                    "Working at Flavor Studios has been an amazing experience. I get to combine my passion for anime with my skills in content creation, and I'm constantly learning and growing.",
-                  name: "Alex Chen",
-                  role: "Content Creator",
-                  avatar: "team%20member%201%20anime%20style",
-                },
-                {
-                  quote:
-                    "The flexibility and creative freedom at Flavor Studios is unmatched. I love being able to bring my ideas to the table and see them come to life in our projects.",
-                  name: "Jordan Taylor",
-                  role: "Animator",
-                  avatar: "team%20member%202%20anime%20style",
-                },
-              ].map((testimonial, index) => (
-                <Card
-                  key={index}
-                  className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-primary/50"
+              <div className="text-center">
+                <Button
+                  asChild
+                  size="lg"
+                  className="w-full sm:w-auto bg-primary hover:bg-primary/90 transition-all duration-300"
                 >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col items-center">
-                      <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-primary/30 mb-4">
-                        <Image
-                          src={`/abstract-geometric-shapes.png?key=ckpjw&height=64&width=64&query=${testimonial.avatar}`}
-                          alt={testimonial.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <p className="text-center mb-4 italic">"{testimonial.quote}"</p>
-                      <div className="text-center">
-                        <h4 className="font-bold font-orbitron">{testimonial.name}</h4>
-                        <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  <Link href="/contact">
+                    <ArrowRight className="mr-2 h-4 w-4" />
+                    Contact Us
+                  </Link>
+                </Button>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 md:py-24 bg-primary/5 border-y border-primary/20">
-        <div className="container mx-auto px-4 text-center">
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold mb-6 font-orbitron">Ready to Join Our Team?</h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Take the first step towards an exciting career in anime content creation. Browse our open positions and
-              apply today!
-            </p>
-            <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
-              <a href="#positions">
-                View Open Positions
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
           </div>
         </div>
       </section>

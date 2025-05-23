@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Mail, MessageSquare, Clock } from "lucide-react"
+import { Mail, MessageSquare, Clock, ArrowRight, CheckCircle } from "lucide-react"
 
 export const metadata = {
   title: "Contact Flavor Studios – Collaborations & Questions",
@@ -13,12 +13,12 @@ export const metadata = {
 export default function ContactPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Left-aligned like Support page */}
+      {/* Hero Section - Left-aligned */}
       <section className="relative py-16 md:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
         <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
         <div className="container relative z-10 mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-3xl">
             <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary mb-6">
               <span className="mr-1">✨</span> Independent Animation Studio
             </div>
@@ -54,7 +54,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="text-lg font-bold font-orbitron">Email</h3>
-                      <p className="text-muted-foreground">contact@flavorstudios.com</p>
+                      <p className="text-muted-foreground">contact@flavorstudios.in</p>
                       <p className="text-sm text-muted-foreground mt-1">For general inquiries and support</p>
                     </div>
                   </div>
@@ -87,7 +87,21 @@ export default function ContactPage() {
                   <p className="text-muted-foreground mb-4">
                     For sponsorships, business partnerships, or collaboration opportunities:
                   </p>
-                  <p className="font-medium">business@flavorstudios.com</p>
+                  <p className="font-medium">contact@flavorstudios.in</p>
+                </div>
+
+                {/* FAQ CTA Button */}
+                <div className="mt-12 p-6 bg-primary/5 rounded-lg border border-primary/20">
+                  <h3 className="text-lg font-bold mb-4 font-orbitron">Have Questions?</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Check out our frequently asked questions page for quick answers to common questions.
+                  </p>
+                  <Button asChild className="group">
+                    <a href="/faq" className="inline-flex items-center">
+                      Visit our FAQ Page
+                      <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </a>
+                  </Button>
                 </div>
               </div>
 
@@ -154,51 +168,85 @@ export default function ContactPage() {
                     Send Message
                   </Button>
                 </form>
+
+                {/* What to Expect - New Enhancement */}
+                <div className="mt-8 pt-8 border-t">
+                  <h4 className="text-lg font-bold mb-4 font-orbitron">What to Expect</h4>
+                  <ul className="space-y-3">
+                    {[
+                      "You'll receive an email confirmation immediately",
+                      "Our team will review your message within 24 hours",
+                      "We'll respond with helpful information or next steps",
+                      "For complex inquiries, we may schedule a follow-up call",
+                    ].map((item, index) => (
+                      <li key={index} className="flex items-start">
+                        <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-muted-foreground">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* Contact Process Timeline */}
       <section className="py-16 md:py-24 bg-primary/5 border-y border-primary/20">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold mb-6 font-orbitron">Frequently Asked Questions</h2>
-            <p className="text-lg text-muted-foreground mb-12">
-              Quick answers to the most common questions we receive.
-            </p>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold mb-12 font-orbitron text-center">Our Contact Process</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-              {[
-                {
-                  question: "How long does it take to get a response?",
-                  answer: "We typically respond to all inquiries within 24-48 hours during business days.",
-                },
-                {
-                  question: "I want to collaborate with Flavor Studios. How do I proceed?",
-                  answer:
-                    "Please use the contact form and select 'Collaboration' as the subject. Include details about your proposal and we'll get back to you.",
-                },
-                {
-                  question: "Do you accept guest blog posts?",
-                  answer:
-                    "Yes, we occasionally feature guest writers who are passionate about anime. Contact us with your topic idea and writing samples.",
-                },
-                {
-                  question: "How can I report a technical issue with the website?",
-                  answer:
-                    "Please use the contact form and select 'Support' as the subject. Include details about the issue you're experiencing and any relevant screenshots.",
-                },
-              ].map((faq, index) => (
-                <div
-                  key={index}
-                  className="bg-card p-6 rounded-lg border hover:border-primary/50 transition-all duration-300"
-                >
-                  <h3 className="text-lg font-bold mb-2 font-orbitron">{faq.question}</h3>
-                  <p className="text-muted-foreground">{faq.answer}</p>
-                </div>
-              ))}
+            <div className="relative">
+              {/* Timeline line */}
+              <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-px bg-primary/30"></div>
+
+              {/* Timeline items */}
+              <div className="space-y-16">
+                {[
+                  {
+                    title: "Submit Your Message",
+                    description:
+                      "Fill out our contact form with your details and inquiry. Be as specific as possible to help us understand your needs.",
+                  },
+                  {
+                    title: "Confirmation & Review",
+                    description:
+                      "You'll receive an immediate confirmation. Our team reviews all inquiries within 24 hours during business days.",
+                  },
+                  {
+                    title: "Personalized Response",
+                    description:
+                      "We'll respond with tailored information addressing your specific questions or concerns.",
+                  },
+                  {
+                    title: "Follow-Up & Resolution",
+                    description:
+                      "For complex matters, we may schedule additional communication to ensure your inquiry is fully resolved.",
+                  },
+                ].map((item, index) => (
+                  <div key={index} className="relative flex items-center">
+                    <div className={`w-1/2 pr-8 text-right ${index % 2 !== 0 ? "order-2" : ""}`}>
+                      <h3 className="text-xl font-bold mb-2 font-orbitron">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                    </div>
+
+                    <div className="absolute left-1/2 transform -translate-x-1/2 w-10 h-10 rounded-full bg-primary flex items-center justify-center z-10">
+                      <span className="text-white font-bold">{index + 1}</span>
+                    </div>
+
+                    <div className={`w-1/2 pl-8 ${index % 2 === 0 ? "order-2" : ""}`}>
+                      {index % 2 !== 0 && (
+                        <>
+                          <h3 className="text-xl font-bold mb-2 font-orbitron">{item.title}</h3>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

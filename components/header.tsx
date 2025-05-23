@@ -95,14 +95,14 @@ export function Header() {
         {/* Left Navigation */}
         <div className="flex items-center">
           {/* Logo */}
-          <Link href="/" className="flex items-center transition-all duration-300 hover:scale-105 mr-6 md:mr-8">
+          <Link href="/" className="flex items-center transition-all duration-300 hover:scale-105 mr-4 md:mr-6">
             <span className="font-orbitron font-bold text-2xl md:text-3xl bg-gradient-to-r from-purple-500 via-pink-500 to-primary bg-clip-text text-transparent">
               fl
             </span>
           </Link>
 
           {/* Desktop Left Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden md:flex items-center space-x-0">
             {/* Home Button */}
             <Link
               href="/"
@@ -152,15 +152,15 @@ export function Header() {
           </nav>
         </div>
 
-        {/* Centered Search - Desktop Only - UNCHANGED */}
-        <div className="hidden md:flex justify-center max-w-md w-full mx-6">
+        {/* Centered Search - Desktop Only */}
+        <div className="hidden md:flex justify-center max-w-md w-full mx-3">
           <PopupSearch />
         </div>
 
         {/* Right Navigation */}
         <div className="flex items-center">
           {/* Desktop Right Navigation */}
-          <nav className="hidden md:flex items-center space-x-3">
+          <nav className="hidden md:flex items-center space-x-1">
             <Link
               href="/about"
               className={cn(
@@ -187,7 +187,7 @@ export function Header() {
             </Link>
 
             {/* Theme Toggle */}
-            <div className="ml-2">
+            <div className="ml-1">
               <ThemeToggle />
             </div>
           </nav>
@@ -291,28 +291,32 @@ export function Header() {
               <div
                 className={cn(
                   "overflow-hidden transition-all duration-500 ease-out",
-                  expandedSection === "blog" ? "max-h-96 opacity-100 mt-2" : "max-h-0 opacity-0",
+                  expandedSection === "blog" ? "max-h-[60vh] opacity-100 mt-2" : "max-h-0 opacity-0",
                 )}
               >
-                <div className="pl-6 pr-2 space-y-1 border-l-2 border-primary/20 ml-4">
-                  {Object.entries(mobileBlogCategories).map(([slug, category]) => {
-                    const categoryUrl = `/blog/category/${slug}`
-                    return (
-                      <Link
-                        key={slug}
-                        href={categoryUrl}
-                        className={cn(
-                          "block px-3 py-2 rounded-lg text-sm transition-all duration-300",
-                          isCategoryActive(categoryUrl)
-                            ? "text-primary font-medium bg-primary/10"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30 hover:translate-x-1",
-                        )}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        {category.heading}
-                      </Link>
-                    )
-                  })}
+                <div className="pl-6 pr-2 space-y-1 border-l-2 border-primary/20 ml-4 max-h-[50vh] overflow-y-auto custom-scrollbar">
+                  {Object.entries(mobileBlogCategories).length > 0 ? (
+                    Object.entries(mobileBlogCategories).map(([slug, category]) => {
+                      const categoryUrl = `/blog/category/${slug}`
+                      return (
+                        <Link
+                          key={slug}
+                          href={categoryUrl}
+                          className={cn(
+                            "block px-3 py-2 rounded-lg text-sm transition-all duration-300",
+                            isCategoryActive(categoryUrl)
+                              ? "text-primary font-medium bg-primary/10"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted/30 hover:translate-x-1",
+                          )}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          {category.heading}
+                        </Link>
+                      )
+                    })
+                  ) : (
+                    <div className="px-3 py-2 text-sm text-muted-foreground">No categories yet.</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -350,28 +354,32 @@ export function Header() {
               <div
                 className={cn(
                   "overflow-hidden transition-all duration-500 ease-out",
-                  expandedSection === "watch" ? "max-h-96 opacity-100 mt-2" : "max-h-0 opacity-0",
+                  expandedSection === "watch" ? "max-h-[60vh] opacity-100 mt-2" : "max-h-0 opacity-0",
                 )}
               >
-                <div className="pl-6 pr-2 space-y-1 border-l-2 border-primary/20 ml-4">
-                  {Object.entries(mobileWatchCategories).map(([slug, category]) => {
-                    const categoryUrl = `/watch/category/${slug}`
-                    return (
-                      <Link
-                        key={slug}
-                        href={categoryUrl}
-                        className={cn(
-                          "block px-3 py-2 rounded-lg text-sm transition-all duration-300",
-                          isCategoryActive(categoryUrl)
-                            ? "text-primary font-medium bg-primary/10"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30 hover:translate-x-1",
-                        )}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        {category.heading}
-                      </Link>
-                    )
-                  })}
+                <div className="pl-6 pr-2 space-y-1 border-l-2 border-primary/20 ml-4 max-h-[50vh] overflow-y-auto custom-scrollbar">
+                  {Object.entries(mobileWatchCategories).length > 0 ? (
+                    Object.entries(mobileWatchCategories).map(([slug, category]) => {
+                      const categoryUrl = `/watch/category/${slug}`
+                      return (
+                        <Link
+                          key={slug}
+                          href={categoryUrl}
+                          className={cn(
+                            "block px-3 py-2 rounded-lg text-sm transition-all duration-300",
+                            isCategoryActive(categoryUrl)
+                              ? "text-primary font-medium bg-primary/10"
+                              : "text-muted-foreground hover:text-foreground hover:bg-muted/30 hover:translate-x-1",
+                          )}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          {category.heading}
+                        </Link>
+                      )
+                    })
+                  ) : (
+                    <div className="px-3 py-2 text-sm text-muted-foreground">No categories yet.</div>
+                  )}
                 </div>
               </div>
             </div>

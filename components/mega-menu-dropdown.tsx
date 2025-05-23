@@ -134,25 +134,25 @@ export function MegaMenuDropdown({ title, menuTitle, mainRoute, categories, clas
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-screen max-w-md z-50"
+            className="absolute left-0 md:left-1/2 md:-translate-x-1/2 top-full mt-2 w-[calc(100vw-2rem)] md:w-screen max-w-md z-50"
             role="menu"
             aria-orientation="vertical"
             aria-labelledby={`${title.toLowerCase()}-menu-button`}
           >
-            <div className="bg-background/98 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl shadow-black/20 p-6">
+            <div className="bg-background/98 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl shadow-black/20 p-4 md:p-6 overflow-hidden">
               {/* Menu Title */}
-              <div className="mb-4 pb-3 border-b border-border/30">
+              <div className="mb-3 pb-2 border-b border-border/30">
                 <h3 className="text-lg font-semibold font-orbitron text-foreground">{menuTitle}</h3>
               </div>
 
               {/* Categories Grid */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 max-h-[60vh] md:max-h-[50vh] overflow-y-auto custom-scrollbar pr-1">
                 {categories.length > 0 ? (
                   categories.map((category, index) => (
                     <Link
                       key={category.href}
                       href={category.href}
-                      className="group p-3 rounded-lg hover:bg-primary/8 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="group p-2 md:p-3 rounded-lg hover:bg-primary/8 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50"
                       role="menuitem"
                       tabIndex={isOpen ? 0 : -1}
                       onClick={() => setIsOpen(false)}
@@ -161,7 +161,7 @@ export function MegaMenuDropdown({ title, menuTitle, mainRoute, categories, clas
                         {category.name}
                       </div>
                       {category.description && (
-                        <div className="text-xs text-muted-foreground mt-1 group-hover:text-muted-foreground/80 transition-colors duration-300">
+                        <div className="text-xs text-muted-foreground mt-1 line-clamp-2 group-hover:text-muted-foreground/80 transition-colors duration-300">
                           {category.description}
                         </div>
                       )}
@@ -173,7 +173,7 @@ export function MegaMenuDropdown({ title, menuTitle, mainRoute, categories, clas
               </div>
 
               {/* View All Link */}
-              <div className="mt-4 pt-3 border-t border-border/30">
+              <div className="mt-3 pt-2 border-t border-border/30">
                 <Link
                   href={mainRoute}
                   className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-300"

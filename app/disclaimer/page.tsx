@@ -10,27 +10,26 @@ export default function DisclaimerPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-12 sm:py-16 md:py-20 overflow-hidden">
+      <section className="relative py-16 md:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
         <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
         <div className="container relative z-10 mx-auto px-4">
           <Link
             href="/"
-            className="inline-flex items-center px-3 md:px-4 py-2 rounded-md bg-primary/10 hover:bg-primary/20 text-primary transition-colors duration-200 mb-6 md:mb-8 border border-primary/20 shadow-sm text-sm md:text-base"
+            className="inline-flex items-center px-4 py-2 rounded-md bg-primary/10 hover:bg-primary/20 text-primary transition-colors duration-200 mb-8 border border-primary/20 shadow-sm"
           >
-            <ArrowLeft className="mr-2 h-3 w-3 md:h-4 md:w-4" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Home
           </Link>
 
-          <div className="max-w-4xl">
-            <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary mb-4 md:mb-6">
-              <span className="mr-1">✨</span> Independent Animation Studio
-            </div>
-
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight">
+          <div className="max-w-4xl mx-auto">
+            <h1
+              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
               <span className="text-white">Disclaimer</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground">Effective Date: May 9, 2025</p>
+            <p className="text-xl text-muted-foreground">Effective Date: May 9, 2025</p>
           </div>
         </div>
       </section>
@@ -46,7 +45,10 @@ export default function DisclaimerPage() {
               completeness, or timeliness of the information.
             </p>
 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 font-orbitron">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 tracking-tight"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
               Limitation of Liability
             </h2>
             <p className="mb-4 md:mb-6">
@@ -55,7 +57,10 @@ export default function DisclaimerPage() {
               of, or reliance on, any content on the Site. Your use of the Site is entirely at your own risk.
             </p>
 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 font-orbitron">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 tracking-tight"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
               External Links Disclaimer
             </h2>
             <p className="mb-4 md:mb-6">
@@ -64,7 +69,10 @@ export default function DisclaimerPage() {
               websites.
             </p>
 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 font-orbitron">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 tracking-tight"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
               Media and Intellectual Property
             </h2>
             <p className="mb-4 md:mb-6">
@@ -77,7 +85,10 @@ export default function DisclaimerPage() {
               .
             </p>
 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 font-orbitron">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 tracking-tight"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
               Third-Party Content Usage
             </h2>
             <p className="mb-4 md:mb-6">
@@ -87,7 +98,10 @@ export default function DisclaimerPage() {
               attribution, please contact us immediately.
             </p>
 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 font-orbitron">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 tracking-tight"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
               User-Generated Content Disclaimer
             </h2>
             <p className="mb-4 md:mb-6">
@@ -96,7 +110,10 @@ export default function DisclaimerPage() {
               solely responsible for their submissions.
             </p>
 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 font-orbitron">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 tracking-tight"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
               Automated Moderation Tools
             </h2>
             <p className="mb-4 md:mb-6">
@@ -106,7 +123,10 @@ export default function DisclaimerPage() {
               user submissions at our discretion.
             </p>
 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 font-orbitron">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 tracking-tight"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
               No Professional Advice
             </h2>
             <p className="mb-4 md:mb-6">
@@ -115,7 +135,10 @@ export default function DisclaimerPage() {
               situation.
             </p>
 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 font-orbitron">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 tracking-tight"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
               Accuracy of Information
             </h2>
             <p className="mb-4 md:mb-6">
@@ -123,7 +146,10 @@ export default function DisclaimerPage() {
               errors or omissions. We reserve the right to modify or correct content at any time, without prior notice.
             </p>
 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 font-orbitron">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 tracking-tight"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
               Changes to this Disclaimer
             </h2>
             <p className="mb-4 md:mb-6">
@@ -131,7 +157,10 @@ export default function DisclaimerPage() {
               revised version to this page. Continued use of the Site signifies your acceptance of the updated terms.
             </p>
 
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 font-orbitron">
+            <h2
+              className="text-xl sm:text-2xl md:text-3xl font-bold mt-8 md:mt-10 mb-3 md:mb-4 tracking-tight"
+              style={{ fontFamily: "var(--font-orbitron)" }}
+            >
               Contact Us
             </h2>
             <p className="mb-3 md:mb-4">

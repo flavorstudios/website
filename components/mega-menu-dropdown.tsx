@@ -7,6 +7,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { motion, AnimatePresence } from "framer-motion"
 
 type MegaMenuCategory = {
   name: string
@@ -125,58 +126,67 @@ export function MegaMenuDropdown({ title, menuTitle, mainRoute, categories, clas
         </button>
       </div>
 
-      {/* Mega Menu Dropdown */}
-      <div
-        className={cn(
-          "absolute left-1/2 -translate-x-1/2 top-full mt-2 w-screen max-w-md transition-all duration-300 ease-out z-50",
-          isOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2 pointer-events-none",
-        )}
-        role="menu"
-        aria-orientation="vertical"
-        aria-labelledby={`${title.toLowerCase()}-menu-button`}
-      >
-        <div className="bg-background/98 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl shadow-black/20 p-6">
-          {/* Menu Title */}
-          <div className="mb-4 pb-3 border-b border-border/30">
-            <h3 className="text-lg font-semibold font-orbitron text-foreground">{menuTitle}</h3>
-          </div>
+      {/* Mega Menu Dropdown with Animation */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-screen max-w-md z-50"
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby={`${title.toLowerCase()}-menu-button`}
+          >
+            <div className="bg-background/98 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl shadow-black/20 p-6">
+              {/* Menu Title */}
+              <div className="mb-4 pb-3 border-b border-border/30">
+                <h3 className="text-lg font-semibold font-orbitron text-foreground">{menuTitle}</h3>
+              </div>
 
-          {/* Categories Grid */}
-          <div className="grid grid-cols-2 gap-3">
-            {categories.map((category, index) => (
-              <Link
-                key={category.href}
-                href={category.href}
-                className="group p-3 rounded-lg hover:bg-primary/8 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50"
-                role="menuitem"
-                tabIndex={isOpen ? 0 : -1}
-                onClick={() => setIsOpen(false)}
-              >
-                <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors duration-300">
-                  {category.name}
-                </div>
-                {category.description && (
-                  <div className="text-xs text-muted-foreground mt-1 group-hover:text-muted-foreground/80 transition-colors duration-300">
-                    {category.description}
-                  </div>
+              {/* Categories Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {categories.length > 0 ? (
+                  categories.map((category, index) => (
+                    <Link
+                      key={category.href}
+                      href={category.href}
+                      className="group p-3 rounded-lg hover:bg-primary/8 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      role="menuitem"
+                      tabIndex={isOpen ? 0 : -1}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors duration-300">
+                        {category.name}
+                      </div>
+                      {category.description && (
+                        <div className="text-xs text-muted-foreground mt-1 group-hover:text-muted-foreground/80 transition-colors duration-300">
+                          {category.description}
+                        </div>
+                      )}
+                    </Link>
+                  ))
+                ) : (
+                  <div className="col-span-2 p-3 text-sm text-muted-foreground">No categories yet.</div>
                 )}
-              </Link>
-            ))}
-          </div>
+              </div>
 
-          {/* View All Link */}
-          <div className="mt-4 pt-3 border-t border-border/30">
-            <Link
-              href={mainRoute}
-              className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-300"
-              onClick={() => setIsOpen(false)}
-            >
-              View All {title}
-              <ChevronDown className="ml-1 h-3 w-3 -rotate-90" />
-            </Link>
-          </div>
-        </div>
-      </div>
+              {/* View All Link */}
+              <div className="mt-4 pt-3 border-t border-border/30">
+                <Link
+                  href={mainRoute}
+                  className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  View All {title}
+                  <ChevronDown className="ml-1 h-3 w-3 -rotate-90" />
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

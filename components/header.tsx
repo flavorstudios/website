@@ -9,6 +9,8 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 import { PopupSearch } from "@/components/popup-search"
 import { MegaMenuDropdown } from "@/components/mega-menu-dropdown"
+import { blogCategories } from "@/lib/blogCategories"
+import { watchCategories } from "@/lib/watchCategories"
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -17,35 +19,22 @@ export function Header() {
   const pathname = usePathname()
 
   // Blog categories for mega menu
-  const blogCategories = [
-    { name: "Anime Reviews", href: "/blog/category/anime-reviews", description: "In-depth anime analysis" },
-    { name: "Industry News", href: "/blog/category/industry-news", description: "Latest anime industry updates" },
-    { name: "Storytelling Tips", href: "/blog/category/storytelling-tips", description: "Creative writing guides" },
-    { name: "Behind the Scenes", href: "/blog/category/behind-the-scenes", description: "Studio insights" },
-  ]
+  const blogCategoriesArray = Object.entries(blogCategories).map(([slug, category]) => ({
+    name: category.heading,
+    href: `/blog/category/${slug}`,
+    description: category.intro.substring(0, 50) + (category.intro.length > 50 ? "..." : ""),
+  }))
 
   // Watch categories for mega menu
-  const watchCategories = [
-    { name: "Original Series", href: "/watch/category/original-series", description: "Our flagship content" },
-    { name: "Short Films", href: "/watch/category/short-films", description: "Bite-sized stories" },
-    { name: "Trailers", href: "/watch/category/trailers", description: "Upcoming releases" },
-    { name: "Recommendations", href: "/watch/category/recommendations", description: "Curated picks" },
-  ]
+  const watchCategoriesArray = Object.entries(watchCategories).map(([slug, category]) => ({
+    name: category.heading,
+    href: `/watch/category/${slug}`,
+    description: category.intro.substring(0, 50) + (category.intro.length > 50 ? "..." : ""),
+  }))
 
   // Mobile categories for accordion
-  const mobileBlogCategories = {
-    "anime-reviews": { heading: "Anime Reviews" },
-    "industry-news": { heading: "Industry News" },
-    "storytelling-tips": { heading: "Storytelling Tips" },
-    "behind-the-scenes": { heading: "Behind the Scenes" },
-  }
-
-  const mobileWatchCategories = {
-    "original-series": { heading: "Original Series" },
-    "short-films": { heading: "Short Films" },
-    trailers: { heading: "Trailers" },
-    recommendations: { heading: "Recommendations" },
-  }
+  const mobileBlogCategories = blogCategories
+  const mobileWatchCategories = watchCategories
 
   // Handle scroll with error handling
   useEffect(() => {
@@ -127,14 +116,27 @@ export function Header() {
             </Link>
 
             {/* Blog Mega Menu */}
-            <MegaMenuDropdown title="Blog" menuTitle="Explore Our Blog" mainRoute="/blog" categories={blogCategories} />
+            <MegaMenuDropdown
+              title="Blog"
+              menuTitle="Explore Our Blog"
+              mainRoute="/blog"
+              categories={
+                blogCategoriesArray.length > 0
+                  ? blogCategoriesArray
+                  : [{ name: "No categories yet", href: "/blog", description: "Check back soon for categories" }]
+              }
+            />
 
             {/* Watch Mega Menu */}
             <MegaMenuDropdown
               title="Watch"
               menuTitle="Watch by Category"
               mainRoute="/watch"
-              categories={watchCategories}
+              categories={
+                watchCategoriesArray.length > 0
+                  ? watchCategoriesArray
+                  : [{ name: "No categories yet", href: "/watch", description: "Check back soon for categories" }]
+              }
             />
 
             <Link

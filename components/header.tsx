@@ -91,23 +91,23 @@ export function Header() {
           : "bg-transparent",
       )}
     >
-      <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
+      <div className="container mx-auto px-2 sm:px-4 h-16 md:h-20 flex items-center justify-between">
         {/* Left Navigation */}
-        <div className="flex items-center">
+        <div className="flex items-center flex-1">
           {/* Logo */}
-          <Link href="/" className="flex items-center transition-all duration-300 hover:scale-105 mr-4 md:mr-6">
+          <Link href="/" className="flex items-center transition-all duration-300 hover:scale-105 mr-2 md:mr-4">
             <span className="font-orbitron font-bold text-2xl md:text-3xl bg-gradient-to-r from-purple-500 via-pink-500 to-primary bg-clip-text text-transparent">
               fl
             </span>
           </Link>
 
           {/* Desktop Left Navigation */}
-          <nav className="hidden md:flex items-center space-x-0">
+          <nav className="hidden md:flex items-center">
             {/* Home Button */}
             <Link
               href="/"
               className={cn(
-                "relative px-4 py-2.5 text-sm font-medium tracking-wide transition-all duration-300 rounded-lg hover:bg-primary/8 hover:text-primary",
+                "relative px-3 py-2.5 text-sm font-medium tracking-wide transition-all duration-300 rounded-lg hover:bg-primary/8 hover:text-primary",
                 pathname === "/" &&
                   "text-primary bg-primary/10 after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-primary after:rounded-full",
               )}
@@ -142,7 +142,7 @@ export function Header() {
             <Link
               href="/play"
               className={cn(
-                "relative px-4 py-2.5 text-sm font-medium tracking-wide transition-all duration-300 rounded-lg hover:bg-primary/8 hover:text-primary",
+                "relative px-3 py-2.5 text-sm font-medium tracking-wide transition-all duration-300 rounded-lg hover:bg-primary/8 hover:text-primary",
                 pathname === "/play" &&
                   "text-primary bg-primary/10 after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-primary after:rounded-full",
               )}
@@ -153,18 +153,18 @@ export function Header() {
         </div>
 
         {/* Centered Search - Desktop Only */}
-        <div className="hidden md:flex justify-center max-w-md w-full mx-3">
+        <div className="hidden md:flex justify-center max-w-[280px] lg:max-w-[320px] mx-1">
           <PopupSearch />
         </div>
 
         {/* Right Navigation */}
-        <div className="flex items-center">
+        <div className="flex items-center flex-1 justify-end">
           {/* Desktop Right Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
+          <nav className="hidden md:flex items-center">
             <Link
               href="/about"
               className={cn(
-                "relative px-4 py-2.5 text-sm font-medium tracking-wide transition-all duration-300 rounded-lg hover:bg-primary/8 hover:text-primary",
+                "relative px-3 py-2.5 text-sm font-medium tracking-wide transition-all duration-300 rounded-lg hover:bg-primary/8 hover:text-primary",
                 pathname === "/about" &&
                   "text-primary bg-primary/10 after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-primary after:rounded-full",
               )}
@@ -177,7 +177,7 @@ export function Header() {
                 size="sm"
                 variant="outline"
                 className={cn(
-                  "flex items-center space-x-2 h-10 px-4 text-sm font-medium tracking-wide border-border/50 hover:bg-primary/8 hover:text-primary hover:border-primary/30 transition-all duration-300",
+                  "flex items-center space-x-2 h-9 px-3 ml-1 text-sm font-medium tracking-wide border-border/50 hover:bg-primary/8 hover:text-primary hover:border-primary/30 transition-all duration-300",
                   pathname === "/support" && "bg-primary/10 text-primary border-primary/30",
                 )}
               >
@@ -192,9 +192,9 @@ export function Header() {
             </div>
           </nav>
 
-          {/* Mobile Controls - UNCHANGED */}
-          <div className="flex items-center space-x-3 md:hidden">
-            {/* Mobile Search - UNCHANGED */}
+          {/* Mobile Controls */}
+          <div className="flex items-center space-x-2 md:hidden">
+            {/* Mobile Search */}
             <div className="md:hidden">
               <PopupSearch />
             </div>
@@ -208,25 +208,25 @@ export function Header() {
               size="icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle Menu"
-              className="relative h-10 w-10 hover:bg-primary/8 transition-all duration-300"
+              className="relative h-9 w-9 hover:bg-primary/8 transition-all duration-300"
             >
-              <div className="relative w-6 h-6">
+              <div className="relative w-5 h-5">
                 <span
                   className={cn(
-                    "absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-out",
-                    isMobileMenuOpen ? "rotate-45 translate-y-0" : "-translate-y-2",
+                    "absolute block h-0.5 w-5 bg-current transform transition-all duration-300 ease-out",
+                    isMobileMenuOpen ? "rotate-45 translate-y-0" : "-translate-y-1.5",
                   )}
                 />
                 <span
                   className={cn(
-                    "absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-out",
+                    "absolute block h-0.5 w-5 bg-current transform transition-all duration-300 ease-out",
                     isMobileMenuOpen ? "opacity-0" : "opacity-100",
                   )}
                 />
                 <span
                   className={cn(
-                    "absolute block h-0.5 w-6 bg-current transform transition-all duration-300 ease-out",
-                    isMobileMenuOpen ? "-rotate-45 translate-y-0" : "translate-y-2",
+                    "absolute block h-0.5 w-5 bg-current transform transition-all duration-300 ease-out",
+                    isMobileMenuOpen ? "-rotate-45 translate-y-0" : "translate-y-1.5",
                   )}
                 />
               </div>

@@ -139,10 +139,12 @@ export function MegaMenuDropdown({ title, menuTitle, mainRoute, categories, clas
             aria-orientation="vertical"
             aria-labelledby={`${title.toLowerCase()}-menu-button`}
           >
-            <div className="bg-background/98 backdrop-blur-xl border border-border/50 rounded-xl shadow-2xl shadow-black/20 p-4 md:p-6 overflow-hidden">
-              {/* Menu Title */}
-              <div className="mb-3 pb-2 border-b border-border/30">
-                <h3 className="text-lg font-semibold font-orbitron text-foreground">{menuTitle}</h3>
+            <div className="bg-[#1a1a1a] border border-purple-500/30 rounded-xl shadow-2xl shadow-purple-900/30 p-4 md:p-6 overflow-hidden">
+              {/* Menu Title with Gradient */}
+              <div className="mb-3 pb-2 border-b border-purple-500/30">
+                <h3 className="text-lg font-semibold font-orbitron bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
+                  {menuTitle}
+                </h3>
               </div>
 
               {/* Categories Grid */}
@@ -152,31 +154,31 @@ export function MegaMenuDropdown({ title, menuTitle, mainRoute, categories, clas
                     <Link
                       key={category.href}
                       href={category.href}
-                      className="group p-2 md:p-3 rounded-lg hover:bg-primary/8 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="group p-2 md:p-3 rounded-lg hover:bg-[#2a2a2a] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                       role="menuitem"
                       tabIndex={isOpen ? 0 : -1}
                       onClick={() => setIsOpen(false)}
                     >
-                      <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors duration-300">
+                      <div className="text-sm font-medium text-white group-hover:text-purple-400 transition-colors duration-300">
                         {category.name}
                       </div>
                       {category.description && (
-                        <div className="text-xs text-muted-foreground mt-1 line-clamp-2 group-hover:text-muted-foreground/80 transition-colors duration-300">
+                        <div className="text-xs text-gray-400 mt-1 line-clamp-2 group-hover:text-gray-300 transition-colors duration-300">
                           {category.description}
                         </div>
                       )}
                     </Link>
                   ))
                 ) : (
-                  <div className="col-span-2 p-3 text-sm text-muted-foreground">No categories yet.</div>
+                  <div className="col-span-2 p-3 text-sm text-gray-400">No categories yet.</div>
                 )}
               </div>
 
               {/* View All Link */}
-              <div className="mt-3 pt-2 border-t border-border/30">
+              <div className="mt-3 pt-2 border-t border-purple-500/30">
                 <Link
                   href={mainRoute}
-                  className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-300"
+                  className="inline-flex items-center text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors duration-300"
                   onClick={() => setIsOpen(false)}
                 >
                   View All {title}

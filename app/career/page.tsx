@@ -102,17 +102,24 @@ export default function CareerPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <section className="relative py-20 md:py-28 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/20 via-background to-background z-0"></div>
+      {/* Hero Section - Left-aligned like Support page */}
+      <section className="relative py-16 md:py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
+        <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
         <div className="container relative z-10 mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-orbitron tracking-tight">
-              <span className="gradient-text">Join Our Team</span>
+          <div className="max-w-3xl mx-auto">
+            <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary mb-6">
+              <span className="mr-1">✨</span> Independent Animation Studio
+            </div>
+
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight text-left">
+              Join Our <span className="text-primary">Team</span>
             </h1>
-            <p className="text-xl max-w-3xl mx-auto mb-10 text-muted-foreground">
+
+            <p className="text-xl mb-6 text-muted-foreground leading-relaxed text-left">
               Help us create amazing anime content and be part of our growing creative studio.
             </p>
+
             <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
               <a href="#positions">
                 View Open Positions

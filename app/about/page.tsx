@@ -11,21 +11,21 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Styled like Support page */}
+      {/* Hero Section - Left-aligned like Support page */}
       <section className="relative py-16 md:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
         <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
         <div className="container relative z-10 mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
+          <div className="max-w-3xl mx-auto">
             <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary mb-6">
               <span className="mr-1">✨</span> Independent Animation Studio
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight text-left">
               <span className="text-primary">About Flavor Studios</span>
             </h1>
 
-            <p className="text-xl mb-6 text-muted-foreground leading-relaxed">
+            <p className="text-xl mb-6 text-muted-foreground leading-relaxed text-left">
               Crafting stories with soul—one frame at a time.
             </p>
           </div>
@@ -221,7 +221,7 @@ export default function AboutPage() {
               {/* Mobile Timeline */}
               <div className="md:hidden">
                 {/* Timeline Line */}
-                <div className="absolute left-4 top-0 bottom-0 w-px bg-primary/30"></div>
+                <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-primary/30"></div>
 
                 {[
                   {
@@ -250,20 +250,20 @@ export default function AboutPage() {
                     description: "Creating original anime and stories.",
                   },
                 ].map((item, index) => (
-                  <div key={index} className="relative pl-12 pb-12 last:pb-0">
+                  <div key={index} className="relative pl-16 pb-8 last:pb-0">
                     {/* Year badge */}
-                    <div className="absolute left-0 transform -translate-x-1/2 mt-6 z-10">
-                      <div className="bg-background border-2 border-primary/30 rounded-full px-3 py-1 font-orbitron font-bold text-primary text-sm">
+                    <div className="absolute left-0 top-2 z-10">
+                      <div className="bg-background border-2 border-primary/30 rounded-full px-4 py-2 font-orbitron font-bold text-primary text-sm whitespace-nowrap shadow-sm">
                         {item.year}
                       </div>
                     </div>
 
                     {/* Timeline dot */}
-                    <div className="absolute left-4 mt-7 transform -translate-x-1/2 w-2 h-2 rounded-full bg-primary"></div>
+                    <div className="absolute left-6 top-4 transform -translate-x-1/2 w-3 h-3 rounded-full bg-primary border-2 border-background shadow-sm z-20"></div>
 
-                    <div className="bg-card/50 p-4 rounded-lg border border-primary/10 shadow-md mt-4">
-                      <h3 className="text-lg font-bold mb-1 font-orbitron">{item.title}</h3>
-                      <p className="text-muted-foreground text-sm">{item.description}</p>
+                    <div className="bg-card/50 p-4 rounded-lg border border-primary/10 shadow-md">
+                      <h3 className="text-lg font-bold mb-2 font-orbitron">{item.title}</h3>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
                     </div>
                   </div>
                 ))}

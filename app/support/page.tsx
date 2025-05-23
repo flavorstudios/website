@@ -54,6 +54,18 @@ export default function SupportPage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
+
+              <Button
+                asChild
+                variant="outline"
+                size="lg"
+                className="border-primary/20 hover:bg-primary/5 font-medium px-8 h-12 transition-all duration-300"
+              >
+                <Link href="/faq">
+                  FAQ
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -130,6 +142,14 @@ export default function SupportPage() {
 
             <p className="text-sm text-muted-foreground mt-4">
               Your support is processed securely through Buy Me a Coffee.
+            </p>
+
+            <p className="text-sm text-muted-foreground mt-4">
+              Have questions? Check our{" "}
+              <Link href="/faq" className="text-primary hover:underline">
+                FAQ page
+              </Link>{" "}
+              for more information.
             </p>
           </div>
         </div>

@@ -12,20 +12,20 @@ export default function AboutPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section - Left-aligned like Support page */}
-      <section className="relative py-16 md:py-20 overflow-hidden">
+      <section className="relative py-12 sm:py-16 md:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
         <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
         <div className="container relative z-10 mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary mb-6">
+            <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary mb-4 md:mb-6">
               <span className="mr-1">✨</span> Independent Animation Studio
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight text-left">
-              <span className="text-primary">About Flavor Studios</span>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight text-left">
+              About <span className="text-primary">Flavor Studios</span>
             </h1>
 
-            <p className="text-xl mb-6 text-muted-foreground leading-relaxed text-left">
+            <p className="text-lg md:text-xl mb-6 text-muted-foreground leading-relaxed text-left">
               Crafting stories with soul—one frame at a time.
             </p>
           </div>
@@ -33,12 +33,12 @@ export default function AboutPage() {
       </section>
 
       {/* About Us Section - Styled like Support page */}
-      <section className="py-10 md:py-14">
+      <section className="py-8 md:py-10 lg:py-14">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8 font-orbitron">Who We Are</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8 font-orbitron">Who We Are</h2>
 
-            <div className="space-y-4 text-lg">
+            <div className="space-y-4 text-base md:text-lg">
               <p>
                 Flavor Studios is a global, independent animation studio specializing in emotionally resonant 3D
                 animated content and original anime series.
@@ -63,16 +63,18 @@ export default function AboutPage() {
       </section>
 
       {/* Mission & Vision Section - Styled like Support page */}
-      <section className="py-10 md:py-14">
+      <section className="py-8 md:py-10 lg:py-14">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8 font-orbitron">Our Mission & Vision</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8 font-orbitron">
+              Our Mission & Vision
+            </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
               <Card className="bg-card/50 border border-primary/10 hover:border-primary/30 transition-all duration-300">
-                <CardContent className="pt-5 pb-1">
-                  <h3 className="text-lg font-bold mb-2">Our Mission</h3>
-                  <p className="text-muted-foreground">
+                <CardContent className="pt-4 md:pt-5 pb-1">
+                  <h3 className="text-base md:text-lg font-bold mb-2">Our Mission</h3>
+                  <p className="text-sm md:text-base text-muted-foreground">
                     To create emotionally resonant animations that inspire, entertain, and foster a global community of
                     animation enthusiasts while maintaining the highest standards of artistic integrity and
                     storytelling.
@@ -80,9 +82,9 @@ export default function AboutPage() {
                 </CardContent>
               </Card>
               <Card className="bg-card/50 border border-primary/10 hover:border-primary/30 transition-all duration-300">
-                <CardContent className="pt-5 pb-1">
-                  <h3 className="text-lg font-bold mb-2">Our Vision</h3>
-                  <p className="text-muted-foreground">
+                <CardContent className="pt-4 md:pt-5 pb-1">
+                  <h3 className="text-base md:text-lg font-bold mb-2">Our Vision</h3>
+                  <p className="text-sm md:text-base text-muted-foreground">
                     To become a leading independent animation studio recognized for creating meaningful content that
                     transcends cultural boundaries and resonates with audiences worldwide, while remaining true to our
                     artistic values.
@@ -95,13 +97,15 @@ export default function AboutPage() {
       </section>
 
       {/* Why Choose Us Section - Styled like Support page */}
-      <section className="py-10 md:py-14">
+      <section className="py-8 md:py-10 lg:py-14">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8 font-orbitron">Why Choose Flavor Studios?</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8 font-orbitron">
+              Why Choose Flavor Studios?
+            </h2>
 
-            <div className="border border-primary/10 rounded-lg p-5 bg-primary/5 mb-8">
-              <ul className="space-y-4">
+            <div className="border border-primary/10 rounded-lg p-4 md:p-5 bg-primary/5 mb-6 md:mb-8">
+              <ul className="space-y-3 md:space-y-4">
                 {[
                   "Original, high-quality animations built from the ground up in Blender",
                   "Powerful storytelling rooted in emotional depth and universal values",
@@ -109,10 +113,10 @@ export default function AboutPage() {
                   "A commitment to creativity, authenticity, and excellence in every frame",
                 ].map((item, index) => (
                   <li key={index} className="flex items-start">
-                    <div className="mr-4 mt-1 flex-shrink-0">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-primary flex items-center justify-center animate-pulse-slow">
+                    <div className="mr-3 md:mr-4 mt-1 flex-shrink-0">
+                      <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gradient-to-r from-purple-500 to-primary flex items-center justify-center animate-pulse-slow">
                         <svg
-                          className="w-3 h-3 text-white"
+                          className="w-2.5 h-2.5 md:w-3 md:h-3 text-white"
                           fill="currentColor"
                           viewBox="0 0 20 20"
                           xmlns="http://www.w3.org/2000/svg"
@@ -125,7 +129,7 @@ export default function AboutPage() {
                         </svg>
                       </div>
                     </div>
-                    <p className="text-lg">{item}</p>
+                    <p className="text-base md:text-lg">{item}</p>
                   </li>
                 ))}
               </ul>
@@ -135,10 +139,10 @@ export default function AboutPage() {
       </section>
 
       {/* Our Journey Section - Styled like Support page */}
-      <section className="py-10 md:py-14">
+      <section className="py-8 md:py-10 lg:py-14">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8 font-orbitron">Our Journey</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8 font-orbitron">Our Journey</h2>
 
             {/* Professional Timeline */}
             <div className="relative">
@@ -253,7 +257,7 @@ export default function AboutPage() {
                   <div key={index} className="relative pl-16 pb-8 last:pb-0">
                     {/* Year badge */}
                     <div className="absolute left-0 top-2 z-10">
-                      <div className="bg-background border-2 border-primary/30 rounded-full px-4 py-2 font-orbitron font-bold text-primary text-sm whitespace-nowrap shadow-sm">
+                      <div className="bg-background border-2 border-primary/30 rounded-full px-3 md:px-4 py-1.5 md:py-2 font-orbitron font-bold text-primary text-xs md:text-sm whitespace-nowrap shadow-sm">
                         {item.year}
                       </div>
                     </div>
@@ -261,8 +265,8 @@ export default function AboutPage() {
                     {/* Timeline dot */}
                     <div className="absolute left-6 top-4 transform -translate-x-1/2 w-3 h-3 rounded-full bg-primary border-2 border-background shadow-sm z-20"></div>
 
-                    <div className="bg-card/50 p-4 rounded-lg border border-primary/10 shadow-md">
-                      <h3 className="text-lg font-bold mb-2 font-orbitron">{item.title}</h3>
+                    <div className="bg-card/50 p-3 md:p-4 rounded-lg border border-primary/10 shadow-md">
+                      <h3 className="text-base md:text-lg font-bold mb-2 font-orbitron">{item.title}</h3>
                       <p className="text-muted-foreground text-sm leading-relaxed">{item.description}</p>
                     </div>
                   </div>
@@ -274,18 +278,23 @@ export default function AboutPage() {
       </section>
 
       {/* Core Values Section - Styled like Support page */}
-      <section className="py-10 md:py-14">
+      <section className="py-8 md:py-10 lg:py-14">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8 font-orbitron">Our Core Values</h2>
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 md:mb-8 font-orbitron">Our Core Values</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
               {[
                 {
                   title: "Authenticity",
                   description: "We create stories that are genuine, honest, and true to our artistic vision.",
                   icon: (
-                    <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="w-5 h-5 md:w-6 md:h-6 text-primary"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -299,7 +308,12 @@ export default function AboutPage() {
                   title: "Innovation",
                   description: "We constantly push boundaries and explore new techniques in animation.",
                   icon: (
-                    <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="w-5 h-5 md:w-6 md:h-6 text-primary"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -313,7 +327,12 @@ export default function AboutPage() {
                   title: "Excellence",
                   description: "We strive for the highest quality in every aspect of our work.",
                   icon: (
-                    <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="w-5 h-5 md:w-6 md:h-6 text-primary"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -327,7 +346,12 @@ export default function AboutPage() {
                   title: "Community",
                   description: "We value and nurture our community of fans, creators, and collaborators.",
                   icon: (
-                    <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="w-5 h-5 md:w-6 md:h-6 text-primary"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -341,7 +365,12 @@ export default function AboutPage() {
                   title: "Integrity",
                   description: "We maintain ethical standards in all our business and creative decisions.",
                   icon: (
-                    <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="w-5 h-5 md:w-6 md:h-6 text-primary"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -355,7 +384,12 @@ export default function AboutPage() {
                   title: "Passion",
                   description: "We pour our hearts into every project, driven by our love for animation.",
                   icon: (
-                    <svg className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg
+                      className="w-5 h-5 md:w-6 md:h-6 text-primary"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -376,10 +410,10 @@ export default function AboutPage() {
                   key={index}
                   className="bg-card/50 border border-primary/10 hover:border-primary/30 transition-all duration-300"
                 >
-                  <CardContent className="pt-5 pb-1">
-                    <div className="mb-3">{value.icon}</div>
-                    <h3 className="text-lg font-bold mb-2">{value.title}</h3>
-                    <p className="text-muted-foreground">{value.description}</p>
+                  <CardContent className="pt-4 md:pt-5 pb-1">
+                    <div className="mb-2 md:mb-3">{value.icon}</div>
+                    <h3 className="text-base md:text-lg font-bold mb-2">{value.title}</h3>
+                    <p className="text-sm md:text-base text-muted-foreground">{value.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -389,15 +423,15 @@ export default function AboutPage() {
       </section>
 
       {/* Call-to-Action Section - INCREASED SIZE FOR BUTTONS */}
-      <section className="py-10 md:py-14 bg-gradient-to-b from-background to-primary/5">
+      <section className="py-8 md:py-10 lg:py-14 bg-gradient-to-b from-background to-primary/5">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 font-orbitron">Be Part of Our Journey</h2>
-            <p className="text-lg mb-6 text-muted-foreground">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 font-orbitron">Be Part of Our Journey</h2>
+            <p className="text-base md:text-lg mb-6 text-muted-foreground">
               Every contribution, no matter the size, helps us bring our creative vision to life.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
               {[
                 {
                   title: "Join the Team",
@@ -428,14 +462,16 @@ export default function AboutPage() {
                   key={index}
                   className="bg-card/50 border border-primary/10 hover:border-primary/30 transition-all duration-300 h-full"
                 >
-                  <CardContent className="pt-6 pb-6 flex flex-col h-full">
-                    <h3 className="text-xl font-bold mb-3 font-orbitron">{item.title}</h3>
-                    <p className="text-muted-foreground mb-6 flex-grow">{item.description}</p>
+                  <CardContent className="pt-4 md:pt-6 pb-4 md:pb-6 flex flex-col h-full">
+                    <h3 className="text-lg md:text-xl font-bold mb-3 font-orbitron">{item.title}</h3>
+                    <p className="text-sm md:text-base text-muted-foreground mb-4 md:mb-6 flex-grow">
+                      {item.description}
+                    </p>
                     <Link
                       href={item.url}
                       target={item.url.startsWith("http") ? "_blank" : undefined}
                       rel={item.url.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className="block bg-primary hover:bg-primary/90 text-white rounded-md py-3 px-6 text-center font-medium transition-colors duration-300 h-auto min-h-[48px] flex items-center justify-center text-lg"
+                      className="block bg-primary hover:bg-primary/90 text-white rounded-md py-2.5 md:py-3 px-4 md:px-6 text-center font-medium transition-colors duration-300 h-auto min-h-[44px] md:min-h-[48px] flex items-center justify-center text-base md:text-lg"
                     >
                       {item.buttonText}
                     </Link>
@@ -448,16 +484,16 @@ export default function AboutPage() {
       </section>
 
       {/* Contact Section - Styled like Support page */}
-      <section className="py-10 md:py-14">
+      <section className="py-8 md:py-10 lg:py-14">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 font-orbitron">Get in Touch</h2>
-            <p className="text-lg mb-6 text-muted-foreground">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 font-orbitron">Get in Touch</h2>
+            <p className="text-base md:text-lg mb-6 text-muted-foreground">
               Have a business inquiry or collaboration opportunity? We'd love to hear from you.
             </p>
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center bg-primary hover:bg-primary/90 text-white font-medium px-8 py-3 rounded-md transition-colors duration-300"
+              className="inline-flex items-center justify-center bg-primary hover:bg-primary/90 text-white font-medium px-6 md:px-8 py-2.5 md:py-3 rounded-md transition-colors duration-300"
             >
               Contact Us
               <ArrowRight className="ml-2 h-4 w-4" />

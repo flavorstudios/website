@@ -13,21 +13,21 @@ export const metadata = {
 export default function ContactPage() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section - Left-aligned */}
+      {/* Hero Section - Aligned with content below */}
       <section className="relative py-16 md:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background"></div>
         <div className="absolute inset-0 bg-grid-small-white/[0.02] -z-10"></div>
         <div className="container relative z-10 mx-auto px-4">
-          <div className="max-w-3xl">
+          <div className="max-w-6xl mx-auto">
             <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm text-primary mb-6">
               <span className="mr-1">✨</span> Independent Animation Studio
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight text-left">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 font-orbitron tracking-tight">
               Contact <span className="text-primary">Us</span>
             </h1>
 
-            <p className="text-xl mb-6 text-muted-foreground leading-relaxed text-left">
+            <p className="text-xl mb-6 text-muted-foreground leading-relaxed max-w-2xl">
               Have a question, feedback, or want to collaborate? We'd love to hear from you!
             </p>
           </div>

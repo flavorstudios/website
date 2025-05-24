@@ -6,7 +6,6 @@ import "./globals.css"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
-import { CookieConsent } from "@/components/cookie-consent"
 import InstallPWAButton from "@/components/InstallPWAButton"
 
 const orbitron = Orbitron({
@@ -85,7 +84,6 @@ export default function RootLayout({
           <Header />
           <main className="flex-grow">{children}</main>
           <Footer />
-          <CookieConsent />
           <InstallPWAButton />
         </ThemeProvider>
       </body>

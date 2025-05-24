@@ -92,17 +92,19 @@ export function Header() {
       )}
     >
       <div className="container mx-auto px-2 sm:px-4 h-16 md:h-20 flex items-center justify-between">
-        {/* Left Navigation */}
-        <div className="flex items-center flex-1">
-          {/* Logo */}
+        {/* Left side - Logo only */}
+        <div className="flex items-center">
           <Link href="/" className="flex items-center transition-all duration-300 hover:scale-105 mr-2 md:mr-4">
             <span className="font-orbitron font-bold text-2xl md:text-3xl bg-gradient-to-r from-purple-500 via-pink-500 to-primary bg-clip-text text-transparent">
               fl
             </span>
           </Link>
+        </div>
 
-          {/* Desktop Left Navigation */}
-          <nav className="hidden md:flex items-center">
+        {/* Right side - All navigation */}
+        <div className="flex items-center space-x-1">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-1">
             {/* Home Button */}
             <Link
               href="/"
@@ -149,18 +151,12 @@ export function Header() {
             >
               Play
             </Link>
-          </nav>
-        </div>
 
-        {/* Centered Search - Desktop Only */}
-        <div className="hidden md:flex justify-center max-w-[280px] lg:max-w-[320px] mx-1">
-          <PopupSearch />
-        </div>
+            {/* Search - positioned after Play with reduced spacing */}
+            <div className="mx-2">
+              <PopupSearch />
+            </div>
 
-        {/* Right Navigation */}
-        <div className="flex items-center flex-1 justify-end">
-          {/* Desktop Right Navigation */}
-          <nav className="hidden md:flex items-center">
             <Link
               href="/about"
               className={cn(
@@ -192,17 +188,13 @@ export function Header() {
             </div>
           </nav>
 
-          {/* Mobile Controls */}
+          {/* Mobile Controls remain the same */}
           <div className="flex items-center space-x-2 md:hidden">
-            {/* Mobile Search */}
             <div className="md:hidden">
               <PopupSearch />
             </div>
-
-            {/* Theme Toggle */}
             <ThemeToggle />
-
-            {/* Mobile Menu Button */}
+            {/* Mobile menu button remains unchanged */}
             <Button
               variant="ghost"
               size="icon"

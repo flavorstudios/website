@@ -29,44 +29,21 @@ export function EmailInbox() {
   const [fromEmail, setFromEmail] = useState("contact@flavorstudios.in")
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate fetching from Firestore
-    const mockMessages: ContactMessage[] = [
-      {
-        id: "1",
-        name: "Sarah Chen",
-        email: "sarah.chen@example.com",
-        subject: "3D Animation Project Inquiry",
-        message:
-          "Hi! I'm interested in your 3D animation services for a commercial project. Could we discuss the timeline and pricing?",
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-        status: "unread",
-        priority: "high",
-      },
-      {
-        id: "2",
-        name: "Mike Rodriguez",
-        email: "mike.r@startup.com",
-        subject: "Collaboration Opportunity",
-        message: "We're a tech startup looking for animation partners. Would love to explore potential collaboration.",
-        timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
-        status: "read",
-        priority: "medium",
-      },
-      {
-        id: "3",
-        name: "Emma Thompson",
-        email: "emma@creativeagency.com",
-        subject: "Portfolio Review Request",
-        message: "Could you share some recent work samples? We have a client who might be interested.",
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
-        status: "replied",
-        priority: "low",
-      },
-    ]
-
-    setMessages(mockMessages)
+    const loadMessages = async () => {
+      try {
+        const response = await fetch("/api/admin/contact-messages")
+        const data = await response.json()
+        setMessages(data.messages || [])
+      } catch (error) {
+        console.error("Failed to load messages:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadMessages()
   }, [])
 
   const filteredMessages = messages.filter((message) => {
@@ -87,19 +64,27 @@ export function EmailInbox() {
   const handleReply = async () => {
     if (!selectedMessage || !replyText.trim()) return
 
-    // Simulate API call to send email
-    console.log("Sending reply:", {
-      to: selectedMessage.email,
-      from: fromEmail,
-      subject: `Re: ${selectedMessage.subject}`,
-      message: replyText,
-    })
+    try {
+      const response = await fetch("/api/admin/send-reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messageId: selectedMessage.id,
+          to: selectedMessage.email,
+          from: fromEmail,
+          subject: `Re: ${selectedMessage.subject}`,
+          message: replyText,
+        }),
+      })
 
-    updateMessageStatus(selectedMessage.id, "replied")
-    setReplyText("")
-
-    // Show success message (you can add a toast here)
-    alert("Reply sent successfully!")
+      if (response.ok) {
+        updateMessageStatus(selectedMessage.id, "replied")
+        setReplyText("")
+        // Show success notification
+      }
+    } catch (error) {
+      console.error("Failed to send reply:", error)
+    }
   }
 
   const getPriorityColor = (priority: string) => {

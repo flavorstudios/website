@@ -12,8 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, Loader2, Shield, Sparkles } from "lucide-react"
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState("admin@flavorstudios.in")
-  const [password, setPassword] = useState("admin123")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -93,16 +93,6 @@ export default function AdminLogin() {
         </CardHeader>
 
         <CardContent>
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-700">
-              <strong>Demo Credentials:</strong>
-              <br />
-              Email: admin@flavorstudios.in
-              <br />
-              Password: admin123
-            </p>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium text-gray-700">
@@ -113,7 +103,7 @@ export default function AdminLogin() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@flavorstudios.in"
+                placeholder="Enter your email address"
                 required
                 disabled={loading}
                 className="h-11 border-gray-200 focus:border-purple-500 focus:ring-purple-500"

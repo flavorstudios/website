@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -19,16 +19,23 @@ interface DashboardStats {
 }
 
 export function DashboardOverview() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalPosts: 24,
-    totalVideos: 8,
-    totalComments: 156,
-    totalViews: 12500,
-    pendingComments: 3,
-    publishedPosts: 18,
-    featuredVideos: 4,
-    monthlyGrowth: 15.2,
-  })
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const response = await fetch("/api/admin/stats")
+        const data = await response.json()
+        setStats(data)
+      } catch (error) {
+        console.error("Failed to load stats:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadStats()
+  }, [])
 
   const [recentActivity] = useState([
     {
@@ -96,6 +103,21 @@ export function DashboardOverview() {
     },
   ]
 
+  const handleQuickAction = (action: string) => {
+    // This will be handled by the parent component
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("admin-navigate", { detail: action }))
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
@@ -125,9 +147,9 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Posts</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalPosts}</p>
+                <p className="text-3xl font-bold text-gray-900">{stats?.totalPosts}</p>
                 <p className="text-sm text-green-600 flex items-center mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />+{stats.monthlyGrowth}% this month
+                  <TrendingUp className="h-3 w-3 mr-1" />+{stats?.monthlyGrowth}% this month
                 </p>
               </div>
               <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -142,8 +164,8 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Videos</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalVideos}</p>
-                <p className="text-sm text-gray-500 mt-1">{stats.featuredVideos} featured</p>
+                <p className="text-3xl font-bold text-gray-900">{stats?.totalVideos}</p>
+                <p className="text-sm text-gray-500 mt-1">{stats?.featuredVideos} featured</p>
               </div>
               <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
                 <Video className="w-6 h-6 text-purple-600" />
@@ -157,8 +179,8 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Comments</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalComments}</p>
-                <p className="text-sm text-yellow-600 mt-1">{stats.pendingComments} pending review</p>
+                <p className="text-3xl font-bold text-gray-900">{stats?.totalComments}</p>
+                <p className="text-sm text-yellow-600 mt-1">{stats?.pendingComments} pending review</p>
               </div>
               <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
                 <MessageSquare className="w-6 h-6 text-green-600" />
@@ -172,7 +194,7 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Views</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalViews.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-gray-900">{stats?.totalViews.toLocaleString()}</p>
                 <p className="text-sm text-blue-600 mt-1">This month</p>
               </div>
               <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
@@ -202,6 +224,7 @@ export function DashboardOverview() {
                     key={index}
                     variant="outline"
                     className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
+                    onClick={() => handleQuickAction(action.action)}
                   >
                     <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center`}>
                       <Icon className="w-4 h-4 text-white" />
@@ -271,29 +294,29 @@ export function DashboardOverview() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">Published Posts</span>
                   <span className="text-sm text-gray-600">
-                    {stats.publishedPosts}/{stats.totalPosts}
+                    {stats?.publishedPosts}/{stats?.totalPosts}
                   </span>
                 </div>
-                <Progress value={(stats.publishedPosts / stats.totalPosts) * 100} className="h-2" />
+                <Progress value={(stats?.publishedPosts / stats?.totalPosts) * 100} className="h-2" />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">Featured Videos</span>
                   <span className="text-sm text-gray-600">
-                    {stats.featuredVideos}/{stats.totalVideos}
+                    {stats?.featuredVideos}/{stats?.totalVideos}
                   </span>
                 </div>
-                <Progress value={(stats.featuredVideos / stats.totalVideos) * 100} className="h-2" />
+                <Progress value={(stats?.featuredVideos / stats?.totalVideos) * 100} className="h-2" />
               </div>
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">Approved Comments</span>
                   <span className="text-sm text-gray-600">
-                    {stats.totalComments - stats.pendingComments}/{stats.totalComments}
+                    {stats?.totalComments - stats?.pendingComments}/{stats?.totalComments}
                   </span>
                 </div>
                 <Progress
-                  value={((stats.totalComments - stats.pendingComments) / stats.totalComments) * 100}
+                  value={((stats?.totalComments - stats?.pendingComments) / stats?.totalComments) * 100}
                   className="h-2"
                 />
               </div>
@@ -311,7 +334,7 @@ export function DashboardOverview() {
           <CardContent>
             <div className="space-y-4">
               <div className="text-center">
-                <p className="text-3xl font-bold text-green-600">+{stats.monthlyGrowth}%</p>
+                <p className="text-3xl font-bold text-green-600">+{stats?.monthlyGrowth}%</p>
                 <p className="text-sm text-gray-600">Content Growth</p>
               </div>
               <div className="space-y-2">

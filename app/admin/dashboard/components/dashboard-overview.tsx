@@ -1,283 +1,336 @@
 "use client"
 
 import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { TrendingUp, FileText, Video, MessageSquare, Eye, Calendar, Activity, Plus, ExternalLink } from "lucide-react"
+
+interface DashboardStats {
+  totalPosts: number
+  totalVideos: number
+  totalComments: number
+  totalViews: number
+  pendingComments: number
+  publishedPosts: number
+  featuredVideos: number
+  monthlyGrowth: number
+}
 
 export function DashboardOverview() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<DashboardStats>({
     totalPosts: 24,
     totalVideos: 8,
     totalComments: 156,
     totalViews: 12500,
     pendingComments: 3,
-    draftPosts: 5,
+    publishedPosts: 18,
+    featuredVideos: 4,
+    monthlyGrowth: 15.2,
   })
 
-  const quickStats = [
+  const [recentActivity] = useState([
     {
-      title: "Total Posts",
-      value: stats.totalPosts,
-      change: "+12%",
-      trend: "up",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
-      ),
-      color: "blue",
+      id: 1,
+      type: "blog",
+      title: "New blog post published",
+      description: "Getting Started with Blender Animation",
+      time: "2 hours ago",
+      status: "success",
     },
     {
-      title: "Videos",
-      value: stats.totalVideos,
-      change: "+8%",
-      trend: "up",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-          />
-        </svg>
-      ),
-      color: "purple",
+      id: 2,
+      type: "video",
+      title: "Video uploaded to YouTube",
+      description: "Character Design Process Tutorial",
+      time: "4 hours ago",
+      status: "success",
     },
     {
-      title: "Total Views",
-      value: `${(stats.totalViews / 1000).toFixed(1)}K`,
-      change: "+23%",
-      trend: "up",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-          />
-        </svg>
-      ),
-      color: "green",
+      id: 3,
+      type: "comment",
+      title: "New comment awaiting moderation",
+      description: "Comment on 'Advanced Rigging Techniques'",
+      time: "6 hours ago",
+      status: "pending",
     },
     {
-      title: "Comments",
-      value: stats.totalComments,
-      change: stats.pendingComments > 0 ? `${stats.pendingComments} pending` : "All reviewed",
-      trend: stats.pendingComments > 0 ? "warning" : "up",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-          />
-        </svg>
-      ),
-      color: "orange",
+      id: 4,
+      type: "system",
+      title: "System backup completed",
+      description: "Automatic daily backup successful",
+      time: "1 day ago",
+      status: "success",
+    },
+  ])
+
+  const quickActions = [
+    {
+      title: "Create New Post",
+      description: "Write a new blog article",
+      icon: FileText,
+      action: "blogs",
+      color: "bg-blue-500",
+    },
+    {
+      title: "Add Video",
+      description: "Upload new video content",
+      icon: Video,
+      action: "videos",
+      color: "bg-purple-500",
+    },
+    {
+      title: "Moderate Comments",
+      description: "Review pending comments",
+      icon: MessageSquare,
+      action: "comments",
+      color: "bg-green-500",
+    },
+    {
+      title: "Edit Pages",
+      description: "Update website content",
+      icon: FileText,
+      action: "pages",
+      color: "bg-orange-500",
     },
   ]
-
-  const recentActivity = [
-    { type: "blog", title: "New blog post: 'Advanced Blender Techniques'", time: "2 hours ago", status: "published" },
-    { type: "video", title: "Video uploaded: 'Character Animation Basics'", time: "4 hours ago", status: "published" },
-    { type: "comment", title: "New comment on 'Getting Started with 3D'", time: "6 hours ago", status: "pending" },
-    { type: "page", title: "Homepage content updated", time: "1 day ago", status: "updated" },
-    { type: "user", title: "New user registration", time: "2 days ago", status: "active" },
-  ]
-
-  const getColorClasses = (color: string) => {
-    const colors = {
-      blue: "text-blue-600 bg-blue-50",
-      purple: "text-purple-600 bg-purple-50",
-      green: "text-green-600 bg-green-50",
-      orange: "text-orange-600 bg-orange-50",
-    }
-    return colors[color as keyof typeof colors] || colors.blue
-  }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-8 text-white">
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-8 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome back, Admin! ✨</h1>
-            <p className="text-purple-100 text-lg">Your creative empire is thriving. Here's what's happening today.</p>
+            <h1 className="text-3xl font-bold mb-2">Welcome back! 👋</h1>
+            <p className="text-purple-100 text-lg">Here's what's happening with your Flavor Studios website today.</p>
           </div>
           <div className="hidden md:block">
-            <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center">
-              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
+            <Button
+              variant="secondary"
+              onClick={() => window.open("https://flavorstudios.in", "_blank")}
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              View Live Site
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Quick Stats */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {quickStats.map((stat, index) => (
-          <div
-            key={index}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-          >
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-                <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                <p
-                  className={`text-sm font-medium flex items-center mt-1 ${
-                    stat.trend === "up"
-                      ? "text-green-600"
-                      : stat.trend === "warning"
-                        ? "text-orange-600"
-                        : "text-red-600"
-                  }`}
-                >
-                  <svg
-                    className={`w-4 h-4 mr-1 ${stat.trend === "up" ? "rotate-0" : "rotate-180"}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 14l5-5 5 5" />
-                  </svg>
-                  {stat.change}
+                <p className="text-sm font-medium text-gray-600">Total Posts</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalPosts}</p>
+                <p className="text-sm text-green-600 flex items-center mt-1">
+                  <TrendingUp className="h-3 w-3 mr-1" />+{stats.monthlyGrowth}% this month
                 </p>
               </div>
-              <div className={`w-12 h-12 ${getColorClasses(stat.color)} rounded-xl flex items-center justify-center`}>
-                {stat.icon}
+              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                <FileText className="w-6 h-6 text-blue-600" />
               </div>
             </div>
-          </div>
-        ))}
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Videos</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalVideos}</p>
+                <p className="text-sm text-gray-500 mt-1">{stats.featuredVideos} featured</p>
+              </div>
+              <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
+                <Video className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Comments</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalComments}</p>
+                <p className="text-sm text-yellow-600 mt-1">{stats.pendingComments} pending review</p>
+              </div>
+              <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Views</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalViews.toLocaleString()}</p>
+                <p className="text-sm text-blue-600 mt-1">This month</p>
+              </div>
+              <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
+                <Eye className="w-6 h-6 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Quick Actions & Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Quick Actions */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Quick Actions
-          </h3>
-          <div className="space-y-3">
-            <button className="w-full flex items-center px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all">
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Create New Post
-            </button>
-            <button className="w-full flex items-center px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              Upload Video
-            </button>
-            <button className="w-full flex items-center px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-              <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                />
-              </svg>
-              Review Comments
-            </button>
-          </div>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Quick Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {quickActions.map((action, index) => {
+                const Icon = action.icon
+                return (
+                  <Button
+                    key={index}
+                    variant="outline"
+                    className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
+                  >
+                    <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center`}>
+                      <Icon className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-medium text-gray-900">{action.title}</p>
+                      <p className="text-sm text-gray-500">{action.description}</p>
+                    </div>
+                  </Button>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Recent Activity */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              />
-            </svg>
-            Recent Activity
-          </h3>
-          <div className="space-y-4">
-            {recentActivity.map((activity, index) => (
-              <div key={index} className="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                <div
-                  className={`w-2 h-2 rounded-full mt-2 ${
-                    activity.status === "published"
-                      ? "bg-green-500"
-                      : activity.status === "pending"
-                        ? "bg-orange-500"
-                        : "bg-blue-500"
-                  }`}
-                ></div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900">{activity.title}</p>
-                  <p className="text-sm text-gray-500">{activity.time}</p>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Recent Activity
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-start gap-3">
+                  <div
+                    className={`w-2 h-2 rounded-full mt-2 ${
+                      activity.status === "success"
+                        ? "bg-green-500"
+                        : activity.status === "pending"
+                          ? "bg-yellow-500"
+                          : "bg-gray-500"
+                    }`}
+                  ></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                    <p className="text-sm text-gray-600">{activity.description}</p>
+                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                  </div>
+                  <Badge
+                    variant={activity.status === "success" ? "default" : "secondary"}
+                    className={activity.status === "pending" ? "bg-yellow-100 text-yellow-800" : ""}
+                  >
+                    {activity.status}
+                  </Badge>
                 </div>
-                <span
-                  className={`px-2 py-1 text-xs rounded-full ${
-                    activity.status === "published"
-                      ? "bg-green-100 text-green-800"
-                      : activity.status === "pending"
-                        ? "bg-orange-100 text-orange-800"
-                        : "bg-blue-100 text-blue-800"
-                  }`}
-                >
-                  {activity.status}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* System Status */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 className="text-lg font-semibold mb-4 flex items-center">
-          <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          System Status
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-            <span className="text-sm font-medium text-green-900">Server Status</span>
-            <span className="px-2 py-1 text-xs bg-green-500 text-white rounded-full">Online</span>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-            <span className="text-sm font-medium text-green-900">Database</span>
-            <span className="px-2 py-1 text-xs bg-green-500 text-white rounded-full">Connected</span>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-            <span className="text-sm font-medium text-blue-900">Cache</span>
-            <span className="px-2 py-1 text-xs bg-blue-500 text-white rounded-full">Optimized</span>
-          </div>
-          <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-            <span className="text-sm font-medium text-purple-900">Uptime</span>
-            <span className="px-2 py-1 text-xs bg-purple-500 text-white rounded-full">99.9%</span>
-          </div>
-        </div>
+      {/* Content Performance */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Content Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Published Posts</span>
+                  <span className="text-sm text-gray-600">
+                    {stats.publishedPosts}/{stats.totalPosts}
+                  </span>
+                </div>
+                <Progress value={(stats.publishedPosts / stats.totalPosts) * 100} className="h-2" />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Featured Videos</span>
+                  <span className="text-sm text-gray-600">
+                    {stats.featuredVideos}/{stats.totalVideos}
+                  </span>
+                </div>
+                <Progress value={(stats.featuredVideos / stats.totalVideos) * 100} className="h-2" />
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Approved Comments</span>
+                  <span className="text-sm text-gray-600">
+                    {stats.totalComments - stats.pendingComments}/{stats.totalComments}
+                  </span>
+                </div>
+                <Progress
+                  value={((stats.totalComments - stats.pendingComments) / stats.totalComments) * 100}
+                  className="h-2"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              This Month
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-green-600">+{stats.monthlyGrowth}%</p>
+                <p className="text-sm text-gray-600">Content Growth</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm">New Posts</span>
+                  <span className="text-sm font-medium">6</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">New Videos</span>
+                  <span className="text-sm font-medium">2</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Total Views</span>
+                  <span className="text-sm font-medium">12.5K</span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

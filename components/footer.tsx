@@ -43,23 +43,23 @@ export function Footer() {
 
   return (
     <footer className="bg-gray-900 text-white">
-      <div className="container mx-auto max-w-7xl px-4 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <div className="container mx-auto max-w-7xl px-4 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {/* Brand Section */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <Link href="/" className="flex items-center space-x-2">
               <span className="font-bold text-xl">Flavor Studios</span>
             </Link>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-sm leading-tight">
               Crafting stories with soul—one frame at a time. Flavor Studios is a global animation studio dedicated to
               creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth,
               we aim to inspire, heal, and connect audiences around the world.
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1 pt-1">
               {socialLinks.map((social) => (
-                <Button key={social.name} variant="ghost" size="icon" asChild className="hover:bg-blue-600">
+                <Button key={social.name} variant="ghost" size="icon" asChild className="hover:bg-blue-600 h-8 w-8">
                   <Link href={social.href} target="_blank" rel="noopener noreferrer">
-                    <social.icon className="h-4 w-4" />
+                    <social.icon className="h-3.5 w-3.5" />
                     <span className="sr-only">{social.name}</span>
                   </Link>
                 </Button>
@@ -69,8 +69,8 @@ export function Footer() {
 
           {/* Studio Links */}
           <div>
-            <h3 className="font-semibold text-lg mb-2">Studio</h3>
-            <ul className="space-y-1">
+            <h3 className="font-semibold text-lg mb-1.5">Studio</h3>
+            <ul className="space-y-0.5">
               {studioLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
@@ -83,8 +83,8 @@ export function Footer() {
 
           {/* Discover Links */}
           <div>
-            <h3 className="font-semibold text-lg mb-2">Discover</h3>
-            <ul className="space-y-1">
+            <h3 className="font-semibold text-lg mb-1.5">Discover</h3>
+            <ul className="space-y-0.5">
               {discoverLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
@@ -97,8 +97,8 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="font-semibold text-lg mb-2">Legal</h3>
-            <ul className="space-y-1">
+            <h3 className="font-semibold text-lg mb-1.5">Legal</h3>
+            <ul className="space-y-0.5">
               {legalLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
@@ -110,7 +110,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-3 pt-3 text-center space-y-1">
+        <div className="border-t border-gray-800 mt-2 pt-2 text-center space-y-0.5">
           <p className="text-gray-400 text-sm">© {currentYear} Flavor Studios. All rights reserved.</p>
           <p className="text-gray-500 text-xs">Built with Passion. Powered by Dreams.</p>
         </div>

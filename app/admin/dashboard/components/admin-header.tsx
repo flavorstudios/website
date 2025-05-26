@@ -3,7 +3,8 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Bell, Search, Menu, ExternalLink, LogOut } from "lucide-react"
+import { Search, Menu, ExternalLink, LogOut } from "lucide-react"
+import { NotificationBell } from "./notification-bell"
 
 interface AdminHeaderProps {
   onLogout: () => void
@@ -42,12 +43,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
             View Site
           </Button>
 
-          <Button variant="ghost" size="sm" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              3
-            </span>
-          </Button>
+          <NotificationBell />
 
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">

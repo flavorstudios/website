@@ -15,7 +15,10 @@ export function middleware(request: NextRequest) {
 
     const token = request.cookies.get("admin-session")
     if (!token) {
-      return NextResponse.redirect(new URL("/admin/login", request.url))
+      const loginUrl = new URL("/admin/login", request.url)
+      loginUrl.searchParams.set("redirect", pathname)
+      loginUrl.searchParams.set("message", "Please log in to access the admin dashboard")
+      return NextResponse.redirect(loginUrl)
     }
   }
 

@@ -351,21 +351,11 @@ export default function CareerPage() {
               Whether you have questions about our work, want to discuss potential collaborations, or simply want to
               introduce yourself and your skills, we'd love to hear from you. Reach out and let's start a conversation.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <div className="flex justify-center">
               <Button asChild className="bg-blue-600 hover:bg-blue-700 h-10 sm:h-11 px-6 sm:px-8 text-sm sm:text-base">
                 <Link href="/contact">
                   <Mail className="mr-2 h-4 w-4" />
                   Contact Us
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white h-10 sm:h-11 px-6 sm:px-8 text-sm sm:text-base"
-              >
-                <Link href="mailto:contact@flavorstudios.in">
-                  <Mail className="mr-2 h-4 w-4" />
-                  Email Directly
                 </Link>
               </Button>
             </div>

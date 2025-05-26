@@ -51,8 +51,9 @@ export function Footer() {
               <span className="font-bold text-xl">Flavor Studios</span>
             </Link>
             <p className="text-gray-400 text-sm">
-              Independent anime studio creating original content and sharing the latest anime news with passionate fans
-              worldwide.
+              Crafting stories with soul—one frame at a time. Flavor Studios is a global animation studio dedicated to
+              creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth,
+              we aim to inspire, heal, and connect audiences around the world.
             </p>
             <div className="flex flex-wrap gap-2">
               {socialLinks.map((social) => (

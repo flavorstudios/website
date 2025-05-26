@@ -376,12 +376,12 @@ export default function FAQPage() {
             />
           </div>
 
-          <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
+          <div className="flex flex-wrap gap-2 sm:gap-3 justify-center items-center max-w-4xl mx-auto">
             {categories.map((category) => (
               <Badge
                 key={category}
                 variant={category === selectedCategory ? "default" : "secondary"}
-                className="cursor-pointer hover:bg-blue-600 hover:text-white text-xs sm:text-sm px-2 sm:px-3 py-1"
+                className="cursor-pointer hover:bg-blue-600 hover:text-white text-xs sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 whitespace-nowrap transition-colors"
                 onClick={() => setSelectedCategory(category)}
               >
                 {category}

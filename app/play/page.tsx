@@ -111,7 +111,12 @@ export default function PlayPage() {
       <div className="container mx-auto max-w-6xl px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Games & Activities</h1>
+          <Badge className="mb-3 sm:mb-4 bg-blue-600 text-white px-3 py-1 text-xs sm:text-sm">
+            Interactive Entertainment
+          </Badge>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
+            Games & Activities
+          </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Have fun with our collection of anime-themed games and interactive activities!
           </p>

@@ -9,6 +9,7 @@ import { CommentManager } from "./components/comment-manager"
 import { PageCustomizer } from "./components/page-customizer"
 import { SystemTools } from "./components/system-tools"
 import { AdminHeader } from "./components/admin-header"
+import { CategoryManager } from "./components/category-manager"
 
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("overview")
@@ -49,6 +50,8 @@ export default function AdminDashboard() {
         return <BlogManager />
       case "videos":
         return <VideoManager />
+      case "categories":
+        return <CategoryManager />
       case "comments":
         return <CommentManager />
       case "pages":

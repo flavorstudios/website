@@ -2,10 +2,17 @@ import { NextResponse } from "next/server"
 
 export async function DELETE() {
   try {
-    // In a real implementation, this would clear actual cache
-    console.log("Cache cleared")
-    return NextResponse.json({ success: true, message: "Cache cleared successfully" })
+    // In a real application, you would clear various caches here
+    // For now, we'll simulate cache clearing
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    return NextResponse.json({
+      success: true,
+      message: "Cache cleared successfully",
+      timestamp: new Date().toISOString(),
+    })
   } catch (error) {
+    console.error("Failed to clear cache:", error)
     return NextResponse.json({ error: "Failed to clear cache" }, { status: 500 })
   }
 }

@@ -146,10 +146,12 @@ export function VideoManager() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="anime">Anime</SelectItem>
-            <SelectItem value="behind-scenes">Behind the Scenes</SelectItem>
-            <SelectItem value="tutorials">Tutorials</SelectItem>
-            <SelectItem value="reviews">Reviews</SelectItem>
+            <SelectItem value="Original Anime">Original Anime</SelectItem>
+            <SelectItem value="Short Films">Short Films</SelectItem>
+            <SelectItem value="Behind the Scenes">Behind the Scenes</SelectItem>
+            <SelectItem value="Tutorials & Guides">Tutorials & Guides</SelectItem>
+            <SelectItem value="Anime Trailers">Anime Trailers</SelectItem>
+            <SelectItem value="YouTube Highlights">YouTube Highlights</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -227,16 +229,32 @@ function VideoForm({
   onSave: (data: Partial<Video>) => void
   onCancel: () => void
 }) {
+  const [categories, setCategories] = useState<string[]>([])
   const [formData, setFormData] = useState({
     title: video?.title || "",
     description: video?.description || "",
     youtubeId: video?.youtubeId || "",
-    category: video?.category || "anime",
+    category: video?.category || "",
     status: video?.status || "draft",
     featured: video?.featured || false,
     episodeNumber: video?.episodeNumber || "",
     season: video?.season || "",
   })
+
+  useEffect(() => {
+    // Load categories
+    fetch("/api/admin/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        const videoCategories =
+          data.categories?.filter((cat: any) => cat.type === "video" && cat.isActive)?.map((cat: any) => cat.name) || []
+        setCategories(videoCategories)
+        if (!formData.category && videoCategories.length > 0) {
+          setFormData((prev) => ({ ...prev, category: videoCategories[0] }))
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   const extractYouTubeId = (url: string) => {
     const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
@@ -312,10 +330,11 @@ function VideoForm({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="anime">Anime</SelectItem>
-                    <SelectItem value="behind-scenes">Behind the Scenes</SelectItem>
-                    <SelectItem value="tutorials">Tutorials</SelectItem>
-                    <SelectItem value="reviews">Reviews</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

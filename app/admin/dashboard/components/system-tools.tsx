@@ -2,23 +2,22 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
-  Settings,
   Database,
   Activity,
   Download,
-  Upload,
   Trash2,
   RefreshCw,
-  Shield,
   Globe,
   Cpu,
   CheckCircle,
   AlertCircle,
+  Zap,
 } from "lucide-react"
 
 interface SystemStats {
@@ -38,12 +37,13 @@ export function SystemTools() {
     memoryUsage: 45,
     diskUsage: 62,
     activeUsers: 3,
-    totalPosts: 24,
-    totalVideos: 8,
-    totalComments: 156,
-    lastBackup: "2024-01-15 10:30 AM",
+    totalPosts: 0,
+    totalVideos: 0,
+    totalComments: 0,
+    lastBackup: "Never",
   })
   const [loading, setLoading] = useState(false)
+  const [cleanupResult, setCleanupResult] = useState<any>(null)
 
   const handleClearCache = async () => {
     setLoading(true)
@@ -51,9 +51,12 @@ export function SystemTools() {
       const response = await fetch("/api/admin/system/cache", { method: "DELETE" })
       if (response.ok) {
         alert("Cache cleared successfully!")
+      } else {
+        alert("Failed to clear cache")
       }
     } catch (error) {
       console.error("Failed to clear cache:", error)
+      alert("Failed to clear cache")
     } finally {
       setLoading(false)
     }
@@ -66,9 +69,12 @@ export function SystemTools() {
       if (response.ok) {
         alert("Backup created successfully!")
         setStats((prev) => ({ ...prev, lastBackup: new Date().toLocaleString() }))
+      } else {
+        alert("Failed to create backup")
       }
     } catch (error) {
       console.error("Failed to create backup:", error)
+      alert("Failed to create backup")
     } finally {
       setLoading(false)
     }
@@ -80,9 +86,38 @@ export function SystemTools() {
       const response = await fetch("/api/admin/system/optimize", { method: "POST" })
       if (response.ok) {
         alert("Database optimized successfully!")
+      } else {
+        alert("Failed to optimize database")
       }
     } catch (error) {
       console.error("Failed to optimize database:", error)
+      alert("Failed to optimize database")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCleanup = async () => {
+    if (!confirm("Are you sure you want to clean up all dummy content? This cannot be undone.")) {
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch("/api/admin/cleanup", { method: "POST" })
+      const result = await response.json()
+
+      if (result.success) {
+        setCleanupResult(result.report)
+        alert(
+          `Cleanup completed!\n\nDeleted:\n- ${result.report.blogPostsDeleted} blog posts\n- ${result.report.watchVideosDeleted} videos\n- ${result.report.blogCategoriesDeleted} invalid blog categories\n- ${result.report.watchCategoriesDeleted} invalid video categories`,
+        )
+      } else {
+        alert("Cleanup failed: " + result.error)
+      }
+    } catch (error) {
+      console.error("Cleanup failed:", error)
+      alert("Cleanup failed. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -101,7 +136,7 @@ export function SystemTools() {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
           <TabsTrigger value="backup">Backup</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="cleanup">Cleanup</TabsTrigger>
         </TabsList>
 
         {/* System Overview */}
@@ -232,14 +267,12 @@ export function SystemTools() {
             <Card>
               <CardHeader>
                 <CardTitle>Cache Management</CardTitle>
+                <CardDescription>Clear cached data to improve performance</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-gray-600">
-                  Clear cached data to improve performance and ensure fresh content delivery.
-                </p>
                 <Button onClick={handleClearCache} disabled={loading} className="w-full">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Clear All Cache
+                  <Zap className="h-4 w-4 mr-2" />
+                  {loading ? "Clearing..." : "Clear All Cache"}
                 </Button>
               </CardContent>
             </Card>
@@ -247,38 +280,16 @@ export function SystemTools() {
             <Card>
               <CardHeader>
                 <CardTitle>Database Optimization</CardTitle>
+                <CardDescription>Optimize database for better performance</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p className="text-gray-600">Optimize database tables and indexes for better performance.</p>
                 <Button onClick={handleOptimizeDatabase} disabled={loading} variant="outline" className="w-full">
                   <RefreshCw className="h-4 w-4 mr-2" />
-                  Optimize Database
+                  {loading ? "Optimizing..." : "Optimize Database"}
                 </Button>
               </CardContent>
             </Card>
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Site Maintenance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button variant="outline" className="w-full">
-                  <Globe className="h-4 w-4 mr-2" />
-                  Check Site Health
-                </Button>
-                <Button variant="outline" className="w-full">
-                  <Activity className="h-4 w-4 mr-2" />
-                  Run Diagnostics
-                </Button>
-                <Button variant="outline" className="w-full">
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Update System
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* Backup */}
@@ -286,108 +297,52 @@ export function SystemTools() {
           <Card>
             <CardHeader>
               <CardTitle>Backup Management</CardTitle>
+              <CardDescription>Create and manage system backups</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button onClick={handleBackup} disabled={loading} className="w-full">
-                  <Download className="h-4 w-4 mr-2" />
-                  Create Backup
-                </Button>
-                <Button variant="outline" className="w-full">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Restore Backup
-                </Button>
-                <Button variant="outline" className="w-full">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Backup Settings
-                </Button>
-              </div>
-
-              <div className="border rounded-lg p-4">
-                <h4 className="font-medium mb-3">Recent Backups</h4>
-                <div className="space-y-2">
-                  {[
-                    { name: "backup-2024-01-15.zip", size: "45.2 MB", date: "2024-01-15 10:30 AM" },
-                    { name: "backup-2024-01-14.zip", size: "44.8 MB", date: "2024-01-14 10:30 AM" },
-                    { name: "backup-2024-01-13.zip", size: "44.1 MB", date: "2024-01-13 10:30 AM" },
-                  ].map((backup, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded">
-                      <div>
-                        <p className="font-medium text-sm">{backup.name}</p>
-                        <p className="text-xs text-gray-500">
-                          {backup.date} • {backup.size}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                          <Download className="h-3 w-3" />
-                        </Button>
-                        <Button variant="destructive" size="sm">
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <Button onClick={handleBackup} disabled={loading} className="w-full">
+                <Download className="h-4 w-4 mr-2" />
+                {loading ? "Creating Backup..." : "Create Backup"}
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* Security */}
-        <TabsContent value="security" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Security Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">SSL Certificate</span>
-                  <Badge className="bg-green-100 text-green-800">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Valid
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Firewall Status</span>
-                  <Badge className="bg-green-100 text-green-800">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Active
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Login Attempts</span>
-                  <Badge className="bg-yellow-100 text-yellow-800">
-                    <AlertCircle className="h-3 w-3 mr-1" />2 Failed
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
+        {/* Cleanup */}
+        <TabsContent value="cleanup" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5" />
+                Content Cleanup
+              </CardTitle>
+              <CardDescription>Remove dummy content and invalid categories from the system</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Warning:</strong> This will permanently delete all test/dummy content and invalid categories.
+                </AlertDescription>
+              </Alert>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Security Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button variant="outline" className="w-full">
-                  <Shield className="h-4 w-4 mr-2" />
-                  Security Scan
-                </Button>
-                <Button variant="outline" className="w-full">
-                  <Activity className="h-4 w-4 mr-2" />
-                  View Access Logs
-                </Button>
-                <Button variant="outline" className="w-full">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Security Settings
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+              {cleanupResult && (
+                <Alert>
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Last cleanup: Deleted {cleanupResult.blogPostsDeleted} blog posts,{" "}
+                    {cleanupResult.watchVideosDeleted} videos, {cleanupResult.blogCategoriesDeleted} invalid blog
+                    categories, and {cleanupResult.watchCategoriesDeleted} invalid video categories.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <Button onClick={handleCleanup} disabled={loading} variant="destructive" className="w-full">
+                <Trash2 className="mr-2 h-4 w-4" />
+                {loading ? "Cleaning Up..." : "Clean Up Dummy Content"}
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

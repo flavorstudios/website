@@ -2,7 +2,6 @@ import Link from "next/link"
 
 import { Youtube, Facebook, Instagram, Twitter, MessageCircle, Send, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -107,18 +106,6 @@ export function Footer() {
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
-
-        {/* Newsletter Section */}
-        <div className="mt-8 pt-8 border-t border-gray-800">
-          <div className="max-w-md mx-auto text-center">
-            <h3 className="font-semibold text-lg mb-4">Stay Updated</h3>
-            <p className="text-gray-400 text-sm mb-4">Get the latest anime news and updates from Flavor Studios.</p>
-            <div className="space-y-2">
-              <Input type="email" placeholder="Enter your email" className="bg-gray-800 border-gray-700 text-white" />
-              <Button className="w-full bg-blue-600 hover:bg-blue-700">Subscribe</Button>
-            </div>
           </div>
         </div>
 

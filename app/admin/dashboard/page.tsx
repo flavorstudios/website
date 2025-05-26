@@ -10,6 +10,8 @@ import { PageCustomizer } from "./components/page-customizer"
 import { SystemTools } from "./components/system-tools"
 import { AdminHeader } from "./components/admin-header"
 import { CategoryManager } from "./components/category-manager"
+import { RoleProvider } from "./contexts/role-context"
+import { EmailInbox } from "./components/email-inbox"
 
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("overview")
@@ -54,6 +56,8 @@ export default function AdminDashboard() {
         return <CategoryManager />
       case "comments":
         return <CommentManager />
+      case "inbox":
+        return <EmailInbox />
       case "pages":
         return <PageCustomizer />
       case "system":
@@ -64,21 +68,23 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <AdminSidebar
-        activeSection={activeSection}
-        setActiveSection={setActiveSection}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
+    <RoleProvider>
+      <div className="min-h-screen bg-gray-50 flex">
+        <AdminSidebar
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
 
-      <div className="flex-1 flex flex-col">
-        <AdminHeader onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="flex-1 flex flex-col">
+          <AdminHeader onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-        <main className="flex-1 p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto">{renderContent()}</div>
-        </main>
+          <main className="flex-1 p-6 overflow-auto">
+            <div className="max-w-7xl mx-auto">{renderContent()}</div>
+          </main>
+        </div>
       </div>
-    </div>
+    </RoleProvider>
   )
 }

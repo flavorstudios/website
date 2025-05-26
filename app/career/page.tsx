@@ -171,10 +171,8 @@ export default function CareerPage() {
                   </div>
                 </div>
 
-                <CardHeader className="pb-3 sm:pb-4 pr-24 text-center">
-                  <CardTitle className="text-base sm:text-lg lg:text-xl mb-3 text-gray-900 hidden sm:block">
-                    {position.title}
-                  </CardTitle>
+                <CardHeader className="pb-3 sm:pb-4 pr-20 sm:pr-24 text-center">
+                  <CardTitle className="text-base sm:text-lg lg:text-xl mb-3 text-gray-900">{position.title}</CardTitle>
 
                   <div className="flex flex-wrap gap-2 mb-3 justify-center">
                     <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">

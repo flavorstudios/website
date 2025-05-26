@@ -1,24 +1,24 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { AdminSidebar } from "./components/admin-sidebar"
 import { DashboardOverview } from "./components/dashboard-overview"
 import { BlogManager } from "./components/blog-manager"
 import { VideoManager } from "./components/video-manager"
 import { CommentManager } from "./components/comment-manager"
-import { PageEditor } from "./components/page-editor"
-import { SystemSettings } from "./components/system-settings"
+import { PageCustomizer } from "./components/page-customizer"
+import { SystemTools } from "./components/system-tools"
 import { AdminHeader } from "./components/admin-header"
 
 export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("overview")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
-  const router = useRouter()
 
   useEffect(() => {
     setMounted(true)
+    // Initialize real data on first load
+    fetch("/api/admin/init", { method: "POST" }).catch(console.error)
   }, [])
 
   const handleLogout = async () => {
@@ -52,9 +52,9 @@ export default function AdminDashboard() {
       case "comments":
         return <CommentManager />
       case "pages":
-        return <PageEditor />
-      case "settings":
-        return <SystemSettings />
+        return <PageCustomizer />
+      case "system":
+        return <SystemTools />
       default:
         return <DashboardOverview />
     }

@@ -24,6 +24,37 @@ export default function AdminDashboard() {
     fetch("/api/admin/init", { method: "POST" }).catch(console.error)
   }, [])
 
+  useEffect(() => {
+    const handleNavigation = (event: CustomEvent) => {
+      setActiveSection(event.detail)
+    }
+
+    window.addEventListener("admin-navigate", handleNavigation as EventListener)
+    return () => window.removeEventListener("admin-navigate", handleNavigation as EventListener)
+  }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Trigger refresh of current section data
+      window.dispatchEvent(new CustomEvent("admin-refresh"))
+    }, 30000) // Refresh every 30 seconds
+
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setSidebarOpen(false)
+      }
+    }
+
+    window.addEventListener("resize", handleResize)
+    handleResize()
+
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
   const handleLogout = async () => {
     try {
       await fetch("/api/admin/auth", { method: "DELETE" })

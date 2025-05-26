@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { useRole } from "../contexts/role-context"
+import { useEffect, useState } from "react"
 
 const navItems = [
   {
@@ -63,6 +64,7 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, setSidebarOpen }: AdminSidebarProps) {
   const { accessibleSections, userRole } = useRole()
+  const [isHovered, setIsHovered] = useState(false)
 
   // Filter navigation items based on user role
   const filteredNavItems = navItems.filter((item) => accessibleSections.includes(item.id) || item.id === "overview")
@@ -87,6 +89,20 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
       }
     }
   }
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setSidebarOpen(false)
+      } else {
+        setSidebarOpen(true)
+      }
+    }
+
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [setSidebarOpen])
 
   return (
     <>
@@ -120,8 +136,14 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
         </SheetContent>
       </Sheet>
 
-      <div className="hidden border-r bg-gray-100/40 dark:bg-gray-800/40 md:block">
-        <div className="flex h-full max-w-[200px] flex-col gap-2">
+      <div
+        className="hidden border-r bg-gray-100/40 dark:bg-gray-800/40 md:block"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div
+          className={`flex h-full flex-col gap-2 ${sidebarOpen && isHovered ? "max-w-[200px]" : "max-w-[65px]"}  transition-all`}
+        >
           <div className="flex-1">
             <div className="px-2 py-3">
               <Avatar className="h-9 w-9">
@@ -143,7 +165,7 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
                     onClick={() => setActiveSection(item.id)}
                   >
                     <item.icon className="h-4 w-4" />
-                    <span>{item.label}</span>
+                    {sidebarOpen && isHovered && <span>{item.label}</span>}
                   </button>
                 ))}
               </div>

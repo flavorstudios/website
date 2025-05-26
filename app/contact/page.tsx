@@ -114,8 +114,79 @@ export default function ContactPage() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12 mb-12 sm:mb-16">
+          {/* Contact Info & Social */}
+          <div className="space-y-4 sm:space-y-6 order-2 lg:order-1">
+            {/* Contact Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg sm:text-xl">Contact Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 sm:space-y-4">
+                {contactInfo.map((info, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                      <info.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-sm sm:text-base">{info.title}</div>
+                      <div className="text-blue-600 text-xs sm:text-sm break-words">{info.details}</div>
+                      <div className="text-xs sm:text-sm text-gray-600">{info.description}</div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Business Inquiries */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg sm:text-xl">Business Inquiries</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  For sponsorships, business partnerships, or collaboration opportunities:
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-blue-600 text-xs sm:text-sm break-all">
+                      contact@flavorstudios.in
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Social Media */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg sm:text-xl">Follow Us</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Connect with us on social media for updates and community discussions.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                  {socialLinks.map((social) => (
+                    <Button
+                      key={social.name}
+                      variant="outline"
+                      asChild
+                      className="justify-start h-9 sm:h-10 text-xs sm:text-sm"
+                    >
+                      <Link href={social.href} target="_blank" rel="noopener noreferrer">
+                        <social.icon className={`mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 ${social.color}`} />
+                        {social.name}
+                      </Link>
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Contact Form */}
-          <div className="lg:col-span-2 order-1 lg:order-1">
+          <div className="lg:col-span-2 order-1 lg:order-2">
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl sm:text-2xl">Send us a Message</CardTitle>
@@ -196,85 +267,18 @@ export default function ContactPage() {
                 {/* What to Expect Section */}
                 <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <h3 className="font-semibold text-blue-900 mb-2 sm:mb-3 text-sm sm:text-base">What to Expect</h3>
-                  <div className="space-y-1.5 sm:space-y-2">
+                  <div className="space-y-2 sm:space-y-3">
                     {expectations.map((expectation, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <div key={index} className="flex items-start gap-3">
+                        <div className="flex-shrink-0 mt-1">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full flex items-center justify-center">
+                            <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white font-bold" />
+                          </div>
+                        </div>
                         <span className="text-xs sm:text-sm text-blue-800 leading-relaxed">{expectation}</span>
                       </div>
                     ))}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Contact Info & Social */}
-          <div className="space-y-4 sm:space-y-6 order-2 lg:order-2">
-            {/* Contact Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Contact Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4">
-                {contactInfo.map((info, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                      <info.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-sm sm:text-base">{info.title}</div>
-                      <div className="text-blue-600 text-xs sm:text-sm break-words">{info.details}</div>
-                      <div className="text-xs sm:text-sm text-gray-600">{info.description}</div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Business Inquiries */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Business Inquiries</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  For sponsorships, business partnerships, or collaboration opportunities:
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-blue-600 text-xs sm:text-sm break-all">
-                      contact@flavorstudios.in
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Social Media */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Follow Us</CardTitle>
-                <CardDescription className="text-xs sm:text-sm">
-                  Connect with us on social media for updates and community discussions.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                  {socialLinks.map((social) => (
-                    <Button
-                      key={social.name}
-                      variant="outline"
-                      asChild
-                      className="justify-start h-9 sm:h-10 text-xs sm:text-sm"
-                    >
-                      <Link href={social.href} target="_blank" rel="noopener noreferrer">
-                        <social.icon className={`mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 ${social.color}`} />
-                        {social.name}
-                      </Link>
-                    </Button>
-                  ))}
                 </div>
               </CardContent>
             </Card>

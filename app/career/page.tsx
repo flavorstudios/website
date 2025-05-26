@@ -144,46 +144,70 @@ export default function CareerPage() {
         {/* Closed Positions */}
         <section className="mb-8 sm:mb-12 lg:mb-16">
           <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">Closed Positions</h2>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">Recently Filled Positions</h2>
             <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto px-4">
-              These positions are currently filled, but represent the types of roles we typically hire for. Stay
-              connected to be notified when new opportunities become available.
+              These positions were recently filled, but represent the types of roles we typically hire for. Join our
+              talent list to be notified when similar opportunities become available.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
             {closedPositions.map((position, index) => (
-              <Card key={index} className="opacity-75 hover:opacity-90 transition-opacity">
-                <CardHeader className="pb-3 sm:pb-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1">
-                      <CardTitle className="text-base sm:text-lg lg:text-xl mb-2">{position.title}</CardTitle>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <Badge variant="secondary" className="text-xs">
-                          {position.type}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          {position.location}
-                        </Badge>
-                        <Badge variant="destructive" className="text-xs">
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Position filled
-                        </Badge>
-                      </div>
-                    </div>
+              <Card
+                key={index}
+                className="relative border-2 border-gray-200 bg-gray-50/50 hover:shadow-md transition-all duration-300"
+              >
+                {/* Position Filled Banner */}
+                <div className="absolute top-4 right-4 z-10">
+                  <div className="bg-green-100 border border-green-300 rounded-full px-3 py-1 flex items-center gap-1.5">
+                    <CheckCircle className="h-3 w-3 text-green-600" />
+                    <span className="text-xs font-medium text-green-700">Position Filled</span>
                   </div>
-                  <CardDescription className="text-xs sm:text-sm leading-relaxed">
+                </div>
+
+                <CardHeader className="pb-3 sm:pb-4 pr-24">
+                  <CardTitle className="text-base sm:text-lg lg:text-xl mb-3 text-gray-800">{position.title}</CardTitle>
+
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
+                      {position.type}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs border-purple-200 text-purple-700 bg-purple-50">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      {position.location}
+                    </Badge>
+                  </div>
+
+                  <CardDescription className="text-xs sm:text-sm leading-relaxed text-gray-600">
                     {position.description}
                   </CardDescription>
                 </CardHeader>
+
                 <CardContent className="pt-0">
-                  <Button disabled className="w-full h-9 sm:h-10 text-xs sm:text-sm" variant="secondary">
-                    {position.status}
-                  </Button>
+                  <div className="bg-gray-100 border border-gray-200 rounded-lg p-3 text-center">
+                    <p className="text-xs sm:text-sm text-gray-600 font-medium">This position has been filled</p>
+                    <p className="text-xs text-gray-500 mt-1">Similar roles may open in the future</p>
+                  </div>
                 </CardContent>
               </Card>
             ))}
+          </div>
+
+          {/* Call to Action for Closed Positions */}
+          <div className="mt-8 sm:mt-12 text-center">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6 sm:p-8 max-w-2xl mx-auto">
+              <h3 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">Interested in Similar Roles?</h3>
+              <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed">
+                While these specific positions are filled, we're always looking for talented individuals. Join our
+                talent list to be the first to know about new opportunities.
+              </p>
+              <Button asChild className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 px-4 sm:px-6 text-xs sm:text-sm">
+                <Link href="#talent-form">
+                  <UserPlus className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  Join Our Talent List
+                </Link>
+              </Button>
+            </div>
           </div>
         </section>
 

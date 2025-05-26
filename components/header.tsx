@@ -24,9 +24,6 @@ export function Header() {
       <div className="container mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">FS</span>
-            </div>
             <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
               Flavor Studios
             </span>

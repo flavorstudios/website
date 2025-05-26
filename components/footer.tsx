@@ -1,7 +1,8 @@
 import Link from "next/link"
+
+import { Youtube, Facebook, Instagram, Twitter, MessageCircle, Send, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Youtube, Facebook, Instagram, Twitter, MessageCircle, Send, Users } from "lucide-react"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
@@ -42,9 +43,6 @@ export function Footer() {
           {/* Brand Section */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="h-8 w-8 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">FS</span>
-              </div>
               <span className="font-bold text-xl">Flavor Studios</span>
             </Link>
             <p className="text-gray-400 text-sm">

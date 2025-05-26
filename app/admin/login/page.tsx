@@ -12,8 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, Loader2, Shield, Sparkles } from "lucide-react"
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [email, setEmail] = useState("admin@flavorstudios.in")
+  const [password, setPassword] = useState("admin123")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -22,15 +22,21 @@ export default function AdminLogin() {
 
   useEffect(() => {
     setMounted(true)
-  }, [])
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const message = urlParams.get("message")
-    if (message) {
-      setError(message)
+    // Check if already authenticated
+    const checkAuth = async () => {
+      try {
+        const response = await fetch("/api/admin/auth")
+        if (response.ok) {
+          router.push("/admin/dashboard")
+        }
+      } catch (error) {
+        // Not authenticated, stay on login page
+      }
     }
-  }, [])
+
+    checkAuth()
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,13 +48,14 @@ export default function AdminLogin() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: "include", // Important for cookies
       })
 
       const data = await response.json()
 
       if (response.ok) {
-        router.push("/admin/dashboard")
-        router.refresh()
+        // Force a hard redirect to ensure middleware runs
+        window.location.href = "/admin/dashboard"
       } else {
         setError(data.error || "Authentication failed")
       }
@@ -86,6 +93,16 @@ export default function AdminLogin() {
         </CardHeader>
 
         <CardContent>
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-700">
+              <strong>Demo Credentials:</strong>
+              <br />
+              Email: admin@flavorstudios.in
+              <br />
+              Password: admin123
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium text-gray-700">

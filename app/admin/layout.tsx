@@ -1,16 +1,9 @@
 import type React from "react"
-import { Poppins } from "next/font/google"
 import "../globals.css"
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
-})
-
 export const metadata = {
-  title: "Admin Dashboard - Flavor Studios",
-  description: "Professional content management system",
+  title: "Flavor Studios Admin",
+  description: "Admin dashboard for Flavor Studios",
 }
 
 export default function AdminLayout({
@@ -19,8 +12,8 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={poppins.variable}>
-      <body className="font-poppins antialiased">{children}</body>
+    <html lang="en">
+      <body className="antialiased">{children}</body>
     </html>
   )
 }

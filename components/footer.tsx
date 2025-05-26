@@ -18,19 +18,25 @@ export function Footer() {
     { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/", icon: Users },
   ]
 
-  const quickLinks = [
+  const studioLinks = [
+    { name: "Studio", href: "/" },
     { name: "About", href: "/about" },
+    { name: "Career", href: "/career" },
+    { name: "Contact", href: "/contact" },
+  ]
+
+  const discoverLinks = [
     { name: "Blog", href: "/blog" },
     { name: "Watch", href: "/watch" },
+    { name: "Play", href: "/play" },
+    { name: "FAQ", href: "/faq" },
     { name: "Support", href: "/support" },
-    { name: "Contact", href: "/contact" },
-    { name: "Career", href: "/career" },
   ]
 
   const legalLinks = [
     { name: "Privacy Policy", href: "/privacy-policy" },
     { name: "Terms of Service", href: "/terms-of-service" },
-    { name: "DMCA Policy", href: "/dmca" },
+    { name: "DMCA", href: "/dmca" },
     { name: "Cookie Policy", href: "/cookie-policy" },
     { name: "Disclaimer", href: "/disclaimer" },
     { name: "Media Usage Policy", href: "/media-usage-policy" },
@@ -61,11 +67,25 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Studio Links */}
           <div>
-            <h3 className="font-semibold text-lg mb-4">Quick Links</h3>
+            <h3 className="font-semibold text-lg mb-4">Studio</h3>
             <ul className="space-y-2">
-              {quickLinks.map((link) => (
+              {studioLinks.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Discover Links */}
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Discover</h3>
+            <ul className="space-y-2">
+              {discoverLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
                     {link.name}
@@ -88,9 +108,11 @@ export function Footer() {
               ))}
             </ul>
           </div>
+        </div>
 
-          {/* Newsletter */}
-          <div>
+        {/* Newsletter Section */}
+        <div className="mt-8 pt-8 border-t border-gray-800">
+          <div className="max-w-md mx-auto text-center">
             <h3 className="font-semibold text-lg mb-4">Stay Updated</h3>
             <p className="text-gray-400 text-sm mb-4">Get the latest anime news and updates from Flavor Studios.</p>
             <div className="space-y-2">

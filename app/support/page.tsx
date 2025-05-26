@@ -85,20 +85,20 @@ export default function SupportPage() {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-4 sm:mb-6 px-2">
               <Button
                 asChild
-                size="lg"
-                className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                size="default"
+                className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-sm sm:text-base h-10 sm:h-11 px-4 sm:px-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
               >
                 <Link href="https://buymeacoffee.com/flavorstudios" target="_blank" rel="noopener noreferrer">
-                  <Coffee className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
+                  <Coffee className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" />
                   Buy Me a Coffee
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button
                 variant="outline"
-                size="lg"
+                size="default"
                 asChild
-                className="w-full sm:w-auto h-12 sm:h-14 px-4 sm:px-6 border-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700"
+                className="w-full sm:w-auto h-10 sm:h-11 px-3 sm:px-4 border-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700"
               >
                 <Link href="/contact">
                   <MessageCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
@@ -107,9 +107,9 @@ export default function SupportPage() {
               </Button>
               <Button
                 variant="outline"
-                size="lg"
+                size="default"
                 asChild
-                className="w-full sm:w-auto h-12 sm:h-14 px-4 sm:px-6 border-2 bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
+                className="w-full sm:w-auto h-10 sm:h-11 px-3 sm:px-4 border-2 bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
               >
                 <Link href="/faq">
                   <HelpCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />

@@ -82,8 +82,18 @@ export default async function BlogPage() {
 
           {posts.length === 0 && (
             <div className="text-center py-20">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">No blog posts yet</h3>
-              <p className="text-gray-600">Check back soon for exciting content from Flavor Studios!</p>
+              <div className="max-w-md mx-auto">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">No posts yet in this category</h3>
+                <p className="text-gray-600 mb-6">
+                  Come back soon for new updates! We're working on exciting content about anime, storytelling, and
+                  behind-the-scenes insights.
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-blue-800 text-sm">
+                    📝 <strong>Content creators:</strong> Use the admin panel to publish your first blog post!
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>

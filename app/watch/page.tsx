@@ -171,14 +171,24 @@ export default async function WatchPage() {
 
           {content.latestVideos.length === 0 && (
             <div className="text-center py-20">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">No videos yet</h3>
-              <p className="text-gray-600 mb-8">Check back soon for exciting content from Flavor Studios!</p>
-              <Button asChild>
-                <Link href="https://www.youtube.com/@flavorstudios" target="_blank">
-                  <Youtube className="mr-2 h-4 w-4" />
-                  Subscribe on YouTube
-                </Link>
-              </Button>
+              <div className="max-w-md mx-auto">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">No videos yet in this category</h3>
+                <p className="text-gray-600 mb-6">
+                  Come back soon for new updates! We're creating amazing original anime content, tutorials, and
+                  behind-the-scenes videos.
+                </p>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <p className="text-red-800 text-sm">
+                    🎬 <strong>Content creators:</strong> Use the admin panel to add your first video!
+                  </p>
+                </div>
+                <Button asChild>
+                  <Link href="https://www.youtube.com/@flavorstudios" target="_blank">
+                    <Youtube className="mr-2 h-4 w-4" />
+                    Subscribe on YouTube
+                  </Link>
+                </Button>
+              </div>
             </div>
           )}
         </div>

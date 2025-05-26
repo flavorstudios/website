@@ -7,8 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Play, Youtube, Calendar, Eye } from "lucide-react"
 
 async function getHomePageContent() {
-  // Default fallback data
-  const defaultData = {
+  const fallbackContent = {
     stats: {
       youtubeSubscribers: "500K+",
       originalEpisodes: "50+",
@@ -55,7 +54,7 @@ async function getHomePageContent() {
         title: "New Anime Season Preview: What to Watch This Fall",
         excerpt: "Discover the most anticipated anime releases coming this season...",
         publishedAt: "2024-01-15",
-        category: "News",
+        category: "Anime News",
         slug: "new-anime-season-preview",
         coverImage: "/placeholder.svg?height=200&width=300&query=anime season preview",
         status: "published",
@@ -65,7 +64,7 @@ async function getHomePageContent() {
         title: "Behind the Scenes: Creating Our Latest Original Series",
         excerpt: "Take a look at our creative process and the making of our newest project...",
         publishedAt: "2024-01-12",
-        category: "Studio Updates",
+        category: "Behind the Frames",
         slug: "behind-the-scenes-latest-series",
         coverImage: "/placeholder.svg?height=200&width=300&query=anime production behind scenes",
         status: "published",
@@ -75,7 +74,7 @@ async function getHomePageContent() {
         title: "Top 10 Underrated Anime You Should Watch",
         excerpt: "Hidden gems that deserve more recognition in the anime community...",
         publishedAt: "2024-01-10",
-        category: "Reviews",
+        category: "Anime Reviews",
         slug: "top-underrated-anime",
         coverImage: "/placeholder.svg?height=200&width=300&query=underrated anime collection",
         status: "published",
@@ -83,87 +82,94 @@ async function getHomePageContent() {
     ],
   }
 
-  // Only try to fetch from API in production or if we're sure the API exists
+  // In development, just return fallback content
   if (process.env.NODE_ENV === "development") {
-    return defaultData
+    return fallbackContent
   }
 
   try {
-    // Try to fetch from API with timeout
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || ""
-
-    const [statsRes, videosRes, blogsRes] = await Promise.allSettled([
+    // Use Promise.allSettled to handle partial failures
+    const [statsResult, videosResult, blogsResult] = await Promise.allSettled([
       fetch(`${baseUrl}/api/admin/stats`, {
-        signal: controller.signal,
-        headers: { Accept: "application/json" },
-      }),
+        cache: "no-store",
+        next: { revalidate: 0 },
+      }).then((res) => (res.ok ? res.json() : null)),
       fetch(`${baseUrl}/api/admin/videos`, {
-        signal: controller.signal,
-        headers: { Accept: "application/json" },
-      }),
+        cache: "no-store",
+        next: { revalidate: 0 },
+      }).then((res) => (res.ok ? res.json() : null)),
       fetch(`${baseUrl}/api/admin/blogs`, {
-        signal: controller.signal,
-        headers: { Accept: "application/json" },
-      }),
+        cache: "no-store",
+        next: { revalidate: 0 },
+      }).then((res) => (res.ok ? res.json() : null)),
     ])
 
-    clearTimeout(timeoutId)
+    const stats =
+      statsResult.status === "fulfilled" && statsResult.value ? statsResult.value.stats : fallbackContent.stats
 
-    let stats = defaultData.stats
-    let videos = defaultData.featuredVideos
-    let blogs = defaultData.latestBlogs
+    const videos =
+      videosResult.status === "fulfilled" && videosResult.value
+        ? videosResult.value.videos?.filter((v: any) => v.status === "published" && v.featured) || []
+        : fallbackContent.featuredVideos
 
-    // Parse stats if successful
-    if (statsRes.status === "fulfilled" && statsRes.value.ok) {
-      try {
-        const statsData = await statsRes.value.json()
-        if (statsData && typeof statsData === "object") {
-          stats = { ...defaultData.stats, ...statsData }
-        }
-      } catch (e) {
-        console.log("Failed to parse stats JSON, using defaults")
-      }
-    }
-
-    // Parse videos if successful
-    if (videosRes.status === "fulfilled" && videosRes.value.ok) {
-      try {
-        const videosData = await videosRes.value.json()
-        if (videosData?.videos && Array.isArray(videosData.videos)) {
-          videos = videosData.videos.filter((v: any) => v.featured && v.status === "published").slice(0, 4)
-          if (videos.length === 0) videos = defaultData.featuredVideos
-        }
-      } catch (e) {
-        console.log("Failed to parse videos JSON, using defaults")
-      }
-    }
-
-    // Parse blogs if successful
-    if (blogsRes.status === "fulfilled" && blogsRes.value.ok) {
-      try {
-        const blogsData = await blogsRes.value.json()
-        if (blogsData?.posts && Array.isArray(blogsData.posts)) {
-          blogs = blogsData.posts.filter((p: any) => p.status === "published").slice(0, 3)
-          if (blogs.length === 0) blogs = defaultData.latestBlogs
-        }
-      } catch (e) {
-        console.log("Failed to parse blogs JSON, using defaults")
-      }
-    }
+    const blogs =
+      blogsResult.status === "fulfilled" && blogsResult.value
+        ? blogsResult.value.posts?.filter((p: any) => p.status === "published").slice(0, 3) || []
+        : fallbackContent.latestBlogs
 
     return {
-      ...defaultData,
+      ...fallbackContent,
       stats,
       featuredVideos: videos,
       latestBlogs: blogs,
     }
   } catch (error) {
-    console.log("API fetch failed, using default data:", error)
-    return defaultData
+    console.error("Failed to fetch homepage content:", error)
+    return fallbackContent
   }
+}
+
+function VideosSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[...Array(4)].map((_, i) => (
+        <Card key={i}>
+          <div className="h-48 bg-gray-200 animate-pulse rounded-t-lg"></div>
+          <CardHeader>
+            <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-3 bg-gray-200 animate-pulse rounded"></div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+function BlogsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {[...Array(3)].map((_, i) => (
+        <Card key={i}>
+          <div className="h-48 bg-gray-200 animate-pulse rounded-t-lg"></div>
+          <CardHeader>
+            <div className="h-4 bg-gray-200 animate-pulse rounded mb-2"></div>
+            <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+              <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3"></div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
 }
 
 export default async function HomePage() {
@@ -181,9 +187,9 @@ export default async function HomePage() {
 
               <div className="space-y-6">
                 <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                  {content.hero.title.split(" ").slice(0, 2).join(" ")}{" "}
+                  Welcome to{" "}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-                    {content.hero.title.split(" ").slice(2).join(" ")}
+                    Flavor Studios
                   </span>
                 </h1>
 
@@ -349,47 +355,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-    </div>
-  )
-}
-
-function VideosSkeleton() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {[...Array(4)].map((_, i) => (
-        <Card key={i}>
-          <div className="h-48 bg-gray-200 animate-pulse rounded-t-lg"></div>
-          <CardHeader>
-            <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-          </CardHeader>
-          <CardContent>
-            <div className="h-3 bg-gray-200 animate-pulse rounded"></div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
-function BlogsSkeleton() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {[...Array(3)].map((_, i) => (
-        <Card key={i}>
-          <div className="h-48 bg-gray-200 animate-pulse rounded-t-lg"></div>
-          <CardHeader>
-            <div className="h-4 bg-gray-200 animate-pulse rounded mb-2"></div>
-            <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-              <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3"></div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
     </div>
   )
 }

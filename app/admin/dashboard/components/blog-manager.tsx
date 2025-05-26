@@ -220,17 +220,33 @@ function BlogPostForm({
   onSave: (data: Partial<BlogPost>) => void
   onCancel: () => void
 }) {
+  const [categories, setCategories] = useState<string[]>([])
   const [formData, setFormData] = useState({
     title: post?.title || "",
     content: post?.content || "",
     excerpt: post?.excerpt || "",
-    category: post?.category || "anime",
+    category: post?.category || "",
     status: post?.status || "draft",
     featured: post?.featured || false,
     seoTitle: post?.seoTitle || "",
     seoDescription: post?.seoDescription || "",
     coverImage: post?.coverImage || "",
   })
+
+  useEffect(() => {
+    // Load categories
+    fetch("/api/admin/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        const blogCategories =
+          data.categories?.filter((cat: any) => cat.type === "blog" && cat.isActive)?.map((cat: any) => cat.name) || []
+        setCategories(blogCategories)
+        if (!formData.category && blogCategories.length > 0) {
+          setFormData((prev) => ({ ...prev, category: blogCategories[0] }))
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -279,10 +295,11 @@ function BlogPostForm({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="anime">Anime</SelectItem>
-                      <SelectItem value="industry">Industry News</SelectItem>
-                      <SelectItem value="behind-scenes">Behind the Scenes</SelectItem>
-                      <SelectItem value="tutorials">Tutorials</SelectItem>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

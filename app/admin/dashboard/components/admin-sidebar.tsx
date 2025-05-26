@@ -41,6 +41,12 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
       count: 8,
     },
     {
+      id: "categories",
+      label: "Categories",
+      icon: Edit,
+      count: null,
+    },
+    {
       id: "comments",
       label: "Comments",
       icon: MessageSquare,

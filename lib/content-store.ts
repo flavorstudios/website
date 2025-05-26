@@ -1,5 +1,6 @@
 import { promises as fs } from "fs"
 import path from "path"
+import { categoryStore } from "./category-store"
 
 const DATA_DIR = path.join(process.cwd(), "content-data")
 
@@ -72,6 +73,31 @@ export interface SiteStats {
   lastUpdated: string
 }
 
+// Backward compatibility: Export static categories for deployment
+export const VALID_BLOG_CATEGORIES = [
+  "Anime Reviews",
+  "Storytelling & Themes",
+  "Behind the Frames",
+  "Creator Spotlights",
+  "Life Through Anime",
+  "Creative Process",
+  "Anime News",
+  "Streaming Updates",
+  "Industry Buzz",
+  "New & Upcoming Releases",
+  "Voice Actor & Crew Updates",
+  "Cultural Highlights",
+]
+
+export const VALID_WATCH_CATEGORIES = [
+  "Original Anime",
+  "Short Films",
+  "Behind the Scenes",
+  "Tutorials & Guides",
+  "Anime Trailers",
+  "YouTube Highlights",
+]
+
 async function ensureDataDir() {
   try {
     await fs.access(DATA_DIR)
@@ -114,9 +140,41 @@ async function writeSingleJsonFile<T>(filename: string, data: T): Promise<void> 
   await fs.writeFile(filePath, JSON.stringify(data, null, 2))
 }
 
+// Get valid categories dynamically with fallback to static
+async function getValidBlogCategories(): Promise<string[]> {
+  try {
+    const categories = await categoryStore.getByType("blog")
+    if (categories.length > 0) {
+      return categories.filter((cat) => cat.isActive).map((cat) => cat.name)
+    }
+  } catch (error) {
+    console.warn("Failed to load dynamic blog categories, using static fallback")
+  }
+  return VALID_BLOG_CATEGORIES
+}
+
+async function getValidVideoCategories(): Promise<string[]> {
+  try {
+    const categories = await categoryStore.getByType("video")
+    if (categories.length > 0) {
+      return categories.filter((cat) => cat.isActive).map((cat) => cat.name)
+    }
+  } catch (error) {
+    console.warn("Failed to load dynamic video categories, using static fallback")
+  }
+  return VALID_WATCH_CATEGORIES
+}
+
 // Blog Store
 export const blogStore = {
   async getAll(): Promise<BlogPost[]> {
+    const posts = await readJsonFile<BlogPost>("blogs.json")
+    const validCategories = await getValidBlogCategories()
+    // Filter out any posts with invalid categories
+    return posts.filter((post) => validCategories.includes(post.category))
+  },
+
+  async getAllRaw(): Promise<BlogPost[]> {
     return readJsonFile<BlogPost>("blogs.json")
   },
 
@@ -132,8 +190,21 @@ export const blogStore = {
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
   },
 
+  async getByCategory(category: string): Promise<BlogPost[]> {
+    const validCategories = await getValidBlogCategories()
+    if (!validCategories.includes(category)) return []
+    const posts = await this.getPublished()
+    return posts.filter((post) => post.category === category)
+  },
+
   async create(post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "views">): Promise<BlogPost> {
-    const posts = await this.getAll()
+    // Validate category
+    const validCategories = await getValidBlogCategories()
+    if (!validCategories.includes(post.category)) {
+      throw new Error(`Invalid blog category: ${post.category}`)
+    }
+
+    const posts = await this.getAllRaw()
     const newPost: BlogPost = {
       ...post,
       id: `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -143,11 +214,27 @@ export const blogStore = {
     }
     posts.unshift(newPost)
     await writeJsonFile("blogs.json", posts)
+
+    // Update category post counts if dynamic categories are available
+    try {
+      await categoryStore.updatePostCounts()
+    } catch (error) {
+      console.warn("Failed to update category post counts")
+    }
+
     return newPost
   },
 
   async update(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
-    const posts = await this.getAll()
+    // Validate category if being updated
+    if (updates.category) {
+      const validCategories = await getValidBlogCategories()
+      if (!validCategories.includes(updates.category)) {
+        throw new Error(`Invalid blog category: ${updates.category}`)
+      }
+    }
+
+    const posts = await this.getAllRaw()
     const index = posts.findIndex((p) => p.id === id)
     if (index === -1) return null
 
@@ -157,19 +244,35 @@ export const blogStore = {
       updatedAt: new Date().toISOString(),
     }
     await writeJsonFile("blogs.json", posts)
+
+    // Update category post counts if dynamic categories are available
+    try {
+      await categoryStore.updatePostCounts()
+    } catch (error) {
+      console.warn("Failed to update category post counts")
+    }
+
     return posts[index]
   },
 
   async delete(id: string): Promise<boolean> {
-    const posts = await this.getAll()
+    const posts = await this.getAllRaw()
     const filtered = posts.filter((p) => p.id !== id)
     if (filtered.length === posts.length) return false
     await writeJsonFile("blogs.json", filtered)
+
+    // Update category post counts if dynamic categories are available
+    try {
+      await categoryStore.updatePostCounts()
+    } catch (error) {
+      console.warn("Failed to update category post counts")
+    }
+
     return true
   },
 
   async incrementViews(slug: string): Promise<void> {
-    const posts = await this.getAll()
+    const posts = await this.getAllRaw()
     const index = posts.findIndex((p) => p.slug === slug)
     if (index !== -1) {
       posts[index].views += 1
@@ -181,6 +284,13 @@ export const blogStore = {
 // Video Store
 export const videoStore = {
   async getAll(): Promise<Video[]> {
+    const videos = await readJsonFile<Video>("videos.json")
+    const validCategories = await getValidVideoCategories()
+    // Filter out any videos with invalid categories
+    return videos.filter((video) => validCategories.includes(video.category))
+  },
+
+  async getAllRaw(): Promise<Video[]> {
     return readJsonFile<Video>("videos.json")
   },
 
@@ -196,8 +306,21 @@ export const videoStore = {
     return videos.filter((v) => v.featured)
   },
 
+  async getByCategory(category: string): Promise<Video[]> {
+    const validCategories = await getValidVideoCategories()
+    if (!validCategories.includes(category)) return []
+    const videos = await this.getPublished()
+    return videos.filter((video) => video.category === category)
+  },
+
   async create(video: Omit<Video, "id" | "createdAt" | "updatedAt" | "views">): Promise<Video> {
-    const videos = await this.getAll()
+    // Validate category
+    const validCategories = await getValidVideoCategories()
+    if (!validCategories.includes(video.category)) {
+      throw new Error(`Invalid video category: ${video.category}`)
+    }
+
+    const videos = await this.getAllRaw()
     const newVideo: Video = {
       ...video,
       id: `video_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -207,11 +330,27 @@ export const videoStore = {
     }
     videos.unshift(newVideo)
     await writeJsonFile("videos.json", videos)
+
+    // Update category post counts if dynamic categories are available
+    try {
+      await categoryStore.updatePostCounts()
+    } catch (error) {
+      console.warn("Failed to update category post counts")
+    }
+
     return newVideo
   },
 
   async update(id: string, updates: Partial<Video>): Promise<Video | null> {
-    const videos = await this.getAll()
+    // Validate category if being updated
+    if (updates.category) {
+      const validCategories = await getValidVideoCategories()
+      if (!validCategories.includes(updates.category)) {
+        throw new Error(`Invalid video category: ${updates.category}`)
+      }
+    }
+
+    const videos = await this.getAllRaw()
     const index = videos.findIndex((v) => v.id === id)
     if (index === -1) return null
 
@@ -221,14 +360,30 @@ export const videoStore = {
       updatedAt: new Date().toISOString(),
     }
     await writeJsonFile("videos.json", videos)
+
+    // Update category post counts if dynamic categories are available
+    try {
+      await categoryStore.updatePostCounts()
+    } catch (error) {
+      console.warn("Failed to update category post counts")
+    }
+
     return videos[index]
   },
 
   async delete(id: string): Promise<boolean> {
-    const videos = await this.getAll()
+    const videos = await this.getAllRaw()
     const filtered = videos.filter((v) => v.id !== id)
     if (filtered.length === videos.length) return false
     await writeJsonFile("videos.json", filtered)
+
+    // Update category post counts if dynamic categories are available
+    try {
+      await categoryStore.updatePostCounts()
+    } catch (error) {
+      console.warn("Failed to update category post counts")
+    }
+
     return true
   },
 }
@@ -338,79 +493,38 @@ export const commentStore = {
   },
 }
 
-// Initialize with real data from your site
+// Backward compatibility: Keep the old function name
 export async function initializeRealData() {
+  return initializeCleanData()
+}
+
+// Initialize with clean data (no dummy content)
+export async function initializeCleanData() {
+  try {
+    // Try to initialize dynamic categories
+    const { initializeDefaultCategories } = await import("./category-store")
+    await initializeDefaultCategories()
+  } catch (error) {
+    console.warn("Failed to initialize dynamic categories, using static categories")
+  }
+
   const blogs = await blogStore.getAll()
   const videos = await videoStore.getAll()
 
-  if (blogs.length === 0) {
-    // Initialize with real blog posts
-    await blogStore.create({
-      title: "New Anime Season Preview: What to Watch This Fall",
-      slug: "anime-season-preview-fall-2024",
-      content:
-        "Discover the most anticipated anime releases coming this season, from action-packed adventures to heartwarming slice-of-life stories. Our team has curated the best upcoming shows that will define this fall season.",
-      excerpt:
-        "Discover the most anticipated anime releases coming this season, from action-packed adventures to heartwarming slice-of-life stories.",
-      status: "published",
-      category: "News",
-      tags: ["anime", "season preview", "fall 2024", "recommendations"],
-      featuredImage: "/placeholder.svg?height=400&width=600&query=anime season preview fall",
-      seoTitle: "Fall 2024 Anime Season Preview - Best Shows to Watch",
-      seoDescription:
-        "Complete guide to the best anime shows premiering in Fall 2024. Get recommendations from Flavor Studios.",
-      author: "Flavor Studios Team",
-      publishedAt: new Date().toISOString(),
-      readTime: "5 min read",
-    })
+  // Only initialize if completely empty
+  if (blogs.length === 0 && videos.length === 0) {
+    // Initialize empty files
+    await writeJsonFile("blogs.json", [])
+    await writeJsonFile("videos.json", [])
+    await writeJsonFile("comments.json", [])
+    await writeJsonFile("pages.json", [])
 
-    await blogStore.create({
-      title: "Behind the Scenes: Creating Our Latest Original Series",
-      slug: "behind-scenes-latest-original-series",
-      content:
-        "Take an exclusive look at our creative process and the making of our newest project, from initial concept to final animation. Learn about the challenges and breakthroughs in our latest production.",
-      excerpt:
-        "Take a look at our creative process and the making of our newest project, from initial concept to final animation.",
-      status: "published",
-      category: "Studio Updates",
-      tags: ["behind the scenes", "production", "original series", "animation"],
-      featuredImage: "/placeholder.svg?height=400&width=600&query=anime production behind scenes",
-      seoTitle: "Behind the Scenes: How We Create Original Anime",
-      seoDescription: "Exclusive behind-the-scenes look at Flavor Studios' animation production process.",
-      author: "Flavor Studios Team",
-      publishedAt: new Date(Date.now() - 86400000).toISOString(),
-      readTime: "8 min read",
-    })
-  }
-
-  if (videos.length === 0) {
-    // Initialize with real videos
-    await videoStore.create({
-      title: "Mystic Chronicles Episode 1: The Beginning",
-      description:
-        "The first episode of our original anime series Mystic Chronicles. Follow young mages discovering their powers in a world where magic and technology collide.",
-      youtubeId: "dQw4w9WgXcQ", // Replace with actual video IDs
-      thumbnail: "/placeholder.svg?height=300&width=400&query=mystic anime series magic",
-      duration: "24:30",
-      category: "Original Series",
-      tags: ["mystic chronicles", "episode 1", "original anime", "magic"],
-      status: "published",
-      publishedAt: new Date().toISOString(),
-      featured: true,
-    })
-
-    await videoStore.create({
-      title: "Character Design Process: From Sketch to Animation",
-      description:
-        "Learn our complete character design workflow, from initial sketches to final animated characters in Blender.",
-      youtubeId: "dQw4w9WgXcQ", // Replace with actual video IDs
-      thumbnail: "/placeholder.svg?height=300&width=400&query=anime character design process",
-      duration: "15:45",
-      category: "Tutorial",
-      tags: ["character design", "tutorial", "blender", "animation"],
-      status: "published",
-      publishedAt: new Date(Date.now() - 172800000).toISOString(),
-      featured: true,
+    // Initialize stats
+    await statsStore.update({
+      youtubeSubscribers: "500K+",
+      originalEpisodes: "50+",
+      totalViews: "2M+",
+      yearsCreating: "5",
     })
   }
 }

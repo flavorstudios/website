@@ -8,6 +8,7 @@ import {
   Heart,
   MapPin,
   ExternalLink,
+  Mail,
   Youtube,
   Instagram,
   CheckCircle,
@@ -63,29 +64,66 @@ export default function CareerPage() {
     },
   ]
 
+  const stayConnectedOptions = [
+    {
+      title: "Join Our Talent List",
+      description: "Be the first to know about new opportunities",
+      icon: UserPlus,
+      action: "Join List",
+      href: "#talent-form",
+      color: "bg-blue-600 hover:bg-blue-700",
+    },
+    {
+      title: "Follow Us on Instagram",
+      description: "Stay updated with our latest projects and behind-the-scenes content",
+      icon: Instagram,
+      action: "Follow Instagram",
+      href: "https://www.instagram.com/flavorstudios",
+      external: true,
+      color: "bg-pink-600 hover:bg-pink-700",
+    },
+    {
+      title: "Subscribe on YouTube",
+      description: "Watch our content and see our creative process in action",
+      icon: Youtube,
+      action: "Subscribe",
+      href: "https://www.youtube.com/@flavorstudios",
+      external: true,
+      color: "bg-red-600 hover:bg-red-700",
+    },
+  ]
+
   return (
-    <div className="min-h-screen py-8">
-      <div className="container mx-auto max-w-6xl px-4">
+    <div className="min-h-screen py-8 sm:py-12">
+      <div className="container mx-auto max-w-6xl px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Join Our Story</h1>
-          <p className="text-lg text-gray-700">Connect with us today and be part of our creative journey tomorrow.</p>
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <Badge className="mb-3 sm:mb-4 bg-blue-600 text-white px-3 py-1 text-xs sm:text-sm">
+            Join Our Creative Team
+          </Badge>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
+            Join Our Story
+          </h1>
+          <p className="text-base sm:text-lg lg:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+            Connect with us today and be part of our creative journey tomorrow.
+          </p>
         </div>
 
         {/* Status Banner */}
-        <div className="text-center mb-8">
-          <div className="bg-yellow-400 border border-yellow-500 rounded-lg p-6 max-w-4xl mx-auto">
-            <h2 className="text-xl font-bold text-black mb-3">
+        <div className="mb-8 sm:mb-12 text-center">
+          <div className="bg-yellow-400 border border-yellow-500 rounded-lg p-4 sm:p-6 max-w-4xl mx-auto">
+            <h2 className="text-base sm:text-lg lg:text-xl font-bold text-black mb-2 sm:mb-3 leading-tight">
               We're Grateful for Your Interest – All Roles Are Currently Filled
             </h2>
-            <p className="text-base text-black">
-              Thank you for your interest in joining Flavor Studios. At this time, all positions are filled.
+            <p className="text-sm sm:text-base text-black leading-relaxed">
+              Thank you for your interest in joining Flavor Studios. At this time, all positions are filled. We'll
+              notify you when new opportunities become available.
             </p>
           </div>
         </div>
 
         {/* About Section */}
-        <div className="mb-12 text-center">
+        <div className="mb-12 sm:mb-16 text-center">
           <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 max-w-4xl mx-auto">
             <CardHeader>
               <div className="flex justify-center mb-4">
@@ -108,10 +146,12 @@ export default function CareerPage() {
         </div>
 
         {/* Closed Positions */}
-        <section className="mb-8 lg:mb-16">
+        <section className="mb-8 sm:mb-12 lg:mb-16">
           <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-            <h2 className="text-xl font-bold mb-3 sm:mb-4 text-gray-900">Recently Filled Positions</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 text-gray-900">
+              Recently Filled Positions
+            </h2>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
               These positions were recently filled, but represent the types of roles we typically hire for. Join our
               talent list to be notified when similar opportunities become available.
             </p>
@@ -132,7 +172,9 @@ export default function CareerPage() {
                 </div>
 
                 <CardHeader className="pb-3 sm:pb-4 pr-24 text-center">
-                  <CardTitle className="text-base sm:text-lg lg:text-xl mb-3 text-gray-900">{position.title}</CardTitle>
+                  <CardTitle className="text-base sm:text-lg lg:text-xl mb-3 text-gray-900 hidden sm:block">
+                    {position.title}
+                  </CardTitle>
 
                   <div className="flex flex-wrap gap-2 mb-3 justify-center">
                     <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
@@ -180,87 +222,55 @@ export default function CareerPage() {
         </section>
 
         {/* Stay Connected */}
-        <section className="mb-8 lg:mb-16">
+        <section className="mb-8 sm:mb-12 lg:mb-16">
           <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-            <h2 className="text-xl font-bold mb-3 sm:mb-4 text-gray-900">Stay Connected</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 text-gray-900">Stay Connected</h2>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Follow our journey, engage with our content, and be the first to know when new opportunities arise.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3 max-w-5xl mx-auto">
-            {/* Join Our Talent List */}
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3 sm:pb-4">
-                <div className="mx-auto mb-3 sm:mb-4 p-3 bg-gray-100 rounded-xl w-fit">
-                  <UserPlus className="h-6 w-6 text-gray-700" />
-                </div>
-                <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">Join Our Talent List</CardTitle>
-                <CardDescription className="text-sm sm:text-base leading-relaxed text-gray-600">
-                  Be the first to know about new opportunities
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <Button asChild className="w-full h-10 sm:h-11 text-sm sm:text-base bg-blue-600 hover:bg-blue-700">
-                  <Link href="#talent-form">Join List</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Follow Us on Instagram */}
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3 sm:pb-4">
-                <div className="mx-auto mb-3 sm:mb-4 p-3 bg-gray-100 rounded-xl w-fit">
-                  <Instagram className="h-6 w-6 text-gray-700" />
-                </div>
-                <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">Follow Us on Instagram</CardTitle>
-                <CardDescription className="text-sm sm:text-base leading-relaxed text-gray-600">
-                  Stay updated with our latest projects and behind-the-scenes content
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <Button asChild className="w-full h-10 sm:h-11 text-sm sm:text-base bg-pink-600 hover:bg-pink-700">
-                  <Link href="https://www.instagram.com/flavorstudios" target="_blank" rel="noopener noreferrer">
-                    Follow Instagram
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Subscribe on YouTube */}
-            <Card className="text-center hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3 sm:pb-4">
-                <div className="mx-auto mb-3 sm:mb-4 p-3 bg-gray-100 rounded-xl w-fit">
-                  <Youtube className="h-6 w-6 text-gray-700" />
-                </div>
-                <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">Subscribe on YouTube</CardTitle>
-                <CardDescription className="text-sm sm:text-base leading-relaxed text-gray-600">
-                  Watch our content and see our creative process in action
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <Button asChild className="w-full h-10 sm:h-11 text-sm sm:text-base bg-red-600 hover:bg-red-700">
-                  <Link href="https://www.youtube.com/@flavorstudios" target="_blank" rel="noopener noreferrer">
-                    Subscribe
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+            {stayConnectedOptions.map((option, index) => (
+              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                <CardHeader className="pb-3 sm:pb-4">
+                  <div className="mx-auto mb-3 sm:mb-4 p-3 bg-gray-100 rounded-xl w-fit">
+                    <option.icon className="h-6 w-6 text-gray-700" />
+                  </div>
+                  <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">{option.title}</CardTitle>
+                  <CardDescription className="text-sm sm:text-base leading-relaxed text-gray-600">
+                    {option.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <Button asChild className={`w-full h-10 sm:h-11 text-sm sm:text-base ${option.color}`}>
+                    <Link
+                      href={option.href}
+                      target={option.external ? "_blank" : undefined}
+                      rel={option.external ? "noopener noreferrer" : undefined}
+                    >
+                      {option.action}
+                      {option.external && <ExternalLink className="ml-2 h-4 w-4" />}
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </section>
 
         {/* Talent List Form */}
-        <section id="talent-form" className="mb-8 lg:mb-16">
+        <section id="talent-form" className="mb-8 sm:mb-12 lg:mb-16">
           <div className="text-center mb-6 sm:mb-8">
             <div className="flex justify-center mb-4">
               <div className="p-3 bg-blue-100 rounded-lg">
                 <Star className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
               </div>
             </div>
-            <h2 className="text-xl font-bold mb-3 sm:mb-4 text-gray-900">Join Our Talent List</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 text-gray-900">
+              Join Our Talent List
+            </h2>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
               Stay in the loop for future opportunities that match your skills and interests.
             </p>
           </div>
@@ -319,7 +329,7 @@ export default function CareerPage() {
                 Join Talent List
               </Button>
 
-              <p className="text-sm text-gray-500 text-center leading-relaxed">
+              <p className="text-xs sm:text-sm text-gray-500 text-center leading-relaxed">
                 We'll only contact you about relevant opportunities and updates.
               </p>
             </CardContent>
@@ -337,23 +347,27 @@ export default function CareerPage() {
             <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-3 sm:mb-4 text-blue-900">
               Have Questions or Want to Connect?
             </h2>
-            <p className="text-lg text-blue-800 leading-relaxed mb-6 sm:mb-8 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base lg:text-lg text-blue-800 leading-relaxed mb-6 sm:mb-8 max-w-2xl mx-auto">
               Whether you have questions about our work, want to discuss potential collaborations, or simply want to
               introduce yourself and your skills, we'd love to hear from you. Reach out and let's start a conversation.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <a
-                href="/contact"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg inline-flex items-center justify-center"
+              <Button asChild className="bg-blue-600 hover:bg-blue-700 h-10 sm:h-11 px-6 sm:px-8 text-sm sm:text-base">
+                <Link href="/contact">
+                  <Mail className="mr-2 h-4 w-4" />
+                  Contact Us
+                </Link>
+              </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white h-10 sm:h-11 px-6 sm:px-8 text-sm sm:text-base"
               >
-                Contact Us
-              </a>
-              <a
-                href="mailto:contact@flavorstudios.in"
-                className="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white px-8 py-3 rounded-lg inline-flex items-center justify-center"
-              >
-                Email Directly
-              </a>
+                <Link href="mailto:contact@flavorstudios.in">
+                  <Mail className="mr-2 h-4 w-4" />
+                  Email Directly
+                </Link>
+              </Button>
             </div>
           </div>
         </section>

@@ -172,9 +172,7 @@ export default function CareerPage() {
                 </div>
 
                 <CardHeader className="pb-3 sm:pb-4 pr-24 text-center">
-                  <CardTitle className="text-base sm:text-lg lg:text-xl mb-3 text-gray-900 hidden sm:block">
-                    {position.title}
-                  </CardTitle>
+                  <CardTitle className="text-base sm:text-lg lg:text-xl mb-3 text-gray-900">{position.title}</CardTitle>
 
                   <div className="flex flex-wrap gap-2 mb-3 justify-center">
                     <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
@@ -231,31 +229,34 @@ export default function CareerPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3 max-w-5xl mx-auto">
-            {stayConnectedOptions.map((option, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3 sm:pb-4">
-                  <div className="mx-auto mb-3 sm:mb-4 p-3 bg-gray-100 rounded-xl w-fit">
-                    <option.icon className="h-6 w-6 text-gray-700" />
-                  </div>
-                  <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">{option.title}</CardTitle>
-                  <CardDescription className="text-sm sm:text-base leading-relaxed text-gray-600">
-                    {option.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <Button asChild className={`w-full h-10 sm:h-11 text-sm sm:text-base ${option.color}`}>
-                    <Link
-                      href={option.href}
-                      target={option.external ? "_blank" : undefined}
-                      rel={option.external ? "noopener noreferrer" : undefined}
-                    >
-                      {option.action}
-                      {option.external && <ExternalLink className="ml-2 h-4 w-4" />}
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+            {stayConnectedOptions.map((option, index) => {
+              const IconComponent = option.icon
+              return (
+                <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3 sm:pb-4">
+                    <div className="mx-auto mb-3 sm:mb-4 p-3 bg-gray-100 rounded-xl w-fit">
+                      <IconComponent className="h-6 w-6 text-gray-700" />
+                    </div>
+                    <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">{option.title}</CardTitle>
+                    <CardDescription className="text-sm sm:text-base leading-relaxed text-gray-600">
+                      {option.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Button asChild className={`w-full h-10 sm:h-11 text-sm sm:text-base ${option.color}`}>
+                      <Link
+                        href={option.href}
+                        target={option.external ? "_blank" : undefined}
+                        rel={option.external ? "noopener noreferrer" : undefined}
+                      >
+                        {option.action}
+                        {option.external && <ExternalLink className="ml-2 h-4 w-4" />}
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </section>
 

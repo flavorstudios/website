@@ -24,6 +24,14 @@ export default function AdminLogin() {
     setMounted(true)
   }, [])
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const message = urlParams.get("message")
+    if (message) {
+      setError(message)
+    }
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)

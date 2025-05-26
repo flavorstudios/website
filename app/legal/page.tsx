@@ -69,8 +69,10 @@ export default function LegalPage() {
       <div className="container mx-auto max-w-6xl px-4 sm:px-6">
         {/* Header */}
         <div className="text-center mb-12 sm:mb-16">
-          <Badge className="mb-3 sm:mb-4 bg-blue-100 text-blue-800 text-xs sm:text-sm">Legal Documents</Badge>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Legal Information</h1>
+          <Badge className="mb-3 sm:mb-4 bg-blue-600 text-white px-3 py-1 text-xs sm:text-sm">Legal Documents</Badge>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
+            Legal Information
+          </h1>
           <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
             Important legal documents and policies that govern your use of Flavor Studios' website and services.
           </p>

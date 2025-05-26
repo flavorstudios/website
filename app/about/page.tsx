@@ -77,8 +77,10 @@ export default function AboutPage() {
       <div className="container mx-auto max-w-6xl px-3 sm:px-4 lg:px-6">
         {/* Hero Section */}
         <div className="mb-8 sm:mb-12 lg:mb-16 text-center">
-          <Badge className="mb-3 sm:mb-4 bg-blue-100 text-blue-800 text-xs sm:text-sm">Independent Anime Studio</Badge>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 lg:mb-6">
+          <Badge className="mb-3 sm:mb-4 lg:mb-6 bg-blue-600 text-white px-3 py-1 text-xs sm:text-sm">
+            Independent Animation Studio
+          </Badge>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 lg:mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
             About Flavor Studios
           </h1>
           <p className="text-lg sm:text-xl lg:text-2xl text-blue-600 font-medium mb-4 sm:mb-6 lg:mb-8 italic">

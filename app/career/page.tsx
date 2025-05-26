@@ -159,9 +159,9 @@ export default function CareerPage() {
               >
                 {/* Position Filled Banner */}
                 <div className="absolute top-4 right-4 z-10">
-                  <div className="bg-green-100 border border-green-300 rounded-full px-3 py-1 flex items-center gap-1.5">
-                    <CheckCircle className="h-3 w-3 text-green-600" />
-                    <span className="text-xs font-medium text-green-700">Position Filled</span>
+                  <div className="bg-yellow-400 border border-yellow-500 rounded-full px-3 py-1 flex items-center gap-1.5">
+                    <CheckCircle className="h-3 w-3 text-black" />
+                    <span className="text-xs font-medium text-black">Position Filled</span>
                   </div>
                 </div>
 
@@ -184,9 +184,9 @@ export default function CareerPage() {
                 </CardHeader>
 
                 <CardContent className="pt-0">
-                  <div className="bg-gray-100 border border-gray-200 rounded-lg p-3 text-center">
-                    <p className="text-xs sm:text-sm text-gray-600 font-medium">This position has been filled</p>
-                    <p className="text-xs text-gray-500 mt-1">Similar roles may open in the future</p>
+                  <div className="bg-yellow-400 border border-yellow-500 rounded-lg p-3 text-center">
+                    <p className="text-xs sm:text-sm text-black font-medium">This position has been filled</p>
+                    <p className="text-xs text-black mt-1">Similar roles may open in the future</p>
                   </div>
                 </CardContent>
               </Card>
@@ -195,7 +195,7 @@ export default function CareerPage() {
 
           {/* Call to Action for Closed Positions */}
           <div className="mt-8 sm:mt-12 text-center">
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6 sm:p-8 max-w-2xl mx-auto">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6 sm:p-8 lg:p-12 mx-4 sm:mx-8 lg:mx-16">
               <h3 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">Interested in Similar Roles?</h3>
               <p className="text-sm sm:text-base text-gray-600 mb-4 leading-relaxed">
                 While these specific positions are filled, we're always looking for talented individuals. Join our

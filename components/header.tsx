@@ -4,21 +4,19 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, Play, BookOpen, Users, Coffee, Phone, Briefcase, HelpCircle } from "lucide-react"
+import { Menu, Play, BookOpen, Users, Phone, Search, Coffee } from "lucide-react"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
 
   const navigation = [
     { name: "Home", href: "/", icon: null },
-    { name: "About", href: "/about", icon: Users },
     { name: "Blog", href: "/blog", icon: BookOpen },
     { name: "Watch", href: "/watch", icon: Play },
+    { name: "Search", href: "#", icon: Search, isSearch: true },
     { name: "Play", href: "/play", icon: null },
-    { name: "Support", href: "/support", icon: Coffee },
+    { name: "About", href: "/about", icon: Users },
     { name: "Contact", href: "/contact", icon: Phone },
-    { name: "Career", href: "/career", icon: Briefcase },
-    { name: "FAQ", href: "/faq", icon: HelpCircle },
   ]
 
   return (
@@ -36,15 +34,29 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            {navigation.slice(0, 6).map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-sm font-medium transition-colors hover:text-blue-600"
-              >
-                {item.name}
-              </Link>
-            ))}
+            {navigation.map((item) =>
+              item.isSearch ? (
+                <button
+                  key={item.name}
+                  className="text-sm font-medium transition-colors hover:text-blue-600"
+                  onClick={() => {
+                    // Search functionality will be added later
+                    console.log("Search clicked")
+                  }}
+                >
+                  <Search className="h-5 w-5" />
+                  <span className="sr-only">Search</span>
+                </button>
+              ) : (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="text-sm font-medium transition-colors hover:text-blue-600"
+                >
+                  {item.name}
+                </Link>
+              ),
+            )}
           </nav>
 
           {/* Mobile Navigation */}
@@ -57,25 +69,43 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <div className="flex flex-col space-y-4 mt-8">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="flex items-center space-x-2 text-lg font-medium transition-colors hover:text-blue-600"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.icon && <item.icon className="h-5 w-5" />}
-                    <span>{item.name}</span>
-                  </Link>
-                ))}
+                {navigation.map((item) =>
+                  item.isSearch ? (
+                    <button
+                      key={item.name}
+                      className="flex items-center space-x-2 text-lg font-medium transition-colors hover:text-blue-600"
+                      onClick={() => {
+                        // Search functionality will be added later
+                        console.log("Search clicked")
+                        setIsOpen(false)
+                      }}
+                    >
+                      <Search className="h-5 w-5" />
+                      <span>Search</span>
+                    </button>
+                  ) : (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="flex items-center space-x-2 text-lg font-medium transition-colors hover:text-blue-600"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.icon && <item.icon className="h-5 w-5" />}
+                      <span>{item.name}</span>
+                    </Link>
+                  ),
+                )}
               </div>
             </SheetContent>
           </Sheet>
 
           {/* CTA Button */}
           <div className="hidden md:flex">
-            <Button asChild className="bg-blue-600 hover:bg-blue-700">
-              <Link href="/support">Support Us</Link>
+            <Button asChild className="bg-orange-600 hover:bg-orange-700">
+              <Link href="/support">
+                <Coffee className="mr-2 h-4 w-4" />
+                Buy Me a Coffee
+              </Link>
             </Button>
           </div>
         </div>

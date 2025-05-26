@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
 
 const ADMIN_CREDENTIALS = {
   email: "admin@flavorstudios.in",
@@ -11,14 +10,13 @@ export async function POST(request: NextRequest) {
     const { email, password } = await request.json()
 
     if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-      const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
       const response = NextResponse.json({
         success: true,
         user: { email, name: "Admin" },
       })
 
-      response.cookies.set("admin-session", sessionToken, {
+      // Set a simple session cookie
+      response.cookies.set("admin-session", "authenticated", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
@@ -41,11 +39,10 @@ export async function DELETE() {
   return response
 }
 
-export async function GET() {
-  const cookieStore = cookies()
-  const session = cookieStore.get("admin-session")
+export async function GET(request: NextRequest) {
+  const session = request.cookies.get("admin-session")
 
-  if (session) {
+  if (session?.value === "authenticated") {
     return NextResponse.json({
       authenticated: true,
       user: { email: ADMIN_CREDENTIALS.email, name: "Admin" },

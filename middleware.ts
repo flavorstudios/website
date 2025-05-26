@@ -5,19 +5,20 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (pathname.startsWith("/admin")) {
+    // Allow access to login page
     if (pathname === "/admin/login") {
       const token = request.cookies.get("admin-session")
-      if (token) {
+      // If already authenticated, redirect to dashboard
+      if (token?.value === "authenticated") {
         return NextResponse.redirect(new URL("/admin/dashboard", request.url))
       }
       return NextResponse.next()
     }
 
+    // Check authentication for all other admin routes
     const token = request.cookies.get("admin-session")
-    if (!token) {
+    if (!token || token.value !== "authenticated") {
       const loginUrl = new URL("/admin/login", request.url)
-      loginUrl.searchParams.set("redirect", pathname)
-      loginUrl.searchParams.set("message", "Please log in to access the admin dashboard")
       return NextResponse.redirect(loginUrl)
     }
   }

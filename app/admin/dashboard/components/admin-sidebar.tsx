@@ -1,59 +1,21 @@
 "use client"
 
-import { LayoutDashboard, ListChecks, ListOrdered, Tag, Users, Settings, MessageSquare, Mail } from "lucide-react"
-
-import { Separator } from "@/components/ui/separator"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import {
+  LayoutDashboard,
+  FileText,
+  Video,
+  MessageSquare,
+  Edit,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Mail,
+  Users,
+} from "lucide-react"
 import { useRole } from "../contexts/role-context"
-import { useEffect, useState } from "react"
-
-const navItems = [
-  {
-    id: "overview",
-    label: "Overview",
-    icon: LayoutDashboard,
-    description: "Your main dashboard overview",
-  },
-  {
-    id: "products",
-    label: "Products",
-    icon: Tag,
-    description: "Manage your products",
-  },
-  {
-    id: "categories",
-    label: "Categories",
-    icon: ListOrdered,
-    description: "Organize your products by categories",
-  },
-  {
-    id: "orders",
-    label: "Orders",
-    icon: ListChecks,
-    description: "View and manage customer orders",
-  },
-  {
-    id: "customers",
-    label: "Customers",
-    icon: Users,
-    description: "Manage customer information",
-  },
-  {
-    id: "comments",
-    label: "Comments",
-    icon: MessageSquare,
-    description: "Manage user comments",
-  },
-  {
-    id: "settings",
-    label: "Settings",
-    icon: Settings,
-    description: "Configure store settings",
-  },
-]
+import { useState, useEffect } from "react"
 
 interface AdminSidebarProps {
   activeSection: string
@@ -64,115 +26,179 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, setSidebarOpen }: AdminSidebarProps) {
   const { accessibleSections, userRole } = useRole()
-  const [isHovered, setIsHovered] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
-  // Filter navigation items based on user role
-  const filteredNavItems = navItems.filter((item) => accessibleSections.includes(item.id) || item.id === "overview")
-
-  // Add inbox item for users who can handle contacts
-  if (accessibleSections.includes("inbox")) {
-    const inboxItem = {
+  const menuItems = [
+    {
+      id: "overview",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      count: null,
+    },
+    {
+      id: "blogs",
+      label: "Blog Posts",
+      icon: FileText,
+      count: null,
+    },
+    {
+      id: "videos",
+      label: "Videos",
+      icon: Video,
+      count: null,
+    },
+    {
+      id: "categories",
+      label: "Categories",
+      icon: Edit,
+      count: null,
+    },
+    {
+      id: "comments",
+      label: "Comments",
+      icon: MessageSquare,
+      count: null,
+    },
+    {
       id: "inbox",
       label: "Email Inbox",
       icon: Mail,
-      description: "Manage contact messages",
-    }
+      count: null,
+    },
+    {
+      id: "users",
+      label: "Users",
+      icon: Users,
+      count: null,
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+      count: null,
+    },
+  ]
 
-    // Insert inbox after comments if it exists, otherwise after categories
-    const insertIndex = filteredNavItems.findIndex((item) => item.id === "comments")
-    if (insertIndex !== -1) {
-      filteredNavItems.splice(insertIndex + 1, 0, inboxItem)
-    } else {
-      const categoryIndex = filteredNavItems.findIndex((item) => item.id === "categories")
-      if (categoryIndex !== -1) {
-        filteredNavItems.splice(categoryIndex + 1, 0, inboxItem)
-      }
-    }
-  }
+  // Filter navigation items based on user role
+  const filteredNavItems = menuItems.filter((item) => accessibleSections.includes(item.id) || item.id === "overview")
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+      if (window.innerWidth < 768) {
         setSidebarOpen(false)
-      } else {
-        setSidebarOpen(true)
       }
     }
 
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
   }, [setSidebarOpen])
 
   return (
-    <>
-      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="sm" className="p-0">
-            Menu
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="p-0">
-          <SheetHeader className="pl-6 pr-8">
-            <SheetTitle>Dashboard</SheetTitle>
-          </SheetHeader>
-          <Separator />
-          <ScrollArea className="h-[calc(100vh-100px)] w-full">
-            <div className="flex flex-col space-y-1 px-2 py-4">
-              {filteredNavItems.map((item) => (
-                <button
-                  key={item.id}
-                  className={`group flex w-full items-center space-x-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-secondary hover:text-foreground ${
-                    activeSection === item.id ? "bg-secondary text-foreground" : "text-muted-foreground"
-                  }`}
-                  onClick={() => setActiveSection(item.id)}
-                >
-                  <item.icon className="h-4 w-4" />
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </div>
-          </ScrollArea>
-        </SheetContent>
-      </Sheet>
-
-      <div
-        className="hidden border-r bg-gray-100/40 dark:bg-gray-800/40 md:block"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <div
-          className={`flex h-full flex-col gap-2 ${sidebarOpen && isHovered ? "max-w-[200px]" : "max-w-[65px]"}  transition-all`}
-        >
-          <div className="flex-1">
-            <div className="px-2 py-3">
-              <Avatar className="h-9 w-9">
-                <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                <AvatarFallback>OM</AvatarFallback>
-              </Avatar>
-              <h2 className="font-semibold mt-2">{userRole === "admin" ? "Administrator" : "Moderator"}</h2>
-              <p className="text-xs text-muted-foreground">Manage your store</p>
-            </div>
-            <Separator />
-            <ScrollArea className="h-[calc(100vh-200px)] w-full">
-              <div className="flex flex-col space-y-1 px-2 py-4">
-                {filteredNavItems.map((item) => (
-                  <button
-                    key={item.id}
-                    className={`group flex w-full items-center space-x-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-secondary hover:text-foreground ${
-                      activeSection === item.id ? "bg-secondary text-foreground" : "text-muted-foreground"
-                    }`}
-                    onClick={() => setActiveSection(item.id)}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {sidebarOpen && isHovered && <span>{item.label}</span>}
-                  </button>
-                ))}
+    <aside
+      className={`bg-white border-r border-gray-200 transition-all duration-300 ease-in-out ${
+        sidebarOpen ? "w-64" : "w-16"
+      } flex flex-col h-full fixed left-0 top-0 z-40 md:relative md:z-auto`}
+    >
+      {/* Sidebar Header */}
+      <div className="p-4 border-b border-gray-200 min-h-[80px] flex items-center">
+        <div className="flex items-center justify-between w-full">
+          {sidebarOpen && (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-bold text-sm">FS</span>
               </div>
-            </ScrollArea>
-          </div>
+              <div className="min-w-0">
+                <span className="font-semibold text-gray-900 text-sm block truncate">Admin Panel</span>
+                <span className="text-xs text-gray-500 block truncate">Flavor Studios</span>
+              </div>
+            </div>
+          )}
+          {!sidebarOpen && (
+            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mx-auto">
+              <span className="text-white font-bold text-xs">FS</span>
+            </div>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="hidden md:flex p-1 h-8 w-8"
+          >
+            {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
         </div>
       </div>
-    </>
+
+      {/* User Info */}
+      {sidebarOpen && (
+        <div className="px-4 py-3 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-gray-600 font-medium text-sm">OM</span>
+            </div>
+            <div className="min-w-0">
+              <p className="font-medium text-gray-900 text-sm truncate">Administrator</p>
+              <p className="text-xs text-gray-500 truncate">Manage your store</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Navigation Menu */}
+      <nav className="flex-1 p-2 overflow-y-auto">
+        <div className="space-y-1">
+          {filteredNavItems.map((item) => {
+            const isActive = activeSection === item.id
+            const Icon = item.icon
+
+            return (
+              <Button
+                key={item.id}
+                variant={isActive ? "default" : "ghost"}
+                className={`w-full ${sidebarOpen ? "justify-start px-3" : "justify-center px-0"} h-10 ${
+                  isActive
+                    ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+                onClick={() => setActiveSection(item.id)}
+                title={!sidebarOpen ? item.label : undefined}
+              >
+                <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />
+                {sidebarOpen && (
+                  <>
+                    <span className="flex-1 text-left text-sm truncate">{item.label}</span>
+                    {item.count && (
+                      <Badge
+                        variant="secondary"
+                        className={`ml-2 text-xs ${isActive ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"}`}
+                      >
+                        {item.count}
+                      </Badge>
+                    )}
+                  </>
+                )}
+              </Button>
+            )
+          })}
+        </div>
+      </nav>
+
+      {/* Sidebar Footer */}
+      {sidebarOpen && (
+        <div className="p-4 border-t border-gray-200 mt-auto">
+          <div className="text-xs text-gray-500 text-center">
+            <p className="font-medium">Flavor Studios Admin</p>
+            <p>Version 1.0.0</p>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Overlay */}
+      {isMobile && sidebarOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+    </aside>
   )
 }

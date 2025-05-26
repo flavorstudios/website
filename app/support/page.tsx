@@ -82,7 +82,7 @@ export default function SupportPage() {
             </p>
 
             {/* Primary CTA */}
-            <div className="flex flex-col gap-3 sm:gap-4 justify-center items-center mb-4 sm:mb-6 px-2">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-4 sm:mb-6 px-2">
               <Button
                 asChild
                 size="lg"
@@ -94,30 +94,28 @@ export default function SupportPage() {
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  asChild
-                  className="w-full sm:w-auto h-12 sm:h-14 px-4 sm:px-6 border-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700"
-                >
-                  <Link href="/contact">
-                    <MessageCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                    Contact
-                  </Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  asChild
-                  className="w-full sm:w-auto h-12 sm:h-14 px-4 sm:px-6 border-2 bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
-                >
-                  <Link href="/faq">
-                    <HelpCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                    FAQ
-                  </Link>
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                size="lg"
+                asChild
+                className="w-full sm:w-auto h-12 sm:h-14 px-4 sm:px-6 border-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700"
+              >
+                <Link href="/contact">
+                  <MessageCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  Contact
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                asChild
+                className="w-full sm:w-auto h-12 sm:h-14 px-4 sm:px-6 border-2 bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
+              >
+                <Link href="/faq">
+                  <HelpCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  FAQ
+                </Link>
+              </Button>
             </div>
 
             <p className="text-xs sm:text-sm text-gray-500 px-2">Secure payments processed through Buy Me a Coffee</p>

@@ -164,17 +164,15 @@ export default function CareerPage() {
                 className="relative border-2 border-gray-200 bg-gray-50/50 hover:shadow-md transition-all duration-300"
               >
                 {/* Position Filled Banner */}
-                <div className="absolute top-4 right-4 z-10">
-                  <div className="bg-yellow-400 border border-yellow-500 rounded-full px-3 py-1 flex items-center gap-1.5">
-                    <CheckCircle className="h-3 w-3 text-black" />
-                    <span className="text-xs font-medium text-black">Position Filled</span>
+                <div className="absolute top-2 right-2 z-10">
+                  <div className="bg-yellow-400 border border-yellow-500 rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center gap-1 sm:gap-1.5">
+                    <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-black" />
+                    <span className="text-[10px] sm:text-xs font-medium text-black">Position Filled</span>
                   </div>
                 </div>
 
-                <CardHeader className="pb-3 sm:pb-4 pr-24 text-center">
-                  <CardTitle className="text-base sm:text-lg lg:text-xl mb-3 text-gray-900 hidden sm:block">
-                    {position.title}
-                  </CardTitle>
+                <CardHeader className="pb-3 sm:pb-4 pr-16 sm:pr-24 text-center">
+                  <CardTitle className="text-sm sm:text-lg lg:text-xl mb-3 text-gray-900">{position.title}</CardTitle>
 
                   <div className="flex flex-wrap gap-2 mb-3 justify-center">
                     <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">

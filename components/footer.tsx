@@ -44,9 +44,9 @@ export function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto max-w-7xl px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Brand Section */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Link href="/" className="flex items-center space-x-2">
               <span className="font-bold text-xl">Flavor Studios</span>
             </Link>
@@ -69,7 +69,7 @@ export function Footer() {
 
           {/* Studio Links */}
           <div>
-            <h3 className="font-semibold text-lg mb-4">Studio</h3>
+            <h3 className="font-semibold text-lg mb-3">Studio</h3>
             <ul className="space-y-2">
               {studioLinks.map((link) => (
                 <li key={link.name}>
@@ -83,7 +83,7 @@ export function Footer() {
 
           {/* Discover Links */}
           <div>
-            <h3 className="font-semibold text-lg mb-4">Discover</h3>
+            <h3 className="font-semibold text-lg mb-3">Discover</h3>
             <ul className="space-y-2">
               {discoverLinks.map((link) => (
                 <li key={link.name}>
@@ -97,7 +97,7 @@ export function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="font-semibold text-lg mb-4">Legal</h3>
+            <h3 className="font-semibold text-lg mb-3">Legal</h3>
             <ul className="space-y-2">
               {legalLinks.map((link) => (
                 <li key={link.name}>
@@ -110,7 +110,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center space-y-2">
+        <div className="border-t border-gray-800 mt-6 pt-6 text-center space-y-2">
           <p className="text-gray-400 text-sm">© {currentYear} Flavor Studios. All rights reserved.</p>
           <p className="text-gray-500 text-xs">Built with Passion. Powered by Dreams.</p>
         </div>

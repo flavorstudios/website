@@ -7,18 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Database,
-  Activity,
-  Download,
-  Trash2,
-  RefreshCw,
-  Globe,
-  Cpu,
-  CheckCircle,
-  AlertCircle,
-  Zap,
-} from "lucide-react"
+import { Database, Activity, Download, Trash2, RefreshCw, Globe, Cpu, CheckCircle, AlertCircle } from "lucide-react"
+import { CacheCleaner } from "./cache-cleaner"
 
 interface SystemStats {
   uptime: string
@@ -264,18 +254,7 @@ export function SystemTools() {
         {/* Maintenance */}
         <TabsContent value="maintenance" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Cache Management</CardTitle>
-                <CardDescription>Clear cached data to improve performance</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button onClick={handleClearCache} disabled={loading} className="w-full">
-                  <Zap className="h-4 w-4 mr-2" />
-                  {loading ? "Clearing..." : "Clear All Cache"}
-                </Button>
-              </CardContent>
-            </Card>
+            <CacheCleaner />
 
             <Card>
               <CardHeader>

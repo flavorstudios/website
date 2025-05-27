@@ -234,18 +234,57 @@ function BlogPostForm({
   })
 
   useEffect(() => {
-    // Load categories
-    fetch("/api/admin/categories")
-      .then((res) => res.json())
-      .then((data) => {
-        const blogCategories =
-          data.categories?.filter((cat: any) => cat.type === "blog" && cat.isActive)?.map((cat: any) => cat.name) || []
-        setCategories(blogCategories)
-        if (!formData.category && blogCategories.length > 0) {
-          setFormData((prev) => ({ ...prev, category: blogCategories[0] }))
+    // Load categories with fallback
+    const loadCategories = async () => {
+      try {
+        const response = await fetch("/api/admin/categories")
+        const data = await response.json()
+
+        // Filter for blog categories that are active
+        const blogCategories = data.categories?.filter((cat: any) => cat.type === "blog" && cat.isActive) || []
+
+        if (blogCategories.length > 0) {
+          const categoryNames = blogCategories.map((cat: any) => cat.name)
+          setCategories(categoryNames)
+
+          // Set default category if none selected
+          if (!formData.category) {
+            setFormData((prev) => ({ ...prev, category: categoryNames[0] }))
+          }
+        } else {
+          // Fallback categories if API fails or returns empty
+          const fallbackCategories = [
+            "Anime Reviews",
+            "Behind the Scenes",
+            "Tutorials",
+            "News & Updates",
+            "Creator Spotlights",
+            "Industry Buzz",
+          ]
+          setCategories(fallbackCategories)
+          if (!formData.category) {
+            setFormData((prev) => ({ ...prev, category: fallbackCategories[0] }))
+          }
         }
-      })
-      .catch(console.error)
+      } catch (error) {
+        console.error("Failed to load categories:", error)
+        // Fallback categories on error
+        const fallbackCategories = [
+          "Anime Reviews",
+          "Behind the Scenes",
+          "Tutorials",
+          "News & Updates",
+          "Creator Spotlights",
+          "Industry Buzz",
+        ]
+        setCategories(fallbackCategories)
+        if (!formData.category) {
+          setFormData((prev) => ({ ...prev, category: fallbackCategories[0] }))
+        }
+      }
+    }
+
+    loadCategories()
   }, [])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -322,12 +361,76 @@ function BlogPostForm({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Cover Image URL</label>
-                  <Input
-                    value={formData.coverImage}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, coverImage: e.target.value }))}
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  <label className="block text-sm font-medium mb-2">Cover Image</label>
+                  <div className="space-y-3">
+                    {/* Image Upload Component */}
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                      <div className="text-center">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (file) {
+                              // Create preview URL
+                              const previewUrl = URL.createObjectURL(file)
+                              setFormData((prev) => ({ ...prev, coverImage: previewUrl }))
+                            }
+                          }}
+                          className="hidden"
+                          id="cover-image-upload"
+                        />
+                        <label
+                          htmlFor="cover-image-upload"
+                          className="cursor-pointer flex flex-col items-center space-y-2"
+                        >
+                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <svg
+                              className="w-6 h-6 text-gray-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                              />
+                            </svg>
+                          </div>
+                          <span className="text-sm text-gray-600">Click to upload image</span>
+                          <span className="text-xs text-gray-400">PNG, JPG, GIF up to 10MB</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Image Preview */}
+                    {formData.coverImage && (
+                      <div className="relative">
+                        <img
+                          src={formData.coverImage || "/placeholder.svg"}
+                          alt="Cover preview"
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setFormData((prev) => ({ ...prev, coverImage: "" }))}
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Alternative URL Input */}
+                    <div className="text-center text-sm text-gray-500">or</div>
+                    <Input
+                      value={formData.coverImage.startsWith("blob:") ? "" : formData.coverImage}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, coverImage: e.target.value }))}
+                      placeholder="Enter image URL..."
+                    />
+                  </div>
                 </div>
               </div>
 

@@ -20,48 +20,64 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate real-time notifications from Firestore
-    const mockNotifications: Notification[] = [
-      {
-        id: "1",
-        type: "comment",
-        title: "New Blog Comment",
-        message: 'Someone commented on "3D Animation Techniques"',
-        timestamp: new Date(Date.now() - 5 * 60 * 1000),
-        read: false,
-      },
-      {
-        id: "2",
-        type: "contact",
-        title: "New Contact Message",
-        message: "Project inquiry from Sarah Chen",
-        timestamp: new Date(Date.now() - 15 * 60 * 1000),
-        read: false,
-      },
-      {
-        id: "3",
-        type: "flagged",
-        title: "Content Flagged",
-        message: "Comment flagged by moderation system",
-        timestamp: new Date(Date.now() - 30 * 60 * 1000),
-        read: true,
-      },
-    ]
+    const loadNotifications = async () => {
+      try {
+        setLoading(true)
+        const response = await fetch("/api/admin/notifications")
+        if (response.ok) {
+          const data = await response.json()
+          setNotifications(data.notifications || [])
+          setUnreadCount(data.notifications?.filter((n: Notification) => !n.read).length || 0)
+        } else {
+          // No notifications available
+          setNotifications([])
+          setUnreadCount(0)
+        }
+      } catch (error) {
+        console.error("Failed to load notifications:", error)
+        setNotifications([])
+        setUnreadCount(0)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-    setNotifications(mockNotifications)
-    setUnreadCount(mockNotifications.filter((n) => !n.read).length)
+    loadNotifications()
+
+    // Set up real-time updates every 30 seconds
+    const interval = setInterval(loadNotifications, 30000)
+    return () => clearInterval(interval)
   }, [])
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
-    setUnreadCount((prev) => Math.max(0, prev - 1))
+  const markAsRead = async (id: string) => {
+    try {
+      await fetch(`/api/admin/notifications/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ read: true }),
+      })
+
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
+      setUnreadCount((prev) => Math.max(0, prev - 1))
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error)
+    }
   }
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-    setUnreadCount(0)
+  const markAllAsRead = async () => {
+    try {
+      await fetch("/api/admin/notifications/mark-all-read", {
+        method: "POST",
+      })
+
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+      setUnreadCount(0)
+    } catch (error) {
+      console.error("Failed to mark all notifications as read:", error)
+    }
   }
 
   const getIcon = (type: string) => {
@@ -141,10 +157,16 @@ export function NotificationBell() {
                   </div>
 
                   <div className="max-h-96 overflow-y-auto">
-                    {notifications.length === 0 ? (
+                    {loading ? (
+                      <div className="p-8 text-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto"></div>
+                        <p className="text-sm text-gray-500 mt-2">Loading notifications...</p>
+                      </div>
+                    ) : notifications.length === 0 ? (
                       <div className="p-8 text-center text-gray-500">
                         <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                         <p>No notifications yet</p>
+                        <p className="text-xs mt-1">Real notifications will appear here</p>
                       </div>
                     ) : (
                       notifications.map((notification) => (
@@ -168,7 +190,7 @@ export function NotificationBell() {
                               </div>
                               <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
                               <p className="text-xs text-gray-400 mt-2">
-                                {notification.timestamp.toLocaleTimeString()}
+                                {new Date(notification.timestamp).toLocaleString()}
                               </p>
                             </div>
                           </div>

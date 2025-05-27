@@ -616,6 +616,80 @@ export default function PlayPage() {
         <Card className="shadow-lg">
           <CardHeader className="pb-3 sm:pb-6">
             <CardTitle className="text-center text-lg sm:text-xl">Game Statistics</CardTitle>
+            {/* Winner Display */}
+            <div className="text-center mt-2">
+              {(() => {
+                const totalGames = stats.xWins + stats.oWins + stats.draws + (stats.timeouts || 0)
+                if (totalGames === 0) {
+                  return <p className="text-sm text-gray-500">No games played yet</p>
+                }
+
+                if (gameMode === "PvC") {
+                  if (stats.xWins > stats.oWins) {
+                    return (
+                      <div className="flex items-center justify-center gap-2">
+                        <Badge className="bg-blue-600 text-white">🎉 Player is Winning!</Badge>
+                        <span className="text-sm text-gray-600">
+                          ({stats.xWins} - {stats.oWins})
+                        </span>
+                      </div>
+                    )
+                  } else if (stats.oWins > stats.xWins) {
+                    return (
+                      <div className="flex items-center justify-center gap-2">
+                        <Badge className="bg-red-600 text-white">🤖 Computer is Winning!</Badge>
+                        <span className="text-sm text-gray-600">
+                          ({stats.oWins} - {stats.xWins})
+                        </span>
+                      </div>
+                    )
+                  } else {
+                    return (
+                      <div className="flex items-center justify-center gap-2">
+                        <Badge variant="outline" className="border-gray-400 text-gray-600">
+                          🤝 It's a Tie!
+                        </Badge>
+                        <span className="text-sm text-gray-600">
+                          ({stats.xWins} - {stats.oWins})
+                        </span>
+                      </div>
+                    )
+                  }
+                } else {
+                  // PvP mode
+                  if (stats.xWins > stats.oWins) {
+                    return (
+                      <div className="flex items-center justify-center gap-2">
+                        <Badge className="bg-blue-600 text-white">🎉 Player X is Winning!</Badge>
+                        <span className="text-sm text-gray-600">
+                          ({stats.xWins} - {stats.oWins})
+                        </span>
+                      </div>
+                    )
+                  } else if (stats.oWins > stats.xWins) {
+                    return (
+                      <div className="flex items-center justify-center gap-2">
+                        <Badge className="bg-red-600 text-white">🎉 Player O is Winning!</Badge>
+                        <span className="text-sm text-gray-600">
+                          ({stats.oWins} - {stats.xWins})
+                        </span>
+                      </div>
+                    )
+                  } else {
+                    return (
+                      <div className="flex items-center justify-center gap-2">
+                        <Badge variant="outline" className="border-gray-400 text-gray-600">
+                          🤝 It's a Tie!
+                        </Badge>
+                        <span className="text-sm text-gray-600">
+                          ({stats.xWins} - {stats.oWins})
+                        </span>
+                      </div>
+                    )
+                  }
+                }
+              })()}
+            </div>
           </CardHeader>
           <CardContent>
             <div
@@ -627,7 +701,9 @@ export default function PlayPage() {
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="text-2xl sm:text-3xl font-bold text-blue-600 text-center">{stats.xWins}</div>
-                <div className="text-xs sm:text-sm text-gray-600 text-center mt-1">X Wins</div>
+                <div className="text-xs sm:text-sm text-gray-600 text-center mt-1">
+                  {gameMode === "PvC" ? "Player (X)" : "Player X"} Wins
+                </div>
               </motion.div>
               <motion.div
                 className="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200"
@@ -643,7 +719,9 @@ export default function PlayPage() {
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="text-2xl sm:text-3xl font-bold text-red-600 text-center">{stats.oWins}</div>
-                <div className="text-xs sm:text-sm text-gray-600 text-center mt-1">O Wins</div>
+                <div className="text-xs sm:text-sm text-gray-600 text-center mt-1">
+                  {gameMode === "PvC" ? "Computer (O)" : "Player O"} Wins
+                </div>
               </motion.div>
               {gameMode === "PvP" && (pvpDifficulty === "timed" || pvpDifficulty === "blitz") && (
                 <motion.div

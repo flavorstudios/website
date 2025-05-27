@@ -49,10 +49,6 @@ export const categoryStore = {
     return readJsonFile<Category>("categories.json")
   },
 
-  async getAllRaw(): Promise<Category[]> {
-    return this.getAll()
-  },
-
   async getByType(type: "blog" | "video"): Promise<Category[]> {
     const categories = await this.getAll()
     return categories.filter((cat) => cat.type === type && cat.isActive).sort((a, b) => a.order - b.order)

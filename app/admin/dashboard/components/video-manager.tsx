@@ -242,71 +242,18 @@ function VideoForm({
   })
 
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        // First ensure default categories are initialized
-        console.log("Initializing categories...")
-        await fetch("/api/admin/categories/init", { method: "POST" })
-
-        // Then fetch all categories
-        console.log("Fetching categories...")
-        const response = await fetch("/api/admin/categories")
-        const data = await response.json()
-
-        console.log("Categories response:", data)
-
-        if (data.categories && Array.isArray(data.categories)) {
-          // Filter for video categories that are active
-          const videoCategories = data.categories
-            .filter((cat) => cat.type === "video" && cat.isActive)
-            .sort((a, b) => a.order - b.order)
-            .map((cat) => cat.name)
-
-          console.log("Video categories found:", videoCategories)
-
-          if (videoCategories.length > 0) {
-            setCategories(videoCategories)
-            // Auto-select first category if none selected
-            if (!formData.category) {
-              setFormData((prev) => ({ ...prev, category: videoCategories[0] }))
-            }
-          } else {
-            console.log("No video categories found, using fallback")
-            // Use fallback if no video categories found
-            const fallbackCategories = [
-              "Original Anime",
-              "Short Films",
-              "Behind the Scenes",
-              "Tutorials & Guides",
-              "Anime Trailers",
-              "YouTube Highlights",
-            ]
-            setCategories(fallbackCategories)
-            if (!formData.category) {
-              setFormData((prev) => ({ ...prev, category: fallbackCategories[0] }))
-            }
-          }
-        } else {
-          throw new Error("Invalid categories response")
+    // Load categories
+    fetch("/api/admin/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        const videoCategories =
+          data.categories?.filter((cat: any) => cat.type === "video" && cat.isActive)?.map((cat: any) => cat.name) || []
+        setCategories(videoCategories)
+        if (!formData.category && videoCategories.length > 0) {
+          setFormData((prev) => ({ ...prev, category: videoCategories[0] }))
         }
-      } catch (error) {
-        console.error("Failed to load categories:", error)
-        // Enhanced fallback categories if API fails
-        const fallbackCategories = [
-          "Original Anime",
-          "Short Films",
-          "Behind the Scenes",
-          "Tutorials & Guides",
-          "Anime Trailers",
-          "YouTube Highlights",
-        ]
-        setCategories(fallbackCategories)
-        if (!formData.category) {
-          setFormData((prev) => ({ ...prev, category: fallbackCategories[0] }))
-        }
-      }
-    }
-    loadCategories()
+      })
+      .catch(console.error)
   }, [])
 
   const extractYouTubeId = (url: string) => {

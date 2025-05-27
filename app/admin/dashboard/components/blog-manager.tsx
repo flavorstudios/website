@@ -35,17 +35,46 @@ export function BlogManager() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
+  const [categories, setCategories] = useState<string[]>([])
 
   // Load posts from API
   useEffect(() => {
     loadPosts()
   }, [])
 
+  // Add this useEffect to sync with categories
+  useEffect(() => {
+    // Load categories and sync with category store
+    const syncCategories = async () => {
+      try {
+        await fetch("/api/admin/categories/sync", { method: "POST" })
+        loadPosts()
+      } catch (error) {
+        console.error("Failed to sync categories:", error)
+      }
+    }
+
+    syncCategories()
+  }, [])
+
+  // Update the loadPosts function to include category validation
   const loadPosts = async () => {
     try {
-      const response = await fetch("/api/admin/blogs")
-      const data = await response.json()
-      setPosts(data.posts || [])
+      const [postsResponse, categoriesResponse] = await Promise.all([
+        fetch("/api/admin/blogs"),
+        fetch("/api/admin/categories?type=blog"),
+      ])
+
+      const [postsData, categoriesData] = await Promise.all([postsResponse.json(), categoriesResponse.json()])
+
+      setPosts(postsData.posts || [])
+
+      // Update categories in the form
+      const blogCategories =
+        categoriesData.categories
+          ?.filter((cat: any) => cat.type === "blog" && cat.isActive)
+          ?.map((cat: any) => cat.name) || []
+      setCategories(blogCategories)
     } catch (error) {
       console.error("Failed to load posts:", error)
     } finally {
@@ -205,6 +234,7 @@ export function BlogManager() {
             setShowCreateForm(false)
             setEditingPost(null)
           }}
+          categories={categories}
         />
       )}
     </div>
@@ -215,12 +245,13 @@ function BlogPostForm({
   post,
   onSave,
   onCancel,
+  categories,
 }: {
   post: BlogPost | null
   onSave: (data: Partial<BlogPost>) => void
   onCancel: () => void
+  categories: string[]
 }) {
-  const [categories, setCategories] = useState<string[]>([])
   const [formData, setFormData] = useState({
     title: post?.title || "",
     content: post?.content || "",
@@ -234,19 +265,10 @@ function BlogPostForm({
   })
 
   useEffect(() => {
-    // Load categories
-    fetch("/api/admin/categories")
-      .then((res) => res.json())
-      .then((data) => {
-        const blogCategories =
-          data.categories?.filter((cat: any) => cat.type === "blog" && cat.isActive)?.map((cat: any) => cat.name) || []
-        setCategories(blogCategories)
-        if (!formData.category && blogCategories.length > 0) {
-          setFormData((prev) => ({ ...prev, category: blogCategories[0] }))
-        }
-      })
-      .catch(console.error)
-  }, [])
+    if (categories.length > 0 && !formData.category) {
+      setFormData((prev) => ({ ...prev, category: categories[0] }))
+    }
+  }, [categories])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

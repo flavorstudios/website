@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Suspense } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -5,6 +6,30 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Play, Youtube, Calendar, Eye } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Flavor Studios - Independent Animation Studio",
+  description:
+    "Independent animation studio specializing in emotionally resonant 3D animated content and original anime series. Crafting stories with soul—one frame at a time.",
+  openGraph: {
+    title: "Flavor Studios - Independent Animation Studio",
+    description:
+      "Independent animation studio specializing in emotionally resonant 3D animated content and original anime series.",
+    type: "website",
+    url: "https://flavorstudios.in",
+    images: ["/og-image.jpg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Flavor Studios - Independent Animation Studio",
+    description:
+      "Independent animation studio specializing in emotionally resonant 3D animated content and original anime series.",
+    images: ["/og-image.jpg"],
+  },
+  alternates: {
+    canonical: "https://flavorstudios.in",
+  },
+}
 
 async function getHomePageContent() {
   const fallbackContent = {

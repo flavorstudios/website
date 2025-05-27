@@ -1,39 +1,28 @@
 import { NextResponse } from "next/server"
-import { initializeDefaultCategories } from "@/lib/category"
-import { categoryStore } from "@/lib/stores/category-store"
 
 export async function POST() {
   try {
+    const { initializeDefaultCategories } = await import("@/lib/category-store")
+
+    // Force initialization of default categories
     await initializeDefaultCategories()
 
     // Verify categories were created
-    const categories = await categoryStore.getAll()
-    const videoCategories = categories.filter((cat) => cat.type === "video")
+    const { categoryStore } = await import("@/lib/category-store")
+    const allCategories = await categoryStore.getAll()
+    const videoCategories = allCategories.filter((cat) => cat.type === "video")
 
-    if (videoCategories.length === 0) {
-      // Force create video categories if they don't exist
-      const defaultVideoCategories = [
-        "Original Anime",
-        "Short Films",
-        "Behind the Scenes",
-        "Tutorials & Guides",
-        "Anime Trailers",
-        "YouTube Highlights",
-      ]
+    console.log("Initialized categories:", {
+      total: allCategories.length,
+      video: videoCategories.length,
+      videoNames: videoCategories.map((cat) => cat.name),
+    })
 
-      for (let i = 0; i < defaultVideoCategories.length; i++) {
-        await categoryStore.create({
-          name: defaultVideoCategories[i],
-          type: "video",
-          description: `Videos related to ${defaultVideoCategories[i].toLowerCase()}`,
-          color: `hsl(${(i * 60) % 360}, 70%, 50%)`,
-          order: i,
-          isActive: true,
-        })
-      }
-    }
-
-    return NextResponse.json({ success: true, message: "Categories initialized" })
+    return NextResponse.json({
+      success: true,
+      message: "Categories initialized",
+      videoCategories: videoCategories.length,
+    })
   } catch (error) {
     console.error("Failed to initialize categories:", error)
     return NextResponse.json({ error: "Failed to initialize categories" }, { status: 500 })

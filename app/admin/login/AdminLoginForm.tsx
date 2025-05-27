@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, Loader2, Shield, Sparkles } from "lucide-react"
+import { ImageUploader } from "./components/image-uploader"
 
 export default function AdminLoginForm() {
   const [email, setEmail] = useState("")
@@ -18,6 +19,7 @@ export default function AdminLoginForm() {
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -173,6 +175,12 @@ export default function AdminLoginForm() {
                 )}
               </Button>
             </form>
+
+            {/* Image Upload Section */}
+            <div className="mt-4 sm:mt-6">
+              <h3 className="text-sm font-medium text-gray-700 mb-3 text-center">Upload & Convert to WebP</h3>
+              <ImageUploader onImageUpload={setUploadedImage} className="w-full" />
+            </div>
 
             <div className="mt-4 sm:mt-6 text-center">
               <p className="text-xs text-gray-500 px-2">Secured with enterprise-grade encryption</p>

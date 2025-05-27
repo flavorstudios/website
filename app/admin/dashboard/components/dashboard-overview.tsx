@@ -114,7 +114,7 @@ export function DashboardOverview() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-gray-600 mb-2">No data available</p>
+          <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
           <Button onClick={() => window.location.reload()} variant="outline">
             Refresh Dashboard
           </Button>
@@ -145,19 +145,20 @@ export function DashboardOverview() {
         </div>
       </div>
 
-      {/* Real-time Stats Grid */}
+      {/* Real-time Stats Grid - Only Real Data */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Posts</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalPosts || 0}</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalPosts}</p>
                 {stats.monthlyGrowth > 0 && (
                   <p className="text-sm text-green-600 flex items-center mt-1">
                     <TrendingUp className="h-3 w-3 mr-1" />+{stats.monthlyGrowth}% this month
                   </p>
                 )}
+                {stats.totalPosts === 0 && <p className="text-sm text-gray-500 mt-1">No posts yet</p>}
               </div>
               <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
                 <FileText className="w-6 h-6 text-blue-600" />
@@ -171,8 +172,8 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Videos</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalVideos || 0}</p>
-                <p className="text-sm text-gray-500 mt-1">{stats.featuredVideos || 0} featured</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalVideos}</p>
+                <p className="text-sm text-gray-500 mt-1">{stats.featuredVideos} featured</p>
               </div>
               <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
                 <Video className="w-6 h-6 text-purple-600" />
@@ -186,9 +187,11 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Comments</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalComments || 0}</p>
-                {stats.pendingComments > 0 && (
+                <p className="text-3xl font-bold text-gray-900">{stats.totalComments}</p>
+                {stats.pendingComments > 0 ? (
                   <p className="text-sm text-yellow-600 mt-1">{stats.pendingComments} pending review</p>
+                ) : (
+                  <p className="text-sm text-gray-500 mt-1">All up to date</p>
                 )}
               </div>
               <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
@@ -203,7 +206,7 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Views</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalViews?.toLocaleString() || 0}</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalViews.toLocaleString()}</p>
                 <p className="text-sm text-blue-600 mt-1">This month</p>
               </div>
               <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
@@ -260,7 +263,11 @@ export function DashboardOverview() {
           <CardContent>
             <div className="space-y-4">
               {recentActivity.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No recent activity</p>
+                <div className="text-center py-8">
+                  <Activity className="h-8 w-8 mx-auto mb-2 opacity-50 text-gray-400" />
+                  <p className="text-gray-500">No recent activity</p>
+                  <p className="text-xs text-gray-400 mt-1">Activity will appear here as you use the dashboard</p>
+                </div>
               ) : (
                 recentActivity.slice(0, 4).map((activity) => (
                   <div key={activity.id} className="flex items-start gap-3">
@@ -292,8 +299,8 @@ export function DashboardOverview() {
         </Card>
       </div>
 
-      {/* Real-time Content Performance */}
-      {stats.totalPosts > 0 && (
+      {/* Content Performance - Only show if there's actual content */}
+      {(stats.totalPosts > 0 || stats.totalVideos > 0 || stats.totalComments > 0) && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
             <CardHeader>
@@ -304,18 +311,17 @@ export function DashboardOverview() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Published Posts</span>
-                    <span className="text-sm text-gray-600">
-                      {stats.publishedPosts}/{stats.totalPosts}
-                    </span>
+                {stats.totalPosts > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Published Posts</span>
+                      <span className="text-sm text-gray-600">
+                        {stats.publishedPosts}/{stats.totalPosts}
+                      </span>
+                    </div>
+                    <Progress value={(stats.publishedPosts / stats.totalPosts) * 100} className="h-2" />
                   </div>
-                  <Progress
-                    value={stats.totalPosts > 0 ? (stats.publishedPosts / stats.totalPosts) * 100 : 0}
-                    className="h-2"
-                  />
-                </div>
+                )}
                 {stats.totalVideos > 0 && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
@@ -355,21 +361,21 @@ export function DashboardOverview() {
             <CardContent>
               <div className="space-y-4">
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-green-600">+{stats.monthlyGrowth || 0}%</p>
+                  <p className="text-3xl font-bold text-green-600">+{stats.monthlyGrowth}%</p>
                   <p className="text-sm text-gray-600">Content Growth</p>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm">Total Posts</span>
-                    <span className="text-sm font-medium">{stats.totalPosts || 0}</span>
+                    <span className="text-sm font-medium">{stats.totalPosts}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Total Videos</span>
-                    <span className="text-sm font-medium">{stats.totalVideos || 0}</span>
+                    <span className="text-sm font-medium">{stats.totalVideos}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Total Views</span>
-                    <span className="text-sm font-medium">{stats.totalViews?.toLocaleString() || 0}</span>
+                    <span className="text-sm font-medium">{stats.totalViews.toLocaleString()}</span>
                   </div>
                 </div>
               </div>

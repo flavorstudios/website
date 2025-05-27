@@ -145,15 +145,15 @@ export function DashboardOverview() {
         </div>
       </div>
 
-      {/* Real-time Stats Grid - No Fallback Data */}
+      {/* Real-time Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Posts</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalPosts ?? 0}</p>
-                {stats?.monthlyGrowth && stats.monthlyGrowth > 0 && (
+                <p className="text-3xl font-bold text-gray-900">{stats.totalPosts || 0}</p>
+                {stats.monthlyGrowth > 0 && (
                   <p className="text-sm text-green-600 flex items-center mt-1">
                     <TrendingUp className="h-3 w-3 mr-1" />+{stats.monthlyGrowth}% this month
                   </p>
@@ -171,8 +171,8 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Videos</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalVideos ?? 0}</p>
-                <p className="text-sm text-gray-500 mt-1">{stats?.featuredVideos ?? 0} featured</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalVideos || 0}</p>
+                <p className="text-sm text-gray-500 mt-1">{stats.featuredVideos || 0} featured</p>
               </div>
               <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
                 <Video className="w-6 h-6 text-purple-600" />
@@ -186,8 +186,8 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Comments</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalComments ?? 0}</p>
-                {stats?.pendingComments && stats.pendingComments > 0 && (
+                <p className="text-3xl font-bold text-gray-900">{stats.totalComments || 0}</p>
+                {stats.pendingComments > 0 && (
                   <p className="text-sm text-yellow-600 mt-1">{stats.pendingComments} pending review</p>
                 )}
               </div>
@@ -203,7 +203,7 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Views</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalViews?.toLocaleString() ?? 0}</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalViews?.toLocaleString() || 0}</p>
                 <p className="text-sm text-blue-600 mt-1">This month</p>
               </div>
               <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">

@@ -18,59 +18,51 @@ interface DashboardStats {
   monthlyGrowth: number
 }
 
+interface ActivityItem {
+  id: string
+  type: string
+  title: string
+  description: string
+  timestamp: string
+  status: string
+}
+
 export function DashboardOverview() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadStats = async () => {
+    const loadDashboardData = async () => {
       try {
-        const response = await fetch("/api/admin/stats")
-        const data = await response.json()
-        setStats(data)
+        setLoading(true)
+
+        // Load real stats from Firestore
+        const statsResponse = await fetch("/api/admin/stats")
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json()
+          setStats(statsData)
+        }
+
+        // Load real activity from Firestore
+        const activityResponse = await fetch("/api/admin/activity")
+        if (activityResponse.ok) {
+          const activityData = await activityResponse.json()
+          setRecentActivity(activityData.activities || [])
+        }
       } catch (error) {
-        console.error("Failed to load stats:", error)
+        console.error("Failed to load dashboard data:", error)
       } finally {
         setLoading(false)
       }
     }
-    loadStats()
-  }, [])
 
-  const [recentActivity] = useState([
-    {
-      id: 1,
-      type: "blog",
-      title: "New blog post published",
-      description: "Getting Started with Blender Animation",
-      time: "2 hours ago",
-      status: "success",
-    },
-    {
-      id: 2,
-      type: "video",
-      title: "Video uploaded to YouTube",
-      description: "Character Design Process Tutorial",
-      time: "4 hours ago",
-      status: "success",
-    },
-    {
-      id: 3,
-      type: "comment",
-      title: "New comment awaiting moderation",
-      description: "Comment on 'Advanced Rigging Techniques'",
-      time: "6 hours ago",
-      status: "pending",
-    },
-    {
-      id: 4,
-      type: "system",
-      title: "System backup completed",
-      description: "Automatic daily backup successful",
-      time: "1 day ago",
-      status: "success",
-    },
-  ])
+    loadDashboardData()
+
+    // Set up real-time updates
+    const interval = setInterval(loadDashboardData, 30000) // Refresh every 30 seconds
+    return () => clearInterval(interval)
+  }, [])
 
   const quickActions = [
     {
@@ -104,7 +96,6 @@ export function DashboardOverview() {
   ]
 
   const handleQuickAction = (action: string) => {
-    // This will be handled by the parent component
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("admin-navigate", { detail: action }))
     }
@@ -114,6 +105,20 @@ export function DashboardOverview() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        <span className="ml-3 text-gray-600">Loading real-time data...</span>
+      </div>
+    )
+  }
+
+  if (!stats) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-gray-600 mb-2">No data available</p>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Refresh Dashboard
+          </Button>
+        </div>
       </div>
     )
   }
@@ -140,17 +145,19 @@ export function DashboardOverview() {
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Real-time Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Posts</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalPosts}</p>
-                <p className="text-sm text-green-600 flex items-center mt-1">
-                  <TrendingUp className="h-3 w-3 mr-1" />+{stats?.monthlyGrowth}% this month
-                </p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalPosts || 0}</p>
+                {stats.monthlyGrowth > 0 && (
+                  <p className="text-sm text-green-600 flex items-center mt-1">
+                    <TrendingUp className="h-3 w-3 mr-1" />+{stats.monthlyGrowth}% this month
+                  </p>
+                )}
               </div>
               <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
                 <FileText className="w-6 h-6 text-blue-600" />
@@ -164,8 +171,8 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Videos</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalVideos}</p>
-                <p className="text-sm text-gray-500 mt-1">{stats?.featuredVideos} featured</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalVideos || 0}</p>
+                <p className="text-sm text-gray-500 mt-1">{stats.featuredVideos || 0} featured</p>
               </div>
               <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
                 <Video className="w-6 h-6 text-purple-600" />
@@ -179,8 +186,10 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Comments</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalComments}</p>
-                <p className="text-sm text-yellow-600 mt-1">{stats?.pendingComments} pending review</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalComments || 0}</p>
+                {stats.pendingComments > 0 && (
+                  <p className="text-sm text-yellow-600 mt-1">{stats.pendingComments} pending review</p>
+                )}
               </div>
               <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
                 <MessageSquare className="w-6 h-6 text-green-600" />
@@ -194,7 +203,7 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Views</p>
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalViews.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-gray-900">{stats.totalViews?.toLocaleString() || 0}</p>
                 <p className="text-sm text-blue-600 mt-1">This month</p>
               </div>
               <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
@@ -240,7 +249,7 @@ export function DashboardOverview() {
           </CardContent>
         </Card>
 
-        {/* Recent Activity */}
+        {/* Real-time Recent Activity */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -250,111 +259,124 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3">
-                  <div
-                    className={`w-2 h-2 rounded-full mt-2 ${
-                      activity.status === "success"
-                        ? "bg-green-500"
-                        : activity.status === "pending"
-                          ? "bg-yellow-500"
-                          : "bg-gray-500"
-                    }`}
-                  ></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                    <p className="text-sm text-gray-600">{activity.description}</p>
-                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+              {recentActivity.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">No recent activity</p>
+              ) : (
+                recentActivity.slice(0, 4).map((activity) => (
+                  <div key={activity.id} className="flex items-start gap-3">
+                    <div
+                      className={`w-2 h-2 rounded-full mt-2 ${
+                        activity.status === "success"
+                          ? "bg-green-500"
+                          : activity.status === "pending"
+                            ? "bg-yellow-500"
+                            : "bg-gray-500"
+                      }`}
+                    ></div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                      <p className="text-sm text-gray-600">{activity.description}</p>
+                      <p className="text-xs text-gray-500 mt-1">{activity.timestamp}</p>
+                    </div>
+                    <Badge
+                      variant={activity.status === "success" ? "default" : "secondary"}
+                      className={activity.status === "pending" ? "bg-yellow-100 text-yellow-800" : ""}
+                    >
+                      {activity.status}
+                    </Badge>
                   </div>
-                  <Badge
-                    variant={activity.status === "success" ? "default" : "secondary"}
-                    className={activity.status === "pending" ? "bg-yellow-100 text-yellow-800" : ""}
-                  >
-                    {activity.status}
-                  </Badge>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Content Performance */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
-              Content Performance
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Published Posts</span>
-                  <span className="text-sm text-gray-600">
-                    {stats?.publishedPosts}/{stats?.totalPosts}
-                  </span>
+      {/* Real-time Content Performance */}
+      {stats.totalPosts > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Content Performance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Published Posts</span>
+                    <span className="text-sm text-gray-600">
+                      {stats.publishedPosts}/{stats.totalPosts}
+                    </span>
+                  </div>
+                  <Progress
+                    value={stats.totalPosts > 0 ? (stats.publishedPosts / stats.totalPosts) * 100 : 0}
+                    className="h-2"
+                  />
                 </div>
-                <Progress value={(stats?.publishedPosts / stats?.totalPosts) * 100} className="h-2" />
+                {stats.totalVideos > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Featured Videos</span>
+                      <span className="text-sm text-gray-600">
+                        {stats.featuredVideos}/{stats.totalVideos}
+                      </span>
+                    </div>
+                    <Progress value={(stats.featuredVideos / stats.totalVideos) * 100} className="h-2" />
+                  </div>
+                )}
+                {stats.totalComments > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Approved Comments</span>
+                      <span className="text-sm text-gray-600">
+                        {stats.totalComments - stats.pendingComments}/{stats.totalComments}
+                      </span>
+                    </div>
+                    <Progress
+                      value={((stats.totalComments - stats.pendingComments) / stats.totalComments) * 100}
+                      className="h-2"
+                    />
+                  </div>
+                )}
               </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Featured Videos</span>
-                  <span className="text-sm text-gray-600">
-                    {stats?.featuredVideos}/{stats?.totalVideos}
-                  </span>
-                </div>
-                <Progress value={(stats?.featuredVideos / stats?.totalVideos) * 100} className="h-2" />
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Approved Comments</span>
-                  <span className="text-sm text-gray-600">
-                    {stats?.totalComments - stats?.pendingComments}/{stats?.totalComments}
-                  </span>
-                </div>
-                <Progress
-                  value={((stats?.totalComments - stats?.pendingComments) / stats?.totalComments) * 100}
-                  className="h-2"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              This Month
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="text-center">
-                <p className="text-3xl font-bold text-green-600">+{stats?.monthlyGrowth}%</p>
-                <p className="text-sm text-gray-600">Content Growth</p>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                This Month
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-green-600">+{stats.monthlyGrowth || 0}%</p>
+                  <p className="text-sm text-gray-600">Content Growth</p>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Total Posts</span>
+                    <span className="text-sm font-medium">{stats.totalPosts || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Total Videos</span>
+                    <span className="text-sm font-medium">{stats.totalVideos || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Total Views</span>
+                    <span className="text-sm font-medium">{stats.totalViews?.toLocaleString() || 0}</span>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm">New Posts</span>
-                  <span className="text-sm font-medium">6</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">New Videos</span>
-                  <span className="text-sm font-medium">2</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Total Views</span>
-                  <span className="text-sm font-medium">12.5K</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 }

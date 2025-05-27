@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, Eye, User } from "lucide-react"
+import { Calendar, Eye, User, Clock } from "lucide-react"
+import CommentSection from "./components/comment-section"
+import SocialShare from "./components/social-share"
 
 async function getBlogPost(slug: string) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/blogs`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/blogs`, {
       cache: "no-store",
     })
 
@@ -54,23 +56,30 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <p className="text-xl text-gray-600 mb-6">{post.excerpt}</p>
 
           <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span className="flex items-center gap-1">
-              <User className="h-4 w-4" />
-              {post.author}
-            </span>
+            {post.author && (
+              <span className="flex items-center gap-1">
+                <User className="h-4 w-4" />
+                {post.author}
+              </span>
+            )}
             <span className="flex items-center gap-1">
               <Eye className="h-4 w-4" />
               {post.views.toLocaleString()} views
             </span>
-            <span>{post.readTime}</span>
+            {post.readTime && (
+              <span className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                {post.readTime}
+              </span>
+            )}
           </div>
         </header>
 
         {/* Featured Image */}
-        {post.featuredImage && (
+        {post.coverImage && (
           <div className="mb-8">
             <img
-              src={post.featuredImage || "/placeholder.svg"}
+              src={post.coverImage || "/placeholder.svg?height=400&width=800&text=Blog+Post+Cover"}
               alt={post.title}
               className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
             />
@@ -78,16 +87,27 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         )}
 
         {/* Content */}
-        <Card className="mb-8">
+        <Card className="mb-12">
           <CardContent className="p-8">
-            <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
+            <div
+              className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
           </CardContent>
         </Card>
 
+        {/* Social Share */}
+        <SocialShare
+          title={post.title}
+          excerpt={post.excerpt}
+          url={`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/blog/${post.slug}`}
+          image={post.coverImage}
+        />
+
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Tags</h3>
+          <div className="mb-12">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Tags</h3>
             <div className="flex flex-wrap gap-2">
               {post.tags.map((tag: string) => (
                 <Badge key={tag} variant="secondary">
@@ -97,6 +117,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
           </div>
         )}
+
+        {/* Comment Section */}
+        <CommentSection postId={post.id} postSlug={post.slug} />
       </article>
     </div>
   )
@@ -114,5 +137,10 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
   return {
     title: post.seoTitle || post.title,
     description: post.seoDescription || post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      images: post.coverImage ? [post.coverImage] : [],
+    },
   }
 }

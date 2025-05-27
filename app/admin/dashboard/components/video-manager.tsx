@@ -40,6 +40,20 @@ export function VideoManager() {
     loadVideos()
   }, [])
 
+  // Add category sync for videos
+  useEffect(() => {
+    const syncCategories = async () => {
+      try {
+        await fetch("/api/admin/categories/sync", { method: "POST" })
+        loadVideos()
+      } catch (error) {
+        console.error("Failed to sync categories:", error)
+      }
+    }
+
+    syncCategories()
+  }, [])
+
   const loadVideos = async () => {
     try {
       const response = await fetch("/api/admin/videos")

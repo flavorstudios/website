@@ -1,4 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { addDoc, collection, getDocs } from "firebase/firestore"
+import { db } from "@/firebase/config"
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,13 +17,14 @@ export async function POST(request: NextRequest) {
       views: blogData.views || 0,
     }
 
-    // In a real implementation, this would save to Firestore
-    // For now, we'll just return the post data
+    // Save to Firestore
+    const docRef = await addDoc(collection(db, "blogs"), post)
+
     console.log("Blog post saved:", post)
 
     return NextResponse.json({
       success: true,
-      id,
+      id: docRef.id,
       message: "Blog post saved successfully",
     })
   } catch (error) {
@@ -32,8 +35,9 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    // In a real implementation, this would fetch from Firestore
-    const posts = []
+    // Fetch from Firestore
+    const querySnapshot = await getDocs(collection(db, "blogs"))
+    const posts = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
 
     return NextResponse.json({ posts })
   } catch (error) {

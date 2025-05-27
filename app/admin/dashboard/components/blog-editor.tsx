@@ -66,31 +66,17 @@ export function BlogEditor() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        // First ensure default categories are initialized
-        await fetch("/api/admin/categories/init", { method: "POST" })
-
         const response = await fetch("/api/admin/categories")
         const data = await response.json()
+        const blogCategories =
+          data.categories?.filter((cat: any) => cat.type === "blog" && cat.isActive)?.map((cat: any) => cat.name) || []
+        setCategories(blogCategories)
 
-        if (data.categories) {
-          const blogCategories = data.categories
-            .filter((cat: any) => cat.type === "blog" && cat.isActive)
-            .map((cat: any) => cat.name)
-
-          setCategories(blogCategories)
-
-          if (!post.category && blogCategories.length > 0) {
-            setPost((prev) => ({ ...prev, category: blogCategories[0] }))
-          }
+        if (!post.category && blogCategories.length > 0) {
+          setPost((prev) => ({ ...prev, category: blogCategories[0] }))
         }
       } catch (error) {
         console.error("Failed to load categories:", error)
-        // Fallback categories if API fails
-        const fallbackCategories = ["Anime Reviews", "Storytelling & Themes", "Behind the Frames", "Creator Spotlights"]
-        setCategories(fallbackCategories)
-        if (!post.category) {
-          setPost((prev) => ({ ...prev, category: fallbackCategories[0] }))
-        }
       }
     }
     loadCategories()

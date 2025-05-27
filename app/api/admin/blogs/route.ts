@@ -4,7 +4,7 @@ import { blogStore } from "@/lib/content-store"
 export async function GET() {
   try {
     const blogs = await blogStore.getAll()
-    return NextResponse.json(blogs)
+    return NextResponse.json({ posts: blogs })
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch blogs" }, { status: 500 })
   }

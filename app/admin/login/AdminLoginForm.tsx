@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, Loader2, Shield, Sparkles } from "lucide-react"
-import { ImageUploader } from "./components/image-uploader"
 
 export default function AdminLoginForm() {
   const [email, setEmail] = useState("")
@@ -19,7 +18,6 @@ export default function AdminLoginForm() {
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -175,36 +173,6 @@ export default function AdminLoginForm() {
                 )}
               </Button>
             </form>
-
-            {/* Placeholder Google Sign-In Button */}
-            <Button
-              variant="outline"
-              className="w-full min-h-[48px] h-12 sm:h-11 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-              disabled
-            >
-              <svg
-                className="mr-2 h-4 w-4"
-                aria-hidden="true"
-                focusable="false"
-                data-prefix="fab"
-                data-icon="google"
-                role="img"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 488 512"
-              >
-                <path
-                  fill="currentColor"
-                  d="M488 148.3C488 98.8 449.1 59.7 399.5 59.7H134.7c-49.6 0-88.5 39.1-88.5 88.6v215.9c0 49.5 38.9 88.6 88.5 88.6h264.8c49.6 0 88.5-39.1 88.5-88.6V148.3H488zM244 415.7c-66.3 0-120.3-54-120.3-120.3s54-120.3 120.3-120.3 120.3 54 120.3 120.3-54 120.3-120.3 120.3z"
-                ></path>
-              </svg>
-              Sign in with Google
-            </Button>
-
-            {/* Image Upload Section */}
-            <div className="mt-4 sm:mt-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-3 text-center">Upload & Convert to WebP</h3>
-              <ImageUploader onImageUpload={setUploadedImage} className="w-full" />
-            </div>
 
             <div className="mt-4 sm:mt-6 text-center">
               <p className="text-xs text-gray-500 px-2">Secured with enterprise-grade encryption</p>

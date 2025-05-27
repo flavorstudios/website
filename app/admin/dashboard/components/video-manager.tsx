@@ -242,18 +242,36 @@ function VideoForm({
   })
 
   useEffect(() => {
-    // Load categories
-    fetch("/api/admin/categories")
-      .then((res) => res.json())
-      .then((data) => {
-        const videoCategories =
-          data.categories?.filter((cat: any) => cat.type === "video" && cat.isActive)?.map((cat: any) => cat.name) || []
-        setCategories(videoCategories)
-        if (!formData.category && videoCategories.length > 0) {
-          setFormData((prev) => ({ ...prev, category: videoCategories[0] }))
+    const loadCategories = async () => {
+      try {
+        // First ensure default categories are initialized
+        await fetch("/api/admin/categories/init", { method: "POST" })
+
+        const response = await fetch("/api/admin/categories")
+        const data = await response.json()
+
+        if (data.categories) {
+          const videoCategories = data.categories
+            .filter((cat: any) => cat.type === "video" && cat.isActive)
+            .map((cat: any) => cat.name)
+
+          setCategories(videoCategories)
+
+          if (!formData.category && videoCategories.length > 0) {
+            setFormData((prev) => ({ ...prev, category: videoCategories[0] }))
+          }
         }
-      })
-      .catch(console.error)
+      } catch (error) {
+        console.error("Failed to load categories:", error)
+        // Fallback categories if API fails
+        const fallbackCategories = ["Original Anime", "Short Films", "Behind the Scenes", "Tutorials & Guides"]
+        setCategories(fallbackCategories)
+        if (!formData.category) {
+          setFormData((prev) => ({ ...prev, category: fallbackCategories[0] }))
+        }
+      }
+    }
+    loadCategories()
   }, [])
 
   const extractYouTubeId = (url: string) => {

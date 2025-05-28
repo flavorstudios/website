@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu, Coffee } from "lucide-react"
 import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
-import { SearchPopup } from "./ui/search-popup"
+import { SearchFeature } from "./ui/search-feature"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -107,13 +107,13 @@ export function Header() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <MegaMenu items={menuItems} />
-            <SearchPopup />
+            <SearchFeature />
           </div>
 
           {/* Mobile Navigation */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <div className="flex items-center md:hidden">
-              <SearchPopup />
+              <SearchFeature />
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Menu className="h-5 w-5" />

@@ -1,28 +1,18 @@
 import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { videoStore } from "@/lib/content-store"
 
 export async function GET() {
   try {
-    const videos = await prisma.video.findMany({
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        published: true,
-        publishedAt: true,
-        updatedAt: true,
-        createdAt: true,
-      },
-    })
+    const videos = await videoStore.getAll()
 
     const formattedVideos = videos.map((video) => ({
       id: video.id,
       slug: video.slug,
       title: video.title,
-      published: video.published,
-      publishedAt: video.publishedAt ? video.publishedAt.toISOString() : null,
-      updatedAt: video.updatedAt.toISOString(),
-      createdAt: video.createdAt.toISOString(),
+      published: video.status === 'published',
+      publishedAt: video.publishedAt,
+      updatedAt: video.updatedAt,
+      createdAt: video.createdAt,
     }))
 
     return NextResponse.json({ videos: formattedVideos }, { status: 200 })

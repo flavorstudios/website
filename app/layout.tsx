@@ -4,6 +4,7 @@ import "./globals.css"
 import { Inter } from "next/font/google"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { BackToTop } from "@/components/back-to-top"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -67,7 +68,7 @@ export const metadata: Metadata = {
     maximumScale: 1,
     userScalable: false,
   },
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
@@ -81,6 +82,7 @@ export default function RootLayout({
         <Header />
         <main>{children}</main>
         <Footer />
+        <BackToTop />
       </body>
     </html>
   )

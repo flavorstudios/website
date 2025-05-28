@@ -75,7 +75,7 @@ export default async function BlogPage({
             0,
           ) / posts.length,
         )
-      : 5
+      : 0
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -89,8 +89,8 @@ export default async function BlogPage({
               Studio Insights & Stories
             </div>
 
-            {/* Gradient Heading */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 leading-tight px-4">
+            {/* Gradient Heading with extra padding at bottom */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 leading-relaxed px-4 pb-2">
               Flavor Studios Blog
             </h1>
 

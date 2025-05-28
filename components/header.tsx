@@ -4,9 +4,10 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, Search, Coffee } from "lucide-react"
+import { Menu, Coffee } from "lucide-react"
 import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
+import { SearchPopup } from "./ui/search-popup"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -104,43 +105,23 @@ export function Header() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <MegaMenu items={menuItems} />
-
-            <button
-              className="text-sm font-medium transition-colors hover:text-blue-600"
-              onClick={() => {
-                // Search functionality will be added later
-                console.log("Search clicked")
-              }}
-            >
-              <Search className="h-5 w-5" />
-              <span className="sr-only">Search</span>
-            </button>
+            <SearchPopup />
           </div>
 
           {/* Mobile Navigation */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
+            <div className="flex items-center md:hidden">
+              <SearchPopup />
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </SheetTrigger>
+            </div>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <div className="mt-8">
                 <MobileMegaMenu items={menuItems} onItemClick={() => setIsOpen(false)} />
-
-                <div className="mt-6 pt-6 border-t">
-                  <button
-                    className="flex items-center space-x-2 text-lg font-medium transition-colors hover:text-blue-600 w-full p-3"
-                    onClick={() => {
-                      console.log("Search clicked")
-                      setIsOpen(false)
-                    }}
-                  >
-                    <Search className="h-5 w-5" />
-                    <span>Search</span>
-                  </button>
-                </div>
               </div>
             </SheetContent>
           </Sheet>

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { MenuItem } from "./mega-menu"
@@ -14,6 +15,7 @@ interface MobileMegaMenuProps {
 
 export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenuProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
+  const pathname = usePathname()
 
   const toggleExpanded = (label: string) => {
     const newExpanded = new Set(expandedItems)
@@ -25,15 +27,28 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
     setExpandedItems(newExpanded)
   }
 
+  // Check if current path matches menu item
+  const isActive = (href?: string) => {
+    if (!href) return false
+    if (href === "/" && pathname === "/") return true
+    if (href !== "/" && pathname.startsWith(href)) return true
+    return false
+  }
+
   return (
-    <div className={cn("space-y-1", className)}>
+    <div className={cn("space-y-1", className)} role="navigation" aria-label="Mobile menu">
       {items.map((item) => (
         <div key={item.label}>
           {item.href && !item.subItems ? (
             <Link
               href={item.href}
-              className="flex items-center py-3 px-4 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors"
+              className={cn(
+                "flex items-center py-3 px-4 text-base font-medium transition-colors rounded-lg",
+                "hover:text-blue-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                isActive(item.href) ? "text-blue-600 bg-blue-50" : "text-gray-700",
+              )}
               onClick={onItemClick}
+              aria-current={isActive(item.href) ? "page" : undefined}
             >
               {item.label}
             </Link>
@@ -42,10 +57,13 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
               <button
                 className={cn(
                   "w-full flex items-center justify-between py-3 px-4 text-base font-medium",
-                  "text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-colors",
-                  expandedItems.has(item.label) && "text-blue-600 bg-blue-50",
+                  "transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500",
+                  "hover:text-blue-600 hover:bg-gray-50",
+                  expandedItems.has(item.label) ? "text-blue-600 bg-blue-50" : "text-gray-700",
                 )}
                 onClick={() => toggleExpanded(item.label)}
+                aria-expanded={expandedItems.has(item.label)}
+                aria-controls={`mobile-submenu-${item.label}`}
               >
                 <span>{item.label}</span>
                 {item.subItems && (
@@ -54,26 +72,46 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                       "h-4 w-4 transition-transform duration-200",
                       expandedItems.has(item.label) && "rotate-180",
                     )}
+                    aria-hidden="true"
                   />
                 )}
               </button>
               {item.subItems && (
                 <div
+                  id={`mobile-submenu-${item.label}`}
                   className={cn(
                     "overflow-hidden transition-all duration-300 ease-in-out",
                     expandedItems.has(item.label) ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
                   )}
+                  role="region"
+                  aria-label={`${item.label} submenu`}
                 >
                   <div className="py-2 pl-4 space-y-1">
                     {item.subItems.map((subItem, index) => (
                       <Link
                         key={index}
                         href={subItem.href}
-                        className="block py-2 px-4 text-sm text-gray-600 hover:text-blue-600 hover:bg-white rounded transition-colors"
+                        className={cn(
+                          "block py-2 px-4 text-sm transition-colors rounded",
+                          "hover:text-blue-600 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500",
+                          isActive(subItem.href) ? "text-blue-600 bg-white" : "text-gray-600",
+                        )}
                         onClick={onItemClick}
+                        aria-current={isActive(subItem.href) ? "page" : undefined}
                       >
-                        <div className="font-medium">{subItem.label}</div>
-                        {subItem.description && <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>}
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-medium">{subItem.label}</div>
+                            {subItem.description && (
+                              <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>
+                            )}
+                          </div>
+                          {subItem.isNew && (
+                            <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                              New
+                            </span>
+                          )}
+                        </div>
                       </Link>
                     ))}
                   </div>

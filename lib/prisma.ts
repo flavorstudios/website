@@ -1,17 +1,36 @@
-import { PrismaClient } from "@prisma/client"
+// Conditional Prisma client that only loads when needed
+let prismaClient: any = null
 
-// PrismaClient is attached to the `global` object in development to prevent
-// exhausting your database connection limit.
-// Learn more: https://pris.ly/d/help/next-js-best-practices
+export async function getPrismaClient() {
+  if (prismaClient) {
+    return prismaClient
+  }
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient }
+  try {
+    // Only try to load Prisma if we're in a server environment and have DATABASE_URL
+    if (typeof window === "undefined" && process.env.DATABASE_URL) {
+      const { PrismaClient } = await import("@prisma/client")
+      prismaClient = new PrismaClient({
+        log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+      })
+      return prismaClient
+    }
+  } catch (error) {
+    console.warn("Prisma client not available:", error)
+  }
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
-  })
+  return null
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma
-
-// Export the prisma instance as a named export
+// Export a lazy-loaded prisma instance
+export const prisma = new Proxy({} as any, {
+  get(target, prop) {
+    return async (...args: any[]) => {
+      const client = await getPrismaClient()
+      if (!client) {
+        throw new Error("Prisma client not available")
+      }
+      return client[prop](...args)
+    }
+  },
+})

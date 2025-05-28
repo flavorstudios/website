@@ -1,33 +1,21 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { type NextRequest, NextResponse } from "next/server"
+import { videoStore } from "@/lib/content-store"
 
 export async function GET() {
   try {
-    const videos = await prisma.video.findMany({
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        published: true,
-        publishedAt: true,
-        updatedAt: true,
-        createdAt: true,
-      },
-    })
-
-    const formattedVideos = videos.map((video) => ({
-      id: video.id,
-      slug: video.slug,
-      title: video.title,
-      published: video.published,
-      publishedAt: video.publishedAt ? video.publishedAt.toISOString() : null,
-      updatedAt: video.updatedAt.toISOString(),
-      createdAt: video.createdAt.toISOString(),
-    }))
-
-    return NextResponse.json({ videos: formattedVideos }, { status: 200 })
+    const videos = await videoStore.getAll()
+    return NextResponse.json({ videos })
   } catch (error) {
-    console.error("Error fetching videos:", error)
     return NextResponse.json({ error: "Failed to fetch videos" }, { status: 500 })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const data = await request.json()
+    const video = await videoStore.create(data)
+    return NextResponse.json(video)
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to create video" }, { status: 500 })
   }
 }

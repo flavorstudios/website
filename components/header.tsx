@@ -19,46 +19,48 @@ export function Header() {
     },
     {
       label: "Blog",
+      href: "/blog",
       subItems: [
-        {
-          label: "Anime News",
-          href: "/blog/category/anime-news",
-          description: "Latest updates from the anime world",
-        },
-        {
-          label: "Reviews",
-          href: "/blog/category/reviews",
-          description: "In-depth anime and manga reviews",
-        },
-        {
-          label: "Behind the Scenes",
-          href: "/blog/category/behind-the-scenes",
-          description: "Studio insights and processes",
-        },
         {
           label: "All Posts",
           href: "/blog",
           description: "Browse all our blog content",
         },
+        {
+          label: "Anime News",
+          href: "/blog?category=anime-news",
+          description: "Latest updates from the anime world",
+        },
+        {
+          label: "Reviews",
+          href: "/blog?category=reviews",
+          description: "In-depth anime and manga reviews",
+        },
+        {
+          label: "Behind the Scenes",
+          href: "/blog?category=behind-the-scenes",
+          description: "Studio insights and processes",
+        },
       ],
     },
     {
       label: "Watch",
+      href: "/watch",
       subItems: [
-        {
-          label: "Originals",
-          href: "/watch/originals",
-          description: "Our exclusive original series",
-        },
-        {
-          label: "Episodes",
-          href: "/watch/episodes",
-          description: "Latest episode releases",
-        },
         {
           label: "All Videos",
           href: "/watch",
           description: "Browse our complete video library",
+        },
+        {
+          label: "Originals",
+          href: "/watch?category=originals",
+          description: "Our exclusive original series",
+        },
+        {
+          label: "Episodes",
+          href: "/watch?category=episodes",
+          description: "Latest episode releases",
         },
       ],
     },
@@ -75,14 +77,14 @@ export function Header() {
           description: "Learn about Flavor Studios",
         },
         {
-          label: "Team",
-          href: "/about/team",
-          description: "Meet our talented creators",
-        },
-        {
           label: "Careers",
           href: "/career",
           description: "Join our creative team",
+        },
+        {
+          label: "FAQ",
+          href: "/faq",
+          description: "Frequently asked questions",
         },
       ],
     },

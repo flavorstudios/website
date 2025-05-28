@@ -1,34 +1,90 @@
-import { NextResponse } from "next/server"
-import { getBlogPosts, getVideos } from "@/lib/content-store"
-import { formatSitemapDate } from "@/lib/sitemap-utils"
+import { type NextRequest, NextResponse } from "next/server"
 
-const baseUrl = process.env.NEXT_PUBLIC_WEBSITE_URL || "https://flavorstudios.in"
-
-// Static pages with their priorities
-const staticPages = [
-  { url: "/", priority: 1.0, changefreq: "daily" },
-  { url: "/blog", priority: 0.8, changefreq: "daily" },
-  { url: "/watch", priority: 0.8, changefreq: "daily" },
-  { url: "/about", priority: 0.6, changefreq: "weekly" },
-  { url: "/contact", priority: 0.6, changefreq: "monthly" },
-  { url: "/support", priority: 0.6, changefreq: "monthly" },
-  { url: "/career", priority: 0.6, changefreq: "monthly" },
-  { url: "/faq", priority: 0.6, changefreq: "monthly" },
-  { url: "/legal", priority: 0.3, changefreq: "yearly" },
-  { url: "/privacy-policy", priority: 0.3, changefreq: "yearly" },
-  { url: "/terms-of-service", priority: 0.3, changefreq: "yearly" },
-  { url: "/cookie-policy", priority: 0.3, changefreq: "yearly" },
-  { url: "/disclaimer", priority: 0.3, changefreq: "yearly" },
-  { url: "/dmca", priority: 0.3, changefreq: "yearly" },
-  { url: "/media-usage-policy", priority: 0.3, changefreq: "yearly" },
-]
-
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Get dynamic content from content store
-    const [blogs, videos] = await Promise.all([getBlogPosts().catch(() => []), getVideos().catch(() => [])])
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
 
-    // Build sitemap XML
+    // Static pages with their priorities
+    const staticPages = [
+      { url: "/", priority: "1.0", changefreq: "daily" },
+      { url: "/blog", priority: "0.8", changefreq: "daily" },
+      { url: "/watch", priority: "0.8", changefreq: "daily" },
+      { url: "/about", priority: "0.6", changefreq: "monthly" },
+      { url: "/contact", priority: "0.6", changefreq: "monthly" },
+      { url: "/support", priority: "0.6", changefreq: "monthly" },
+      { url: "/career", priority: "0.6", changefreq: "monthly" },
+      { url: "/faq", priority: "0.6", changefreq: "monthly" },
+      { url: "/legal", priority: "0.3", changefreq: "yearly" },
+      { url: "/privacy-policy", priority: "0.3", changefreq: "yearly" },
+      { url: "/terms-of-service", priority: "0.3", changefreq: "yearly" },
+      { url: "/cookie-policy", priority: "0.3", changefreq: "yearly" },
+      { url: "/disclaimer", priority: "0.3", changefreq: "yearly" },
+      { url: "/dmca", priority: "0.3", changefreq: "yearly" },
+      { url: "/media-usage-policy", priority: "0.3", changefreq: "yearly" },
+    ]
+
+    const dynamicPages: Array<{
+      url: string
+      priority: string
+      changefreq: string
+      lastmod?: string
+    }> = []
+
+    try {
+      // Fetch blog posts
+      const blogsResponse = await fetch(`${baseUrl}/api/admin/blogs`, {
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      })
+
+      if (blogsResponse.ok) {
+        const blogsData = await blogsResponse.json()
+        const blogs = blogsData.blogs || []
+
+        blogs.forEach((blog: any) => {
+          if (blog.slug && blog.published) {
+            dynamicPages.push({
+              url: `/blog/${blog.slug}`,
+              priority: "0.7",
+              changefreq: "weekly",
+              lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
+            })
+          }
+        })
+      }
+    } catch (error) {
+      console.error("Error fetching blogs for sitemap:", error)
+    }
+
+    try {
+      // Fetch videos
+      const videosResponse = await fetch(`${baseUrl}/api/admin/videos`, {
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      })
+
+      if (videosResponse.ok) {
+        const videosData = await videosResponse.json()
+        const videos = videosData.videos || []
+
+        videos.forEach((video: any) => {
+          if (video.slug && video.published) {
+            dynamicPages.push({
+              url: `/watch/${video.slug}`,
+              priority: "0.7",
+              changefreq: "weekly",
+              lastmod: video.updatedAt || video.publishedAt || video.createdAt,
+            })
+          }
+        })
+      }
+    } catch (error) {
+      console.error("Error fetching videos for sitemap:", error)
+    }
+
+    // Generate XML sitemap
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
@@ -40,29 +96,19 @@ ${staticPages
   .map(
     (page) => `  <url>
     <loc>${baseUrl}${page.url}</loc>
-    <lastmod>${formatSitemapDate(new Date())}</lastmod>
+    <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>`,
   )
   .join("\n")}
-${blogs
+${dynamicPages
   .map(
-    (blog) => `  <url>
-    <loc>${baseUrl}/blog/${blog.slug}</loc>
-    <lastmod>${formatSitemapDate(blog.updatedAt || blog.publishedAt)}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`,
-  )
-  .join("\n")}
-${videos
-  .map(
-    (video) => `  <url>
-    <loc>${baseUrl}/watch/${video.youtubeId || video.id}</loc>
-    <lastmod>${formatSitemapDate(video.updatedAt || video.publishedAt)}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    (page) => `  <url>
+    <loc>${baseUrl}${page.url}</loc>
+    ${page.lastmod ? `<lastmod>${new Date(page.lastmod).toISOString()}</lastmod>` : `<lastmod>${new Date().toISOString()}</lastmod>`}
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
   </url>`,
   )
   .join("\n")}
@@ -73,31 +119,42 @@ ${videos
       headers: {
         "Content-Type": "application/xml",
         "Cache-Control": "public, max-age=3600, s-maxage=3600",
+        "CDN-Cache-Control": "public, max-age=3600",
+        "Vercel-CDN-Cache-Control": "public, max-age=3600",
       },
     })
   } catch (error) {
     console.error("Error generating sitemap:", error)
 
-    // Fallback sitemap with just static pages
+    // Return a basic sitemap with static pages only if there's an error
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
     const fallbackSitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${staticPages
-  .map(
-    (page) => `  <url>
-    <loc>${baseUrl}${page.url}</loc>
-    <lastmod>${formatSitemapDate(new Date())}</lastmod>
-    <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
-  </url>`,
-  )
-  .join("\n")}
+  <url>
+    <loc>${baseUrl}/</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/blog</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/watch</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>`
 
     return new NextResponse(fallbackSitemap, {
       status: 200,
       headers: {
         "Content-Type": "application/xml",
-        "Cache-Control": "public, max-age=3600, s-maxage=3600",
+        "Cache-Control": "public, max-age=300",
       },
     })
   }

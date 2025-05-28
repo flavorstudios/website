@@ -5,11 +5,14 @@ import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { CategoryData } from "@/lib/dynamic-categories"
+import Link from "next/link"
 
 interface CategoryTabsProps {
   categories: CategoryData[]
   selectedCategory: string
-  onCategoryChange: (category: string) => void
+  onCategoryChange?: (category: string) => void
+  basePath?: string
+  type?: string
   showAll?: boolean
   className?: string
 }
@@ -18,6 +21,7 @@ export function CategoryTabs({
   categories,
   selectedCategory,
   onCategoryChange,
+  basePath,
   showAll = true,
   className,
 }: CategoryTabsProps) {
@@ -84,25 +88,66 @@ export function CategoryTabs({
           className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth px-8 md:px-0 py-2"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {allCategories.map((category) => (
-            <Button
-              key={category.slug}
-              variant={selectedCategory === category.slug ? "default" : "outline"}
-              size="sm"
-              className={cn(
-                "whitespace-nowrap flex-shrink-0 transition-all duration-200 min-h-[36px] px-4",
-                selectedCategory === category.slug
-                  ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
-                  : "hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300",
-              )}
-              onClick={() => onCategoryChange(category.slug)}
-            >
-              {category.name}
-              {category.count > 0 && (
-                <span className="ml-2 text-xs opacity-70 bg-white/20 px-1.5 py-0.5 rounded-full">{category.count}</span>
-              )}
-            </Button>
-          ))}
+          {allCategories.map((category) => {
+            return onCategoryChange ? (
+              <Button
+                key={category.slug}
+                variant={selectedCategory === category.slug ? "default" : "outline"}
+                size="sm"
+                className={cn(
+                  "whitespace-nowrap flex-shrink-0 transition-all duration-200 min-h-[36px] px-4",
+                  selectedCategory === category.slug
+                    ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                    : "hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300",
+                )}
+                onClick={() => {
+                  if (onCategoryChange) {
+                    onCategoryChange(category.slug)
+                  } else if (basePath) {
+                    const params = new URLSearchParams()
+                    if (category.slug !== "all") params.set("category", category.slug)
+                    const url = `${basePath}${params.toString() ? `?${params.toString()}` : ""}`
+                    window.location.href = url
+                  }
+                }}
+              >
+                {category.name}
+                {category.count > 0 && (
+                  <span className="ml-2 text-xs opacity-70 bg-white/20 px-1.5 py-0.5 rounded-full">
+                    {category.count}
+                  </span>
+                )}
+              </Button>
+            ) : (
+              <Button
+                key={category.slug}
+                variant={selectedCategory === category.slug ? "default" : "outline"}
+                size="sm"
+                className={cn(
+                  "whitespace-nowrap flex-shrink-0 transition-all duration-200 min-h-[36px] px-4",
+                  selectedCategory === category.slug
+                    ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                    : "hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300",
+                )}
+                asChild
+              >
+                <Link
+                  href={(() => {
+                    const params = new URLSearchParams()
+                    if (category.slug !== "all") params.set("category", category.slug)
+                    return `${basePath}${params.toString() ? `?${params.toString()}` : ""}`
+                  })()}
+                >
+                  {category.name}
+                  {category.count > 0 && (
+                    <span className="ml-2 text-xs opacity-70 bg-white/20 px-1.5 py-0.5 rounded-full">
+                      {category.count}
+                    </span>
+                  )}
+                </Link>
+              </Button>
+            )
+          })}
         </div>
 
         {/* Right scroll button */}

@@ -1,89 +1,108 @@
 import { getBlogPosts, getVideos, getBlogPostBySlug, getVideoBySlug } from "./content-store"
 
-// Try to import prisma, but don't fail if it's not available
-let prismaClient: any = null
-try {
-  // Dynamic import to avoid issues during build time
-  const { prisma } = require("./prisma")
-  prismaClient = prisma
-} catch (error) {
-  console.warn("Prisma client not available, using content store fallback")
-}
-
 // Database utility functions that work with or without Prisma
 export async function getAllBlogs() {
   try {
-    if (prismaClient) {
-      return await prismaClient.blog.findMany({
-        where: { published: true },
-        include: { category: true },
-        orderBy: { publishedAt: "desc" },
-      })
-    } else {
-      return await getBlogPosts()
+    // Try to use Prisma if available
+    if (typeof window === "undefined" && process.env.DATABASE_URL) {
+      const { getPrismaClient } = await import("./prisma")
+      const prisma = await getPrismaClient()
+
+      if (prisma) {
+        return await prisma.blog.findMany({
+          where: { published: true },
+          include: { category: true },
+          orderBy: { publishedAt: "desc" },
+        })
+      }
     }
   } catch (error) {
-    console.error("Error fetching blogs:", error)
-    return await getBlogPosts()
+    console.warn("Prisma not available, using content store:", error)
   }
+
+  // Fallback to content store
+  return await getBlogPosts()
 }
 
 export async function getAllVideos() {
   try {
-    if (prismaClient) {
-      return await prismaClient.video.findMany({
-        where: { published: true },
-        include: { category: true },
-        orderBy: { publishedAt: "desc" },
-      })
-    } else {
-      return await getVideos()
+    // Try to use Prisma if available
+    if (typeof window === "undefined" && process.env.DATABASE_URL) {
+      const { getPrismaClient } = await import("./prisma")
+      const prisma = await getPrismaClient()
+
+      if (prisma) {
+        return await prisma.video.findMany({
+          where: { published: true },
+          include: { category: true },
+          orderBy: { publishedAt: "desc" },
+        })
+      }
     }
   } catch (error) {
-    console.error("Error fetching videos:", error)
-    return await getVideos()
+    console.warn("Prisma not available, using content store:", error)
   }
+
+  // Fallback to content store
+  return await getVideos()
 }
 
 export async function getBlogBySlug(slug: string) {
   try {
-    if (prismaClient) {
-      return await prismaClient.blog.findUnique({
-        where: { slug },
-        include: { category: true },
-      })
-    } else {
-      return await getBlogPostBySlug(slug)
+    // Try to use Prisma if available
+    if (typeof window === "undefined" && process.env.DATABASE_URL) {
+      const { getPrismaClient } = await import("./prisma")
+      const prisma = await getPrismaClient()
+
+      if (prisma) {
+        return await prisma.blog.findUnique({
+          where: { slug },
+          include: { category: true },
+        })
+      }
     }
   } catch (error) {
-    console.error(`Error fetching blog with slug ${slug}:`, error)
-    return await getBlogPostBySlug(slug)
+    console.warn("Prisma not available, using content store:", error)
   }
+
+  // Fallback to content store
+  return await getBlogPostBySlug(slug)
 }
 
 export async function getVideoBySlugDb(slug: string) {
   try {
-    if (prismaClient) {
-      return await prismaClient.video.findUnique({
-        where: { slug },
-        include: { category: true },
-      })
-    } else {
-      return await getVideoBySlug(slug)
+    // Try to use Prisma if available
+    if (typeof window === "undefined" && process.env.DATABASE_URL) {
+      const { getPrismaClient } = await import("./prisma")
+      const prisma = await getPrismaClient()
+
+      if (prisma) {
+        return await prisma.video.findUnique({
+          where: { slug },
+          include: { category: true },
+        })
+      }
     }
   } catch (error) {
-    console.error(`Error fetching video with slug ${slug}:`, error)
-    return await getVideoBySlug(slug)
+    console.warn("Prisma not available, using content store:", error)
   }
+
+  // Fallback to content store
+  return await getVideoBySlug(slug)
 }
 
 // Check if database is connected
 export async function isDatabaseConnected() {
   try {
-    if (prismaClient) {
-      // Try a simple query to check connection
-      await prismaClient.$queryRaw`SELECT 1`
-      return true
+    if (typeof window === "undefined" && process.env.DATABASE_URL) {
+      const { getPrismaClient } = await import("./prisma")
+      const prisma = await getPrismaClient()
+
+      if (prisma) {
+        // Try a simple query to check connection
+        await prisma.$queryRaw`SELECT 1`
+        return true
+      }
     }
     return false
   } catch (error) {

@@ -1,115 +1,82 @@
-export interface SitemapUrl {
-  url: string
-  priority: string
-  changefreq: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never"
-  lastmod?: string
-}
-
-export function formatSitemapDate(date: string | Date): string {
-  if (!date) return new Date().toISOString()
-
+/**
+ * Formats a date for use in sitemap XML
+ * @param date - Date string, Date object, or null/undefined
+ * @returns ISO date string suitable for sitemap
+ */
+export function formatSitemapDate(date: string | Date | null | undefined): string {
   try {
+    if (!date) {
+      return new Date().toISOString().split("T")[0]
+    }
+
     const dateObj = typeof date === "string" ? new Date(date) : date
-    return dateObj.toISOString()
-  } catch (error) {
-    console.warn("Invalid date format:", date)
-    return new Date().toISOString()
-  }
-}
 
-export function generateSitemapXML(baseUrl: string, urls: SitemapUrl[]): string {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml"
-        xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
-        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-${urls
-  .map(
-    (page) => `  <url>
-    <loc>${baseUrl}${page.url}</loc>
-    <lastmod>${page.lastmod ? formatSitemapDate(page.lastmod) : formatSitemapDate(new Date())}</lastmod>
-    <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
-  </url>`,
-  )
-  .join("\n")}
-</urlset>`
-}
-
-export function getStaticPages(): SitemapUrl[] {
-  return [
-    { url: "/", priority: "1.0", changefreq: "daily" },
-    { url: "/blog", priority: "0.8", changefreq: "daily" },
-    { url: "/watch", priority: "0.8", changefreq: "daily" },
-    { url: "/about", priority: "0.6", changefreq: "monthly" },
-    { url: "/contact", priority: "0.6", changefreq: "monthly" },
-    { url: "/support", priority: "0.6", changefreq: "monthly" },
-    { url: "/career", priority: "0.6", changefreq: "monthly" },
-    { url: "/faq", priority: "0.6", changefreq: "monthly" },
-    { url: "/legal", priority: "0.3", changefreq: "yearly" },
-    { url: "/privacy-policy", priority: "0.3", changefreq: "yearly" },
-    { url: "/terms-of-service", priority: "0.3", changefreq: "yearly" },
-    { url: "/cookie-policy", priority: "0.3", changefreq: "yearly" },
-    { url: "/disclaimer", priority: "0.3", changefreq: "yearly" },
-    { url: "/dmca", priority: "0.3", changefreq: "yearly" },
-    { url: "/media-usage-policy", priority: "0.3", changefreq: "yearly" },
-  ]
-}
-
-export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]> {
-  const dynamicPages: SitemapUrl[] = []
-
-  try {
-    // Fetch blog posts
-    const blogsResponse = await fetch(`${baseUrl}/api/admin/blogs`, {
-      headers: { "Cache-Control": "no-cache" },
-    })
-
-    if (blogsResponse.ok) {
-      const blogsData = await blogsResponse.json()
-      const blogs = blogsData.blogs || []
-
-      blogs.forEach((blog: any) => {
-        if (blog.slug && blog.published) {
-          dynamicPages.push({
-            url: `/blog/${blog.slug}`,
-            priority: "0.7",
-            changefreq: "weekly",
-            lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
-          })
-        }
-      })
+    // Check if date is valid
+    if (isNaN(dateObj.getTime())) {
+      return new Date().toISOString().split("T")[0]
     }
+
+    return dateObj.toISOString().split("T")[0]
   } catch (error) {
-    console.error("Error fetching blogs for sitemap:", error)
+    console.warn("Error formatting sitemap date:", error)
+    return new Date().toISOString().split("T")[0]
   }
+}
 
-  try {
-    // Fetch videos
-    const videosResponse = await fetch(`${baseUrl}/api/admin/videos`, {
-      headers: { "Cache-Control": "no-cache" },
-    })
+/**
+ * Validates and formats a URL for sitemap
+ * @param baseUrl - Base URL of the site
+ * @param path - Path to append
+ * @returns Complete URL
+ */
+export function formatSitemapUrl(baseUrl: string, path: string): string {
+  // Ensure baseUrl doesn't end with slash and path starts with slash
+  const cleanBaseUrl = baseUrl.replace(/\/$/, "")
+  const cleanPath = path.startsWith("/") ? path : `/${path}`
 
-    if (videosResponse.ok) {
-      const videosData = await videosResponse.json()
-      const videos = videosData.videos || []
+  return `${cleanBaseUrl}${cleanPath}`
+}
 
-      videos.forEach((video: any) => {
-        if (video.slug && video.published) {
-          dynamicPages.push({
-            url: `/watch/${video.slug}`,
-            priority: "0.7",
-            changefreq: "weekly",
-            lastmod: video.updatedAt || video.publishedAt || video.createdAt,
-          })
-        }
-      })
-    }
-  } catch (error) {
-    console.error("Error fetching videos for sitemap:", error)
+/**
+ * Generates sitemap priority based on content type
+ * @param type - Type of content (homepage, section, post, etc.)
+ * @returns Priority value between 0.0 and 1.0
+ */
+export function getSitemapPriority(type: "homepage" | "section" | "post" | "page" | "legal"): number {
+  switch (type) {
+    case "homepage":
+      return 1.0
+    case "section":
+      return 0.8
+    case "post":
+      return 0.7
+    case "page":
+      return 0.6
+    case "legal":
+      return 0.3
+    default:
+      return 0.5
   }
+}
 
-  return dynamicPages
+/**
+ * Generates change frequency for sitemap based on content type
+ * @param type - Type of content
+ * @returns Change frequency string
+ */
+export function getSitemapChangeFreq(type: "homepage" | "section" | "post" | "page" | "legal"): string {
+  switch (type) {
+    case "homepage":
+      return "daily"
+    case "section":
+      return "daily"
+    case "post":
+      return "weekly"
+    case "page":
+      return "monthly"
+    case "legal":
+      return "yearly"
+    default:
+      return "monthly"
+  }
 }

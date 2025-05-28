@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CategoryDropdown } from "@/components/ui/category-dropdown"
+import { getDynamicCategoriesClient } from "@/lib/dynamic-categories"
 
 interface Video {
   id: string
@@ -35,32 +37,24 @@ export function VideoManager() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterCategory, setFilterCategory] = useState("all")
+  const [categories, setCategories] = useState<Array<{ name: string; slug: string; count: number }>>([])
 
   useEffect(() => {
-    loadVideos()
+    loadData()
   }, [])
 
-  // Add category sync for videos
-  useEffect(() => {
-    const syncCategories = async () => {
-      try {
-        await fetch("/api/admin/categories/sync", { method: "POST" })
-        loadVideos()
-      } catch (error) {
-        console.error("Failed to sync categories:", error)
-      }
-    }
-
-    syncCategories()
-  }, [])
-
-  const loadVideos = async () => {
+  const loadData = async () => {
     try {
-      const response = await fetch("/api/admin/videos")
-      const data = await response.json()
-      setVideos(data.videos || [])
+      const [videosResponse, categoriesData] = await Promise.all([
+        fetch("/api/admin/videos"),
+        getDynamicCategoriesClient(),
+      ])
+
+      const videosData = await videosResponse.json()
+      setVideos(videosData.videos || [])
+      setCategories(categoriesData.videoCategories || [])
     } catch (error) {
-      console.error("Failed to load videos:", error)
+      console.error("Failed to load data:", error)
     } finally {
       setLoading(false)
     }
@@ -75,7 +69,7 @@ export function VideoManager() {
       })
 
       if (response.ok) {
-        await loadVideos()
+        await loadData()
         setShowCreateForm(false)
       }
     } catch (error) {
@@ -92,7 +86,7 @@ export function VideoManager() {
       })
 
       if (response.ok) {
-        await loadVideos()
+        await loadData()
         setEditingVideo(null)
       }
     } catch (error) {
@@ -109,7 +103,7 @@ export function VideoManager() {
       })
 
       if (response.ok) {
-        await loadVideos()
+        await loadData()
       }
     } catch (error) {
       console.error("Failed to delete video:", error)
@@ -147,27 +141,19 @@ export function VideoManager() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-4 items-center flex-wrap">
         <Input
           placeholder="Search videos..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
-        <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            <SelectItem value="Original Anime">Original Anime</SelectItem>
-            <SelectItem value="Short Films">Short Films</SelectItem>
-            <SelectItem value="Behind the Scenes">Behind the Scenes</SelectItem>
-            <SelectItem value="Tutorials & Guides">Tutorials & Guides</SelectItem>
-            <SelectItem value="Anime Trailers">Anime Trailers</SelectItem>
-            <SelectItem value="YouTube Highlights">YouTube Highlights</SelectItem>
-          </SelectContent>
-        </Select>
+        <CategoryDropdown
+          categories={categories}
+          selectedCategory={filterCategory}
+          onCategoryChange={setFilterCategory}
+          type="video"
+        />
       </div>
 
       {/* Videos Grid */}
@@ -193,6 +179,7 @@ export function VideoManager() {
               <CardTitle className="text-lg line-clamp-2">{video.title}</CardTitle>
               <div className="flex items-center gap-2">
                 <Badge variant={video.status === "published" ? "default" : "secondary"}>{video.status}</Badge>
+                <Badge variant="outline">{video.category}</Badge>
                 <span className="text-sm text-gray-500">{video.views.toLocaleString()} views</span>
               </div>
             </CardHeader>
@@ -228,6 +215,7 @@ export function VideoManager() {
             setShowCreateForm(false)
             setEditingVideo(null)
           }}
+          categories={categories}
         />
       )}
     </div>
@@ -238,12 +226,13 @@ function VideoForm({
   video,
   onSave,
   onCancel,
+  categories,
 }: {
   video: Video | null
   onSave: (data: Partial<Video>) => void
   onCancel: () => void
+  categories: Array<{ name: string; slug: string; count: number }>
 }) {
-  const [categories, setCategories] = useState<string[]>([])
   const [formData, setFormData] = useState({
     title: video?.title || "",
     description: video?.description || "",
@@ -256,19 +245,10 @@ function VideoForm({
   })
 
   useEffect(() => {
-    // Load categories
-    fetch("/api/admin/categories")
-      .then((res) => res.json())
-      .then((data) => {
-        const videoCategories =
-          data.categories?.filter((cat: any) => cat.type === "video" && cat.isActive)?.map((cat: any) => cat.name) || []
-        setCategories(videoCategories)
-        if (!formData.category && videoCategories.length > 0) {
-          setFormData((prev) => ({ ...prev, category: videoCategories[0] }))
-        }
-      })
-      .catch(console.error)
-  }, [])
+    if (categories.length > 0 && !formData.category) {
+      setFormData((prev) => ({ ...prev, category: categories[0].name }))
+    }
+  }, [categories])
 
   const extractYouTubeId = (url: string) => {
     const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
@@ -345,8 +325,8 @@ function VideoForm({
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
+                      <SelectItem key={category.name} value={category.name}>
+                        {category.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

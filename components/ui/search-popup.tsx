@@ -5,9 +5,9 @@ import type React from "react"
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Search, X, Clock, TrendingUp, ArrowRight } from "lucide-react"
+import { Search, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 interface SearchResult {
   id: string
@@ -18,11 +18,34 @@ interface SearchResult {
   category?: string
 }
 
+interface BlogResult {
+  id: string
+  slug: string
+  title: string
+  excerpt: string
+  category: string
+  publishedAt: string
+}
+
+interface VideoResult {
+  id: string
+  slug: string
+  title: string
+  views: number
+  duration: string
+  publishedAt: string
+}
+
+interface SearchResults {
+  blogs: BlogResult[]
+  videos: VideoResult[]
+}
+
 export function SearchPopup() {
   const [isOpen, setIsOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [isSearching, setIsSearching] = useState(false)
-  const [results, setResults] = useState<SearchResult[]>([])
+  const [searchResult, setSearchResult] = useState<SearchResults>({ blogs: [], videos: [] })
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -56,7 +79,7 @@ export function SearchPopup() {
       }, 100)
     } else {
       setQuery("")
-      setResults([])
+      setSearchResult({ blogs: [], videos: [] })
       setSelectedIndex(-1)
     }
   }, [isOpen])
@@ -79,7 +102,7 @@ export function SearchPopup() {
           if (searchQuery.trim()) {
             performSearch(searchQuery)
           } else {
-            setResults([])
+            setSearchResult({ blogs: [], videos: [] })
             setIsSearching(false)
           }
         }, 300)
@@ -96,37 +119,30 @@ export function SearchPopup() {
     await new Promise((resolve) => setTimeout(resolve, 500))
 
     // Mock results
-    const mockResults: SearchResult[] = [
-      {
-        id: "1",
-        title: "Latest Anime News and Updates",
-        type: "blog",
-        url: "/blog/anime-news-updates",
-        excerpt: "Stay updated with the latest happenings in the anime world...",
-        category: "News",
-      },
-      {
-        id: "2",
-        title: "Behind the Scenes: Animation Process",
-        type: "video",
-        url: "/watch/behind-scenes-animation",
-        excerpt: "Discover how we create our animated content...",
-        category: "Tutorial",
-      },
-      {
-        id: "3",
-        title: "About Flavor Studios",
-        type: "page",
-        url: "/about",
-        excerpt: "Learn more about our studio and mission...",
-      },
-    ].filter(
-      (result) =>
-        result.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        result.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
+    const mockResults: SearchResults = {
+      blogs: [
+        {
+          id: "1",
+          slug: "anime-news-updates",
+          title: "Latest Anime News and Updates",
+          excerpt: "Stay updated with the latest happenings in the anime world...",
+          category: "News",
+          publishedAt: new Date().toISOString(),
+        },
+      ],
+      videos: [
+        {
+          id: "2",
+          slug: "behind-scenes-animation",
+          title: "Behind the Scenes: Animation Process",
+          views: 1000,
+          duration: "5:00",
+          publishedAt: new Date().toISOString(),
+        },
+      ],
+    }
 
-    setResults(mockResults)
+    setSearchResult(mockResults)
     setIsSearching(false)
     setSelectedIndex(-1)
   }
@@ -140,10 +156,12 @@ export function SearchPopup() {
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Skip keyboard navigation on mobile devices
+    if ("ontouchstart" in window) return
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault()
-        setSelectedIndex((prev) => Math.min(prev + 1, results.length - 1))
+        setSelectedIndex((prev) => Math.min(prev + 1, searchResult.blogs.length + searchResult.videos.length - 1))
         break
       case "ArrowUp":
         e.preventDefault()
@@ -151,8 +169,10 @@ export function SearchPopup() {
         break
       case "Enter":
         e.preventDefault()
-        if (selectedIndex >= 0 && results[selectedIndex]) {
-          handleResultClick(results[selectedIndex])
+        if (selectedIndex >= 0 && searchResult.blogs[selectedIndex]) {
+          handleResultClick(searchResult.blogs[selectedIndex])
+        } else if (selectedIndex >= 0 && searchResult.videos[selectedIndex - searchResult.blogs.length]) {
+          handleResultClick(searchResult.videos[selectedIndex - searchResult.blogs.length])
         } else if (query.trim()) {
           handleSearch(query)
         }
@@ -164,10 +184,10 @@ export function SearchPopup() {
   }
 
   // Handle result click
-  const handleResultClick = (result: SearchResult) => {
+  const handleResultClick = (result: BlogResult | VideoResult) => {
     addToRecentSearches(query)
     setIsOpen(false)
-    window.location.href = result.url
+    window.location.href = `/blog/${result.slug}`
   }
 
   // Handle search submission
@@ -201,6 +221,9 @@ export function SearchPopup() {
     }
   }
 
+  const hasResults = searchResult.blogs.length > 0 || searchResult.videos.length > 0
+  const showNoResults = query.trim() !== "" && !isSearching && !hasResults
+
   return (
     <>
       {/* Search trigger button */}
@@ -216,144 +239,112 @@ export function SearchPopup() {
 
       {/* Search modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-full h-full sm:h-auto p-0 gap-0 border-none bg-transparent">
-          <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 flex flex-col items-center justify-start pt-[10vh] px-4">
-            {/* Close button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
-              onClick={() => setIsOpen(false)}
-              aria-label="Close search"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-
-            <div className="w-full max-w-2xl mx-auto">
-              {/* Search input */}
-              <div className="relative mb-6">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <DialogContent className="max-w-full max-h-full sm:max-w-2xl sm:max-h-[80vh] p-0 gap-0 border-none bg-transparent sm:bg-white sm:border sm:rounded-lg">
+          <div className="fixed inset-0 sm:relative bg-background/95 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none flex flex-col">
+            {/* Header with search input */}
+            <div className="flex-shrink-0 border-b bg-white p-4">
+              <div className="flex items-center gap-3">
+                <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                 <Input
                   ref={inputRef}
+                  placeholder="Search blog posts, videos, or support content…"
                   value={query}
                   onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Search blog posts, videos..."
-                  className="pl-12 pr-4 py-4 text-lg border-2 focus-visible:ring-blue-600 bg-white"
-                  aria-label="Search input"
-                  aria-describedby="search-description"
+                  className="border-0 focus-visible:ring-0 text-base sm:text-lg flex-1"
+                  autoComplete="off"
                 />
-                {isSearching && (
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                  </div>
-                )}
+                {isSearching && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground flex-shrink-0" />}
               </div>
+            </div>
 
-              {/* Search results */}
-              <div ref={resultsRef} className="bg-white rounded-lg border shadow-lg max-h-96 overflow-y-auto">
-                {query && results.length > 0 && (
-                  <div className="p-2">
-                    <div className="text-sm text-muted-foreground mb-2 px-2">
-                      {results.length} result{results.length !== 1 ? "s" : ""} for "{query}"
-                    </div>
-                    {results.map((result, index) => (
-                      <button
-                        key={result.id}
-                        className={cn(
-                          "w-full text-left p-3 rounded-lg transition-colors",
-                          "hover:bg-gray-50 focus:bg-gray-50 focus:outline-none",
-                          selectedIndex === index && "bg-blue-50",
-                        )}
-                        onClick={() => handleResultClick(result)}
-                      >
-                        <div className="flex items-start space-x-3">
-                          <span className="text-lg">{getTypeIcon(result.type)}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900">{result.title}</div>
-                            {result.excerpt && (
-                              <div className="text-sm text-gray-500 mt-1 line-clamp-2">{result.excerpt}</div>
-                            )}
-                            {result.category && <div className="text-xs text-blue-600 mt-1">{result.category}</div>}
-                          </div>
-                          <ArrowRight className="h-4 w-4 text-gray-400" />
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {query && !isSearching && results.length === 0 && (
-                  <div className="p-6 text-center text-gray-500">
-                    <Search className="h-8 w-8 mx-auto mb-2 text-gray-300" />
-                    <div>No results found for "{query}"</div>
-                    <div className="text-sm mt-1">Try different keywords or check spelling</div>
-                  </div>
-                )}
-
-                {!query && (
-                  <div className="p-4 space-y-4">
-                    {recentSearches.length > 0 && (
-                      <div>
-                        <div className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
-                          <Clock className="h-4 w-4" />
-                          <span>Recent searches</span>
-                        </div>
-                        <div className="space-y-1">
-                          {recentSearches.map((search, index) => (
-                            <button
-                              key={index}
-                              className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded transition-colors"
-                              onClick={() => {
-                                setQuery(search)
-                                debouncedSearch(search)
-                              }}
-                            >
-                              {search}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    <div>
-                      <div className="flex items-center space-x-2 text-sm font-medium text-gray-700 mb-2">
-                        <TrendingUp className="h-4 w-4" />
-                        <span>Popular searches</span>
-                      </div>
-                      <div className="space-y-1">
-                        {popularSearches.map((search, index) => (
-                          <button
-                            key={index}
-                            className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded transition-colors"
-                            onClick={() => {
-                              setQuery(search)
-                              debouncedSearch(search)
-                            }}
-                          >
-                            {search}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Keyboard shortcuts */}
-              <div className="mt-4 text-center text-sm text-muted-foreground">
-                <div className="flex items-center justify-center space-x-4">
-                  <span>
-                    <kbd className="px-2 py-1 bg-muted rounded text-xs">↑↓</kbd> to navigate
-                  </span>
-                  <span>
-                    <kbd className="px-2 py-1 bg-muted rounded text-xs">↵</kbd> to select
-                  </span>
-                  <span>
-                    <kbd className="px-2 py-1 bg-muted rounded text-xs">ESC</kbd> to close
-                  </span>
+            {/* Results area */}
+            <div className="flex-1 overflow-y-auto bg-white">
+              {/* Loading State */}
+              {isSearching && (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-muted-foreground">Searching...</span>
                 </div>
-              </div>
+              )}
+
+              {/* No Results */}
+              {showNoResults && (
+                <div className="text-center py-8 px-4">
+                  <div className="text-muted-foreground mb-2">No results found for "{query}"</div>
+                  <div className="text-sm text-muted-foreground">
+                    Try searching for blog posts, videos, or support content
+                  </div>
+                </div>
+              )}
+
+              {/* Results */}
+              {hasResults && !isSearching && (
+                <div className="p-2">
+                  {/* Blog Results */}
+                  {searchResult.blogs.length > 0 && (
+                    <div className="mb-4">
+                      <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        Blog Posts
+                      </div>
+                      {searchResult.blogs.map((blog, index) => (
+                        <Link
+                          key={blog.id}
+                          href={`/blog/${blog.slug}`}
+                          onClick={() => setIsOpen(false)}
+                          className={`block p-3 rounded-lg hover:bg-muted transition-colors touch-manipulation ${
+                            selectedIndex === index ? "bg-muted" : ""
+                          }`}
+                        >
+                          <div className="font-medium text-sm mb-1">{blog.title}</div>
+                          <div className="text-xs text-muted-foreground mb-1">
+                            📝 {blog.category} • {new Date(blog.publishedAt).toLocaleDateString()}
+                          </div>
+                          <div className="text-xs text-muted-foreground line-clamp-2">{blog.excerpt}</div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Video Results */}
+                  {searchResult.videos.length > 0 && (
+                    <div>
+                      <div className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        Videos
+                      </div>
+                      {searchResult.videos.map((video, index) => (
+                        <Link
+                          key={video.id}
+                          href={`/watch/${video.slug}`}
+                          onClick={() => setIsOpen(false)}
+                          className={`block p-3 rounded-lg hover:bg-muted transition-colors touch-manipulation ${
+                            selectedIndex === (searchResult.blogs.length + index) ? "bg-muted" : ""
+                          }`}
+                        >
+                          <div className="font-medium text-sm mb-1">{video.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            🎥 {video.views.toLocaleString()} views • {video.duration} •{" "}
+                            {new Date(video.publishedAt).toLocaleDateString()}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Keyboard Shortcuts Hint */}
+              {!query.trim() && !isSearching && (
+                <div className="p-4 border-t bg-muted/30">
+                  <div className="text-xs text-muted-foreground text-center">
+                    <div className="hidden sm:block">
+                      <kbd className="px-2 py-1 bg-muted rounded text-xs">↑↓</kbd> to navigate •{" "}
+                      <kbd className="px-2 py-1 bg-muted rounded text-xs">Enter</kbd> to select •{" "}
+                      <kbd className="px-2 py-1 bg-muted rounded text-xs">Esc</kbd> to close
+                    </div>
+                    <div className="sm:hidden">Tap to select • Swipe down to close</div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </DialogContent>

@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { CategoryDropdown } from "@/components/ui/category-dropdown"
+import { getDynamicCategoriesClient } from "@/lib/dynamic-categories"
 
 interface BlogPost {
   id: string
@@ -35,48 +37,26 @@ export function BlogManager() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
-  const [categories, setCategories] = useState<string[]>([])
+  const [filterCategory, setFilterCategory] = useState("all")
+  const [categories, setCategories] = useState<Array<{ name: string; slug: string; count: number }>>([])
 
-  // Load posts from API
+  // Load posts and categories
   useEffect(() => {
-    loadPosts()
+    loadData()
   }, [])
 
-  // Add this useEffect to sync with categories
-  useEffect(() => {
-    // Load categories and sync with category store
-    const syncCategories = async () => {
-      try {
-        await fetch("/api/admin/categories/sync", { method: "POST" })
-        loadPosts()
-      } catch (error) {
-        console.error("Failed to sync categories:", error)
-      }
-    }
-
-    syncCategories()
-  }, [])
-
-  // Update the loadPosts function to include category validation
-  const loadPosts = async () => {
+  const loadData = async () => {
     try {
-      const [postsResponse, categoriesResponse] = await Promise.all([
+      const [postsResponse, categoriesData] = await Promise.all([
         fetch("/api/admin/blogs"),
-        fetch("/api/admin/categories?type=blog"),
+        getDynamicCategoriesClient(),
       ])
 
-      const [postsData, categoriesData] = await Promise.all([postsResponse.json(), categoriesResponse.json()])
-
+      const postsData = await postsResponse.json()
       setPosts(postsData.posts || [])
-
-      // Update categories in the form
-      const blogCategories =
-        categoriesData.categories
-          ?.filter((cat: any) => cat.type === "blog" && cat.isActive)
-          ?.map((cat: any) => cat.name) || []
-      setCategories(blogCategories)
+      setCategories(categoriesData.blogCategories || [])
     } catch (error) {
-      console.error("Failed to load posts:", error)
+      console.error("Failed to load data:", error)
     } finally {
       setLoading(false)
     }
@@ -91,7 +71,7 @@ export function BlogManager() {
       })
 
       if (response.ok) {
-        await loadPosts()
+        await loadData()
         setShowCreateForm(false)
       }
     } catch (error) {
@@ -108,7 +88,7 @@ export function BlogManager() {
       })
 
       if (response.ok) {
-        await loadPosts()
+        await loadData()
         setEditingPost(null)
       }
     } catch (error) {
@@ -125,7 +105,7 @@ export function BlogManager() {
       })
 
       if (response.ok) {
-        await loadPosts()
+        await loadData()
       }
     } catch (error) {
       console.error("Failed to delete post:", error)
@@ -137,7 +117,8 @@ export function BlogManager() {
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       post.content.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === "all" || post.status === filterStatus
-    return matchesSearch && matchesStatus
+    const matchesCategory = filterCategory === "all" || post.category === filterCategory
+    return matchesSearch && matchesStatus && matchesCategory
   })
 
   if (loading) {
@@ -165,7 +146,7 @@ export function BlogManager() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-4 items-center flex-wrap">
         <Input
           placeholder="Search posts..."
           value={searchTerm}
@@ -183,6 +164,12 @@ export function BlogManager() {
             <SelectItem value="scheduled">Scheduled</SelectItem>
           </SelectContent>
         </Select>
+        <CategoryDropdown
+          categories={categories}
+          selectedCategory={filterCategory}
+          onCategoryChange={setFilterCategory}
+          type="blog"
+        />
       </div>
 
       {/* Posts Grid */}
@@ -195,6 +182,7 @@ export function BlogManager() {
                   <CardTitle className="text-xl">{post.title}</CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge variant={post.status === "published" ? "default" : "secondary"}>{post.status}</Badge>
+                    <Badge variant="outline">{post.category}</Badge>
                     {post.featured && <Badge variant="outline">Featured</Badge>}
                     <span className="text-sm text-gray-500">{post.views.toLocaleString()} views</span>
                   </div>
@@ -250,7 +238,7 @@ function BlogPostForm({
   post: BlogPost | null
   onSave: (data: Partial<BlogPost>) => void
   onCancel: () => void
-  categories: string[]
+  categories: Array<{ name: string; slug: string; count: number }>
 }) {
   const [formData, setFormData] = useState({
     title: post?.title || "",
@@ -266,7 +254,7 @@ function BlogPostForm({
 
   useEffect(() => {
     if (categories.length > 0 && !formData.category) {
-      setFormData((prev) => ({ ...prev, category: categories[0] }))
+      setFormData((prev) => ({ ...prev, category: categories[0].name }))
     }
   }, [categories])
 
@@ -318,8 +306,8 @@ function BlogPostForm({
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
+                        <SelectItem key={category.name} value={category.name}>
+                          {category.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

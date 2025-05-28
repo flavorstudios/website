@@ -2,9 +2,10 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Calendar, User, Eye, BookOpen, Clock, TrendingUp, Star, ArrowRight } from "lucide-react"
+import { Calendar, User, Eye, BookOpen, Clock, Star, ArrowRight } from "lucide-react"
 import { blogStore } from "@/lib/content-store"
-import { categoryStore } from "@/lib/category-store"
+import { getDynamicCategories } from "@/lib/dynamic-categories"
+import { CategoryTabs } from "@/components/ui/category-tabs"
 
 export const metadata = {
   title: "Blog | Flavor Studios - Anime Creation Insights & Stories",
@@ -26,15 +27,9 @@ export const metadata = {
 
 async function getBlogData() {
   try {
-    // Use content stores directly instead of API calls
-    const [posts, categories] = await Promise.all([
-      blogStore.getPublished(),
-      categoryStore
-        .getByType("blog")
-        .catch(() => []), // Fallback to empty array if categories fail
-    ])
+    const [posts, { blogCategories }] = await Promise.all([blogStore.getPublished(), getDynamicCategories()])
 
-    return { posts, categories }
+    return { posts, categories: blogCategories }
   } catch (error) {
     console.error("Failed to fetch blog data:", error)
     return { posts: [], categories: [] }
@@ -52,7 +47,15 @@ export default async function BlogPage({
   const postsPerPage = 9
 
   const filteredPosts =
-    selectedCategory === "all" ? posts : posts.filter((post: any) => post.category === selectedCategory)
+    selectedCategory === "all"
+      ? posts
+      : posts.filter((post: any) => {
+          const categorySlug = post.category
+            ?.toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "")
+          return categorySlug === selectedCategory
+        })
 
   // Pagination
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage)
@@ -119,18 +122,8 @@ export default async function BlogPage({
         </div>
       </div>
 
-      {/* Enhanced Category Filter */}
-      <section className="bg-white border-b shadow-sm sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
-              <h3 className="text-lg font-semibold text-gray-900">Browse by Category</h3>
-            </div>
-            <CategoryFilter categories={categories} selectedCategory={selectedCategory} />
-          </div>
-        </div>
-      </section>
+      {/* Dynamic Category Tabs */}
+      <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/blog" type="blog" />
 
       {/* Featured Posts */}
       {featuredPosts.length > 0 && (
@@ -155,7 +148,9 @@ export default async function BlogPage({
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
             <div>
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                {selectedCategory === "all" ? "Latest Posts" : `${selectedCategory} Posts`}
+                {selectedCategory === "all"
+                  ? "Latest Posts"
+                  : `${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory} Posts`}
               </h2>
               <p className="text-gray-600">
                 {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""} found
@@ -202,36 +197,6 @@ export default async function BlogPage({
           </Button>
         </div>
       </section>
-    </div>
-  )
-}
-
-function CategoryFilter({ categories, selectedCategory }: { categories: any[]; selectedCategory: string }) {
-  return (
-    <div className="flex flex-wrap gap-2 max-w-full overflow-x-auto pb-2">
-      <Link
-        href="/blog"
-        className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-          selectedCategory === "all"
-            ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-            : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md"
-        }`}
-      >
-        All Posts
-      </Link>
-      {categories.map((category: any) => (
-        <Link
-          key={category.id}
-          href={`/blog?category=${encodeURIComponent(category.name)}`}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-            selectedCategory === category.name
-              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md"
-          }`}
-        >
-          {category.name}
-        </Link>
-      ))}
     </div>
   )
 }
@@ -398,12 +363,12 @@ function EmptyState({ selectedCategory }: { selectedCategory: string }) {
           <BookOpen className="h-12 w-12 text-blue-600" />
         </div>
         <h3 className="text-2xl font-bold text-gray-900 mb-4">
-          {selectedCategory === "all" ? "No posts yet" : `No posts in ${selectedCategory}`}
+          {selectedCategory === "all" ? "No posts yet" : `No posts in this category`}
         </h3>
         <p className="text-gray-600 mb-8 leading-relaxed">
           {selectedCategory === "all"
             ? "We're working on exciting content about anime, storytelling, and behind-the-scenes insights. Check back soon!"
-            : `No posts have been published in the ${selectedCategory} category yet. Try selecting a different category or check back later.`}
+            : `No posts have been published in this category yet. Try selecting a different category or check back later.`}
         </p>
         <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
           <p className="text-blue-800 text-sm">

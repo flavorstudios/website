@@ -1,88 +1,18 @@
 import { Suspense } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Play, Youtube, Calendar, Eye } from "lucide-react"
+import { Play, Calendar, Eye, Clock, ArrowRight } from "lucide-react"
 
 async function getHomePageContent() {
   const fallbackContent = {
-    stats: {
-      youtubeSubscribers: "500K+",
-      originalEpisodes: "50+",
-      totalViews: "2M+",
-      yearsCreating: "5",
-    },
-    hero: {
-      badge: "Independent Anime Studio",
-      title: "Welcome to Flavor Studios",
-      description:
-        "Your destination for original anime content, industry news, and creative storytelling. We're passionate creators bringing unique anime experiences to life.",
-      ctaText: "Watch Our Content",
-      ctaLink: "/watch",
-    },
-    about: {
-      title: "Latest from Flavor Studios",
-      description: "Stay updated with our newest anime content, industry insights, and behind-the-scenes stories.",
-    },
-    featuredVideos: [
-      {
-        id: 1,
-        title: "Flavor Studios Original: Mystic Chronicles Episode 1",
-        thumbnail: "/placeholder.svg?height=180&width=320&query=anime episode thumbnail mystic",
-        duration: "24:30",
-        views: 125000,
-        publishedAt: "2024-01-15",
-        featured: true,
-        status: "published",
-      },
-      {
-        id: 2,
-        title: "Anime News Weekly: Latest Industry Updates",
-        thumbnail: "/placeholder.svg?height=180&width=320&query=anime news studio setup",
-        duration: "15:45",
-        views: 89000,
-        publishedAt: "2024-01-12",
-        featured: true,
-        status: "published",
-      },
-    ],
-    latestBlogs: [
-      {
-        id: 1,
-        title: "New Anime Season Preview: What to Watch This Fall",
-        excerpt: "Discover the most anticipated anime releases coming this season...",
-        publishedAt: "2024-01-15",
-        category: "Anime News",
-        slug: "new-anime-season-preview",
-        coverImage: "/placeholder.svg?height=200&width=300&query=anime season preview",
-        status: "published",
-      },
-      {
-        id: 2,
-        title: "Behind the Scenes: Creating Our Latest Original Series",
-        excerpt: "Take a look at our creative process and the making of our newest project...",
-        publishedAt: "2024-01-12",
-        category: "Behind the Frames",
-        slug: "behind-the-scenes-latest-series",
-        coverImage: "/placeholder.svg?height=200&width=300&query=anime production behind scenes",
-        status: "published",
-      },
-      {
-        id: 3,
-        title: "Top 10 Underrated Anime You Should Watch",
-        excerpt: "Hidden gems that deserve more recognition in the anime community...",
-        publishedAt: "2024-01-10",
-        category: "Anime Reviews",
-        slug: "top-underrated-anime",
-        coverImage: "/placeholder.svg?height=200&width=300&query=underrated anime collection",
-        status: "published",
-      },
-    ],
+    latestBlogs: [],
+    featuredVideos: [],
+    stats: null,
   }
 
-  // In development, just return fallback content
+  // In development, return fallback content
   if (process.env.NODE_ENV === "development") {
     return fallbackContent
   }
@@ -106,21 +36,19 @@ async function getHomePageContent() {
       }).then((res) => (res.ok ? res.json() : null)),
     ])
 
-    const stats =
-      statsResult.status === "fulfilled" && statsResult.value ? statsResult.value.stats : fallbackContent.stats
+    const stats = statsResult.status === "fulfilled" && statsResult.value ? statsResult.value.stats : null
 
     const videos =
       videosResult.status === "fulfilled" && videosResult.value
-        ? videosResult.value.videos?.filter((v: any) => v.status === "published" && v.featured) || []
-        : fallbackContent.featuredVideos
+        ? videosResult.value.videos?.filter((v: any) => v.status === "published") || []
+        : []
 
     const blogs =
       blogsResult.status === "fulfilled" && blogsResult.value
-        ? blogsResult.value.posts?.filter((p: any) => p.status === "published").slice(0, 3) || []
-        : fallbackContent.latestBlogs
+        ? blogsResult.value.posts?.filter((p: any) => p.status === "published").slice(0, 6) || []
+        : []
 
     return {
-      ...fallbackContent,
       stats,
       featuredVideos: videos,
       latestBlogs: blogs,
@@ -131,30 +59,12 @@ async function getHomePageContent() {
   }
 }
 
-function VideosSkeleton() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {[...Array(4)].map((_, i) => (
-        <Card key={i}>
-          <div className="h-48 bg-gray-200 animate-pulse rounded-t-lg"></div>
-          <CardHeader>
-            <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-          </CardHeader>
-          <CardContent>
-            <div className="h-3 bg-gray-200 animate-pulse rounded"></div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
-}
-
 function BlogsSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {[...Array(3)].map((_, i) => (
-        <Card key={i}>
-          <div className="h-48 bg-gray-200 animate-pulse rounded-t-lg"></div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[...Array(6)].map((_, i) => (
+        <Card key={i} className="overflow-hidden">
+          <div className="h-48 bg-gray-200 animate-pulse"></div>
           <CardHeader>
             <div className="h-4 bg-gray-200 animate-pulse rounded mb-2"></div>
             <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
@@ -172,6 +82,44 @@ function BlogsSkeleton() {
   )
 }
 
+function VideosSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[...Array(6)].map((_, i) => (
+        <Card key={i} className="overflow-hidden">
+          <div className="h-48 bg-gray-200 animate-pulse"></div>
+          <CardHeader>
+            <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+              <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2"></div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+function StatsSkeleton() {
+  return (
+    <section className="py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="text-center">
+              <div className="h-12 bg-gray-200 animate-pulse rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export default async function HomePage() {
   const content = await getHomePageContent()
 
@@ -181,177 +129,223 @@ export default async function HomePage() {
       <section className="relative bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <Badge className="bg-blue-600 text-white px-4 py-2 text-sm font-medium">{content.hero.badge}</Badge>
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <Badge className="bg-blue-600 text-white px-6 py-3 text-base font-medium">Independent Anime Studio</Badge>
 
-              <div className="space-y-6">
-                <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                  Welcome to{" "}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
-                    Flavor Studios
-                  </span>
-                </h1>
+            <div className="space-y-6">
+              <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+                Creating Stories That{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+                  Inspire
+                </span>
+              </h1>
 
-                <p className="text-xl md:text-2xl text-gray-300 leading-relaxed">{content.hero.description}</p>
-              </div>
+              <p className="text-xl md:text-2xl text-gray-300 leading-relaxed max-w-3xl mx-auto">
+                Welcome to Flavor Studios, where imagination meets animation. We craft original anime content, share
+                industry insights, and bring unique stories to life through the art of animation.
+              </p>
+            </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Link href={content.hero.ctaLink}>
-                    <Play className="mr-2 h-5 w-5" />
-                    {content.hero.ctaText}
-                  </Link>
-                </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
+                <Link href="/blog">
+                  Explore Our Stories
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Enter your email"
-                    className="bg-white/10 border-white/20 text-white placeholder:text-gray-300"
-                  />
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                    Subscribe
-                  </Button>
+      {/* Stats Section - Only show if real stats are available */}
+      {content.stats && (
+        <Suspense fallback={<StatsSkeleton />}>
+          <section className="py-16 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div className="text-center">
+                  <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">
+                    {content.stats.youtubeSubscribers}
+                  </div>
+                  <div className="text-gray-600 font-medium">YouTube Subscribers</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl md:text-5xl font-bold text-purple-600 mb-2">
+                    {content.stats.originalEpisodes}
+                  </div>
+                  <div className="text-gray-600 font-medium">Original Episodes</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl md:text-5xl font-bold text-cyan-600 mb-2">{content.stats.totalViews}</div>
+                  <div className="text-gray-600 font-medium">Total Views</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
+                    {content.stats.yearsCreating}
+                  </div>
+                  <div className="text-gray-600 font-medium">Years Creating</div>
                 </div>
               </div>
             </div>
+          </section>
+        </Suspense>
+      )}
 
-            <div className="relative">
-              <div className="aspect-video rounded-xl overflow-hidden shadow-2xl">
-                <iframe
-                  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                  title="Featured Video"
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">
-                {content.stats.youtubeSubscribers}
-              </div>
-              <div className="text-gray-600 font-medium">YouTube Subscribers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-purple-600 mb-2">
-                {content.stats.originalEpisodes}
-              </div>
-              <div className="text-gray-600 font-medium">Original Episodes</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-cyan-600 mb-2">{content.stats.totalViews}</div>
-              <div className="text-gray-600 font-medium">Total Views</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">{content.stats.yearsCreating}</div>
-              <div className="text-gray-600 font-medium">Years Creating</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Latest Content Section */}
+      {/* Blog Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{content.about.title}</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">{content.about.description}</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Latest Blog Posts</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Dive into our latest articles covering anime reviews, industry insights, and creative storytelling.
+            </p>
           </div>
 
-          {/* Featured Videos */}
-          <div className="mb-16">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                <Youtube className="h-6 w-6 text-red-600" />
-                Featured Videos
-              </h3>
-              <Button asChild variant="outline">
-                <Link href="/watch">View All</Link>
-              </Button>
+          <Suspense fallback={<BlogsSkeleton />}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {content.latestBlogs.map((post: any) => (
+                <Link key={post.id} href={`/blog/${post.slug}`}>
+                  <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                    {post.coverImage && (
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={post.coverImage || "/placeholder.svg"}
+                          alt={post.title}
+                          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        />
+                      </div>
+                    )}
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge variant="outline" className="text-xs">
+                          {post.category}
+                        </Badge>
+                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(post.publishedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <CardTitle className="line-clamp-2 text-lg leading-tight">{post.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 line-clamp-3 text-sm leading-relaxed">{post.excerpt}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
             </div>
+          </Suspense>
 
-            <Suspense fallback={<VideosSkeleton />}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {content.featuredVideos.map((video: any) => (
-                  <Card key={video.id} className="hover:shadow-lg transition-shadow">
+          <div className="text-center">
+            <Button asChild size="lg" variant="outline" className="px-8">
+              <Link href="/blog">
+                View All Posts
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Watch Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Watch Our Originals</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Experience our original anime content, behind-the-scenes footage, and exclusive video content.
+            </p>
+          </div>
+
+          <Suspense fallback={<VideosSkeleton />}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {content.featuredVideos.slice(0, 6).map((video: any) => (
+                <Link key={video.id} href={`/watch/${video.id}`}>
+                  <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                     <div className="relative">
                       <img
                         src={video.thumbnail || "/placeholder.svg"}
                         alt={video.title}
-                        className="w-full h-48 object-cover rounded-t-lg"
+                        className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
                       />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <Play className="h-12 w-12 text-white" />
+                      </div>
                       <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-sm">
                         {video.duration}
                       </div>
                     </div>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg line-clamp-2">{video.title}</CardTitle>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-lg line-clamp-2 leading-tight">{video.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="flex items-center justify-between text-sm text-gray-500">
                         <span className="flex items-center gap-1">
                           <Eye className="h-3 w-3" />
-                          {video.views.toLocaleString()}
+                          {video.views?.toLocaleString() || "0"}
                         </span>
-                        <span>{new Date(video.publishedAt).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {new Date(video.publishedAt).toLocaleDateString()}
+                        </span>
                       </div>
                     </CardContent>
                   </Card>
-                ))}
-              </div>
-            </Suspense>
-          </div>
+                </Link>
+              ))}
+            </div>
+          </Suspense>
 
-          {/* Latest Blog Posts */}
-          <div>
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-bold text-gray-900">Latest Articles</h3>
-              <Button asChild variant="outline">
-                <Link href="/blog">View All</Link>
+          <div className="text-center">
+            <Button asChild size="lg" variant="outline" className="px-8">
+              <Link href="/watch">
+                View All Videos
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action Section */}
+      <section className="relative bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="max-w-4xl mx-auto space-y-8">
+            <h2 className="text-4xl md:text-6xl font-bold leading-tight">
+              Bring Your{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">
+                Imagination
+              </span>{" "}
+              to Life
+            </h2>
+
+            <p className="text-xl md:text-2xl text-gray-300 leading-relaxed max-w-3xl mx-auto">
+              Ready to start your creative journey? Whether you want to collaborate, learn more about our process, or
+              support our mission, we're here to help bring stories to life.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
+                <Link href="/contact">
+                  Contact Us
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-white/20 text-white hover:bg-white/10 px-8 py-4 text-lg"
+              >
+                <Link href="/support">
+                  Support Us
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
               </Button>
             </div>
-
-            <Suspense fallback={<BlogsSkeleton />}>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {content.latestBlogs.map((post: any) => (
-                  <Link key={post.id} href={`/blog/${post.slug}`}>
-                    <Card className="h-full hover:shadow-lg transition-shadow">
-                      {post.coverImage && (
-                        <div className="relative h-48 overflow-hidden rounded-t-lg">
-                          <img
-                            src={post.coverImage || "/placeholder.svg"}
-                            alt={post.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <CardHeader>
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline">{post.category}</Badge>
-                          <span className="text-sm text-gray-500 flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(post.publishedAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <CardTitle className="line-clamp-2">{post.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-gray-600 line-clamp-3">{post.excerpt}</p>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            </Suspense>
           </div>
         </div>
       </section>

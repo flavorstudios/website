@@ -397,8 +397,8 @@ export default async function HomePage() {
                 <Button
                   asChild
                   size="lg"
-                  variant="outline"
-                  className="border-white/20 text-white hover:bg-white/10 px-8 py-4 text-lg"
+                  variant="secondary"
+                  className="bg-white text-blue-900 hover:bg-gray-100 px-8 py-4 text-lg border-0"
                 >
                   <Link href="/support">
                     Support Us

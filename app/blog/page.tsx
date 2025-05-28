@@ -2,10 +2,11 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Calendar, User, Eye, BookOpen, Clock, Star, ArrowRight } from "lucide-react"
+import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react"
 import { blogStore } from "@/lib/content-store"
 import { getDynamicCategories } from "@/lib/dynamic-categories"
 import { CategoryTabs } from "@/components/ui/category-tabs"
+import { NewsletterSignup } from "@/components/newsletter-signup"
 
 export const metadata = {
   title: "Blog | Flavor Studios - Anime Creation Insights & Stories",
@@ -189,12 +190,9 @@ export default async function BlogPage({
           <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 opacity-90">
             Get exclusive behind-the-scenes content and industry insights delivered to your inbox.
           </p>
-          <Button asChild size="lg" variant="secondary" className="shadow-lg">
-            <Link href="/contact">
-              Subscribe to Newsletter
-              <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-            </Link>
-          </Button>
+          <div className="max-w-md mx-auto">
+            <NewsletterSignup />
+          </div>
         </div>
       </section>
     </div>

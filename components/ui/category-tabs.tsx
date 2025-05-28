@@ -1,81 +1,113 @@
 "use client"
 
-import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
-import { TrendingUp } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { cn } from "@/lib/utils"
 import type { CategoryData } from "@/lib/dynamic-categories"
 
 interface CategoryTabsProps {
   categories: CategoryData[]
   selectedCategory: string
-  basePath: string
-  type: "blog" | "video"
+  onCategoryChange: (category: string) => void
+  showAll?: boolean
+  className?: string
 }
 
-export function CategoryTabs({ categories, selectedCategory, basePath, type }: CategoryTabsProps) {
-  const getTabUrl = (categorySlug: string) => {
-    if (categorySlug === "all") {
-      return basePath
-    }
-    return `${basePath}?category=${categorySlug}`
+export function CategoryTabs({
+  categories,
+  selectedCategory,
+  onCategoryChange,
+  showAll = true,
+  className,
+}: CategoryTabsProps) {
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  const allCategories = showAll ? [{ name: "All", slug: "all", count: 0 }, ...categories] : categories
+
+  const checkScrollButtons = () => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    setCanScrollLeft(container.scrollLeft > 0)
+    setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth)
   }
 
-  const getTabLabel = (categorySlug: string) => {
-    if (categorySlug === "all") {
-      return type === "blog" ? "All Posts" : "All Videos"
+  useEffect(() => {
+    checkScrollButtons()
+    const container = scrollContainerRef.current
+    if (container) {
+      container.addEventListener("scroll", checkScrollButtons)
+      return () => container.removeEventListener("scroll", checkScrollButtons)
     }
-    const category = categories.find((c) => c.slug === categorySlug)
-    return category?.name || categorySlug
+  }, [categories])
+
+  const scroll = (direction: "left" | "right") => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const scrollAmount = 200
+    const newScrollLeft =
+      direction === "left" ? container.scrollLeft - scrollAmount : container.scrollLeft + scrollAmount
+
+    container.scrollTo({
+      left: newScrollLeft,
+      behavior: "smooth",
+    })
   }
 
   return (
-    <section className="bg-white border-b shadow-sm sticky top-16 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="h-5 w-5 text-blue-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Browse by Category</h3>
-          </div>
-          <div className="flex flex-wrap gap-2 max-w-full overflow-x-auto pb-2">
-            {/* All Items Tab */}
-            <Link
-              href={getTabUrl("all")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                selectedCategory === "all"
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md"
-              }`}
-            >
-              {getTabLabel("all")}
-            </Link>
+    <div className={cn("relative", className)}>
+      <div className="flex items-center">
+        {/* Left scroll button */}
+        {canScrollLeft && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute left-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-sm"
+            onClick={() => scroll("left")}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        )}
 
-            {/* Dynamic Category Tabs */}
-            {categories.map((category) => (
-              <Link
-                key={category.slug}
-                href={getTabUrl(category.slug)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
-                  selectedCategory === category.slug
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md"
-                }`}
-              >
-                {category.name}
-                <Badge
-                  variant="secondary"
-                  className={`text-xs ${
-                    selectedCategory === category.slug
-                      ? "bg-white/20 text-white border-white/30"
-                      : "bg-gray-200 text-gray-600"
-                  }`}
-                >
-                  {category.count}
-                </Badge>
-              </Link>
-            ))}
-          </div>
+        {/* Category tabs container */}
+        <div
+          ref={scrollContainerRef}
+          className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth px-8 md:px-0"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {allCategories.map((category) => (
+            <Button
+              key={category.slug}
+              variant={selectedCategory === category.slug ? "default" : "outline"}
+              size="sm"
+              className={cn(
+                "whitespace-nowrap flex-shrink-0 transition-all duration-200",
+                selectedCategory === category.slug ? "bg-primary text-primary-foreground shadow-md" : "hover:bg-muted",
+              )}
+              onClick={() => onCategoryChange(category.slug)}
+            >
+              {category.name}
+              {category.count > 0 && <span className="ml-1 text-xs opacity-70">({category.count})</span>}
+            </Button>
+          ))}
         </div>
+
+        {/* Right scroll button */}
+        {canScrollRight && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute right-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-sm"
+            onClick={() => scroll("right")}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
       </div>
-    </section>
+    </div>
   )
 }

@@ -8,7 +8,7 @@ import { Menu, Coffee } from "lucide-react"
 import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
-import { getDynamicCategoriesClient } from "@/lib/dynamic-categories"
+import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -24,7 +24,7 @@ export function Header() {
   useEffect(() => {
     const loadMenuItems = async () => {
       try {
-        const { blogCategories, videoCategories } = await getDynamicCategoriesClient()
+        const { blogCategories, videoCategories } = await getCategoriesWithFallback()
 
         const dynamicMenuItems: MenuItem[] = [
           {
@@ -40,10 +40,10 @@ export function Header() {
                 href: "/blog",
                 description: "Browse all our blog content",
               },
-              ...blogCategories.map((category) => ({
+              ...blogCategories.slice(0, 6).map((category) => ({
                 label: category.name,
                 href: `/blog?category=${category.slug}`,
-                description: `${category.name} posts and articles (${category.count})`,
+                description: `${category.name} posts and articles${category.count > 0 ? ` (${category.count})` : ""}`,
               })),
             ],
           },
@@ -56,10 +56,10 @@ export function Header() {
                 href: "/watch",
                 description: "Browse our complete video library",
               },
-              ...videoCategories.map((category) => ({
+              ...videoCategories.slice(0, 6).map((category) => ({
                 label: category.name,
                 href: `/watch?category=${category.slug}`,
-                description: `${category.name} videos and content (${category.count})`,
+                description: `${category.name} videos and content${category.count > 0 ? ` (${category.count})` : ""}`,
               })),
             ],
           },

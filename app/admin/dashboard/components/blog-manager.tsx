@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CategoryDropdown } from "@/components/ui/category-dropdown"
-import { getDynamicCategoriesClient } from "@/lib/dynamic-categories"
+import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
 
 interface BlogPost {
   id: string
@@ -48,11 +48,15 @@ export function BlogManager() {
   const loadData = async () => {
     try {
       const [postsResponse, categoriesData] = await Promise.all([
-        fetch("/api/admin/blogs"),
-        getDynamicCategoriesClient(),
+        fetch("/api/admin/blogs").catch(() => ({ ok: false, json: () => Promise.resolve({ posts: [] }) })),
+        getCategoriesWithFallback(),
       ])
 
-      const postsData = await postsResponse.json()
+      let postsData = { posts: [] }
+      if (postsResponse.ok) {
+        postsData = await postsResponse.json()
+      }
+
       setPosts(postsData.posts || [])
       setCategories(categoriesData.blogCategories || [])
     } catch (error) {

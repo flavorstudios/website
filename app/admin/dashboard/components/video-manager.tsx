@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CategoryDropdown } from "@/components/ui/category-dropdown"
-import { getDynamicCategoriesClient } from "@/lib/dynamic-categories"
+import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
 
 interface Video {
   id: string
@@ -46,11 +46,15 @@ export function VideoManager() {
   const loadData = async () => {
     try {
       const [videosResponse, categoriesData] = await Promise.all([
-        fetch("/api/admin/videos"),
-        getDynamicCategoriesClient(),
+        fetch("/api/admin/videos").catch(() => ({ ok: false, json: () => Promise.resolve({ videos: [] }) })),
+        getCategoriesWithFallback(),
       ])
 
-      const videosData = await videosResponse.json()
+      let videosData = { videos: [] }
+      if (videosResponse.ok) {
+        videosData = await videosResponse.json()
+      }
+
       setVideos(videosData.videos || [])
       setCategories(categoriesData.videoCategories || [])
     } catch (error) {

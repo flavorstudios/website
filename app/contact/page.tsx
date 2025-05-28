@@ -1,3 +1,8 @@
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -5,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
 import {
   Mail,
   Clock,
@@ -19,11 +25,24 @@ import {
   MessageSquare,
   Users,
   Check,
+  Loader2,
+  AlertCircle,
 } from "lucide-react"
 import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    subject: "",
+    message: "",
+    privacyAccepted: false,
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
   const contactInfo = [
     {
       icon: Mail,
@@ -98,22 +117,96 @@ export default function ContactPage() {
     "For complex inquiries, we may schedule a follow-up call.",
   ]
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = "First name is required"
+    }
+
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = "Last name is required"
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required"
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address"
+    }
+
+    if (!formData.subject) {
+      newErrors.subject = "Please select a subject"
+    }
+
+    if (!formData.message.trim()) {
+      newErrors.message = "Message is required"
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = "Message must be at least 10 characters long"
+    }
+
+    if (!formData.privacyAccepted) {
+      newErrors.privacyAccepted = "You must accept the privacy policy"
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!validateForm()) {
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitStatus("idle")
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      // Mock success
+      setSubmitStatus("success")
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        subject: "",
+        message: "",
+        privacyAccepted: false,
+      })
+      setErrors({})
+    } catch (error) {
+      setSubmitStatus("error")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }))
+    }
+  }
+
   return (
-    <div className="min-h-screen py-8 sm:py-12">
+    <div className="min-h-screen py-6 sm:py-8 lg:py-12">
       <div className="container mx-auto max-w-6xl px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-12 sm:mb-16">
+        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
           <Badge className="mb-3 sm:mb-4 bg-blue-600 text-white px-3 py-1 text-xs sm:text-sm">Connect With Us</Badge>
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
             Get In Touch
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
             Whether you have a question about our content, want to collaborate, or just want to say hello, we're here to
             help. Fill out the form and we'll get back to you as soon as possible.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 lg:gap-12 mb-12 sm:mb-16">
+        <div className="grid lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12 mb-8 sm:mb-12 lg:mb-16">
           {/* Contact Info & Social */}
           <div className="space-y-4 sm:space-y-6 order-2 lg:order-1">
             {/* Contact Information */}
@@ -195,74 +288,178 @@ export default function ContactPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-sm sm:text-base">
-                      First Name
-                    </Label>
-                    <Input id="firstName" placeholder="Your first name" className="h-10 sm:h-11" />
+                {submitStatus === "success" && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-green-800">Message sent successfully!</h4>
+                      <p className="text-sm text-green-700">We'll get back to you within 24-48 hours.</p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-sm sm:text-base">
-                      Last Name
-                    </Label>
-                    <Input id="lastName" placeholder="Your last name" className="h-10 sm:h-11" />
+                )}
+
+                {submitStatus === "error" && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-red-800">Failed to send message</h4>
+                      <p className="text-sm text-red-700">Please try again or contact us directly via email.</p>
+                    </div>
                   </div>
-                </div>
+                )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm sm:text-base">
-                    Email
-                  </Label>
-                  <Input id="email" type="email" placeholder="your.email@example.com" className="h-10 sm:h-11" />
-                </div>
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName" className="text-sm sm:text-base">
+                        First Name *
+                      </Label>
+                      <Input
+                        id="firstName"
+                        placeholder="Your first name"
+                        className="h-10 sm:h-11"
+                        value={formData.firstName}
+                        onChange={(e) => handleInputChange("firstName", e.target.value)}
+                        aria-invalid={!!errors.firstName}
+                        aria-describedby={errors.firstName ? "firstName-error" : undefined}
+                      />
+                      {errors.firstName && (
+                        <p id="firstName-error" className="text-sm text-red-600">
+                          {errors.firstName}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName" className="text-sm sm:text-base">
+                        Last Name *
+                      </Label>
+                      <Input
+                        id="lastName"
+                        placeholder="Your last name"
+                        className="h-10 sm:h-11"
+                        value={formData.lastName}
+                        onChange={(e) => handleInputChange("lastName", e.target.value)}
+                        aria-invalid={!!errors.lastName}
+                        aria-describedby={errors.lastName ? "lastName-error" : undefined}
+                      />
+                      {errors.lastName && (
+                        <p id="lastName-error" className="text-sm text-red-600">
+                          {errors.lastName}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="subject" className="text-sm sm:text-base">
-                    Subject
-                  </Label>
-                  <Select>
-                    <SelectTrigger className="h-10 sm:h-11">
-                      <SelectValue placeholder="Select a topic" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="general">General Inquiry</SelectItem>
-                      <SelectItem value="collaboration">Collaboration</SelectItem>
-                      <SelectItem value="business">Business Partnership</SelectItem>
-                      <SelectItem value="press">Press & Media</SelectItem>
-                      <SelectItem value="technical">Technical Support</SelectItem>
-                      <SelectItem value="feedback">Feedback</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-sm sm:text-base">
+                      Email *
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your.email@example.com"
+                      className="h-10 sm:h-11"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      aria-invalid={!!errors.email}
+                      aria-describedby={errors.email ? "email-error" : undefined}
+                    />
+                    {errors.email && (
+                      <p id="email-error" className="text-sm text-red-600">
+                        {errors.email}
+                      </p>
+                    )}
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="message" className="text-sm sm:text-base">
-                    Message
-                  </Label>
-                  <Textarea
-                    id="message"
-                    placeholder="Tell us more about your inquiry..."
-                    className="min-h-[100px] sm:min-h-[120px] resize-none"
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="subject" className="text-sm sm:text-base">
+                      Subject *
+                    </Label>
+                    <Select value={formData.subject} onValueChange={(value) => handleInputChange("subject", value)}>
+                      <SelectTrigger className="h-10 sm:h-11" aria-invalid={!!errors.subject}>
+                        <SelectValue placeholder="Select a topic" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="general">General Inquiry</SelectItem>
+                        <SelectItem value="collaboration">Collaboration</SelectItem>
+                        <SelectItem value="business">Business Partnership</SelectItem>
+                        <SelectItem value="press">Press & Media</SelectItem>
+                        <SelectItem value="technical">Technical Support</SelectItem>
+                        <SelectItem value="feedback">Feedback</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {errors.subject && (
+                      <p id="subject-error" className="text-sm text-red-600">
+                        {errors.subject}
+                      </p>
+                    )}
+                  </div>
 
-                {/* Privacy Policy Checkbox */}
-                <div className="flex items-start space-x-2 pt-2">
-                  <Checkbox id="privacy" className="mt-0.5" />
-                  <Label htmlFor="privacy" className="text-xs sm:text-sm leading-relaxed">
-                    I agree to the{" "}
-                    <Link href="/privacy-policy" className="text-blue-600 hover:underline">
-                      Privacy Policy
-                    </Link>
-                  </Label>
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="message" className="text-sm sm:text-base">
+                      Message *
+                    </Label>
+                    <Textarea
+                      id="message"
+                      placeholder="Tell us more about your inquiry..."
+                      className="min-h-[100px] sm:min-h-[120px] resize-none"
+                      value={formData.message}
+                      onChange={(e) => handleInputChange("message", e.target.value)}
+                      aria-invalid={!!errors.message}
+                      aria-describedby={errors.message ? "message-error" : undefined}
+                    />
+                    {errors.message && (
+                      <p id="message-error" className="text-sm text-red-600">
+                        {errors.message}
+                      </p>
+                    )}
+                  </div>
 
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-11">
-                  <Send className="mr-2 h-4 w-4" />
-                  Send Message
-                </Button>
+                  {/* Privacy Policy Checkbox */}
+                  <div className="flex items-start space-x-2 pt-2">
+                    <Checkbox
+                      id="privacy"
+                      className="mt-0.5"
+                      checked={formData.privacyAccepted}
+                      onCheckedChange={(checked) => handleInputChange("privacyAccepted", !!checked)}
+                      aria-invalid={!!errors.privacyAccepted}
+                      aria-describedby={errors.privacyAccepted ? "privacy-error" : undefined}
+                    />
+                    <div className="space-y-1">
+                      <Label htmlFor="privacy" className="text-xs sm:text-sm leading-relaxed">
+                        I agree to the{" "}
+                        <Link href="/privacy-policy" className="text-blue-600 hover:underline">
+                          Privacy Policy
+                        </Link>{" "}
+                        *
+                      </Label>
+                      {errors.privacyAccepted && (
+                        <p id="privacy-error" className="text-sm text-red-600">
+                          {errors.privacyAccepted}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-11"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        Send Message
+                      </>
+                    )}
+                  </Button>
+                </form>
 
                 {/* What to Expect Section */}
                 <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -286,8 +483,8 @@ export default function ContactPage() {
         </div>
 
         {/* Contact Process Timeline - Mobile Optimized */}
-        <section className="mb-12 sm:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Our Contact Process</h2>
+        <section className="mb-8 sm:mb-12 lg:mb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 lg:mb-12">Our Contact Process</h2>
           <div className="max-w-4xl mx-auto">
             <div className="relative">
               {/* Timeline line - Hidden on mobile, shown on larger screens */}
@@ -329,7 +526,7 @@ export default function ContactPage() {
         </section>
 
         {/* FAQ Call-to-Action Section */}
-        <section className="mt-12 sm:mt-16 text-center bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 sm:p-8">
+        <section className="mt-8 sm:mt-12 lg:mt-16 text-center bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 sm:p-8">
           <HelpCircle className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-blue-600" />
           <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-blue-900">Need Quick Answers?</h2>
           <p className="text-base sm:text-lg text-blue-700 mb-4 sm:mb-6 max-w-2xl mx-auto px-4">

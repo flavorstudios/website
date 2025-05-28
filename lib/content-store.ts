@@ -528,21 +528,3 @@ export async function initializeCleanData() {
     })
   }
 }
-
-// Additional exports for compatibility
-export async function getBlogPosts(): Promise<BlogPost[]> {
-  return blogStore.getPublished()
-}
-
-export async function getVideos(): Promise<Video[]> {
-  return videoStore.getPublished()
-}
-
-export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
-  return blogStore.getBySlug(slug)
-}
-
-export async function getVideoBySlug(slug: string): Promise<Video | null> {
-  const videos = await videoStore.getPublished()
-  return videos.find((v) => v.youtubeId === slug || v.id === slug) || null
-}

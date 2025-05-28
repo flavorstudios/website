@@ -1,4 +1,3 @@
-// Client-side only implementation for dynamic categories
 export interface CategoryData {
   name: string
   slug: string
@@ -10,81 +9,7 @@ export interface DynamicCategoriesResult {
   videoCategories: CategoryData[]
 }
 
-// Server-side compatible function (alias for client function)
-export async function getDynamicCategories(): Promise<DynamicCategoriesResult> {
-  return getDynamicCategoriesClient()
-}
-
-// Client-side function for browser usage
-export async function getDynamicCategoriesClient(): Promise<DynamicCategoriesResult> {
-  try {
-    const [blogResponse, videoResponse] = await Promise.allSettled([
-      fetch("/api/admin/blogs").catch(() => ({ ok: false, json: () => Promise.resolve({ posts: [] }) })),
-      fetch("/api/admin/videos").catch(() => ({ ok: false, json: () => Promise.resolve({ videos: [] }) })),
-    ])
-
-    let blogData = { posts: [] }
-    let videoData = { videos: [] }
-
-    if (blogResponse.status === "fulfilled" && blogResponse.value.ok) {
-      blogData = await blogResponse.value.json()
-    }
-
-    if (videoResponse.status === "fulfilled" && videoResponse.value.ok) {
-      videoData = await videoResponse.value.json()
-    }
-
-    const blogPosts = blogData.posts || []
-    const videos = videoData.videos || []
-
-    // Extract and count blog categories
-    const blogCategoryMap = new Map<string, number>()
-    blogPosts.forEach((post: any) => {
-      if (post.category && post.status === "published") {
-        const count = blogCategoryMap.get(post.category) || 0
-        blogCategoryMap.set(post.category, count + 1)
-      }
-    })
-
-    // Extract and count video categories
-    const videoCategoryMap = new Map<string, number>()
-    videos.forEach((video: any) => {
-      if (video.category && video.status === "published") {
-        const count = videoCategoryMap.get(video.category) || 0
-        videoCategoryMap.set(video.category, count + 1)
-      }
-    })
-
-    // Convert to CategoryData format
-    const blogCategories: CategoryData[] = Array.from(blogCategoryMap.entries()).map(([name, count]) => ({
-      name,
-      slug: name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, ""),
-      count,
-    }))
-
-    const videoCategories: CategoryData[] = Array.from(videoCategoryMap.entries()).map(([name, count]) => ({
-      name,
-      slug: name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, ""),
-      count,
-    }))
-
-    return {
-      blogCategories: blogCategories.sort((a, b) => b.count - a.count),
-      videoCategories: videoCategories.sort((a, b) => b.count - a.count),
-    }
-  } catch (error) {
-    console.error("Failed to get dynamic categories (client):", error)
-    return fallbackCategories
-  }
-}
-
-// Fallback categories for when API fails
+// Fallback categories for when API calls fail
 export const fallbackCategories: DynamicCategoriesResult = {
   blogCategories: [
     { name: "Anime News", slug: "anime-news", count: 0 },
@@ -93,31 +18,14 @@ export const fallbackCategories: DynamicCategoriesResult = {
     { name: "Tutorials", slug: "tutorials", count: 0 },
   ],
   videoCategories: [
-    { name: "Original Anime", slug: "original-anime", count: 0 },
-    { name: "Short Films", slug: "short-films", count: 0 },
+    { name: "Episodes", slug: "episodes", count: 0 },
+    { name: "Shorts", slug: "shorts", count: 0 },
     { name: "Behind the Scenes", slug: "behind-the-scenes", count: 0 },
-    { name: "Tutorials & Guides", slug: "tutorials-guides", count: 0 },
+    { name: "Tutorials", slug: "tutorials", count: 0 },
   ],
 }
 
-// Helper function to get categories with fallback
-export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResult> {
-  try {
-    const categories = await getDynamicCategoriesClient()
-
-    // If no categories found, use fallback
-    if (categories.blogCategories.length === 0 && categories.videoCategories.length === 0) {
-      return fallbackCategories
-    }
-
-    return categories
-  } catch (error) {
-    console.error("Failed to get categories, using fallback:", error)
-    return fallbackCategories
-  }
-}
-
-// Utility function to create slug from category name
+// Utility functions
 export function createCategorySlug(name: string): string {
   return name
     .toLowerCase()
@@ -125,15 +33,99 @@ export function createCategorySlug(name: string): string {
     .replace(/(^-|-$)/g, "")
 }
 
-// Utility function to get category by slug
 export function getCategoryBySlug(categories: CategoryData[], slug: string): CategoryData | undefined {
-  return categories.find((category) => category.slug === slug)
+  return categories.find((cat) => cat.slug === slug)
 }
 
-// Utility function to format category display name
-export function formatCategoryName(name: string): string {
-  return name
+export function formatCategoryName(slug: string): string {
+  return slug
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
 }
+
+// Client-side category fetching with fallback
+export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResult> {
+  try {
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"
+
+    const [blogsResponse, videosResponse] = await Promise.allSettled([
+      fetch(`${baseUrl}/api/admin/blogs`, { cache: "no-store" }),
+      fetch(`${baseUrl}/api/admin/videos`, { cache: "no-store" }),
+    ])
+
+    let blogCategories: CategoryData[] = []
+    let videoCategories: CategoryData[] = []
+
+    // Process blog categories
+    if (blogsResponse.status === "fulfilled" && blogsResponse.value.ok) {
+      try {
+        const blogsData = await blogsResponse.value.json()
+        const posts = blogsData.posts || []
+        const categoryMap = new Map<string, number>()
+
+        posts
+          .filter((post: any) => post.status === "published")
+          .forEach((post: any) => {
+            if (post.category) {
+              const slug = createCategorySlug(post.category)
+              categoryMap.set(slug, (categoryMap.get(slug) || 0) + 1)
+            }
+          })
+
+        blogCategories = Array.from(categoryMap.entries()).map(([slug, count]) => ({
+          name: formatCategoryName(slug),
+          slug,
+          count,
+        }))
+      } catch (error) {
+        console.error("Error processing blog categories:", error)
+      }
+    }
+
+    // Process video categories
+    if (videosResponse.status === "fulfilled" && videosResponse.value.ok) {
+      try {
+        const videosData = await videosResponse.value.json()
+        const videos = videosData.videos || []
+        const categoryMap = new Map<string, number>()
+
+        videos
+          .filter((video: any) => video.status === "published")
+          .forEach((video: any) => {
+            if (video.category) {
+              const slug = createCategorySlug(video.category)
+              categoryMap.set(slug, (categoryMap.get(slug) || 0) + 1)
+            }
+          })
+
+        videoCategories = Array.from(categoryMap.entries()).map(([slug, count]) => ({
+          name: formatCategoryName(slug),
+          slug,
+          count,
+        }))
+      } catch (error) {
+        console.error("Error processing video categories:", error)
+      }
+    }
+
+    // Use fallback if no categories found
+    if (blogCategories.length === 0) {
+      blogCategories = fallbackCategories.blogCategories
+    }
+    if (videoCategories.length === 0) {
+      videoCategories = fallbackCategories.videoCategories
+    }
+
+    return { blogCategories, videoCategories }
+  } catch (error) {
+    console.error("Failed to fetch categories:", error)
+    return fallbackCategories
+  }
+}
+
+// Server-side compatible function (alias for client function)
+export const getDynamicCategories = getCategoriesWithFallback
+
+// Client-side only function (alias for consistency)
+export const getDynamicCategoriesClient = getCategoriesWithFallback

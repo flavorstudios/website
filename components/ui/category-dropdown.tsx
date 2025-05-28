@@ -1,13 +1,15 @@
 "use client"
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { ChevronDown, Filter } from "lucide-react"
 import type { CategoryData } from "@/lib/dynamic-categories"
 
 interface CategoryDropdownProps {
   categories: CategoryData[]
   selectedCategory: string
   onCategoryChange: (category: string) => void
-  type: "blog" | "video"
   placeholder?: string
   showAll?: boolean
   className?: string
@@ -17,30 +19,51 @@ export function CategoryDropdown({
   categories,
   selectedCategory,
   onCategoryChange,
-  type,
-  placeholder,
+  placeholder = "Select category",
   showAll = true,
   className,
 }: CategoryDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false)
+
   const allCategories = showAll ? [{ name: "All Categories", slug: "all", count: 0 }, ...categories] : categories
 
-  const defaultPlaceholder = `All ${type === "blog" ? "Blog" : "Video"} Categories`
+  const selectedCategoryData = allCategories.find((cat) => cat.slug === selectedCategory)
+  const displayText = selectedCategoryData?.name || placeholder
 
   return (
-    <Select value={selectedCategory} onValueChange={onCategoryChange}>
-      <SelectTrigger className={className || "w-48"}>
-        <SelectValue placeholder={placeholder || defaultPlaceholder} />
-      </SelectTrigger>
-      <SelectContent>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="outline"
+          className={`justify-between min-w-[180px] ${className}`}
+          aria-label="Filter by category"
+        >
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            <span className="truncate">{displayText}</span>
+          </div>
+          <ChevronDown className="h-4 w-4 opacity-50" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-[180px]">
         {allCategories.map((category) => (
-          <SelectItem key={category.slug} value={category.slug}>
+          <DropdownMenuItem
+            key={category.slug}
+            onClick={() => {
+              onCategoryChange(category.slug)
+              setIsOpen(false)
+            }}
+            className={`cursor-pointer ${selectedCategory === category.slug ? "bg-blue-50 text-blue-700" : ""}`}
+          >
             <div className="flex items-center justify-between w-full">
               <span>{category.name}</span>
-              {category.count > 0 && <span className="ml-2 text-xs text-muted-foreground">({category.count})</span>}
+              {category.count > 0 && (
+                <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">{category.count}</span>
+              )}
             </div>
-          </SelectItem>
+          </DropdownMenuItem>
         ))}
-      </SelectContent>
-    </Select>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

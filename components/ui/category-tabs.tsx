@@ -40,7 +40,11 @@ export function CategoryTabs({
     const container = scrollContainerRef.current
     if (container) {
       container.addEventListener("scroll", checkScrollButtons)
-      return () => container.removeEventListener("scroll", checkScrollButtons)
+      window.addEventListener("resize", checkScrollButtons)
+      return () => {
+        container.removeEventListener("scroll", checkScrollButtons)
+        window.removeEventListener("resize", checkScrollButtons)
+      }
     }
   }, [categories])
 
@@ -66,8 +70,9 @@ export function CategoryTabs({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute left-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-sm"
+            className="absolute left-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-sm rounded-full"
             onClick={() => scroll("left")}
+            aria-label="Scroll categories left"
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -76,7 +81,7 @@ export function CategoryTabs({
         {/* Category tabs container */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth px-8 md:px-0"
+          className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth px-8 md:px-0 py-2"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {allCategories.map((category) => (
@@ -85,13 +90,17 @@ export function CategoryTabs({
               variant={selectedCategory === category.slug ? "default" : "outline"}
               size="sm"
               className={cn(
-                "whitespace-nowrap flex-shrink-0 transition-all duration-200",
-                selectedCategory === category.slug ? "bg-primary text-primary-foreground shadow-md" : "hover:bg-muted",
+                "whitespace-nowrap flex-shrink-0 transition-all duration-200 min-h-[36px] px-4",
+                selectedCategory === category.slug
+                  ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                  : "hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300",
               )}
               onClick={() => onCategoryChange(category.slug)}
             >
               {category.name}
-              {category.count > 0 && <span className="ml-1 text-xs opacity-70">({category.count})</span>}
+              {category.count > 0 && (
+                <span className="ml-2 text-xs opacity-70 bg-white/20 px-1.5 py-0.5 rounded-full">{category.count}</span>
+              )}
             </Button>
           ))}
         </div>
@@ -101,8 +110,9 @@ export function CategoryTabs({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute right-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-sm"
+            className="absolute right-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-sm rounded-full"
             onClick={() => scroll("right")}
+            aria-label="Scroll categories right"
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

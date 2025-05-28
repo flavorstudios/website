@@ -9,6 +9,8 @@ interface CategoryDropdownProps {
   onCategoryChange: (category: string) => void
   type: "blog" | "video"
   placeholder?: string
+  showAll?: boolean
+  className?: string
 }
 
 export function CategoryDropdown({
@@ -17,21 +19,24 @@ export function CategoryDropdown({
   onCategoryChange,
   type,
   placeholder,
+  showAll = true,
+  className,
 }: CategoryDropdownProps) {
-  const defaultPlaceholder = type === "blog" ? "All Categories" : "All Categories"
+  const allCategories = showAll ? [{ name: "All Categories", slug: "all", count: 0 }, ...categories] : categories
+
+  const defaultPlaceholder = `All ${type === "blog" ? "Blog" : "Video"} Categories`
 
   return (
     <Select value={selectedCategory} onValueChange={onCategoryChange}>
-      <SelectTrigger className="w-48">
+      <SelectTrigger className={className || "w-48"}>
         <SelectValue placeholder={placeholder || defaultPlaceholder} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">{defaultPlaceholder}</SelectItem>
-        {categories.map((category) => (
-          <SelectItem key={category.slug} value={category.name}>
+        {allCategories.map((category) => (
+          <SelectItem key={category.slug} value={category.slug}>
             <div className="flex items-center justify-between w-full">
               <span>{category.name}</span>
-              <span className="text-xs text-gray-500 ml-2">({category.count})</span>
+              {category.count > 0 && <span className="ml-2 text-xs text-muted-foreground">({category.count})</span>}
             </div>
           </SelectItem>
         ))}

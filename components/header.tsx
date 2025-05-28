@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -8,91 +8,100 @@ import { Menu, Coffee } from "lucide-react"
 import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
+import { getDynamicCategoriesClient } from "@/lib/dynamic-categories"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([
+    { label: "Home", href: "/" },
+    { label: "Blog", href: "/blog" },
+    { label: "Watch", href: "/watch" },
+    { label: "Play", href: "/play" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+  ])
 
-  const menuItems: MenuItem[] = [
-    {
-      label: "Home",
-      href: "/",
-    },
-    {
-      label: "Blog",
-      href: "/blog",
-      subItems: [
-        {
-          label: "All Posts",
-          href: "/blog",
-          description: "Browse all our blog content",
-        },
-        {
-          label: "Anime News",
-          href: "/blog?category=anime-news",
-          description: "Latest updates from the anime world",
-        },
-        {
-          label: "Reviews",
-          href: "/blog?category=reviews",
-          description: "In-depth anime and manga reviews",
-        },
-        {
-          label: "Behind the Scenes",
-          href: "/blog?category=behind-the-scenes",
-          description: "Studio insights and processes",
-        },
-      ],
-    },
-    {
-      label: "Watch",
-      href: "/watch",
-      subItems: [
-        {
-          label: "All Videos",
-          href: "/watch",
-          description: "Browse our complete video library",
-        },
-        {
-          label: "Originals",
-          href: "/watch?category=originals",
-          description: "Our exclusive original series",
-        },
-        {
-          label: "Episodes",
-          href: "/watch?category=episodes",
-          description: "Latest episode releases",
-        },
-      ],
-    },
-    {
-      label: "Play",
-      href: "/play",
-    },
-    {
-      label: "About",
-      subItems: [
-        {
-          label: "Our Story",
-          href: "/about",
-          description: "Learn about Flavor Studios",
-        },
-        {
-          label: "Careers",
-          href: "/career",
-          description: "Join our creative team",
-        },
-        {
-          label: "FAQ",
-          href: "/faq",
-          description: "Frequently asked questions",
-        },
-      ],
-    },
-    {
-      label: "Contact",
-      href: "/contact",
-    },
-  ]
+  useEffect(() => {
+    const loadMenuItems = async () => {
+      try {
+        const { blogCategories, videoCategories } = await getDynamicCategoriesClient()
+
+        const dynamicMenuItems: MenuItem[] = [
+          {
+            label: "Home",
+            href: "/",
+          },
+          {
+            label: "Blog",
+            href: "/blog",
+            subItems: [
+              {
+                label: "All Posts",
+                href: "/blog",
+                description: "Browse all our blog content",
+              },
+              ...blogCategories.map((category) => ({
+                label: category.name,
+                href: `/blog?category=${category.slug}`,
+                description: `${category.name} posts and articles (${category.count})`,
+              })),
+            ],
+          },
+          {
+            label: "Watch",
+            href: "/watch",
+            subItems: [
+              {
+                label: "All Videos",
+                href: "/watch",
+                description: "Browse our complete video library",
+              },
+              ...videoCategories.map((category) => ({
+                label: category.name,
+                href: `/watch?category=${category.slug}`,
+                description: `${category.name} videos and content (${category.count})`,
+              })),
+            ],
+          },
+          {
+            label: "Play",
+            href: "/play",
+          },
+          {
+            label: "About",
+            subItems: [
+              {
+                label: "Our Story",
+                href: "/about",
+                description: "Learn about Flavor Studios",
+              },
+              {
+                label: "Careers",
+                href: "/career",
+                description: "Join our creative team",
+              },
+              {
+                label: "FAQ",
+                href: "/faq",
+                description: "Frequently asked questions",
+              },
+            ],
+          },
+          {
+            label: "Contact",
+            href: "/contact",
+          },
+        ]
+
+        setMenuItems(dynamicMenuItems)
+      } catch (error) {
+        console.error("Failed to load dynamic menu items:", error)
+        // Keep the fallback menu items that were set in useState
+      }
+    }
+
+    loadMenuItems()
+  }, [])
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

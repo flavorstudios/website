@@ -2,9 +2,10 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Play, Calendar, Eye, Video, Clock, TrendingUp, Star, ArrowRight, Users } from "lucide-react"
+import { Play, Calendar, Eye, Video, Clock, Star, ArrowRight, Users } from "lucide-react"
 import { videoStore } from "@/lib/content-store"
-import { categoryStore } from "@/lib/category-store"
+import { getDynamicCategories } from "@/lib/dynamic-categories"
+import { CategoryTabs } from "@/components/ui/category-tabs"
 
 export const metadata = {
   title: "Watch | Flavor Studios - Original Anime Content & Series",
@@ -26,15 +27,9 @@ export const metadata = {
 
 async function getWatchData() {
   try {
-    // Use content stores directly instead of API calls
-    const [videos, categories] = await Promise.all([
-      videoStore.getPublished(),
-      categoryStore
-        .getByType("video")
-        .catch(() => []), // Fallback to empty array if categories fail
-    ])
+    const [videos, { videoCategories }] = await Promise.all([videoStore.getPublished(), getDynamicCategories()])
 
-    return { videos, categories }
+    return { videos, categories: videoCategories }
   } catch (error) {
     console.error("Failed to fetch watch data:", error)
     return { videos: [], categories: [] }
@@ -52,7 +47,15 @@ export default async function WatchPage({
   const videosPerPage = 9
 
   const filteredVideos =
-    selectedCategory === "all" ? videos : videos.filter((video: any) => video.category === selectedCategory)
+    selectedCategory === "all"
+      ? videos
+      : videos.filter((video: any) => {
+          const categorySlug = video.category
+            ?.toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "")
+          return categorySlug === selectedCategory
+        })
 
   // Pagination
   const totalPages = Math.ceil(filteredVideos.length / videosPerPage)
@@ -115,18 +118,8 @@ export default async function WatchPage({
         </div>
       </div>
 
-      {/* Enhanced Category Filter */}
-      <section className="bg-white border-b shadow-sm sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
-              <h3 className="text-lg font-semibold text-gray-900">Browse by Category</h3>
-            </div>
-            <CategoryFilter categories={categories} selectedCategory={selectedCategory} />
-          </div>
-        </div>
-      </section>
+      {/* Dynamic Category Tabs */}
+      <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/watch" type="video" />
 
       {/* Featured Videos */}
       {featuredVideos.length > 0 && (
@@ -151,7 +144,9 @@ export default async function WatchPage({
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
             <div>
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                {selectedCategory === "all" ? "Latest Videos" : `${selectedCategory} Videos`}
+                {selectedCategory === "all"
+                  ? "Latest Videos"
+                  : `${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory} Videos`}
               </h2>
               <p className="text-gray-600">
                 {filteredVideos.length} video{filteredVideos.length !== 1 ? "s" : ""} found
@@ -199,36 +194,6 @@ export default async function WatchPage({
           </Button>
         </div>
       </section>
-    </div>
-  )
-}
-
-function CategoryFilter({ categories, selectedCategory }: { categories: any[]; selectedCategory: string }) {
-  return (
-    <div className="flex flex-wrap gap-2 max-w-full overflow-x-auto pb-2">
-      <Link
-        href="/watch"
-        className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-          selectedCategory === "all"
-            ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-            : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md"
-        }`}
-      >
-        All Videos
-      </Link>
-      {categories.map((category: any) => (
-        <Link
-          key={category.id}
-          href={`/watch?category=${encodeURIComponent(category.name)}`}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-            selectedCategory === category.name
-              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md"
-          }`}
-        >
-          {category.name}
-        </Link>
-      ))}
     </div>
   )
 }
@@ -392,12 +357,12 @@ function EmptyState({ selectedCategory }: { selectedCategory: string }) {
           <Video className="h-12 w-12 text-blue-600" />
         </div>
         <h3 className="text-2xl font-bold text-gray-900 mb-4">
-          {selectedCategory === "all" ? "No videos yet" : `No videos in ${selectedCategory}`}
+          {selectedCategory === "all" ? "No videos yet" : `No videos in this category`}
         </h3>
         <p className="text-gray-600 mb-8 leading-relaxed">
           {selectedCategory === "all"
             ? "We're working on exciting video content! Check back soon for original anime episodes and behind-the-scenes footage."
-            : `No videos have been published in the ${selectedCategory} category yet. Try selecting a different category or check back later.`}
+            : `No videos have been published in this category yet. Try selecting a different category or check back later.`}
         </p>
         <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6">
           <p className="text-blue-800 text-sm">

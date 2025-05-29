@@ -1,786 +1,472 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { RotateCcw, Trophy, Users, Bot, Smartphone, Monitor, Clock, Zap, Brain } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { RotateCcw, Trophy, Clock, Zap, Users, Bot } from "lucide-react"
 
 type Player = "X" | "O" | null
-type GameMode = "PvC" | "PvP"
+type GameMode = "vs-computer" | "pvp-untimed" | "pvp-timed" | "pvp-blitz"
 type Difficulty = "easy" | "medium" | "hard"
-type PvPDifficulty = "casual" | "timed" | "blitz"
-type GameState = "playing" | "won" | "draw" | "timeout"
 
-interface GameStats {
-  xWins: number
-  oWins: number
-  draws: number
-  timeouts?: number
+interface GameState {
+  board: Player[]
+  currentPlayer: Player
+  winner: Player | "tie" | null
+  gameMode: GameMode
+  difficulty: Difficulty
+  scores: { X: number; O: number; ties: number }
+  timeLeft: number
+  isGameActive: boolean
+  moveHistory: number[]
 }
 
-interface WinningLine {
-  positions: number[]
-  player: Player
+const INITIAL_STATE: GameState = {
+  board: Array(9).fill(null),
+  currentPlayer: "X",
+  winner: null,
+  gameMode: "vs-computer",
+  difficulty: "medium",
+  scores: { X: 0, O: 0, ties: 0 },
+  timeLeft: 30,
+  isGameActive: true,
+  moveHistory: [],
 }
 
 export default function PlayPage() {
-  const [board, setBoard] = useState<Player[]>(Array(9).fill(null))
-  const [currentPlayer, setCurrentPlayer] = useState<Player>("X")
-  const [gameState, setGameState] = useState<GameState>("playing")
-  const [gameMode, setGameMode] = useState<GameMode>("PvC")
-  const [difficulty, setDifficulty] = useState<Difficulty>("medium")
-  const [pvpDifficulty, setPvpDifficulty] = useState<PvPDifficulty>("casual")
-  const [stats, setStats] = useState<GameStats>({ xWins: 0, oWins: 0, draws: 0, timeouts: 0 })
-  const [winningLine, setWinningLine] = useState<WinningLine | null>(null)
-  const [isComputerThinking, setIsComputerThinking] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const [timeLeft, setTimeLeft] = useState<number | null>(null)
-  const [moveCount, setMoveCount] = useState(0)
+  const [gameState, setGameState] = useState<GameState>(INITIAL_STATE)
+  const [autoResetTimer, setAutoResetTimer] = useState<number | null>(null)
+  const [resetFeedback, setResetFeedback] = useState(false)
 
-  // Detect mobile device
+  // Timer for timed modes
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+    if (!gameState.isGameActive || gameState.winner) return
+    if (gameState.gameMode !== "pvp-timed" && gameState.gameMode !== "pvp-blitz") return
+
+    const timer = setInterval(() => {
+      setGameState((prev) => {
+        if (prev.timeLeft <= 1) {
+          // Time's up - current player loses
+          const winner = prev.currentPlayer === "X" ? "O" : "X"
+          return {
+            ...prev,
+            winner,
+            isGameActive: false,
+            timeLeft: 0,
+            scores: {
+              ...prev.scores,
+              [winner]: prev.scores[winner] + 1,
+            },
+          }
+        }
+        return { ...prev, timeLeft: prev.timeLeft - 1 }
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [gameState.currentPlayer, gameState.isGameActive, gameState.winner, gameState.gameMode])
+
+  // Auto-reset timer after game ends
+  useEffect(() => {
+    if (gameState.winner && !autoResetTimer) {
+      const timer = setTimeout(() => {
+        resetGame()
+        setAutoResetTimer(null)
+      }, 4000)
+      setAutoResetTimer(timer)
     }
-
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-
-    return () => window.removeEventListener("resize", checkMobile)
-  }, [])
-
-  // Reset stats on component mount and unmount
-  useEffect(() => {
-    setStats({ xWins: 0, oWins: 0, draws: 0, timeouts: 0 })
 
     return () => {
-      setStats({ xWins: 0, oWins: 0, draws: 0, timeouts: 0 })
-    }
-  }, [])
-
-  // Timer logic for PvP timed modes
-  useEffect(() => {
-    if (
-      gameMode === "PvP" &&
-      (pvpDifficulty === "timed" || pvpDifficulty === "blitz") &&
-      gameState === "playing" &&
-      timeLeft !== null
-    ) {
-      if (timeLeft <= 0) {
-        // Time's up - current player loses
-        setGameState("timeout")
-        const winner = currentPlayer === "X" ? "O" : "X"
-        setStats((prev) => ({
-          ...prev,
-          [winner === "X" ? "xWins" : "oWins"]: prev[winner === "X" ? "xWins" : "oWins"] + 1,
-          timeouts: (prev.timeouts || 0) + 1,
-        }))
-        return
-      }
-
-      const timer = setTimeout(() => {
-        setTimeLeft(timeLeft - 1)
-      }, 1000)
-
-      return () => clearTimeout(timer)
-    }
-  }, [timeLeft, gameMode, pvpDifficulty, gameState, currentPlayer])
-
-  // Initialize timer when starting a new turn in timed modes
-  const initializeTimer = useCallback(() => {
-    if (gameMode === "PvP" && gameState === "playing") {
-      if (pvpDifficulty === "timed") {
-        setTimeLeft(30) // 30 seconds per move
-      } else if (pvpDifficulty === "blitz") {
-        setTimeLeft(10) // 10 seconds per move
-      } else {
-        setTimeLeft(null)
+      if (autoResetTimer) {
+        clearTimeout(autoResetTimer)
+        setAutoResetTimer(null)
       }
     }
-  }, [gameMode, pvpDifficulty, gameState])
+  }, [gameState.winner])
 
-  const checkWinner = useCallback((board: Player[]): WinningLine | null => {
+  const checkWinner = useCallback((board: Player[]): Player | "tie" | null => {
     const lines = [
       [0, 1, 2],
       [3, 4, 5],
-      [6, 7, 8], // rows
+      [6, 7, 8],
       [0, 3, 6],
       [1, 4, 7],
-      [2, 5, 8], // columns
+      [2, 5, 8],
       [0, 4, 8],
-      [2, 4, 6], // diagonals
+      [2, 4, 6],
     ]
 
-    for (const line of lines) {
-      const [a, b, c] = line
+    for (const [a, b, c] of lines) {
       if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-        return { positions: line, player: board[a] }
+        return board[a]
       }
     }
-    return null
+
+    return board.every((cell) => cell !== null) ? "tie" : null
   }, [])
-
-  const checkDraw = useCallback((board: Player[]): boolean => {
-    return board.every((cell) => cell !== null)
-  }, [])
-
-  const getAvailableMoves = useCallback((board: Player[]): number[] => {
-    return board.map((cell, index) => (cell === null ? index : -1)).filter((index) => index !== -1)
-  }, [])
-
-  const minimax = useCallback(
-    (
-      board: Player[],
-      depth: number,
-      isMaximizing: boolean,
-      alpha = Number.NEGATIVE_INFINITY,
-      beta: number = Number.POSITIVE_INFINITY,
-    ): number => {
-      const winner = checkWinner(board)
-
-      if (winner) {
-        return winner.player === "O" ? 10 - depth : depth - 10
-      }
-
-      if (checkDraw(board)) {
-        return 0
-      }
-
-      if (isMaximizing) {
-        let maxEval = Number.NEGATIVE_INFINITY
-        for (const move of getAvailableMoves(board)) {
-          const newBoard = [...board]
-          newBoard[move] = "O"
-          const value = minimax(newBoard, depth + 1, false, alpha, beta)
-          maxEval = Math.max(maxEval, value)
-          alpha = Math.max(alpha, value)
-          if (beta <= alpha) break
-        }
-        return maxEval
-      } else {
-        let minEval = Number.POSITIVE_INFINITY
-        for (const move of getAvailableMoves(board)) {
-          const newBoard = [...board]
-          newBoard[move] = "X"
-          const value = minimax(newBoard, depth + 1, true, alpha, beta)
-          minEval = Math.min(minEval, value)
-          beta = Math.min(beta, value)
-          if (beta <= alpha) break
-        }
-        return minEval
-      }
-    },
-    [checkWinner, checkDraw, getAvailableMoves],
-  )
 
   const getComputerMove = useCallback(
     (board: Player[], difficulty: Difficulty): number => {
-      const availableMoves = getAvailableMoves(board)
+      const availableMoves = board.map((cell, index) => (cell === null ? index : null)).filter((val) => val !== null)
 
       if (availableMoves.length === 0) return -1
 
-      switch (difficulty) {
-        case "easy":
-          return availableMoves[Math.floor(Math.random() * availableMoves.length)]
-
-        case "medium":
-          // 70% chance of optimal move, 30% random
-          if (Math.random() < 0.7) {
-            let bestMove = availableMoves[0]
-            let bestValue = Number.NEGATIVE_INFINITY
-
-            for (const move of availableMoves) {
-              const newBoard = [...board]
-              newBoard[move] = "O"
-              const value = minimax(newBoard, 0, false)
-              if (value > bestValue) {
-                bestValue = value
-                bestMove = move
-              }
-            }
-            return bestMove
-          } else {
-            return availableMoves[Math.floor(Math.random() * availableMoves.length)]
-          }
-
-        case "hard":
-          let bestMove = availableMoves[0]
-          let bestValue = Number.NEGATIVE_INFINITY
-
-          for (const move of availableMoves) {
-            const newBoard = [...board]
-            newBoard[move] = "O"
-            const value = minimax(newBoard, 0, false)
-            if (value > bestValue) {
-              bestValue = value
-              bestMove = move
-            }
-          }
-          return bestMove
-
-        default:
-          return availableMoves[0]
+      if (difficulty === "easy") {
+        return availableMoves[Math.floor(Math.random() * availableMoves.length)]!
       }
+
+      // Medium and Hard: Try to win first, then block, then random
+      const checkMove = (player: Player) => {
+        for (const move of availableMoves) {
+          const testBoard = [...board]
+          testBoard[move!] = player
+          if (checkWinner(testBoard) === player) {
+            return move
+          }
+        }
+        return null
+      }
+
+      // Try to win
+      const winMove = checkMove("O")
+      if (winMove !== null) return winMove
+
+      // Try to block player from winning
+      const blockMove = checkMove("X")
+      if (blockMove !== null && difficulty === "hard") return blockMove
+
+      // Take center if available (hard mode)
+      if (difficulty === "hard" && board[4] === null) return 4
+
+      // Take corners (hard mode)
+      if (difficulty === "hard") {
+        const corners = [0, 2, 6, 8].filter((i) => board[i] === null)
+        if (corners.length > 0) {
+          return corners[Math.floor(Math.random() * corners.length)]
+        }
+      }
+
+      return availableMoves[Math.floor(Math.random() * availableMoves.length)]!
     },
-    [getAvailableMoves, minimax],
+    [checkWinner],
   )
 
   const makeMove = useCallback(
-    (index: number, player: Player) => {
-      if (board[index] || gameState !== "playing") return
+    (index: number) => {
+      if (gameState.board[index] || gameState.winner || !gameState.isGameActive) return
 
-      // Haptic feedback simulation for mobile
-      if (isMobile && "vibrate" in navigator) {
-        navigator.vibrate(50)
-      }
+      setGameState((prev) => {
+        const newBoard = [...prev.board]
+        newBoard[index] = prev.currentPlayer
+        const winner = checkWinner(newBoard)
+        const nextPlayer = prev.currentPlayer === "X" ? "O" : "X"
 
-      const newBoard = [...board]
-      newBoard[index] = player
-      setBoard(newBoard)
-      setMoveCount((prev) => prev + 1)
+        const newTimeLeft = prev.gameMode === "pvp-timed" ? 30 : prev.gameMode === "pvp-blitz" ? 10 : prev.timeLeft
 
-      const winner = checkWinner(newBoard)
-      if (winner) {
-        setWinningLine(winner)
-        setGameState("won")
-        setStats((prev) => ({
+        const newState = {
           ...prev,
-          [winner.player === "X" ? "xWins" : "oWins"]: prev[winner.player === "X" ? "xWins" : "oWins"] + 1,
-        }))
+          board: newBoard,
+          currentPlayer: nextPlayer,
+          winner,
+          timeLeft: winner ? prev.timeLeft : newTimeLeft,
+          isGameActive: !winner,
+          moveHistory: [...prev.moveHistory, index],
+          scores: winner
+            ? {
+                ...prev.scores,
+                [winner === "tie" ? "ties" : winner]: prev.scores[winner === "tie" ? "ties" : winner] + 1,
+              }
+            : prev.scores,
+        }
 
-        // Victory vibration for mobile
-        if (isMobile && "vibrate" in navigator) {
-          navigator.vibrate([100, 50, 100])
-        }
-      } else if (checkDraw(newBoard)) {
-        setGameState("draw")
-        setStats((prev) => ({ ...prev, draws: prev.draws + 1 }))
-      } else {
-        setCurrentPlayer(player === "X" ? "O" : "X")
-        // Initialize timer for next player in PvP timed modes
-        if (gameMode === "PvP" && (pvpDifficulty === "timed" || pvpDifficulty === "blitz")) {
-          initializeTimer()
-        }
-      }
+        return newState
+      })
     },
-    [board, gameState, checkWinner, checkDraw, isMobile, gameMode, pvpDifficulty, initializeTimer],
+    [gameState.board, gameState.winner, gameState.isGameActive, gameState.currentPlayer, checkWinner],
   )
 
-  const handleCellClick = (index: number) => {
-    if (gameMode === "PvP") {
-      makeMove(index, currentPlayer)
-    } else if (currentPlayer === "X") {
-      makeMove(index, "X")
-    }
-  }
-
-  // Computer move logic
-  useEffect(() => {
-    if (gameMode === "PvC" && currentPlayer === "O" && gameState === "playing") {
-      setIsComputerThinking(true)
-      const timer = setTimeout(
-        () => {
-          const move = getComputerMove(board, difficulty)
-          if (move !== -1) {
-            makeMove(move, "O")
-          }
-          setIsComputerThinking(false)
-        },
-        Math.random() * 500 + 500, // Random delay between 500-1000ms for more realistic AI
-      )
-
-      return () => clearTimeout(timer)
-    }
-  }, [currentPlayer, gameMode, gameState, board, difficulty, getComputerMove, makeMove])
-
-  // Auto-reset after game ends
-  useEffect(() => {
-    if (gameState !== "playing") {
-      const timer = setTimeout(() => {
-        resetBoard()
-      }, 4000) // Increased to 4 seconds for better user experience
-
-      return () => clearTimeout(timer)
-    }
-  }, [gameState])
-
-  // Initialize timer when game starts in PvP timed modes
+  // Computer move effect
   useEffect(() => {
     if (
-      gameMode === "PvP" &&
-      (pvpDifficulty === "timed" || pvpDifficulty === "blitz") &&
-      gameState === "playing" &&
-      moveCount === 0
+      gameState.gameMode === "vs-computer" &&
+      gameState.currentPlayer === "O" &&
+      !gameState.winner &&
+      gameState.isGameActive
     ) {
-      initializeTimer()
-    }
-  }, [gameMode, pvpDifficulty, gameState, moveCount, initializeTimer])
+      const timer = setTimeout(
+        () => {
+          const move = getComputerMove(gameState.board, gameState.difficulty)
+          if (move !== -1) {
+            makeMove(move)
+          }
+        },
+        Math.random() * 800 + 400,
+      ) // Random delay between 400-1200ms
 
-  const resetGame = () => {
-    setBoard(Array(9).fill(null))
-    setCurrentPlayer("X")
-    setGameState("playing")
-    setWinningLine(null)
-    setIsComputerThinking(false)
-    setTimeLeft(null)
-    setMoveCount(0)
-    setStats({ xWins: 0, oWins: 0, draws: 0, timeouts: 0 })
-
-    // Show clear feedback
-    if (isMobile && "vibrate" in navigator) {
-      navigator.vibrate([50, 50, 50])
+      return () => clearTimeout(timer)
     }
+  }, [gameState.currentPlayer, gameState.gameMode, gameState.board, gameState.difficulty, makeMove, getComputerMove])
+
+  const resetGame = useCallback(() => {
+    // Clear auto-reset timer
+    if (autoResetTimer) {
+      clearTimeout(autoResetTimer)
+      setAutoResetTimer(null)
+    }
+
+    // Show reset feedback
+    setResetFeedback(true)
+    setTimeout(() => setResetFeedback(false), 200)
+
+    // Haptic feedback for mobile
+    if (typeof window !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(50)
+    }
+
+    setGameState((prev) => ({
+      ...prev,
+      board: Array(9).fill(null),
+      currentPlayer: "X",
+      winner: null,
+      timeLeft: prev.gameMode === "pvp-timed" ? 30 : prev.gameMode === "pvp-blitz" ? 10 : 30,
+      isGameActive: true,
+      moveHistory: [],
+    }))
+  }, [autoResetTimer])
+
+  const resetBoard = useCallback(() => {
+    resetGame()
+  }, [resetGame])
+
+  const changeGameMode = useCallback((mode: GameMode) => {
+    setGameState((prev) => ({
+      ...INITIAL_STATE,
+      gameMode: mode,
+      difficulty: prev.difficulty,
+      scores: prev.scores,
+      timeLeft: mode === "pvp-timed" ? 30 : mode === "pvp-blitz" ? 10 : 30,
+    }))
+  }, [])
+
+  const changeDifficulty = useCallback((difficulty: Difficulty) => {
+    setGameState((prev) => ({ ...prev, difficulty }))
+  }, [])
+
+  const getStatusMessage = () => {
+    if (gameState.winner === "tie") return "It's a tie! 🤝"
+    if (gameState.winner) {
+      if (gameState.gameMode === "vs-computer") {
+        return gameState.winner === "X" ? "You win! 🎉" : "Computer wins! 🤖"
+      }
+      return `Player ${gameState.winner} wins! 🏆`
+    }
+    if (gameState.gameMode === "vs-computer") {
+      return gameState.currentPlayer === "X" ? "Your turn" : "Computer thinking..."
+    }
+    return `Player ${gameState.currentPlayer}'s turn`
   }
 
-  const resetBoard = () => {
-    setBoard(Array(9).fill(null))
-    setCurrentPlayer("X")
-    setGameState("playing")
-    setWinningLine(null)
-    setIsComputerThinking(false)
-    setTimeLeft(null)
-    setMoveCount(0)
-    // Initialize timer for new game in PvP timed modes
-    if (gameMode === "PvP" && (pvpDifficulty === "timed" || pvpDifficulty === "blitz")) {
-      setTimeout(() => initializeTimer(), 100)
+  const getTimeDisplay = () => {
+    if (gameState.gameMode === "pvp-timed" || gameState.gameMode === "pvp-blitz") {
+      return `${gameState.timeLeft}s`
     }
-  }
-
-  const getGameStatus = () => {
-    if (gameState === "won" && winningLine) {
-      return `${winningLine.player} Wins! 🎉`
-    }
-    if (gameState === "draw") {
-      return "It's a Draw! 🤝"
-    }
-    if (gameState === "timeout") {
-      const winner = currentPlayer === "X" ? "O" : "X"
-      return `Time's Up! ${winner} Wins! ⏰`
-    }
-    if (isComputerThinking) {
-      return "Computer is thinking... 🤔"
-    }
-    return `Player ${currentPlayer}'s Turn`
-  }
-
-  const getDifficultyColor = (diff: Difficulty) => {
-    switch (diff) {
-      case "easy":
-        return "bg-green-500 hover:bg-green-600"
-      case "medium":
-        return "bg-yellow-500 hover:bg-yellow-600"
-      case "hard":
-        return "bg-red-500 hover:bg-red-600"
-      default:
-        return "bg-gray-500 hover:bg-gray-600"
-    }
-  }
-
-  const getPvPDifficultyColor = (diff: PvPDifficulty) => {
-    switch (diff) {
-      case "casual":
-        return "bg-blue-500 hover:bg-blue-600"
-      case "timed":
-        return "bg-orange-500 hover:bg-orange-600"
-      case "blitz":
-        return "bg-purple-500 hover:bg-purple-600"
-      default:
-        return "bg-gray-500 hover:bg-gray-600"
-    }
-  }
-
-  const getDifficultyIcon = (diff: Difficulty) => {
-    switch (diff) {
-      case "easy":
-        return "😊"
-      case "medium":
-        return "🤔"
-      case "hard":
-        return "😤"
-      default:
-        return "🎯"
-    }
-  }
-
-  const getPvPDifficultyIcon = (diff: PvPDifficulty) => {
-    switch (diff) {
-      case "casual":
-        return <Users className="h-4 w-4" />
-      case "timed":
-        return <Clock className="h-4 w-4" />
-      case "blitz":
-        return <Zap className="h-4 w-4" />
-      default:
-        return <Brain className="h-4 w-4" />
-    }
-  }
-
-  const getPvPDifficultyDescription = (diff: PvPDifficulty) => {
-    switch (diff) {
-      case "casual":
-        return "No time limit - play at your own pace"
-      case "timed":
-        return "30 seconds per move"
-      case "blitz":
-        return "10 seconds per move - fast-paced!"
-      default:
-        return "Standard gameplay"
-    }
-  }
-
-  const getTimerColor = () => {
-    if (timeLeft === null) return "text-gray-600"
-    if (timeLeft <= 5) return "text-red-600"
-    if (timeLeft <= 10) return "text-orange-600"
-    return "text-blue-600"
+    return null
   }
 
   return (
-    <div className="min-h-screen py-6 sm:py-12 bg-gradient-to-br from-blue-50 to-purple-50">
-      <div className="container mx-auto max-w-4xl px-3 sm:px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <Badge className="mb-3 sm:mb-4 bg-blue-600 text-white px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm">
-            {isMobile ? <Smartphone className="h-3 w-3 mr-1" /> : <Monitor className="h-4 w-4 mr-2" />}
-            Interactive Game
-          </Badge>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
-            Tic-Tac-Toe
-          </h1>
-          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-2">
-            Challenge yourself against the computer or play with a friend!
-          </p>
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Tic-Tac-Toe</h1>
+          <p className="text-gray-600">Challenge yourself against AI or play with friends!</p>
         </div>
 
-        {/* Game Controls */}
-        <Card className="mb-6 sm:mb-8 shadow-lg">
-          <CardHeader className="pb-3 sm:pb-6">
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <Trophy className="h-5 w-5 sm:h-6 sm:w-6" />
-              Game Settings
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 sm:space-y-0">
-            {/* Game Mode Toggle */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <span className="text-sm font-medium text-gray-700">Game Mode:</span>
-                <div className="flex bg-gray-100 rounded-lg p-1 w-full sm:w-auto">
-                  <button
-                    onClick={() => setGameMode("PvC")}
-                    className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-md text-sm font-medium transition-all flex-1 sm:flex-none min-h-[44px] ${
-                      gameMode === "PvC" ? "bg-white shadow-sm text-blue-600" : "text-gray-600 hover:text-gray-800"
-                    }`}
-                  >
-                    <Bot className="h-4 w-4" />
-                    vs Computer
-                  </button>
-                  <button
-                    onClick={() => setGameMode("PvP")}
-                    className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-md text-sm font-medium transition-all flex-1 sm:flex-none min-h-[44px] ${
-                      gameMode === "PvP" ? "bg-white shadow-sm text-blue-600" : "text-gray-600 hover:text-gray-800"
-                    }`}
-                  >
-                    <Users className="h-4 w-4" />
-                    vs Player
-                  </button>
-                </div>
-              </div>
-
-              {/* Reset Button */}
-              <Button
-                onClick={() => {
-                  resetGame()
-                  // Visual feedback
-                  const button = document.activeElement as HTMLButtonElement
-                  if (button) {
-                    button.blur()
-                  }
-                }}
-                variant="outline"
-                size={isMobile ? "default" : "sm"}
-                className="min-h-[44px] w-full sm:w-auto hover:bg-gray-100 active:bg-gray-200 transition-colors"
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Reset Game
-              </Button>
-            </div>
-
-            {/* Difficulty Selector for PvC */}
-            {gameMode === "PvC" && (
-              <div className="flex flex-col gap-3 pt-2 border-t border-gray-100">
-                <span className="text-sm font-medium text-gray-700">AI Difficulty Level:</span>
-                <div className="grid grid-cols-3 gap-2 sm:flex sm:gap-3">
-                  {(["easy", "medium", "hard"] as Difficulty[]).map((diff) => (
-                    <button
-                      key={diff}
-                      onClick={() => setDifficulty(diff)}
-                      className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-sm font-medium transition-all min-h-[44px] flex items-center justify-center gap-2 ${
-                        difficulty === diff
-                          ? `${getDifficultyColor(diff)} text-white shadow-md`
-                          : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                      }`}
-                    >
-                      <span className="text-base">{getDifficultyIcon(diff)}</span>
-                      <span className="capitalize">{diff}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Difficulty Selector for PvP */}
-            {gameMode === "PvP" && (
-              <div className="flex flex-col gap-3 pt-2 border-t border-gray-100">
-                <span className="text-sm font-medium text-gray-700">Game Style:</span>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-                  {(["casual", "timed", "blitz"] as PvPDifficulty[]).map((diff) => (
-                    <button
-                      key={diff}
-                      onClick={() => setPvpDifficulty(diff)}
-                      className={`px-3 sm:px-4 py-3 rounded-lg text-sm font-medium transition-all min-h-[44px] flex flex-col sm:flex-row items-center justify-center gap-2 ${
-                        pvpDifficulty === diff
-                          ? `${getPvPDifficultyColor(diff)} text-white shadow-md`
-                          : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                      }`}
-                    >
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Game Controls */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Game Mode
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Select value={gameState.gameMode} onValueChange={changeGameMode}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="vs-computer">
                       <div className="flex items-center gap-2">
-                        {getPvPDifficultyIcon(diff)}
-                        <span className="capitalize font-semibold">{diff}</span>
+                        <Bot className="h-4 w-4" />
+                        vs Computer
                       </div>
-                      <span className="text-xs opacity-90 text-center">{getPvPDifficultyDescription(diff)}</span>
-                    </button>
+                    </SelectItem>
+                    <SelectItem value="pvp-untimed">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Player vs Player
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="pvp-timed">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4" />
+                        Timed (30s)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="pvp-blitz">
+                      <div className="flex items-center gap-2">
+                        <Zap className="h-4 w-4" />
+                        Blitz (10s)
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {gameState.gameMode === "vs-computer" && (
+                  <Select value={gameState.difficulty} onValueChange={changeDifficulty}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="easy">Easy</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="hard">Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Scores */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5" />
+                  Score
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">{gameState.scores.X}</div>
+                    <div className="text-sm text-gray-600">Player X</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-gray-600">{gameState.scores.ties}</div>
+                    <div className="text-sm text-gray-600">Ties</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-red-600">{gameState.scores.O}</div>
+                    <div className="text-sm text-gray-600">Player O</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Game Board */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="text-lg font-semibold">{getStatusMessage()}</div>
+                    {getTimeDisplay() && (
+                      <Badge variant="outline" className="ml-2">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {getTimeDisplay()}
+                      </Badge>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={resetBoard}
+                    className={`transition-all duration-200 ${
+                      resetFeedback
+                        ? "bg-blue-100 border-blue-300 scale-95"
+                        : "hover:bg-blue-50 hover:border-blue-300 hover:scale-105"
+                    }`}
+                    disabled={resetFeedback}
+                  >
+                    <RotateCcw className={`h-4 w-4 mr-2 ${resetFeedback ? "animate-spin" : ""}`} />
+                    {resetFeedback ? "Resetting..." : "Reset"}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-2 max-w-xs mx-auto">
+                  {gameState.board.map((cell, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      className="h-20 w-20 text-2xl font-bold hover:bg-blue-50 transition-all duration-200 hover:scale-105"
+                      onClick={() => makeMove(index)}
+                      disabled={!!cell || !!gameState.winner || !gameState.isGameActive}
+                    >
+                      {cell && <span className={cell === "X" ? "text-blue-600" : "text-red-600"}>{cell}</span>}
+                    </Button>
                   ))}
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Game Status with Timer */}
-        <div className="text-center mb-4 sm:mb-6">
-          <motion.h2
-            key={getGameStatus()}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-xl sm:text-2xl font-bold text-gray-800 px-2 mb-2"
-          >
-            {getGameStatus()}
-          </motion.h2>
-
-          {/* Timer Display */}
-          {timeLeft !== null && gameState === "playing" && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-md ${getTimerColor()}`}
-            >
-              <Clock className="h-4 w-4" />
-              <span className="font-mono text-lg font-bold">{timeLeft}s</span>
-            </motion.div>
-          )}
-        </div>
-
-        {/* Game Board */}
-        <Card className="mb-6 sm:mb-8 shadow-xl">
-          <CardContent className="p-4 sm:p-6">
-            <div className="flex justify-center">
-              <div className="grid grid-cols-3 gap-2 sm:gap-3 p-3 sm:p-4 bg-gray-100 rounded-xl">
-                {board.map((cell, index) => (
-                  <motion.button
-                    key={index}
-                    onClick={() => handleCellClick(index)}
-                    disabled={cell !== null || gameState !== "playing" || isComputerThinking}
-                    className={`
-                      w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-white rounded-lg shadow-sm
-                      flex items-center justify-center text-2xl sm:text-3xl md:text-4xl font-bold
-                      transition-all duration-200 hover:shadow-md active:scale-95
-                      min-h-[44px] min-w-[44px]
-                      ${cell === "X" ? "text-blue-600" : "text-red-500"}
-                      ${winningLine?.positions.includes(index) ? "bg-green-100 ring-2 ring-green-400 shadow-lg" : ""}
-                      ${cell === null && gameState === "playing" && !isComputerThinking ? "hover:bg-gray-50 cursor-pointer active:bg-gray-100" : ""}
-                      disabled:cursor-not-allowed disabled:opacity-60
-                    `}
-                    whileHover={cell === null && gameState === "playing" && !isComputerThinking ? { scale: 1.05 } : {}}
-                    whileTap={cell === null && gameState === "playing" && !isComputerThinking ? { scale: 0.95 } : {}}
-                    style={{ touchAction: "manipulation" }} // Prevents double-tap zoom on mobile
-                  >
-                    <AnimatePresence>
-                      {cell && (
-                        <motion.span
-                          initial={{ scale: 0, rotate: -180 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          exit={{ scale: 0, rotate: 180 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                        >
-                          {cell}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </motion.button>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Game Stats */}
-        <Card className="shadow-lg">
-          <CardHeader className="pb-3 sm:pb-6">
-            <CardTitle className="text-center text-lg sm:text-xl">Game Statistics</CardTitle>
-            {/* Winner Display */}
-            <div className="text-center mt-2">
-              {(() => {
-                const totalGames = stats.xWins + stats.oWins + stats.draws + (stats.timeouts || 0)
-                if (totalGames === 0) {
-                  return <p className="text-sm text-gray-500">No games played yet</p>
-                }
-
-                if (gameMode === "PvC") {
-                  if (stats.xWins > stats.oWins) {
-                    return (
-                      <div className="flex items-center justify-center gap-2">
-                        <Badge className="bg-blue-600 text-white">🎉 Player is Winning!</Badge>
-                        <span className="text-sm text-gray-600">
-                          ({stats.xWins} - {stats.oWins})
-                        </span>
-                      </div>
-                    )
-                  } else if (stats.oWins > stats.xWins) {
-                    return (
-                      <div className="flex items-center justify-center gap-2">
-                        <Badge className="bg-red-600 text-white">🤖 Computer is Winning!</Badge>
-                        <span className="text-sm text-gray-600">
-                          ({stats.oWins} - {stats.xWins})
-                        </span>
-                      </div>
-                    )
-                  } else {
-                    return (
-                      <div className="flex items-center justify-center gap-2">
-                        <Badge variant="outline" className="border-gray-400 text-gray-600">
-                          🤝 It's a Tie!
-                        </Badge>
-                        <span className="text-sm text-gray-600">
-                          ({stats.xWins} - {stats.oWins})
-                        </span>
-                      </div>
-                    )
-                  }
-                } else {
-                  // PvP mode
-                  if (stats.xWins > stats.oWins) {
-                    return (
-                      <div className="flex items-center justify-center gap-2">
-                        <Badge className="bg-blue-600 text-white">🎉 Player X is Winning!</Badge>
-                        <span className="text-sm text-gray-600">
-                          ({stats.xWins} - {stats.oWins})
-                        </span>
-                      </div>
-                    )
-                  } else if (stats.oWins > stats.xWins) {
-                    return (
-                      <div className="flex items-center justify-center gap-2">
-                        <Badge className="bg-red-600 text-white">🎉 Player O is Winning!</Badge>
-                        <span className="text-sm text-gray-600">
-                          ({stats.oWins} - {stats.xWins})
-                        </span>
-                      </div>
-                    )
-                  } else {
-                    return (
-                      <div className="flex items-center justify-center gap-2">
-                        <Badge variant="outline" className="border-gray-400 text-gray-600">
-                          🤝 It's a Tie!
-                        </Badge>
-                        <span className="text-sm text-gray-600">
-                          ({stats.xWins} - {stats.oWins})
-                        </span>
-                      </div>
-                    )
-                  }
-                }
-              })()}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div
-              className={`grid gap-3 sm:gap-4 ${gameMode === "PvP" && (pvpDifficulty === "timed" || pvpDifficulty === "blitz") ? "grid-cols-4" : "grid-cols-3"}`}
-            >
-              <motion.div
-                className="p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-100"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="text-2xl sm:text-3xl font-bold text-blue-600 text-center">{stats.xWins}</div>
-                <div className="text-xs sm:text-sm text-gray-600 text-center mt-1">
-                  {gameMode === "PvC" ? "Player (X)" : "Player X"} Wins
-                </div>
-              </motion.div>
-              <motion.div
-                className="p-3 sm:p-4 bg-gray-50 rounded-lg border border-gray-200"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="text-2xl sm:text-3xl font-bold text-gray-600 text-center">{stats.draws}</div>
-                <div className="text-xs sm:text-sm text-gray-600 text-center mt-1">Draws</div>
-              </motion.div>
-              <motion.div
-                className="p-3 sm:p-4 bg-red-50 rounded-lg border border-red-100"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="text-2xl sm:text-3xl font-bold text-red-600 text-center">{stats.oWins}</div>
-                <div className="text-xs sm:text-sm text-gray-600 text-center mt-1">
-                  {gameMode === "PvC" ? "Computer (O)" : "Player O"} Wins
-                </div>
-              </motion.div>
-              {gameMode === "PvP" && (pvpDifficulty === "timed" || pvpDifficulty === "blitz") && (
-                <motion.div
-                  className="p-3 sm:p-4 bg-orange-50 rounded-lg border border-orange-100"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="text-2xl sm:text-3xl font-bold text-orange-600 text-center">
-                    {stats.timeouts || 0}
+                {/* Auto-reset countdown */}
+                {gameState.winner && autoResetTimer && (
+                  <div className="text-center mt-4">
+                    <p className="text-sm text-gray-600">Next game starts in 4 seconds...</p>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                      <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: "100%" }}></div>
+                    </div>
                   </div>
-                  <div className="text-xs sm:text-sm text-gray-600 text-center mt-1">Timeouts</div>
-                </motion.div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
-        {gameState !== "playing" && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200"
-          >
-            <p className="text-sm text-blue-700">
-              🎮 New game starting in {Math.ceil((4000 - (Date.now() % 4000)) / 1000)} seconds...
-            </p>
-          </motion.div>
-        )}
-
-        {/* Mobile-specific tips */}
-        {isMobile && (
-          <Card className="mt-6 bg-blue-50 border-blue-200">
-            <CardContent className="p-4">
-              <div className="text-center">
-                <p className="text-sm text-blue-700">
-                  💡 <strong>Mobile Tip:</strong> Tap cells to make your move.
-                  {gameMode === "PvP" &&
-                    (pvpDifficulty === "timed" || pvpDifficulty === "blitz") &&
-                    " Watch the timer!"}
-                  The game auto-resets after each round!
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          {/* Game Info */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>How to Play</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm text-gray-600">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Objective</h4>
+                  <p>Get three of your marks in a row (horizontally, vertically, or diagonally).</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Game Modes</h4>
+                  <ul className="space-y-1">
+                    <li>
+                      • <strong>vs Computer:</strong> Play against AI with different difficulty levels
+                    </li>
+                    <li>
+                      • <strong>Player vs Player:</strong> Take turns with a friend
+                    </li>
+                    <li>
+                      • <strong>Timed:</strong> Each player has 30 seconds per turn
+                    </li>
+                    <li>
+                      • <strong>Blitz:</strong> Fast-paced with 10 seconds per turn
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">Tips</h4>
+                  <ul className="space-y-1">
+                    <li>• Control the center square when possible</li>
+                    <li>• Block your opponent's winning moves</li>
+                    <li>• Create multiple winning opportunities</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   )

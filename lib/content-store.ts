@@ -73,28 +73,15 @@ export interface SiteStats {
   lastUpdated: string
 }
 
-// Backward compatibility: Export static categories for deployment
-export const VALID_BLOG_CATEGORIES = [
-  "Anime Reviews",
-  "Storytelling & Themes",
-  "Behind the Frames",
-  "Creator Spotlights",
-  "Life Through Anime",
-  "Creative Process",
-  "Anime News",
-  "Streaming Updates",
-  "Industry Buzz",
-  "New & Upcoming Releases",
-  "Voice Actor & Crew Updates",
-  "Cultural Highlights",
-]
+// Updated categories to match watch page
+export const VALID_BLOG_CATEGORIES = ["Episodes", "Shorts", "Behind the Scenes", "Tutorials", "Anime News", "Reviews"]
 
 export const VALID_WATCH_CATEGORIES = [
-  "Original Anime",
-  "Short Films",
+  "Episodes",
+  "Shorts",
   "Behind the Scenes",
-  "Tutorials & Guides",
-  "Anime Trailers",
+  "Tutorials",
+  "Original Anime",
   "YouTube Highlights",
 ]
 

@@ -17,6 +17,10 @@ Allow: /faq
 Allow: /legal
 Allow: /privacy-policy
 Allow: /terms-of-service
+Allow: /cookie-policy
+Allow: /disclaimer
+Allow: /dmca
+Allow: /media-usage-policy
 
 # Disallow admin and private areas
 Disallow: /admin/

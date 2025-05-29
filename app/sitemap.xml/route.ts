@@ -1,4 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { getDynamicCategories } from "@/lib/dynamic-categories"
+import { blogStore, videoStore } from "@/lib/content-store"
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,6 +16,7 @@ export async function GET(request: NextRequest) {
       { url: "/support", priority: "0.6", changefreq: "monthly" },
       { url: "/career", priority: "0.6", changefreq: "monthly" },
       { url: "/faq", priority: "0.6", changefreq: "monthly" },
+      { url: "/play", priority: "0.5", changefreq: "monthly" },
       { url: "/legal", priority: "0.3", changefreq: "yearly" },
       { url: "/privacy-policy", priority: "0.3", changefreq: "yearly" },
       { url: "/terms-of-service", priority: "0.3", changefreq: "yearly" },
@@ -31,55 +34,60 @@ export async function GET(request: NextRequest) {
     }> = []
 
     try {
-      // Fetch blog posts
-      const blogsResponse = await fetch(`${baseUrl}/api/admin/blogs`, {
-        headers: {
-          "Cache-Control": "no-cache",
-        },
+      // Get dynamic categories for category pages
+      const categories = await getDynamicCategories()
+      categories.forEach((category) => {
+        if (category.slug && category.slug !== "all") {
+          // Add blog category pages
+          dynamicPages.push({
+            url: `/blog?category=${category.slug}`,
+            priority: "0.6",
+            changefreq: "weekly",
+            lastmod: new Date().toISOString(),
+          })
+          // Add watch category pages
+          dynamicPages.push({
+            url: `/watch?category=${category.slug}`,
+            priority: "0.6",
+            changefreq: "weekly",
+            lastmod: new Date().toISOString(),
+          })
+        }
       })
+    } catch (error) {
+      console.error("Error fetching categories for sitemap:", error)
+    }
 
-      if (blogsResponse.ok) {
-        const blogsData = await blogsResponse.json()
-        const blogs = blogsData.blogs || []
-
-        blogs.forEach((blog: any) => {
-          if (blog.slug && blog.published) {
-            dynamicPages.push({
-              url: `/blog/${blog.slug}`,
-              priority: "0.7",
-              changefreq: "weekly",
-              lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
-            })
-          }
-        })
-      }
+    try {
+      // Get blog posts from content store
+      const blogs = blogStore.getAllPosts()
+      blogs.forEach((blog: any) => {
+        if (blog.slug && blog.published) {
+          dynamicPages.push({
+            url: `/blog/${blog.slug}`,
+            priority: "0.7",
+            changefreq: "weekly",
+            lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt || new Date().toISOString(),
+          })
+        }
+      })
     } catch (error) {
       console.error("Error fetching blogs for sitemap:", error)
     }
 
     try {
-      // Fetch videos
-      const videosResponse = await fetch(`${baseUrl}/api/admin/videos`, {
-        headers: {
-          "Cache-Control": "no-cache",
-        },
+      // Get videos from content store
+      const videos = videoStore.getAllVideos()
+      videos.forEach((video: any) => {
+        if (video.slug && video.published) {
+          dynamicPages.push({
+            url: `/watch/${video.slug}`,
+            priority: "0.7",
+            changefreq: "weekly",
+            lastmod: video.updatedAt || video.publishedAt || video.createdAt || new Date().toISOString(),
+          })
+        }
       })
-
-      if (videosResponse.ok) {
-        const videosData = await videosResponse.json()
-        const videos = videosData.videos || []
-
-        videos.forEach((video: any) => {
-          if (video.slug && video.published) {
-            dynamicPages.push({
-              url: `/watch/${video.slug}`,
-              priority: "0.7",
-              changefreq: "weekly",
-              lastmod: video.updatedAt || video.publishedAt || video.createdAt,
-            })
-          }
-        })
-      }
     } catch (error) {
       console.error("Error fetching videos for sitemap:", error)
     }
@@ -106,7 +114,7 @@ ${dynamicPages
   .map(
     (page) => `  <url>
     <loc>${baseUrl}${page.url}</loc>
-    ${page.lastmod ? `<lastmod>${new Date(page.lastmod).toISOString()}</lastmod>` : `<lastmod>${new Date().toISOString()}</lastmod>`}
+    <lastmod>${page.lastmod ? new Date(page.lastmod).toISOString() : new Date().toISOString()}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>`,

@@ -1,122 +1,180 @@
-import { blogStore, videoStore } from "./content-store"
-
-export async function generateRssFeed() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-
-  try {
-    // Fetch all published content
-    const [blogs, videos] = await Promise.all([blogStore.getPublished(), videoStore.getPublished()])
-
-    // Sort all content by date, newest first
-    const allContent = [
-      ...blogs.map((blog) => ({
-        type: "blog",
-        title: blog.title,
-        description: blog.excerpt,
-        url: `${baseUrl}/blog/${blog.slug}`,
-        date: new Date(blog.publishedAt),
-        author: blog.author,
-        category: blog.category,
-      })),
-      ...videos.map((video) => ({
-        type: "video",
-        title: video.title,
-        description: video.description,
-        url: `${baseUrl}/watch/${video.id}`,
-        date: new Date(video.publishedAt),
-        author: "Flavor Studios",
-        category: video.category,
-      })),
-    ].sort((a, b) => b.date.getTime() - a.date.getTime())
-
-    // Take only the most recent 50 items
-    const recentContent = allContent.slice(0, 50)
-
-    // Generate RSS XML
-    const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" 
-  xmlns:content="http://purl.org/rss/1.0/modules/content/"
-  xmlns:wfw="http://wellformedweb.org/CommentAPI/"
-  xmlns:dc="http://purl.org/dc/elements/1.1/"
-  xmlns:atom="http://www.w3.org/2005/Atom"
-  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
-  xmlns:slash="http://purl.org/rss/1.0/modules/slash/"
->
-  <channel>
-    <title>Flavor Studios</title>
-    <atom:link href="${baseUrl}/rss.xml" rel="self" type="application/rss+xml" />
-    <link>${baseUrl}</link>
-    <description>Original anime content and behind-the-scenes insights from Flavor Studios</description>
-    <language>en-US</language>
-    <pubDate>${new Date().toUTCString()}</pubDate>
-    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-    <generator>Flavor Studios RSS Generator</generator>
-    <sy:updatePeriod>hourly</sy:updatePeriod>
-    <sy:updateFrequency>1</sy:updateFrequency>
-    <image>
-      <url>${baseUrl}/favicon.ico</url>
-      <title>Flavor Studios</title>
-      <link>${baseUrl}</link>
-    </image>
-    ${recentContent
-      .map(
-        (item) => `
-    <item>
-      <title>${escapeXml(item.title)}</title>
-      <link>${item.url}</link>
-      <pubDate>${item.date.toUTCString()}</pubDate>
-      <dc:creator><![CDATA[${item.author}]]></dc:creator>
-      <category><![CDATA[${item.category}]]></category>
-      <guid isPermaLink="false">${item.url}</guid>
-      <description><![CDATA[${item.description}]]></description>
-      <content:encoded><![CDATA[${item.description}]]></content:encoded>
-    </item>
-    `,
-      )
-      .join("")}
-  </channel>
-</rss>`
-
-    return rssXml
-  } catch (error) {
-    console.error("Error generating RSS feed:", error)
-
-    // Return a basic RSS feed if there's an error
-    return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>Flavor Studios</title>
-    <link>${baseUrl}</link>
-    <description>Original anime content and behind-the-scenes insights from Flavor Studios</description>
-    <language>en-US</language>
-    <pubDate>${new Date().toUTCString()}</pubDate>
-    <item>
-      <title>Welcome to Flavor Studios</title>
-      <link>${baseUrl}</link>
-      <description>Check back soon for new content!</description>
-      <pubDate>${new Date().toUTCString()}</pubDate>
-    </item>
-  </channel>
-</rss>`
+export interface RSSItem {
+  title: string
+  description: string
+  link: string
+  pubDate: string
+  category?: string
+  author?: string
+  guid?: string
+  enclosure?: {
+    url: string
+    type: string
+    length: string
   }
 }
 
-// Helper function to escape XML special characters
-function escapeXml(unsafe: string): string {
-  return unsafe.replace(/[<>&'"]/g, (c) => {
-    switch (c) {
-      case "<":
-        return "&lt;"
-      case ">":
-        return "&gt;"
-      case "&":
-        return "&amp;"
-      case "'":
-        return "&apos;"
-      case '"':
-        return "&quot;"
-      default:
-        return c
+export interface RSSChannel {
+  title: string
+  description: string
+  link: string
+  language: string
+  lastBuildDate: string
+  pubDate: string
+  ttl: number
+  image?: {
+    url: string
+    title: string
+    link: string
+    width: number
+    height: number
+  }
+}
+
+export function formatRSSDate(date: string | Date): string {
+  return new Date(date).toUTCString()
+}
+
+export function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, "").trim()
+}
+
+export function truncateDescription(text: string, maxLength = 200): string {
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength).trim() + "..."
+}
+
+export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
+  const xmlItems = items
+    .map(
+      (item) => `    <item>
+      <title><![CDATA[${item.title}]]></title>
+      <description><![CDATA[${item.description}]]></description>
+      <link>${item.link}</link>
+      <pubDate>${item.pubDate}</pubDate>
+      ${item.category ? `<category><![CDATA[${item.category}]]></category>` : ""}
+      ${item.author ? `<author><![CDATA[${item.author}]]></author>` : ""}
+      <guid isPermaLink="true">${item.guid || item.link}</guid>
+      ${
+        item.enclosure
+          ? `<enclosure url="${item.enclosure.url}" type="${item.enclosure.type}" length="${item.enclosure.length}"/>`
+          : ""
+      }
+    </item>`,
+    )
+    .join("\n")
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title><![CDATA[${channel.title}]]></title>
+    <description><![CDATA[${channel.description}]]></description>
+    <link>${channel.link}</link>
+    <language>${channel.language}</language>
+    <lastBuildDate>${channel.lastBuildDate}</lastBuildDate>
+    <pubDate>${channel.pubDate}</pubDate>
+    <ttl>${channel.ttl}</ttl>
+    <atom:link href="${channel.link}/rss.xml" rel="self" type="application/rss+xml"/>
+    ${
+      channel.image
+        ? `<image>
+      <url>${channel.image.url}</url>
+      <title><![CDATA[${channel.image.title}]]></title>
+      <link>${channel.image.link}</link>
+      <width>${channel.image.width}</width>
+      <height>${channel.image.height}</height>
+    </image>`
+        : ""
     }
-  })
+${xmlItems}
+  </channel>
+</rss>`
+}
+
+export async function generateRssFeed(): Promise<string> {
+  try {
+    const { blogStore, videoStore } = await import("./content-store")
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+
+    // Fetch published content
+    const [blogPosts, videos] = await Promise.all([
+      blogStore.getPublished().catch(() => []),
+      videoStore.getPublished().catch(() => []),
+    ])
+
+    // Convert blog posts to RSS items
+    const blogItems: RSSItem[] = blogPosts.map((post: any) => ({
+      title: post.title,
+      description: truncateDescription(stripHtml(post.excerpt || post.content)),
+      link: `${baseUrl}/blog/${post.slug}`,
+      pubDate: formatRSSDate(post.publishedAt),
+      category: post.category,
+      author: post.author || "Flavor Studios",
+      guid: `${baseUrl}/blog/${post.slug}`,
+    }))
+
+    // Convert videos to RSS items
+    const videoItems: RSSItem[] = videos.map((video: any) => ({
+      title: video.title,
+      description: truncateDescription(stripHtml(video.description)),
+      link: `${baseUrl}/watch/${video.slug || video.id}`,
+      pubDate: formatRSSDate(video.publishedAt),
+      category: video.category,
+      author: "Flavor Studios",
+      guid: `${baseUrl}/watch/${video.slug || video.id}`,
+      enclosure: video.thumbnail
+        ? {
+            url: video.thumbnail,
+            type: "image/jpeg",
+            length: "0",
+          }
+        : undefined,
+    }))
+
+    // Combine and sort all items by publication date
+    const allItems = [...blogItems, ...videoItems].sort(
+      (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime(),
+    )
+
+    // Limit to most recent 50 items
+    const recentItems = allItems.slice(0, 50)
+
+    // Channel configuration
+    const channel: RSSChannel = {
+      title: "Flavor Studios - Anime Creation Stories",
+      description:
+        "Behind the scenes of anime creation—one story at a time. Discover exclusive content, industry insights, and creative processes from Flavor Studios.",
+      link: baseUrl,
+      language: "en-US",
+      lastBuildDate: formatRSSDate(new Date()),
+      pubDate: recentItems.length > 0 ? recentItems[0].pubDate : formatRSSDate(new Date()),
+      ttl: 60, // 1 hour
+      image: {
+        url: `${baseUrl}/placeholder.svg?height=144&width=144&text=Flavor+Studios`,
+        title: "Flavor Studios",
+        link: baseUrl,
+        width: 144,
+        height: 144,
+      },
+    }
+
+    // Generate RSS XML
+    return generateRSSXML(channel, recentItems)
+  } catch (error) {
+    console.error("Error generating RSS feed:", error)
+
+    // Return minimal RSS feed on error
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+    return generateRSSXML(
+      {
+        title: "Flavor Studios",
+        description: "Anime creation stories and insights",
+        link: baseUrl,
+        language: "en-US",
+        lastBuildDate: formatRSSDate(new Date()),
+        pubDate: formatRSSDate(new Date()),
+        ttl: 60,
+      },
+      [],
+    )
+  }
 }

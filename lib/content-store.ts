@@ -39,6 +39,7 @@ export interface Video {
   updatedAt: string
   views: number
   featured: boolean
+  slug?: string
 }
 
 export interface PageContent {
@@ -73,8 +74,8 @@ export interface SiteStats {
   lastUpdated: string
 }
 
-// Updated categories to match watch page
-export const VALID_BLOG_CATEGORIES = [
+// SYNCHRONIZED CATEGORIES - Both blog and video use the same categories
+export const VALID_CATEGORIES = [
   "Episodes",
   "Shorts",
   "Behind the Scenes",
@@ -83,14 +84,8 @@ export const VALID_BLOG_CATEGORIES = [
   "YouTube Highlights",
 ]
 
-export const VALID_WATCH_CATEGORIES = [
-  "Episodes",
-  "Shorts",
-  "Behind the Scenes",
-  "Tutorials",
-  "Original Anime",
-  "YouTube Highlights",
-]
+export const VALID_BLOG_CATEGORIES = VALID_CATEGORIES
+export const VALID_WATCH_CATEGORIES = VALID_CATEGORIES
 
 async function ensureDataDir() {
   try {
@@ -195,7 +190,7 @@ export const blogStore = {
     // Validate category
     const validCategories = await getValidBlogCategories()
     if (!validCategories.includes(post.category)) {
-      throw new Error(`Invalid blog category: ${post.category}`)
+      throw new Error(`Invalid blog category: ${post.category}. Valid categories: ${validCategories.join(", ")}`)
     }
 
     const posts = await this.getAllRaw()
@@ -224,7 +219,7 @@ export const blogStore = {
     if (updates.category) {
       const validCategories = await getValidBlogCategories()
       if (!validCategories.includes(updates.category)) {
-        throw new Error(`Invalid blog category: ${updates.category}`)
+        throw new Error(`Invalid blog category: ${updates.category}. Valid categories: ${validCategories.join(", ")}`)
       }
     }
 
@@ -311,13 +306,21 @@ export const videoStore = {
     // Validate category
     const validCategories = await getValidVideoCategories()
     if (!validCategories.includes(video.category)) {
-      throw new Error(`Invalid video category: ${video.category}`)
+      throw new Error(`Invalid video category: ${video.category}. Valid categories: ${validCategories.join(", ")}`)
     }
 
     const videos = await this.getAllRaw()
+
+    // Generate slug if not provided
+    const slug = video.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+
     const newVideo: Video = {
       ...video,
       id: `video_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      slug,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       views: 0,
@@ -340,7 +343,7 @@ export const videoStore = {
     if (updates.category) {
       const validCategories = await getValidVideoCategories()
       if (!validCategories.includes(updates.category)) {
-        throw new Error(`Invalid video category: ${updates.category}`)
+        throw new Error(`Invalid video category: ${updates.category}. Valid categories: ${validCategories.join(", ")}`)
       }
     }
 

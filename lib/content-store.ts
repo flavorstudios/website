@@ -74,7 +74,14 @@ export interface SiteStats {
 }
 
 // Updated categories to match watch page
-export const VALID_BLOG_CATEGORIES = ["Episodes", "Shorts", "Behind the Scenes", "Tutorials", "Anime News", "Reviews"]
+export const VALID_BLOG_CATEGORIES = [
+  "Episodes",
+  "Shorts",
+  "Behind the Scenes",
+  "Tutorials",
+  "Original Anime",
+  "YouTube Highlights",
+]
 
 export const VALID_WATCH_CATEGORIES = [
   "Episodes",

@@ -1,50 +1,29 @@
-import { type NextRequest, NextResponse } from "next/server"
+export async function GET(): Promise<Response> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
 
-export async function GET(request: NextRequest) {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
-
-  const robotsTxt = `User-agent: *
+  // Generate robots.txt content
+  const robotsTxt = `# Robots.txt for Flavor Studios
+User-agent: *
 Allow: /
 
-# Allow all crawlers to access public content
-Allow: /blog
-Allow: /watch
-Allow: /about
-Allow: /contact
-Allow: /support
-Allow: /career
-Allow: /faq
-Allow: /legal
-Allow: /privacy-policy
-Allow: /terms-of-service
-Allow: /cookie-policy
-Allow: /disclaimer
-Allow: /dmca
-Allow: /media-usage-policy
-
-# Disallow admin and private areas
+# Disallow admin paths
 Disallow: /admin/
-Disallow: /api/
-Disallow: /_next/
-Disallow: /private/
+Disallow: /api/admin/
 
-# Crawl delay for respectful crawling
-Crawl-delay: 1
-
-# Sitemap location
+# Sitemaps
+Sitemap: ${baseUrl}/sitemap-index.xml
 Sitemap: ${baseUrl}/sitemap.xml
+Sitemap: ${baseUrl}/blog/sitemap.xml
+Sitemap: ${baseUrl}/watch/sitemap.xml
 
-# Additional sitemaps (if needed in the future)
-# Sitemap: ${baseUrl}/blog-sitemap.xml
-# Sitemap: ${baseUrl}/video-sitemap.xml`
+# Crawl delay
+Crawl-delay: 10
+`
 
-  return new NextResponse(robotsTxt, {
-    status: 200,
+  return new Response(robotsTxt, {
     headers: {
       "Content-Type": "text/plain",
-      "Cache-Control": "public, max-age=86400, s-maxage=86400",
-      "CDN-Cache-Control": "public, max-age=86400",
-      "Vercel-CDN-Cache-Control": "public, max-age=86400",
+      "Cache-Control": "public, max-age=3600, s-maxage=3600",
     },
   })
 }

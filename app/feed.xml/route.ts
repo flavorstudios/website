@@ -1,8 +1,6 @@
-import { NextResponse } from "next/server"
+import { redirect } from "next/navigation"
 
-// Redirect /feed.xml to /rss.xml for compatibility
-export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
-
-  return NextResponse.redirect(`${baseUrl}/rss.xml`, 301)
+export async function GET(): Promise<Response> {
+  // Redirect to the main RSS feed
+  return redirect("/rss.xml")
 }

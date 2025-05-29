@@ -1,29 +1,44 @@
-export async function GET(): Promise<Response> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+import { NextResponse } from "next/server"
 
-  // Generate robots.txt content
-  const robotsTxt = `# Robots.txt for Flavor Studios
-User-agent: *
+export async function GET() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+
+  const robotsTxt = `User-agent: *
 Allow: /
 
-# Disallow admin paths
+# Disallow admin and API routes
 Disallow: /admin/
-Disallow: /api/admin/
+Disallow: /api/
 
-# Sitemaps
-Sitemap: ${baseUrl}/sitemap-index.xml
+# Disallow temporary or test pages
+Disallow: /test/
+Disallow: /temp/
+
+# Allow important pages
+Allow: /
+Allow: /about
+Allow: /watch
+Allow: /blog
+Allow: /contact
+Allow: /faq
+Allow: /career
+Allow: /support
+Allow: /play
+
+# Sitemap location
 Sitemap: ${baseUrl}/sitemap.xml
-Sitemap: ${baseUrl}/blog/sitemap.xml
-Sitemap: ${baseUrl}/watch/sitemap.xml
+Sitemap: ${baseUrl}/sitemap-index.xml
 
-# Crawl delay
-Crawl-delay: 10
-`
+# RSS Feed
+Sitemap: ${baseUrl}/rss.xml
 
-  return new Response(robotsTxt, {
+# Crawl delay (optional)
+Crawl-delay: 1`
+
+  return new NextResponse(robotsTxt, {
     headers: {
       "Content-Type": "text/plain",
-      "Cache-Control": "public, max-age=3600, s-maxage=3600",
+      "Cache-Control": "public, max-age=86400, s-maxage=86400",
     },
   })
 }

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 
-export async function GET(): Promise<Response> {
+export async function GET() {
   // Redirect to the main RSS feed
-  return redirect("/rss.xml")
+  redirect("/rss.xml")
 }

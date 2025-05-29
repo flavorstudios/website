@@ -31,11 +31,11 @@ export async function GET() {
     const videoItems: RSSItem[] = videos.map((video) => ({
       title: video.title,
       description: truncateDescription(stripHtml(video.description)),
-      link: `${baseUrl}/watch/${video.id}`,
+      link: `${baseUrl}/watch/${video.slug || video.id}`,
       pubDate: formatRSSDate(video.publishedAt),
       category: video.category,
       author: "Flavor Studios",
-      guid: `${baseUrl}/watch/${video.id}`,
+      guid: `${baseUrl}/watch/${video.slug || video.id}`,
       enclosure: video.thumbnail
         ? {
             url: video.thumbnail,
@@ -64,7 +64,7 @@ export async function GET() {
       pubDate: recentItems.length > 0 ? recentItems[0].pubDate : formatRSSDate(new Date()),
       ttl: 60, // 1 hour
       image: {
-        url: `${baseUrl}/images/logo.png`,
+        url: `${baseUrl}/placeholder.svg?height=144&width=144&text=Flavor+Studios`,
         title: "Flavor Studios",
         link: baseUrl,
         width: 144,

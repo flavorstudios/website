@@ -90,14 +90,16 @@ export default function PlayPage() {
 
   // Initialize timer when starting a new turn in timed modes
   const initializeTimer = useCallback(() => {
-    if (gameMode === "PvP" && pvpDifficulty === "timed") {
-      setTimeLeft(30) // 30 seconds per move
-    } else if (gameMode === "PvP" && pvpDifficulty === "blitz") {
-      setTimeLeft(10) // 10 seconds per move
-    } else {
-      setTimeLeft(null)
+    if (gameMode === "PvP" && gameState === "playing") {
+      if (pvpDifficulty === "timed") {
+        setTimeLeft(30) // 30 seconds per move
+      } else if (pvpDifficulty === "blitz") {
+        setTimeLeft(10) // 10 seconds per move
+      } else {
+        setTimeLeft(null)
+      }
     }
-  }, [gameMode, pvpDifficulty])
+  }, [gameMode, pvpDifficulty, gameState])
 
   const checkWinner = useCallback((board: Player[]): WinningLine | null => {
     const lines = [
@@ -286,19 +288,19 @@ export default function PlayPage() {
           }
           setIsComputerThinking(false)
         },
-        isMobile ? 800 : 500,
-      ) // Slightly longer delay on mobile for better UX
+        Math.random() * 500 + 500, // Random delay between 500-1000ms for more realistic AI
+      )
 
       return () => clearTimeout(timer)
     }
-  }, [currentPlayer, gameMode, gameState, board, difficulty, getComputerMove, makeMove, isMobile])
+  }, [currentPlayer, gameMode, gameState, board, difficulty, getComputerMove, makeMove])
 
   // Auto-reset after game ends
   useEffect(() => {
     if (gameState !== "playing") {
       const timer = setTimeout(() => {
         resetBoard()
-      }, 3000) // Increased to 3 seconds for mobile users
+      }, 4000) // Increased to 4 seconds for better user experience
 
       return () => clearTimeout(timer)
     }
@@ -325,6 +327,11 @@ export default function PlayPage() {
     setTimeLeft(null)
     setMoveCount(0)
     setStats({ xWins: 0, oWins: 0, draws: 0, timeouts: 0 })
+
+    // Show clear feedback
+    if (isMobile && "vibrate" in navigator) {
+      navigator.vibrate([50, 50, 50])
+    }
   }
 
   const resetBoard = () => {
@@ -484,10 +491,17 @@ export default function PlayPage() {
 
               {/* Reset Button */}
               <Button
-                onClick={resetGame}
+                onClick={() => {
+                  resetGame()
+                  // Visual feedback
+                  const button = document.activeElement as HTMLButtonElement
+                  if (button) {
+                    button.blur()
+                  }
+                }}
                 variant="outline"
                 size={isMobile ? "default" : "sm"}
-                className="min-h-[44px] w-full sm:w-auto"
+                className="min-h-[44px] w-full sm:w-auto hover:bg-gray-100 active:bg-gray-200 transition-colors"
               >
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Reset Game
@@ -738,6 +752,18 @@ export default function PlayPage() {
             </div>
           </CardContent>
         </Card>
+
+        {gameState !== "playing" && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200"
+          >
+            <p className="text-sm text-blue-700">
+              🎮 New game starting in {Math.ceil((4000 - (Date.now() % 4000)) / 1000)} seconds...
+            </p>
+          </motion.div>
+        )}
 
         {/* Mobile-specific tips */}
         {isMobile && (

@@ -1,66 +1,83 @@
 import { NextResponse } from "next/server"
 import { blogStore, videoStore } from "@/lib/content-store"
+import { categoryStore } from "@/lib/category-store"
 
 export async function GET() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
 
-    // Get dynamic content
-    const [blogs, videos] = await Promise.all([
+    // Get dynamic content with error handling
+    const [blogs, videos, categories] = await Promise.all([
       blogStore.getPublished().catch(() => []),
       videoStore.getPublished().catch(() => []),
+      categoryStore.getAll().catch(() => []),
     ])
 
-    // Static pages
+    // Static pages with proper lastmod dates
     const staticPages = [
-      { url: "", changefreq: "daily", priority: "1.0" },
-      { url: "/about", changefreq: "monthly", priority: "0.8" },
-      { url: "/watch", changefreq: "daily", priority: "0.9" },
-      { url: "/blog", changefreq: "daily", priority: "0.9" },
-      { url: "/contact", changefreq: "monthly", priority: "0.7" },
-      { url: "/faq", changefreq: "monthly", priority: "0.6" },
-      { url: "/career", changefreq: "monthly", priority: "0.6" },
-      { url: "/support", changefreq: "monthly", priority: "0.6" },
-      { url: "/play", changefreq: "weekly", priority: "0.7" },
-      { url: "/legal", changefreq: "yearly", priority: "0.3" },
-      { url: "/privacy-policy", changefreq: "yearly", priority: "0.3" },
-      { url: "/terms-of-service", changefreq: "yearly", priority: "0.3" },
-      { url: "/cookie-policy", changefreq: "yearly", priority: "0.3" },
-      { url: "/disclaimer", changefreq: "yearly", priority: "0.3" },
-      { url: "/dmca", changefreq: "yearly", priority: "0.3" },
-      { url: "/media-usage-policy", changefreq: "yearly", priority: "0.3" },
+      { url: "", changefreq: "daily", priority: "1.0", lastmod: new Date().toISOString() },
+      { url: "/about", changefreq: "monthly", priority: "0.8", lastmod: new Date().toISOString() },
+      { url: "/watch", changefreq: "daily", priority: "0.9", lastmod: new Date().toISOString() },
+      { url: "/blog", changefreq: "daily", priority: "0.9", lastmod: new Date().toISOString() },
+      { url: "/contact", changefreq: "monthly", priority: "0.7", lastmod: new Date().toISOString() },
+      { url: "/faq", changefreq: "monthly", priority: "0.6", lastmod: new Date().toISOString() },
+      { url: "/career", changefreq: "monthly", priority: "0.6", lastmod: new Date().toISOString() },
+      { url: "/support", changefreq: "monthly", priority: "0.6", lastmod: new Date().toISOString() },
+      { url: "/play", changefreq: "weekly", priority: "0.7", lastmod: new Date().toISOString() },
+      { url: "/legal", changefreq: "yearly", priority: "0.3", lastmod: new Date().toISOString() },
+      { url: "/privacy-policy", changefreq: "yearly", priority: "0.3", lastmod: new Date().toISOString() },
+      { url: "/terms-of-service", changefreq: "yearly", priority: "0.3", lastmod: new Date().toISOString() },
+      { url: "/cookie-policy", changefreq: "yearly", priority: "0.3", lastmod: new Date().toISOString() },
+      { url: "/disclaimer", changefreq: "yearly", priority: "0.3", lastmod: new Date().toISOString() },
+      { url: "/dmca", changefreq: "yearly", priority: "0.3", lastmod: new Date().toISOString() },
+      { url: "/media-usage-policy", changefreq: "yearly", priority: "0.3", lastmod: new Date().toISOString() },
     ]
 
-    // Generate XML
+    // Dynamic blog pages
+    const blogPages = blogs.map((blog: any) => ({
+      url: `/blog/${blog.slug}`,
+      changefreq: "weekly",
+      priority: "0.8",
+      lastmod: new Date(blog.updatedAt || blog.publishedAt).toISOString(),
+    }))
+
+    // Dynamic video pages
+    const videoPages = videos.map((video: any) => ({
+      url: `/watch/${video.slug || video.id}`,
+      changefreq: "weekly",
+      priority: "0.8",
+      lastmod: new Date(video.updatedAt || video.publishedAt).toISOString(),
+    }))
+
+    // Category pages
+    const categoryPages = categories.flatMap((category: any) => [
+      {
+        url: `/blog?category=${category.slug}`,
+        changefreq: "weekly",
+        priority: "0.7",
+        lastmod: new Date().toISOString(),
+      },
+      {
+        url: `/watch?category=${category.slug}`,
+        changefreq: "weekly",
+        priority: "0.7",
+        lastmod: new Date().toISOString(),
+      },
+    ])
+
+    // Combine all pages
+    const allPages = [...staticPages, ...blogPages, ...videoPages, ...categoryPages]
+
+    // Generate XML sitemap
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${staticPages
+${allPages
   .map(
     (page) => `  <url>
     <loc>${baseUrl}${page.url}</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${page.lastmod}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`,
-  )
-  .join("\n")}
-${blogs
-  .map(
-    (blog: any) => `  <url>
-    <loc>${baseUrl}/blog/${blog.slug}</loc>
-    <lastmod>${new Date(blog.updatedAt || blog.publishedAt).toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`,
-  )
-  .join("\n")}
-${videos
-  .map(
-    (video: any) => `  <url>
-    <loc>${baseUrl}/watch/${video.id}</loc>
-    <lastmod>${new Date(video.updatedAt || video.publishedAt).toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
   </url>`,
   )
   .join("\n")}
@@ -75,7 +92,7 @@ ${videos
   } catch (error) {
     console.error("Error generating sitemap:", error)
 
-    // Fallback sitemap
+    // Fallback sitemap with essential pages
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
     const fallbackSitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

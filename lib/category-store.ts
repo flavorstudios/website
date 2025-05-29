@@ -146,8 +146,8 @@ export const categoryStore = {
     const { blogStore, videoStore } = await import("./content-store")
 
     const [blogs, videos] = await Promise.all([
-      blogStore.getAllRaw(), // We'll need to add this method
-      videoStore.getAllRaw(),
+      blogStore.getAllRaw().catch(() => []),
+      videoStore.getAllRaw().catch(() => []),
     ])
 
     // Count posts for each category
@@ -178,53 +178,39 @@ export const categoryStore = {
   },
 }
 
-// Initialize default categories
+// Initialize default categories - FIXED to match watch page
 export async function initializeDefaultCategories() {
   const categories = await categoryStore.getAll()
 
   if (categories.length === 0) {
-    const defaultBlogCategories = [
-      "Anime Reviews",
-      "Storytelling & Themes",
-      "Behind the Frames",
-      "Creator Spotlights",
-      "Life Through Anime",
-      "Creative Process",
-      "Anime News",
-      "Streaming Updates",
-      "Industry Buzz",
-      "New & Upcoming Releases",
-      "Voice Actor & Crew Updates",
-      "Cultural Highlights",
-    ]
-
-    const defaultVideoCategories = [
-      "Original Anime",
-      "Short Films",
+    // SYNCHRONIZED CATEGORIES - Both blog and video use the same categories
+    const sharedCategories = [
+      "Episodes",
+      "Shorts",
       "Behind the Scenes",
-      "Tutorials & Guides",
-      "Anime Trailers",
+      "Tutorials",
+      "Original Anime",
       "YouTube Highlights",
     ]
 
     // Create blog categories
-    for (let i = 0; i < defaultBlogCategories.length; i++) {
+    for (let i = 0; i < sharedCategories.length; i++) {
       await categoryStore.create({
-        name: defaultBlogCategories[i],
+        name: sharedCategories[i],
         type: "blog",
-        description: `Content related to ${defaultBlogCategories[i].toLowerCase()}`,
-        color: `hsl(${(i * 30) % 360}, 70%, 50%)`,
+        description: `Blog content related to ${sharedCategories[i].toLowerCase()}`,
+        color: `hsl(${(i * 60) % 360}, 70%, 50%)`,
         order: i,
         isActive: true,
       })
     }
 
-    // Create video categories
-    for (let i = 0; i < defaultVideoCategories.length; i++) {
+    // Create video categories with same names
+    for (let i = 0; i < sharedCategories.length; i++) {
       await categoryStore.create({
-        name: defaultVideoCategories[i],
+        name: sharedCategories[i],
         type: "video",
-        description: `Videos related to ${defaultVideoCategories[i].toLowerCase()}`,
+        description: `Video content related to ${sharedCategories[i].toLowerCase()}`,
         color: `hsl(${(i * 60) % 360}, 70%, 50%)`,
         order: i,
         isActive: true,

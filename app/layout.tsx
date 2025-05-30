@@ -13,6 +13,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://flavorstudios.in"),
   title: {
     default: "Flavor Studios – Anime & Stories That Stay With You",
     template: "%s | Flavor Studios",
@@ -28,7 +29,6 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://flavorstudios.in"),
   alternates: {
     canonical: "/",
   },

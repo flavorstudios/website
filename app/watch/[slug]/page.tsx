@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation"
+import type { Metadata } from "next"
+import { generateCanonicalMetadata } from "@/lib/canonical-utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -29,6 +31,38 @@ async function getVideo(slug: string) {
 interface VideoPageProps {
   params: {
     slug: string
+  }
+}
+
+export async function generateMetadata({ params }: VideoPageProps): Promise<Metadata> {
+  const video = await getVideo(params.slug)
+
+  if (!video) {
+    return {
+      title: "Video Not Found",
+      ...generateCanonicalMetadata(`/watch/${params.slug}`),
+    }
+  }
+
+  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
+
+  return {
+    title: video.title,
+    description: video.description,
+    keywords: video.tags || [],
+    ...generateCanonicalMetadata(`/watch/${params.slug}`),
+    openGraph: {
+      title: video.title,
+      description: video.description,
+      type: "video.other",
+      images: [thumbnailUrl],
+    },
+    twitter: {
+      card: "player",
+      title: video.title,
+      description: video.description,
+      images: [thumbnailUrl],
+    },
   }
 }
 
@@ -184,33 +218,4 @@ export default async function VideoPage({ params }: VideoPageProps) {
       </div>
     </div>
   )
-}
-
-export async function generateMetadata({ params }: VideoPageProps) {
-  const video = await getVideo(params.slug)
-
-  if (!video) {
-    return {
-      title: "Video Not Found",
-    }
-  }
-
-  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
-
-  return {
-    title: video.title,
-    description: video.description,
-    openGraph: {
-      title: video.title,
-      description: video.description,
-      images: [thumbnailUrl],
-      type: "video.other",
-    },
-    twitter: {
-      card: "player",
-      title: video.title,
-      description: video.description,
-      images: [thumbnailUrl],
-    },
-  }
 }

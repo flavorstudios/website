@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation"
+import type { Metadata } from "next"
+import { generateCanonicalMetadata } from "@/lib/canonical-utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Eye, User, Clock } from "lucide-react"
@@ -28,6 +30,38 @@ async function getBlogPost(slug: string) {
 interface BlogPostPageProps {
   params: {
     slug: string
+  }
+}
+
+export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
+  const post = await getBlogPost(params.slug)
+
+  if (!post) {
+    return {
+      title: "Post Not Found",
+      ...generateCanonicalMetadata(`/blog/${params.slug}`),
+    }
+  }
+
+  return {
+    title: post.seoTitle || post.title,
+    description: post.seoDescription || post.excerpt,
+    keywords: post.tags || [],
+    ...generateCanonicalMetadata(`/blog/${params.slug}`),
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      type: "article",
+      publishedTime: post.publishedAt,
+      authors: [post.author],
+      tags: post.tags,
+      images: post.coverImage ? [post.coverImage] : [],
+    },
+    twitter: {
+      title: post.title,
+      description: post.excerpt,
+      images: post.coverImage ? [post.coverImage] : [],
+    },
   }
 }
 
@@ -123,24 +157,4 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       </article>
     </div>
   )
-}
-
-export async function generateMetadata({ params }: BlogPostPageProps) {
-  const post = await getBlogPost(params.slug)
-
-  if (!post) {
-    return {
-      title: "Post Not Found",
-    }
-  }
-
-  return {
-    title: post.seoTitle || post.title,
-    description: post.seoDescription || post.excerpt,
-    openGraph: {
-      title: post.title,
-      description: post.excerpt,
-      images: post.coverImage ? [post.coverImage] : [],
-    },
-  }
 }

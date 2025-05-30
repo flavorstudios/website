@@ -178,12 +178,12 @@ export const categoryStore = {
   },
 }
 
-// Initialize default categories - EXACTLY matching your screenshot
+// Initialize default categories - EXACTLY matching your screenshot: Episodes, Shorts, Behind the Scenes, Tutorials
 export async function initializeDefaultCategories() {
   const categories = await categoryStore.getAll()
 
   if (categories.length === 0) {
-    // EXACT CATEGORIES from your screenshot: Episodes, Shorts, Behind the Scenes, Tutorials
+    // EXACT 4 CATEGORIES from your screenshot
     const exactCategories = ["Episodes", "Shorts", "Behind the Scenes", "Tutorials"]
 
     // Create blog categories

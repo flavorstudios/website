@@ -74,15 +74,8 @@ export interface SiteStats {
   lastUpdated: string
 }
 
-// SYNCHRONIZED CATEGORIES - Both blog and video use the same categories
-export const VALID_CATEGORIES = [
-  "Episodes",
-  "Shorts",
-  "Behind the Scenes",
-  "Tutorials",
-  "Original Anime",
-  "YouTube Highlights",
-]
+// EXACT CATEGORIES from your screenshot - Episodes, Shorts, Behind the Scenes, Tutorials
+export const VALID_CATEGORIES = ["Episodes", "Shorts", "Behind the Scenes", "Tutorials"]
 
 export const VALID_BLOG_CATEGORIES = VALID_CATEGORIES
 export const VALID_WATCH_CATEGORIES = VALID_CATEGORIES

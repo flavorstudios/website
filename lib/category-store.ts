@@ -178,40 +178,33 @@ export const categoryStore = {
   },
 }
 
-// Initialize default categories - FIXED to match watch page
+// Initialize default categories - EXACTLY matching your screenshot
 export async function initializeDefaultCategories() {
   const categories = await categoryStore.getAll()
 
   if (categories.length === 0) {
-    // SYNCHRONIZED CATEGORIES - Both blog and video use the same categories
-    const sharedCategories = [
-      "Episodes",
-      "Shorts",
-      "Behind the Scenes",
-      "Tutorials",
-      "Original Anime",
-      "YouTube Highlights",
-    ]
+    // EXACT CATEGORIES from your screenshot: Episodes, Shorts, Behind the Scenes, Tutorials
+    const exactCategories = ["Episodes", "Shorts", "Behind the Scenes", "Tutorials"]
 
     // Create blog categories
-    for (let i = 0; i < sharedCategories.length; i++) {
+    for (let i = 0; i < exactCategories.length; i++) {
       await categoryStore.create({
-        name: sharedCategories[i],
+        name: exactCategories[i],
         type: "blog",
-        description: `Blog content related to ${sharedCategories[i].toLowerCase()}`,
-        color: `hsl(${(i * 60) % 360}, 70%, 50%)`,
+        description: `Blog content related to ${exactCategories[i].toLowerCase()}`,
+        color: `hsl(${(i * 90) % 360}, 70%, 50%)`,
         order: i,
         isActive: true,
       })
     }
 
     // Create video categories with same names
-    for (let i = 0; i < sharedCategories.length; i++) {
+    for (let i = 0; i < exactCategories.length; i++) {
       await categoryStore.create({
-        name: sharedCategories[i],
+        name: exactCategories[i],
         type: "video",
-        description: `Video content related to ${sharedCategories[i].toLowerCase()}`,
-        color: `hsl(${(i * 60) % 360}, 70%, 50%)`,
+        description: `Video content related to ${exactCategories[i].toLowerCase()}`,
+        color: `hsl(${(i * 90) % 360}, 70%, 50%)`,
         order: i,
         isActive: true,
       })

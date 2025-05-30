@@ -66,7 +66,7 @@ export default async function BlogPage({
   const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3)
   const regularPosts = paginatedPosts.filter((post: any) => !post.featured)
 
-  // Analytics data
+  // Analytics data - matching watch page format exactly
   const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0)
   const avgReadTime =
     posts.length > 0
@@ -100,7 +100,7 @@ export default async function BlogPage({
               Behind the scenes of anime creation—one story at a time.
             </p>
 
-            {/* Enhanced Stats */}
+            {/* Enhanced Stats - EXACTLY matching watch page */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 border border-blue-100">
                 <div className="text-xl sm:text-2xl font-bold text-blue-600">{posts.length}</div>

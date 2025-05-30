@@ -1,5 +1,9 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardDescription } from "@/components/ui/card"
+import type { Metadata } from "next"
+import { generateCanonicalMetadata } from "@/lib/canonical-utils"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import {
   Heart,
   Target,
@@ -13,7 +17,25 @@ import {
   Phone,
 } from "lucide-react"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+
+export const metadata: Metadata = {
+  title: "About Us - Our Story & Mission",
+  description:
+    "Learn about Flavor Studios' journey in creating meaningful anime content, our passionate team, and our mission to inspire through storytelling.",
+  keywords: ["about flavor studios", "anime studio team", "animation company", "creative mission", "storytelling"],
+  ...generateCanonicalMetadata("/about"),
+  openGraph: {
+    title: "About Flavor Studios - Our Story & Mission",
+    description:
+      "Learn about our journey in creating meaningful anime content and our mission to inspire through storytelling.",
+    type: "website",
+  },
+  twitter: {
+    title: "About Flavor Studios - Our Story & Mission",
+    description:
+      "Learn about our journey in creating meaningful anime content and our mission to inspire through storytelling.",
+  },
+}
 
 export default function AboutPage() {
   const values = [
@@ -73,38 +95,51 @@ export default function AboutPage() {
   ]
 
   return (
-    <div className="min-h-screen py-6 sm:py-8 lg:py-12">
-      <div className="container mx-auto max-w-6xl px-3 sm:px-4 lg:px-6">
-        {/* Hero Section */}
-        <div className="mb-8 sm:mb-12 lg:mb-16 text-center">
-          <Badge className="mb-3 sm:mb-4 lg:mb-6 bg-blue-600 text-white px-3 py-1 text-xs sm:text-sm">
-            Independent Animation Studio
-          </Badge>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 lg:mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
-            About Flavor Studios
-          </h1>
-          <p className="text-lg sm:text-xl lg:text-2xl text-blue-600 font-medium mb-4 sm:mb-6 lg:mb-8 italic">
-            Crafting stories with soul, one frame at a time.
-          </p>
-          <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 lg:space-y-6 text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed px-2">
-            <p>
-              Flavor Studios is a global, independent animation studio specializing in emotionally resonant 3D animated
-              content and original anime series. Founded with a deep passion for authentic storytelling, we bring to
-              life compelling narratives that explore universal themes such as life, loss, resilience, and redemption.
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+          <div className="text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-blue-600 text-white rounded-full px-4 sm:px-6 py-2 mb-4 sm:mb-6 text-sm font-medium shadow-lg">
+              <Heart className="h-4 w-4" />
+              Our Story & Mission
+            </div>
+
+            {/* Main Heading */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 leading-relaxed px-4 pb-2">
+              About Flavor Studios
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 italic font-light max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
+              Creating stories that resonate, inspire, and stay with you forever.
             </p>
-            <p>
-              Every project at Flavor Studios is developed entirely in-house using Blender, ensuring complete creative
-              control and artistic integrity. Our work blends cinematic storytelling with meaningful messages—delivering
-              both short-form animations that offer thought-provoking life lessons, and long-form anime series designed
-              to captivate audiences of all ages.
-            </p>
-            <p>
-              We are more than a studio—we are a community of dreamers, artists, and storytellers dedicated to pushing
-              the boundaries of independent animation.
-            </p>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 border border-blue-100">
+                <div className="text-xl sm:text-2xl font-bold text-blue-600">5+</div>
+                <div className="text-xs sm:text-sm text-gray-600">Years</div>
+              </div>
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-3 sm:p-4 border border-purple-100">
+                <div className="text-xl sm:text-2xl font-bold text-purple-600">50+</div>
+                <div className="text-xs sm:text-sm text-gray-600">Projects</div>
+              </div>
+              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-3 sm:p-4 border border-green-100">
+                <div className="text-xl sm:text-2xl font-bold text-green-600">100K+</div>
+                <div className="text-xs sm:text-sm text-gray-600">Viewers</div>
+              </div>
+              <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-3 sm:p-4 border border-orange-100">
+                <div className="text-xl sm:text-2xl font-bold text-orange-600">15+</div>
+                <div className="text-xs sm:text-sm text-gray-600">Awards</div>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
+      <div className="container mx-auto max-w-6xl px-3 sm:px-4 lg:px-6">
         {/* Why Choose Us */}
         <div className="mb-8 sm:mb-12 lg:mb-16">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-6 sm:mb-8 lg:mb-12 text-center">

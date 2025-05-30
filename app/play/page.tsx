@@ -280,8 +280,8 @@ export default function PlayPage() {
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Tic-Tac-Toe</h1>
-          <p className="text-gray-600">Challenge yourself against AI or play with friends!</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Play</h1>
+          <p className="text-gray-600">Enjoy our collection of interactive games!</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

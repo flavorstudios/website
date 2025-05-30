@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"),
+  metadataBase: new URL("https://flavorstudios.in"),
   alternates: {
     canonical: "/",
   },
@@ -47,29 +47,30 @@ export const metadata: Metadata = {
     google: "MeePZ4w9DtPgCxWKExhl-q-KmjeE9F3nhDU9Iu2QKhY",
   },
   openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://flavorstudios.in",
     title: "Flavor Studios – Anime & Stories That Stay With You",
     description:
       "Explore powerful animations, blogs, and games that inspire, entertain, and connect with your soul. Made with love by Flavor Studios.",
+    url: "https://flavorstudios.in",
+    type: "website",
+    locale: "en_US",
     siteName: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
         width: 1200,
         height: 630,
-        alt: "Flavor Studios Cover Image",
+        alt: "Flavor Studios – Original Anime, Stories & Life Lessons",
+        type: "image/jpeg",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
+    site: "@flavor_studios",
+    creator: "@flavor_studios",
     title: "Flavor Studios – Anime & Stories That Stay With You",
     description:
       "Explore powerful animations, blogs, and games that inspire, entertain, and connect with your soul. Made with love by Flavor Studios.",
-    site: "@flavor_studios",
-    creator: "@flavor_studios",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
   viewport: {

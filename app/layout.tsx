@@ -59,7 +59,7 @@ export const metadata: Metadata = {
         url: "https://flavorstudios.in/cover.jpg",
         width: 1200,
         height: 630,
-        alt: "Flavor Studios – Original Anime, Stories & Life Lessons",
+        alt: "Flavor Studios – Anime & Stories That Stay With You",
         type: "image/jpeg",
       },
     ],
@@ -85,6 +85,7 @@ export const metadata: Metadata = {
   },
   other: {
     "fediverse:creator": "@flavorstudios@mastodon.social",
+    "fb:app_id": "1404440770881914",
   },
     generator: 'v0.dev'
 }

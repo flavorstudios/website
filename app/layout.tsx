@@ -1,4 +1,5 @@
 import type React from "react"
+import type { Metadata } from "next"
 import "./globals.css"
 import { Inter } from "next/font/google"
 import { Header } from "@/components/header"
@@ -11,7 +12,7 @@ const inter = Inter({
   display: "swap",
 })
 
-export const metadata = {
+export const metadata: Metadata = {
   title: {
     default: "Flavor Studios – Anime & Stories That Stay With You",
     template: "%s | Flavor Studios",
@@ -83,10 +84,7 @@ export const metadata = {
   },
   other: {
     "fediverse:creator": "@flavorstudios@mastodon.social",
-  },,
-  // Adding Mastodon verification link
-  // Note: Next.js Metadata API doesn't directly support rel="me" links
-  // We'll add this in the head.js file
+  },
     generator: 'v0.dev'
 }
 

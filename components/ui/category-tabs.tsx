@@ -1,75 +1,167 @@
 "use client"
 
-import Link from "next/link"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-
-interface CategoryData {
-  name: string
-  slug: string
-  count?: number
-}
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { cn } from "@/lib/utils"
+import type { CategoryData } from "@/lib/dynamic-categories"
+import Link from "next/link"
 
 interface CategoryTabsProps {
   categories: CategoryData[]
   selectedCategory: string
-  basePath: string
-  type: "blog" | "video"
+  onCategoryChange?: (category: string) => void
+  basePath?: string
+  type?: string
+  showAll?: boolean
+  className?: string
 }
 
-// Default categories that always appear
-const DEFAULT_CATEGORIES: CategoryData[] = [
-  { name: "Anime News", slug: "anime-news", count: 0 },
-  { name: "Reviews", slug: "reviews", count: 0 },
-  { name: "Behind the Scenes", slug: "behind-the-scenes", count: 0 },
-  { name: "Tutorials", slug: "tutorials", count: 0 },
-]
+export function CategoryTabs({
+  categories,
+  selectedCategory,
+  onCategoryChange,
+  basePath,
+  showAll = true,
+  className,
+}: CategoryTabsProps) {
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-export function CategoryTabs({ categories = [], selectedCategory, basePath, type }: CategoryTabsProps) {
-  // Always show categories - use provided ones or fallback to defaults
-  const displayCategories = categories.length > 0 ? categories : DEFAULT_CATEGORIES
+  const allCategories = showAll ? [{ name: "All", slug: "all", count: 0 }, ...categories] : categories
 
-  const getCategoryUrl = (categorySlug: string) => {
-    if (categorySlug === "all") return basePath
-    return `${basePath}?category=${categorySlug}`
+  const checkScrollButtons = () => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    setCanScrollLeft(container.scrollLeft > 0)
+    setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth)
+  }
+
+  useEffect(() => {
+    checkScrollButtons()
+    const container = scrollContainerRef.current
+    if (container) {
+      container.addEventListener("scroll", checkScrollButtons)
+      window.addEventListener("resize", checkScrollButtons)
+      return () => {
+        container.removeEventListener("scroll", checkScrollButtons)
+        window.removeEventListener("resize", checkScrollButtons)
+      }
+    }
+  }, [categories])
+
+  const scroll = (direction: "left" | "right") => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const scrollAmount = 200
+    const newScrollLeft =
+      direction === "left" ? container.scrollLeft - scrollAmount : container.scrollLeft + scrollAmount
+
+    container.scrollTo({
+      left: newScrollLeft,
+      behavior: "smooth",
+    })
   }
 
   return (
-    <div className="bg-white border-b sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2 py-4 overflow-x-auto scrollbar-hide">
-          {/* All Categories Button */}
-          <Link href={basePath}>
-            <Button
-              variant={selectedCategory === "all" ? "default" : "outline"}
-              size="sm"
-              className="whitespace-nowrap flex-shrink-0"
-            >
-              All
-              <Badge variant="secondary" className="ml-2 text-xs">
-                {displayCategories.reduce((sum, cat) => sum + (cat.count || 0), 0)}
-              </Badge>
-            </Button>
-          </Link>
+    <div className={cn("relative", className)}>
+      <div className="flex items-center">
+        {/* Left scroll button */}
+        {canScrollLeft && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute left-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-sm rounded-full"
+            onClick={() => scroll("left")}
+            aria-label="Scroll categories left"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        )}
 
-          {/* Category Buttons */}
-          {displayCategories.map((category) => (
-            <Link key={category.slug} href={getCategoryUrl(category.slug)}>
+        {/* Category tabs container */}
+        <div
+          ref={scrollContainerRef}
+          className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth px-8 md:px-0 py-2"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {allCategories.map((category) => {
+            return onCategoryChange ? (
               <Button
+                key={category.slug}
                 variant={selectedCategory === category.slug ? "default" : "outline"}
                 size="sm"
-                className="whitespace-nowrap flex-shrink-0"
+                className={cn(
+                  "whitespace-nowrap flex-shrink-0 transition-all duration-200 min-h-[36px] px-4",
+                  selectedCategory === category.slug
+                    ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                    : "hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300",
+                )}
+                onClick={() => {
+                  if (onCategoryChange) {
+                    onCategoryChange(category.slug)
+                  } else if (basePath) {
+                    const params = new URLSearchParams()
+                    if (category.slug !== "all") params.set("category", category.slug)
+                    const url = `${basePath}${params.toString() ? `?${params.toString()}` : ""}`
+                    window.location.href = url
+                  }
+                }}
               >
                 {category.name}
-                {category.count !== undefined && category.count > 0 && (
-                  <Badge variant="secondary" className="ml-2 text-xs">
+                {category.count > 0 && (
+                  <span className="ml-2 text-xs opacity-70 bg-white/20 px-1.5 py-0.5 rounded-full">
                     {category.count}
-                  </Badge>
+                  </span>
                 )}
               </Button>
-            </Link>
-          ))}
+            ) : (
+              <Button
+                key={category.slug}
+                variant={selectedCategory === category.slug ? "default" : "outline"}
+                size="sm"
+                className={cn(
+                  "whitespace-nowrap flex-shrink-0 transition-all duration-200 min-h-[36px] px-4",
+                  selectedCategory === category.slug
+                    ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                    : "hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300",
+                )}
+                asChild
+              >
+                <Link
+                  href={(() => {
+                    const params = new URLSearchParams()
+                    if (category.slug !== "all") params.set("category", category.slug)
+                    return `${basePath}${params.toString() ? `?${params.toString()}` : ""}`
+                  })()}
+                >
+                  {category.name}
+                  {category.count > 0 && (
+                    <span className="ml-2 text-xs opacity-70 bg-white/20 px-1.5 py-0.5 rounded-full">
+                      {category.count}
+                    </span>
+                  )}
+                </Link>
+              </Button>
+            )
+          })}
         </div>
+
+        {/* Right scroll button */}
+        {canScrollRight && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute right-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-sm rounded-full"
+            onClick={() => scroll("right")}
+            aria-label="Scroll categories right"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   )

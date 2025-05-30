@@ -84,7 +84,7 @@ export default function AboutPage() {
             About Flavor Studios
           </h1>
           <p className="text-lg sm:text-xl lg:text-2xl text-blue-600 font-medium mb-4 sm:mb-6 lg:mb-8 italic">
-            Crafting stories with soul—one frame at a time.
+            Crafting stories with soul, one frame at a time.
           </p>
           <div className="max-w-4xl mx-auto space-y-3 sm:space-y-4 lg:space-y-6 text-sm sm:text-base lg:text-lg text-gray-600 leading-relaxed px-2">
             <p>

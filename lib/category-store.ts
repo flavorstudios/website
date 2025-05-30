@@ -22,6 +22,7 @@ async function ensureDataDir() {
   try {
     await fs.access(DATA_DIR)
   } catch {
+    console.log("Creating data directory:", DATA_DIR)
     await fs.mkdir(DATA_DIR, { recursive: true })
   }
 }
@@ -31,8 +32,10 @@ async function readJsonFile<T>(filename: string): Promise<T[]> {
   const filePath = path.join(DATA_DIR, filename)
   try {
     const data = await fs.readFile(filePath, "utf-8")
-    return JSON.parse(data)
-  } catch {
+    const parsed = JSON.parse(data)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (error) {
+    console.warn(`Failed to read ${filename}, returning empty array:`, error)
     return []
   }
 }
@@ -43,10 +46,11 @@ async function writeJsonFile<T>(filename: string, data: T[]): Promise<void> {
   await fs.writeFile(filePath, JSON.stringify(data, null, 2))
 }
 
-// Category Store
+// Category Store - EXPORTED AS NAMED EXPORT
 export const categoryStore = {
   async getAll(): Promise<Category[]> {
-    return readJsonFile<Category>("categories.json")
+    const categories = await readJsonFile<Category>("categories.json")
+    return categories
   },
 
   async getByType(type: "blog" | "video"): Promise<Category[]> {
@@ -180,34 +184,50 @@ export const categoryStore = {
 
 // Initialize default categories - EXACTLY matching your screenshot: Episodes, Shorts, Behind the Scenes, Tutorials
 export async function initializeDefaultCategories() {
-  const categories = await categoryStore.getAll()
+  try {
+    await ensureDataDir()
+    const categories = await categoryStore.getAll()
 
-  if (categories.length === 0) {
-    // EXACT 4 CATEGORIES from your screenshot
-    const exactCategories = ["Episodes", "Shorts", "Behind the Scenes", "Tutorials"]
+    if (categories.length === 0) {
+      console.log("Initializing default categories...")
+      // EXACT 4 CATEGORIES from your screenshot
+      const exactCategories = ["Anime News", "Reviews", "Behind the Scenes", "Tutorials"]
 
-    // Create blog categories
-    for (let i = 0; i < exactCategories.length; i++) {
-      await categoryStore.create({
-        name: exactCategories[i],
-        type: "blog",
-        description: `Blog content related to ${exactCategories[i].toLowerCase()}`,
-        color: `hsl(${(i * 90) % 360}, 70%, 50%)`,
-        order: i,
-        isActive: true,
-      })
+      // Create blog categories
+      for (let i = 0; i < exactCategories.length; i++) {
+        try {
+          await categoryStore.create({
+            name: exactCategories[i],
+            type: "blog",
+            description: `Blog content related to ${exactCategories[i].toLowerCase()}`,
+            color: `hsl(${(i * 90) % 360}, 70%, 50%)`,
+            order: i,
+            isActive: true,
+          })
+        } catch (error) {
+          console.warn(`Failed to create blog category ${exactCategories[i]}:`, error)
+        }
+      }
+
+      // Create video categories with same names
+      for (let i = 0; i < exactCategories.length; i++) {
+        try {
+          await categoryStore.create({
+            name: exactCategories[i],
+            type: "video",
+            description: `Video content related to ${exactCategories[i].toLowerCase()}`,
+            color: `hsl(${(i * 90) % 360}, 70%, 50%)`,
+            order: i,
+            isActive: true,
+          })
+        } catch (error) {
+          console.warn(`Failed to create video category ${exactCategories[i]}:`, error)
+        }
+      }
+
+      console.log("Default categories initialized successfully")
     }
-
-    // Create video categories with same names
-    for (let i = 0; i < exactCategories.length; i++) {
-      await categoryStore.create({
-        name: exactCategories[i],
-        type: "video",
-        description: `Video content related to ${exactCategories[i].toLowerCase()}`,
-        color: `hsl(${(i * 90) % 360}, 70%, 50%)`,
-        order: i,
-        isActive: true,
-      })
-    }
+  } catch (error) {
+    console.error("Failed to initialize default categories:", error)
   }
 }

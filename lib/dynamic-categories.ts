@@ -18,8 +18,8 @@ export const fallbackCategories: DynamicCategoriesResult = {
     { name: "Tutorials", slug: "tutorials", count: 0 },
   ],
   videoCategories: [
-    { name: "Episodes", slug: "episodes", count: 0 },
-    { name: "Shorts", slug: "shorts", count: 0 },
+    { name: "Anime News", slug: "anime-news", count: 0 },
+    { name: "Reviews", slug: "reviews", count: 0 },
     { name: "Behind the Scenes", slug: "behind-the-scenes", count: 0 },
     { name: "Tutorials", slug: "tutorials", count: 0 },
   ],
@@ -47,7 +47,10 @@ export function formatCategoryName(slug: string): string {
 // Client-side category fetching with fallback
 export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResult> {
   try {
-    const baseUrl = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000"
+    const baseUrl =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
 
     const [blogsResponse, videosResponse] = await Promise.allSettled([
       fetch(`${baseUrl}/api/admin/blogs`, { cache: "no-store" }),

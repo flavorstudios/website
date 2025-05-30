@@ -44,7 +44,7 @@ export function formatCategoryName(slug: string): string {
     .join(" ")
 }
 
-// Client-side category fetching with fallback
+// Dynamic category fetching with real-time updates
 export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResult> {
   try {
     const baseUrl =
@@ -53,14 +53,28 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
         : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
 
     const [blogsResponse, videosResponse] = await Promise.allSettled([
-      fetch(`${baseUrl}/api/admin/blogs`, { cache: "no-store" }),
-      fetch(`${baseUrl}/api/admin/videos`, { cache: "no-store" }),
+      fetch(`${baseUrl}/api/admin/blogs`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      }),
+      fetch(`${baseUrl}/api/admin/videos`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      }),
     ])
 
     let blogCategories: CategoryData[] = []
     let videoCategories: CategoryData[] = []
 
-    // Process blog categories
+    // Process blog categories dynamically
     if (blogsResponse.status === "fulfilled" && blogsResponse.value.ok) {
       try {
         const blogsData = await blogsResponse.value.json()
@@ -81,12 +95,18 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
           slug,
           count,
         }))
+
+        // Sort by count (most popular first) then by name
+        blogCategories.sort((a, b) => {
+          if (b.count !== a.count) return b.count - a.count
+          return a.name.localeCompare(b.name)
+        })
       } catch (error) {
         console.error("Error processing blog categories:", error)
       }
     }
 
-    // Process video categories
+    // Process video categories dynamically
     if (videosResponse.status === "fulfilled" && videosResponse.value.ok) {
       try {
         const videosData = await videosResponse.value.json()
@@ -107,20 +127,25 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
           slug,
           count,
         }))
+
+        // Sort by count (most popular first) then by name
+        videoCategories.sort((a, b) => {
+          if (b.count !== a.count) return b.count - a.count
+          return a.name.localeCompare(b.name)
+        })
       } catch (error) {
         console.error("Error processing video categories:", error)
       }
     }
 
-    // Use fallback if no categories found
-    if (blogCategories.length === 0) {
-      blogCategories = fallbackCategories.blogCategories
-    }
-    if (videoCategories.length === 0) {
-      videoCategories = fallbackCategories.videoCategories
-    }
+    // Use fallback if no categories found, but merge with any dynamic ones
+    const finalBlogCategories = blogCategories.length > 0 ? blogCategories : fallbackCategories.blogCategories
+    const finalVideoCategories = videoCategories.length > 0 ? videoCategories : fallbackCategories.videoCategories
 
-    return { blogCategories, videoCategories }
+    return {
+      blogCategories: finalBlogCategories,
+      videoCategories: finalVideoCategories,
+    }
   } catch (error) {
     console.error("Failed to fetch categories:", error)
     return fallbackCategories

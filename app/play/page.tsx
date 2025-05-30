@@ -20,6 +20,8 @@ interface GameState {
   scores: { X: number; O: number; ties: number }
   isGameActive: boolean
   moveHistory: number[]
+  turnTimeLimit: number
+  timeLeft: number
 }
 
 const INITIAL_STATE: GameState = {
@@ -31,6 +33,8 @@ const INITIAL_STATE: GameState = {
   scores: { X: 0, O: 0, ties: 0 },
   isGameActive: true,
   moveHistory: [],
+  turnTimeLimit: 0,
+  timeLeft: 0,
 }
 
 export default function PlayPage() {
@@ -38,6 +42,33 @@ export default function PlayPage() {
   const [autoResetTimer, setAutoResetTimer] = useState<number | null>(null)
   const [countdown, setCountdown] = useState<number>(0)
   const [resetFeedback, setResetFeedback] = useState(false)
+
+  // Timer for P2P difficulty modes
+  useEffect(() => {
+    if (gameState.gameMode === "p2p" && gameState.turnTimeLimit > 0 && gameState.isGameActive && !gameState.winner) {
+      const timer = setInterval(() => {
+        setGameState((prev) => {
+          if (prev.timeLeft <= 1) {
+            // Time's up - current player loses
+            const winner = prev.currentPlayer === "X" ? "O" : "X"
+            return {
+              ...prev,
+              winner,
+              isGameActive: false,
+              timeLeft: 0,
+              scores: {
+                ...prev.scores,
+                [winner]: prev.scores[winner] + 1,
+              },
+            }
+          }
+          return { ...prev, timeLeft: prev.timeLeft - 1 }
+        })
+      }, 1000)
+
+      return () => clearInterval(timer)
+    }
+  }, [gameState.currentPlayer, gameState.isGameActive, gameState.winner, gameState.gameMode, gameState.turnTimeLimit])
 
   const checkWinner = useCallback((board: Player[]): Player | "tie" | null => {
     const lines = [
@@ -128,6 +159,7 @@ export default function PlayPage() {
           winner,
           isGameActive: !winner,
           moveHistory: [...prev.moveHistory, index],
+          timeLeft: winner ? prev.timeLeft : prev.turnTimeLimit,
           scores: winner
             ? {
                 ...prev.scores,
@@ -215,6 +247,7 @@ export default function PlayPage() {
       winner: null,
       isGameActive: true,
       moveHistory: [],
+      timeLeft: prev.turnTimeLimit,
     }))
   }, [autoResetTimer])
 
@@ -227,12 +260,43 @@ export default function PlayPage() {
       winner: null,
       isGameActive: true,
       moveHistory: [],
+      turnTimeLimit: 0,
+      timeLeft: 0,
     }))
   }, [])
 
-  const changeDifficulty = useCallback((difficulty: Difficulty) => {
-    setGameState((prev) => ({ ...prev, difficulty }))
-  }, [])
+  const changeDifficulty = useCallback(
+    (difficulty: Difficulty) => {
+      const getTimeLimit = (mode: GameMode, diff: Difficulty) => {
+        if (mode === "p2c") return 0
+        switch (diff) {
+          case "easy":
+            return 30 // 30 seconds per turn
+          case "medium":
+            return 15 // 15 seconds per turn
+          case "hard":
+            return 10 // 10 seconds per turn
+          default:
+            return 0
+        }
+      }
+
+      const newTimeLimit = getTimeLimit(gameState.gameMode, difficulty)
+
+      setGameState((prev) => ({
+        ...prev,
+        difficulty,
+        turnTimeLimit: newTimeLimit,
+        timeLeft: newTimeLimit,
+        board: Array(9).fill(null),
+        currentPlayer: "X",
+        winner: null,
+        isGameActive: true,
+        moveHistory: [],
+      }))
+    },
+    [gameState.gameMode],
+  )
 
   const getStatusMessage = () => {
     if (gameState.winner === "tie") return "It's a tie! 🤝"
@@ -248,11 +312,37 @@ export default function PlayPage() {
     return `Player ${gameState.currentPlayer}'s turn`
   }
 
+  const getDifficultyDescription = (mode: GameMode, difficulty: Difficulty) => {
+    if (mode === "p2c") {
+      switch (difficulty) {
+        case "easy":
+          return "Computer makes random moves"
+        case "medium":
+          return "Computer uses basic strategy"
+        case "hard":
+          return "Computer uses advanced AI"
+        default:
+          return ""
+      }
+    } else {
+      switch (difficulty) {
+        case "easy":
+          return "30 seconds per turn"
+        case "medium":
+          return "15 seconds per turn"
+        case "hard":
+          return "10 seconds per turn"
+        default:
+          return ""
+      }
+    }
+  }
+
   const gameFeatures = [
     {
       icon: Users,
       title: "Multiple Modes",
-      description: "Play against a friend or challenge the computer AI.",
+      description: "Play against a friend or challenge the computer AI with different difficulty levels.",
     },
     {
       icon: Zap,
@@ -274,7 +364,7 @@ export default function PlayPage() {
           <Badge className="mb-2 sm:mb-3 lg:mb-4 bg-blue-600 text-white px-3 py-1 text-xs sm:text-sm">
             Interactive Games
           </Badge>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 lg:mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 lg:mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-[1.2] pb-2">
             Play Games
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-blue-600 font-medium mb-3 sm:mb-4 lg:mb-6 italic">
@@ -344,21 +434,23 @@ export default function PlayPage() {
                       </SelectContent>
                     </Select>
 
-                    {gameState.gameMode === "p2c" && (
-                      <Select
-                        value={gameState.difficulty}
-                        onValueChange={(value) => changeDifficulty(value as Difficulty)}
-                      >
-                        <SelectTrigger className="text-sm">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="easy">Easy</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="hard">Hard</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
+                    <Select
+                      value={gameState.difficulty}
+                      onValueChange={(value) => changeDifficulty(value as Difficulty)}
+                    >
+                      <SelectTrigger className="text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="easy">Easy</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="hard">Hard</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                      {getDifficultyDescription(gameState.gameMode, gameState.difficulty)}
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -397,6 +489,15 @@ export default function PlayPage() {
                       <div className="flex items-center gap-2">
                         <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                         <div className="text-sm sm:text-base font-semibold">{getStatusMessage()}</div>
+                        {gameState.gameMode === "p2p" &&
+                          gameState.turnTimeLimit > 0 &&
+                          gameState.isGameActive &&
+                          !gameState.winner && (
+                            <Badge variant="outline" className="ml-2">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {gameState.timeLeft}s
+                            </Badge>
+                          )}
                       </div>
                       <Button
                         variant="outline"
@@ -470,15 +571,15 @@ export default function PlayPage() {
                       <h4 className="font-semibold text-gray-900 mb-1">Game Modes</h4>
                       <ul className="space-y-1">
                         <li>
-                          • <strong>vs Computer:</strong> Play against AI
+                          • <strong>vs Computer:</strong> Play against AI with different intelligence levels
                         </li>
                         <li>
-                          • <strong>vs Player:</strong> Take turns with a friend
+                          • <strong>vs Player:</strong> Take turns with a friend, with optional time limits
                         </li>
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-1">Difficulty</h4>
+                      <h4 className="font-semibold text-gray-900 mb-1">P2C Difficulty</h4>
                       <ul className="space-y-1">
                         <li>
                           • <strong>Easy:</strong> Random moves
@@ -488,6 +589,20 @@ export default function PlayPage() {
                         </li>
                         <li>
                           • <strong>Hard:</strong> Advanced AI
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-1">P2P Difficulty</h4>
+                      <ul className="space-y-1">
+                        <li>
+                          • <strong>Easy:</strong> 30s per turn
+                        </li>
+                        <li>
+                          • <strong>Medium:</strong> 15s per turn
+                        </li>
+                        <li>
+                          • <strong>Hard:</strong> 10s per turn
                         </li>
                       </ul>
                     </div>

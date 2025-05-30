@@ -42,11 +42,11 @@ export function formatCategoryName(slug: string): string {
     .join(" ")
 }
 
-// ALWAYS return categories - never empty
+// ALWAYS return categories - but prioritize dynamic content
 export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResult> {
-  // Start with static categories as base
-  let blogCategories: CategoryData[] = [...STATIC_CATEGORIES]
-  let videoCategories: CategoryData[] = [...STATIC_CATEGORIES]
+  // Start with empty arrays to prioritize dynamic content
+  let blogCategories: CategoryData[] = []
+  let videoCategories: CategoryData[] = []
 
   try {
     // Use relative URLs instead of absolute URLs to avoid environment variable issues
@@ -68,7 +68,7 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
     ])
 
     // Process blog categories if available
-    if (blogsResponse.status === "fulfilled" && blogsResponse.value) {
+    if (blogsResponse.status === "fulfilled" && blogsResponse.value && blogsResponse.value.ok) {
       try {
         const blogsData = await blogsResponse.value.json()
         const posts = blogsData.posts || []
@@ -91,6 +91,12 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
               slug,
               count,
             }))
+
+            // Sort by count (most popular first) then by name
+            blogCategories.sort((a, b) => {
+              if (b.count !== a.count) return b.count - a.count
+              return a.name.localeCompare(b.name)
+            })
           }
         }
       } catch (error) {
@@ -99,7 +105,7 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
     }
 
     // Process video categories if available
-    if (videosResponse.status === "fulfilled" && videosResponse.value) {
+    if (videosResponse.status === "fulfilled" && videosResponse.value && videosResponse.value.ok) {
       try {
         const videosData = await videosResponse.value.json()
         const videos = videosData.videos || []
@@ -122,6 +128,12 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
               slug,
               count,
             }))
+
+            // Sort by count (most popular first) then by name
+            videoCategories.sort((a, b) => {
+              if (b.count !== a.count) return b.count - a.count
+              return a.name.localeCompare(b.name)
+            })
           }
         }
       } catch (error) {
@@ -132,7 +144,7 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
     console.warn("Failed to fetch categories, using static fallback:", error)
   }
 
-  // ALWAYS return categories - never empty
+  // Return dynamic categories if available, otherwise use static fallback
   return {
     blogCategories: blogCategories.length > 0 ? blogCategories : STATIC_CATEGORIES,
     videoCategories: videoCategories.length > 0 ? videoCategories : STATIC_CATEGORIES,

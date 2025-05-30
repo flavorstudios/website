@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     siteName: "Flavor Studios",
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: "https://flavorstudios.in/cover.jpg?v=2",
         width: 1200,
         height: 630,
         alt: "Flavor Studios – Anime & Stories That Stay With You",
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     title: "Flavor Studios – Anime & Stories That Stay With You",
     description:
       "Explore powerful animations, blogs, and games that inspire, entertain, and connect with your soul. Made with love by Flavor Studios.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: ["https://flavorstudios.in/cover.jpg?v=2"],
   },
   viewport: {
     width: "device-width",
@@ -83,9 +83,13 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
+  appLinks: {
+    web: {
+      url: "https://flavorstudios.in",
+    },
+  },
   other: {
     "fediverse:creator": "@flavorstudios@mastodon.social",
-    "fb:app_id": "1404440770881914",
   },
     generator: 'v0.dev'
 }
@@ -99,6 +103,7 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <head>
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
+        <meta property="fb:app_id" content="1404440770881914" />
       </head>
       <body className={`${inter.className} antialiased`}>
         <Header />

@@ -63,6 +63,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "Flavor Studios",
+    appId: "1404440770881914", // ✅ Facebook App ID
     images: [
       {
         url: "https://flavorstudios.in/cover.png",

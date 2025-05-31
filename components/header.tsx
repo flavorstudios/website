@@ -42,7 +42,7 @@ export function Header() {
               },
               ...blogCategories.slice(0, 6).map((category) => ({
                 label: category.name,
-                href: `/blog?category=${category.slug}`,
+                href: `/blog/category/${category.slug}`, // 🚀 dynamic, SEO-friendly!
                 description: `${category.name} posts and articles${category.count > 0 ? ` (${category.count})` : ""}`,
               })),
             ],
@@ -58,7 +58,7 @@ export function Header() {
               },
               ...videoCategories.slice(0, 6).map((category) => ({
                 label: category.name,
-                href: `/watch?category=${category.slug}`,
+                href: `/watch?category=${category.slug}`, // Use /watch/category/${category.slug} if you implement video category pages!
                 description: `${category.name} videos and content${category.count > 0 ? ` (${category.count})` : ""}`,
               })),
             ],

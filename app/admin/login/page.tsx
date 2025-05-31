@@ -1,12 +1,8 @@
-import type { Metadata } from "next"
-import AdminLoginForm from "./AdminLoginForm"
-
-export const metadata: Metadata = {
-  title: "Admin Login | Flavor Studios",
-  description: "Access your creative command center",
+export const metadata = {
   robots: "noindex, nofollow",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 }
+
+import AdminLoginForm from "./AdminLoginForm"
 
 export default function AdminLoginPage() {
   return <AdminLoginForm />

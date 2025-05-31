@@ -5,14 +5,12 @@ import { Button } from "@/components/ui/button"
 import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react"
 import { getDynamicCategories } from "@/lib/dynamic-categories"
 import { CategoryTabs } from "@/components/ui/category-tabs"
-import { generateCanonicalMetadata } from "@/lib/canonical-utils"
 
 export const metadata = {
   title: "Watch | Flavor Studios - Original Anime & Video Content",
   description:
     "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
   keywords: "anime videos, original series, short films, behind the scenes, animation studio, watch anime",
-  ...generateCanonicalMetadata("/watch"),
   openGraph: {
     title: "Flavor Studios Watch - Original Content & Series",
     description: "Bringing anime to life—one frame at a time.",

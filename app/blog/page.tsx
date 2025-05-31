@@ -7,14 +7,12 @@ import { blogStore } from "@/lib/content-store"
 import { getDynamicCategories } from "@/lib/dynamic-categories"
 import { CategoryTabs } from "@/components/ui/category-tabs"
 import { NewsletterSignup } from "@/components/newsletter-signup"
-import { generateCanonicalMetadata } from "@/lib/canonical-utils"
 
 export const metadata = {
   title: "Blog | Flavor Studios - Anime Creation Insights & Stories",
   description:
     "Dive deep into the world of anime creation, industry insights, and behind-the-scenes stories from Flavor Studios. Discover our creative process and expertise.",
   keywords: "anime blog, animation insights, studio stories, anime creation, behind the scenes, animation tutorials",
-  ...generateCanonicalMetadata("/blog"),
   openGraph: {
     title: "Flavor Studios Blog - Anime Creation Insights",
     description: "Behind the scenes of anime creation—one story at a time.",

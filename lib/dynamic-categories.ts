@@ -42,13 +42,97 @@ export function formatCategoryName(slug: string): string {
     .join(" ")
 }
 
-// Simple function that ALWAYS works
+// DYNAMIC function that fetches real data but falls back gracefully
 export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResult> {
-  // Always return the static categories for now to ensure it works
-  // This will show your screenshot categories consistently
+  let blogCategories: CategoryData[] = []
+  let videoCategories: CategoryData[] = []
+
+  try {
+    // Try to fetch from admin APIs
+    const [blogsResponse, videosResponse] = await Promise.allSettled([
+      fetch("/api/admin/blogs", {
+        cache: "no-store",
+        next: { revalidate: 0 },
+      }),
+      fetch("/api/admin/videos", {
+        cache: "no-store",
+        next: { revalidate: 0 },
+      }),
+    ])
+
+    // Process blog categories
+    if (blogsResponse.status === "fulfilled" && blogsResponse.value?.ok) {
+      const blogsData = await blogsResponse.value.json()
+      const posts = blogsData.posts || []
+
+      if (posts.length > 0) {
+        const categoryMap = new Map<string, number>()
+
+        posts
+          .filter((post: any) => post.status === "published")
+          .forEach((post: any) => {
+            if (post.category) {
+              const slug = createCategorySlug(post.category)
+              categoryMap.set(slug, (categoryMap.get(slug) || 0) + 1)
+            }
+          })
+
+        if (categoryMap.size > 0) {
+          blogCategories = Array.from(categoryMap.entries()).map(([slug, count]) => ({
+            name: formatCategoryName(slug),
+            slug,
+            count,
+          }))
+
+          // Sort by count (most popular first) then by name
+          blogCategories.sort((a, b) => {
+            if (b.count !== a.count) return b.count - a.count
+            return a.name.localeCompare(b.name)
+          })
+        }
+      }
+    }
+
+    // Process video categories
+    if (videosResponse.status === "fulfilled" && videosResponse.value?.ok) {
+      const videosData = await videosResponse.value.json()
+      const videos = videosData.videos || []
+
+      if (videos.length > 0) {
+        const categoryMap = new Map<string, number>()
+
+        videos
+          .filter((video: any) => video.status === "published")
+          .forEach((video: any) => {
+            if (video.category) {
+              const slug = createCategorySlug(video.category)
+              categoryMap.set(slug, (categoryMap.get(slug) || 0) + 1)
+            }
+          })
+
+        if (categoryMap.size > 0) {
+          videoCategories = Array.from(categoryMap.entries()).map(([slug, count]) => ({
+            name: formatCategoryName(slug),
+            slug,
+            count,
+          }))
+
+          // Sort by count (most popular first) then by name
+          videoCategories.sort((a, b) => {
+            if (b.count !== a.count) return b.count - a.count
+            return a.name.localeCompare(b.name)
+          })
+        }
+      }
+    }
+  } catch (error) {
+    console.warn("Failed to fetch dynamic categories, using static fallback:", error)
+  }
+
+  // Return dynamic categories if available, otherwise use static fallback
   return {
-    blogCategories: STATIC_CATEGORIES,
-    videoCategories: STATIC_CATEGORIES,
+    blogCategories: blogCategories.length > 0 ? blogCategories : STATIC_CATEGORIES,
+    videoCategories: videoCategories.length > 0 ? videoCategories : STATIC_CATEGORIES,
   }
 }
 

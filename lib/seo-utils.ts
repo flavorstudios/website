@@ -1,29 +1,3 @@
-// /lib/seo-utils.ts
-
-type SEOInput = {
-  title: string
-  description: string
-  path: string              // e.g. '/about', '/blog/some-slug'
-  openGraph?: Partial<{
-    images: string[]        // Array of image URLs
-    type: string
-  }>
-  twitter?: Partial<{
-    card: string
-    site: string
-    creator: string
-    image: string
-  }>
-  schema?: object           // Raw JSON-LD object, if needed
-  robots?: string           // e.g. "noindex, nofollow"
-  customMeta?: Record<string, string> // For extra tags if needed
-}
-
-// === Base config ===
-const BASE_URL = "https://flavorstudios.in"
-const BASE_TWITTER = "@flavorstudios"
-const DEFAULT_OG_IMAGE = `${BASE_URL}/cover.png`
-
 export function getMetadata({
   title,
   description,
@@ -60,7 +34,32 @@ export function getMetadata({
         ]
       : []
 
-  // Build metadata object for Next.js App Router
+  // --- NEW: Collect customMeta into 'other' array ---
+  const other: any[] = structuredData.slice() // Copy JSON-LD script if present
+
+  // Always inject the fb:app_id tag (replace value if needed)
+  other.push({
+    tagName: "meta",
+    attributes: {
+      property: "fb:app_id",
+      content: "1404440770881914",
+    },
+  })
+
+  // If you want to add more customMeta tags, add them here
+  if (customMeta) {
+    for (const [key, value] of Object.entries(customMeta)) {
+      other.push({
+        tagName: "meta",
+        attributes: {
+          property: key,
+          content: value,
+        },
+      })
+    }
+  }
+
+  // --- MAIN RETURN ---
   return {
     title,
     description,
@@ -84,7 +83,6 @@ export function getMetadata({
       description,
       images: [twitterImage],
     },
-    ...(customMeta || {}),
-    ...(structuredData.length && { other: structuredData }),
+    ...(other.length && { other }), // <--- ENSURE 'other' IS ADDED!
   }
 }

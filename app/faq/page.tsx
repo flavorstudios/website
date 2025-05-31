@@ -385,7 +385,6 @@ export default function FAQPage() {
               className="pl-10 sm:pl-12 h-10 sm:h-12 text-sm sm:text-base"
             />
           </div>
-
           <div className="flex flex-wrap gap-2 sm:gap-3 justify-center items-center max-w-4xl mx-auto">
             {categories.map((category) => (
               <Badge
@@ -781,7 +780,6 @@ export default function FAQPage() {
                 </ul>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg sm:text-xl">For Anime Fans</CardTitle>

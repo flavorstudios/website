@@ -1,3 +1,13 @@
+// === SEO METADATA BLOCK ===
+export const metadata = {
+  title: "Contact | Flavor Studios",
+  description:
+    "Connect with Flavor Studios—reach out for collaborations, support, business inquiries, or just to say hello. Fill out our contact form and our team will respond quickly.",
+  alternates: {
+    canonical: "https://flavorstudios.in/contact",
+  },
+}
+
 "use client"
 
 import type React from "react"
@@ -123,27 +133,22 @@ export default function ContactPage() {
     if (!formData.firstName.trim()) {
       newErrors.firstName = "First name is required"
     }
-
     if (!formData.lastName.trim()) {
       newErrors.lastName = "Last name is required"
     }
-
     if (!formData.email.trim()) {
       newErrors.email = "Email is required"
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address"
     }
-
     if (!formData.subject) {
       newErrors.subject = "Please select a subject"
     }
-
     if (!formData.message.trim()) {
       newErrors.message = "Message is required"
     } else if (formData.message.trim().length < 10) {
       newErrors.message = "Message must be at least 10 characters long"
     }
-
     if (!formData.privacyAccepted) {
       newErrors.privacyAccepted = "You must accept the privacy policy"
     }
@@ -154,10 +159,7 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!validateForm()) {
-      return
-    }
+    if (!validateForm()) return
 
     setIsSubmitting(true)
     setSubmitStatus("idle")
@@ -165,8 +167,6 @@ export default function ContactPage() {
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Mock success
       setSubmitStatus("success")
       setFormData({
         firstName: "",
@@ -229,7 +229,6 @@ export default function ContactPage() {
                 ))}
               </CardContent>
             </Card>
-
             {/* Business Inquiries */}
             <Card>
               <CardHeader>
@@ -249,7 +248,6 @@ export default function ContactPage() {
                 </div>
               </CardContent>
             </Card>
-
             {/* Social Media */}
             <Card>
               <CardHeader>
@@ -277,7 +275,6 @@ export default function ContactPage() {
               </CardContent>
             </Card>
           </div>
-
           {/* Contact Form */}
           <div className="lg:col-span-2 order-1 lg:order-2">
             <Card>
@@ -297,7 +294,6 @@ export default function ContactPage() {
                     </div>
                   </div>
                 )}
-
                 {submitStatus === "error" && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
                     <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
@@ -307,7 +303,6 @@ export default function ContactPage() {
                     </div>
                   </div>
                 )}
-
                 <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -349,7 +344,6 @@ export default function ContactPage() {
                       )}
                     </div>
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm sm:text-base">
                       Email *
@@ -370,7 +364,6 @@ export default function ContactPage() {
                       </p>
                     )}
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="subject" className="text-sm sm:text-base">
                       Subject *
@@ -395,7 +388,6 @@ export default function ContactPage() {
                       </p>
                     )}
                   </div>
-
                   <div className="space-y-2">
                     <Label htmlFor="message" className="text-sm sm:text-base">
                       Message *
@@ -415,7 +407,6 @@ export default function ContactPage() {
                       </p>
                     )}
                   </div>
-
                   {/* Privacy Policy Checkbox */}
                   <div className="flex items-start space-x-2 pt-2">
                     <Checkbox
@@ -441,7 +432,6 @@ export default function ContactPage() {
                       )}
                     </div>
                   </div>
-
                   <Button
                     type="submit"
                     className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-11"
@@ -460,7 +450,6 @@ export default function ContactPage() {
                     )}
                   </Button>
                 </form>
-
                 {/* What to Expect Section */}
                 <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <h3 className="font-semibold text-blue-900 mb-2 sm:mb-3 text-sm sm:text-base">What to Expect</h3>
@@ -481,15 +470,13 @@ export default function ContactPage() {
             </Card>
           </div>
         </div>
-
-        {/* Contact Process Timeline - Mobile Optimized */}
+        {/* Contact Process Timeline */}
         <section className="mb-8 sm:mb-12 lg:mb-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 lg:mb-12">Our Contact Process</h2>
           <div className="max-w-4xl mx-auto">
             <div className="relative">
               {/* Timeline line - Hidden on mobile, shown on larger screens */}
               <div className="hidden sm:block absolute left-6 md:left-8 top-0 bottom-0 w-0.5 bg-blue-200"></div>
-
               <div className="space-y-6 sm:space-y-12">
                 {contactProcess.map((process, index) => (
                   <div key={index} className="relative flex items-start">
@@ -499,7 +486,6 @@ export default function ContactPage() {
                         {process.step}
                       </div>
                     </div>
-
                     {/* Content */}
                     <div className="ml-4 sm:ml-8 flex-1">
                       <Card className="hover:shadow-lg transition-shadow">
@@ -524,7 +510,6 @@ export default function ContactPage() {
             </div>
           </div>
         </section>
-
         {/* FAQ Call-to-Action Section */}
         <section className="mt-8 sm:mt-12 lg:mt-16 text-center bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 sm:p-8">
           <HelpCircle className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-blue-600" />

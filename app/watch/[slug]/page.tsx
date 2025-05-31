@@ -186,23 +186,32 @@ export default async function VideoPage({ params }: VideoPageProps) {
   )
 }
 
+// --- SEO + Canonical Tag Section ---
 export async function generateMetadata({ params }: VideoPageProps) {
   const video = await getVideo(params.slug)
 
   if (!video) {
     return {
       title: "Video Not Found",
+      alternates: {
+        canonical: `https://flavorstudios.in/watch/${params.slug}`,
+      },
     }
   }
 
+  const canonicalUrl = `https://flavorstudios.in/watch/${video.slug}` // Ensures casing/slug is correct
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
 
   return {
     title: video.title,
     description: video.description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: video.title,
       description: video.description,
+      url: canonicalUrl,
       images: [thumbnailUrl],
       type: "video.other",
     },

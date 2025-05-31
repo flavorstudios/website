@@ -65,11 +65,11 @@ export const metadata: Metadata = {
     siteName: "Flavor Studios",
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: "https://flavorstudios.in/cover.png",
         width: 1200,
         height: 630,
         alt: "Flavor Studios – Original Anime, Stories & Life Lessons",
-        type: "image/jpeg",
+        type: "image/png",
       },
     ],
   },
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
     title: "Flavor Studios – Anime & Stories That Stay With You",
     description:
       "Explore powerful animations, blogs, and games that inspire, entertain, and connect with your soul. Made with love by Flavor Studios.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: ["https://flavorstudios.in/cover.png"],
   },
   viewport: {
     width: "device-width",

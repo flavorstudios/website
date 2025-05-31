@@ -1,3 +1,5 @@
+"use client"
+
 // === SEO METADATA BLOCK ===
 export const metadata = {
   title: "Contact | Flavor Studios",
@@ -7,8 +9,6 @@ export const metadata = {
     canonical: "https://flavorstudios.in/contact",
   },
 }
-
-"use client"
 
 import type React from "react"
 

@@ -6,23 +6,7 @@ import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lu
 import { getDynamicCategories } from "@/lib/dynamic-categories"
 import { CategoryTabs } from "@/components/ui/category-tabs"
 
-export const metadata = {
-  title: "Watch | Flavor Studios - Original Anime & Video Content",
-  description:
-    "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
-  keywords: "anime videos, original series, short films, behind the scenes, animation studio, watch anime",
-  openGraph: {
-    title: "Flavor Studios Watch - Original Content & Series",
-    description: "Bringing anime to life—one frame at a time.",
-    type: "website",
-    images: ["/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Watch"],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Flavor Studios Watch",
-    description: "Bringing anime to life—one frame at a time.",
-  },
-}
+// === REMOVED metadata BLOCK ===
 
 async function getWatchData() {
   try {

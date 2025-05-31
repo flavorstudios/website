@@ -413,3 +413,111 @@ export default function ContactForm() {
                       <Label htmlFor="privacy" className="text-xs sm:text-sm leading-relaxed">
                         I agree to the{" "}
                         <Link href="/privacy-policy" className="text-blue-600 hover:underline">
+                          Privacy Policy
+                        </Link>{" "}
+                        *
+                      </Label>
+                      {errors.privacyAccepted && (
+                        <p id="privacy-error" className="text-sm text-red-600">
+                          {errors.privacyAccepted}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-11"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        Send Message
+                      </>
+                    )}
+                  </Button>
+                </form>
+                {/* What to Expect Section */}
+                <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h3 className="font-semibold text-blue-900 mb-2 sm:mb-3 text-sm sm:text-base">What to Expect</h3>
+                  <div className="space-y-2 sm:space-y-3">
+                    {expectations.map((expectation, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <div className="flex-shrink-0 mt-1">
+                          <div className="w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full flex items-center justify-center">
+                            <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white font-bold" />
+                          </div>
+                        </div>
+                        <span className="text-xs sm:text-sm text-blue-800 leading-relaxed">{expectation}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        {/* Contact Process Timeline */}
+        <section className="mb-8 sm:mb-12 lg:mb-16">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 lg:mb-12">Our Contact Process</h2>
+          <div className="max-w-4xl mx-auto">
+            <div className="relative">
+              {/* Timeline line - Hidden on mobile, shown on larger screens */}
+              <div className="hidden sm:block absolute left-6 md:left-8 top-0 bottom-0 w-0.5 bg-blue-200"></div>
+              <div className="space-y-6 sm:space-y-12">
+                {contactProcess.map((process, index) => (
+                  <div key={index} className="relative flex items-start">
+                    {/* Timeline dot */}
+                    <div className="relative z-10 flex-shrink-0">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-lg sm:text-xl font-bold shadow-lg">
+                        {process.step}
+                      </div>
+                    </div>
+                    {/* Content */}
+                    <div className="ml-4 sm:ml-8 flex-1">
+                      <Card className="hover:shadow-lg transition-shadow">
+                        <CardHeader className="pb-3 sm:pb-4">
+                          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                            <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
+                              <process.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                            </div>
+                            <CardTitle className="text-lg sm:text-xl">{process.title}</CardTitle>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <CardDescription className="text-sm sm:text-base leading-relaxed">
+                            {process.description}
+                          </CardDescription>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+        {/* FAQ Call-to-Action Section */}
+        <section className="mt-8 sm:mt-12 lg:mt-16 text-center bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 sm:p-8">
+          <HelpCircle className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-blue-600" />
+          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-blue-900">Need Quick Answers?</h2>
+          <p className="text-base sm:text-lg text-blue-700 mb-4 sm:mb-6 max-w-2xl mx-auto px-4">
+            Before reaching out, check our comprehensive FAQ page where we've answered the most common questions about
+            our content, collaborations, and services.
+          </p>
+          <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 h-10 sm:h-12 px-6 sm:px-8">
+            <Link href="/faq">
+              <HelpCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+              Browse FAQ
+            </Link>
+          </Button>
+        </section>
+      </div>
+    </div>
+  );
+}

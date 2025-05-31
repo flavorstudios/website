@@ -1,11 +1,3 @@
-export const metadata = {
-  title: "About | Flavor Studios",
-  description: "Learn more about Flavor Studios—our mission, vision, creative values, and the story behind our independent anime journey.",
-  alternates: {
-    canonical: "https://flavorstudios.in/about",
-  },
-}
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {

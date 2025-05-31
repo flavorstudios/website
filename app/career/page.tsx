@@ -1,14 +1,5 @@
 // app/career/page.tsx
 
-export const metadata = {
-  title: "Careers | Flavor Studios",
-  description:
-    "Discover career opportunities at Flavor Studios. Join our talent list and be the first to know when creative roles open up for animators, writers, voice artists, and more.",
-  alternates: {
-    canonical: "https://flavorstudios.in/career",
-  },
-};
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

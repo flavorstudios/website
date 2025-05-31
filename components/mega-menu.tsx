@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -33,9 +32,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
 
   // Debounced mouse enter handler
   const debouncedMouseEnter = useCallback((label: string) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
     timeoutRef.current = setTimeout(() => {
       setActiveMenu(label)
       setFocusedIndex(-1)
@@ -43,6 +40,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
   }, [])
 
   const handleMouseLeave = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
     timeoutRef.current = setTimeout(() => {
       setActiveMenu(null)
       setFocusedIndex(-1)
@@ -56,7 +54,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
         case "Enter":
         case " ":
           e.preventDefault()
-          if (item.subItems) {
+          if (item.subItems?.length) {
             setActiveMenu(activeMenu === item.label ? null : item.label)
           } else if (item.href) {
             window.location.href = item.href
@@ -64,7 +62,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           break
         case "ArrowDown":
           e.preventDefault()
-          if (item.subItems && activeMenu === item.label) {
+          if (item.subItems?.length && activeMenu === item.label) {
             setFocusedIndex(0)
           } else {
             setActiveMenu(item.label)
@@ -98,7 +96,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
     [activeMenu, focusedIndex, items.length],
   )
 
-  // Click outside handler
+  // Click outside handler & timeout cleanup
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -108,7 +106,10 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
     }
 
     document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
   }, [])
 
   // Check if current path matches menu item
@@ -125,10 +126,11 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
     return (
       <div
         className={cn(
-          "absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50",
-          "min-w-[280px] py-2",
-          "transform transition-all duration-200 ease-out",
-          activeMenu === item.label ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible",
+          "absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 min-w-[280px] py-2",
+          // Animation upgrades: scale and opacity for smoothness
+          "transform-gpu transition-all duration-200 ease-in-out origin-top scale-95 opacity-0 invisible",
+          activeMenu === item.label && "scale-100 opacity-100 visible translate-y-0",
+          !activeMenu && "-translate-y-2"
         )}
         role="menu"
         aria-label={`${item.label} submenu`}
@@ -197,6 +199,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                 isActive(item.href) && "text-blue-600",
               )}
               aria-current={isActive(item.href) ? "page" : undefined}
+              aria-label={item.label}
             >
               {item.label}
             </Link>
@@ -205,12 +208,14 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               role="menuitem"
               aria-haspopup="true"
               aria-expanded={activeMenu === item.label}
+              aria-label={`${item.label} menu`}
               className={cn(
                 "flex items-center space-x-1 text-sm font-medium transition-colors hover:text-blue-600",
                 "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1",
                 activeMenu === item.label && "text-blue-600",
               )}
               onKeyDown={(e) => handleKeyDown(e, item, index)}
+              tabIndex={0}
             >
               <span>{item.label}</span>
               {item.subItems && (

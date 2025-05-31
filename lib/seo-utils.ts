@@ -1,3 +1,34 @@
+// /lib/seo-utils.ts
+
+type SEOInput = {
+  title: string
+  description: string
+  path: string              // e.g. '/about', '/blog/some-slug'
+  openGraph?: Partial<{
+    images: string[]        // Array of image URLs
+    type: string
+  }>
+  twitter?: Partial<{
+    card: string
+    site: string
+    creator: string
+    image: string
+  }>
+  schema?: object           // Raw JSON-LD object, if needed
+  robots?: string           // e.g. "noindex, nofollow"
+  customMeta?: Record<string, string> // For extra meta tags
+  customLinks?: { rel: string; href: string }[] // For custom links like Mastodon
+}
+
+// === Base config ===
+const BASE_URL = "https://flavorstudios.in"
+const BASE_TWITTER = "@flavorstudios"
+const DEFAULT_OG_IMAGE = `${BASE_URL}/cover.png`
+
+// === Change these for your real values ===
+const GOOGLE_VERIFICATION_CODE = "2aFJnq37uAMARLFJJQy8aUjz2OV3sGGeR86taIdCpgE"
+const MASTODON_URL = "https://mastodon.social/@flavorstudios"
+
 export function getMetadata({
   title,
   description,
@@ -7,6 +38,7 @@ export function getMetadata({
   schema,
   robots,
   customMeta,
+  customLinks,
 }: SEOInput) {
   const url = `${BASE_URL}${path}`
 
@@ -34,10 +66,10 @@ export function getMetadata({
         ]
       : []
 
-  // --- NEW: Collect customMeta into 'other' array ---
-  const other: any[] = structuredData.slice() // Copy JSON-LD script if present
+  // --- "other" for meta and link tags ---
+  const other: any[] = structuredData.slice()
 
-  // Always inject the fb:app_id tag (replace value if needed)
+  // Always add fb:app_id
   other.push({
     tagName: "meta",
     attributes: {
@@ -46,26 +78,53 @@ export function getMetadata({
     },
   })
 
-  // If you want to add more customMeta tags, add them here
+  // Always add Google site verification
+  other.push({
+    tagName: "meta",
+    attributes: {
+      name: "google-site-verification",
+      content: GOOGLE_VERIFICATION_CODE,
+    },
+  })
+
+  // Always add Mastodon verification link
+  other.push({
+    tagName: "link",
+    attributes: {
+      rel: "me",
+      href: MASTODON_URL,
+    },
+  })
+
+  // Add customMeta as meta tags (auto choose 'name' or 'property')
   if (customMeta) {
     for (const [key, value] of Object.entries(customMeta)) {
+      let attrKey: "property" | "name" = "name"
+      if (key.startsWith("og:") || key.startsWith("fb:")) attrKey = "property"
       other.push({
         tagName: "meta",
         attributes: {
-          property: key,
+          [attrKey]: key,
           content: value,
         },
       })
     }
   }
 
-  // --- MAIN RETURN ---
+  // Add customLinks as <link rel="me" href="...">
+  if (customLinks) {
+    for (const { rel, href } of customLinks) {
+      other.push({
+        tagName: "link",
+        attributes: { rel, href },
+      })
+    }
+  }
+
   return {
     title,
     description,
-    alternates: {
-      canonical: url,
-    },
+    alternates: { canonical: url },
     robots,
     openGraph: {
       title,
@@ -83,6 +142,6 @@ export function getMetadata({
       description,
       images: [twitterImage],
     },
-    ...(other.length && { other }), // <--- ENSURE 'other' IS ADDED!
+    ...(other.length && { other }),
   }
 }

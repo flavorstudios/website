@@ -5,6 +5,7 @@ import { Inter } from "next/font/google"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
+import Script from "next/script"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,7 +20,15 @@ export const metadata: Metadata = {
   },
   description:
     "Explore powerful animations, blogs, and games that inspire, entertain, and connect with your soul. Made with love by Flavor Studios.",
-  keywords: ["animation", "anime", "design", "creative studio", "visual effects", "storytelling", "games"],
+  keywords: [
+    "animation",
+    "anime",
+    "design",
+    "creative studio",
+    "visual effects",
+    "storytelling",
+    "games",
+  ],
   authors: [{ name: "Flavor Studios", url: "https://flavorstudios.in" }],
   creator: "Flavor Studios",
   publisher: "Flavor Studios",
@@ -86,7 +95,7 @@ export const metadata: Metadata = {
   other: {
     "fediverse:creator": "@flavorstudios@mastodon.social",
   },
-    generator: 'v0.dev'
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
@@ -97,9 +106,31 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
+        {/* Mastodon Verification */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
+        {/* Google Tag Manager (in head) */}
+        <Script
+          id="gtm-script"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-WMTGR7NM');`,
+          }}
+        />
       </head>
       <body className={`${inter.className} antialiased`}>
+        {/* Google Tag Manager (noscript) */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
         <Header />
         <main>{children}</main>
         <Footer />

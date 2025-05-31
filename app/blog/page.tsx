@@ -8,23 +8,9 @@ import { getDynamicCategories } from "@/lib/dynamic-categories"
 import { CategoryTabs } from "@/components/ui/category-tabs"
 import { NewsletterSignup } from "@/components/newsletter-signup"
 
-export const metadata = {
-  title: "Blog | Flavor Studios - Anime Creation Insights & Stories",
-  description:
-    "Dive deep into the world of anime creation, industry insights, and behind-the-scenes stories from Flavor Studios. Discover our creative process and expertise.",
-  keywords: "anime blog, animation insights, studio stories, anime creation, behind the scenes, animation tutorials",
-  openGraph: {
-    title: "Flavor Studios Blog - Anime Creation Insights",
-    description: "Behind the scenes of anime creation—one story at a time.",
-    type: "website",
-    images: ["/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Blog"],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Flavor Studios Blog",
-    description: "Behind the scenes of anime creation—one story at a time.",
-  },
-}
+// ======== REMOVED METADATA/SEO BLOCK ========
+// export const metadata = { ... }
+// ============================================
 
 async function getBlogData() {
   try {

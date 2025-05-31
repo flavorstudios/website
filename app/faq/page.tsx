@@ -16,7 +16,6 @@ export default function FAQPage() {
   const [selectedCategory, setSelectedCategory] = useState("All Categories")
   const [expandedQuestions, setExpandedQuestions] = useState<string[]>([])
 
-  // FAQ data remains INTACT!
   const categories = [
     "All Categories",
     "About Flavor Studios",
@@ -28,7 +27,6 @@ export default function FAQPage() {
   ]
 
   const faqData = [
-    // --- All your questions & answers are here, as before ---
     {
       id: "what-is-flavor-studios",
       question: "What is Flavor Studios?",
@@ -56,7 +54,6 @@ export default function FAQPage() {
       tags: ["popular"],
       relatedQuestions: [],
     },
-    // --- Add all your remaining Q&A objects here, as you have above ---
     {
       id: "suggest-topics",
       question: "Can I suggest topics for future videos or blog posts?",

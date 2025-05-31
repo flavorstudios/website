@@ -11,9 +11,10 @@ interface MobileMegaMenuProps {
   items: MenuItem[]
   onItemClick?: () => void
   className?: string
+  loading?: boolean   // <-- NEW: support for loading state
 }
 
-export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenuProps) {
+export function MobileMegaMenu({ items, onItemClick, className, loading }: MobileMegaMenuProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
   const pathname = usePathname()
 
@@ -34,6 +35,18 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
     if (href !== "/" && pathname.startsWith(href)) return true
     return false
   }
+
+  // --- LOADING SKELETON (matches desktop look/feel) ---
+  if (loading) {
+    return (
+      <div className={cn("space-y-1", className)}>
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="h-10 w-full bg-gray-200 animate-pulse rounded-lg" />
+        ))}
+      </div>
+    )
+  }
+  // ----------------------------------------------------
 
   return (
     <div className={cn("space-y-1", className)} role="navigation" aria-label="Mobile menu">

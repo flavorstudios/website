@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Page not found - Flavor Studios">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Page Not Found - Flavor Studios</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #1a1a2e;
+            --text-secondary: #6b7280;
+            --shadow-soft: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-glow: 0 0 50px rgba(102, 126, 234, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #1f2937;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 30%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        .shape:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            right: 30%;
+            animation-delay: 1s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            padding: 1rem 0;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+
+        .home-link {
+            background: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 44px; /* Touch-friendly */
+        }
+
+        .home-link:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .error-code {
+            font-size: clamp(4rem, 8vw, 8rem);
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 1rem;
+            line-height: 1;
+        }
+
+        .error-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .error-description {
+            font-size: 1.125rem;
+            color: #6b7280;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Navigation Grid */
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .nav-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .nav-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .nav-card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .nav-card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        .nav-card-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 44px; /* Touch-friendly */
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid #e5e7eb;
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: #6b7280;
+            text-decoration: none;
+            transition: color 0.2s ease;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-links a:hover {
+            color: #3b82f6;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .header {
+                margin-bottom: 1.5rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .main-content {
+                padding: 1rem 0;
+            }
+
+            .error-description {
+                font-size: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .nav-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .nav-card {
+                padding: 1.25rem;
+                min-height: 100px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .footer-links {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-card {
+                padding: 1rem;
+                text-align: center;
+            }
+
+            .nav-card-title {
+                font-size: 1rem;
+            }
+
+            .nav-card-description {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        .home-link:focus,
+        .nav-card:focus,
+        .btn:focus,
+        .footer-links a:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <a href="/" class="logo" aria-label="Flavor Studios Home">Flavor Studios</a>
+                <a href="/" class="home-link" aria-label="Return to homepage">
+                    <span>🏠</span>
+                    <span>Back to Home</span>
+                </a>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="error-code" aria-hidden="true">404</div>
+            <h1 class="error-title">Page Not Found</h1>
+            <p class="error-description">
+                Sorry, we couldn't find the page you're looking for. It might have been moved, deleted, or you entered the wrong URL.
+            </p>
+
+            <nav class="nav-grid" aria-label="Site navigation">
+                <a href="/" class="nav-card">
+                    <div class="nav-card-icon">🏠</div>
+                    <div class="nav-card-title">Home</div>
+                    <div class="nav-card-description">Return to our homepage</div>
+                </a>
+                <a href="/blog" class="nav-card">
+                    <div class="nav-card-icon">📝</div>
+                    <div class="nav-card-title">Blog</div>
+                    <div class="nav-card-description">Read our latest articles</div>
+                </a>
+                <a href="/watch" class="nav-card">
+                    <div class="nav-card-icon">🎥</div>
+                    <div class="nav-card-title">Watch</div>
+                    <div class="nav-card-description">Explore our video content</div>
+                </a>
+                <a href="/about" class="nav-card">
+                    <div class="nav-card-icon">ℹ️</div>
+                    <div class="nav-card-title">About</div>
+                    <div class="nav-card-description">Learn about our studio</div>
+                </a>
+            </nav>
+
+            <div class="action-buttons">
+                <button onclick="history.back()" class="btn btn-secondary" aria-label="Go back to previous page">
+                    <span>←</span>
+                    <span>Go Back</span>
+                </button>
+                <a href="/contact" class="btn btn-primary">
+                    <span>💬</span>
+                    <span>Contact Support</span>
+                </a>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <nav class="footer-links" aria-label="Footer navigation">
+                    <a href="/support">Support</a>
+                    <a href="/faq">FAQ</a>
+                    <a href="/contact">Contact</a>
+                    <a href="/privacy-policy">Privacy</a>
+                </nav>
+                <p>&copy; 2024 Flavor Studios. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Add some interactive magic
+        document.addEventListener('DOMContentLoaded', function() {
+            // Parallax effect for floating shapes
+            document.addEventListener('mousemove', function(e) {
+                const shapes = document.querySelectorAll('.shape');
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                
+                shapes.forEach((shape, index) => {
+                    const speed = (index + 1) * 0.5;
+                    const xPos = (x - 0.5) * speed * 50;
+                    const yPos = (y - 0.5) * speed * 50;
+                    shape.style.transform = `translate(${xPos}px, ${yPos}px)`;
+                });
+            });
+
+            // Add click ripple effect to cards
+            document.querySelectorAll('.nav-card, .btn').forEach(element => {
+                element.addEventListener('click', function(e) {
+                    const ripple = document.createElement('div');
+                    const rect = element.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255, 255, 255, 0.3);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+                    
+                    element.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+
+        // Add keyboard navigation support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                window.history.back();
+            }
+        });
+
+        // Add touch feedback for mobile
+        if ('ontouchstart' in window) {
+            document.querySelectorAll('.nav-card, .btn').forEach(element => {
+                element.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                });
+                element.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
+            });
+        }
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

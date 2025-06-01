@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduled Maintenance | Flavor Studios</title>
+    <meta name="description" content="Flavor Studios is currently undergoing scheduled maintenance. We're working to improve your experience and will be back soon.">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        .container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .maintenance-content {
+            max-width: 600px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .maintenance-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            background: #fef3c7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .gear-symbol {
+            font-size: 3rem;
+            color: #d97706;
+            animation: rotate 3s linear infinite;
+        }
+
+        .maintenance-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .maintenance-description {
+            font-size: 1.125rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        .status-card {
+            background: #fffbeb;
+            border: 1px solid #fed7aa;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-label {
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #fde68a;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #d97706;
+            border-radius: 4px;
+            width: 65%;
+            animation: pulse-width 2s ease-in-out infinite;
+        }
+
+        .eta-section {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .eta-label {
+            font-size: 0.875rem;
+            color: #0369a1;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .eta-time {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .eta-note {
+            font-size: 0.875rem;
+            color: #0369a1;
+        }
+
+        .updates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .update-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: left;
+        }
+
+        .update-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: #3b82f6;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .update-title {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .update-description {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .contact-section {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .contact-title {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+        }
+
+        .contact-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .contact-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 0.75rem;
+            color: #374151;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .contact-link:hover {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+            transform: translateY(-2px);
+        }
+
+        .footer-info {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 2rem;
+        }
+
+        .brand-name {
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        /* Animations */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-width {
+            0%, 100% { width: 65%; }
+            50% { width: 75%; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .maintenance-title {
+                font-size: 2rem;
+            }
+            
+            .maintenance-description {
+                font-size: 1rem;
+            }
+            
+            .updates-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .eta-time {
+                font-size: 1.5rem;
+            }
+            
+            .contact-links {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .contact-link {
+                width: 100%;
+                max-width: 200px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="maintenance-content">
+            <div class="maintenance-icon">
+                <div class="gear-symbol">⚙️</div>
+            </div>
+
+            <h1 class="maintenance-title">Scheduled Maintenance</h1>
+            <p class="maintenance-description">
+                We're currently performing scheduled maintenance to improve our services. 
+                Thank you for your patience while we enhance your experience.
+            </p>
+
+            <div class="status-card">
+                <div class="progress-section">
+                    <div class="progress-label">Maintenance Progress</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div style="color: #92400e; font-size: 0.875rem;">System updates in progress...</div>
+                </div>
+            </div>
+
+            <div class="eta-section">
+                <div class="eta-label">Estimated Completion Time</div>
+                <div class="eta-time" id="countdown">1h 45m</div>
+                <div class="eta-note">We'll be back online shortly</div>
+            </div>
+
+            <div class="updates-grid">
+                <div class="update-card">
+                    <div class="update-icon">🔧</div>
+                    <div class="update-title">System Optimization</div>
+                    <div class="update-description">Improving server performance and response times</div>
+                </div>
+                
+                <div class="update-card">
+                    <div class="update-icon">🛡️</div>
+                    <div class="update-title">Security Updates</div>
+                    <div class="update-description">Installing latest security patches and improvements</div>
+                </div>
+                
+                <div class="update-card">
+                    <div class="update-icon">📱</div>
+                    <div class="update-title">Mobile Experience</div>
+                    <div class="update-description">Enhancing mobile responsiveness and usability</div>
+                </div>
+                
+                <div class="update-card">
+                    <div class="update-icon">💾</div>
+                    <div class="update-title">Database Maintenance</div>
+                    <div class="update-description">Optimizing data storage and backup systems</div>
+                </div>
+            </div>
+
+            <div class="contact-section">
+                <div class="contact-title">Need Immediate Assistance?</div>
+                <div class="contact-links">
+                    <a href="mailto:support@flavorstudios.in" class="contact-link">
+                        📧 Email Support
+                    </a>
+                    <a href="https://twitter.com/flavor_studios" class="contact-link">
+                        🐦 Twitter Updates
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-info">
+                <span class="brand-name">Flavor Studios</span> • Scheduled Maintenance • Thank You for Your Patience
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Countdown Timer
+        let timeLeft = 6300; // 1 hour 45 minutes in seconds
+
+        function updateCountdown() {
+            const hours = Math.floor(timeLeft / 3600);
+            const minutes = Math.floor((timeLeft % 3600) / 60);
+            
+            let display = '';
+            if (hours > 0) {
+                display = `${hours}h ${minutes}m`;
+            } else if (minutes > 0) {
+                display = `${minutes}m`;
+            } else {
+                display = 'Completing...';
+            }
+            
+            document.getElementById('countdown').textContent = display;
+            
+            if (timeLeft > 0) {
+                timeLeft--;
+            } else {
+                document.getElementById('countdown').textContent = 'Complete!';
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            }
+        }
+
+        // Update countdown every minute
+        setInterval(updateCountdown, 60000);
+        updateCountdown();
+
+        // Auto-refresh every 30 minutes to check if maintenance is complete
+        setTimeout(function() {
+            window.location.reload();
+        }, 30 * 60 * 1000);
+    </script>
+</body>
+</html>

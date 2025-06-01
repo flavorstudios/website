@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Page not found - Flavor Studios">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Page Not Found - Flavor Studios</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #1a1a2e;
+            --text-secondary: #6b7280;
+            --shadow-soft: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-glow: 0 0 50px rgba(102, 126, 234, 0.3);
+            --primary-blue: #3b82f6;
+            --primary-blue-dark: #2563eb;
+            --primary-blue-light: #60a5fa;
+            --secondary-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-accent: #f0f9ff;
+            --border-light: #e2e8f0;
+            --border-primary: #d1d5db;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+            opacity: 0.1;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 120px;
+            height: 120px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 80px;
+            height: 80px;
+            top: 70%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        .shape:nth-child(4) {
+            width: 60px;
+            height: 60px;
+            top: 30%;
+            right: 30%;
+            animation-delay: 6s;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.1;
+            }
+            50% { 
+                transform: translateY(-30px) rotate(180deg);
+                opacity: 0.2;
+            }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .error-illustration {
+            width: 240px;
+            height: 240px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, var(--bg-accent), var(--bg-secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            color: var(--primary-blue);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            border: 3px solid rgba(59, 130, 246, 0.1);
+        }
+
+        .error-illustration::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            animation: shimmer 4s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .error-code {
+            font-size: clamp(3.5rem, 10vw, 5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            line-height: 1;
+            text-shadow: 0 4px 8px rgba(59, 130, 246, 0.1);
+        }
+
+        .error-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .error-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.7;
+        }
+
+        /* Primary CTA */
+        .primary-cta {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-dark));
+            color: white;
+            padding: 1.125rem 2.5rem;
+            border-radius: 1rem;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.125rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            margin-bottom: 2.5rem;
+            min-height: 52px;
+            box-shadow: var(--shadow-lg);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .primary-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .primary-cta:hover::before {
+            left: 100%;
+        }
+
+        .primary-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .primary-cta:active {
+            transform: translateY(-1px);
+        }
+
+        /* Secondary Actions */
+        .secondary-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .secondary-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.875rem 1.25rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 48px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+        }
+
+        .secondary-link:hover {
+            color: var(--primary-blue);
+            background: var(--bg-accent);
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Help Section */
+        .help-section {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-accent));
+            border: 1px solid var(--border-light);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .help-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .help-content {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .help-link {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .help-link:hover {
+            color: var(--primary-blue-dark);
+            text-decoration: underline;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .logo {
+                font-size: 1.25rem;
+            }
+
+            .error-illustration {
+                width: 180px;
+                height: 180px;
+                font-size: 4rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .error-description {
+                font-size: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .primary-cta {
+                width: 100%;
+                max-width: 320px;
+                justify-content: center;
+                font-size: 1rem;
+                padding: 1rem 2rem;
+            }
+
+            .secondary-actions {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .secondary-link {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
+            }
+
+            .help-section {
+                padding: 1.5rem;
+                margin-top: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .error-illustration {
+                width: 150px;
+                height: 150px;
+                font-size: 3rem;
+            }
+
+            .help-section {
+                padding: 1.25rem;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        .logo:focus,
+        .primary-cta:focus,
+        .secondary-link:focus,
+        .help-link:focus {
+            outline: 2px solid var(--primary-blue);
+            outline-offset: 2px;
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .error-illustration::before,
+            .shape {
+                animation: none;
+            }
+            
+            * {
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* High contrast mode */
+        @media (prefers-contrast: high) {
+            :root {
+                --text-primary: #000000;
+                --text-secondary: #333333;
+                --border-light: #666666;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <header class="header">
+        <a href="/" class="logo" aria-label="Flavor Studios Home">Flavor Studios</a>
+    </header>
+
+    <div class="container">
+        <main class="main-content">
+            <div class="error-illustration" aria-hidden="true">
+                <span>🎬</span>
+            </div>
+            
+            <div class="error-code" aria-hidden="true">404</div>
+            <h1 class="error-title">Scene Not Found</h1>
+            <p class="error-description">
+                Looks like this page took an unexpected plot twist! The content you're looking for might have been moved to a different scene or doesn't exist in our story.
+            </p>
+
+            <a href="/" class="primary-cta">
+                <span>🏠</span>
+                <span>Return to Main Stage</span>
+            </a>
+
+            <div class="secondary-actions">
+                <button onclick="history.back()" class="secondary-link" aria-label="Go back to previous page">
+                    <span>←</span>
+                    <span>Previous Scene</span>
+                </button>
+                <a href="/blog" class="secondary-link">
+                    <span>📖</span>
+                    <span>Read Stories</span>
+                </a>
+                <a href="/watch" class="secondary-link">
+                    <span>🎥</span>
+                    <span>Watch Content</span>
+                </a>
+            </div>
+
+            <div class="help-section">
+                <h2 class="help-title">
+                    <span>💡</span>
+                    Need Direction?
+                </h2>
+                <p class="help-content">
+                    If you believe this is an error in our script, please <a href="/contact" class="help-link">contact our production team</a> and we'll help you find the right scene.
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Enhanced interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Parallax effect for floating shapes
+            document.addEventListener('mousemove', function(e) {
+                const shapes = document.querySelectorAll('.shape');
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                
+                shapes.forEach((shape, index) => {
+                    const speed = (index + 1) * 0.3;
+                    const xPos = (x - 0.5) * speed * 30;
+                    const yPos = (y - 0.5) * speed * 30;
+                    shape.style.transform = `translate(${xPos}px, ${yPos}px)`;
+                });
+            });
+
+            // Add ripple effect to buttons
+            document.querySelectorAll('.primary-cta, .secondary-link').forEach(element => {
+                element.addEventListener('click', function(e) {
+                    const ripple = document.createElement('div');
+                    const rect = element.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255, 255, 255, 0.3);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                        z-index: 0;
+                    `;
+                    
+                    element.style.position = 'relative';
+                    element.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Add CSS for ripple animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                window.history.back();
+            }
+        });
+
+        // Touch feedback for mobile
+        if ('ontouchstart' in window) {
+            document.querySelectorAll('.primary-cta, .secondary-link').forEach(element => {
+                element.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.98)';
+                });
+                element.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
+            });
+        }
+    </script>
+</body>
+</html>

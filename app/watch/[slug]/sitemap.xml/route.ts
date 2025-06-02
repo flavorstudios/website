@@ -47,15 +47,16 @@ export async function GET(
                 }
               : undefined,
 
-            // Image support for thumbnail
-            images: videoData.thumbnailUrl
-              ? [
-                  {
-                    loc: videoData.thumbnailUrl,
-                    title: videoData.title,
-                  },
-                ]
-              : [],
+            // Tiny pro tip: robust thumbnail validation
+            images:
+              typeof videoData.thumbnailUrl === "string" && videoData.thumbnailUrl.trim()
+                ? [
+                    {
+                      loc: videoData.thumbnailUrl,
+                      title: videoData.title,
+                    },
+                  ]
+                : [],
           },
         ])
       : generateSitemapXML(baseUrl, [

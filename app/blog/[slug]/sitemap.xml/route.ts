@@ -39,19 +39,21 @@ export async function GET(
             news: blogData.isNews
               ? {
                   publicationName: "Flavor Studios Anime News",
-                  publicationLanguage: "en",
+                  publicationLanguage: blogData.language || "en",
                   title: blogData.title,
                   publicationDate: blogData.publishedAt || blogData.createdAt,
                 }
               : undefined,
 
-            // Image support
+            // Image support, with robust filtering
             images: Array.isArray(blogData.images)
-              ? blogData.images.map((img: any) => ({
-                  loc: img.url || img.loc,
-                  title: img.title,
-                  caption: img.caption,
-                }))
+              ? blogData.images
+                  .filter((img: any) => img && (img.url || img.loc))
+                  .map((img: any) => ({
+                    loc: img.url || img.loc,
+                    title: img.title,
+                    caption: img.caption,
+                  }))
               : [],
           },
         ])

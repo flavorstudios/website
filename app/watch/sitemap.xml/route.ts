@@ -20,6 +20,27 @@ export async function GET() {
           priority: "0.8",
           changefreq: "weekly",
           lastmod: video.updatedAt || video.publishedAt || video.createdAt,
+
+          // Video sitemap info for Google/Bing (adapt property names as needed!)
+          video: {
+            title: video.title,
+            description: video.description || video.title, // fallback
+            content_loc: video.youtubeUrl, // e.g. "https://www.youtube.com/watch?v=..."
+            thumbnail_loc: video.thumbnailUrl, // e.g. "https://img.youtube.com/vi/XXXXXX/hqdefault.jpg"
+            publication_date: video.publishedAt || video.createdAt,
+            duration: video.duration, // in seconds, optional
+            // Add more fields as needed!
+          },
+
+          // Also include images if you want!
+          images: video.thumbnailUrl
+            ? [
+                {
+                  loc: video.thumbnailUrl,
+                  title: video.title,
+                },
+              ]
+            : [],
         }))
     }
   } catch (error) {

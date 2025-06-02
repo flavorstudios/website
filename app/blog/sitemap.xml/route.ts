@@ -22,6 +22,25 @@ export async function GET() {
           priority: "0.8",
           changefreq: "weekly",
           lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
+
+          // Google News data (set isNews: true for news posts)
+          news: blog.isNews
+            ? {
+                publicationName: "Flavor Studios Anime News",
+                publicationLanguage: "en",
+                title: blog.title,
+                publicationDate: blog.publishedAt || blog.createdAt,
+              }
+            : undefined,
+
+          // Images array (auto-detect structure, adapt if needed)
+          images: Array.isArray(blog.images)
+            ? blog.images.map((img: any) => ({
+                loc: img.url || img.loc, // adapt if your data uses "url" or "loc"
+                title: img.title,
+                caption: img.caption,
+              }))
+            : [],
         }))
     }
   } catch (error) {

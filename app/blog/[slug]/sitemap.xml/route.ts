@@ -34,6 +34,25 @@ export async function GET(
             priority: "0.8",
             changefreq: "weekly",
             lastmod: blogData.updatedAt || blogData.publishedAt || blogData.createdAt,
+
+            // Google News support
+            news: blogData.isNews
+              ? {
+                  publicationName: "Flavor Studios Anime News",
+                  publicationLanguage: "en",
+                  title: blogData.title,
+                  publicationDate: blogData.publishedAt || blogData.createdAt,
+                }
+              : undefined,
+
+            // Image support
+            images: Array.isArray(blogData.images)
+              ? blogData.images.map((img: any) => ({
+                  loc: img.url || img.loc,
+                  title: img.title,
+                  caption: img.caption,
+                }))
+              : [],
           },
         ])
       : generateSitemapXML(baseUrl, [

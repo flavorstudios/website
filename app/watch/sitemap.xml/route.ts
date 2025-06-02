@@ -22,24 +22,24 @@ export async function GET() {
           lastmod: video.updatedAt || video.publishedAt || video.createdAt,
 
           // Video sitemap info for Google/Bing (adapt property names as needed!)
-          video: {
-            title: video.title,
-            description: video.description || video.title, // fallback
-            content_loc: video.youtubeUrl, // e.g. "https://www.youtube.com/watch?v=..."
-            thumbnail_loc: video.thumbnailUrl, // e.g. "https://img.youtube.com/vi/XXXXXX/hqdefault.jpg"
-            publication_date: video.publishedAt || video.createdAt,
-            duration: video.duration, // in seconds, optional
-            // Add more fields as needed!
-          },
+          video: video.youtubeUrl
+            ? {
+                title: video.title,
+                description: video.description || video.title,
+                content_loc: video.youtubeUrl,
+                thumbnail_loc: video.thumbnailUrl,
+                publication_date: video.publishedAt || video.createdAt,
+                duration: video.duration,
+                // You can add more fields here if your API supports them
+              }
+            : undefined,
 
-          // Also include images if you want!
-          images: video.thumbnailUrl
-            ? [
-                {
-                  loc: video.thumbnailUrl,
-                  title: video.title,
-                },
-              ]
+          // Tiny pro tip: robust thumbnail validation (only valid URLs included)
+          images: (typeof video.thumbnailUrl === "string" && video.thumbnailUrl.trim())
+            ? [{
+                loc: video.thumbnailUrl,
+                title: video.title,
+              }]
             : [],
         }))
     }

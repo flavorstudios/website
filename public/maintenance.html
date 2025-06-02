@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under Maintenance | Flavor Studios</title>
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <meta http-equiv="refresh" content="300">
+  <style>
+    :root {
+      --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--font-inter);
+      background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 900px;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+    }
+    
+    .floating-shapes {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .shape {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(45deg, rgba(245, 158, 11, 0.1), rgba(249, 115, 22, 0.1));
+      animation: float 8s ease-in-out infinite;
+    }
+    
+    .shape:nth-child(1) {
+      width: 100px;
+      height: 100px;
+      top: 15%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+    
+    .shape:nth-child(2) {
+      width: 150px;
+      height: 150px;
+      top: 10%;
+      right: 15%;
+      animation-delay: 3s;
+    }
+    
+    .shape:nth-child(3) {
+      width: 80px;
+      height: 80px;
+      bottom: 25%;
+      left: 20%;
+      animation-delay: 6s;
+    }
+    
+    .shape:nth-child(4) {
+      width: 120px;
+      height: 120px;
+      bottom: 15%;
+      right: 10%;
+      animation-delay: 2s;
+    }
+    
+    .logo-container {
+      margin-bottom: 2rem;
+    }
+    
+    .logo-container img {
+      max-width: 200px;
+      height: auto;
+      filter: brightness(1.2);
+    }
+    
+    .maintenance-container {
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    
+    .maintenance-text {
+      font-size: clamp(3rem, 12vw, 6rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #f59e0b, #f97316, #ea580c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 1rem;
+      text-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+      animation: glow 3s ease-in-out infinite alternate;
+    }
+    
+    .gear-icon {
+      display: inline-block;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    
+    .gear-icon svg {
+      width: clamp(80px, 15vw, 120px);
+      height: auto;
+      color: #f59e0b;
+      filter: drop-shadow(0 10px 8px rgb(245 158 11 / 0.3));
+      animation: spin 10s linear infinite;
+    }
+    
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      margin-bottom: 1rem;
+      color: #f8fafc;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+    
+    .subtitle {
+      font-size: clamp(1.1rem, 3vw, 1.4rem);
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+    
+    .progress-section {
+      margin-bottom: 3rem;
+    }
+    
+    .progress-container {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 9999px;
+      height: 12px;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto 1rem;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .progress-bar {
+      height: 100%;
+      width: 75%;
+      background: linear-gradient(90deg, #f59e0b, #f97316, #ea580c);
+      border-radius: 9999px;
+      animation: progress 4s ease-in-out infinite alternate;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+    }
+    
+    .countdown {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 1rem;
+    }
+    
+    .info-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    
+    .info-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      padding: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #f59e0b, #f97316, #ea580c);
+    }
+    
+    .info-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .info-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #f8fafc;
+      font-weight: 600;
+    }
+    
+    .info-card p {
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+    
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .social-link:hover {
+      background: rgba(245, 158, 11, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+    }
+    
+    .social-link svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .footer {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      margin-top: 2rem;
+    }
+    
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      50% {
+        transform: translateY(-30px) rotate(180deg);
+      }
+    }
+    
+    @keyframes glow {
+      0% {
+        text-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+      }
+      100% {
+        text-shadow: 0 4px 20px rgba(245, 158, 11, 0.6), 0 0 30px rgba(249, 115, 22, 0.3);
+      }
+    }
+    
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    @keyframes progress {
+      0% {
+        width: 15%;
+      }
+      100% {
+        width: 85%;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .social-links {
+        flex-wrap: wrap;
+      }
+      
+      .info-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="floating-shapes">
+      <div class="shape"></div>
+      <div class="shape"></div>
+      <div class="shape"></div>
+      <div class="shape"></div>
+    </div>
+    
+    <div class="logo-container">
+      <img src="/cover.png" alt="Flavor Studios Logo" onerror="this.src='/favicon.ico'; this.style.width='80px';">
+    </div>
+    
+    <div class="maintenance-container">
+      <div class="gear-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </div>
+      <div class="maintenance-text">MAINTENANCE</div>
+    </div>
+    
+    <h1>We're Upgrading Our Website</h1>
+    <p class="subtitle">Flavor Studios is currently undergoing scheduled maintenance. We're working hard to improve your experience and will be back shortly!</p>
+    
+    <div class="progress-section">
+      <div class="progress-container">
+        <div class="progress-bar"></div>
+      </div>
+      <div class="countdown">
+        Estimated completion: <span id="countdown">30:00</span>
+      </div>
+    </div>
+    
+    <div class="info-cards">
+      <div class="info-card">
+        <h3>🚀 What's New?</h3>
+        <p>We're adding exciting new features, improving performance, and enhancing security to give you the best possible experience.</p>
+      </div>
+      
+      <div class="info-card">
+        <h3>⏰ Expected Downtime</h3>
+        <p>This maintenance window is scheduled for approximately 30 minutes. We'll be back online as soon as possible!</p>
+      </div>
+      
+      <div class="info-card">
+        <h3>📱 Stay Connected</h3>
+        <p>Follow us on social media for real-time updates about our maintenance progress and new feature announcements.</p>
+      </div>
+    </div>
+    
+    <div class="social-links">
+      <a href="https://twitter.com/flavor_studios" class="social-link" target="_blank" rel="noopener noreferrer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+        </svg>
+      </a>
+      <a href="https://instagram.com/flavor_studios" class="social-link" target="_blank" rel="noopener noreferrer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+      </a>
+      <a href="mailto:support@flavorstudios.in" class="social-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+          <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+      </a>
+    </div>
+    
+    <div class="footer">
+      <p>© 2024 Flavor Studios • Under Maintenance</p>
+    </div>
+  </div>
+  
+  <script>
+    // Countdown timer
+    function startCountdown() {
+      let minutes = 30;
+      let seconds = 0;
+      
+      const interval = setInterval(function() {
+        if (seconds === 0) {
+          if (minutes === 0) {
+            clearInterval(interval);
+            window.location.reload();
+            return;
+          }
+          minutes--;
+          seconds = 59;
+        } else {
+          seconds--;
+        }
+        
+        document.getElementById('countdown').textContent = 
+          (minutes < 10 ? '0' + minutes : minutes) + ':' + 
+          (seconds < 10 ? '0' + seconds : seconds);
+      }, 1000);
+    }
+    
+    // Start the countdown when the page loads
+    window.onload = startCountdown;
+  </script>
+</body>
+</html>

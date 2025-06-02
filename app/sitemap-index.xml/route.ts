@@ -1,8 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { categoryStore } from "@/lib/category-store"
 
+const FALLBACK_BASE_URL = "https://flavorstudios.in"
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
+  // Use .in and always strip trailing slash for cleanliness
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || FALLBACK_BASE_URL).replace(/\/$/, "")
 
   try {
     // Get all categories to create category-specific sitemaps
@@ -16,7 +19,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     ]
 
     // Add category-specific sitemaps
-    categories.forEach((category) => {
+    categories.forEach((category: any) => {
       const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-")
       sitemaps.push({
         url: `${baseUrl}/category/${slug}/sitemap.xml`,
@@ -29,12 +32,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemaps
   .map(
-    (sitemap) => `
-  <sitemap>
+    (sitemap) => `  <sitemap>
     <loc>${sitemap.url}</loc>
     <lastmod>${sitemap.lastModified.toISOString()}</lastmod>
   </sitemap>
-`,
+`
   )
   .join("")}
 </sitemapindex>`

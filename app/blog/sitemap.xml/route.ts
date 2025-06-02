@@ -4,10 +4,8 @@ import { generateSitemapXML } from "@/lib/sitemap-utils"
 const FALLBACK_BASE_URL = "https://flavorstudios.in"
 
 export async function GET() {
-  // Always use .in and strip trailing slash
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || FALLBACK_BASE_URL).replace(/\/$/, "")
 
-  // Fetch dynamic blogs only
   let blogUrls: any[] = []
   try {
     const res = await fetch(`${baseUrl}/api/admin/blogs`, {
@@ -23,23 +21,23 @@ export async function GET() {
           changefreq: "weekly",
           lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
 
-          // Google News data (set isNews: true for news posts)
           news: blog.isNews
             ? {
                 publicationName: "Flavor Studios Anime News",
-                publicationLanguage: "en",
+                publicationLanguage: blog.language || "en",
                 title: blog.title,
                 publicationDate: blog.publishedAt || blog.createdAt,
               }
             : undefined,
 
-          // Images array (auto-detect structure, adapt if needed)
           images: Array.isArray(blog.images)
-            ? blog.images.map((img: any) => ({
-                loc: img.url || img.loc, // adapt if your data uses "url" or "loc"
-                title: img.title,
-                caption: img.caption,
-              }))
+            ? blog.images
+                .filter((img: any) => img && (img.url || img.loc))
+                .map((img: any) => ({
+                  loc: img.url || img.loc,
+                  title: img.title,
+                  caption: img.caption,
+                }))
             : [],
         }))
     }
@@ -47,7 +45,6 @@ export async function GET() {
     console.error("Error generating blog sitemap:", error)
   }
 
-  // Fallback: minimal XML if nothing found
   const xml =
     blogUrls.length > 0
       ? generateSitemapXML(baseUrl, blogUrls)

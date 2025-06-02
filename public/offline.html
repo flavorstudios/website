@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>You're Offline | Flavor Studios</title>
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <style>
+    :root {
+      --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: var(--font-inter);
+      background: linear-gradient(135deg, #f8fafc, #dbeafe, #ede9fe);
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    
+    .container {
+      max-width: 800px;
+      text-align: center;
+      padding: 2rem;
+    }
+    
+    .icon-container {
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    
+    .icon-container svg {
+      width: clamp(100px, 20vw, 150px);
+      height: auto;
+      color: #6366f1;
+      filter: drop-shadow(0 10px 8px rgb(99 102 241 / 0.2));
+    }
+    
+    .pulse {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: clamp(120px, 24vw, 180px);
+      height: clamp(120px, 24vw, 180px);
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.1);
+      animation: pulse 2s infinite;
+    }
+    
+    h1 {
+      font-size: clamp(1.75rem, 5vw, 3rem);
+      margin-bottom: 1rem;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    
+    p {
+      font-size: clamp(1rem, 3vw, 1.25rem);
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      color: #475569;
+      line-height: 1.6;
+    }
+    
+    .info-box {
+      background-color: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    .info-box h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #0f172a;
+    }
+    
+    .info-box ul {
+      text-align: left;
+      list-style-position: inside;
+      margin-bottom: 1rem;
+    }
+    
+    .info-box li {
+      margin-bottom: 0.5rem;
+      color: #475569;
+    }
+    
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+    
+    .button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .button svg {
+      width: 16px;
+      height: 16px;
+      margin-right: 0.5rem;
+    }
+    
+    .button-primary {
+      background: linear-gradient(to right, #3b82f6, #6366f1);
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.5);
+    }
+    
+    .button-primary:hover {
+      box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4), 0 4px 6px -2px rgba(99, 102, 241, 0.1);
+    }
+    
+    .footer {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 2rem;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: translate(-50%, -50%) scale(0.95);
+        opacity: 0.7;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.05);
+        opacity: 0.3;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(0.95);
+        opacity: 0.7;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .buttons {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon-container">
+      <div class="pulse"></div>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414" />
+      </svg>
+    </div>
+    
+    <h1>You're Currently Offline</h1>
+    <p>It looks like you've lost your internet connection. Some features may be limited until you're back online.</p>
+    
+    <div class="info-box">
+      <h2>What you can do:</h2>
+      <ul>
+        <li>Check your internet connection</li>
+        <li>Try connecting to a different network</li>
+        <li>Some previously visited pages may still work offline</li>
+        <li>Try refreshing the page once you're back online</li>
+      </ul>
+      
+      <div class="buttons">
+        <button onclick="window.location.reload()" class="button button-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh Page
+        </button>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>Flavor Studios • Offline Mode</p>
+    </div>
+  </div>
+</body>
+</html>

@@ -2,9 +2,12 @@ import { NextResponse } from "next/server"
 import { blogStore, videoStore } from "@/lib/content-store"
 import { categoryStore } from "@/lib/category-store"
 
+const FALLBACK_BASE_URL = "https://flavorstudios.in"
+
 export async function GET() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+    // Always use .in for SEO integrity!
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") || FALLBACK_BASE_URL
 
     // Get dynamic content with error handling
     const [blogs, videos, categories] = await Promise.all([
@@ -78,7 +81,7 @@ ${allPages
     <lastmod>${page.lastmod}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`,
+  </url>`
   )
   .join("\n")}
 </urlset>`
@@ -92,8 +95,8 @@ ${allPages
   } catch (error) {
     console.error("Error generating sitemap:", error)
 
-    // Fallback sitemap with essential pages
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+    // Fallback sitemap with essential pages, always .in domain
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") || FALLBACK_BASE_URL
     const fallbackSitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>

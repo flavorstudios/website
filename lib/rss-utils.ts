@@ -39,8 +39,19 @@ export function stripHtml(html: string): string {
 }
 
 export function truncateDescription(text: string, maxLength = 200): string {
+  if (!text) return ""
   if (text.length <= maxLength) return text
   return text.substring(0, maxLength).trim() + "..."
+}
+
+// XML attribute escape for enclosure URLs, etc.
+function escapeAttr(unsafe: string) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
 }
 
 export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
@@ -53,10 +64,11 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
       <pubDate>${item.pubDate}</pubDate>
       ${item.category ? `<category><![CDATA[${item.category}]]></category>` : ""}
       ${item.author ? `<author><![CDATA[${item.author}]]></author>` : ""}
+      ${item.author ? `<dc:creator><![CDATA[${item.author}]]></dc:creator>` : ""}
       <guid isPermaLink="true">${item.guid || item.link}</guid>
       ${
         item.enclosure
-          ? `<enclosure url="${item.enclosure.url}" type="${item.enclosure.type}" length="${item.enclosure.length}"/>`
+          ? `<enclosure url="${escapeAttr(item.enclosure.url)}" type="${item.enclosure.type}" length="${item.enclosure.length}"/>`
           : ""
       }
     </item>`,
@@ -64,7 +76,10 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
     .join("\n")
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+>
   <channel>
     <title><![CDATA[${channel.title}]]></title>
     <description><![CDATA[${channel.description}]]></description>
@@ -93,7 +108,8 @@ ${xmlItems}
 export async function generateRssFeed(): Promise<string> {
   try {
     const { blogStore, videoStore } = await import("./content-store")
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+    // ALWAYS .in for SEO integrity!
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
 
     // Fetch published content
     const [blogPosts, videos] = await Promise.all([
@@ -104,10 +120,10 @@ export async function generateRssFeed(): Promise<string> {
     // Convert blog posts to RSS items
     const blogItems: RSSItem[] = blogPosts.map((post: any) => ({
       title: post.title,
-      description: truncateDescription(stripHtml(post.excerpt || post.content)),
+      description: truncateDescription(stripHtml(post.excerpt || post.content || "")),
       link: `${baseUrl}/blog/${post.slug}`,
       pubDate: formatRSSDate(post.publishedAt),
-      category: post.category,
+      category: post.category || "",
       author: post.author || "Flavor Studios",
       guid: `${baseUrl}/blog/${post.slug}`,
     }))
@@ -115,13 +131,13 @@ export async function generateRssFeed(): Promise<string> {
     // Convert videos to RSS items
     const videoItems: RSSItem[] = videos.map((video: any) => ({
       title: video.title,
-      description: truncateDescription(stripHtml(video.description)),
+      description: truncateDescription(stripHtml(video.description || "")),
       link: `${baseUrl}/watch/${video.slug || video.id}`,
       pubDate: formatRSSDate(video.publishedAt),
-      category: video.category,
+      category: video.category || "",
       author: "Flavor Studios",
       guid: `${baseUrl}/watch/${video.slug || video.id}`,
-      enclosure: video.thumbnail
+      enclosure: typeof video.thumbnail === "string" && video.thumbnail.trim()
         ? {
             url: video.thumbnail,
             type: "image/jpeg",
@@ -163,7 +179,7 @@ export async function generateRssFeed(): Promise<string> {
     console.error("Error generating RSS feed:", error)
 
     // Return minimal RSS feed on error
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
     return generateRSSXML(
       {
         title: "Flavor Studios",

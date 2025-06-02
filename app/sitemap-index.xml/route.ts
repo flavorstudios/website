@@ -3,22 +3,21 @@ import { categoryStore } from "@/lib/category-store"
 
 const FALLBACK_BASE_URL = "https://flavorstudios.in"
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
-  // Use .in and always strip trailing slash for cleanliness
+export async function GET(_request: NextRequest): Promise<NextResponse> {
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || FALLBACK_BASE_URL).replace(/\/$/, "")
 
   try {
-    // Get all categories to create category-specific sitemaps
+    // 1. Get all categories for category-specific sitemaps
     const categories = await categoryStore.getAll()
 
-    // Define the sitemaps
+    // 2. List all section sitemaps here!
     const sitemaps = [
       { url: `${baseUrl}/sitemap.xml`, lastModified: new Date() },
       { url: `${baseUrl}/blog/sitemap.xml`, lastModified: new Date() },
       { url: `${baseUrl}/watch/sitemap.xml`, lastModified: new Date() },
     ]
 
-    // Add category-specific sitemaps
+    // 3. Add a sitemap for every category (dynamic)
     categories.forEach((category: any) => {
       const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-")
       sitemaps.push({
@@ -27,7 +26,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       })
     })
 
-    // Generate XML
+    // 4. Generate sitemap index XML
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemaps
@@ -35,10 +34,9 @@ ${sitemaps
     (sitemap) => `  <sitemap>
     <loc>${sitemap.url}</loc>
     <lastmod>${sitemap.lastModified.toISOString()}</lastmod>
-  </sitemap>
-`
+  </sitemap>`
   )
-  .join("")}
+  .join("\n")}
 </sitemapindex>`
 
     return new NextResponse(xml, {
@@ -50,7 +48,7 @@ ${sitemaps
   } catch (error) {
     console.error("Error generating sitemap index:", error)
 
-    // Return a basic sitemap index if there's an error
+    // Fallback: minimal valid index
     const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>

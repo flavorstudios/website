@@ -3,16 +3,28 @@ export interface SitemapUrl {
   priority: string
   changefreq: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never"
   lastmod?: string
+
+  // For Google News
+  news?: {
+    publicationName: string
+    publicationLanguage: string // "en" for English, "hi" for Hindi, etc.
+    title: string
+    publicationDate: string // ISO date string
+  }
+
+  // For Images
+  images?: { loc: string; title?: string; caption?: string }[]
 }
 
 export function generateSitemapXML(baseUrl: string, urls: SitemapUrl[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml"
-        xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
-        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml"
+  xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+  xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 ${urls
   .map(
     (page) => `  <url>
@@ -20,10 +32,41 @@ ${urls
     <lastmod>${page.lastmod ? new Date(page.lastmod).toISOString() : new Date().toISOString()}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`,
+${page.news
+  ? `    <news:news>
+      <news:publication>
+        <news:name>${escapeXml(page.news.publicationName)}</news:name>
+        <news:language>${escapeXml(page.news.publicationLanguage)}</news:language>
+      </news:publication>
+      <news:publication_date>${new Date(page.news.publicationDate).toISOString()}</news:publication_date>
+      <news:title>${escapeXml(page.news.title)}</news:title>
+    </news:news>`
+  : ""}
+${page.images?.length
+  ? page.images
+      .map(
+        (img) => `    <image:image>
+      <image:loc>${escapeXml(img.loc)}</image:loc>
+      ${img.title ? `<image:title>${escapeXml(img.title)}</image:title>` : ""}
+      ${img.caption ? `<image:caption>${escapeXml(img.caption)}</image:caption>` : ""}
+    </image:image>`
+      )
+      .join("\n")
+  : ""}
+  </url>`
   )
   .join("\n")}
 </urlset>`
+}
+
+// Helper to escape XML special chars
+function escapeXml(unsafe: string) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
 }
 
 export function getStaticPages(): SitemapUrl[] {
@@ -66,6 +109,23 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
             priority: "0.7",
             changefreq: "weekly",
             lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
+            // Add images array if present (adapt as needed!)
+            images: Array.isArray(blog.images)
+              ? blog.images.map((img: any) => ({
+                  loc: img.url || img.loc, // adapt property name to your data!
+                  title: img.title,
+                  caption: img.caption,
+                }))
+              : [],
+            // Add Google News info for news posts
+            news: blog.isNews
+              ? {
+                  publicationName: "Flavor Studios Anime News",
+                  publicationLanguage: "en",
+                  title: blog.title,
+                  publicationDate: blog.publishedAt || blog.createdAt,
+                }
+              : undefined,
           })
         }
       })
@@ -91,6 +151,13 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
             priority: "0.7",
             changefreq: "weekly",
             lastmod: video.updatedAt || video.publishedAt || video.createdAt,
+            images: Array.isArray(video.images)
+              ? video.images.map((img: any) => ({
+                  loc: img.url || img.loc,
+                  title: img.title,
+                  caption: img.caption,
+                }))
+              : [],
           })
         }
       })

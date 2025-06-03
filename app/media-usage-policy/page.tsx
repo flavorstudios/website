@@ -1,3 +1,35 @@
+import { getMetadata } from "@/lib/seo-utils"
+
+export const metadata = getMetadata({
+  title: "Media Usage Policy | Flavor Studios",
+  description: "Understand the rules and permissions for using Flavor Studios’ media. Learn what’s allowed, what’s prohibited, and how to request commercial rights.",
+  path: "/media-usage-policy",
+  openGraph: {
+    images: ["https://flavorstudios.in/og-image.png"],
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    image: "https://flavorstudios.in/og-image.png",
+  },
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Media Usage Policy",
+    "description": "Official Media Usage Policy for Flavor Studios. Details on permitted and prohibited uses, attribution, permission requests, and ownership of original content.",
+    "url": "https://flavorstudios.in/media-usage-policy",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Flavor Studios",
+      "url": "https://flavorstudios.in"
+    },
+    "datePublished": "2025-05-09",
+    "dateModified": "2025-05-09"
+  },
+  robots: "index, follow"
+});
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

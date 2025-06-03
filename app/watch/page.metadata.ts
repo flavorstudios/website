@@ -28,4 +28,4 @@ export const metadata = getMetadata({
     "dateModified": "2025-05-09"
   },
   robots: "index, follow"
-})
+});

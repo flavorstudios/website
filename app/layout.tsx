@@ -6,6 +6,7 @@ import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import Script from "next/script"
+import { usePathname } from "next/navigation"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,7 +64,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "Flavor Studios",
-    appId: "1404440770881914", // ✅ Facebook App ID
+    appId: "1404440770881914",
     images: [
       {
         url: "https://flavorstudios.in/cover.png",
@@ -104,34 +105,41 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
+  const isAdmin = pathname.startsWith("/admin") // Block scripts for /admin
+
   return (
     <html lang="en" className={inter.variable}>
       <head>
         {/* Mastodon Verification */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
-        {/* Google Tag Manager (in head) */}
-        <Script
-          id="gtm-script"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-WMTGR7NM');`,
-          }}
-        />
+        {/* Google Tag Manager (only on non-admin routes) */}
+        {!isAdmin && (
+          <Script
+            id="gtm-script"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-WMTGR7NM');`,
+            }}
+          />
+        )}
       </head>
       <body className={`${inter.className} antialiased`}>
-        {/* Google Tag Manager (noscript) */}
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          />
-        </noscript>
+        {/* Google Tag Manager (noscript, only on non-admin routes) */}
+        {!isAdmin && (
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        )}
         <Header />
         <main>{children}</main>
         <Footer />

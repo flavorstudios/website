@@ -1,3 +1,6 @@
+import type { Category } from "./category-store" // If you want TS type safety (optional)
+let initialized = false
+
 export interface CategoryData {
   name: string
   slug: string
@@ -39,7 +42,29 @@ export function formatCategoryName(slug: string): string {
     .join(" ")
 }
 
+// -- CATEGORY INITIALIZATION PATCH --
+// This guarantees /content-data/categories.json always exists on the server (build/cold start)
+async function ensureCategoryDataInitialized() {
+  // Only do this on server (not browser/Edge), and only once
+  if (
+    typeof window === "undefined" &&
+    !initialized
+  ) {
+    try {
+      const { initializeDefaultCategories } = await import("./category-store")
+      await initializeDefaultCategories()
+      initialized = true
+    } catch (error) {
+      // Don’t fail the request, just warn
+      console.warn("Failed to initialize categories.json:", error)
+    }
+  }
+}
+
+// -------- MAIN EXPORT --------
 export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResult> {
+  await ensureCategoryDataInitialized()
+
   let blogCategories: CategoryData[] = []
   let videoCategories: CategoryData[] = []
 
@@ -62,7 +87,6 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
 
         if (posts.length > 0) {
           const categoryMap = new Map<string, number>()
-
           posts
             .filter((post: any) => post.status === "published")
             .forEach((post: any) => {
@@ -78,7 +102,6 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
               slug,
               count,
             }))
-
             blogCategories.sort((a, b) => {
               if (b.count !== a.count) return b.count - a.count
               return a.name.localeCompare(b.name)
@@ -97,7 +120,6 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
 
         if (videos.length > 0) {
           const categoryMap = new Map<string, number>()
-
           videos
             .filter((video: any) => video.status === "published")
             .forEach((video: any) => {
@@ -113,7 +135,6 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
               slug,
               count,
             }))
-
             videoCategories.sort((a, b) => {
               if (b.count !== a.count) return b.count - a.count
               return a.name.localeCompare(b.name)

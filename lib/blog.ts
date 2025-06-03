@@ -4,17 +4,16 @@ import type { BlogPost, Category, Video } from "./data"
 
 const BASE_URL =
   typeof window === "undefined"
-    ? process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-    : "" // browser fetch can use relative URLs
+    ? process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+    : ""
 
-// Utility: Gets full API URL for SSR/SSG or client-side
 function getApiUrl(path: string) {
   return typeof window === "undefined"
     ? `${BASE_URL}${path}`
     : path
 }
 
-// Blog Posts
+// --- Blog Store ---
 export const blogStore = {
   async getAllPosts(): Promise<BlogPost[]> {
     try {
@@ -63,7 +62,44 @@ export const blogStore = {
   },
 }
 
-// Categories
+// --- Video Store ---
+export const videoStore = {
+  async getAllVideos(): Promise<Video[]> {
+    try {
+      const response = await fetch(getApiUrl("/api/admin/videos"), {
+        cache: "no-store",
+      })
+      if (response.ok) {
+        const videos = await response.json()
+        // Some APIs return { videos: [...] }, some just return [...]
+        return Array.isArray(videos) ? videos : videos.videos || []
+      }
+    } catch (error) {
+      console.warn("Failed to fetch videos:", error)
+    }
+    return []
+  },
+
+  async getVideoBySlug(slug: string): Promise<Video | null> {
+    try {
+      const videos = await this.getAllVideos()
+      return (
+        videos.find(
+          (video: any) =>
+            (video.slug === slug || video.id === slug) &&
+            (video.status ? video.status === "published" : true)
+        ) || null
+      )
+    } catch (error) {
+      console.warn("Failed to fetch video:", error)
+      return null
+    }
+  },
+}
+
+// --- Categories ---
+import { defaultCategories } from "./data"
+
 export async function getDynamicCategories(): Promise<Category[]> {
   try {
     const response = await fetch(getApiUrl("/api/admin/categories"), {
@@ -78,22 +114,8 @@ export async function getDynamicCategories(): Promise<Category[]> {
   } catch (error) {
     console.warn("Failed to fetch dynamic categories:", error)
   }
-  // Fallback to default categories
-  return (await import("./data")).defaultCategories
+  return defaultCategories
 }
 
-// Videos
-export async function getVideos(): Promise<Video[]> {
-  try {
-    const response = await fetch(getApiUrl("/api/admin/videos"), {
-      cache: "no-store",
-    })
-    if (response.ok) {
-      const videos = await response.json()
-      return videos || []
-    }
-  } catch (error) {
-    console.warn("Failed to fetch videos:", error)
-  }
-  return []
-}
+// --- For legacy compatibility (if still used elsewhere) ---
+export const getVideos = videoStore.getAllVideos

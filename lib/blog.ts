@@ -1,6 +1,7 @@
 // /lib/blog.ts
 
-import type { BlogPost, Category, Video } from "./data"
+import type { BlogPost, Category } from "./data"
+import { defaultCategories } from "./data"
 
 const BASE_URL =
   typeof window === "undefined"
@@ -62,44 +63,7 @@ export const blogStore = {
   },
 }
 
-// --- Video Store ---
-export const videoStore = {
-  async getAllVideos(): Promise<Video[]> {
-    try {
-      const response = await fetch(getApiUrl("/api/admin/videos"), {
-        cache: "no-store",
-      })
-      if (response.ok) {
-        const videos = await response.json()
-        // Some APIs return { videos: [...] }, some just return [...]
-        return Array.isArray(videos) ? videos : videos.videos || []
-      }
-    } catch (error) {
-      console.warn("Failed to fetch videos:", error)
-    }
-    return []
-  },
-
-  async getVideoBySlug(slug: string): Promise<Video | null> {
-    try {
-      const videos = await this.getAllVideos()
-      return (
-        videos.find(
-          (video: any) =>
-            (video.slug === slug || video.id === slug) &&
-            (video.status ? video.status === "published" : true)
-        ) || null
-      )
-    } catch (error) {
-      console.warn("Failed to fetch video:", error)
-      return null
-    }
-  },
-}
-
 // --- Categories ---
-import { defaultCategories } from "./data"
-
 export async function getDynamicCategories(): Promise<Category[]> {
   try {
     const response = await fetch(getApiUrl("/api/admin/categories"), {
@@ -116,6 +80,3 @@ export async function getDynamicCategories(): Promise<Category[]> {
   }
   return defaultCategories
 }
-
-// --- For legacy compatibility (if still used elsewhere) ---
-export const getVideos = videoStore.getAllVideos

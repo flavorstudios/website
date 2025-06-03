@@ -1,3 +1,35 @@
+import { getMetadata } from "@/lib/seo-utils"
+
+export const metadata = getMetadata({
+  title: "Support | Flavor Studios",
+  description: "Discover how you can support Flavor Studios and help bring more creative, independent anime to life. Buy Me a Coffee, join our community, or spread the word!",
+  path: "/support",
+  openGraph: {
+    images: ["https://flavorstudios.in/og-image.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    image: "https://flavorstudios.in/og-image.png",
+  },
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Support",
+    "description": "Learn about the ways you can support Flavor Studios—help us keep creating high-quality, independent anime and animation for everyone.",
+    "url": "https://flavorstudios.in/support",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Flavor Studios",
+      "url": "https://flavorstudios.in"
+    },
+    "datePublished": "2025-05-09",
+    "dateModified": "2025-05-09"
+  },
+  robots: "index, follow"
+});
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

@@ -11,12 +11,12 @@ import { NewsletterSignup } from "@/components/newsletter-signup"
 // --- FETCH BLOG DATA AND CATEGORIES ---
 async function getBlogData() {
   try {
-    // Don't destructure categories as { blogCategories }—just fetch array
-    const [posts, categories] = await Promise.all([
+    // SAFELY destructure blogCategories for dynamic usage
+    const [posts, { blogCategories }] = await Promise.all([
       blogStore.getPublished(),
       getDynamicCategories(),
     ])
-    return { posts, categories }
+    return { posts, categories: blogCategories }
   } catch (error) {
     console.error("Failed to fetch blog data:", error)
     return { posts: [], categories: [] }
@@ -34,17 +34,20 @@ export default async function BlogPage({
   const currentPage = Number.parseInt(searchParams.page || "1")
   const postsPerPage = 9
 
-  // --- Standardize category slugs and counts ---
+  // --- Standardize slug generator to match server-side dynamic categories ---
   const makeSlug = (str: string) =>
     str?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
 
-  // Add .count to each category based on blog posts
+  // Add .count to each category based on blog posts, fallback if missing
   const categoriesWithCounts = categories.map(cat => ({
     ...cat,
-    count: posts.filter(
-      post =>
-        (post.categorySlug || makeSlug(post.category)) === cat.slug
-    ).length,
+    count:
+      typeof cat.count === "number"
+        ? cat.count
+        : posts.filter(
+            post =>
+              (post.categorySlug || makeSlug(post.category)) === cat.slug
+          ).length,
   }))
 
   // Filter posts by selected category slug

@@ -30,4 +30,4 @@ export const metadata = getMetadata({
   alternates: {
     canonical: "https://flavorstudios.in/play",
   },
-})
+});

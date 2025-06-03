@@ -1,15 +1,30 @@
 "use client"
 import { useEffect } from "react"
 
-export function JsonLdScript({ jsonLd }: { jsonLd: object }) {
+type JsonLdScriptProps = {
+  jsonLd: object | null
+}
+
+/**
+ * Injects a <script type="application/ld+json"> tag into <head>
+ * for Google/SEO structured data.
+ */
+export function JsonLdScript({ jsonLd }: JsonLdScriptProps) {
   useEffect(() => {
+    if (!jsonLd) return
+
     const script = document.createElement("script")
     script.type = "application/ld+json"
     script.innerHTML = JSON.stringify(jsonLd)
+    script.setAttribute("data-injected", "jsonld") // for easy debugging
+
     document.head.appendChild(script)
     return () => {
-      document.head.removeChild(script)
+      if (document.head.contains(script)) {
+        document.head.removeChild(script)
+      }
     }
   }, [jsonLd])
-  return null // This component only injects the script
+
+  return null // Component renders nothing in DOM
 }

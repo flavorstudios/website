@@ -11,12 +11,16 @@ import { NewsletterSignup } from "@/components/newsletter-signup"
 // --- FETCH BLOG DATA AND CATEGORIES ---
 async function getBlogData() {
   try {
-    // SAFELY destructure blogCategories for dynamic usage
-    const [posts, { blogCategories }] = await Promise.all([
+    // ALWAYS extract blogCategories for safety
+    const [posts, dynamicCategories] = await Promise.all([
       blogStore.getPublished(),
       getDynamicCategories(),
     ])
-    return { posts, categories: blogCategories }
+    // Fallback to [] if for some reason .blogCategories is missing
+    const categories = Array.isArray(dynamicCategories?.blogCategories)
+      ? dynamicCategories.blogCategories
+      : []
+    return { posts, categories }
   } catch (error) {
     console.error("Failed to fetch blog data:", error)
     return { posts: [], categories: [] }
@@ -34,11 +38,11 @@ export default async function BlogPage({
   const currentPage = Number.parseInt(searchParams.page || "1")
   const postsPerPage = 9
 
-  // --- Standardize slug generator to match server-side dynamic categories ---
+  // Standardize category slugs to match backend/client logic
   const makeSlug = (str: string) =>
     str?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
 
-  // Add .count to each category based on blog posts, fallback if missing
+  // Add .count to each category based on blog posts (guaranteed accuracy even if count missing)
   const categoriesWithCounts = categories.map(cat => ({
     ...cat,
     count:
@@ -68,7 +72,7 @@ export default async function BlogPage({
   const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3)
   const regularPosts = paginatedPosts.filter((post: any) => !post.featured)
 
-  // --- Dynamic stats cards ---
+  // Stats
   const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0)
   const avgReadTime =
     posts.length > 0

@@ -1,11 +1,11 @@
-import { blogStore } from "@/lib/blogStore" // or your correct path
+import { blogStore } from "@/lib/blog" // Correct path—no 'blogStore' filename!
 
 export async function generateMetadata({ params }) {
-  const post = await blogStore.getPostBySlug(params.slug)
+  const post = await blogStore.getPostBySlug(params.slug);
 
   // Fallback for missing post
   if (!post) {
-    const fallbackUrl = `https://flavorstudios.in/blog/${params.slug}`
+    const fallbackUrl = `https://flavorstudios.in/blog/${params.slug}`;
     return {
       title: "Post Not Found – Flavor Studios",
       description: "This blog post could not be found.",
@@ -36,15 +36,15 @@ export async function generateMetadata({ params }) {
   }
 
   // Gather post data
-  const canonicalUrl = `https://flavorstudios.in/blog/${post.slug}`
-  const ogImage = post.imageUrl || "https://flavorstudios.in/cover.jpg"
-  const seoTitle = post.title
-  const seoDescription = post.excerpt || "Discover powerful stories and animation at Flavor Studios."
-  const publishedTime = post.publishedAt || new Date().toISOString()
-  const updatedTime = post.updatedAt || publishedTime
-  const tags = post.tags || []
-  const category = post.category || "Blog"
-  const robots = post.draft ? "noindex, nofollow" : "index, follow"
+  const canonicalUrl = `https://flavorstudios.in/blog/${post.slug}`;
+  const ogImage = post.imageUrl || "https://flavorstudios.in/cover.jpg";
+  const seoTitle = post.title;
+  const seoDescription = post.excerpt || "Discover powerful stories and animation at Flavor Studios.";
+  const publishedTime = post.publishedAt || new Date().toISOString();
+  const updatedTime = post.updatedAt || publishedTime;
+  const tags = post.tags || [];
+  const category = post.category || "Blog";
+  const robots = post.draft ? "noindex, nofollow" : "index, follow";
 
   // JSON-LD Structured Data for Article
   const jsonLd = {

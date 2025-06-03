@@ -8,6 +8,10 @@ export default function AdminLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <title>Flavor Studios Admin Dashboard</title>
+        <link rel="icon" href="/favicon.ico" />
+      </head>
       <body className="antialiased">{children}</body>
     </html>
   )

@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-
+import Head from "next/head"
 import { useState, useEffect } from "react"
 import { AdminSidebar } from "./admin-sidebar"
 import { AdminHeader } from "./admin-header"
@@ -55,22 +55,28 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <AdminSidebar
-        activeSection={activeSection}
-        setActiveSection={setActiveSection}
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-      />
+    <>
+      <Head>
+        <title>Flavor Studios Admin Dashboard</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <div className="min-h-screen bg-gray-50 flex">
+        <AdminSidebar
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+        />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <AdminHeader onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <div className="flex-1 flex flex-col min-w-0">
+          <AdminHeader onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-        <main className="flex-1 p-4 sm:p-6 overflow-auto">
-          <div className="max-w-7xl mx-auto">{children}</div>
-        </main>
+          <main className="flex-1 p-4 sm:p-6 overflow-auto">
+            <div className="max-w-7xl mx-auto">{children}</div>
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

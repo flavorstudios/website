@@ -1,3 +1,35 @@
+import { getMetadata } from "@/lib/seo-utils"
+
+export const metadata = getMetadata({
+  title: "Disclaimer | Flavor Studios",
+  description: "Read the official Disclaimer for Flavor Studios. Understand our limitations, third-party content usage, risk factors, automated moderation, and your responsibilities as a user.",
+  path: "/disclaimer",
+  openGraph: {
+    images: ["https://flavorstudios.in/og-image.png"],
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    image: "https://flavorstudios.in/og-image.png",
+  },
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Disclaimer",
+    "description": "Flavor Studios’ Disclaimer outlines our liability limitations, copyright policies, user responsibilities, and how we handle third-party and user-generated content.",
+    "url": "https://flavorstudios.in/disclaimer",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Flavor Studios",
+      "url": "https://flavorstudios.in"
+    },
+    "datePublished": "2025-05-09",
+    "dateModified": "2025-05-09"
+  },
+  robots: "index, follow"
+});
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

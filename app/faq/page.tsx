@@ -1,35 +1,3 @@
-import { getMetadata } from "@/lib/seo-utils"
-
-export const metadata = getMetadata({
-  title: "FAQ | Flavor Studios",
-  description: "Get answers to the most frequently asked questions about Flavor Studios—covering content, support, donations, legal info, and more.",
-  path: "/faq",
-  openGraph: {
-    images: ["https://flavorstudios.in/og-image.png"],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@flavorstudios",
-    image: "https://flavorstudios.in/og-image.png",
-  },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "name": "Flavor Studios FAQ",
-    "description": "Frequently asked questions about Flavor Studios, support, legal, technical, and community topics.",
-    "url": "https://flavorstudios.in/faq",
-    "publisher": {
-      "@type": "Organization",
-      "name": "Flavor Studios",
-      "url": "https://flavorstudios.in"
-    },
-    "datePublished": "2025-05-09",
-    "dateModified": "2025-05-09"
-  },
-  robots: "index, follow"
-});
-
 "use client"
 
 import { useState } from "react"

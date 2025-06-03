@@ -1,5 +1,7 @@
 import { promises as fs } from "fs"
 import path from "path"
+// Uncomment below if you want bulletproof IDs
+// import { nanoid } from "nanoid"
 
 const DATA_DIR = path.join(process.cwd(), "data")
 
@@ -23,6 +25,10 @@ export interface Video {
   thumbnail: string
   createdAt: string
   updatedAt: string
+  // Add these if you want to match global Video interface:
+  // youtubeId?: string
+  // status?: string
+  // views?: number
 }
 
 export interface Comment {
@@ -58,7 +64,8 @@ async function readJsonFile<T>(filename: string): Promise<T[]> {
   try {
     const data = await fs.readFile(filePath, "utf-8")
     return JSON.parse(data)
-  } catch {
+  } catch (err) {
+    console.error(`Error reading ${filename}:`, err)
     return []
   }
 }
@@ -69,6 +76,7 @@ async function writeJsonFile<T>(filename: string, data: T[]): Promise<void> {
   await fs.writeFile(filePath, JSON.stringify(data, null, 2))
 }
 
+// --- Blog ---
 export const blogData = {
   async getAll(): Promise<BlogPost[]> {
     return readJsonFile<BlogPost>("blogs.json")
@@ -78,6 +86,7 @@ export const blogData = {
     const posts = await this.getAll()
     const newPost: BlogPost = {
       ...post,
+      // id: nanoid(), // Use nanoid for unique IDs
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -90,7 +99,6 @@ export const blogData = {
   async update(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
     const posts = await this.getAll()
     const index = posts.findIndex((p) => p.id === id)
-
     if (index === -1) return null
 
     posts[index] = { ...posts[index], ...updates, updatedAt: new Date().toISOString() }
@@ -101,7 +109,6 @@ export const blogData = {
   async delete(id: string): Promise<boolean> {
     const posts = await this.getAll()
     const filtered = posts.filter((p) => p.id !== id)
-
     if (filtered.length === posts.length) return false
 
     await writeJsonFile("blogs.json", filtered)
@@ -109,6 +116,7 @@ export const blogData = {
   },
 }
 
+// --- Videos ---
 export const videoData = {
   async getAll(): Promise<Video[]> {
     return readJsonFile<Video>("videos.json")
@@ -118,6 +126,7 @@ export const videoData = {
     const videos = await this.getAll()
     const newVideo: Video = {
       ...video,
+      // id: nanoid(),
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -130,7 +139,6 @@ export const videoData = {
   async update(id: string, updates: Partial<Video>): Promise<Video | null> {
     const videos = await this.getAll()
     const index = videos.findIndex((v) => v.id === id)
-
     if (index === -1) return null
 
     videos[index] = { ...videos[index], ...updates, updatedAt: new Date().toISOString() }
@@ -141,7 +149,6 @@ export const videoData = {
   async delete(id: string): Promise<boolean> {
     const videos = await this.getAll()
     const filtered = videos.filter((v) => v.id !== id)
-
     if (filtered.length === videos.length) return false
 
     await writeJsonFile("videos.json", filtered)
@@ -149,6 +156,7 @@ export const videoData = {
   },
 }
 
+// --- Comments ---
 export const commentData = {
   async getAll(): Promise<Comment[]> {
     return readJsonFile<Comment>("comments.json")
@@ -157,7 +165,6 @@ export const commentData = {
   async updateStatus(id: string, status: Comment["status"]): Promise<Comment | null> {
     const comments = await this.getAll()
     const index = comments.findIndex((c) => c.id === id)
-
     if (index === -1) return null
 
     comments[index].status = status
@@ -168,7 +175,6 @@ export const commentData = {
   async delete(id: string): Promise<boolean> {
     const comments = await this.getAll()
     const filtered = comments.filter((c) => c.id !== id)
-
     if (filtered.length === comments.length) return false
 
     await writeJsonFile("comments.json", filtered)
@@ -176,6 +182,7 @@ export const commentData = {
   },
 }
 
+// --- Page Content ---
 export const pageContentData = {
   async getAll(): Promise<PageContent[]> {
     return readJsonFile<PageContent>("page-content.json")
@@ -184,7 +191,6 @@ export const pageContentData = {
   async update(page: string, section: string, content: Record<string, any>): Promise<PageContent> {
     const contents = await this.getAll()
     const index = contents.findIndex((c) => c.page === page && c.section === section)
-
     const updatedContent: PageContent = {
       id: `${page}-${section}`,
       page,
@@ -192,13 +198,11 @@ export const pageContentData = {
       content,
       updatedAt: new Date().toISOString(),
     }
-
     if (index === -1) {
       contents.push(updatedContent)
     } else {
       contents[index] = updatedContent
     }
-
     await writeJsonFile("page-content.json", contents)
     return updatedContent
   },

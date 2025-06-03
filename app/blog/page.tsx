@@ -11,12 +11,12 @@ import { NewsletterSignup } from "@/components/newsletter-signup"
 // --- FETCH BLOG DATA AND CATEGORIES ---
 async function getBlogData() {
   try {
-    // ALWAYS extract blogCategories for safety
-    const [posts, dynamicCategories] = await Promise.all([
+    const [postsRaw, dynamicCategories] = await Promise.all([
       blogStore.getPublished(),
       getDynamicCategories(),
     ])
-    // Fallback to [] if for some reason .blogCategories is missing
+    // Defensive fallback if any are missing or misformatted
+    const posts = Array.isArray(postsRaw) ? postsRaw : []
     const categories = Array.isArray(dynamicCategories?.blogCategories)
       ? dynamicCategories.blogCategories
       : []
@@ -38,11 +38,9 @@ export default async function BlogPage({
   const currentPage = Number.parseInt(searchParams.page || "1")
   const postsPerPage = 9
 
-  // Standardize category slugs to match backend/client logic
   const makeSlug = (str: string) =>
     str?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
 
-  // Add .count to each category based on blog posts (guaranteed accuracy even if count missing)
   const categoriesWithCounts = categories.map(cat => ({
     ...cat,
     count:
@@ -54,7 +52,6 @@ export default async function BlogPage({
           ).length,
   }))
 
-  // Filter posts by selected category slug
   const filteredPosts =
     selectedCategory === "all"
       ? posts
@@ -63,16 +60,13 @@ export default async function BlogPage({
             (post.categorySlug || makeSlug(post.category)) === selectedCategory
         )
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage)
   const startIndex = (currentPage - 1) * postsPerPage
   const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage)
 
-  // Featured and regular posts
   const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3)
   const regularPosts = paginatedPosts.filter((post: any) => !post.featured)
 
-  // Stats
   const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0)
   const avgReadTime =
     posts.length > 0

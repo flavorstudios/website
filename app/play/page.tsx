@@ -1,3 +1,35 @@
+import { getMetadata } from "@/lib/seo-utils"
+
+export const metadata = getMetadata({
+  title: "Play Games | Flavor Studios",
+  description: "Take a break and play interactive games like Tic-Tac-Toe—multiple modes, AI difficulty, and instant auto-reset. Built for anime fans by Flavor Studios.",
+  path: "/play",
+  openGraph: {
+    images: ["https://flavorstudios.in/og-image.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    image: "https://flavorstudios.in/og-image.png",
+  },
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Play Games",
+    "description": "Challenge yourself and friends to fun, interactive games on Flavor Studios.",
+    "url": "https://flavorstudios.in/play",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Flavor Studios",
+      "url": "https://flavorstudios.in"
+    },
+    "datePublished": "2025-05-09",
+    "dateModified": "2025-05-09"
+  },
+  robots: "index, follow"
+});
+
 "use client"
 
 import { useState, useCallback, useEffect } from "react"

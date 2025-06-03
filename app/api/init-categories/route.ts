@@ -10,6 +10,9 @@ export async function GET() {
     })
   } catch (error) {
     console.error("Failed to initialize data files:", error)
-    return NextResponse.json({ success: false, error: "Failed to initialize data files." }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: error?.message || String(error) },
+      { status: 500 }
+    )
   }
 }

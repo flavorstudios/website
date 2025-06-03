@@ -28,6 +28,9 @@ export interface Video {
   videoUrl: string
   duration: string
   featured: boolean
+  youtubeId?: string    // For YouTube embeds, optional
+  status?: string       // e.g., "published", "draft"
+  views?: number        // For video view stats
 }
 
 export interface Category {

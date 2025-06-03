@@ -1,6 +1,4 @@
 import type { Category } from "./category-store"
-import path from "path"
-import { promises as fs } from "fs"
 
 let initialized = false
 
@@ -58,9 +56,12 @@ async function ensureCategoryDataInitialized() {
   }
 }
 
-// ---- LOAD CATEGORIES DIRECTLY FROM FILE (server fail-safe) ----
+// ---- LOAD CATEGORIES DIRECTLY FROM FILE (server fail-safe, dynamic import!) ----
 async function tryLoadCategoriesJson(type: "blog" | "video"): Promise<CategoryData[]> {
+  if (typeof window !== "undefined") return STATIC_CATEGORIES // Never run on client
   try {
+    const path = await import("path")
+    const fs = await import("fs/promises")
     const DATA_DIR = path.join(process.cwd(), "content-data")
     const categoriesPath = path.join(DATA_DIR, "categories.json")
     await fs.access(categoriesPath)
@@ -85,7 +86,6 @@ async function tryLoadCategoriesJson(type: "blog" | "video"): Promise<CategoryDa
 export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResult> {
   await ensureCategoryDataInitialized()
 
-  // --- Prefer API route (client or serverless) ---
   let blogCategories: CategoryData[] = []
   let videoCategories: CategoryData[] = []
 
@@ -175,7 +175,6 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
   // --- If not loaded via API, try direct file read (SSR/build/server) ---
   if (!usedApi || blogCategories.length === 0 || videoCategories.length === 0) {
     if (typeof window === "undefined") {
-      // On server, load directly from categories.json for fail-safe
       if (blogCategories.length === 0)
         blogCategories = await tryLoadCategoriesJson("blog")
       if (videoCategories.length === 0)

@@ -1,82 +1,101 @@
-import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react"
-import { blogStore } from "@/lib/content-store"
-import { getDynamicCategories } from "@/lib/dynamic-categories"
-import { CategoryTabs } from "@/components/ui/category-tabs"
-import { NewsletterSignup } from "@/components/newsletter-signup"
+// app/blog/page.tsx
 
-// --- FETCH BLOG DATA AND CATEGORIES ---
-async function getBlogData() {
-  try {
-    const [postsRaw, dynamicCategories] = await Promise.all([
-      blogStore.getPublished(),
-      getDynamicCategories(),
-    ])
-    // Defensive fallback if any are missing or misformatted
-    const posts = Array.isArray(postsRaw) ? postsRaw : []
-    const categories = Array.isArray(dynamicCategories?.blogCategories)
-      ? dynamicCategories.blogCategories
-      : []
-    return { posts, categories }
-  } catch (error) {
-    console.error("Failed to fetch blog data:", error)
-    return { posts: [], categories: [] }
-  }
+import { prisma } from "@/lib/prisma"
+import { CategoryTabs } from "@/components/ui/category-tabs"
+import { FeaturedPostCard } from "@/components/ui/featured-post-card"
+import { BlogPostCard } from "@/components/ui/blog-post-card"
+import { NewsletterSignup } from "@/components/newsletter-signup"
+import { Pagination } from "@/components/ui/pagination"
+import { BookOpen, Star } from "lucide-react"
+import { CategoryDropdown } from "@/components/ui/category-dropdown" // direct import (client component)
+
+const POSTS_PER_PAGE = 9
+
+function calculateAvgReadTime(posts: { readTime?: number }[]) {
+  if (!posts.length) return 0
+  const total = posts.reduce((sum, post) => sum + (post.readTime || 5), 0)
+  return Math.round(total / posts.length)
 }
 
-// --- MAIN PAGE ---
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: { category?: string; page?: string }
+  searchParams?: { category?: string; page?: string }
 }) {
-  const { posts, categories } = await getBlogData()
-  const selectedCategory = searchParams.category || "all"
-  const currentPage = Number.parseInt(searchParams.page || "1")
-  const postsPerPage = 9
+  const params = (await searchParams) || {}
 
-  const makeSlug = (str: string) =>
-    str?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
+  const selectedCategory = params.category || "all"
+  const currentPage = Number.parseInt(params.page || "1", 10)
+  const skip = (currentPage - 1) * POSTS_PER_PAGE
 
-  const categoriesWithCounts = categories.map(cat => ({
-    ...cat,
-    count:
-      typeof cat.count === "number"
-        ? cat.count
-        : posts.filter(
-            post =>
-              (post.categorySlug || makeSlug(post.category)) === cat.slug
-          ).length,
-  }))
+  // Fetch blog categories from DB
+  const categories = await prisma.category.findMany({
+    where: { type: "blog" },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      posts: {
+        where: { status: "published" },
+        select: { id: true },
+      },
+    },
+  })
 
-  const filteredPosts =
+  // Prepare where clause for posts filter
+  const whereClause =
     selectedCategory === "all"
-      ? posts
-      : posts.filter(
-          post =>
-            (post.categorySlug || makeSlug(post.category)) === selectedCategory
-        )
+      ? { status: "published" }
+      : {
+          status: "published",
+          category: { slug: selectedCategory },
+        }
 
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage)
-  const startIndex = (currentPage - 1) * postsPerPage
-  const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage)
+  // Fetch posts, total count and all published posts for stats
+  const [posts, totalCount, allPosts] = await Promise.all([
+    prisma.blogPost.findMany({
+      where: whereClause,
+      orderBy: { publishedAt: "desc" },
+      skip,
+      take: POSTS_PER_PAGE,
+      include: { category: true },
+    }),
+    prisma.blogPost.count({ where: whereClause }),
+    prisma.blogPost.findMany({ where: { status: "published" } }),
+  ])
 
-  const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3)
-  const regularPosts = paginatedPosts.filter((post: any) => !post.featured)
+  const totalViews = allPosts.reduce((sum, p) => sum + (p.views || 0), 0)
+  const avgReadTime = calculateAvgReadTime(allPosts)
+  const totalPages = Math.ceil(totalCount / POSTS_PER_PAGE)
 
-  const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0)
-  const avgReadTime =
-    posts.length > 0
-      ? Math.round(
-          posts.reduce(
-            (sum: number, post: any) => sum + Number.parseInt(post.readTime?.replace(" min read", "") || "5"),
-            0,
-          ) / posts.length,
-        )
-      : 0
+  // Prepare categories with counts & remove duplicates
+  const categoriesWithCountsRaw = [
+    { name: "All", slug: "all", count: allPosts.length },
+    ...categories
+      .filter((cat) => cat.slug && cat.slug !== "all")
+      .map((cat) => ({ name: cat.name, slug: cat.slug, count: cat.posts.length })),
+  ]
+  const seen = new Set()
+  const categoriesWithCounts = categoriesWithCountsRaw.filter((cat) => {
+    if (seen.has(cat.slug)) return false
+    seen.add(cat.slug)
+    return true
+  })
+
+  // Separate featured and regular posts
+  const featuredPosts = posts.filter((p) => p.featured).slice(0, 3)
+  const regularPosts = posts.filter((p) => !p.featured)
+
+  const EmptyState = ({ selectedCategory }: { selectedCategory: string }) => (
+    <div className="flex flex-col items-center py-20 text-center opacity-70">
+      <img src="/empty-blog.svg" alt="No posts" className="h-28 mb-4" />
+      <h2 className="font-bold text-xl mb-2">Nothing here yet</h2>
+      <p className="text-muted-foreground">
+        No blog posts found in this category. Try a different one or check back soon!
+      </p>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -96,11 +115,11 @@ export default async function BlogPage({
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 border border-blue-100">
-                <div className="text-xl sm:text-2xl font-bold text-blue-600">{posts.length}</div>
+                <div className="text-xl sm:text-2xl font-bold text-blue-600">{allPosts.length}</div>
                 <div className="text-xs sm:text-sm text-gray-600">Articles</div>
               </div>
               <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-3 sm:p-4 border border-purple-100">
-                <div className="text-xl sm:text-2xl font-bold text-purple-600">{categoriesWithCounts.length}</div>
+                <div className="text-xl sm:text-2xl font-bold text-purple-600">{categories.length}</div>
                 <div className="text-xs sm:text-sm text-gray-600">Categories</div>
               </div>
               <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-3 sm:p-4 border border-green-100">
@@ -116,7 +135,17 @@ export default async function BlogPage({
         </div>
       </div>
 
-      {/* Dynamic Category Tabs */}
+      {/* Category Dropdown - Client Component */}
+      <CategoryDropdown
+        categories={categoriesWithCounts}
+        selectedCategory={selectedCategory}
+        onCategoryChange={(category) => {
+          window.history.pushState(null, "", `/blog?category=${category}`)
+          window.location.reload()
+        }}
+      />
+
+      {/* Category Tabs - static links */}
       <CategoryTabs
         categories={categoriesWithCounts}
         selectedCategory={selectedCategory}
@@ -133,8 +162,8 @@ export default async function BlogPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Featured Posts</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {featuredPosts.map((post: any, index: number) => (
-                <FeaturedPostCard key={post.id} post={post} priority={index === 0} />
+              {featuredPosts.map((post, idx) => (
+                <FeaturedPostCard key={post.id} post={post} priority={idx === 0} />
               ))}
             </div>
           </div>
@@ -152,7 +181,7 @@ export default async function BlogPage({
                   : `${categoriesWithCounts.find((c) => c.slug === selectedCategory)?.name || selectedCategory} Posts`}
               </h2>
               <p className="text-gray-600 text-sm sm:text-base">
-                {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""} found
+                {totalCount} post{totalCount !== 1 ? "s" : ""}
               </p>
             </div>
             {totalPages > 1 && (
@@ -162,18 +191,21 @@ export default async function BlogPage({
             )}
           </div>
 
-          {filteredPosts.length === 0 ? (
+          {totalCount === 0 ? (
             <EmptyState selectedCategory={selectedCategory} />
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-                {regularPosts.map((post: any) => (
+                {regularPosts.map((post) => (
                   <BlogPostCard key={post.id} post={post} />
                 ))}
               </div>
-
               {totalPages > 1 && (
-                <Pagination currentPage={currentPage} totalPages={totalPages} selectedCategory={selectedCategory} />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  selectedCategory={selectedCategory}
+                />
               )}
             </>
           )}
@@ -195,5 +227,3 @@ export default async function BlogPage({
     </div>
   )
 }
-
-// --- Keep your existing FeaturedPostCard, BlogPostCard, Pagination, EmptyState components exactly as before! ---

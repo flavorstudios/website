@@ -13,11 +13,17 @@ export interface DynamicCategoriesResult {
   videoCategories: CategoryData[]
 }
 
+// Static fallback categories — brand aligned
 const STATIC_CATEGORIES: CategoryData[] = [
   { name: "Anime News", slug: "anime-news", count: 0 },
-  { name: "Reviews", slug: "reviews", count: 0 },
+  { name: "Studio Originals", slug: "studio-originals", count: 0 },
   { name: "Behind the Scenes", slug: "behind-the-scenes", count: 0 },
   { name: "Tutorials", slug: "tutorials", count: 0 },
+  { name: "Reviews", slug: "reviews", count: 0 },
+  { name: "Inspiration & Life", slug: "inspiration-life", count: 0 },
+  { name: "Industry Insights", slug: "industry-insights", count: 0 },
+  { name: "Community & Events", slug: "community-events", count: 0 },
+  { name: "Interviews", slug: "interviews", count: 0 },
 ]
 
 export const fallbackCategories: DynamicCategoriesResult = {
@@ -25,6 +31,7 @@ export const fallbackCategories: DynamicCategoriesResult = {
   videoCategories: STATIC_CATEGORIES,
 }
 
+// Utility: Create URL-friendly slug from category name
 export function createCategorySlug(name: string): string {
   return name
     .toLowerCase()
@@ -32,10 +39,12 @@ export function createCategorySlug(name: string): string {
     .replace(/(^-|-$)/g, "")
 }
 
+// Utility: Find category by slug
 export function getCategoryBySlug(categories: CategoryData[], slug: string): CategoryData | undefined {
   return categories.find((cat) => cat.slug === slug)
 }
 
+// Utility: Format slug back to readable category name
 export function formatCategoryName(slug: string): string {
   return slug
     .split("-")
@@ -43,7 +52,7 @@ export function formatCategoryName(slug: string): string {
     .join(" ")
 }
 
-// ---- CATEGORY DATA INITIALIZATION ----
+// Server-side initialization of categories (runs once)
 async function ensureCategoryDataInitialized() {
   if (typeof window === "undefined" && !initialized) {
     try {
@@ -56,18 +65,20 @@ async function ensureCategoryDataInitialized() {
   }
 }
 
-// ---- LOAD CATEGORIES DIRECTLY FROM FILE (server fail-safe, dynamic import!) ----
+// Load categories.json from file on server (fallback)
 async function tryLoadCategoriesJson(type: "blog" | "video"): Promise<CategoryData[]> {
-  if (typeof window !== "undefined") return STATIC_CATEGORIES // Never run on client
+  if (typeof window !== "undefined") return STATIC_CATEGORIES // Prevent running on client
+
   try {
     const path = await import("path")
     const fs = await import("fs/promises")
     const DATA_DIR = path.join(process.cwd(), "content-data")
     const categoriesPath = path.join(DATA_DIR, "categories.json")
+
     await fs.access(categoriesPath)
     const raw = await fs.readFile(categoriesPath, "utf-8")
     const allCategories: Category[] = JSON.parse(raw)
-    // Filter for type and isActive
+
     const filtered = allCategories
       .filter((cat) => cat.type === type && cat.isActive)
       .map((cat) => ({
@@ -75,33 +86,29 @@ async function tryLoadCategoriesJson(type: "blog" | "video"): Promise<CategoryDa
         slug: createCategorySlug(cat.name),
         count: typeof cat.count === "number" ? cat.count : 0,
       }))
+      .filter((cat) => cat.slug !== "all") // Reserved slug
+
     if (filtered.length > 0) return filtered
-  } catch (error) {
-    // Silent fallback
+  } catch {
+    // silent fallback to static categories
   }
+
   return STATIC_CATEGORIES
 }
 
-// --------- MAIN EXPORT ---------
+// Main exported function to get categories dynamically with fallbacks
 export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResult> {
   await ensureCategoryDataInitialized()
 
   let blogCategories: CategoryData[] = []
   let videoCategories: CategoryData[] = []
-
   let usedApi = false
 
   try {
     if (typeof fetch !== "undefined") {
       const [blogsResponse, videosResponse] = await Promise.allSettled([
-        fetch("/api/admin/blogs", {
-          cache: "no-store",
-          next: { revalidate: 0 },
-        }).catch(() => null),
-        fetch("/api/admin/videos", {
-          cache: "no-store",
-          next: { revalidate: 0 },
-        }).catch(() => null),
+        fetch("/api/admin/blogs", { cache: "no-store", next: { revalidate: 0 } }).catch(() => null),
+        fetch("/api/admin/videos", { cache: "no-store", next: { revalidate: 0 } }).catch(() => null),
       ])
 
       if (blogsResponse.status === "fulfilled" && blogsResponse.value?.ok) {
@@ -120,15 +127,9 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
                 }
               })
             if (categoryMap.size > 0) {
-              blogCategories = Array.from(categoryMap.entries()).map(([slug, count]) => ({
-                name: formatCategoryName(slug),
-                slug,
-                count,
-              }))
-              blogCategories.sort((a, b) => {
-                if (b.count !== a.count) return b.count - a.count
-                return a.name.localeCompare(b.name)
-              })
+              blogCategories = Array.from(categoryMap.entries())
+                .map(([slug, count]) => ({ name: formatCategoryName(slug), slug, count }))
+                .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
             }
           }
         } catch (error) {
@@ -152,15 +153,9 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
                 }
               })
             if (categoryMap.size > 0) {
-              videoCategories = Array.from(categoryMap.entries()).map(([slug, count]) => ({
-                name: formatCategoryName(slug),
-                slug,
-                count,
-              }))
-              videoCategories.sort((a, b) => {
-                if (b.count !== a.count) return b.count - a.count
-                return a.name.localeCompare(b.name)
-              })
+              videoCategories = Array.from(categoryMap.entries())
+                .map(([slug, count]) => ({ name: formatCategoryName(slug), slug, count }))
+                .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
             }
           }
         } catch (error) {
@@ -172,23 +167,28 @@ export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResu
     console.warn("Failed to fetch dynamic categories, using static fallback:", error)
   }
 
-  // --- If not loaded via API, try direct file read (SSR/build/server) ---
+  // Fallback: try direct file loading on server if API not used or categories empty
   if (!usedApi || blogCategories.length === 0 || videoCategories.length === 0) {
     if (typeof window === "undefined") {
-      if (blogCategories.length === 0)
-        blogCategories = await tryLoadCategoriesJson("blog")
-      if (videoCategories.length === 0)
-        videoCategories = await tryLoadCategoriesJson("video")
+      if (blogCategories.length === 0) blogCategories = await tryLoadCategoriesJson("blog")
+      if (videoCategories.length === 0) videoCategories = await tryLoadCategoriesJson("video")
     }
   }
 
-  // --- Fallback to STATIC_CATEGORIES if *still* empty ---
+  // Final fallback to static categories if still empty
+  let finalBlogCategories = blogCategories.length > 0 ? blogCategories : STATIC_CATEGORIES
+  let finalVideoCategories = videoCategories.length > 0 ? videoCategories : STATIC_CATEGORIES
+
+  // Remove any accidental "all" slug
+  finalBlogCategories = finalBlogCategories.filter((c) => c.slug !== "all")
+  finalVideoCategories = finalVideoCategories.filter((c) => c.slug !== "all")
+
   return {
-    blogCategories: blogCategories.length > 0 ? blogCategories : STATIC_CATEGORIES,
-    videoCategories: videoCategories.length > 0 ? videoCategories : STATIC_CATEGORIES,
+    blogCategories: finalBlogCategories,
+    videoCategories: finalVideoCategories,
   }
 }
 
-// Server-side compatible function (alias for client function)
+// Aliases for convenience
 export const getDynamicCategories = getCategoriesWithFallback
 export const getDynamicCategoriesClient = getCategoriesWithFallback

@@ -3,10 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react"
-import { blogStore } from "@/lib/content-store"
-import { getDynamicCategories } from "@/lib/dynamic-categories"
+import { prisma } from "@/lib/prisma"
+import { getCategoriesWithFallback, type CategoryData } from "@/lib/dynamic-categories"
 import { CategoryTabs } from "@/components/ui/category-tabs"
 import { NewsletterSignup } from "@/components/newsletter-signup"
+import dynamic from "next/dynamic"
+
+const BlogCategoryDropdown = dynamic(() => import("@/components/blog/blog-category-dropdown").then(m => m.BlogCategoryDropdown), { ssr: false })
 
 export const metadata = {
   title: "Blog | Flavor Studios - Anime Creation Insights & Stories",
@@ -28,9 +31,16 @@ export const metadata = {
 
 async function getBlogData() {
   try {
-    const [posts, { blogCategories }] = await Promise.all([blogStore.getPublished(), getDynamicCategories()])
+    const posts = await prisma.blogPost.findMany({
+      where: { status: "published" },
+      include: { category: true },
+      orderBy: { publishedAt: "desc" },
+    })
 
-    return { posts, categories: blogCategories }
+    const { blogCategories } = await getCategoriesWithFallback()
+    const categories: CategoryData[] = blogCategories.map((c) => ({ ...c }))
+
+    return { posts, categories }
   } catch (error) {
     console.error("Failed to fetch blog data:", error)
     return { posts: [], categories: [] }
@@ -43,14 +53,20 @@ export default async function BlogPage({
   searchParams: { category?: string; page?: string }
 }) {
   const { posts, categories } = await getBlogData()
+  const postsList = Array.isArray(posts) ? posts : []
   const selectedCategory = searchParams.category || "all"
   const currentPage = Number.parseInt(searchParams.page || "1")
   const postsPerPage = 9
 
+  const categoriesWithCounts: CategoryData[] = [
+    { name: "All", slug: "all", count: postsList.length },
+    ...categories,
+  ]
+
   const filteredPosts =
     selectedCategory === "all"
-      ? posts
-      : posts.filter((post: any) => {
+      ? postsList
+      : postsList.filter((post: any) => {
           const categorySlug = post.category
             ?.toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
@@ -67,14 +83,14 @@ export default async function BlogPage({
   const regularPosts = paginatedPosts.filter((post: any) => !post.featured)
 
   // Analytics data - matching watch page format exactly
-  const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0)
+  const totalViews = postsList.reduce((sum: number, post: any) => sum + (post.views || 0), 0)
   const avgReadTime =
-    posts.length > 0
+    postsList.length > 0
       ? Math.round(
-          posts.reduce(
+          postsList.reduce(
             (sum: number, post: any) => sum + Number.parseInt(post.readTime?.replace(" min read", "") || "5"),
             0,
-          ) / posts.length,
+          ) / postsList.length,
         )
       : 0
 
@@ -103,7 +119,7 @@ export default async function BlogPage({
             {/* Enhanced Stats - EXACTLY matching watch page */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 border border-blue-100">
-                <div className="text-xl sm:text-2xl font-bold text-blue-600">{posts.length}</div>
+                <div className="text-xl sm:text-2xl font-bold text-blue-600">{postsList.length}</div>
                 <div className="text-xs sm:text-sm text-gray-600">Articles</div>
               </div>
               <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-3 sm:p-4 border border-purple-100">
@@ -120,6 +136,13 @@ export default async function BlogPage({
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Category Filter */}
+      <div className="py-4 border-b bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <BlogCategoryDropdown categories={categoriesWithCounts} selected={selectedCategory} />
         </div>
       </div>
 

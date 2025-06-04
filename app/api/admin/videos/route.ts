@@ -1,77 +1,25 @@
 import { NextResponse } from "next/server"
-import { videoStore } from "@/lib/content-store"
+import { videoStore } from "@/lib/video"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const videos = await videoStore.getAll()
+    const url = new URL(request.url)
+    const categorySlug = url.searchParams.get("category") || "all"
 
-    const formattedVideos = videos.map((video) => ({
-      id: video.id,
-      slug: video.slug || video.id,
-      title: video.title,
-      description: video.description,
-      youtubeId: video.youtubeId,
-      thumbnail: video.thumbnail,
-      duration: video.duration,
-      category: video.category,
-      tags: video.tags,
-      status: video.status,
-      published: video.status === "published",
-      publishedAt: video.publishedAt,
-      updatedAt: video.updatedAt,
-      createdAt: video.createdAt,
-      views: video.views,
-      featured: video.featured,
-    }))
+    // Fetch all published videos
+    let videos = await videoStore.getAllVideos()
 
-    return NextResponse.json({ videos: formattedVideos }, { status: 200 })
-  } catch (error) {
-    console.error("Error fetching videos:", error)
-    return NextResponse.json(
-      {
-        error: "Failed to fetch videos",
-        videos: [], // Return empty array as fallback
-      },
-      { status: 500 },
-    )
-  }
-}
-
-export async function POST(request: Request) {
-  try {
-    const videoData = await request.json()
-
-    // Validate required fields
-    if (!videoData.title || !videoData.youtubeId) {
-      return NextResponse.json(
-        {
-          error: "Title and YouTube ID are required",
-        },
-        { status: 400 },
-      )
+    // Filter by category if not 'all'
+    if (categorySlug !== "all") {
+      videos = videos.filter(video => video.category === categorySlug)
     }
 
-    const video = await videoStore.create({
-      title: videoData.title,
-      description: videoData.description || "",
-      youtubeId: videoData.youtubeId,
-      thumbnail: videoData.thumbnail || `https://img.youtube.com/vi/${videoData.youtubeId}/maxresdefault.jpg`,
-      duration: videoData.duration || "0:00",
-      category: videoData.category || "Episodes",
-      tags: videoData.tags || [],
-      status: videoData.status || "draft",
-      publishedAt: videoData.publishedAt || new Date().toISOString(),
-      featured: videoData.featured || false,
-    })
+    // Ensure only published videos
+    videos = videos.filter(video => video.status === "published")
 
-    return NextResponse.json({ video }, { status: 201 })
+    return NextResponse.json({ videos })
   } catch (error) {
-    console.error("Error creating video:", error)
-    return NextResponse.json(
-      {
-        error: "Failed to create video",
-      },
-      { status: 500 },
-    )
+    console.error("Failed to fetch videos:", error)
+    return NextResponse.json({ error: "Failed to fetch videos" }, { status: 500 })
   }
 }

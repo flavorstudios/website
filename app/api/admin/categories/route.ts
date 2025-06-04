@@ -1,21 +1,20 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { categoryStore } from "@/lib/category-store"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const categories = await categoryStore.getAll()
-    return NextResponse.json({ categories })
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 })
-  }
-}
+    const url = new URL(request.url)
+    const type = url.searchParams.get("type") || "blog" // default to 'blog'
 
-export async function POST(request: NextRequest) {
-  try {
-    const data = await request.json()
-    const category = await categoryStore.create(data)
-    return NextResponse.json({ category })
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to create category" }, { status: 400 })
+    // Get categories by type, only active
+    const categories = await categoryStore.getByType(type)
+
+    // Filter out any 'all' slug just in case
+    const filtered = categories.filter(cat => cat.slug !== "all")
+
+    return NextResponse.json(filtered)
+  } catch (error) {
+    console.error("Failed to fetch categories:", error)
+    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 })
   }
 }

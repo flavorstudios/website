@@ -6,8 +6,25 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
-  Search, ThumbsUp, ThumbsDown, HelpCircle, Mail, Heart, Users, Shield, FileText, Eye, BookOpen, Play, Gamepad2,
-  Briefcase, Copyright, Cookie, ExternalLink, ChevronDown, ChevronUp,
+  Search,
+  ThumbsUp,
+  ThumbsDown,
+  HelpCircle,
+  Mail,
+  Heart,
+  Users,
+  Shield,
+  FileText,
+  Eye,
+  BookOpen,
+  Play,
+  Gamepad2,
+  Briefcase,
+  Copyright,
+  Cookie,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -27,6 +44,7 @@ export default function FAQPage() {
   ]
 
   const faqData = [
+    // Most Popular Questions
     {
       id: "what-is-flavor-studios",
       question: "What is Flavor Studios?",
@@ -54,6 +72,7 @@ export default function FAQPage() {
       tags: ["popular"],
       relatedQuestions: [],
     },
+    // Recently Added Questions
     {
       id: "suggest-topics",
       question: "Can I suggest topics for future videos or blog posts?",
@@ -90,6 +109,7 @@ export default function FAQPage() {
       tags: ["new"],
       relatedQuestions: [],
     },
+    // About Flavor Studios
     {
       id: "original-anime",
       question: "Do you create original anime?",
@@ -108,6 +128,7 @@ export default function FAQPage() {
       tags: [],
       relatedQuestions: [],
     },
+    // General & Contact
     {
       id: "response-time",
       question: "How long does it take to get a response?",
@@ -143,6 +164,7 @@ export default function FAQPage() {
       tags: [],
       relatedQuestions: ["website-not-working"],
     },
+    // Support & Donations
     {
       id: "payment-security",
       question: "Is my payment information secure?",
@@ -169,6 +191,7 @@ export default function FAQPage() {
       tags: [],
       relatedQuestions: ["donation-rewards"],
     },
+    // Legal & Privacy
     {
       id: "legal-policies",
       question: "Where can I find your legal and privacy policies?",
@@ -195,6 +218,7 @@ export default function FAQPage() {
       tags: [],
       relatedQuestions: [],
     },
+    // Blog & Watch Pages
     {
       id: "anime-selection",
       question: "How do you select which anime to review?",
@@ -204,6 +228,7 @@ export default function FAQPage() {
       tags: [],
       relatedQuestions: [],
     },
+    // Technical & Notifications
     {
       id: "website-not-working",
       question: "The website or video isn't working properly. What should I do?",
@@ -234,18 +259,78 @@ export default function FAQPage() {
   ]
 
   const quickLinks = [
-    { title: "Support Us", href: "/support", icon: Heart, description: "Learn how you can support our content creation and animation projects." },
-    { title: "Contact", href: "/contact", icon: Mail, description: "Get in touch with our team directly for personalized assistance." },
-    { title: "About Us", href: "/about", icon: Users, description: "Discover our story, mission, and the team behind Flavor Studios." },
-    { title: "Privacy Policy", href: "/privacy-policy", icon: Shield, description: "Understand how we protect and handle your personal data." },
-    { title: "Terms of Service", href: "/terms-of-service", icon: FileText, description: "Review the rules and guidelines for using our services." },
-    { title: "Media Usage Policy", href: "/media-usage-policy", icon: Eye, description: "Guidelines for using our content in your own projects." },
-    { title: "Blog", href: "/blog", icon: BookOpen, description: "Read our latest articles about anime, storytelling, and animation." },
-    { title: "Watch", href: "/watch", icon: Play, description: "Explore our original anime content and video creations." },
-    { title: "Play", href: "/play", icon: Gamepad2, description: "Try our interactive games and entertainment experiences." },
-    { title: "Careers", href: "/career", icon: Briefcase, description: "Join our team and help create amazing anime content." },
-    { title: "DMCA", href: "/dmca", icon: Copyright, description: "Information about copyright and content protection policies." },
-    { title: "Cookie Policy", href: "/cookie-policy", icon: Cookie, description: "Learn about how we use cookies to improve your experience." },
+    {
+      title: "Support Us",
+      href: "/support",
+      icon: Heart,
+      description: "Learn how you can support our content creation and animation projects.",
+    },
+    {
+      title: "Contact",
+      href: "/contact",
+      icon: Mail,
+      description: "Get in touch with our team directly for personalized assistance.",
+    },
+    {
+      title: "About Us",
+      href: "/about",
+      icon: Users,
+      description: "Discover our story, mission, and the team behind Flavor Studios.",
+    },
+    {
+      title: "Privacy Policy",
+      href: "/privacy-policy",
+      icon: Shield,
+      description: "Understand how we protect and handle your personal data.",
+    },
+    {
+      title: "Terms of Service",
+      href: "/terms-of-service",
+      icon: FileText,
+      description: "Review the rules and guidelines for using our services.",
+    },
+    {
+      title: "Media Usage Policy",
+      href: "/media-usage-policy",
+      icon: Eye,
+      description: "Guidelines for using our content in your own projects.",
+    },
+    {
+      title: "Blog",
+      href: "/blog",
+      icon: BookOpen,
+      description: "Read our latest articles about anime, storytelling, and animation.",
+    },
+    {
+      title: "Watch",
+      href: "/watch",
+      icon: Play,
+      description: "Explore our original anime content and video creations.",
+    },
+    {
+      title: "Play",
+      href: "/play",
+      icon: Gamepad2,
+      description: "Try our interactive games and entertainment experiences.",
+    },
+    {
+      title: "Careers",
+      href: "/career",
+      icon: Briefcase,
+      description: "Join our team and help create amazing anime content.",
+    },
+    {
+      title: "DMCA",
+      href: "/dmca",
+      icon: Copyright,
+      description: "Information about copyright and content protection policies.",
+    },
+    {
+      title: "Cookie Policy",
+      href: "/cookie-policy",
+      icon: Cookie,
+      description: "Learn about how we use cookies to improve your experience.",
+    },
   ]
 
   const filteredFAQs = faqData.filter((faq) => {
@@ -265,7 +350,6 @@ export default function FAQPage() {
   const popularQuestions = faqData.filter((faq) => faq.tags.includes("popular"))
   const recentQuestions = faqData.filter((faq) => faq.tags.includes("new"))
 
-  // ---- Render UI ----
   return (
     <div className="min-h-screen py-8 sm:py-12">
       <div className="container mx-auto max-w-6xl px-4 sm:px-6">
@@ -291,6 +375,7 @@ export default function FAQPage() {
               className="pl-10 sm:pl-12 h-10 sm:h-12 text-sm sm:text-base"
             />
           </div>
+
           <div className="flex flex-wrap gap-2 sm:gap-3 justify-center items-center max-w-4xl mx-auto">
             {categories.map((category) => (
               <Badge
@@ -686,6 +771,7 @@ export default function FAQPage() {
                 </ul>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg sm:text-xl">For Anime Fans</CardTitle>

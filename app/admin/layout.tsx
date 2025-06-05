@@ -1,6 +1,11 @@
 import type React from "react"
 import "../globals.css"
 
+export const metadata = {
+  title: "Flavor Studios Admin",
+  description: "Admin dashboard for Flavor Studios",
+}
+
 export default function AdminLayout({
   children,
 }: {
@@ -8,10 +13,6 @@ export default function AdminLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <title>Flavor Studios Admin Dashboard</title>
-        <link rel="icon" href="/favicon.ico" />
-      </head>
       <body className="antialiased">{children}</body>
     </html>
   )

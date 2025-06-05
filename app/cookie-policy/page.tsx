@@ -1,35 +1,3 @@
-import { getMetadata } from "@/lib/seo-utils"
-
-export const metadata = getMetadata({
-  title: "Cookie Policy | Flavor Studios",
-  description: "Learn how Flavor Studios uses cookies and similar technologies to enhance your experience. Read about cookie types, management options, and your privacy rights.",
-  path: "/cookie-policy",
-  openGraph: {
-    images: ["https://flavorstudios.in/og-image.png"],
-    type: "article",
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@flavorstudios",
-    image: "https://flavorstudios.in/og-image.png",
-  },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Cookie Policy",
-    "description": "Flavor Studios’ Cookie Policy details what cookies are, which ones we use, how to manage them, and your privacy options.",
-    "url": "https://flavorstudios.in/cookie-policy",
-    "publisher": {
-      "@type": "Organization",
-      "name": "Flavor Studios",
-      "url": "https://flavorstudios.in"
-    },
-    "datePublished": "2025-05-09",
-    "dateModified": "2025-05-09"
-  },
-  robots: "index, follow"
-});
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

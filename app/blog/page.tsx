@@ -3,12 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react"
-import { prisma } from "@/lib/prisma"
-import { getCategoriesWithFallback, type CategoryData } from "@/lib/dynamic-categories"
+import { blogStore } from "@/lib/content-store"
+import { getDynamicCategories } from "@/lib/dynamic-categories"
 import { CategoryTabs } from "@/components/ui/category-tabs"
 import { NewsletterSignup } from "@/components/newsletter-signup"
 
-// --- SEO ---
 export const metadata = {
   title: "Blog | Flavor Studios - Anime Creation Insights & Stories",
   description:
@@ -27,26 +26,17 @@ export const metadata = {
   },
 }
 
-// --- DATA FETCH ---
 async function getBlogData() {
   try {
-    const posts = await prisma.blogPost.findMany({
-      where: { status: "published" },
-      include: { category: true }, // for category filtering
-      orderBy: { publishedAt: "desc" },
-    })
+    const [posts, { blogCategories }] = await Promise.all([blogStore.getPublished(), getDynamicCategories()])
 
-    const { blogCategories } = await getCategoriesWithFallback()
-    const categories: CategoryData[] = blogCategories.map((c) => ({ ...c }))
-
-    return { posts, categories }
+    return { posts, categories: blogCategories }
   } catch (error) {
     console.error("Failed to fetch blog data:", error)
     return { posts: [], categories: [] }
   }
 }
 
-// --- PAGE ---
 export default async function BlogPage({
   searchParams,
 }: {
@@ -57,17 +47,12 @@ export default async function BlogPage({
   const currentPage = Number.parseInt(searchParams.page || "1")
   const postsPerPage = 9
 
-  // --- Fixed: Prisma posts category can be string or object (depends on schema) ---
   const filteredPosts =
     selectedCategory === "all"
       ? posts
       : posts.filter((post: any) => {
-          // Works with both: { category: { name: "..." } } or { category: "..." }
-          const categoryName = typeof post.category === "string"
-            ? post.category
-            : post.category?.name || ""
-          const categorySlug = categoryName
-            .toLowerCase()
+          const categorySlug = post.category
+            ?.toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
             .replace(/(^-|-$)/g, "")
           return categorySlug === selectedCategory
@@ -104,15 +89,18 @@ export default async function BlogPage({
               <BookOpen className="h-4 w-4" />
               Studio Insights & Stories
             </div>
-            {/* Gradient Heading */}
+
+            {/* Gradient Heading with extra padding at bottom */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 leading-relaxed px-4 pb-2">
               Flavor Studios Blog
             </h1>
-            {/* Subtitle */}
+
+            {/* Italic Subtitle */}
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 italic font-light max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
               Behind the scenes of anime creation—one story at a time.
             </p>
-            {/* Stats */}
+
+            {/* Enhanced Stats - EXACTLY matching watch page */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 border border-blue-100">
                 <div className="text-xl sm:text-2xl font-bold text-blue-600">{posts.length}</div>
@@ -211,7 +199,7 @@ export default async function BlogPage({
   )
 }
 
-// --- COMPONENTS ---
+// Keep all the existing component functions (FeaturedPostCard, BlogPostCard, Pagination, EmptyState)
 function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
   return (
     <Link href={`/blog/${post.slug}`} className="group">
@@ -231,7 +219,7 @@ function FeaturedPostCard({ post, priority = false }: { post: any; priority?: bo
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 right-3 sm:right-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
             <Badge variant="secondary" className="mb-2 bg-white/90 backdrop-blur-sm text-xs">
-              {typeof post.category === "string" ? post.category : post.category?.name}
+              {post.category}
             </Badge>
             <h3 className="text-sm sm:text-lg font-bold text-white mb-2 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               {post.title}
@@ -299,7 +287,7 @@ function BlogPostCard({ post }: { post: any }) {
         <CardHeader className="pb-3 p-4 sm:p-6">
           <div className="flex items-center gap-2 mb-3">
             <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 text-xs">
-              {typeof post.category === "string" ? post.category : post.category?.name}
+              {post.category}
             </Badge>
             <span className="text-xs text-gray-500 flex items-center gap-1">
               <Calendar className="h-3 w-3" />

@@ -2,22 +2,18 @@ import { NextResponse } from "next/server"
 import { blogStore, videoStore } from "@/lib/content-store"
 import { categoryStore } from "@/lib/category-store"
 
-// Force .in as the only possible fallback—no .com risk!
-const FALLBACK_BASE_URL = "https://flavorstudios.in"
-
 export async function GET() {
-  // Normalize baseUrl: from env or fallback, always strips trailing slash
-  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || FALLBACK_BASE_URL).replace(/\/$/, "")
-
   try {
-    // Fetch dynamic content with error handling for safety
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+
+    // Get dynamic content with error handling
     const [blogs, videos, categories] = await Promise.all([
       blogStore.getPublished().catch(() => []),
       videoStore.getPublished().catch(() => []),
       categoryStore.getAll().catch(() => []),
     ])
 
-    // Static pages
+    // Static pages with proper lastmod dates
     const staticPages = [
       { url: "", changefreq: "daily", priority: "1.0", lastmod: new Date().toISOString() },
       { url: "/about", changefreq: "monthly", priority: "0.8", lastmod: new Date().toISOString() },
@@ -69,7 +65,7 @@ export async function GET() {
       },
     ])
 
-    // All pages
+    // Combine all pages
     const allPages = [...staticPages, ...blogPages, ...videoPages, ...categoryPages]
 
     // Generate XML sitemap
@@ -82,7 +78,7 @@ ${allPages
     <lastmod>${page.lastmod}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`
+  </url>`,
   )
   .join("\n")}
 </urlset>`
@@ -96,7 +92,8 @@ ${allPages
   } catch (error) {
     console.error("Error generating sitemap:", error)
 
-    // Fallback sitemap: always uses .in
+    // Fallback sitemap with essential pages
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
     const fallbackSitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>

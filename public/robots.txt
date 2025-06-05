@@ -1,8 +1,14 @@
 User-agent: *
+Allow: /
+
+# Block admin area from all search engines
 Disallow: /admin/
+Disallow: /admin/*
+
+# Block API routes
 Disallow: /api/
 
-# Explicitly allow main sections (redundant but harmless for clarity)
+# Allow specific pages
 Allow: /
 Allow: /about
 Allow: /blog
@@ -12,6 +18,5 @@ Allow: /faq
 Allow: /support
 Allow: /career
 
-# Sitemap entries
+# Sitemap location
 Sitemap: https://flavorstudios.in/sitemap.xml
-Sitemap: https://flavorstudios.in/sitemap-index.xml

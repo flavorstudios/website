@@ -1,24 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { categoryStore } from "@/lib/category-store"
 
-const FALLBACK_BASE_URL = "https://flavorstudios.in"
-
-export async function GET(_request: NextRequest): Promise<NextResponse> {
-  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || FALLBACK_BASE_URL).replace(/\/$/, "")
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
 
   try {
-    // 1. Get all categories for category-specific sitemaps
+    // Get all categories to create category-specific sitemaps
     const categories = await categoryStore.getAll()
 
-    // 2. List all section sitemaps here!
+    // Define the sitemaps
     const sitemaps = [
       { url: `${baseUrl}/sitemap.xml`, lastModified: new Date() },
       { url: `${baseUrl}/blog/sitemap.xml`, lastModified: new Date() },
       { url: `${baseUrl}/watch/sitemap.xml`, lastModified: new Date() },
     ]
 
-    // 3. Add a sitemap for every category (dynamic)
-    categories.forEach((category: any) => {
+    // Add category-specific sitemaps
+    categories.forEach((category) => {
       const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-")
       sitemaps.push({
         url: `${baseUrl}/category/${slug}/sitemap.xml`,
@@ -26,17 +24,19 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
       })
     })
 
-    // 4. Generate sitemap index XML
+    // Generate XML
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemaps
   .map(
-    (sitemap) => `  <sitemap>
+    (sitemap) => `
+  <sitemap>
     <loc>${sitemap.url}</loc>
     <lastmod>${sitemap.lastModified.toISOString()}</lastmod>
-  </sitemap>`
+  </sitemap>
+`,
   )
-  .join("\n")}
+  .join("")}
 </sitemapindex>`
 
     return new NextResponse(xml, {
@@ -48,7 +48,7 @@ ${sitemaps
   } catch (error) {
     console.error("Error generating sitemap index:", error)
 
-    // Fallback: minimal valid index
+    // Return a basic sitemap index if there's an error
     const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>

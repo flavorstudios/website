@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>404 Not Found | Flavor Studios</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet"/>
+  <meta name="description" content="Oops! The page you’re looking for isn’t here. Explore more stories at Flavor Studios." />
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', Arial, sans-serif;
+      background: linear-gradient(135deg, #fffaf3 0%, #ffe6f5 100%);
+      color: #292d34;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 0 1.5rem;
+      animation: fadeIn 0.9s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0;}
+      to { opacity: 1;}
+    }
+    .container {
+      background: rgba(255,255,255,0.95);
+      border-radius: 2rem;
+      box-shadow: 0 4px 32px 0 rgba(249,164,245,0.18), 0 1.5px 12px 0 rgba(220,220,245,0.12);
+      padding: 2.5rem 2rem 2rem 2rem;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .anime-icon {
+      margin-bottom: 1rem;
+      animation: float 2.5s ease-in-out infinite;
+      width: 56px;
+      height: 56px;
+      display: inline-block;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0);}
+      50% { transform: translateY(-18px);}
+    }
+    .title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -1px;
+      color: #f23d7a;
+      text-shadow: 0 2px 14px #ffd8ef60;
+    }
+    .subtitle {
+      font-size: 1.1rem;
+      margin-bottom: 1.7rem;
+      color: #6c7383;
+    }
+    .back-btn {
+      background: linear-gradient(90deg, #fcb0f7 0%, #ff84ba 100%);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.9rem 2.2rem;
+      border: none;
+      border-radius: 1.6rem;
+      box-shadow: 0 1.5px 8px 0 #ffd8ef60;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s;
+      outline: none;
+      margin-top: 0.7rem;
+      letter-spacing: 0.5px;
+    }
+    .back-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 5px 20px 0 #ffd8ef70;
+      background: linear-gradient(90deg, #ff84ba 0%, #fcb0f7 100%);
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 1.7rem 0.6rem 1.2rem 0.6rem;
+        max-width: 97vw;
+      }
+      .title { font-size: 2rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="anime-icon">
+      <!-- Cute anime eyes SVG, copyright-free & light theme friendly -->
+      <svg viewBox="0 0 64 64" fill="none">
+        <ellipse cx="20" cy="32" rx="12" ry="18" fill="#fff6fa" stroke="#f23d7a" stroke-width="3"/>
+        <ellipse cx="44" cy="32" rx="12" ry="18" fill="#fff6fa" stroke="#f23d7a" stroke-width="3"/>
+        <ellipse cx="20" cy="38" rx="5" ry="7" fill="#f23d7a" opacity="0.18"/>
+        <ellipse cx="44" cy="38" rx="5" ry="7" fill="#f23d7a" opacity="0.18"/>
+        <ellipse cx="20" cy="32" rx="5" ry="7" fill="#f23d7a" opacity="0.35"/>
+        <ellipse cx="44" cy="32" rx="5" ry="7" fill="#f23d7a" opacity="0.35"/>
+        <ellipse cx="20" cy="32" rx="2" ry="3" fill="#fff"/>
+        <ellipse cx="44" cy="32" rx="2" ry="3" fill="#fff"/>
+      </svg>
+    </div>
+    <div class="title">404</div>
+    <div class="subtitle">
+      Oops! The page you’re looking for doesn’t exist.<br>
+      But every lost story is a chance to discover something new!
+    </div>
+    <a href="/" style="text-decoration:none;">
+      <button class="back-btn">Back to Home</button>
+    </a>
+  </div>
+</body>
+</html>

@@ -3,36 +3,22 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, Eye, Youtube, Clock, Share2, ThumbsUp } from "lucide-react"
-// Optional: import your JSON-LD injection component if you use it
-// import { JsonLdScript } from "@/components/JsonLdScript"
 
-// 1. --- Robust SSR/Client-safe Video Fetcher ---
 async function getVideo(slug: string) {
   try {
-    const baseUrl =
-      typeof window === "undefined"
-        ? process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-        : ""
-    const apiUrl =
-      typeof window === "undefined"
-        ? `${baseUrl}/api/admin/videos`
-        : "/api/admin/videos"
-    const response = await fetch(apiUrl, { cache: "no-store" })
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`, {
+      cache: "no-store",
+    })
 
     if (!response.ok) {
       return null
     }
 
-    // Adjust to your actual API response shape
     const data = await response.json()
-    // Some APIs return { videos: [...] }, some just return [...]; adjust as needed:
-    const videos = Array.isArray(data) ? data : data.videos || []
+    const videos = data.videos || []
 
     return (
-      videos.find(
-        (video: any) =>
-          (video.slug === slug || video.id === slug) && video.status === "published"
-      ) || null
+      videos.find((video: any) => (video.slug === slug || video.id === slug) && video.status === "published") || null
     )
   } catch (error) {
     console.error("Failed to fetch video:", error)
@@ -40,112 +26,10 @@ async function getVideo(slug: string) {
   }
 }
 
-// 2. --- Dynamic Metadata Export ---
-export async function generateMetadata({ params }) {
-  const video = await getVideo(params.slug)
-
-  if (!video) {
-    const fallbackUrl = `https://flavorstudios.in/watch/${params.slug}`
-    return {
-      title: "Video Not Found – Flavor Studios",
-      description: "This video could not be found.",
-      alternates: { canonical: fallbackUrl },
-      openGraph: {
-        title: "Video Not Found",
-        description: "This video could not be found.",
-        url: fallbackUrl,
-        type: "video.other",
-        images: [
-          {
-            url: "https://flavorstudios.in/cover.jpg",
-            width: 1200,
-            height: 630,
-            alt: "Flavor Studios Cover",
-          },
-        ],
-      },
-      twitter: {
-        card: "summary_large_image",
-        site: "@flavor_studios",
-        title: "Video Not Found – Flavor Studios",
-        description: "This video could not be found.",
-        images: ["https://flavorstudios.in/cover.jpg"],
-      },
-      robots: "noindex, nofollow",
-    }
-  }
-
-  const canonicalUrl = `https://flavorstudios.in/watch/${video.slug}`
-  const ogImage = video.thumbnailUrl || "https://flavorstudios.in/cover.jpg"
-  const seoTitle = video.title
-  const seoDescription = video.description || "Watch creative anime content and tutorials at Flavor Studios."
-  const publishedTime = video.publishedAt || new Date().toISOString()
-  const tags = video.tags || []
-  const category = video.category || "Video"
-  const robots = "index, follow"
-
-  // JSON-LD Structured Data for VideoObject
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "VideoObject",
-    "name": seoTitle,
-    "description": seoDescription,
-    "thumbnailUrl": [ogImage],
-    "uploadDate": publishedTime,
-    "duration": video.duration,
-    "contentUrl": video.videoUrl,
-    "embedUrl": canonicalUrl,
-    "publisher": {
-      "@type": "Organization",
-      "name": "Flavor Studios",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://flavorstudios.in/favicon-512.png",
-      },
-    },
-    "genre": category,
-    "keywords": tags.join(", "),
-  }
-
-  return {
-    title: `${seoTitle} – Flavor Studios`,
-    description: seoDescription,
-    alternates: { canonical: canonicalUrl },
-    openGraph: {
-      title: seoTitle,
-      description: seoDescription,
-      url: canonicalUrl,
-      type: "video.other",
-      siteName: "Flavor Studios",
-      images: [
-        {
-          url: ogImage,
-          width: 1200,
-          height: 630,
-          alt: seoTitle,
-        },
-      ],
-      publishedTime,
-      section: category,
-      tags,
-    },
-    twitter: {
-      card: "summary_large_image",
-      site: "@flavor_studios",
-      title: seoTitle,
-      description: seoDescription,
-      images: [ogImage],
-    },
-    robots,
-    other: {
-      "schema:jsonld": JSON.stringify(jsonLd),
-    },
-  }
-}
-
-// 3. --- Video Page Component (with robust null checks) ---
 interface VideoPageProps {
-  params: { slug: string }
+  params: {
+    slug: string
+  }
 }
 
 export default async function VideoPage({ params }: VideoPageProps) {
@@ -155,16 +39,8 @@ export default async function VideoPage({ params }: VideoPageProps) {
     notFound()
   }
 
-  // Defensive: fallback if youtubeId missing
-  const embedUrl = video.youtubeId
-    ? `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`
-    : ""
-  const youtubeUrl = video.youtubeId
-    ? `https://www.youtube.com/watch?v=${video.youtubeId}`
-    : "#"
-
-  // --- (Optional) JSON-LD injection for SEO ---
-  // <JsonLdScript jsonLd={...}/>
+  const embedUrl = `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`
+  const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtubeId}`
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -175,15 +51,13 @@ export default async function VideoPage({ params }: VideoPageProps) {
             {/* Video Player */}
             <Card className="overflow-hidden">
               <div className="relative aspect-video">
-                {embedUrl && (
-                  <iframe
-                    src={embedUrl}
-                    title={video.title}
-                    className="w-full h-full"
-                    allowFullScreen
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  />
-                )}
+                <iframe
+                  src={embedUrl}
+                  title={video.title}
+                  className="w-full h-full"
+                  allowFullScreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                />
               </div>
             </Card>
 
@@ -193,25 +67,21 @@ export default async function VideoPage({ params }: VideoPageProps) {
                 <Badge variant="outline">{video.category}</Badge>
                 <span className="text-sm text-gray-500 flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  {video.publishedAt
-                    ? new Date(video.publishedAt).toLocaleDateString()
-                    : "Unknown"}
+                  {new Date(video.publishedAt).toLocaleDateString()}
                 </span>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
-                {video.title}
-              </h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">{video.title}</h1>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
-                    {(video.views ?? 0).toLocaleString()} views
+                    {video.views.toLocaleString()} views
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
-                    {video.duration || "?"}
+                    {video.duration}
                   </span>
                 </div>
 
@@ -232,9 +102,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
             <Card>
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-3">About this video</h3>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {video.description}
-                </p>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{video.description}</p>
 
                 {/* Tags */}
                 {video.tags && video.tags.length > 0 && (
@@ -280,11 +148,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
                   Creating original anime content, behind-the-scenes insights, and industry tutorials.
                 </p>
                 <Button asChild variant="outline" className="w-full">
-                  <a
-                    href="https://www.youtube.com/@flavorstudios"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href="https://www.youtube.com/@flavorstudios" target="_blank" rel="noopener noreferrer">
                     Subscribe to Channel
                   </a>
                 </Button>
@@ -298,21 +162,15 @@ export default async function VideoPage({ params }: VideoPageProps) {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Published</span>
-                    <span className="font-medium">
-                      {video.publishedAt
-                        ? new Date(video.publishedAt).toLocaleDateString()
-                        : "Unknown"}
-                    </span>
+                    <span className="font-medium">{new Date(video.publishedAt).toLocaleDateString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Duration</span>
-                    <span className="font-medium">{video.duration || "?"}</span>
+                    <span className="font-medium">{video.duration}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Views</span>
-                    <span className="font-medium">
-                      {(video.views ?? 0).toLocaleString()}
-                    </span>
+                    <span className="font-medium">{video.views.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Category</span>
@@ -326,4 +184,33 @@ export default async function VideoPage({ params }: VideoPageProps) {
       </div>
     </div>
   )
+}
+
+export async function generateMetadata({ params }: VideoPageProps) {
+  const video = await getVideo(params.slug)
+
+  if (!video) {
+    return {
+      title: "Video Not Found",
+    }
+  }
+
+  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
+
+  return {
+    title: video.title,
+    description: video.description,
+    openGraph: {
+      title: video.title,
+      description: video.description,
+      images: [thumbnailUrl],
+      type: "video.other",
+    },
+    twitter: {
+      card: "player",
+      title: video.title,
+      description: video.description,
+      images: [thumbnailUrl],
+    },
+  }
 }

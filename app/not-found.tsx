@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Home, BookOpen, Play, Phone, Compass, Coffee } from "lucide-react"
+import { Home, Search, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"
 
 export default function NotFound() {
   const quickLinks = [
@@ -64,12 +64,32 @@ export default function NotFound() {
             The page you're looking for seems to have wandered off into another dimension. Don't worry though—our studio
             has plenty of other amazing content to explore!
           </p>
+
+          {/* Primary CTA */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
+            <Button
+              asChild
+              size="lg"
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+            >
+              <Link href="/">
+                <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                Return to Home
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="w-full sm:w-auto border-blue-200 hover:bg-blue-50">
+              <Link href="/blog">
+                <Search className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                Search Our Content
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Quick Links */}
         <div className="mb-6 sm:mb-8">
           <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
-            Explore these popular sections:
+            Or explore these popular sections:
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
             {quickLinks.map((link) => (

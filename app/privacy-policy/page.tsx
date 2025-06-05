@@ -1,37 +1,3 @@
-import { getMetadata } from "@/lib/seo-utils"
-
-export const metadata = getMetadata({
-  title: "Privacy Policy | Flavor Studios",
-  description: "Read Flavor Studios’ Privacy Policy. Learn how we collect, use, and protect your personal data in a transparent, secure, and responsible manner.",
-  path: "/privacy-policy",
-  openGraph: {
-    images: ["https://flavorstudios.in/og-image.png"],
-    type: "article",
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@flavorstudios",
-    image: "https://flavorstudios.in/og-image.png",
-  },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Privacy Policy",
-    "description": "Flavor Studios’ official Privacy Policy. Learn how we handle your personal data, security, cookies, and privacy rights.",
-    "url": "https://flavorstudios.in/privacy-policy",
-    "publisher": {
-      "@type": "Organization",
-      "name": "Flavor Studios",
-      "url": "https://flavorstudios.in"
-    },
-    "datePublished": "2025-05-09",
-    "dateModified": "2025-05-09"
-  },
-  robots: "index, follow"
-});
-
-// <--- Add this blank line (or at least a semicolon above if you prefer)
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

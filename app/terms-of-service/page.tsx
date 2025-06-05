@@ -1,35 +1,3 @@
-import { getMetadata } from "@/lib/seo-utils"
-
-export const metadata = getMetadata({
-  title: "Terms of Service | Flavor Studios",
-  description: "Review Flavor Studios’ Terms of Service. Learn about our usage policies, user responsibilities, legal rights, and how we protect your experience.",
-  path: "/terms-of-service",
-  openGraph: {
-    images: ["https://flavorstudios.in/og-image.png"],
-    type: "article",
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@flavorstudios",
-    image: "https://flavorstudios.in/og-image.png",
-  },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Terms of Service",
-    "description": "Official Terms of Service for Flavor Studios—covering user guidelines, legal disclaimers, liabilities, moderation, and your rights as a visitor.",
-    "url": "https://flavorstudios.in/terms-of-service",
-    "publisher": {
-      "@type": "Organization",
-      "name": "Flavor Studios",
-      "url": "https://flavorstudios.in"
-    },
-    "datePublished": "2025-05-09",
-    "dateModified": "2025-05-09"
-  },
-  robots: "index, follow"
-});
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

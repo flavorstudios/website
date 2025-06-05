@@ -1,26 +1,24 @@
-// /lib/blog.ts
-
-import type { BlogPost, Category } from "./data"
-import { defaultCategories } from "./data"
-
-const BASE_URL =
-  typeof window === "undefined"
-    ? process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-    : ""
-
-function getApiUrl(path: string) {
-  return typeof window === "undefined"
-    ? `${BASE_URL}${path}`
-    : path
+export interface BlogPost {
+  id: string
+  title: string
+  slug: string
+  excerpt: string
+  content: string
+  category: string
+  tags: string[]
+  publishedAt: string
+  author: string
+  featured: boolean
+  imageUrl?: string
 }
 
-// --- Blog Store ---
 export const blogStore = {
   async getAllPosts(): Promise<BlogPost[]> {
     try {
-      const response = await fetch(getApiUrl("/api/admin/blogs"), {
+      const response = await fetch("/api/admin/blogs", {
         cache: "no-store",
       })
+
       if (response.ok) {
         const posts = await response.json()
         return posts || []
@@ -28,13 +26,14 @@ export const blogStore = {
     } catch (error) {
       console.warn("Failed to fetch blog posts:", error)
     }
+
     return []
   },
 
   async getPostBySlug(slug: string): Promise<BlogPost | null> {
     try {
       const posts = await this.getAllPosts()
-      return posts.find((post) => post?.slug === slug) || null
+      return posts.find((post) => post.slug === slug) || null
     } catch (error) {
       console.warn("Failed to fetch blog post:", error)
       return null
@@ -61,22 +60,4 @@ export const blogStore = {
       return []
     }
   },
-}
-
-// --- Categories ---
-export async function getDynamicCategories(): Promise<Category[]> {
-  try {
-    const response = await fetch(getApiUrl("/api/admin/categories"), {
-      cache: "no-store",
-    })
-    if (response.ok) {
-      const categories = await response.json()
-      if (categories && categories.length > 0) {
-        return categories
-      }
-    }
-  } catch (error) {
-    console.warn("Failed to fetch dynamic categories:", error)
-  }
-  return defaultCategories
 }

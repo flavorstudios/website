@@ -1,85 +1,40 @@
 import { NextResponse } from "next/server"
 import { blogStore, videoStore } from "@/lib/content-store"
 
-// XML attribute escape for URLs
-function escapeAttr(unsafe: string) {
-  return String(unsafe)
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-}
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, "").trim()
-}
-function truncateDescription(text: string, maxLength = 200): string {
-  if (!text) return ""
-  if (text.length <= maxLength) return text
-  return text.substring(0, maxLength).trim() + "..."
-}
-
 export async function GET() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
 
-    // Fetch all published blogs and videos
+    // Get latest content
     const [blogs, videos] = await Promise.all([
       blogStore.getPublished().catch(() => []),
       videoStore.getPublished().catch(() => []),
     ])
 
-    // Helper to add enclosures (image/audio/video) to each item
-    function getEnclosures(item: any): string {
-      let enclosures = ""
-
-      // Images (RSS best practice: use main thumbnail)
-      if (item.thumbnail || item.image || item.coverImage) {
-        const imgUrl = item.thumbnail || item.image || item.coverImage
-        enclosures += `<enclosure url="${escapeAttr(imgUrl)}" type="image/jpeg" length="0"/>`
-      }
-      // Audio (for podcasts)
-      if (item.audioUrl) {
-        enclosures += `<enclosure url="${escapeAttr(item.audioUrl)}" type="audio/mpeg" length="0"/>`
-      }
-      // Video (mp4 or YouTube direct)
-      if (item.videoUrl || item.youtubeUrl) {
-        const url = item.videoUrl || item.youtubeUrl
-        const type = item.videoUrl ? "video/mp4" : "video/*"
-        enclosures += `<enclosure url="${escapeAttr(url)}" type="${type}" length="0"/>`
-      }
-      return enclosures
-    }
-
-    // Merge and sort by newest date
+    // Combine and sort by date
     const allContent = [
       ...blogs.map((blog: any) => ({
         title: blog.title,
-        description: truncateDescription(stripHtml(blog.excerpt || blog.seoDescription || blog.content || "")),
+        description: blog.excerpt || blog.seoDescription || "",
         link: `${baseUrl}/blog/${blog.slug}`,
         pubDate: new Date(blog.publishedAt).toUTCString(),
-        categories: (blog.tags || [blog.category]).filter(Boolean), // support tags AND category
-        author: blog.author || "Flavor Studios",
-        enclosures: getEnclosures(blog),
+        category: blog.category,
+        type: "blog",
       })),
       ...videos.map((video: any) => ({
         title: video.title,
-        description: truncateDescription(stripHtml(video.description || "")),
-        link: `${baseUrl}/watch/${video.slug || video.id}`,
+        description: video.description || "",
+        link: `${baseUrl}/watch/${video.id}`,
         pubDate: new Date(video.publishedAt).toUTCString(),
-        categories: (video.tags || [video.category]).filter(Boolean),
-        author: "Flavor Studios",
-        enclosures: getEnclosures(video),
+        category: video.category,
+        type: "video",
       })),
     ]
       .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
-      .slice(0, 50)
+      .slice(0, 50) // Limit to 50 most recent items
 
     const rssXml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0"
-  xmlns:atom="http://www.w3.org/2005/Atom"
-  xmlns:dc="http://purl.org/dc/elements/1.1/"
->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Flavor Studios - Anime Creation & Stories</title>
     <description>Latest anime episodes, behind-the-scenes content, and creative insights from Flavor Studios</description>
@@ -101,12 +56,9 @@ ${allContent
       <description><![CDATA[${item.description}]]></description>
       <link>${item.link}</link>
       <pubDate>${item.pubDate}</pubDate>
-      ${item.categories.map((cat: string) => `<category><![CDATA[${cat}]]></category>`).join("\n      ")}
-      <author><![CDATA[${item.author}]]></author>
-      <dc:creator><![CDATA[${item.author}]]></dc:creator>
+      <category><![CDATA[${item.category}]]></category>
       <guid isPermaLink="true">${item.link}</guid>
-      ${item.enclosures}
-    </item>`
+    </item>`,
   )
   .join("\n")}
   </channel>
@@ -121,8 +73,8 @@ ${allContent
   } catch (error) {
     console.error("Error generating RSS feed:", error)
 
-    // Fallback RSS (.in domain)
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
+    // Fallback RSS
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
     const fallbackRss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>

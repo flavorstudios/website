@@ -13,7 +13,9 @@ const inter = Inter({
   display: "swap",
 })
 
-export const metadata: Metadata = { /* ...same as before... */ }
+export const metadata: Metadata = {
+    generator: 'v0.dev'
+}
 
 export default function RootLayout({
   children,

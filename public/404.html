@@ -1,123 +1,179 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>404 Not Found | Flavor Studios</title>
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet"/>
-  <meta name="description" content="Oops! The page you’re looking for isn’t here. Explore more stories at Flavor Studios." />
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', Arial, sans-serif;
-      background: linear-gradient(135deg, #fffaf3 0%, #ffe6f5 100%);
-      color: #292d34;
-      min-height: 100vh;
-      box-sizing: border-box;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 0 1.5rem;
-      animation: fadeIn 0.9s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0;}
-      to { opacity: 1;}
-    }
-    .container {
-      background: rgba(255,255,255,0.95);
-      border-radius: 2rem;
-      box-shadow: 0 4px 32px 0 rgba(249,164,245,0.18), 0 1.5px 12px 0 rgba(220,220,245,0.12);
-      padding: 2.5rem 2rem 2rem 2rem;
-      max-width: 380px;
-      width: 100%;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
-    .anime-icon {
-      margin-bottom: 1rem;
-      animation: float 2.5s ease-in-out infinite;
-      width: 56px;
-      height: 56px;
-      display: inline-block;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0);}
-      50% { transform: translateY(-18px);}
-    }
-    .title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      letter-spacing: -1px;
-      color: #f23d7a;
-      text-shadow: 0 2px 14px #ffd8ef60;
-    }
-    .subtitle {
-      font-size: 1.1rem;
-      margin-bottom: 1.7rem;
-      color: #6c7383;
-    }
-    .back-btn {
-      background: linear-gradient(90deg, #fcb0f7 0%, #ff84ba 100%);
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 600;
-      padding: 0.9rem 2.2rem;
-      border: none;
-      border-radius: 1.6rem;
-      box-shadow: 0 1.5px 8px 0 #ffd8ef60;
-      cursor: pointer;
-      transition: transform 0.12s, box-shadow 0.12s;
-      outline: none;
-      margin-top: 0.7rem;
-      letter-spacing: 0.5px;
-    }
-    .back-btn:hover {
-      transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 5px 20px 0 #ffd8ef70;
-      background: linear-gradient(90deg, #ff84ba 0%, #fcb0f7 100%);
-    }
-    @media (max-width: 480px) {
-      .container {
-        padding: 1.7rem 0.6rem 1.2rem 0.6rem;
-        max-width: 97vw;
-      }
-      .title { font-size: 2rem;}
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="anime-icon">
-      <!-- Cute anime eyes SVG, copyright-free & light theme friendly -->
-      <svg viewBox="0 0 64 64" fill="none">
-        <ellipse cx="20" cy="32" rx="12" ry="18" fill="#fff6fa" stroke="#f23d7a" stroke-width="3"/>
-        <ellipse cx="44" cy="32" rx="12" ry="18" fill="#fff6fa" stroke="#f23d7a" stroke-width="3"/>
-        <ellipse cx="20" cy="38" rx="5" ry="7" fill="#f23d7a" opacity="0.18"/>
-        <ellipse cx="44" cy="38" rx="5" ry="7" fill="#f23d7a" opacity="0.18"/>
-        <ellipse cx="20" cy="32" rx="5" ry="7" fill="#f23d7a" opacity="0.35"/>
-        <ellipse cx="44" cy="32" rx="5" ry="7" fill="#f23d7a" opacity="0.35"/>
-        <ellipse cx="20" cy="32" rx="2" ry="3" fill="#fff"/>
-        <ellipse cx="44" cy="32" rx="2" ry="3" fill="#fff"/>
-      </svg>
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Home, Search, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"
+
+export default function NotFound() {
+  const quickLinks = [
+    {
+      title: "Home",
+      description: "Return to our homepage",
+      href: "/",
+      icon: Home,
+      color: "from-blue-500 to-cyan-500",
+    },
+    {
+      title: "Blog",
+      description: "Read our latest stories",
+      href: "/blog",
+      icon: BookOpen,
+      color: "from-purple-500 to-pink-500",
+    },
+    {
+      title: "Watch",
+      description: "Explore our video content",
+      href: "/watch",
+      icon: Play,
+      color: "from-green-500 to-emerald-500",
+    },
+    {
+      title: "About",
+      description: "Learn about our studio",
+      href: "/about",
+      icon: Compass,
+      color: "from-orange-500 to-red-500",
+    },
+    {
+      title: "Contact",
+      description: "Get in touch with us",
+      href: "/contact",
+      icon: Phone,
+      color: "from-indigo-500 to-purple-500",
+    },
+  ]
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4">
+      <div className="max-w-4xl mx-auto text-center">
+        {/* 404 Animation */}
+        <div className="mb-6 sm:mb-8">
+          <div className="relative">
+            <h1
+              className="text-6xl sm:text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 animate-pulse"
+              aria-label="Error 404"
+            >
+              404
+            </h1>
+            <div
+              className="absolute inset-0 text-6xl sm:text-8xl md:text-9xl font-bold text-blue-100 -z-10 transform translate-x-1 translate-y-1 sm:translate-x-2 sm:translate-y-2"
+              aria-hidden="true"
+            >
+              404
+            </div>
+          </div>
+        </div>
+
+        {/* Main Message */}
+        <div className="mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">Oops! Page Not Found</h2>
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
+            The page you're looking for seems to have wandered off into another dimension. Don't worry though—our studio
+            has plenty of other amazing content to explore!
+          </p>
+
+          {/* Primary CTA */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
+            <Button
+              asChild
+              size="lg"
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg transition-all duration-200 min-h-[44px]"
+            >
+              <Link href="/" aria-label="Return to homepage">
+                <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                Return to Home
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="w-full sm:w-auto border-blue-200 hover:bg-blue-50 transition-all duration-200 min-h-[44px]"
+            >
+              <Link href="/blog" aria-label="Search our content">
+                <Search className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                Search Our Content
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* Quick Links */}
+        <div className="mb-6 sm:mb-8">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
+            Or explore these popular sections:
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+            {quickLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="group focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg"
+                aria-label={`Navigate to ${link.title}: ${link.description}`}
+              >
+                <Card className="h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 group-focus:shadow-xl group-focus:-translate-y-2">
+                  <CardContent className="p-4 sm:p-6 text-center">
+                    <div
+                      className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r ${link.color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                      aria-hidden="true"
+                    >
+                      <link.icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors text-sm sm:text-base">
+                      {link.title}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">{link.description}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Help Section */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-blue-100 shadow-lg">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Still can't find what you're looking for?</h3>
+          <p className="text-gray-600 mb-6">
+            Our team is here to help! Reach out to us and we'll get you back on track.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Button
+              asChild
+              variant="outline"
+              className="border-blue-200 hover:bg-blue-50 transition-all duration-200 min-h-[44px]"
+            >
+              <Link href="/contact" aria-label="Contact our support team">
+                <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
+                Contact Support
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="border-blue-200 hover:bg-blue-50 transition-all duration-200 min-h-[44px]"
+            >
+              <Link href="/faq" aria-label="Check frequently asked questions">
+                <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" />
+                Check FAQ
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="border-orange-200 hover:bg-orange-50 transition-all duration-200 min-h-[44px]"
+            >
+              <Link href="/support" aria-label="Support our studio">
+                <Coffee className="mr-2 h-4 w-4" aria-hidden="true" />
+                Support Us
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* Footer Message */}
+        <div className="mt-6 sm:mt-8 text-xs sm:text-sm text-gray-500">
+          <p>Error Code: 404 • Page Not Found • Flavor Studios</p>
+        </div>
+      </div>
     </div>
-    <div class="title">404</div>
-    <div class="subtitle">
-      Oops! The page you’re looking for doesn’t exist.<br>
-      But every lost story is a chance to discover something new!
-    </div>
-    <a href="/" style="text-decoration:none;">
-      <button class="back-btn">Back to Home</button>
-    </a>
-  </div>
-</body>
-</html>
+  )
+}

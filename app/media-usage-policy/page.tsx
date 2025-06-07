@@ -1,3 +1,28 @@
+import { getMetadata } from "@/lib/seo-utils";
+
+export const metadata = getMetadata({
+  title: "Media Usage Policy",
+  description: "Read the Media Usage Policy for Flavor Studios. Learn about acceptable, prohibited, and commercial use of our animation, images, and content. Attribution rules included.",
+  path: "/media-usage-policy",
+  ogImage: "https://flavorstudios.in/cover.jpg",
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Media Usage Policy",
+    description: "Read the Media Usage Policy for Flavor Studios. Learn about acceptable, prohibited, and commercial use of our animation, images, and content. Attribution rules included.",
+    url: "https://flavorstudios.in/media-usage-policy",
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.svg"
+      }
+    }
+  }
+});
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

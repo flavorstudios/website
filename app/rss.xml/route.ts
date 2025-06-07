@@ -3,7 +3,8 @@ import { blogStore, videoStore } from "@/lib/content-store"
 
 export async function GET() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+    // Always use .in domain, never .com
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
 
     // Get latest content
     const [blogs, videos] = await Promise.all([
@@ -73,8 +74,8 @@ ${allContent
   } catch (error) {
     console.error("Error generating RSS feed:", error)
 
-    // Fallback RSS
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+    // Fallback RSS: always .in domain!
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
     const fallbackRss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>

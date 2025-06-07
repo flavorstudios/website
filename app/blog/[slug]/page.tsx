@@ -32,7 +32,7 @@ interface BlogPostPageProps {
   }
 }
 
-// --- CENTRALIZED SEO METADATA (ADVANCED: OG, Twitter, Schema) ---
+// --- CLEAN CENTRALIZED SEO METADATA (OG, Twitter, Schema) ---
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const post = await getBlogPost(params.slug)
 
@@ -55,26 +55,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     title: `${seoTitle} – Flavor Studios`,
     description: seoDescription,
     path: `/blog/${post.slug}`,
-    openGraph: {
-      images: [ogImage],
-      type: "article",
-      url: canonicalUrl,
-      article: {
-        published_time: post.publishedAt,
-        modified_time: post.updatedAt || post.publishedAt,
-        author: post.author ? [`https://flavorstudios.in/`] : undefined,
-        tags: post.tags,
-      },
-      appId: "1404440770881914", // Facebook App ID
-    },
-    twitter: {
-      card: "summary_large_image",
-      site: "@flavorstudios",
-      creator: "@flavorstudios",
-      image: ogImage,
-      title: seoTitle,
-      description: seoDescription,
-    },
+    ogImage,
     schema: {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
@@ -100,6 +81,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
         "@id": canonicalUrl
       }
     }
+    // robots can be added if needed, e.g., robots: "index, follow"
   })
 }
 

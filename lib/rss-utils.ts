@@ -93,7 +93,8 @@ ${xmlItems}
 export async function generateRssFeed(): Promise<string> {
   try {
     const { blogStore, videoStore } = await import("./content-store")
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+    // --- Always .in, never .com! ---
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
 
     // Fetch published content
     const [blogPosts, videos] = await Promise.all([
@@ -162,8 +163,8 @@ export async function generateRssFeed(): Promise<string> {
   } catch (error) {
     console.error("Error generating RSS feed:", error)
 
-    // Return minimal RSS feed on error
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+    // --- Fallback: always .in domain! ---
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
     return generateRSSXML(
       {
         title: "Flavor Studios",

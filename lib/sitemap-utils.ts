@@ -1,3 +1,6 @@
+// lib/sitemap-utils.ts
+
+// Sitemap entry interface
 export interface SitemapUrl {
   url: string
   priority: string
@@ -5,6 +8,7 @@ export interface SitemapUrl {
   lastmod?: string
 }
 
+// Generate the XML for any list of URLs (for all sitemaps)
 export function generateSitemapXML(baseUrl: string, urls: SitemapUrl[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -26,6 +30,7 @@ ${urls
 </urlset>`
 }
 
+// Static pages to always include in the main sitemap
 export function getStaticPages(): SitemapUrl[] {
   return [
     { url: "/", priority: "1.0", changefreq: "daily" },
@@ -46,6 +51,7 @@ export function getStaticPages(): SitemapUrl[] {
   ]
 }
 
+// Dynamically fetch blog and video pages for the sitemap
 export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]> {
   const dynamicPages: SitemapUrl[] = []
 

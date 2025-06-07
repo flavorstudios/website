@@ -1,3 +1,28 @@
+import { getMetadata } from "@/lib/seo-utils";
+
+export const metadata = getMetadata({
+  title: "Terms of Service",
+  description: "Read the Terms of Service for using Flavor Studios and our content.",
+  path: "/terms-of-service",
+  ogImage: "https://flavorstudios.in/cover.jpg",
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Terms of Service",
+    description: "Read the Terms of Service for using Flavor Studios and our content.",
+    url: "https://flavorstudios.in/terms-of-service",
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.svg"
+      }
+    }
+  }
+});
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

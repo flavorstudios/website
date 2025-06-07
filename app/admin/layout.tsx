@@ -1,10 +1,14 @@
 import type React from "react"
 import "../globals.css"
+import { getMetadata } from "@/lib/seo-utils"
 
-export const metadata = {
+// Use centralized metadata for admin layout
+export const metadata = getMetadata({
   title: "Flavor Studios Admin",
   description: "Admin dashboard for Flavor Studios",
-}
+  path: "/admin",
+  robots: "noindex, nofollow",
+})
 
 export default function AdminLayout({
   children,

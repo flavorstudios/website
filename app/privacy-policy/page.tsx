@@ -4,7 +4,16 @@ export const metadata = getMetadata({
   title: "Privacy Policy",
   description: "Our Privacy Policy explains how Flavor Studios collects, uses, and protects your data on https://flavorstudios.in.",
   path: "/privacy-policy",
-  ogImage: "https://flavorstudios.in/cover.jpg",
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  robots: "noindex, nofollow", // Prevents indexing of legal page
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

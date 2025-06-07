@@ -51,8 +51,8 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
       <description><![CDATA[${item.description}]]></description>
       <link>${item.link}</link>
       <pubDate>${item.pubDate}</pubDate>
-      ${item.category ? `<category><![CDATA[${item.category}]]></category>` : ""}
-      ${item.author ? `<author><![CDATA[${item.author}]]></author>` : ""}
+      <category><![CDATA[${item.category || "General"}]]></category>
+      <author><![CDATA[${item.author || "Flavor Studios"}]]></author>
       <guid isPermaLink="true">${item.guid || item.link}</guid>
       ${
         item.enclosure
@@ -85,6 +85,7 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
     </image>`
         : ""
     }
+    <generator>Flavor Studios RSS Generator</generator>
 ${xmlItems}
   </channel>
 </rss>`
@@ -108,7 +109,7 @@ export async function generateRssFeed(): Promise<string> {
       description: truncateDescription(stripHtml(post.excerpt || post.content)),
       link: `${baseUrl}/blog/${post.slug}`,
       pubDate: formatRSSDate(post.publishedAt),
-      category: post.category,
+      category: post.category || "General",
       author: post.author || "Flavor Studios",
       guid: `${baseUrl}/blog/${post.slug}`,
     }))
@@ -119,7 +120,7 @@ export async function generateRssFeed(): Promise<string> {
       description: truncateDescription(stripHtml(video.description)),
       link: `${baseUrl}/watch/${video.slug || video.id}`,
       pubDate: formatRSSDate(video.publishedAt),
-      category: video.category,
+      category: video.category || "General",
       author: "Flavor Studios",
       guid: `${baseUrl}/watch/${video.slug || video.id}`,
       enclosure: video.thumbnail

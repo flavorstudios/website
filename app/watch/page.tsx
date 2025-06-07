@@ -1,35 +1,16 @@
+import { getMetadata } from "@/lib/seo-utils"
+import Link from "next/link"
+// ...all your other imports...
+
 export const metadata = getMetadata({
-  title: "Watch – Flavor Studios",
-  description:
-    "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
+  title: "Watch",
+  description: "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
   path: "/watch",
   openGraph: {
-    images: ["https://flavorstudios.in/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Watch"],
+    images: ["/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Watch"],
     type: "website",
   },
-  twitter: {
-    card: "summary_large_image",
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
-    image: "https://flavorstudios.in/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Watch",
-  },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "Watch – Flavor Studios",
-    "description": "Browse original anime series, short films, and exclusive videos by Flavor Studios.",
-    "url": "https://flavorstudios.in/watch",
-    "publisher": {
-      "@type": "Organization",
-      "name": "Flavor Studios",
-      "url": "https://flavorstudios.in",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://flavorstudios.in/favicon.png"
-      }
-    }
-  }
-})
+});
 
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

@@ -4,7 +4,16 @@ export const metadata = getMetadata({
   title: "Disclaimer",
   description: "Read the Disclaimer for Flavor Studios. Learn about our legal limitations, content liability, third-party links, and user responsibilities on https://flavorstudios.in.",
   path: "/disclaimer",
-  ogImage: "https://flavorstudios.in/cover.jpg",
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

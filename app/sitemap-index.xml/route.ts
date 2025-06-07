@@ -1,31 +1,29 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { categoryStore } from "@/lib/category-store"
 
-// Hardcode canonical domain for all sitemap entries (never .com)
 const BASE_URL = "https://flavorstudios.in"
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    // Get all categories for category-specific sitemaps
-    const categories = await categoryStore.getAll()
+    // --- If you want to disable category sitemaps for now, comment out the next 4 lines ---
+    // const categories = await categoryStore.getAll()
+    // const categorySitemaps = categories.map((category: any) => {
+    //   const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-")
+    //   return {
+    //     url: `${BASE_URL}/category/${slug}/sitemap.xml`,
+    //     lastModified: new Date(category.updatedAt || category.createdAt || new Date()),
+    //   }
+    // })
 
-    // Define the sitemaps (main, blog, watch)
+    // Main sitemaps (always exist)
     const sitemaps = [
       { url: `${BASE_URL}/sitemap.xml`, lastModified: new Date() },
       { url: `${BASE_URL}/blog/sitemap.xml`, lastModified: new Date() },
       { url: `${BASE_URL}/watch/sitemap.xml`, lastModified: new Date() },
+      // ...categorySitemaps // Uncomment if category sitemaps are implemented and routes exist!
     ]
 
-    // Add category-specific sitemaps (future-proof)
-    categories.forEach((category: any) => {
-      const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-")
-      sitemaps.push({
-        url: `${BASE_URL}/category/${slug}/sitemap.xml`,
-        lastModified: new Date(category.updatedAt || category.createdAt || new Date()),
-      })
-    })
-
-    // Generate XML sitemap index
+    // Generate XML
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemaps
@@ -47,7 +45,7 @@ ${sitemaps
   } catch (error) {
     console.error("Error generating sitemap index:", error)
 
-    // Basic fallback sitemap index (main sitemap only)
+    // Fallback: only main sitemap
     const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Eye, User, Clock } from "lucide-react"
 import CommentSection from "./components/comment-section"
 import SocialShare from "./components/social-share"
+import { getMetadata } from "@/lib/seo-utils"
 
 async function getBlogPost(slug: string) {
   try {
@@ -29,6 +30,24 @@ interface BlogPostPageProps {
   params: {
     slug: string
   }
+}
+
+// --- CENTRALIZED METADATA ---
+export async function generateMetadata({ params }: BlogPostPageProps) {
+  const post = await getBlogPost(params.slug)
+
+  if (!post) {
+    return {
+      title: "Post Not Found",
+    }
+  }
+
+  return getMetadata({
+    title: post.seoTitle || post.title,
+    description: post.seoDescription || post.excerpt,
+    path: `/blog/${params.slug}`,
+    ogImage: post.coverImage,
+  })
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
@@ -123,24 +142,4 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       </article>
     </div>
   )
-}
-
-export async function generateMetadata({ params }: BlogPostPageProps) {
-  const post = await getBlogPost(params.slug)
-
-  if (!post) {
-    return {
-      title: "Post Not Found",
-    }
-  }
-
-  return {
-    title: post.seoTitle || post.title,
-    description: post.seoDescription || post.excerpt,
-    openGraph: {
-      title: post.title,
-      description: post.excerpt,
-      images: post.coverImage ? [post.coverImage] : [],
-    },
-  }
 }

@@ -1,3 +1,38 @@
+import { getMetadata } from "@/lib/seo-utils";
+
+export const metadata = getMetadata({
+  title: "Watch – Flavor Studios | Original Anime & Video Content",
+  description:
+    "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
+  path: "/watch",
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    creator: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Watch – Flavor Studios",
+    description: "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
+    url: "https://flavorstudios.in/watch",
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.png"
+      }
+    }
+  }
+});
+
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

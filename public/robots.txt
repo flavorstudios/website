@@ -8,8 +8,11 @@ Disallow: /admin/*
 # Block API routes
 Disallow: /api/
 
-# Allow specific pages
-Allow: /
+# Block temp/test/dev pages (future-proof)
+Disallow: /test/
+Disallow: /temp/
+
+# Allow main public pages (redundant but explicit)
 Allow: /about
 Allow: /blog
 Allow: /watch
@@ -18,5 +21,18 @@ Allow: /faq
 Allow: /support
 Allow: /career
 
-# Sitemap location
+# Optional: Block search and query pages (not required for most, but safe)
+Disallow: /*?
+Disallow: /*search=
+
+# Sitemaps (dynamic, future-proof)
 Sitemap: https://flavorstudios.in/sitemap.xml
+Sitemap: https://flavorstudios.in/sitemap-index.xml
+Sitemap: https://flavorstudios.in/blog/sitemap.xml
+Sitemap: https://flavorstudios.in/watch/sitemap.xml
+
+# RSS Feed (if you publish one)
+Sitemap: https://flavorstudios.in/rss.xml
+
+# Optional: Crawl-delay for less server strain (ignored by Google/Bing)
+Crawl-delay: 1

@@ -1,3 +1,39 @@
+import { getMetadata } from "@/lib/seo-utils";
+
+export const metadata = getMetadata({
+  title: "Careers – Flavor Studios",
+  description:
+    "Explore creative career opportunities at Flavor Studios. Join our talent list, discover recently filled positions, and stay connected for future roles in animation, writing, voice acting, and more.",
+  path: "/career",
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    creator: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Careers at Flavor Studios",
+    description:
+      "Explore creative career opportunities at Flavor Studios. Join our talent list, discover recently filled positions, and stay connected for future roles in animation, writing, voice acting, and more.",
+    url: "https://flavorstudios.in/career",
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.png",
+      },
+    },
+  },
+});
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

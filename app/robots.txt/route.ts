@@ -1,21 +1,20 @@
 import { NextResponse } from "next/server"
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.com"
+  // Always use the canonical .in domain for SEO consistency
+  const baseUrl = "https://flavorstudios.in"
 
-  const robotsTxt = `User-agent: *
+  const robotsTxt = `
+User-agent: *
 Allow: /
 
-# Disallow admin and API routes
+# Disallow admin, API, and test/dev pages
 Disallow: /admin/
 Disallow: /api/
-
-# Disallow temporary or test pages
 Disallow: /test/
 Disallow: /temp/
 
-# Allow important pages
-Allow: /
+# Allow all main public pages (redundant with Allow: /, but explicit for clarity)
 Allow: /about
 Allow: /watch
 Allow: /blog
@@ -25,15 +24,29 @@ Allow: /career
 Allow: /support
 Allow: /play
 
-# Sitemap location
+# Sitemap locations (all .in, no .com, auto-updating sitemaps)
 Sitemap: ${baseUrl}/sitemap.xml
 Sitemap: ${baseUrl}/sitemap-index.xml
+Sitemap: ${baseUrl}/blog/sitemap.xml
+Sitemap: ${baseUrl}/watch/sitemap.xml
 
 # RSS Feed
 Sitemap: ${baseUrl}/rss.xml
 
-# Crawl delay (optional)
-Crawl-delay: 1`
+# Explicitly block crawling of query parameters & search (optional, industry best-practice)
+Disallow: /*?
+Disallow: /*search=
+
+# Crawl-delay for less server strain (optional, Google ignores, but some bots respect)
+Crawl-delay: 1
+
+# Industry-standard: No indexing of non-production environments (if you ever add, like, staging.)
+# Uncomment if needed:
+# User-agent: *
+# Disallow: /
+
+# End of robots.txt
+`.trim()
 
   return new NextResponse(robotsTxt, {
     headers: {

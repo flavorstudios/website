@@ -1,3 +1,39 @@
+import { getMetadata } from "@/lib/seo-utils";
+
+export const metadata = getMetadata({
+  title: "About – Flavor Studios",
+  description:
+    "Discover the mission, values, and story behind Flavor Studios. We are an independent animation studio crafting emotionally resonant anime and original 3D animated content with a community-driven approach.",
+  path: "/about",
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    creator: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: "About Flavor Studios",
+    description:
+      "Discover the mission, values, and story behind Flavor Studios. We are an independent animation studio crafting emotionally resonant anime and original 3D animated content with a community-driven approach.",
+    url: "https://flavorstudios.in/about",
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.png",
+      },
+    },
+  },
+});
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import {

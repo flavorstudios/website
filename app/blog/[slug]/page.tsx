@@ -32,21 +32,64 @@ interface BlogPostPageProps {
   }
 }
 
-// --- CENTRALIZED METADATA ---
+// --- CENTRALIZED SEO METADATA ---
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const post = await getBlogPost(params.slug)
 
   if (!post) {
     return {
-      title: "Post Not Found",
+      title: "Post Not Found – Flavor Studios",
+      description: "This blog post could not be found.",
+      alternates: {
+        canonical: `https://flavorstudios.in/blog/${params.slug}`,
+      },
     }
   }
 
+  const canonicalUrl = `https://flavorstudios.in/blog/${post.slug}`
+  const ogImage = post.coverImage || "https://flavorstudios.in/cover.jpg"
+  const seoTitle = post.seoTitle || post.title
+  const seoDescription = post.seoDescription || post.excerpt
+
   return getMetadata({
-    title: post.seoTitle || post.title,
-    description: post.seoDescription || post.excerpt,
-    path: `/blog/${params.slug}`,
-    ogImage: post.coverImage,
+    title: `${seoTitle} – Flavor Studios`,
+    description: seoDescription,
+    path: `/blog/${post.slug}`,
+    openGraph: {
+      images: [ogImage],
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: "@flavorstudios",
+      creator: "@flavorstudios",
+      image: ogImage,
+    },
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": seoTitle,
+      "description": seoDescription,
+      "image": ogImage,
+      "author": {
+        "@type": "Person",
+        "name": post.author || "Flavor Studios"
+      },
+      "datePublished": post.publishedAt,
+      "dateModified": post.updatedAt || post.publishedAt,
+      "publisher": {
+        "@type": "Organization",
+        "name": "Flavor Studios",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://flavorstudios.in/logo.png"
+        }
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": canonicalUrl
+      }
+    }
   })
 }
 
@@ -83,7 +126,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             )}
             <span className="flex items-center gap-1">
               <Eye className="h-4 w-4" />
-              {post.views.toLocaleString()} views
+              {post.views?.toLocaleString() ?? 0} views
             </span>
             {post.readTime && (
               <span className="flex items-center gap-1">

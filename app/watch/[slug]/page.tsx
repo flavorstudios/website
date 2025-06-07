@@ -33,23 +33,73 @@ interface VideoPageProps {
   }
 }
 
-// --- CENTRALIZED METADATA ONLY ---
+// --- CENTRALIZED METADATA (with FB App ID + Twitter Player) ---
 export async function generateMetadata({ params }: VideoPageProps) {
   const video = await getVideo(params.slug)
 
   if (!video) {
     return {
-      title: "Video Not Found",
+      title: "Video Not Found – Flavor Studios",
+      description: "This video could not be found.",
+      alternates: {
+        canonical: `https://flavorstudios.in/watch/${params.slug}`,
+      },
     }
   }
 
+  const canonicalUrl = `https://flavorstudios.in/watch/${video.slug || params.slug}`
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
+  const seoTitle = video.title
+  const seoDescription = video.description
 
   return getMetadata({
-    title: video.title,
-    description: video.description,
-    path: `/watch/${params.slug}`,
-    ogImage: thumbnailUrl,
+    title: `${seoTitle} – Watch | Flavor Studios`,
+    description: seoDescription,
+    path: `/watch/${video.slug || params.slug}`,
+    openGraph: {
+      images: [thumbnailUrl],
+      type: "video.other",
+      video: {
+        url: `https://www.youtube.com/watch?v=${video.youtubeId}`,
+        secureUrl: `https://www.youtube.com/watch?v=${video.youtubeId}`,
+        type: "text/html",
+        width: 1280,
+        height: 720,
+      },
+      appId: "1404440770881914", // Facebook App ID
+    },
+    twitter: {
+      card: "player",
+      site: "@flavorstudios",
+      creator: "@flavorstudios",
+      image: thumbnailUrl,
+      player: `https://www.youtube.com/embed/${video.youtubeId}`,
+      playerWidth: "1280",
+      playerHeight: "720",
+    },
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "VideoObject",
+      "name": seoTitle,
+      "description": seoDescription,
+      "thumbnailUrl": [thumbnailUrl],
+      "uploadDate": video.publishedAt,
+      "duration": video.duration,
+      "embedUrl": `https://www.youtube.com/embed/${video.youtubeId}`,
+      "interactionStatistic": {
+        "@type": "InteractionCounter",
+        "interactionType": { "@type": "WatchAction" },
+        "userInteractionCount": video.views,
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Flavor Studios",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://flavorstudios.in/logo.png"
+        }
+      }
+    }
   })
 }
 
@@ -111,9 +161,17 @@ export default async function VideoPage({ params }: VideoPageProps) {
                     <ThumbsUp className="h-4 w-4 mr-2" />
                     Like
                   </Button>
-                  <Button variant="outline" size="sm">
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share
+                  <Button variant="outline" size="sm" asChild>
+                    <a
+                      href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
+                        `https://flavorstudios.in/watch/${video.slug || params.slug}`
+                      )}&text=${encodeURIComponent(`Watch "${video.title}" on Flavor Studios!`)}&hashtags=Anime,Animation`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share
+                    </a>
                   </Button>
                 </div>
               </div>

@@ -5,14 +5,14 @@ export const metadata = getMetadata({
   description: "Find answers to common questions about Flavor Studios, animation, support, and our creative process. Get the info you need to enjoy our content and community.",
   path: "/faq",
   openGraph: {
-    images: ["https://flavorstudios.in/og-faq.png"],
+    images: ["https://flavorstudios.in/cover.jpg"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    image: "https://flavorstudios.in/og-faq.png",
+    image: "https://flavorstudios.in/cover.jpg",
   },
   schema: {
     "@context": "https://schema.org",

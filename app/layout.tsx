@@ -1,83 +1,21 @@
-import type React from "react"
-import type { Metadata } from "next"
-import "./globals.css"
-import { Inter } from "next/font/google"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { BackToTop } from "@/components/back-to-top"
+import type React from "react";
+import "./globals.css";
+import { Inter } from "next/font/google";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { BackToTop } from "@/components/back-to-top";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
-})
+});
 
-export const metadata: Metadata = {
-  title: {
-    default: "Flavor Studios – Anime & Stories That Stay With You",
-    template: "%s | Flavor Studios",
-  },
+export const metadata = {
+  title: "Flavor Studios – Anime & Stories That Stay With You",
   description:
     "Explore powerful animations, blogs, and games that inspire, entertain, and connect with your soul. Made with love by Flavor Studios.",
-  keywords: ["animation", "anime", "design", "creative studio", "visual effects", "storytelling", "games"],
-  authors: [{ name: "Flavor Studios", url: "https://flavorstudios.in" }],
-  creator: "Flavor Studios",
-  publisher: "Flavor Studios",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
   metadataBase: new URL("https://flavorstudios.in"),
-  alternates: {
-    canonical: "/",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  verification: {
-    google: "MeePZ4w9DtPgCxWKExhl-q-KmjeE9F3nhDU9Iu2QKhY",
-  },
-  openGraph: {
-    title: "Flavor Studios – Anime & Stories That Stay With You",
-    description:
-      "Explore powerful animations, blogs, and games that inspire, entertain, and connect with your soul. Made with love by Flavor Studios.",
-    url: "https://flavorstudios.in",
-    type: "website",
-    locale: "en_US",
-    siteName: "Flavor Studios",
-    images: [
-      {
-        url: "https://flavorstudios.in/cover.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Flavor Studios – Original Anime, Stories & Life Lessons",
-        type: "image/jpeg",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@flavor_studios",
-    creator: "@flavor_studios",
-    title: "Flavor Studios – Anime & Stories That Stay With You",
-    description:
-      "Explore powerful animations, blogs, and games that inspire, entertain, and connect with your soul. Made with love by Flavor Studios.",
-    images: ["https://flavorstudios.in/cover.jpg"],
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-  },
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
@@ -85,14 +23,14 @@ export const metadata: Metadata = {
   },
   other: {
     "fediverse:creator": "@flavorstudios@mastodon.social",
+    generator: "v0.dev",
   },
-    generator: 'v0.dev'
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" className={inter.variable}>
@@ -106,5 +44,5 @@ export default function RootLayout({
         <BackToTop />
       </body>
     </html>
-  )
+  );
 }

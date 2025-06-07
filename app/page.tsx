@@ -1,3 +1,41 @@
+import { getMetadata } from "@/lib/seo-utils";
+
+export const metadata = getMetadata({
+  title: "Flavor Studios – Original Anime, Animation & Storytelling",
+  description:
+    "Flavor Studios is an independent anime and animation studio bringing stories to life with 3D animated content, original series, behind-the-scenes, and creative insights. Discover, watch, and be inspired.",
+  path: "/",
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    creator: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Flavor Studios",
+    description:
+      "Flavor Studios is an independent anime and animation studio bringing stories to life with 3D animated content, original series, behind-the-scenes, and creative insights.",
+    url: "https://flavorstudios.in/",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://flavorstudios.in/logo.png",
+    },
+    sameAs: [
+      "https://www.youtube.com/@flavorstudios",
+      "https://www.instagram.com/flavorstudios",
+      "https://twitter.com/flavor_studios",
+      "https://www.facebook.com/flavourstudios",
+      "https://www.threads.net/@flavorstudios",
+    ],
+  },
+});
+
 import { Suspense } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"

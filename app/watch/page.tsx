@@ -1,15 +1,18 @@
 import { getMetadata } from "@/lib/seo-utils"
 import Link from "next/link"
-// ...all your other imports...
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react"
+import { getDynamicCategories } from "@/lib/dynamic-categories"
+import { CategoryTabs } from "@/components/ui/category-tabs"
 
+// ✅ CENTRALIZED SEO METADATA ONLY!
 export const metadata = getMetadata({
   title: "Watch",
   description: "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
   path: "/watch",
-  openGraph: {
-    images: ["/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Watch"],
-    type: "website",
-  },
+  ogImage: "/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Watch",
 });
 
 import Link from "next/link"

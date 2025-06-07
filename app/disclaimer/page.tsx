@@ -1,3 +1,28 @@
+import { getMetadata } from "@/lib/seo-utils";
+
+export const metadata = getMetadata({
+  title: "Disclaimer",
+  description: "Read the Disclaimer for Flavor Studios. Learn about our legal limitations, content liability, third-party links, and user responsibilities on https://flavorstudios.in.",
+  path: "/disclaimer",
+  ogImage: "https://flavorstudios.in/cover.jpg",
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Disclaimer",
+    description: "Read the Disclaimer for Flavor Studios. Learn about our legal limitations, content liability, third-party links, and user responsibilities on https://flavorstudios.in.",
+    url: "https://flavorstudios.in/disclaimer",
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.svg"
+      }
+    }
+  }
+});
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

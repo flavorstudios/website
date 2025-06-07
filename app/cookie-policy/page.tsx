@@ -4,7 +4,16 @@ export const metadata = getMetadata({
   title: "Cookie Policy",
   description: "Read the Cookie Policy for Flavor Studios. Learn how we use cookies and how you can control your privacy on https://flavorstudios.in.",
   path: "/cookie-policy",
-  ogImage: "https://flavorstudios.in/cover.jpg",
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

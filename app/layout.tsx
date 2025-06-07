@@ -35,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
-        <meta property="fb:app_id" content="239785049383481" />
+        <meta property="fb:app_id" content="1404440770881914" />
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
       </head>
       <body className={`${inter.className} antialiased`}>

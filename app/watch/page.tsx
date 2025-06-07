@@ -1,5 +1,13 @@
 import { getMetadata } from "@/lib/seo-utils";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react";
+import { getDynamicCategories } from "@/lib/dynamic-categories";
+import { CategoryTabs } from "@/components/ui/category-tabs";
 
+// ✅ Only this ONE metadata declaration!
 export const metadata = getMetadata({
   title: "Watch – Flavor Studios | Original Anime & Video Content",
   description:
@@ -33,32 +41,6 @@ export const metadata = getMetadata({
   }
 });
 
-import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react"
-import { getDynamicCategories } from "@/lib/dynamic-categories"
-import { CategoryTabs } from "@/components/ui/category-tabs"
-
-export const metadata = {
-  title: "Watch | Flavor Studios - Original Anime & Video Content",
-  description:
-    "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
-  keywords: "anime videos, original series, short films, behind the scenes, animation studio, watch anime",
-  openGraph: {
-    title: "Flavor Studios Watch - Original Content & Series",
-    description: "Bringing anime to life—one frame at a time.",
-    type: "website",
-    images: ["/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Watch"],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Flavor Studios Watch",
-    description: "Bringing anime to life—one frame at a time.",
-  },
-}
-
 async function getWatchData() {
   try {
     const [videosResponse, { videoCategories }] = await Promise.all([
@@ -66,58 +48,58 @@ async function getWatchData() {
         cache: "no-store",
       }).catch(() => ({ ok: false, json: () => Promise.resolve({ videos: [] }) })),
       getDynamicCategories(),
-    ])
+    ]);
 
-    let videos = []
+    let videos = [];
     if (videosResponse.ok) {
-      const videosData = await videosResponse.json()
-      videos = (videosData.videos || []).filter((video: any) => video.status === "published")
+      const videosData = await videosResponse.json();
+      videos = (videosData.videos || []).filter((video) => video.status === "published");
     }
 
-    return { videos, categories: videoCategories }
+    return { videos, categories: videoCategories };
   } catch (error) {
-    console.error("Failed to fetch watch data:", error)
-    return { videos: [], categories: [] }
+    console.error("Failed to fetch watch data:", error);
+    return { videos: [], categories: [] };
   }
 }
 
 export default async function WatchPage({
   searchParams,
 }: {
-  searchParams: { category?: string; page?: string }
+  searchParams: { category?: string; page?: string };
 }) {
-  const { videos, categories } = await getWatchData()
-  const selectedCategory = searchParams.category || "all"
-  const currentPage = Number.parseInt(searchParams.page || "1")
-  const videosPerPage = 12
+  const { videos, categories } = await getWatchData();
+  const selectedCategory = searchParams.category || "all";
+  const currentPage = Number.parseInt(searchParams.page || "1");
+  const videosPerPage = 12;
 
   const filteredVideos =
     selectedCategory === "all"
       ? videos
-      : videos.filter((video: any) => {
+      : videos.filter((video) => {
           const categorySlug = video.category
             ?.toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "")
-          return categorySlug === selectedCategory || video.category === selectedCategory
-        })
+            .replace(/(^-|-$)/g, "");
+          return categorySlug === selectedCategory || video.category === selectedCategory;
+        });
 
   // Pagination
-  const totalPages = Math.ceil(filteredVideos.length / videosPerPage)
-  const startIndex = (currentPage - 1) * videosPerPage
-  const paginatedVideos = filteredVideos.slice(startIndex, startIndex + videosPerPage)
+  const totalPages = Math.ceil(filteredVideos.length / videosPerPage);
+  const startIndex = (currentPage - 1) * videosPerPage;
+  const paginatedVideos = filteredVideos.slice(startIndex, startIndex + videosPerPage);
 
-  const featuredVideos = filteredVideos.filter((video: any) => video.featured).slice(0, 3)
-  const regularVideos = paginatedVideos.filter((video: any) => !video.featured)
+  const featuredVideos = filteredVideos.filter((video) => video.featured).slice(0, 3);
+  const regularVideos = paginatedVideos.filter((video) => !video.featured);
 
   // Analytics data
-  const totalViews = videos.reduce((sum: number, video: any) => sum + (video.views || 0), 0)
-  const totalDuration = videos.reduce((sum: number, video: any) => {
-    const duration = video.duration || "0:00"
-    const [minutes, seconds] = duration.split(":").map(Number)
-    return sum + (minutes || 0) + (seconds || 0) / 60
-  }, 0)
-  const avgDuration = videos.length > 0 ? Math.round(totalDuration / videos.length) : 0
+  const totalViews = videos.reduce((sum, video) => sum + (video.views || 0), 0);
+  const totalDuration = videos.reduce((sum, video) => {
+    const duration = video.duration || "0:00";
+    const [minutes, seconds] = duration.split(":").map(Number);
+    return sum + (minutes || 0) + (seconds || 0) / 60;
+  }, 0);
+  const avgDuration = videos.length > 0 ? Math.round(totalDuration / videos.length) : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -130,17 +112,14 @@ export default async function WatchPage({
               <Video className="h-4 w-4" />
               Original Content & Series
             </div>
-
             {/* Gradient Heading */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 leading-relaxed px-4 pb-2">
               Watch Our Stories
             </h1>
-
             {/* Italic Subtitle */}
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 italic font-light max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
               Bringing anime to life—one frame at a time.
             </p>
-
             {/* Enhanced Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 border border-blue-100">
@@ -176,7 +155,7 @@ export default async function WatchPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Featured Videos</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {featuredVideos.map((video: any, index: number) => (
+              {featuredVideos.map((video, index) => (
                 <FeaturedVideoCard key={video.id} video={video} priority={index === 0} />
               ))}
             </div>
@@ -210,7 +189,7 @@ export default async function WatchPage({
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-                {regularVideos.map((video: any) => (
+                {regularVideos.map((video) => (
                   <VideoCard key={video.id} video={video} />
                 ))}
               </div>
@@ -229,8 +208,7 @@ export default async function WatchPage({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4">Subscribe to Our YouTube Channel</h2>
           <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 opacity-90">
-            Don't miss any of our latest content! Subscribe for weekly episodes, behind-the-scenes content, and anime
-            news.
+            Don't miss any of our latest content! Subscribe for weekly episodes, behind-the-scenes content, and anime news.
           </p>
           <Button asChild size="lg" variant="secondary" className="shadow-lg">
             <Link href="https://www.youtube.com/@flavorstudios" target="_blank">
@@ -242,11 +220,11 @@ export default async function WatchPage({
         </div>
       </section>
     </div>
-  )
+  );
 }
 
 function FeaturedVideoCard({ video, priority = false }: { video: any; priority?: boolean }) {
-  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
+  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
 
   return (
     <Link href={`/watch/${video.slug || video.id}`} className="group">
@@ -308,11 +286,11 @@ function FeaturedVideoCard({ video, priority = false }: { video: any; priority?:
         </CardContent>
       </Card>
     </Link>
-  )
+  );
 }
 
 function VideoCard({ video }: { video: any }) {
-  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
+  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
 
   return (
     <Link href={`/watch/${video.slug || video.id}`} className="group">
@@ -325,7 +303,7 @@ function VideoCard({ video }: { video: any }) {
             loading="lazy"
           />
           <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded-md text-sm flex items-center gap-1 backdrop-blur-sm">
-            <Clock className="h-3 w-3" />
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
             {video.duration}
           </div>
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/50 backdrop-blur-sm">
@@ -375,7 +353,7 @@ function VideoCard({ video }: { video: any }) {
         </CardContent>
       </Card>
     </Link>
-  )
+  );
 }
 
 function Pagination({
@@ -384,11 +362,11 @@ function Pagination({
   selectedCategory,
 }: { currentPage: number; totalPages: number; selectedCategory: string }) {
   const getPageUrl = (page: number) => {
-    const params = new URLSearchParams()
-    if (selectedCategory !== "all") params.set("category", selectedCategory)
-    if (page > 1) params.set("page", page.toString())
-    return `/watch${params.toString() ? `?${params.toString()}` : ""}`
-  }
+    const params = new URLSearchParams();
+    if (selectedCategory !== "all") params.set("category", selectedCategory);
+    if (page > 1) params.set("page", page.toString());
+    return `/watch${params.toString() ? `?${params.toString()}` : ""}`;
+  };
 
   return (
     <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -399,22 +377,22 @@ function Pagination({
       )}
 
       {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-        let page: number
+        let page: number;
         if (totalPages <= 5) {
-          page = i + 1
+          page = i + 1;
         } else if (currentPage <= 3) {
-          page = i + 1
+          page = i + 1;
         } else if (currentPage >= totalPages - 2) {
-          page = totalPages - 4 + i
+          page = totalPages - 4 + i;
         } else {
-          page = currentPage - 2 + i
+          page = currentPage - 2 + i;
         }
 
         return (
           <Button key={page} asChild variant={page === currentPage ? "default" : "outline"} size="sm">
             <Link href={getPageUrl(page)}>{page}</Link>
           </Button>
-        )
+        );
       })}
 
       {currentPage < totalPages && (
@@ -423,7 +401,7 @@ function Pagination({
         </Button>
       )}
     </div>
-  )
+  );
 }
 
 function EmptyState({ selectedCategory }: { selectedCategory: string }) {
@@ -448,5 +426,5 @@ function EmptyState({ selectedCategory }: { selectedCategory: string }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

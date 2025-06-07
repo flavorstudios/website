@@ -1,3 +1,28 @@
+import { getMetadata } from "@/lib/seo-utils";
+
+export const metadata = getMetadata({
+  title: "DMCA Policy",
+  description: "Learn how to submit a DMCA notice to Flavor Studios. Our DMCA Policy outlines your rights and our process for copyright takedown requests.",
+  path: "/dmca",
+  ogImage: "https://flavorstudios.in/cover.jpg",
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "DMCA Policy",
+    description: "Learn how to submit a DMCA notice to Flavor Studios. Our DMCA Policy outlines your rights and our process for copyright takedown requests.",
+    url: "https://flavorstudios.in/dmca",
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.svg"
+      }
+    }
+  }
+});
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

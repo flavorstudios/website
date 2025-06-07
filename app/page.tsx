@@ -1,4 +1,4 @@
-import { getMetadata } from "@/lib/seo-utils";
+import { getMetadata } from "@/lib/seo-utils"
 
 export const metadata = getMetadata({
   title: "Flavor Studios – Original Anime, Animation & Storytelling",
@@ -6,14 +6,23 @@ export const metadata = getMetadata({
     "Flavor Studios is an independent anime and animation studio bringing stories to life with 3D animated content, original series, behind-the-scenes, and creative insights. Discover, watch, and be inspired.",
   path: "/",
   openGraph: {
-    images: ["https://flavorstudios.in/cover.jpg"],
+    title: "Flavor Studios – Original Anime, Animation & Storytelling",
+    description:
+      "Flavor Studios is an independent anime and animation studio bringing stories to life with 3D animated content, original series, behind-the-scenes, and creative insights.",
+    url: "https://flavorstudios.in/",
     type: "website",
+    site_name: "Flavor Studios",
+    images: ["https://flavorstudios.in/cover.jpg"],
+    fbAppId: "239785049383481", // <--- your Facebook App ID here!
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg"
+    title: "Flavor Studios – Original Anime, Animation & Storytelling",
+    description:
+      "Flavor Studios is an independent anime and animation studio bringing stories to life with 3D animated content, original series, behind-the-scenes, and creative insights.",
+    image: "https://flavorstudios.in/cover.jpg",
   },
   schema: {
     "@context": "https://schema.org",
@@ -33,6 +42,9 @@ export const metadata = getMetadata({
       "https://www.facebook.com/flavourstudios",
       "https://www.threads.net/@flavorstudios",
     ],
+  },
+  customMeta: {
+    "fb:app_id": "239785049383481", // for extra compatibility
   },
 });
 

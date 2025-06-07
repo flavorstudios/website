@@ -5,7 +5,16 @@ export const metadata = getMetadata({
   description:
     "Discover how you can support Flavor Studios! Buy us a coffee, join our community, or help us grow. Every contribution fuels new anime and creative projects.",
   path: "/support",
-  ogImage: "https://flavorstudios.in/cover.jpg",
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  // No robots: "noindex, nofollow" — this page **should** be indexed!
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

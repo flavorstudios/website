@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Calendar, Eye, Youtube, Clock, Share2, ThumbsUp } from "lucide-react"
+import { getMetadata } from "@/lib/seo-utils"
 
 async function getVideo(slug: string) {
   try {
@@ -30,6 +31,26 @@ interface VideoPageProps {
   params: {
     slug: string
   }
+}
+
+// --- CENTRALIZED METADATA ONLY ---
+export async function generateMetadata({ params }: VideoPageProps) {
+  const video = await getVideo(params.slug)
+
+  if (!video) {
+    return {
+      title: "Video Not Found",
+    }
+  }
+
+  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
+
+  return getMetadata({
+    title: video.title,
+    description: video.description,
+    path: `/watch/${params.slug}`,
+    ogImage: thumbnailUrl,
+  })
 }
 
 export default async function VideoPage({ params }: VideoPageProps) {
@@ -184,33 +205,4 @@ export default async function VideoPage({ params }: VideoPageProps) {
       </div>
     </div>
   )
-}
-
-export async function generateMetadata({ params }: VideoPageProps) {
-  const video = await getVideo(params.slug)
-
-  if (!video) {
-    return {
-      title: "Video Not Found",
-    }
-  }
-
-  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
-
-  return {
-    title: video.title,
-    description: video.description,
-    openGraph: {
-      title: video.title,
-      description: video.description,
-      images: [thumbnailUrl],
-      type: "video.other",
-    },
-    twitter: {
-      card: "player",
-      title: video.title,
-      description: video.description,
-      images: [thumbnailUrl],
-    },
-  }
 }

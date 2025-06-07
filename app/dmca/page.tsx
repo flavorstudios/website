@@ -26,7 +26,7 @@ export const metadata = getMetadata({
       url: "https://flavorstudios.in",
       logo: {
         "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.svg"
+        url: "https://flavorstudios.in/logo.png" // Use .png here for consistency
       }
     }
   }

@@ -13,7 +13,7 @@ export const metadata = getMetadata({
     type: "website",
     site_name: "Flavor Studios",
     images: ["https://flavorstudios.in/cover.jpg"],
-    fbAppId: "239785049383481", // <--- your Facebook App ID here!
+    // No fbAppId here — handled globally!
   },
   twitter: {
     card: "summary_large_image",
@@ -43,9 +43,7 @@ export const metadata = getMetadata({
       "https://www.threads.net/@flavorstudios",
     ],
   },
-  customMeta: {
-    "fb:app_id": "239785049383481", // for extra compatibility
-  },
+  // No customMeta needed — fb:app_id will be injected globally!
 });
 
 import { Suspense } from "react"

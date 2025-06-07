@@ -1,30 +1,55 @@
-import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react"
-import { blogStore } from "@/lib/content-store"
-import { getDynamicCategories } from "@/lib/dynamic-categories"
-import { CategoryTabs } from "@/components/ui/category-tabs"
-import { NewsletterSignup } from "@/components/newsletter-signup"
-import { getMetadata } from "@/lib/seo-utils"
+import { getMetadata } from "@/lib/seo-utils";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
+import { blogStore } from "@/lib/content-store";
+import { getDynamicCategories } from "@/lib/dynamic-categories";
+import { CategoryTabs } from "@/components/ui/category-tabs";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 
 // ✅ Centralized SEO metadata only — all manual/duplicate SEO removed!
 export const metadata = getMetadata({
-  title: "Blog | Flavor Studios - Anime Creation Insights & Stories",
+  title: "Blog – Flavor Studios | Anime Creation Insights & Stories",
   description:
     "Dive deep into the world of anime creation, industry insights, and behind-the-scenes stories from Flavor Studios. Discover our creative process and expertise.",
   path: "/blog",
-  ogImage: "/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Blog",
-})
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    creator: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "Flavor Studios Blog",
+    description: "Dive deep into the world of anime creation, industry insights, and behind-the-scenes stories from Flavor Studios.",
+    url: "https://flavorstudios.in/blog",
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.png"
+      }
+    }
+  }
+});
 
 async function getBlogData() {
   try {
-    const [posts, { blogCategories }] = await Promise.all([blogStore.getPublished(), getDynamicCategories()])
-    return { posts, categories: blogCategories }
+    const [posts, { blogCategories }] = await Promise.all([blogStore.getPublished(), getDynamicCategories()]);
+    return { posts, categories: blogCategories };
   } catch (error) {
-    console.error("Failed to fetch blog data:", error)
-    return { posts: [], categories: [] }
+    console.error("Failed to fetch blog data:", error);
+    return { posts: [], categories: [] };
   }
 }
 
@@ -33,10 +58,10 @@ export default async function BlogPage({
 }: {
   searchParams: { category?: string; page?: string }
 }) {
-  const { posts, categories } = await getBlogData()
-  const selectedCategory = searchParams.category || "all"
-  const currentPage = Number.parseInt(searchParams.page || "1")
-  const postsPerPage = 9
+  const { posts, categories } = await getBlogData();
+  const selectedCategory = searchParams.category || "all";
+  const currentPage = Number.parseInt(searchParams.page || "1");
+  const postsPerPage = 9;
 
   const filteredPosts =
     selectedCategory === "all"
@@ -45,20 +70,20 @@ export default async function BlogPage({
           const categorySlug = post.category
             ?.toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "")
-          return categorySlug === selectedCategory
-        })
+            .replace(/(^-|-$)/g, "");
+          return categorySlug === selectedCategory;
+        });
 
   // Pagination
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage)
-  const startIndex = (currentPage - 1) * postsPerPage
-  const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage)
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
 
-  const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3)
-  const regularPosts = paginatedPosts.filter((post: any) => !post.featured)
+  const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3);
+  const regularPosts = paginatedPosts.filter((post: any) => !post.featured);
 
   // Analytics data - matching watch page format exactly
-  const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0)
+  const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0);
   const avgReadTime =
     posts.length > 0
       ? Math.round(
@@ -67,7 +92,7 @@ export default async function BlogPage({
             0,
           ) / posts.length,
         )
-      : 0
+      : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -184,10 +209,11 @@ export default async function BlogPage({
         </div>
       </section>
     </div>
-  )
+  );
 }
 
-// FeaturedPostCard, BlogPostCard, Pagination, EmptyState remain unchanged below
+// FeaturedPostCard, BlogPostCard, Pagination, EmptyState remain unchanged below (use your existing implementations)
+
 function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
   return (
     <Link href={`/blog/${post.slug}`} className="group">
@@ -249,7 +275,7 @@ function FeaturedPostCard({ post, priority = false }: { post: any; priority?: bo
         </CardContent>
       </Card>
     </Link>
-  )
+  );
 }
 
 function BlogPostCard({ post }: { post: any }) {
@@ -310,7 +336,7 @@ function BlogPostCard({ post }: { post: any }) {
         </CardContent>
       </Card>
     </Link>
-  )
+  );
 }
 
 function Pagination({
@@ -319,11 +345,11 @@ function Pagination({
   selectedCategory,
 }: { currentPage: number; totalPages: number; selectedCategory: string }) {
   const getPageUrl = (page: number) => {
-    const params = new URLSearchParams()
-    if (selectedCategory !== "all") params.set("category", selectedCategory)
-    if (page > 1) params.set("page", page.toString())
-    return `/blog${params.toString() ? `?${params.toString()}` : ""}`
-  }
+    const params = new URLSearchParams();
+    if (selectedCategory !== "all") params.set("category", selectedCategory);
+    if (page > 1) params.set("page", page.toString());
+    return `/blog${params.toString() ? `?${params.toString()}` : ""}`;
+  };
 
   return (
     <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -334,22 +360,22 @@ function Pagination({
       )}
 
       {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-        let page: number
+        let page: number;
         if (totalPages <= 5) {
-          page = i + 1
+          page = i + 1;
         } else if (currentPage <= 3) {
-          page = i + 1
+          page = i + 1;
         } else if (currentPage >= totalPages - 2) {
-          page = totalPages - 4 + i
+          page = totalPages - 4 + i;
         } else {
-          page = currentPage - 2 + i
+          page = currentPage - 2 + i;
         }
 
         return (
           <Button key={page} asChild variant={page === currentPage ? "default" : "outline"} size="sm">
             <Link href={getPageUrl(page)}>{page}</Link>
           </Button>
-        )
+        );
       })}
 
       {currentPage < totalPages && (
@@ -358,7 +384,7 @@ function Pagination({
         </Button>
       )}
     </div>
-  )
+  );
 }
 
 function EmptyState({ selectedCategory }: { selectedCategory: string }) {
@@ -383,5 +409,5 @@ function EmptyState({ selectedCategory }: { selectedCategory: string }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

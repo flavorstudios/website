@@ -33,7 +33,7 @@ interface VideoPageProps {
   }
 }
 
-// --- CENTRALIZED METADATA (with FB App ID + Twitter Player) ---
+// --- CLEAN CENTRALIZED METADATA ---
 export async function generateMetadata({ params }: VideoPageProps) {
   const video = await getVideo(params.slug)
 
@@ -56,27 +56,7 @@ export async function generateMetadata({ params }: VideoPageProps) {
     title: `${seoTitle} – Watch | Flavor Studios`,
     description: seoDescription,
     path: `/watch/${video.slug || params.slug}`,
-    openGraph: {
-      images: [thumbnailUrl],
-      type: "video.other",
-      video: {
-        url: `https://www.youtube.com/watch?v=${video.youtubeId}`,
-        secureUrl: `https://www.youtube.com/watch?v=${video.youtubeId}`,
-        type: "text/html",
-        width: 1280,
-        height: 720,
-      },
-      appId: "1404440770881914", // Facebook App ID
-    },
-    twitter: {
-      card: "player",
-      site: "@flavorstudios",
-      creator: "@flavorstudios",
-      image: thumbnailUrl,
-      player: `https://www.youtube.com/embed/${video.youtubeId}`,
-      playerWidth: "1280",
-      playerHeight: "720",
-    },
+    ogImage: thumbnailUrl,
     schema: {
       "@context": "https://schema.org",
       "@type": "VideoObject",
@@ -99,7 +79,8 @@ export async function generateMetadata({ params }: VideoPageProps) {
           "url": "https://flavorstudios.in/logo.png"
         }
       }
-    }
+    },
+    // robots can be added if needed, e.g., robots: "index, follow"
   })
 }
 

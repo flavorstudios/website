@@ -1,7 +1,18 @@
+// /app/not-found.tsx
+
 import Link from "next/link"
+import { getMetadata } from "@/lib/seo-utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Home, Search, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"
+
+// --- SEO Metadata for 404 Page ---
+export const metadata = getMetadata({
+  title: "404 Not Found",
+  description: "Sorry, this page does not exist. Explore other sections of Flavor Studios.",
+  path: "/404",
+  robots: "noindex",
+})
 
 export default function NotFound() {
   const quickLinks = [

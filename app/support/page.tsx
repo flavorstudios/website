@@ -1,3 +1,30 @@
+import { getMetadata } from "@/lib/seo-utils";
+
+export const metadata = getMetadata({
+  title: "Support Flavor Studios",
+  description:
+    "Discover how you can support Flavor Studios! Buy us a coffee, join our community, or help us grow. Every contribution fuels new anime and creative projects.",
+  path: "/support",
+  ogImage: "https://flavorstudios.in/cover.jpg",
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Support Flavor Studios",
+    description:
+      "Discover how you can support Flavor Studios! Buy us a coffee, join our community, or help us grow. Every contribution fuels new anime and creative projects.",
+    url: "https://flavorstudios.in/support",
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.svg",
+      },
+    },
+  },
+});
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"

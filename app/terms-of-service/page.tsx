@@ -4,7 +4,16 @@ export const metadata = getMetadata({
   title: "Terms of Service",
   description: "Read the Terms of Service for using Flavor Studios and our content.",
   path: "/terms-of-service",
-  ogImage: "https://flavorstudios.in/cover.jpg",
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

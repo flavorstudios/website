@@ -1,4 +1,3 @@
-import { getMetadata } from "@/lib/seo-utils"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -7,31 +6,23 @@ import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lu
 import { getDynamicCategories } from "@/lib/dynamic-categories"
 import { CategoryTabs } from "@/components/ui/category-tabs"
 
-// ✅ CENTRALIZED SEO METADATA ONLY!
-export const metadata = getMetadata({
-  title: "Watch",
-  description: "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
-  path: "/watch",
-  ogImage: "/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Watch",
-});
-
-import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react"
-import { getDynamicCategories } from "@/lib/dynamic-categories"
-import { CategoryTabs } from "@/components/ui/category-tabs"
-import { getMetadata } from "@/lib/seo-utils"
-
-// ✅ CENTRALIZED SEO METADATA ONLY!
-export const metadata = getMetadata({
-  title: "Watch",
+export const metadata = {
+  title: "Watch | Flavor Studios - Original Anime & Video Content",
   description:
     "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
-  path: "/watch",
-  ogImage: "/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Watch",
-})
+  keywords: "anime videos, original series, short films, behind the scenes, animation studio, watch anime",
+  openGraph: {
+    title: "Flavor Studios Watch - Original Content & Series",
+    description: "Bringing anime to life—one frame at a time.",
+    type: "website",
+    images: ["/placeholder.svg?height=630&width=1200&text=Flavor+Studios+Watch"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Flavor Studios Watch",
+    description: "Bringing anime to life—one frame at a time.",
+  },
+}
 
 async function getWatchData() {
   try {
@@ -299,7 +290,7 @@ function VideoCard({ video }: { video: any }) {
             loading="lazy"
           />
           <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded-md text-sm flex items-center gap-1 backdrop-blur-sm">
-            <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+            <Clock className="h-3 w-3" />
             {video.duration}
           </div>
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/50 backdrop-blur-sm">

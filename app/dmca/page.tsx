@@ -4,7 +4,16 @@ export const metadata = getMetadata({
   title: "DMCA Policy",
   description: "Learn how to submit a DMCA notice to Flavor Studios. Our DMCA Policy outlines your rights and our process for copyright takedown requests.",
   path: "/dmca",
-  ogImage: "https://flavorstudios.in/cover.jpg",
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  robots: "noindex, nofollow", // This ensures legal page is not indexed
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

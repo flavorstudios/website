@@ -43,6 +43,15 @@ export const metadata = getMetadata({
           text: "Blog posts go up 2 to 3 times per week. Animated videos are released weekly, though timelines may vary during larger productions."
         }
       }
-    ]
+    ],
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.png" // .png logo for global consistency
+      }
+    }
   }
 });

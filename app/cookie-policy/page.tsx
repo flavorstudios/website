@@ -1,3 +1,28 @@
+import { getMetadata } from "@/lib/seo-utils";
+
+export const metadata = getMetadata({
+  title: "Cookie Policy",
+  description: "Read the Cookie Policy for Flavor Studios. Learn how we use cookies and how you can control your privacy on https://flavorstudios.in.",
+  path: "/cookie-policy",
+  ogImage: "https://flavorstudios.in/cover.jpg",
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Cookie Policy",
+    description: "Read the Cookie Policy for Flavor Studios. Learn how we use cookies and how you can control your privacy on https://flavorstudios.in.",
+    url: "https://flavorstudios.in/cookie-policy",
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.svg"
+      }
+    }
+  }
+});
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

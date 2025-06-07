@@ -1,4 +1,13 @@
 import { cookies } from "next/headers"
+import { getMetadata } from "@/lib/seo-utils"
+
+// --- SEO: Block search engines ---
+export const metadata = getMetadata({
+  title: "Admin Test Page",
+  description: "Internal page for verifying admin authentication. Not for public indexing.",
+  path: "/admin/test",
+  robots: "noindex, nofollow",
+})
 
 export default async function AdminTest() {
   const cookieStore = await cookies()

@@ -6,21 +6,38 @@ export function getCanonicalUrl(path: string): string {
   return `${BASE_URL}${path}`
 }
 
+/**
+ * SEO Metadata helper for Flavor Studios.
+ * Supports title, description, canonical, Open Graph, Twitter, Schema, and robots meta.
+ */
 export function getMetadata({
   title,
   description,
   path,
   ogImage = DEFAULT_OG_IMAGE,
   schema,
+  robots, // New: robots option for meta (e.g. "noindex, nofollow")
 }: {
   title: string
   description: string
   path: string
   ogImage?: string
   schema?: object
+  robots?: string
 }) {
   const fullTitle = `${title} ${DEFAULT_TITLE_SUFFIX}`
   const canonical = getCanonicalUrl(path)
+
+  // Prepare additional meta fields (robots, schema)
+  const other: Record<string, string> = {}
+
+  if (robots) {
+    other.robots = robots
+  }
+
+  if (schema) {
+    other["application/ld+json"] = JSON.stringify(schema)
+  }
 
   return {
     title: fullTitle,
@@ -42,10 +59,6 @@ export function getMetadata({
       description,
       images: [ogImage],
     },
-    ...(schema && {
-      other: {
-        "application/ld+json": JSON.stringify(schema),
-      },
-    }),
+    ...(Object.keys(other).length > 0 && { other }),
   }
 }

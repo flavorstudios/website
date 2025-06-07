@@ -4,7 +4,16 @@ export const metadata = getMetadata({
   title: "Media Usage Policy",
   description: "Read the Media Usage Policy for Flavor Studios. Learn about acceptable, prohibited, and commercial use of our animation, images, and content. Attribution rules included.",
   path: "/media-usage-policy",
-  ogImage: "https://flavorstudios.in/cover.jpg",
+  openGraph: {
+    images: ["https://flavorstudios.in/cover.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    image: "https://flavorstudios.in/cover.jpg"
+  },
+  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

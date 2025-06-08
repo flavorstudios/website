@@ -1,4 +1,5 @@
 import { getMetadata } from "@/lib/seo-utils";
+import SchemaScript from "@/components/SchemaScript";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,22 @@ export const metadata = getMetadata({
     }
   }
 });
+
+// --- PAGE COMPONENT ---
+export default async function WatchPage() {
+  // Fetch video data and categories (as you already do)
+  const { videos, categories } = await getDynamicCategories();
+
+  return (
+    <>
+      {/* Your existing page UI here */}
+      {/* ...Header, CategoryTabs, Video Cards, etc... */}
+
+      {/* Inject JSON-LD Schema for Google */}
+      <SchemaScript schema={metadata.schema} />
+    </>
+  );
+} // <--- This is your closing bracket!
 
 async function getWatchData() {
   try {

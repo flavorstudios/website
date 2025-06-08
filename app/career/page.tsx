@@ -6,14 +6,21 @@ export const metadata = getMetadata({
     "Explore creative career opportunities at Flavor Studios. Join our talent list, discover recently filled positions, and stay connected for future roles in animation, writing, voice acting, and more.",
   path: "/career",
   openGraph: {
+    title: "Careers at Flavor Studios",
+    description:
+      "Animation, writing, voice acting & more—discover opportunities at Flavor Studios and join our creative talent list.",
     images: ["https://flavorstudios.in/cover.jpg"],
     type: "website",
+    url: "https://flavorstudios.in/career",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg"
+    title: "Careers at Flavor Studios",
+    description:
+      "Explore creative jobs in animation, writing, and production. Join our talent pool for future roles.",
+    image: "https://flavorstudios.in/cover.jpg",
   },
   schema: {
     "@context": "https://schema.org",

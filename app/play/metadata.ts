@@ -6,14 +6,20 @@ export const metadata = getMetadata({
     "Take a break and play classic games like Tic-Tac-Toe online! Challenge your friends or our advanced AI. Multiple modes, score tracking, and more—only on Flavor Studios.",
   path: "/play",
   openGraph: {
-    images: ["https://flavorstudios.in/cover.jpg"], // Updated to your global OG image
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ], // Updated: array of objects, not strings
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg",
+    images: ["https://flavorstudios.in/cover.jpg"], // Updated: array of strings
   },
   schema: {
     "@context": "https://schema.org",
@@ -28,8 +34,8 @@ export const metadata = getMetadata({
       url: "https://flavorstudios.in",
       logo: {
         "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png" // Updated to .png logo for brand unity
-      }
-    }
-  }
-});
+        url: "https://flavorstudios.in/logo.png",
+      },
+    },
+  },
+}); // <- semicolon is important

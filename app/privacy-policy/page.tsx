@@ -1,6 +1,11 @@
+import { getMetadata } from "@/lib/seo-utils";
+import SchemaScript from "@/components/SchemaScript";
+
+// Set up all SEO metadata for this page
 export const metadata = getMetadata({
   title: "Privacy Policy",
-  description: "Our Privacy Policy explains how Flavor Studios collects, uses, and protects your data on https://flavorstudios.in.",
+  description:
+    "Our Privacy Policy explains how Flavor Studios collects, uses, and protects your data on https://flavorstudios.in.",
   path: "/privacy-policy",
   openGraph: {
     images: ["https://flavorstudios.in/cover.jpg"],
@@ -16,7 +21,8 @@ export const metadata = getMetadata({
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Privacy Policy",
-    description: "Our Privacy Policy explains how Flavor Studios collects, uses, and protects your data on https://flavorstudios.in.",
+    description:
+      "Our Privacy Policy explains how Flavor Studios collects, uses, and protects your data on https://flavorstudios.in.",
     url: "https://flavorstudios.in/privacy-policy",
     publisher: {
       "@type": "Organization",
@@ -28,6 +34,21 @@ export const metadata = getMetadata({
       }
     }
   }
+}); // <--- semicolon here
+
+// Main page component
+export default function PrivacyPolicyPage() {
+  return (
+    <main>
+      <h1>Privacy Policy</h1>
+      <p>
+        {/* Replace this with your real Privacy Policy content */}
+        Our Privacy Policy explains how Flavor Studios collects, uses, and protects your data on https://flavorstudios.in.
+      </p>
+      {/* Render the schema as JSON-LD */}
+      <SchemaScript schema={metadata.schema} />
+    </main>
+  );
 });
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

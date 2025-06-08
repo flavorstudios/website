@@ -12,11 +12,9 @@ async function getBlogPost(slug: string) {
       `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/blogs`,
       { cache: "no-store" }
     );
-
     if (!response.ok) {
       return null;
     }
-
     const data = await response.json();
     const posts = data.posts || [];
     return posts.find((post: any) => post.slug === slug && post.status === "published") || null;
@@ -53,7 +51,25 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     title: `${seoTitle} – Flavor Studios`,
     description: seoDescription,
     path: `/blog/${post.slug}`,
-    ogImage,
+    openGraph: {
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+        },
+      ],
+      type: "article",
+      url: canonicalUrl,
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: "@flavorstudios",
+      creator: "@flavorstudios",
+      images: [ogImage],
+      title: seoTitle,
+      description: seoDescription,
+    },
     schema: {
       "@context": "https://schema.org",
       "@type": "BlogPosting",

@@ -2,23 +2,31 @@ import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
   title: "Media Usage Policy",
-  description: "Read the Media Usage Policy for Flavor Studios. Learn about acceptable, prohibited, and commercial use of our animation, images, and content. Attribution rules included.",
+  description:
+    "Read the Media Usage Policy for Flavor Studios. Learn about acceptable, prohibited, and commercial use of our animation, images, and content. Attribution rules included.",
   path: "/media-usage-policy",
   openGraph: {
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg"
+    images: ["https://flavorstudios.in/cover.jpg"], // updated to array format
   },
   robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Media Usage Policy",
-    description: "Read the Media Usage Policy for Flavor Studios. Learn about acceptable, prohibited, and commercial use of our animation, images, and content. Attribution rules included.",
+    description:
+      "Read the Media Usage Policy for Flavor Studios. Learn about acceptable, prohibited, and commercial use of our animation, images, and content. Attribution rules included.",
     url: "https://flavorstudios.in/media-usage-policy",
     publisher: {
       "@type": "Organization",
@@ -26,11 +34,11 @@ export const metadata = getMetadata({
       url: "https://flavorstudios.in",
       logo: {
         "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png"
-      }
-    }
-  }
-});
+        url: "https://flavorstudios.in/logo.png",
+      },
+    },
+  },
+}); // <- semicolon is important
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

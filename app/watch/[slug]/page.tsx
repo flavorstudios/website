@@ -1,41 +1,33 @@
-import { notFound } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Calendar, Eye, Youtube, Clock, Share2, ThumbsUp } from "lucide-react"
-import { getMetadata } from "@/lib/seo-utils"
+import { notFound } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar, Eye, Youtube, Clock, Share2, ThumbsUp } from "lucide-react";
+import { getMetadata } from "@/lib/seo-utils";
 
 async function getVideo(slug: string) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`, {
-      cache: "no-store",
-    })
-
-    if (!response.ok) {
-      return null
-    }
-
-    const data = await response.json()
-    const videos = data.videos || []
-
-    return (
-      videos.find((video: any) => (video.slug === slug || video.id === slug) && video.status === "published") || null
-    )
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`,
+      { cache: "no-store" }
+    );
+    if (!response.ok) return null;
+    const data = await response.json();
+    const videos = data.videos || [];
+    return videos.find((video: any) => (video.slug === slug || video.id === slug) && video.status === "published") || null;
   } catch (error) {
-    console.error("Failed to fetch video:", error)
-    return null
+    console.error("Failed to fetch video:", error);
+    return null;
   }
 }
 
 interface VideoPageProps {
-  params: {
-    slug: string
-  }
+  params: { slug: string };
 }
 
 // --- CLEAN CENTRALIZED METADATA ---
 export async function generateMetadata({ params }: VideoPageProps) {
-  const video = await getVideo(params.slug)
+  const video = await getVideo(params.slug);
 
   if (!video) {
     return {
@@ -44,13 +36,13 @@ export async function generateMetadata({ params }: VideoPageProps) {
       alternates: {
         canonical: `https://flavorstudios.in/watch/${params.slug}`,
       },
-    }
+    };
   }
 
-  const canonicalUrl = `https://flavorstudios.in/watch/${video.slug || params.slug}`
-  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
-  const seoTitle = video.title
-  const seoDescription = video.description
+  const canonicalUrl = `https://flavorstudios.in/watch/${video.slug || params.slug}`;
+  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
+  const seoTitle = video.title;
+  const seoDescription = video.description;
 
   return getMetadata({
     title: `${seoTitle} – Watch | Flavor Studios`,
@@ -60,39 +52,39 @@ export async function generateMetadata({ params }: VideoPageProps) {
     schema: {
       "@context": "https://schema.org",
       "@type": "VideoObject",
-      "name": seoTitle,
-      "description": seoDescription,
-      "thumbnailUrl": [thumbnailUrl],
-      "uploadDate": video.publishedAt,
-      "duration": video.duration,
-      "embedUrl": `https://www.youtube.com/embed/${video.youtubeId}`,
-      "interactionStatistic": {
+      name: seoTitle,
+      description: seoDescription,
+      thumbnailUrl: [thumbnailUrl],
+      uploadDate: video.publishedAt,
+      duration: video.duration,
+      embedUrl: `https://www.youtube.com/embed/${video.youtubeId}`,
+      interactionStatistic: {
         "@type": "InteractionCounter",
-        "interactionType": { "@type": "WatchAction" },
-        "userInteractionCount": video.views,
+        interactionType: { "@type": "WatchAction" },
+        userInteractionCount: video.views,
       },
-      "publisher": {
+      publisher: {
         "@type": "Organization",
-        "name": "Flavor Studios",
-        "logo": {
+        name: "Flavor Studios",
+        logo: {
           "@type": "ImageObject",
-          "url": "https://flavorstudios.in/logo.png"
-        }
-      }
+          url: "https://flavorstudios.in/logo.png",
+        },
+      },
     },
-    // robots can be added if needed, e.g., robots: "index, follow"
-  })
+    // robots: "index, follow" // Optional!
+  });
 }
 
 export default async function VideoPage({ params }: VideoPageProps) {
-  const video = await getVideo(params.slug)
+  const video = await getVideo(params.slug);
 
   if (!video) {
-    notFound()
+    notFound();
   }
 
-  const embedUrl = `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`
-  const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtubeId}`
+  const embedUrl = `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`;
+  const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtubeId}`;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -122,9 +114,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
                   {new Date(video.publishedAt).toLocaleDateString()}
                 </span>
               </div>
-
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">{video.title}</h1>
-
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span className="flex items-center gap-1">
@@ -136,7 +126,6 @@ export default async function VideoPage({ params }: VideoPageProps) {
                     {video.duration}
                   </span>
                 </div>
-
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm">
                     <ThumbsUp className="h-4 w-4 mr-2" />
@@ -163,7 +152,6 @@ export default async function VideoPage({ params }: VideoPageProps) {
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-3">About this video</h3>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{video.description}</p>
-
                 {/* Tags */}
                 {video.tags && video.tags.length > 0 && (
                   <div className="mt-6">
@@ -243,5 +231,5 @@ export default async function VideoPage({ params }: VideoPageProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

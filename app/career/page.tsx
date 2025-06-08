@@ -9,7 +9,13 @@ export const metadata = getMetadata({
     title: "Careers at Flavor Studios",
     description:
       "Animation, writing, voice acting & more—discover opportunities at Flavor Studios and join our creative talent list.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
     type: "website",
     url: "https://flavorstudios.in/career",
   },
@@ -20,7 +26,7 @@ export const metadata = getMetadata({
     title: "Careers at Flavor Studios",
     description:
       "Explore creative jobs in animation, writing, and production. Join our talent pool for future roles.",
-    image: "https://flavorstudios.in/cover.jpg",
+    images: ["https://flavorstudios.in/cover.jpg"], // updated: array of strings
   },
   schema: {
     "@context": "https://schema.org",
@@ -39,7 +45,7 @@ export const metadata = getMetadata({
       },
     },
   },
-});
+}); // <- semicolon is important
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

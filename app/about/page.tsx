@@ -9,7 +9,13 @@ export const metadata = getMetadata({
     title: "About Flavor Studios",
     description:
       "Get to know Flavor Studios: our mission, core values, and the creative journey behind our emotionally-driven anime and 3D animation projects.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
     type: "website",
     url: "https://flavorstudios.in/about",
   },
@@ -20,7 +26,7 @@ export const metadata = getMetadata({
     title: "About Flavor Studios",
     description:
       "We’re an independent anime & 3D animation studio blending heart, storytelling, and community spirit.",
-    image: "https://flavorstudios.in/cover.jpg",
+    images: ["https://flavorstudios.in/cover.jpg"], // Correct: array of strings
   },
   schema: {
     "@context": "https://schema.org",
@@ -39,7 +45,7 @@ export const metadata = getMetadata({
       },
     },
   },
-});
+}); // <- semicolon is important
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

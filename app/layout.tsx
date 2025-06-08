@@ -22,8 +22,10 @@ export const metadata = {
     apple: "/apple-touch-icon.png",
   },
   other: {
+    "fb:app_id": "1404440770881914", // Global Facebook App ID
     "fediverse:creator": "@flavorstudios@mastodon.social",
     generator: "v0.dev",
+    "me": "https://mastodon.social/@flavorstudios", // Mastodon verification
   },
 };
 
@@ -34,10 +36,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <head>
-        <meta property="fb:app_id" content="1404440770881914" />
-        <link rel="me" href="https://mastodon.social/@flavorstudios" />
-      </head>
       <body className={`${inter.className} antialiased`}>
         <Header />
         <main>{children}</main>

@@ -9,7 +9,7 @@ import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { NewsletterSignup } from "@/components/newsletter-signup";
 
-// ✅ Centralized SEO metadata only — all manual/duplicate SEO removed!
+// === SEO METADATA BLOCK (Centralized for Next.js 15+) ===
 export const metadata = getMetadata({
   title: "Blog – Flavor Studios | Anime Creation Insights & Stories",
   description:
@@ -23,13 +23,14 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg"
+    image: "https://flavorstudios.in/cover.jpg",
   },
   schema: {
     "@context": "https://schema.org",
     "@type": "Blog",
     name: "Flavor Studios Blog",
-    description: "Dive deep into the world of anime creation, industry insights, and behind-the-scenes stories from Flavor Studios.",
+    description:
+      "Dive deep into the world of anime creation, industry insights, and behind-the-scenes stories from Flavor Studios.",
     url: "https://flavorstudios.in/blog",
     publisher: {
       "@type": "Organization",
@@ -37,12 +38,13 @@ export const metadata = getMetadata({
       url: "https://flavorstudios.in",
       logo: {
         "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png"
-      }
-    }
-  }
+        url: "https://flavorstudios.in/logo.png",
+      },
+    },
+  },
 });
 
+// --- DATA FETCHING ---
 async function getBlogData() {
   try {
     const [posts, { blogCategories }] = await Promise.all([blogStore.getPublished(), getDynamicCategories()]);
@@ -53,10 +55,11 @@ async function getBlogData() {
   }
 }
 
+// --- MAIN PAGE COMPONENT ---
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: { category?: string; page?: string }
+  searchParams: { category?: string; page?: string };
 }) {
   const { posts, categories } = await getBlogData();
   const selectedCategory = searchParams.category || "all";
@@ -82,7 +85,7 @@ export default async function BlogPage({
   const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3);
   const regularPosts = paginatedPosts.filter((post: any) => !post.featured);
 
-  // Analytics data - matching watch page format exactly
+  // Analytics data (matches Watch page)
   const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0);
   const avgReadTime =
     posts.length > 0
@@ -105,7 +108,7 @@ export default async function BlogPage({
               <BookOpen className="h-4 w-4" />
               Studio Insights & Stories
             </div>
-            {/* Gradient Heading with extra padding at bottom */}
+            {/* Gradient Heading */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 leading-relaxed px-4 pb-2">
               Flavor Studios Blog
             </h1>
@@ -113,7 +116,7 @@ export default async function BlogPage({
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 italic font-light max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
               Behind the scenes of anime creation—one story at a time.
             </p>
-            {/* Enhanced Stats - EXACTLY matching watch page */}
+            {/* Enhanced Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 border border-blue-100">
                 <div className="text-xl sm:text-2xl font-bold text-blue-600">{posts.length}</div>
@@ -212,7 +215,7 @@ export default async function BlogPage({
   );
 }
 
-// FeaturedPostCard, BlogPostCard, Pagination, EmptyState remain unchanged below (use your existing implementations)
+// --- COMPONENTS ---
 
 function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
   return (

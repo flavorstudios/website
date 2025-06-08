@@ -11,6 +11,7 @@ const inter = Inter({
   display: "swap",
 });
 
+// Metadata for Next.js Metadata API (all other SEO info)
 export const metadata = {
   title: "Flavor Studios – Anime & Stories That Stay With You",
   description:
@@ -22,10 +23,9 @@ export const metadata = {
     apple: "/apple-touch-icon.png",
   },
   other: {
-    "fb:app_id": "1404440770881914", // Global Facebook App ID
     "fediverse:creator": "@flavorstudios@mastodon.social",
     generator: "v0.dev",
-    "me": "https://mastodon.social/@flavorstudios", // Mastodon verification
+    me: "https://mastodon.social/@flavorstudios",
   },
 };
 
@@ -36,6 +36,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
+      <head>
+        {/* This is the **ONLY** correct way to declare the Facebook App ID for OG */}
+        <meta property="fb:app_id" content="1404440770881914" />
+        {/* Optional: Mastodon verification (social rel) */}
+        <link rel="me" href="https://mastodon.social/@flavorstudios" />
+      </head>
       <body className={`${inter.className} antialiased`}>
         <Header />
         <main>{children}</main>

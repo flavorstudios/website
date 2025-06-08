@@ -11,7 +11,6 @@ const inter = Inter({
   display: "swap",
 });
 
-// Metadata for Next.js Metadata API (all other SEO info)
 export const metadata = {
   title: "Flavor Studios – Anime & Stories That Stay With You",
   description:
@@ -27,6 +26,7 @@ export const metadata = {
     generator: "v0.dev",
     me: "https://mastodon.social/@flavorstudios",
   },
+  // Do NOT add openGraph, twitter, or robots here—handled per-page!
 };
 
 export default function RootLayout({

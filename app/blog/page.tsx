@@ -1,14 +1,3 @@
-import { getMetadata } from "@/lib/seo-utils";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
-import { blogStore } from "@/lib/content-store";
-import { getDynamicCategories } from "@/lib/dynamic-categories";
-import { CategoryTabs } from "@/components/ui/category-tabs";
-import { NewsletterSignup } from "@/components/newsletter-signup";
-
 // === SEO METADATA BLOCK (Centralized for Next.js 15+) ===
 export const metadata = getMetadata({
   title: "Blog – Flavor Studios | Anime Creation Insights & Stories",
@@ -16,14 +5,20 @@ export const metadata = getMetadata({
     "Dive deep into the world of anime creation, industry insights, and behind-the-scenes stories from Flavor Studios. Discover our creative process and expertise.",
   path: "/blog",
   openGraph: {
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200, // Standard OG image size for social preview
+        height: 630,
+      },
+    ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg",
+    images: ["https://flavorstudios.in/cover.jpg"], // ← correct: array of strings
   },
   schema: {
     "@context": "https://schema.org",

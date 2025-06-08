@@ -13,7 +13,7 @@ export const metadata = getMetadata({
     site: "@flavorstudios",
     image: "https://flavorstudios.in/cover.jpg"
   },
-  robots: "noindex, nofollow",
+  robots: "noindex, nofollow", // Prevents indexing of legal page
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -26,7 +26,7 @@ export const metadata = getMetadata({
       url: "https://flavorstudios.in",
       logo: {
         "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png" // <-- Use .png here
+        url: "https://flavorstudios.in/logo.png"
       }
     }
   }

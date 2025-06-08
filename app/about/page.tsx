@@ -6,14 +6,21 @@ export const metadata = getMetadata({
     "Discover the mission, values, and story behind Flavor Studios. We are an independent animation studio crafting emotionally resonant anime and original 3D animated content with a community-driven approach.",
   path: "/about",
   openGraph: {
+    title: "About Flavor Studios",
+    description:
+      "Get to know Flavor Studios: our mission, core values, and the creative journey behind our emotionally-driven anime and 3D animation projects.",
     images: ["https://flavorstudios.in/cover.jpg"],
     type: "website",
+    url: "https://flavorstudios.in/about",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg"
+    title: "About Flavor Studios",
+    description:
+      "We’re an independent anime & 3D animation studio blending heart, storytelling, and community spirit.",
+    image: "https://flavorstudios.in/cover.jpg",
   },
   schema: {
     "@context": "https://schema.org",

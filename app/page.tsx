@@ -12,7 +12,13 @@ export const metadata = getMetadata({
     url: "https://flavorstudios.in/",
     type: "website",
     site_name: "Flavor Studios",
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ], // updated: array of objects, not strings
   },
   twitter: {
     card: "summary_large_image",
@@ -21,7 +27,7 @@ export const metadata = getMetadata({
     title: "Flavor Studios – Original Anime, Animation & Storytelling",
     description:
       "Flavor Studios is an independent anime and animation studio bringing stories to life with 3D animated content, original series, behind-the-scenes, and creative insights.",
-    image: "https://flavorstudios.in/cover.jpg",
+    images: ["https://flavorstudios.in/cover.jpg"], // updated: array of strings
   },
   schema: {
     "@context": "https://schema.org",
@@ -42,7 +48,7 @@ export const metadata = getMetadata({
       "https://www.threads.net/@flavorstudios",
     ],
   },
-});
+}); // <- semicolon is important
 
 import { Suspense } from "react"
 import Link from "next/link"

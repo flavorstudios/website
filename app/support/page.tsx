@@ -6,13 +6,19 @@ export const metadata = getMetadata({
     "Discover how you can support Flavor Studios! Buy us a coffee, join our community, or help us grow. Every contribution fuels new anime and creative projects.",
   path: "/support",
   openGraph: {
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg"
+    images: ["https://flavorstudios.in/cover.jpg"], // Correct format: array of strings
   },
   // No robots field, so search engines WILL index this page.
   schema: {
@@ -32,7 +38,7 @@ export const metadata = getMetadata({
       },
     },
   },
-});
+}); // <- semicolon is important
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"

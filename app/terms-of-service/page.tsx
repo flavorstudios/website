@@ -5,13 +5,19 @@ export const metadata = getMetadata({
   description: "Read the Terms of Service for using Flavor Studios and our content.",
   path: "/terms-of-service",
   openGraph: {
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg"
+    images: ["https://flavorstudios.in/cover.jpg"], // updated to array
   },
   robots: "noindex, nofollow", // Prevents indexing of legal page
   schema: {
@@ -26,11 +32,11 @@ export const metadata = getMetadata({
       url: "https://flavorstudios.in",
       logo: {
         "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png"
-      }
-    }
-  }
-});
+        url: "https://flavorstudios.in/logo.png",
+      },
+    },
+  },
+}); // <- semicolon is important
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

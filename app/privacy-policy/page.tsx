@@ -1,5 +1,3 @@
-import { getMetadata } from "@/lib/seo-utils";
-
 export const metadata = getMetadata({
   title: "Privacy Policy",
   description: "Our Privacy Policy explains how Flavor Studios collects, uses, and protects your data on https://flavorstudios.in.",
@@ -26,7 +24,7 @@ export const metadata = getMetadata({
       url: "https://flavorstudios.in",
       logo: {
         "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png" // <-- Use .png here
+        url: "https://flavorstudios.in/logo.png"
       }
     }
   }

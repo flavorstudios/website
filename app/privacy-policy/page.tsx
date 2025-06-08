@@ -1,5 +1,10 @@
 import { getMetadata } from "@/lib/seo-utils";
 import SchemaScript from "@/components/SchemaScript";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Mail, Shield, Eye, Lock, Users, FileText, AlertCircle, Phone, Cookie, Copyright } from "lucide-react";
+import Link from "next/link";
 
 // Set up all SEO metadata for this page
 export const metadata = getMetadata({
@@ -36,18 +41,33 @@ export const metadata = getMetadata({
   }
 }); // <--- semicolon here
 
-// Main page component
 export default function PrivacyPolicyPage() {
+  const sections = [
+    // ... your existing sections data ...
+  ];
+
+  const additionalSections = [
+    // ... your existing additionalSections data ...
+  ];
+
   return (
-    <main>
-      <h1>Privacy Policy</h1>
-      <p>
-        {/* Replace this with your real Privacy Policy content */}
-        Our Privacy Policy explains how Flavor Studios collects, uses, and protects your data on https://flavorstudios.in.
-      </p>
-      {/* Render the schema as JSON-LD */}
-      <SchemaScript schema={metadata.schema} />
-    </main>
+    <div className="min-h-screen py-6 sm:py-8 md:py-12">
+      <div className="container mx-auto max-w-4xl px-3 sm:px-4 md:px-6">
+        {/* Header */}
+        {/* ... rest of your original JSX, unchanged ... */}
+
+        {/* (Put all your beautiful design and logic here) */}
+
+        {/* Footer Note */}
+        <div className="mt-12 sm:mt-16 text-center">
+          <p className="text-xs sm:text-sm text-gray-500">
+            Last updated: May 9, 2025 • This Privacy Policy is effective immediately upon posting.
+          </p>
+        </div>
+        {/* <-- Add SchemaScript just before the final closing tag --> */}
+        <SchemaScript schema={metadata.schema} />
+      </div>
+    </div>
   );
 }
 

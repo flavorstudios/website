@@ -2,23 +2,31 @@ import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
   title: "Cookie Policy",
-  description: "Read the Cookie Policy for Flavor Studios. Learn how we use cookies and how you can control your privacy on https://flavorstudios.in.",
+  description:
+    "Read the Cookie Policy for Flavor Studios. Learn how we use cookies and how you can control your privacy on https://flavorstudios.in.",
   path: "/cookie-policy",
   openGraph: {
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg"
+    images: ["https://flavorstudios.in/cover.jpg"], // new format: array of strings
   },
   robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Cookie Policy",
-    description: "Read the Cookie Policy for Flavor Studios. Learn how we use cookies and how you can control your privacy on https://flavorstudios.in.",
+    description:
+      "Read the Cookie Policy for Flavor Studios. Learn how we use cookies and how you can control your privacy on https://flavorstudios.in.",
     url: "https://flavorstudios.in/cookie-policy",
     publisher: {
       "@type": "Organization",
@@ -26,11 +34,11 @@ export const metadata = getMetadata({
       url: "https://flavorstudios.in",
       logo: {
         "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png"
-      }
-    }
-  }
-});
+        url: "https://flavorstudios.in/logo.png",
+      },
+    },
+  },
+}); // <- semicolon is important
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

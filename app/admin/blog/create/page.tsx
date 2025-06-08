@@ -1,11 +1,27 @@
-import type { Metadata } from "next"
-import { BlogEditor } from "../../dashboard/components/blog-editor"
+import { getMetadata } from "@/lib/seo-utils";
+import { BlogEditor } from "../../dashboard/components/blog-editor";
 
-export const metadata: Metadata = {
-  title: "Create New Post - Flavor Studios Admin",
-  description: "Create and publish new blog posts for Flavor Studios",
-  robots: "noindex, nofollow",
-}
+export const metadata = getMetadata({
+  title: "Create New Post – Flavor Studios Admin",
+  description: "Create and publish new blog posts for Flavor Studios.",
+  path: "/admin/blog/create",
+  openGraph: {
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    images: ["https://flavorstudios.in/cover.jpg"],
+  },
+  robots: "noindex, nofollow", // Prevent indexing of admin/editor pages
+});
 
 export default function CreateBlogPage() {
   return (
@@ -14,5 +30,5 @@ export default function CreateBlogPage() {
         <BlogEditor />
       </div>
     </div>
-  )
+  );
 }

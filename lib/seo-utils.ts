@@ -9,7 +9,7 @@ export function getCanonicalUrl(path: string): string {
 /**
  * SEO Metadata helper for Flavor Studios.
  * Supports title, description, canonical, Open Graph, Twitter, Schema, and robots meta.
- * Now accepts per-page openGraph and twitter overrides!
+ * Accepts per-page openGraph and twitter overrides (images always correct format).
  */
 export function getMetadata({
   title,
@@ -30,11 +30,11 @@ export function getMetadata({
   openGraph?: Record<string, any>;
   twitter?: Record<string, any>;
 }) {
-  const fullTitle = `${title} ${DEFAULT_TITLE_SUFFIX}`;
+  const fullTitle = `${title} ${DEFAULT_TITLE_SUFFIX}`.replace(/ +/g, " ").trim();
   const canonical = getCanonicalUrl(path);
 
   // Prepare additional meta fields (robots, schema)
-  const other: Array<{ property: string; content: string }> = [];
+  const other: Record<string, string>[] = [];
   if (robots) {
     other.push({ property: "robots", content: robots });
   }
@@ -57,25 +57,34 @@ export function getMetadata({
     images: [ogImage],
   };
 
+  // Merge, but always use arrays for images
+  const mergedOpenGraph = {
+    ...defaultOpenGraph,
+    ...openGraph,
+    images:
+      Array.isArray(openGraph.images) && openGraph.images.length > 0
+        ? openGraph.images
+        : defaultOpenGraph.images,
+  };
+
+  const mergedTwitter = {
+    ...defaultTwitter,
+    ...twitter,
+    images:
+      Array.isArray(twitter.images) && twitter.images.length > 0
+        ? twitter.images
+        : defaultTwitter.images,
+  };
+
   return {
     title: fullTitle,
     description,
     alternates: {
       canonical,
     },
-    openGraph: {
-      ...defaultOpenGraph,
-      ...openGraph, // Allow per-page overrides
-      images: openGraph.images || defaultOpenGraph.images,
-    },
-    twitter: {
-      ...defaultTwitter,
-      ...twitter, // Allow per-page overrides
-      images: twitter.images || defaultTwitter.images,
-    },
-    // Next.js v13+ supports an 'other' array for custom meta properties
+    openGraph: mergedOpenGraph,
+    twitter: mergedTwitter,
     other,
-    // Optionally add schema as needed
     ...(schema && { schema }),
   };
 }

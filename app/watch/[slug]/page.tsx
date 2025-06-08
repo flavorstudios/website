@@ -14,7 +14,9 @@ async function getVideo(slug: string) {
     if (!response.ok) return null;
     const data = await response.json();
     const videos = data.videos || [];
-    return videos.find((video: any) => (video.slug === slug || video.id === slug) && video.status === "published") || null;
+    return videos.find(
+      (video: any) => (video.slug === slug || video.id === slug) && video.status === "published"
+    ) || null;
   } catch (error) {
     console.error("Failed to fetch video:", error);
     return null;
@@ -40,7 +42,8 @@ export async function generateMetadata({ params }: VideoPageProps) {
   }
 
   const canonicalUrl = `https://flavorstudios.in/watch/${video.slug || params.slug}`;
-  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
+  const thumbnailUrl =
+    video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
   const seoTitle = video.title;
   const seoDescription = video.description;
 
@@ -48,7 +51,27 @@ export async function generateMetadata({ params }: VideoPageProps) {
     title: `${seoTitle} – Watch | Flavor Studios`,
     description: seoDescription,
     path: `/watch/${video.slug || params.slug}`,
-    ogImage: thumbnailUrl,
+    openGraph: {
+      images: [
+        {
+          url: thumbnailUrl,
+          width: 1280,
+          height: 720,
+        },
+      ],
+      type: "video.other",
+      url: canonicalUrl,
+      title: seoTitle,
+      description: seoDescription,
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: "@flavorstudios",
+      creator: "@flavorstudios",
+      images: [thumbnailUrl],
+      title: seoTitle,
+      description: seoDescription,
+    },
     schema: {
       "@context": "https://schema.org",
       "@type": "VideoObject",
@@ -114,7 +137,9 @@ export default async function VideoPage({ params }: VideoPageProps) {
                   {new Date(video.publishedAt).toLocaleDateString()}
                 </span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">{video.title}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                {video.title}
+              </h1>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span className="flex items-center gap-1">
@@ -135,7 +160,9 @@ export default async function VideoPage({ params }: VideoPageProps) {
                     <a
                       href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
                         `https://flavorstudios.in/watch/${video.slug || params.slug}`
-                      )}&text=${encodeURIComponent(`Watch "${video.title}" on Flavor Studios!`)}&hashtags=Anime,Animation`}
+                      )}&text=${encodeURIComponent(
+                        `Watch "${video.title}" on Flavor Studios!`
+                      )}&hashtags=Anime,Animation`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -196,7 +223,11 @@ export default async function VideoPage({ params }: VideoPageProps) {
                   Creating original anime content, behind-the-scenes insights, and industry tutorials.
                 </p>
                 <Button asChild variant="outline" className="w-full">
-                  <a href="https://www.youtube.com/@flavorstudios" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://www.youtube.com/@flavorstudios"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Subscribe to Channel
                   </a>
                 </Button>
@@ -210,7 +241,9 @@ export default async function VideoPage({ params }: VideoPageProps) {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Published</span>
-                    <span className="font-medium">{new Date(video.publishedAt).toLocaleDateString()}</span>
+                    <span className="font-medium">
+                      {new Date(video.publishedAt).toLocaleDateString()}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Duration</span>

@@ -14,7 +14,7 @@ export const metadata = getMetadata({
     site: "@flavorstudios",
     image: "https://flavorstudios.in/cover.jpg"
   },
-  // No robots: "noindex, nofollow" — this page **should** be indexed!
+  // No robots field, so search engines WILL index this page.
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -28,7 +28,7 @@ export const metadata = getMetadata({
       url: "https://flavorstudios.in",
       logo: {
         "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png", // Use .png for consistency!
+        url: "https://flavorstudios.in/logo.png",
       },
     },
   },

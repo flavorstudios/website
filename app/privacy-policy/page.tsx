@@ -49,7 +49,7 @@ export default function PrivacyPolicyPage() {
       <SchemaScript schema={metadata.schema} />
     </main>
   );
-});
+}
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

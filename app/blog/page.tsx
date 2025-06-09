@@ -16,14 +16,20 @@ export const metadata = getMetadata({
     "Dive deep into the world of anime creation, industry insights, and behind-the-scenes stories from Flavor Studios. Discover our creative process and expertise.",
   path: "/blog",
   openGraph: {
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",
@@ -47,7 +53,10 @@ export const metadata = getMetadata({
 // --- DATA FETCHING ---
 async function getBlogData() {
   try {
-    const [posts, { blogCategories }] = await Promise.all([blogStore.getPublished(), getDynamicCategories()]);
+    const [posts, { blogCategories }] = await Promise.all([
+      blogStore.getPublished(),
+      getDynamicCategories(),
+    ]);
     return { posts, categories: blogCategories };
   } catch (error) {
     console.error("Failed to fetch blog data:", error);
@@ -167,7 +176,7 @@ export default async function BlogPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                 {selectedCategory === "all"
                   ? "Latest Posts"
-                  : ${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory} Posts}
+                  : `${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory} Posts`}
               </h2>
               <p className="text-gray-600 text-sm sm:text-base">
                 {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""} found
@@ -219,7 +228,7 @@ export default async function BlogPage({
 
 function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
   return (
-    <Link href={/blog/${post.slug}} className="group">
+    <Link href={`/blog/${post.slug}`} className="group">
       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full bg-gradient-to-br from-white to-gray-50">
         <div className="relative h-40 sm:h-48 lg:h-56 overflow-hidden">
           <img
@@ -283,7 +292,7 @@ function FeaturedPostCard({ post, priority = false }: { post: any; priority?: bo
 
 function BlogPostCard({ post }: { post: any }) {
   return (
-    <Link href={/blog/${post.slug}} className="group">
+    <Link href={`/blog/${post.slug}`} className="group">
       <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 bg-white">
         <div className="relative h-40 sm:h-48 overflow-hidden">
           <img
@@ -351,7 +360,7 @@ function Pagination({
     const params = new URLSearchParams();
     if (selectedCategory !== "all") params.set("category", selectedCategory);
     if (page > 1) params.set("page", page.toString());
-    return /blog${params.toString() ? ?${params.toString()} : ""};
+    return `/blog${params.toString() ? `?${params.toString()}` : ""}`;
   };
 
   return (
@@ -398,12 +407,12 @@ function EmptyState({ selectedCategory }: { selectedCategory: string }) {
           <BookOpen className="h-10 w-10 sm:h-12 sm:w-12 text-blue-600" />
         </div>
         <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
-          {selectedCategory === "all" ? "No posts yet" : No posts in this category}
+          {selectedCategory === "all" ? "No posts yet" : "No posts in this category"}
         </h3>
         <p className="text-gray-600 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
           {selectedCategory === "all"
             ? "We're working on exciting content about anime, storytelling, and behind-the-scenes insights. Check back soon!"
-            : No posts have been published in this category yet. Try selecting a different category or check back later.}
+            : "No posts have been published in this category yet. Try selecting a different category or check back later."}
         </p>
         <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 sm:p-6">
           <p className="text-blue-800 text-sm">

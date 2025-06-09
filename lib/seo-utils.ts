@@ -36,7 +36,7 @@ export function getMetadata({
   // Prepare additional meta fields (robots, schema)
   const other: Record<string, string>[] = [];
   if (robots) {
-    other.push({ property: "robots", content: robots });
+    other.push({ name: "robots", content: robots }); // <-- FIXED: use name, not property!
   }
 
   // Default Open Graph data

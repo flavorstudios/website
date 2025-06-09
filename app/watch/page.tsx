@@ -14,14 +14,20 @@ export const metadata = getMetadata({
     "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
   path: "/watch",
   openGraph: {
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    image: "https://flavorstudios.in/cover.jpg",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",

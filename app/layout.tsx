@@ -37,12 +37,37 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
-        {/* This is the **ONLY** correct way to declare the Facebook App ID for OG */}
+        {/* Facebook OG App ID */}
         <meta property="fb:app_id" content="1404440770881914" />
-        {/* Optional: Mastodon verification (social rel) */}
+        {/* Mastodon verification */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
+
+        {/* === Google Tag Manager SCRIPT (in HEAD) === */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WMTGR7NM');
+            `,
+          }}
+        />
+        {/* === END Google Tag Manager SCRIPT === */}
       </head>
       <body className={`${inter.className} antialiased`}>
+        {/* === Google Tag Manager NOSCRIPT (immediately after <body>) === */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+        {/* === END Google Tag Manager NOSCRIPT === */}
+
         <Header />
         <main>{children}</main>
         <Footer />

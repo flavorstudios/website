@@ -1,29 +1,29 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { categoryStore } from "@/lib/category-store"
+import { type NextRequest, NextResponse } from "next/server";
+import { categoryStore } from "@/lib/category-store";
 
-const BASE_URL = "https://flavorstudios.in"
+const BASE_URL = "https://flavorstudios.in";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    // --- If you want to disable category sitemaps for now, comment out the next 4 lines ---
-    // const categories = await categoryStore.getAll()
+    // To include category sitemaps in the index, uncomment below:
+    // const categories = await categoryStore.getAll();
     // const categorySitemaps = categories.map((category: any) => {
-    //   const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-")
+    //   const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-");
     //   return {
     //     url: `${BASE_URL}/category/${slug}/sitemap.xml`,
     //     lastModified: new Date(category.updatedAt || category.createdAt || new Date()),
-    //   }
-    // })
+    //   };
+    // });
 
-    // Main sitemaps (always exist)
+    // Main sitemaps (always present)
     const sitemaps = [
       { url: `${BASE_URL}/sitemap.xml`, lastModified: new Date() },
       { url: `${BASE_URL}/blog/sitemap.xml`, lastModified: new Date() },
       { url: `${BASE_URL}/watch/sitemap.xml`, lastModified: new Date() },
-      // ...categorySitemaps // Uncomment if category sitemaps are implemented and routes exist!
-    ]
+      // ...(categorySitemaps || []) // Uncomment if/when category sitemaps exist!
+    ];
 
-    // Generate XML
+    // Build sitemap index XML
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemaps
@@ -34,16 +34,17 @@ ${sitemaps
   </sitemap>`
   )
   .join("\n")}
-</sitemapindex>`
+</sitemapindex>`;
 
     return new NextResponse(xml, {
+      status: 200,
       headers: {
         "Content-Type": "application/xml",
         "Cache-Control": "public, max-age=3600, s-maxage=3600",
       },
-    })
+    });
   } catch (error) {
-    console.error("Error generating sitemap index:", error)
+    console.error("Error generating sitemap index:", error);
 
     // Fallback: only main sitemap
     const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -52,13 +53,14 @@ ${sitemaps
     <loc>${BASE_URL}/sitemap.xml</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
   </sitemap>
-</sitemapindex>`
+</sitemapindex>`;
 
     return new NextResponse(fallbackXml, {
+      status: 200,
       headers: {
         "Content-Type": "application/xml",
         "Cache-Control": "public, max-age=3600, s-maxage=3600",
       },
-    })
+    });
   }
 }

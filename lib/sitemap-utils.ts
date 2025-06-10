@@ -10,6 +10,14 @@ export interface SitemapUrl {
 
 // Generate the XML for any list of URLs (for all sitemaps)
 export function generateSitemapXML(baseUrl: string, urls: SitemapUrl[]): string {
+  const sitemapEntries = urls.map((page) => `
+  <url>
+    <loc>${baseUrl}${page.url}</loc>
+    <lastmod>${new Date(page.lastmod || new Date()).toISOString()}</lastmod>
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
+  </url>`).join("");
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
@@ -17,17 +25,8 @@ export function generateSitemapXML(baseUrl: string, urls: SitemapUrl[]): string 
         xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-${urls
-  .map(
-    (page) => `  <url>
-    <loc>${baseUrl}${page.url}</loc>
-    <lastmod>${page.lastmod ? new Date(page.lastmod).toISOString() : new Date().toISOString()}</lastmod>
-    <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
-  </url>`,
-  )
-  .join("\n")}
-</urlset>`
+${sitemapEntries}
+</urlset>`;
 }
 
 // Static pages to always include in the main sitemap
@@ -56,7 +55,6 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
   const dynamicPages: SitemapUrl[] = []
 
   try {
-    // Fetch blog posts
     const blogsResponse = await fetch(`${baseUrl}/api/admin/blogs`, {
       headers: { "Cache-Control": "no-cache" },
     })
@@ -81,7 +79,6 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
   }
 
   try {
-    // Fetch videos
     const videosResponse = await fetch(`${baseUrl}/api/admin/videos`, {
       headers: { "Cache-Control": "no-cache" },
     })

@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: VideoPageProps) {
     const fallbackTitle = "Video Not Found – Flavor Studios";
     const fallbackDescription = "Sorry, this video could not be found. Explore more inspiring anime videos at Flavor Studios.";
     const fallbackUrl = `https://flavorstudios.in/watch/${params.slug}`;
-    const fallbackImage = "https://flavorstudios.in/og-default.jpg"; // Make sure you have a generic fallback image
+    const fallbackImage = "https://flavorstudios.in/cover.jpg"; // Make sure you have a generic fallback image
 
     return {
       title: fallbackTitle,

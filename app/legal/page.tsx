@@ -1,8 +1,48 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Shield, FileText, Copyright, Cookie, AlertCircle, Eye, Scale, AlertTriangle, Gavel } from "lucide-react"
-import Link from "next/link"
+import { getMetadata } from "@/lib/seo-utils";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Shield, FileText, Copyright, Cookie, AlertCircle, Eye, Scale, AlertTriangle, Gavel } from "lucide-react";
+import Link from "next/link";
+
+// === SEO METADATA (REQUIRED FOR NEXT.JS 15+) ===
+export const metadata = getMetadata({
+  title: "Legal – Flavor Studios",
+  description: "Read our legal documents and policies covering privacy, DMCA, terms of service, and more.",
+  path: "/legal",
+  openGraph: {
+    images: [
+      {
+        url: "https://flavorstudios.in/cover.jpg",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    creator: "@flavorstudios",
+    images: ["https://flavorstudios.in/cover.jpg"],
+  },
+  schema: {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Legal – Flavor Studios",
+    description: "Read our legal documents and policies covering privacy, DMCA, terms of service, and more.",
+    url: "https://flavorstudios.in/legal",
+    publisher: {
+      "@type": "Organization",
+      name: "Flavor Studios",
+      url: "https://flavorstudios.in",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://flavorstudios.in/logo.png",
+      },
+    },
+  },
+});
 
 export default function LegalPage() {
   const legalDocuments = [
@@ -60,9 +100,9 @@ export default function LegalPage() {
       category: "Copyright",
       color: "bg-cyan-100 text-cyan-600",
     },
-  ]
+  ];
 
-  const categories = ["All", "Privacy", "Legal", "Copyright"]
+  const categories = ["All", "Privacy", "Legal", "Copyright"];
 
   return (
     <div className="min-h-screen py-8 sm:py-12">
@@ -213,5 +253,5 @@ export default function LegalPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

@@ -1,60 +1,59 @@
-import { NextResponse } from "next/server"
-import { blogStore } from "@/lib/content-store"
+import { NextResponse } from "next/server";
+import { blogStore } from "@/lib/content-store";
+import { generateSitemapXML } from "@/lib/sitemap-utils";
 
-const BASE_URL = "https://flavorstudios.in"
+const BASE_URL = "https://flavorstudios.in";
 
 export async function GET() {
   try {
-    const blogs = await blogStore.getPublished()
-    const hasEntries = blogs && blogs.length > 0
+    const blogs = await blogStore.getPublished();
 
-    // Always include at least one <url> entry (for /blog itself) if empty
-    const blogUrls = hasEntries
-      ? blogs
-          .map(
-            (blog: any) => `  <url>
-    <loc>${BASE_URL}/blog/${blog.slug}</loc>
-    <lastmod>${new Date(blog.updatedAt || blog.publishedAt || blog.createdAt).toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`
-          )
-          .join("\n")
-      : `  <url>
-    <loc>${BASE_URL}/blog</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>`
+    // Always include /blog root page
+    const blogPages =
+      Array.isArray(blogs) && blogs.length > 0
+        ? blogs
+            .filter((b: any) => b.slug)
+            .map((blog: any) => ({
+              url: `/blog/${blog.slug}`,
+              changefreq: "weekly",
+              priority: "0.8",
+              lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
+            }))
+        : [];
 
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${blogUrls}
-</urlset>`
+    // Always include /blog even if no posts exist
+    blogPages.unshift({
+      url: "/blog",
+      changefreq: "weekly",
+      priority: "0.5",
+      lastmod: new Date().toISOString(),
+    });
+
+    const xml = generateSitemapXML(BASE_URL, blogPages);
 
     return new NextResponse(xml, {
+      status: 200,
       headers: {
         "Content-Type": "application/xml",
         "Cache-Control": "public, max-age=3600, s-maxage=3600",
       },
-    })
+    });
   } catch (error) {
-    // On error, return minimal but valid sitemap with only /blog
-    const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>${BASE_URL}/blog</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-</urlset>`
-
-    return new NextResponse(fallbackXml, {
+    // Fallback: minimal, valid sitemap with only /blog
+    const xml = generateSitemapXML(BASE_URL, [
+      {
+        url: "/blog",
+        changefreq: "weekly",
+        priority: "0.5",
+        lastmod: new Date().toISOString(),
+      },
+    ]);
+    return new NextResponse(xml, {
+      status: 200,
       headers: {
         "Content-Type": "application/xml",
         "Cache-Control": "public, max-age=1800, s-maxage=1800",
       },
-    })
+    });
   }
 }

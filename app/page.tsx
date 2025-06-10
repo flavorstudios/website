@@ -1,14 +1,14 @@
 import { getMetadata } from "@/lib/seo-utils"
 
 export const metadata = getMetadata({
-  title: "Flavor Studios – Original Anime, Animation & Storytelling",
+  title: "Flavor Studios – Anime That Stays With You",
   description:
-    "Flavor Studios is an independent anime and animation studio bringing stories to life with 3D animated content, original series, behind-the-scenes, and creative insights. Discover, watch, and be inspired.",
+    "Explore original anime and animated stories made with heart by Flavor Studios. Watch, learn, and feel inspired through powerful storytelling and 3D content.",
   path: "/",
   openGraph: {
-    title: "Flavor Studios – Original Anime, Animation & Storytelling",
+    title: "Flavor Studios – Anime That Stays With You",
     description:
-      "Flavor Studios is an independent anime and animation studio bringing stories to life with 3D animated content, original series, behind-the-scenes, and creative insights.",
+      "Explore original anime and animated stories made with heart by Flavor Studios. Watch, learn, and feel inspired through powerful storytelling and 3D content.",
     url: "https://flavorstudios.in/",
     type: "website",
     site_name: "Flavor Studios",
@@ -18,23 +18,23 @@ export const metadata = getMetadata({
         width: 1200,
         height: 630,
       },
-    ], // updated: array of objects, not strings
+    ],
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Flavor Studios – Original Anime, Animation & Storytelling",
+    title: "Flavor Studios – Anime That Stays With You",
     description:
-      "Flavor Studios is an independent anime and animation studio bringing stories to life with 3D animated content, original series, behind-the-scenes, and creative insights.",
-    images: ["https://flavorstudios.in/cover.jpg"], // updated: array of strings
+      "Explore original anime and animated stories made with heart by Flavor Studios. Watch, learn, and feel inspired through powerful storytelling and 3D content.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Flavor Studios",
     description:
-      "Flavor Studios is an independent anime and animation studio bringing stories to life with 3D animated content, original series, behind-the-scenes, and creative insights.",
+      "Explore original anime and animated stories made with heart by Flavor Studios. Watch, learn, and feel inspired through powerful storytelling and 3D content.",
     url: "https://flavorstudios.in/",
     logo: {
       "@type": "ImageObject",
@@ -48,7 +48,7 @@ export const metadata = getMetadata({
       "https://www.threads.net/@flavorstudios",
     ],
   },
-}); // <- semicolon is important
+});
 
 import { Suspense } from "react"
 import Link from "next/link"

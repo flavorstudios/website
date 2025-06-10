@@ -28,16 +28,41 @@ interface BlogPostPageProps {
   params: { slug: string };
 }
 
-// --- CLEAN CENTRALIZED SEO METADATA (OG, Twitter, Schema) ---
+// --- SEO METADATA (ALWAYS COMPLETE, EVEN IF NOT FOUND) ---
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const post = await getBlogPost(params.slug);
 
   if (!post) {
+    const fallbackUrl = `https://flavorstudios.in/blog/${params.slug}`;
+    const fallbackTitle = "Post Not Found – Flavor Studios";
+    const fallbackDesc = "This blog post could not be found.";
+
     return {
-      title: "Post Not Found – Flavor Studios",
-      description: "This blog post could not be found.",
+      title: fallbackTitle,
+      description: fallbackDesc,
       alternates: {
-        canonical: `https://flavorstudios.in/blog/${params.slug}`,
+        canonical: fallbackUrl,
+      },
+      openGraph: {
+        title: fallbackTitle,
+        description: fallbackDesc,
+        url: fallbackUrl,
+        type: "article",
+        images: [
+          {
+            url: "https://flavorstudios.in/cover.jpg",
+            width: 1200,
+            height: 630,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        site: "@flavorstudios",
+        creator: "@flavorstudios",
+        title: fallbackTitle,
+        description: fallbackDesc,
+        images: ["https://flavorstudios.in/cover.jpg"],
       },
     };
   }

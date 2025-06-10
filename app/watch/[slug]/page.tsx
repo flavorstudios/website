@@ -14,9 +14,11 @@ async function getVideo(slug: string) {
     if (!response.ok) return null;
     const data = await response.json();
     const videos = data.videos || [];
-    return videos.find(
-      (video: any) => (video.slug === slug || video.id === slug) && video.status === "published"
-    ) || null;
+    return (
+      videos.find(
+        (video: any) => (video.slug === slug || video.id === slug) && video.status === "published"
+      ) || null
+    );
   } catch (error) {
     console.error("Failed to fetch video:", error);
     return null;
@@ -27,20 +29,48 @@ interface VideoPageProps {
   params: { slug: string };
 }
 
-// --- CLEAN CENTRALIZED METADATA ---
+// --- SEO-COMPLIANT CENTRALIZED METADATA ---
 export async function generateMetadata({ params }: VideoPageProps) {
   const video = await getVideo(params.slug);
 
+  // 1️⃣ Fallback: Content not found
   if (!video) {
+    const fallbackTitle = "Video Not Found – Flavor Studios";
+    const fallbackDescription = "Sorry, this video could not be found. Explore more inspiring anime videos at Flavor Studios.";
+    const fallbackUrl = `https://flavorstudios.in/watch/${params.slug}`;
+    const fallbackImage = "https://flavorstudios.in/og-default.jpg"; // Make sure you have a generic fallback image
+
     return {
-      title: "Video Not Found – Flavor Studios",
-      description: "This video could not be found.",
+      title: fallbackTitle,
+      description: fallbackDescription,
       alternates: {
-        canonical: `https://flavorstudios.in/watch/${params.slug}`,
+        canonical: fallbackUrl,
       },
+      openGraph: {
+        title: fallbackTitle,
+        description: fallbackDescription,
+        url: fallbackUrl,
+        type: "website",
+        images: [
+          {
+            url: fallbackImage,
+            width: 1200,
+            height: 630,
+            alt: "Flavor Studios Not Found",
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: fallbackTitle,
+        description: fallbackDescription,
+        images: [fallbackImage],
+      },
+      robots: "noindex, follow", // Optional but best for non-existent pages
     };
   }
 
+  // 2️⃣ Normal: Video found
   const canonicalUrl = `https://flavorstudios.in/watch/${video.slug || params.slug}`;
   const thumbnailUrl =
     video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
@@ -95,7 +125,7 @@ export async function generateMetadata({ params }: VideoPageProps) {
         },
       },
     },
-    // robots: "index, follow" // Optional!
+    // robots: "index, follow" // Uncomment if you want to enforce for published videos
   });
 }
 

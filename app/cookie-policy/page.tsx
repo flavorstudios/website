@@ -1,11 +1,17 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
-  title: "Cookie Policy",
+  title: "Cookie Policy – Flavor Studios",
   description:
-    "Read the Cookie Policy for Flavor Studios. Learn how we use cookies and how you can control your privacy on https://flavorstudios.in.",
+    "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
   path: "/cookie-policy",
   openGraph: {
+    title: "Cookie Policy – Flavor Studios",
+    description:
+      "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
+    url: "https://flavorstudios.in/cookie-policy",
+    type: "website",
+    site_name: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -13,12 +19,15 @@ export const metadata = getMetadata({
         height: 630,
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    images: ["https://flavorstudios.in/cover.jpg"], // new format: array of strings
+    creator: "@flavorstudios",
+    title: "Cookie Policy – Flavor Studios",
+    description:
+      "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
   robots: "noindex, nofollow",
   schema: {
@@ -26,7 +35,7 @@ export const metadata = getMetadata({
     "@type": "WebPage",
     name: "Cookie Policy",
     description:
-      "Read the Cookie Policy for Flavor Studios. Learn how we use cookies and how you can control your privacy on https://flavorstudios.in.",
+      "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
     url: "https://flavorstudios.in/cookie-policy",
     publisher: {
       "@type": "Organization",
@@ -36,9 +45,20 @@ export const metadata = getMetadata({
         "@type": "ImageObject",
         url: "https://flavorstudios.in/logo.png",
       },
+      sameAs: [
+        "https://www.youtube.com/@flavorstudios",
+        "https://www.instagram.com/flavorstudios",
+        "https://twitter.com/flavor_studios",
+        "https://www.facebook.com/flavourstudios",
+        "https://www.threads.net/@flavorstudios",
+        "https://discord.com/channels/@flavorstudios",
+        "https://t.me/flavorstudios",
+        "https://www.reddit.com/r/flavorstudios/",
+        "https://bsky.app/profile/flavorstudios.bsky.social"
+      ]
     },
   },
-}); // <- semicolon is important
+});
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

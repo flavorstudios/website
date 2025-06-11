@@ -1,10 +1,17 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
-  title: "Terms of Service",
-  description: "Read the Terms of Service for using Flavor Studios and our content.",
+  title: "Terms of Service – Flavor Studios",
+  description:
+    "Review the Terms of Service for using Flavor Studios’ website, original content, and community features. Stay informed and protected.",
   path: "/terms-of-service",
   openGraph: {
+    title: "Terms of Service – Flavor Studios",
+    description:
+      "Review the Terms of Service for using Flavor Studios’ website, original content, and community features. Stay informed and protected.",
+    url: "https://flavorstudios.in/terms-of-service",
+    type: "website",
+    site_name: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -12,19 +19,23 @@ export const metadata = getMetadata({
         height: 630,
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    images: ["https://flavorstudios.in/cover.jpg"], // updated to array
+    creator: "@flavorstudios",
+    title: "Terms of Service – Flavor Studios",
+    description:
+      "Review the Terms of Service for using Flavor Studios’ website, original content, and community features. Stay informed and protected.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
-  robots: "noindex, nofollow", // Prevents indexing of legal page
+  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Terms of Service",
-    description: "Read the Terms of Service for using Flavor Studios and our content.",
+    description:
+      "Review the Terms of Service for using Flavor Studios’ website, original content, and community features. Stay informed and protected.",
     url: "https://flavorstudios.in/terms-of-service",
     publisher: {
       "@type": "Organization",
@@ -36,7 +47,7 @@ export const metadata = getMetadata({
       },
     },
   },
-}); // <- semicolon is important
+});
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

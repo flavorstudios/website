@@ -1,11 +1,17 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
-  title: "Disclaimer",
+  title: "Disclaimer – Legal Notice | Flavor Studios",
   description:
-    "Read the Disclaimer for Flavor Studios. Learn about our legal limitations, content liability, third-party links, and user responsibilities on https://flavorstudios.in.",
+    "Read Flavor Studios' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.",
   path: "/disclaimer",
   openGraph: {
+    title: "Disclaimer – Legal Notice | Flavor Studios",
+    description:
+      "Read Flavor Studios' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.",
+    url: "https://flavorstudios.in/disclaimer",
+    type: "website",
+    site_name: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -13,21 +19,24 @@ export const metadata = getMetadata({
         height: 630,
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    images: ["https://flavorstudios.in/cover.jpg"], // array as required
+    creator: "@flavorstudios",
+    title: "Disclaimer – Legal Notice | Flavor Studios",
+    description:
+      "Read Flavor Studios' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
   robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Disclaimer",
-    description:
-      "Read the Disclaimer for Flavor Studios. Learn about our legal limitations, content liability, third-party links, and user responsibilities on https://flavorstudios.in.",
     url: "https://flavorstudios.in/disclaimer",
+    description:
+      "Read Flavor Studios' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies.",
     publisher: {
       "@type": "Organization",
       name: "Flavor Studios",
@@ -38,7 +47,7 @@ export const metadata = getMetadata({
       },
     },
   },
-}); // <- semicolon is important
+});
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

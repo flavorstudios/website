@@ -1,9 +1,15 @@
+// --- WATCH PAGE WITH SEO-COMPLIANT METADATA ---
+
 import { notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Eye, Youtube, Clock, Share2, ThumbsUp } from "lucide-react";
 import { getMetadata } from "@/lib/seo-utils";
+
+interface VideoPageProps {
+  params: { slug: string };
+}
 
 async function getVideo(slug: string) {
   try {
@@ -16,7 +22,8 @@ async function getVideo(slug: string) {
     const videos = data.videos || [];
     return (
       videos.find(
-        (video: any) => (video.slug === slug || video.id === slug) && video.status === "published"
+        (video: any) =>
+          (video.slug === slug || video.id === slug) && video.status === "published"
       ) || null
     );
   } catch (error) {
@@ -25,20 +32,14 @@ async function getVideo(slug: string) {
   }
 }
 
-interface VideoPageProps {
-  params: { slug: string };
-}
-
-// --- SEO-COMPLIANT CENTRALIZED METADATA ---
 export async function generateMetadata({ params }: VideoPageProps) {
   const video = await getVideo(params.slug);
 
-  // 1️⃣ Fallback: Content not found
   if (!video) {
     const fallbackTitle = "Video Not Found – Flavor Studios";
     const fallbackDescription = "Sorry, this video could not be found. Explore more inspiring anime videos at Flavor Studios.";
     const fallbackUrl = `https://flavorstudios.in/watch/${params.slug}`;
-    const fallbackImage = "https://flavorstudios.in/cover.jpg"; // Make sure you have a generic fallback image
+    const fallbackImage = "https://flavorstudios.in/cover.jpg";
 
     return {
       title: fallbackTitle,
@@ -56,7 +57,7 @@ export async function generateMetadata({ params }: VideoPageProps) {
             url: fallbackImage,
             width: 1200,
             height: 630,
-            alt: "Flavor Studios Not Found",
+            alt: "Flavor Studios – Not Found",
           },
         ],
       },
@@ -66,19 +67,20 @@ export async function generateMetadata({ params }: VideoPageProps) {
         description: fallbackDescription,
         images: [fallbackImage],
       },
-      robots: "noindex, follow", // Optional but best for non-existent pages
+      robots: "noindex, follow",
     };
   }
 
-  // 2️⃣ Normal: Video found
   const canonicalUrl = `https://flavorstudios.in/watch/${video.slug || params.slug}`;
   const thumbnailUrl =
     video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
-  const seoTitle = video.title;
-  const seoDescription = video.description;
+  const seoTitle = `${video.title} – Watch | Flavor Studios`;
+  const seoDescription =
+    video.description ||
+    "Watch original anime content crafted by Flavor Studios — emotionally driven storytelling, 3D animation, and passion for creative expression.";
 
   return getMetadata({
-    title: `${seoTitle} – Watch | Flavor Studios`,
+    title: seoTitle,
     description: seoDescription,
     path: `/watch/${video.slug || params.slug}`,
     openGraph: {
@@ -125,7 +127,6 @@ export async function generateMetadata({ params }: VideoPageProps) {
         },
       },
     },
-    // robots: "index, follow" // Uncomment if you want to enforce for published videos
   });
 }
 
@@ -145,7 +146,6 @@ export default async function VideoPage({ params }: VideoPageProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Video Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Video Player */}
             <Card className="overflow-hidden">
               <div className="relative aspect-video">
                 <iframe
@@ -158,7 +158,6 @@ export default async function VideoPage({ params }: VideoPageProps) {
               </div>
             </Card>
 
-            {/* Video Info */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Badge variant="outline">{video.category}</Badge>
@@ -191,7 +190,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
                       href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
                         `https://flavorstudios.in/watch/${video.slug || params.slug}`
                       )}&text=${encodeURIComponent(
-                        `Watch "${video.title}" on Flavor Studios!`
+                        `Watch \"${video.title}\" on Flavor Studios!`
                       )}&hashtags=Anime,Animation`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -204,12 +203,10 @@ export default async function VideoPage({ params }: VideoPageProps) {
               </div>
             </div>
 
-            {/* Description */}
             <Card>
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-3">About this video</h3>
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{video.description}</p>
-                {/* Tags */}
                 {video.tags && video.tags.length > 0 && (
                   <div className="mt-6">
                     <h4 className="text-sm font-medium text-gray-900 mb-2">Tags</h4>
@@ -228,7 +225,6 @@ export default async function VideoPage({ params }: VideoPageProps) {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Watch on YouTube */}
             <Card>
               <CardContent className="p-6 text-center">
                 <Youtube className="h-12 w-12 text-red-600 mx-auto mb-4" />
@@ -245,7 +241,6 @@ export default async function VideoPage({ params }: VideoPageProps) {
               </CardContent>
             </Card>
 
-            {/* Channel Info */}
             <Card>
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-3">Flavor Studios</h3>
@@ -264,7 +259,6 @@ export default async function VideoPage({ params }: VideoPageProps) {
               </CardContent>
             </Card>
 
-            {/* Video Stats */}
             <Card>
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold mb-3">Video Statistics</h3>

@@ -1,14 +1,17 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
-  title: "Careers – Flavor Studios",
+  title: "Join Our Team – Careers at Flavor Studios",
   description:
-    "Explore creative career opportunities at Flavor Studios. Join our talent list, discover recently filled positions, and stay connected for future roles in animation, writing, voice acting, and more.",
+    "Discover animation, writing, and voice acting opportunities at Flavor Studios. Join our talent list and be part of something original.",
   path: "/career",
   openGraph: {
-    title: "Careers at Flavor Studios",
+    title: "Join Our Team – Careers at Flavor Studios",
     description:
-      "Animation, writing, voice acting & more—discover opportunities at Flavor Studios and join our creative talent list.",
+      "Explore creative roles in animation, writing, and voice acting. Join our talent list and shape the future of storytelling at Flavor Studios.",
+    url: "https://flavorstudios.in/career",
+    type: "website",
+    site_name: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -16,24 +19,22 @@ export const metadata = getMetadata({
         height: 630,
       },
     ],
-    type: "website",
-    url: "https://flavorstudios.in/career",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Careers at Flavor Studios",
+    title: "Join Our Team – Careers at Flavor Studios",
     description:
-      "Explore creative jobs in animation, writing, and production. Join our talent pool for future roles.",
-    images: ["https://flavorstudios.in/cover.jpg"], // updated: array of strings
+      "Animation, writing, voice acting, and more—join our creative network at Flavor Studios and stay connected for future roles.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Careers at Flavor Studios",
     description:
-      "Explore creative career opportunities at Flavor Studios. Join our talent list, discover recently filled positions, and stay connected for future roles in animation, writing, voice acting, and more.",
+      "Discover animation, writing, and voice acting opportunities at Flavor Studios. Join our talent list and be part of something original.",
     url: "https://flavorstudios.in/career",
     publisher: {
       "@type": "Organization",
@@ -45,7 +46,7 @@ export const metadata = getMetadata({
       },
     },
   },
-}); // <- semicolon is important
+});
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

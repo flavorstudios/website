@@ -1,11 +1,17 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
-  title: "Media Usage Policy",
+  title: "Media Usage Policy – Copyright & Attribution | Flavor Studios",
   description:
-    "Read the Media Usage Policy for Flavor Studios. Learn about acceptable, prohibited, and commercial use of our animation, images, and content. Attribution rules included.",
+    "Understand how you can use Flavor Studios' media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.",
   path: "/media-usage-policy",
   openGraph: {
+    title: "Media Usage Policy – Copyright & Attribution | Flavor Studios",
+    description:
+      "Understand how you can use Flavor Studios' media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.",
+    url: "https://flavorstudios.in/media-usage-policy",
+    type: "website",
+    site_name: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -13,21 +19,24 @@ export const metadata = getMetadata({
         height: 630,
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    images: ["https://flavorstudios.in/cover.jpg"], // updated to array format
+    creator: "@flavorstudios",
+    title: "Media Usage Policy – Copyright & Attribution | Flavor Studios",
+    description:
+      "Understand how you can use Flavor Studios' media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
   robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Media Usage Policy",
-    description:
-      "Read the Media Usage Policy for Flavor Studios. Learn about acceptable, prohibited, and commercial use of our animation, images, and content. Attribution rules included.",
     url: "https://flavorstudios.in/media-usage-policy",
+    description:
+      "Understand how you can use Flavor Studios' media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.",
     publisher: {
       "@type": "Organization",
       name: "Flavor Studios",
@@ -38,7 +47,7 @@ export const metadata = getMetadata({
       },
     },
   },
-}); // <- semicolon is important
+});
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

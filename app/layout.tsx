@@ -12,9 +12,9 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Flavor Studios – Anime & Stories That Stay With You",
+  title: "Flavor Studios | Anime News & Original Stories That Inspire",
   description:
-    "Explore powerful animations, blogs, and games that inspire, entertain, and connect with your soul. Made with love by Flavor Studios.",
+    "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
   metadataBase: new URL("https://flavorstudios.in"),
   icons: {
     icon: "/favicon.ico",
@@ -37,12 +37,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
-        {/* Facebook OG App ID */}
+        {/* === Facebook Open Graph App ID (if you ever use Facebook Insights) === */}
         <meta property="fb:app_id" content="1404440770881914" />
-        {/* Mastodon verification */}
+        {/* === Mastodon Verification for Fediverse === */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
 
-        {/* === Google Tag Manager SCRIPT (in HEAD) === */}
+        {/* === Google Tag Manager (HEAD) === */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -54,19 +54,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             `,
           }}
         />
-        {/* === END Google Tag Manager SCRIPT === */}
+        {/* === END Google Tag Manager (HEAD) === */}
       </head>
       <body className={`${inter.className} antialiased`}>
-        {/* === Google Tag Manager NOSCRIPT (immediately after <body>) === */}
+        {/* === Google Tag Manager (NOSCRIPT, immediately after <body>) === */}
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
             height="0"
             width="0"
             style={{ display: "none", visibility: "hidden" }}
+            title="GTM"
           />
         </noscript>
-        {/* === END Google Tag Manager NOSCRIPT === */}
+        {/* === END Google Tag Manager (NOSCRIPT) === */}
 
         <Header />
         <main>{children}</main>

@@ -1,33 +1,41 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
-  title: "Play Games – Flavor Studios",
+  title: "Play Anime-Inspired Games Online | Flavor Studios",
   description:
-    "Take a break and play classic games like Tic-Tac-Toe online! Challenge your friends or our advanced AI. Multiple modes, score tracking, and more—only on Flavor Studios.",
+    "Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on Flavor Studios.",
   path: "/play",
   openGraph: {
+    title: "Play Anime-Inspired Games Online | Flavor Studios",
+    description:
+      "Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on Flavor Studios.",
+    url: "https://flavorstudios.in/play",
+    type: "website",
+    site_name: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
         width: 1200,
         height: 630,
       },
-    ], // Updated: array of objects, not strings
-    type: "website",
+    ],
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    images: ["https://flavorstudios.in/cover.jpg"], // Updated: array of strings
+    title: "Play Anime-Inspired Games Online | Flavor Studios",
+    description:
+      "Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on Flavor Studios.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Play Games",
+    url: "https://flavorstudios.in/play",
     description:
       "Enjoy interactive games including Tic-Tac-Toe with AI and multiplayer options on Flavor Studios. Experience classic fun with a modern twist.",
-    url: "https://flavorstudios.in/play",
     publisher: {
       "@type": "Organization",
       name: "Flavor Studios",
@@ -38,4 +46,4 @@ export const metadata = getMetadata({
       },
     },
   },
-}); // <- semicolon is important
+});

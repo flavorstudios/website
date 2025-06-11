@@ -1,5 +1,9 @@
 import { getMetadata } from "@/lib/seo-utils";
-// ...other imports remain unchanged
+import { Shield, FileText, Copyright, Cookie, AlertCircle, Eye, Scale, AlertTriangle, Gavel } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 // === SEO METADATA (REQUIRED FOR NEXT.JS 15+) ===
 export const metadata = getMetadata({
@@ -175,10 +179,8 @@ export default function LegalPage() {
           {legalDocuments.map((doc, index) => (
             <Card key={index} className="hover:shadow-lg transition-shadow h-full">
               <CardHeader>
-                <div className="flex items-center justify-between mb-3">
-                  <div className={`p-2 rounded-lg ${doc.color}`}>
-                    <doc.icon className="h-5 w-5 sm:h-6 sm:w-6" />
-                  </div>
+                <div className={`p-2 rounded-lg ${doc.color} flex items-center justify-between mb-3`}>
+                  <doc.icon className="h-5 w-5 sm:h-6 sm:w-6" />
                   <Badge variant="secondary" className="text-xs">
                     {doc.category}
                   </Badge>

@@ -1,32 +1,40 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
-  title: "Contact – Flavor Studios",
+  title: "Contact Flavor Studios – Collaborate or Inquire",
   description:
-    "Contact Flavor Studios for collaborations, support, or general inquiries. Reach out via email, social, or our form. We reply within 24–48 hours.",
+    "Have a question or proposal? Contact Flavor Studios for support, collaborations, or general inquiries. We respond within 24–48 hours.",
   path: "/contact",
   openGraph: {
+    title: "Contact Flavor Studios – Collaborate or Inquire",
+    description:
+      "Have a question or proposal? Contact Flavor Studios for support, collaborations, or general inquiries. We respond within 24–48 hours.",
+    url: "https://flavorstudios.in/contact",
+    type: "website",
+    site_name: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
         width: 1200,
         height: 630,
       },
-    ], // Correct: array of objects
-    type: "website",
+    ],
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    images: ["https://flavorstudios.in/cover.jpg"], // Correct: array of strings
+    title: "Contact Flavor Studios – Collaborate or Inquire",
+    description:
+      "Have a question or proposal? Contact Flavor Studios for support, collaborations, or general inquiries. We respond within 24–48 hours.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",
     "@type": "ContactPage",
-    name: "Contact – Flavor Studios",
+    name: "Contact Flavor Studios",
     description:
-      "Contact Flavor Studios for collaborations, support, or general inquiries. We reply within 24–48 hours.",
+      "Contact Flavor Studios for support, collaborations, or inquiries. We typically respond within 24 to 48 hours.",
     url: "https://flavorstudios.in/contact",
     publisher: {
       "@type": "Organization",
@@ -46,4 +54,4 @@ export const metadata = getMetadata({
       ],
     },
   },
-}); // <- semicolon is important
+});

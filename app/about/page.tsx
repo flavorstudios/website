@@ -1,14 +1,17 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
-  title: "About – Flavor Studios",
+  title: "About Us – The Vision Behind Flavor Studios",
   description:
-    "Discover the mission, values, and story behind Flavor Studios. We are an independent animation studio crafting emotionally resonant anime and original 3D animated content with a community-driven approach.",
+    "Explore the heart and vision of Flavor Studios — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.",
   path: "/about",
   openGraph: {
-    title: "About Flavor Studios",
+    title: "About Us – The Vision Behind Flavor Studios",
     description:
-      "Get to know Flavor Studios: our mission, core values, and the creative journey behind our emotionally-driven anime and 3D animation projects.",
+      "Learn what drives Flavor Studios. Discover our mission, creative values, and passion for telling original stories through anime and 3D animation.",
+    url: "https://flavorstudios.in/about",
+    type: "website",
+    site_name: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -16,24 +19,22 @@ export const metadata = getMetadata({
         height: 630,
       },
     ],
-    type: "website",
-    url: "https://flavorstudios.in/about",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "About Flavor Studios",
+    title: "About Us – The Vision Behind Flavor Studios",
     description:
-      "We’re an independent anime & 3D animation studio blending heart, storytelling, and community spirit.",
-    images: ["https://flavorstudios.in/cover.jpg"], // Correct: array of strings
+      "We’re an indie animation studio fueled by storytelling, emotion, and community. Discover our journey and purpose.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",
     "@type": "AboutPage",
     name: "About Flavor Studios",
     description:
-      "Discover the mission, values, and story behind Flavor Studios. We are an independent animation studio crafting emotionally resonant anime and original 3D animated content with a community-driven approach.",
+      "Explore the heart and vision of Flavor Studios — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.",
     url: "https://flavorstudios.in/about",
     publisher: {
       "@type": "Organization",
@@ -45,7 +46,7 @@ export const metadata = getMetadata({
       },
     },
   },
-}); // <- semicolon is important
+});
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

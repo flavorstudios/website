@@ -1,3 +1,5 @@
+// --- BLOG POST PAGE WITH SEO-COMPLIANT METADATA ---
+
 import { notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,9 +14,7 @@ async function getBlogPost(slug: string) {
       `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/blogs`,
       { cache: "no-store" }
     );
-    if (!response.ok) {
-      return null;
-    }
+    if (!response.ok) return null;
     const data = await response.json();
     const posts = data.posts || [];
     return posts.find((post: any) => post.slug === slug && post.status === "published") || null;
@@ -28,7 +28,6 @@ interface BlogPostPageProps {
   params: { slug: string };
 }
 
-// --- SEO METADATA (ALWAYS COMPLETE, EVEN IF NOT FOUND) ---
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const post = await getBlogPost(params.slug);
 
@@ -64,6 +63,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
         description: fallbackDesc,
         images: ["https://flavorstudios.in/cover.jpg"],
       },
+      robots: "noindex, follow",
     };
   }
 
@@ -86,6 +86,8 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
       ],
       type: "article",
       url: canonicalUrl,
+      title: seoTitle,
+      description: seoDescription,
     },
     twitter: {
       card: "summary_large_image",
@@ -120,7 +122,6 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
         "@id": canonicalUrl,
       },
     },
-    // robots: "index, follow" // optional, uncomment if needed
   });
 }
 

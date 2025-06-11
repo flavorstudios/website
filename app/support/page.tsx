@@ -1,11 +1,17 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
-  title: "Support Flavor Studios",
+  title: "Support Flavor Studios – Fuel Anime & Stories",
   description:
-    "Discover how you can support Flavor Studios! Buy us a coffee, join our community, or help us grow. Every contribution fuels new anime and creative projects.",
+    "Help Flavor Studios grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.",
   path: "/support",
   openGraph: {
+    title: "Support Flavor Studios – Fuel Anime & Stories",
+    description:
+      "Help Flavor Studios grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.",
+    url: "https://flavorstudios.in/support",
+    type: "website",
+    site_name: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -13,21 +19,23 @@ export const metadata = getMetadata({
         height: 630,
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    images: ["https://flavorstudios.in/cover.jpg"], // Correct format: array of strings
+    creator: "@flavorstudios",
+    title: "Support Flavor Studios – Fuel Anime & Stories",
+    description:
+      "Help Flavor Studios grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
-  // No robots field, so search engines WILL index this page.
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "Support Flavor Studios",
-    description:
-      "Discover how you can support Flavor Studios! Buy us a coffee, join our community, or help us grow. Every contribution fuels new anime and creative projects.",
     url: "https://flavorstudios.in/support",
+    description:
+      "Help Flavor Studios grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.",
     publisher: {
       "@type": "Organization",
       name: "Flavor Studios",
@@ -38,7 +46,7 @@ export const metadata = getMetadata({
       },
     },
   },
-}); // <- semicolon is important
+});
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"

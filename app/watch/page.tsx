@@ -9,32 +9,42 @@ import { CategoryTabs } from "@/components/ui/category-tabs";
 
 // === SEO METADATA (REQUIRED FOR NEXT.JS 15+) ===
 export const metadata = getMetadata({
-  title: "Watch – Flavor Studios | Original Anime & Video Content",
+  title: "Flavor Studios Videos | Original Anime, Studio Films & More",
   description:
-    "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
+    "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
   path: "/watch",
+  canonical: "https://flavorstudios.in/watch",
+  robots: "index,follow",
   openGraph: {
+    title: "Flavor Studios Videos | Original Anime, Studio Films & More",
+    description:
+      "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
+    url: "https://flavorstudios.in/watch",
+    type: "website",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
         width: 1200,
         height: 630,
+        alt: "Flavor Studios Videos – Original Anime, Studio Films & More",
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
+    title: "Flavor Studios Videos | Original Anime, Studio Films & More",
+    description:
+      "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Watch – Flavor Studios",
+    name: "Flavor Studios Videos",
     description:
-      "Watch our original anime series, short films, and exclusive behind-the-scenes content. Experience the world of Flavor Studios through our video library.",
+      "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
     url: "https://flavorstudios.in/watch",
     publisher: {
       "@type": "Organization",

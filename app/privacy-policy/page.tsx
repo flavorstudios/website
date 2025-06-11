@@ -1,11 +1,17 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
-  title: "Privacy Policy",
+  title: "Privacy Policy – Flavor Studios",
   description:
-    "Our Privacy Policy explains how Flavor Studios collects, uses, and protects your data on https://flavorstudios.in.",
+    "Read how Flavor Studios collects, uses, and safeguards your personal data while using https://flavorstudios.in. Your privacy matters to us.",
   path: "/privacy-policy",
   openGraph: {
+    title: "Privacy Policy – Flavor Studios",
+    description:
+      "Read how Flavor Studios collects, uses, and safeguards your personal data while using https://flavorstudios.in. Your privacy matters to us.",
+    url: "https://flavorstudios.in/privacy-policy",
+    type: "website",
+    site_name: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -13,12 +19,14 @@ export const metadata = getMetadata({
         height: 630,
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    images: ["https://flavorstudios.in/cover.jpg"], // updated to array of strings
+    title: "Privacy Policy – Flavor Studios",
+    description:
+      "Read how Flavor Studios collects, uses, and safeguards your personal data while using https://flavorstudios.in. Your privacy matters to us.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
   robots: "noindex, nofollow",
   schema: {
@@ -26,7 +34,7 @@ export const metadata = getMetadata({
     "@type": "WebPage",
     name: "Privacy Policy",
     description:
-      "Our Privacy Policy explains how Flavor Studios collects, uses, and protects your data on https://flavorstudios.in.",
+      "Read how Flavor Studios collects, uses, and safeguards your personal data while using https://flavorstudios.in. Your privacy matters to us.",
     url: "https://flavorstudios.in/privacy-policy",
     publisher: {
       "@type": "Organization",
@@ -38,7 +46,7 @@ export const metadata = getMetadata({
       },
     },
   },
-}); // <- semicolon is important
+});
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

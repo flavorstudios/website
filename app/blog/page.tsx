@@ -11,24 +11,34 @@ import { NewsletterSignup } from "@/components/newsletter-signup";
 
 // === SEO METADATA BLOCK (Centralized for Next.js 15+) ===
 export const metadata = getMetadata({
-  title: "Blog – Flavor Studios | Anime Creation Insights & Stories",
+  title: "Flavor Studios Blog | Anime News, Insights & Studio Stories",
   description:
-    "Dive deep into the world of anime creation, industry insights, and behind-the-scenes stories from Flavor Studios. Discover our creative process and expertise.",
+    "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
   path: "/blog",
+  canonical: "https://flavorstudios.in/blog",
+  robots: "index,follow",
   openGraph: {
+    title: "Flavor Studios Blog | Anime News, Insights & Studio Stories",
+    description:
+      "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
+    url: "https://flavorstudios.in/blog",
+    type: "website",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
         width: 1200,
         height: 630,
+        alt: "Flavor Studios Blog – Anime News, Insights & Studio Stories",
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
+    title: "Flavor Studios Blog | Anime News, Insights & Studio Stories",
+    description:
+      "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
@@ -36,7 +46,7 @@ export const metadata = getMetadata({
     "@type": "Blog",
     name: "Flavor Studios Blog",
     description:
-      "Dive deep into the world of anime creation, industry insights, and behind-the-scenes stories from Flavor Studios.",
+      "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
     url: "https://flavorstudios.in/blog",
     publisher: {
       "@type": "Organization",
@@ -94,7 +104,7 @@ export default async function BlogPage({
   const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3);
   const regularPosts = paginatedPosts.filter((post: any) => !post.featured);
 
-  // Analytics data (matches Watch page)
+  // Analytics data
   const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0);
   const avgReadTime =
     posts.length > 0

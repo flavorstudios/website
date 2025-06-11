@@ -1,14 +1,14 @@
 import { getMetadata } from "@/lib/seo-utils"
 
 export const metadata = getMetadata({
-  title: "Flavor Studios – Anime That Stays With You",
+  title: "Flavor Studios | Anime News & Original Stories That Inspire",
   description:
-    "Explore original anime and animated stories made with heart by Flavor Studios. Watch, learn, and feel inspired through powerful storytelling and 3D content.",
+    "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
   path: "/",
   openGraph: {
-    title: "Flavor Studios – Anime That Stays With You",
+    title: "Flavor Studios | Anime News & Original Stories That Inspire",
     description:
-      "Explore original anime and animated stories made with heart by Flavor Studios. Watch, learn, and feel inspired through powerful storytelling and 3D content.",
+      "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
     url: "https://flavorstudios.in/",
     type: "website",
     site_name: "Flavor Studios",
@@ -24,18 +24,18 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Flavor Studios – Anime That Stays With You",
+    title: "Flavor Studios | Anime News & Original Stories That Inspire",
     description:
-      "Explore original anime and animated stories made with heart by Flavor Studios. Watch, learn, and feel inspired through powerful storytelling and 3D content.",
+      "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Flavor Studios",
-    description:
-      "Explore original anime and animated stories made with heart by Flavor Studios. Watch, learn, and feel inspired through powerful storytelling and 3D content.",
     url: "https://flavorstudios.in/",
+    description:
+      "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
     logo: {
       "@type": "ImageObject",
       url: "https://flavorstudios.in/logo.png",
@@ -46,7 +46,11 @@ export const metadata = getMetadata({
       "https://twitter.com/flavor_studios",
       "https://www.facebook.com/flavourstudios",
       "https://www.threads.net/@flavorstudios",
-    ],
+      "https://discord.com/channels/@flavorstudios",
+      "https://t.me/flavorstudios",
+      "https://www.reddit.com/r/flavorstudios/",
+      "https://bsky.app/profile/flavorstudios.bsky.social"
+    ]
   },
 });
 

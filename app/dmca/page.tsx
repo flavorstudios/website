@@ -1,10 +1,17 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
-  title: "DMCA Policy",
-  description: "Learn how to submit a DMCA notice to Flavor Studios. Our DMCA Policy outlines your rights and our process for copyright takedown requests.",
+  title: "DMCA Takedown Policy – Flavor Studios",
+  description:
+    "Learn how to file a DMCA takedown notice with Flavor Studios. Understand your rights and our copyright policy for protecting original content.",
   path: "/dmca",
   openGraph: {
+    title: "DMCA Takedown Policy – Flavor Studios",
+    description:
+      "Learn how to file a DMCA takedown notice with Flavor Studios. Understand your rights and our copyright policy for protecting original content.",
+    url: "https://flavorstudios.in/dmca",
+    type: "website",
+    site_name: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -12,19 +19,23 @@ export const metadata = getMetadata({
         height: 630,
       },
     ],
-    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    images: ["https://flavorstudios.in/cover.jpg"], // updated to array format
+    creator: "@flavorstudios",
+    title: "DMCA Takedown Policy – Flavor Studios",
+    description:
+      "Learn how to file a DMCA takedown notice with Flavor Studios. Understand your rights and our copyright policy for protecting original content.",
+    images: ["https://flavorstudios.in/cover.jpg"],
   },
-  robots: "noindex, nofollow", // This ensures the legal page is not indexed
+  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "DMCA Policy",
-    description: "Learn how to submit a DMCA notice to Flavor Studios. Our DMCA Policy outlines your rights and our process for copyright takedown requests.",
+    name: "DMCA Takedown Policy",
+    description:
+      "Learn how to file a DMCA takedown notice with Flavor Studios. Understand your rights and our copyright policy for protecting original content.",
     url: "https://flavorstudios.in/dmca",
     publisher: {
       "@type": "Organization",
@@ -34,9 +45,20 @@ export const metadata = getMetadata({
         "@type": "ImageObject",
         url: "https://flavorstudios.in/logo.png",
       },
+      sameAs: [
+        "https://www.youtube.com/@flavorstudios",
+        "https://www.instagram.com/flavorstudios",
+        "https://twitter.com/flavor_studios",
+        "https://www.facebook.com/flavourstudios",
+        "https://www.threads.net/@flavorstudios",
+        "https://discord.com/channels/@flavorstudios",
+        "https://t.me/flavorstudios",
+        "https://www.reddit.com/r/flavorstudios/",
+        "https://bsky.app/profile/flavorstudios.bsky.social"
+      ]
     },
   },
-}); // <- semicolon is important
+});
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

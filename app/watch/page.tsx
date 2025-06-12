@@ -14,7 +14,7 @@ export const metadata = getMetadata({
     "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
   path: "/watch",
   canonical: "https://flavorstudios.in/watch",
-  robots: "index,follow",
+  robots: "index,follow", // <-- EXPLICITLY SET
   openGraph: {
     title: "Flavor Studios Videos | Original Anime, Studio Films & More",
     description:

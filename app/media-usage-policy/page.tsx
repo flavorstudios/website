@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Understand how you can use Flavor Studios' media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.",
   path: "/media-usage-policy",
+  robots: "noindex, nofollow", // Correct: media usage/copyright policy should NOT be indexed
   openGraph: {
     title: "Media Usage Policy – Copyright & Attribution | Flavor Studios",
     description:
@@ -29,7 +30,6 @@ export const metadata = getMetadata({
       "Understand how you can use Flavor Studios' media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

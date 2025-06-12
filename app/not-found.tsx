@@ -9,7 +9,7 @@ export const metadata = getMetadata({
   title: "404 Not Found – Flavor Studios",
   description: "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
   path: "/404",
-  robots: "noindex",
+  robots: "noindex, follow", // Correct for 404/error pages!
   openGraph: {
     title: "404 Not Found – Flavor Studios",
     description: "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",

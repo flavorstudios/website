@@ -11,6 +11,10 @@
     <link rel="canonical" href="https://flavorstudios.in/404" />
     <!-- ROBOTS (noindex for error page) -->
     <meta name="robots" content="noindex, follow" />
+    <!-- FAVICON -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" sizes="16x16 32x32 48x48" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <!-- OPEN GRAPH -->
     <meta property="og:title" content="Page Not Found – Flavor Studios" />
     <meta property="og:description" content="This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections." />
@@ -24,22 +28,13 @@
     <meta name="twitter:title" content="Page Not Found – Flavor Studios" />
     <meta name="twitter:description" content="This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections." />
     <meta name="twitter:image" content="https://flavorstudios.in/cover.jpg" />
-    <!-- SCHEMA.ORG JSON-LD -->
+    <!-- SCHEMA.ORG JSON-LD (minified, valid, with @id) -->
     <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "Page Not Found – Flavor Studios",
-        "description": "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
-        "url": "https://flavorstudios.in/404"
-      }
+      {"@context":"https://schema.org","@type":"WebPage","@id":"https://flavorstudios.in/404","url":"https://flavorstudios.in/404","name":"Page Not Found – Flavor Studios","description":"This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections."}
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         .bg-clip-text { -webkit-background-clip: text; background-clip: text; }
         .text-transparent { color: transparent; }
@@ -97,20 +92,18 @@
                             <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Return to our homepage</p>
                         </div>
                     </a>
-
                     <!-- Blog Link -->
                     <a href="/blog" class="group">
                         <div class="h-full bg-white rounded-lg border border-gray-200 p-4 sm:p-6 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
                             <div class="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
                                 <svg class="h-5 w-5 sm:h-6 sm:w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332 0.477-4.5 1.253"/>
                                 </svg>
                             </div>
                             <h4 class="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors text-sm sm:text-base">Blog</h4>
                             <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Read our latest stories</p>
                         </div>
                     </a>
-
                     <!-- Watch Link -->
                     <a href="/watch" class="group">
                         <div class="h-full bg-white rounded-lg border border-gray-200 p-4 sm:p-6 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
@@ -123,7 +116,6 @@
                             <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Explore our video content</p>
                         </div>
                     </a>
-
                     <!-- About Link -->
                     <a href="/about" class="group">
                         <div class="h-full bg-white rounded-lg border border-gray-200 p-4 sm:p-6 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
@@ -136,7 +128,6 @@
                             <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Learn about our studio</p>
                         </div>
                     </a>
-
                     <!-- Contact Link -->
                     <a href="/contact" class="group">
                         <div class="h-full bg-white rounded-lg border border-gray-200 p-4 sm:p-6 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
@@ -151,7 +142,6 @@
                     </a>
                 </div>
             </div>
-
             <!-- Help Section -->
             <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-blue-100 shadow-lg">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Still can't find what you're looking for?</h3>
@@ -167,7 +157,7 @@
                     </a>
                     <a href="/faq" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-blue-700 bg-white border border-blue-200 hover:bg-blue-50 rounded-lg transition-all duration-200">
                         <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332 0.477-4.5 1.253"/>
                         </svg>
                         Check FAQ
                     </a>
@@ -179,7 +169,6 @@
                     </a>
                 </div>
             </div>
-
             <!-- Footer Message -->
             <div class="mt-6 sm:mt-8 text-xs sm:text-sm text-gray-500">
                 <p>Error Code: 404 • Page Not Found • Flavor Studios</p>

@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Have a question or proposal? Contact Flavor Studios for support, collaborations, or general inquiries. We respond within 24–48 hours.",
   path: "/contact",
+  robots: "index,follow", // Explicit: Contact pages should be indexed!
   openGraph: {
     title: "Contact Flavor Studios – Collaborate or Inquire",
     description:

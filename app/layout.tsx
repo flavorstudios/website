@@ -16,6 +16,7 @@ export const metadata = {
   description:
     "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
   metadataBase: new URL("https://flavorstudios.in"),
+  robots: "index,follow", // Explicitly set robots for the root layout
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",

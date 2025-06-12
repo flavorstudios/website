@@ -6,6 +6,7 @@ export const metadata = getMetadata({
   title: "Admin Test – Flavor Studios",
   description: "Internal admin test page for verifying authentication. Not publicly indexed.",
   path: "/admin/test",
+  robots: "noindex, nofollow", // Explicit and correct!
   openGraph: {
     title: "Admin Test – Flavor Studios",
     description: "Internal admin test page for verifying authentication. Not publicly indexed.",
@@ -55,7 +56,6 @@ export const metadata = getMetadata({
       ]
     },
   },
-  robots: "noindex, nofollow",
 });
 
 export default async function AdminTest() {

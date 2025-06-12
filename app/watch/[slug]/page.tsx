@@ -83,6 +83,7 @@ export async function generateMetadata({ params }: VideoPageProps) {
     title: seoTitle,
     description: seoDescription,
     path: `/watch/${video.slug || params.slug}`,
+    robots: "index,follow",
     openGraph: {
       images: [
         {

@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Get answers to frequently asked questions about Flavor Studios, supporting us, using our content, and how we create original anime and stories.",
   path: "/faq",
+  robots: "index,follow", // Explicit for public FAQ pages (SEO best practice)
   openGraph: {
     title: "Flavor Studios FAQ – Anime & Support Help",
     description:

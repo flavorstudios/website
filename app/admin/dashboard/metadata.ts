@@ -1,14 +1,15 @@
 import { getMetadata } from "@/lib/seo-utils";
 
 const metadata = getMetadata({
-  title: "Admin Dashboard – Flavor Studios",
+  title: "Flavor Studios Admin Dashboard",
   description:
-    "Secure access to the Flavor Studios admin dashboard. Manage blog posts, videos, comments, categories, pages, and all system tools in one place.",
+    "Access all admin tools to manage posts, videos, comments, and more for Flavor Studios from a single secure dashboard.",
   path: "/admin/dashboard",
+  robots: "noindex, nofollow", // Admin area must not be indexed
   openGraph: {
-    title: "Admin Dashboard – Flavor Studios",
+    title: "Flavor Studios Admin Dashboard",
     description:
-      "Secure access to the Flavor Studios admin dashboard. Manage blog posts, videos, comments, categories, pages, and all system tools in one place.",
+      "Access all admin tools to manage posts, videos, comments, and more for Flavor Studios from a single secure dashboard.",
     url: "https://flavorstudios.in/admin/dashboard",
     type: "website",
     site_name: "Flavor Studios",
@@ -24,17 +25,17 @@ const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Admin Dashboard – Flavor Studios",
+    title: "Flavor Studios Admin Dashboard",
     description:
-      "Secure access to the Flavor Studios admin dashboard. Manage blog posts, videos, comments, categories, pages, and all system tools in one place.",
+      "Access all admin tools to manage posts, videos, comments, and more for Flavor Studios from a single secure dashboard.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "Admin Dashboard – Flavor Studios",
+    name: "Flavor Studios Admin Dashboard",
     description:
-      "Secure access to the Flavor Studios admin dashboard. Manage blog posts, videos, comments, categories, pages, and all system tools in one place.",
+      "Access all admin tools to manage posts, videos, comments, and more for Flavor Studios from a single secure dashboard.",
     url: "https://flavorstudios.in/admin/dashboard",
     applicationCategory: "AdministrativeApplication",
     publisher: {
@@ -58,7 +59,6 @@ const metadata = getMetadata({
       ]
     },
   },
-  robots: "noindex, nofollow",
 });
 
 export default metadata;

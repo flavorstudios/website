@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on Flavor Studios.",
   path: "/play",
+  robots: "index,follow", // Explicit for public, discoverable pages
   openGraph: {
     title: "Play Anime-Inspired Games Online | Flavor Studios",
     description:

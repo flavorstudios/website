@@ -38,12 +38,15 @@
         .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         .bg-clip-text { -webkit-background-clip: text; background-clip: text; }
         .text-transparent { color: transparent; }
+        html, body { height: 100%; margin: 0; padding: 0; }
+        body { display: flex; flex-direction: column; }
+        .container-wrapper { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
-<body>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4">
-        <div class="max-w-4xl mx-auto text-center">
-            <!-- 404 Animation -->
+<body class="bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
+    <div class="container-wrapper px-4">
+        <div class="max-w-4xl mx-auto text-center py-12 sm:py-16">
+            {/* 404 Animation */}
             <div class="mb-6 sm:mb-8">
                 <div class="relative">
                     <h1 class="text-6xl sm:text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 animate-pulse">
@@ -55,7 +58,7 @@
                 </div>
             </div>
 
-            <!-- Main Message -->
+            {/* Main Message */}
             <div class="mb-8 sm:mb-12">
                 <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">Oops! Page Not Found</h2>
                 <p class="text-base sm:text-lg md:text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
@@ -63,10 +66,10 @@
                     has plenty of other amazing content to explore!
                 </p>
 
-                <!-- Primary CTA -->
-                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
-                    <a href="/" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg shadow-lg transition-all duration-200">
-                        <svg class="mr-2 h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* Primary CTA - Single Button */}
+                <div class="flex justify-center items-center mb-6 sm:mb-8">
+                    <a href="/" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 text-base sm:text-lg font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg shadow-lg transition-all duration-200">
+                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>
                         Return to Home
@@ -74,13 +77,13 @@
                 </div>
             </div>
 
-            <!-- Quick Links -->
+            {/* Quick Links */}
             <div class="mb-6 sm:mb-8">
                 <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
                     Or explore these popular sections:
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-                    <!-- Home Link -->
+                    {/* Home Link */}
                     <a href="/" class="group">
                         <div class="h-full bg-white rounded-lg border border-gray-200 p-4 sm:p-6 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
                             <div class="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -92,7 +95,7 @@
                             <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Return to our homepage</p>
                         </div>
                     </a>
-                    <!-- Blog Link -->
+                    {/* Blog Link */}
                     <a href="/blog" class="group">
                         <div class="h-full bg-white rounded-lg border border-gray-200 p-4 sm:p-6 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
                             <div class="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -104,7 +107,7 @@
                             <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Read our latest stories</p>
                         </div>
                     </a>
-                    <!-- Watch Link -->
+                    {/* Watch Link */}
                     <a href="/watch" class="group">
                         <div class="h-full bg-white rounded-lg border border-gray-200 p-4 sm:p-6 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
                             <div class="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -116,7 +119,7 @@
                             <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Explore our video content</p>
                         </div>
                     </a>
-                    <!-- About Link -->
+                    {/* About Link */}
                     <a href="/about" class="group">
                         <div class="h-full bg-white rounded-lg border border-gray-200 p-4 sm:p-6 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
                             <div class="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -128,7 +131,7 @@
                             <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Learn about our studio</p>
                         </div>
                     </a>
-                    <!-- Contact Link -->
+                    {/* Contact Link */}
                     <a href="/contact" class="group">
                         <div class="h-full bg-white rounded-lg border border-gray-200 p-4 sm:p-6 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
                             <div class="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
@@ -142,7 +145,7 @@
                     </a>
                 </div>
             </div>
-            <!-- Help Section -->
+            {/* Help Section */}
             <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-blue-100 shadow-lg">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Still can't find what you're looking for?</h3>
                 <p class="text-gray-600 mb-6">
@@ -169,7 +172,7 @@
                     </a>
                 </div>
             </div>
-            <!-- Footer Message -->
+            {/* Footer Message */}
             <div class="mt-6 sm:mt-8 text-xs sm:text-sm text-gray-500">
                 <p>Error Code: 404 • Page Not Found • Flavor Studios</p>
             </div>

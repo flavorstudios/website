@@ -25,10 +25,10 @@ export function BackToTop() {
           clearTimeout(scrollTimeoutRef.current)
         }
 
-        // Set new timeout to hide after 0.7 seconds of no scrolling
+        // Set new timeout to hide after 2 seconds of no scrolling
         scrollTimeoutRef.current = setTimeout(() => {
           setIsScrolling(false)
-        }, 700)
+        }, 2000)
       }
     }
 

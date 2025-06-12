@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Read how Flavor Studios collects, uses, and safeguards your personal data while using https://flavorstudios.in. Your privacy matters to us.",
   path: "/privacy-policy",
+  robots: "noindex, nofollow", // ✔️ Prevents indexing for legal/privacy policy
   openGraph: {
     title: "Privacy Policy – Flavor Studios",
     description:
@@ -28,7 +29,6 @@ export const metadata = getMetadata({
       "Read how Flavor Studios collects, uses, and safeguards your personal data while using https://flavorstudios.in. Your privacy matters to us.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

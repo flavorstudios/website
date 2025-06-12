@@ -7,14 +7,13 @@ import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lu
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 
-// === SEO METADATA (REQUIRED FOR NEXT.JS 15+) ===
+// === SEO METADATA (Centralized for Next.js 15+) ===
 export const metadata = getMetadata({
   title: "Flavor Studios Videos | Original Anime, Studio Films & More",
   description:
     "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
   path: "/watch",
-  canonical: "https://flavorstudios.in/watch",
-  robots: "index,follow", // <-- EXPLICITLY SET
+  robots: "index,follow", // Explicitly set
   openGraph: {
     title: "Flavor Studios Videos | Original Anime, Studio Films & More",
     description:
@@ -241,6 +240,8 @@ export default async function WatchPage({
     </div>
   );
 }
+
+// --- COMPONENTS ---
 
 function FeaturedVideoCard({ video, priority = false }: { video: any; priority?: boolean }) {
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;

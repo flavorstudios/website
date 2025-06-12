@@ -6,7 +6,6 @@ const DEFAULT_TITLE_SUFFIX = "– Flavor Studios";
  * Returns a canonical, SEO-optimized URL for any path.
  */
 export function getCanonicalUrl(path: string): string {
-  // Ensure leading slash, no trailing slash except for root
   if (!path.startsWith("/")) path = "/" + path;
   return `${BASE_URL}${path === "/" ? "" : path.replace(/\/$/, "")}`;
 }
@@ -35,22 +34,19 @@ export function getMetadata({
   openGraph?: Record<string, any>;
   twitter?: Record<string, any>;
 }) {
-  // Append suffix unless already present (avoid "Flavor Studios – Flavor Studios")
+  // Suffix "– Flavor Studios" if not present at the end (avoiding double/awkward titles)
   const fullTitle =
-    title.includes("Flavor Studios") ||
-    title.includes("Flavor Studios".toLowerCase())
+    title.trim().toLowerCase().includes("flavor studios")
       ? title.trim()
       : `${title} ${DEFAULT_TITLE_SUFFIX}`.replace(/ +/g, " ").trim();
 
   const canonical = getCanonicalUrl(path);
 
-  // Prepare additional meta fields (robots, schema)
+  // Extra meta fields (e.g., robots)
   const other: Record<string, string>[] = [];
-  if (robots) {
-    other.push({ name: "robots", content: robots });
-  }
+  if (robots) other.push({ name: "robots", content: robots });
 
-  // Default Open Graph data
+  // Defaults (OG, Twitter)
   const defaultOpenGraph = {
     title: fullTitle,
     description,
@@ -60,7 +56,6 @@ export function getMetadata({
     images: [{ url: ogImage, width: 1200, height: 630 }],
   };
 
-  // Default Twitter data
   const defaultTwitter = {
     card: "summary_large_image",
     site: "@flavorstudios",
@@ -69,7 +64,7 @@ export function getMetadata({
     images: [ogImage],
   };
 
-  // Merge, always enforce array for images
+  // Merge defaults + overrides, always images as array
   const mergedOpenGraph = {
     ...defaultOpenGraph,
     ...openGraph,
@@ -97,6 +92,6 @@ export function getMetadata({
     openGraph: mergedOpenGraph,
     twitter: mergedTwitter,
     other,
-    ...(schema && { schema }),
+    ...(schema && { schema }), // Make sure your _layout renders this as <script type="application/ld+json">
   };
 }

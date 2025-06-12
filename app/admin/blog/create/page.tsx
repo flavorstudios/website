@@ -3,11 +3,11 @@ import { BlogEditor } from "../../dashboard/components/blog-editor";
 
 // === SEO METADATA (ADMIN - NOINDEX) ===
 export const metadata = getMetadata({
-  title: "Create New Blog Post – Admin | Flavor Studios",
+  title: "Blog Editor – Admin Panel | Flavor Studios",
   description: "Use the admin panel to create and publish original anime news, blog stories, and updates for Flavor Studios.",
   path: "/admin/blog/create",
   openGraph: {
-    title: "Create New Blog Post – Admin | Flavor Studios",
+    title: "Blog Editor – Admin Panel | Flavor Studios",
     description: "Use the admin panel to create and publish original anime news, blog stories, and updates for Flavor Studios.",
     url: "https://flavorstudios.in/admin/blog/create",
     type: "website",
@@ -24,15 +24,15 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Create New Blog Post – Admin | Flavor Studios",
+    title: "Blog Editor – Admin Panel | Flavor Studios",
     description: "Use the admin panel to create and publish original anime news, blog stories, and updates for Flavor Studios.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  robots: "noindex, nofollow", // Prevent indexing of admin/editor pages
+  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "Create New Blog Post – Admin",
+    name: "Blog Editor – Admin Panel",
     description: "Admin-only page for publishing original anime news, blog stories, and updates on Flavor Studios.",
     url: "https://flavorstudios.in/admin/blog/create",
     publisher: {

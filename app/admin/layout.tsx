@@ -65,8 +65,19 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
+  const { schema } = metadata;
+
   return (
     <html lang="en">
+      <head>
+        {/* === Schema.org JSON-LD (renders if schema exists) === */}
+        {schema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        )}
+      </head>
       <body className="antialiased">{children}</body>
     </html>
   );

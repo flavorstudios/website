@@ -76,6 +76,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     title: `${seoTitle} – Flavor Studios`,
     description: seoDescription,
     path: `/blog/${post.slug}`,
+    robots: "index,follow", // <-- Explicit for published posts
     openGraph: {
       images: [
         {

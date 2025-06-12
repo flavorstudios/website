@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
   path: "/cookie-policy",
+  robots: "noindex, nofollow", // Correct: Policy/legal pages are not for search indexing
   openGraph: {
     title: "Cookie Policy – Flavor Studios",
     description:
@@ -29,7 +30,6 @@ export const metadata = getMetadata({
       "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

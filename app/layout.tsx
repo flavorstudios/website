@@ -1,14 +1,15 @@
 import type React from "react";
 import "./globals.css";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 
 // Font setup
-const inter = Inter({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "600"], // Add more weights if needed: "300", "700", etc.
+  variable: "--font-poppins",
   display: "swap",
 });
 
@@ -44,7 +45,7 @@ export default function RootLayout({
   const { schema } = metadata;
 
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={poppins.variable}>
       <head>
         {/* === Facebook Open Graph App ID (if you ever use Facebook Insights) === */}
         <meta property="fb:app_id" content="1404440770881914" />
@@ -73,7 +74,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
         )}
       </head>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${poppins.className} antialiased`}>
         {/* === Google Tag Manager (NOSCRIPT, immediately after <body>) === */}
         <noscript>
           <iframe

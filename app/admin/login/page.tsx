@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   title: "Admin Login – Flavor Studios",
   description: "Login securely to manage Flavor Studios content, blogs, and creative assets.",
   path: "/admin/login",
+  robots: "noindex, nofollow", // Explicit and correct for admin login
   openGraph: {
     title: "Admin Login – Flavor Studios",
     description: "Login securely to manage Flavor Studios content, blogs, and creative assets.",
@@ -55,7 +56,6 @@ export const metadata = getMetadata({
       ]
     },
   },
-  robots: "noindex, nofollow", // Prevents indexing of admin login page
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 });
 

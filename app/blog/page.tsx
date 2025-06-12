@@ -15,7 +15,6 @@ export const metadata = getMetadata({
   description:
     "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
   path: "/blog",
-  canonical: "https://flavorstudios.in/blog",
   robots: "index,follow", // Explicit and perfect
   openGraph: {
     title: "Flavor Studios Blog | Anime News, Insights & Studio Stories",

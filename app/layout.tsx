@@ -5,6 +5,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 
+// Font setup
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -35,6 +36,13 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // --- SCHEMA SUPPORT START ---
+  // Next.js automatically merges per-page metadata with layout metadata
+  // On the latest Next.js (14/15), `metadata` is available here.
+  // If you use generateMetadata, you might need to access via props or useHead.
+  // This works for standard static metadata:
+  const { schema } = metadata;
+
   return (
     <html lang="en" className={inter.variable}>
       <head>
@@ -56,6 +64,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }}
         />
         {/* === END Google Tag Manager (HEAD) === */}
+
+        {/* === Schema.org JSON-LD: renders if schema exists === */}
+        {schema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        )}
       </head>
       <body className={`${inter.className} antialiased`}>
         {/* === Google Tag Manager (NOSCRIPT, immediately after <body>) === */}

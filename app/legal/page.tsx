@@ -10,6 +10,7 @@ export const metadata = getMetadata({
   title: "Flavor Studios | Legal Policies, Privacy & Terms",
   description: "Access all Flavor Studios legal documents: Privacy Policy, DMCA, Terms of Service, and more. Stay informed and protected with our up-to-date policies.",
   path: "/legal",
+  robots: "index,follow", // Explicitly index the /legal overview page
   openGraph: {
     title: "Flavor Studios | Legal Policies, Privacy & Terms",
     description: "Access all Flavor Studios legal documents: Privacy Policy, DMCA, Terms of Service, and more. Stay informed and protected with our up-to-date policies.",

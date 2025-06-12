@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Review the Terms of Service for using Flavor Studios’ website, original content, and community features. Stay informed and protected.",
   path: "/terms-of-service",
+  robots: "noindex, nofollow", // ✔️ Block search bots from indexing and following
   openGraph: {
     title: "Terms of Service – Flavor Studios",
     description:
@@ -29,7 +30,6 @@ export const metadata = getMetadata({
       "Review the Terms of Service for using Flavor Studios’ website, original content, and community features. Stay informed and protected.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

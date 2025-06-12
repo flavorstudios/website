@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Read Flavor Studios' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.",
   path: "/disclaimer",
+  robots: "noindex, nofollow", // Required for legal/policy pages
   openGraph: {
     title: "Disclaimer – Legal Notice | Flavor Studios",
     description:
@@ -29,7 +30,6 @@ export const metadata = getMetadata({
       "Read Flavor Studios' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

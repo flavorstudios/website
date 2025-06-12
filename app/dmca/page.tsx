@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Learn how to file a DMCA takedown notice with Flavor Studios. Understand your rights and our copyright policy for protecting original content.",
   path: "/dmca",
+  robots: "noindex, nofollow", // Correct for legal/copyright policy pages
   openGraph: {
     title: "DMCA Takedown Policy – Flavor Studios",
     description:
@@ -29,7 +30,6 @@ export const metadata = getMetadata({
       "Learn how to file a DMCA takedown notice with Flavor Studios. Understand your rights and our copyright policy for protecting original content.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  robots: "noindex, nofollow",
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",

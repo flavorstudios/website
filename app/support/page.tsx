@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Help Flavor Studios grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.",
   path: "/support",
+  robots: "index,follow", // Public-facing: encourage indexing
   openGraph: {
     title: "Support Flavor Studios – Fuel Anime & Stories",
     description:

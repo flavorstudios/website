@@ -18,7 +18,7 @@ export const metadata = {
   description:
     "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
   metadataBase: new URL("https://flavorstudios.in"),
-  robots: "index,follow", // Explicitly set robots for the root layout
+  robots: "index,follow",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
@@ -28,9 +28,8 @@ export const metadata = {
     "fediverse:creator": "@flavorstudios@mastodon.social",
     generator: "v0.dev",
     me: "https://mastodon.social/@flavorstudios",
-  },,
+  },
   // Do NOT add openGraph, twitter, or robots here—handled per-page!
-    generator: 'v0.dev'
 };
 
 export default function RootLayout({
@@ -38,19 +37,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // --- SCHEMA SUPPORT START ---
-  // Next.js automatically merges per-page metadata with layout metadata
-  // On the latest Next.js (14/15), `metadata` is available here.
-  // If you use generateMetadata, you might need to access via props or useHead.
-  // This works for standard static metadata:
   const { schema } = metadata;
 
   return (
     <html lang="en" className={poppins.variable}>
       <head>
-        {/* === Facebook Open Graph App ID (if you ever use Facebook Insights) === */}
+        {/* === Facebook Open Graph App ID === */}
         <meta property="fb:app_id" content="1404440770881914" />
-        {/* === Mastodon Verification for Fediverse === */}
+
+        {/* === Mastodon Verification === */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
 
         {/* === Google Tag Manager (HEAD) === */}
@@ -65,9 +60,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             `,
           }}
         />
-        {/* === END Google Tag Manager (HEAD) === */}
+        {/* === END GTM (HEAD) === */}
 
-        {/* === Schema.org JSON-LD: renders if schema exists === */}
+        {/* === Schema.org JSON-LD === */}
         {schema && (
           <script
             type="application/ld+json"
@@ -76,7 +71,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         )}
       </head>
       <body className={`${poppins.className} antialiased`}>
-        {/* === Google Tag Manager (NOSCRIPT, immediately after <body>) === */}
+        {/* === GTM (NOSCRIPT) === */}
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
@@ -86,7 +81,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             title="GTM"
           />
         </noscript>
-        {/* === END Google Tag Manager (NOSCRIPT) === */}
+        {/* === END GTM (NOSCRIPT) === */}
 
         <Header />
         <main>{children}</main>

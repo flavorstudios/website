@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Discover animation, writing, and voice acting opportunities at Flavor Studios. Join our talent list and be part of something original.",
   path: "/career",
+  robots: "index,follow", // Explicit: Careers should be indexed!
   openGraph: {
     title: "Join Our Team – Careers at Flavor Studios",
     description:

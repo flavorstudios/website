@@ -28,8 +28,9 @@ export const metadata = {
     "fediverse:creator": "@flavorstudios@mastodon.social",
     generator: "v0.dev",
     me: "https://mastodon.social/@flavorstudios",
-  },
+  },,
   // Do NOT add openGraph, twitter, or robots here—handled per-page!
+    generator: 'v0.dev'
 };
 
 export default function RootLayout({

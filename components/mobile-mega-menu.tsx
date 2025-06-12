@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, Coffee } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { MenuItem } from "./mega-menu"
 
@@ -121,6 +121,16 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
           )}
         </div>
       ))}
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <Link
+          href="/support"
+          className="flex items-center justify-center py-3 px-4 text-base font-medium text-white bg-orange-600 hover:bg-orange-700 transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          onClick={onItemClick}
+        >
+          <Coffee className="mr-2 h-5 w-5" />
+          Buy Me a Coffee
+        </Link>
+      </div>
     </div>
   )
 }

@@ -159,3 +159,30 @@ export async function logoutAdmin() {
     redirect("/admin/login")
   }
 }
+
+export async function revalidateBlogAndAdminDashboard() {
+  revalidatePath("/blog")
+  revalidatePath("/admin/dashboard")
+  // Optionally revalidate specific blog post paths if needed
+  // const posts = await blogStore.getAll(); // Assuming blogStore has such a method
+  // posts.forEach(post => revalidatePath(`/blog/${post.slug}`));
+  return { success: true, message: "Blog and Admin Dashboard revalidated." }
+}
+
+// Rename clearAllCaches to revalidateEntireWebsite
+export async function revalidateEntireWebsite() {
+  // Simulate delay if necessary, or remove if not needed for revalidation
+  // await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  revalidatePath("/")
+  revalidatePath("/admin/dashboard")
+  revalidatePath("/blog")
+  // Add other key paths if necessary
+  // e.g., videoStore.getAll().then(videos => videos.forEach(v => revalidatePath(`/watch/${v.slug}`)));
+  // pageStore.getAll().then(pages => pages.forEach(p => revalidatePath(`/${p.slug}`)));
+  revalidatePath("/watch")
+  // Add more paths as needed
+
+  console.log("Revalidated entire website paths.")
+  return { success: true, message: "Entire website revalidated successfully." }
+}

@@ -4,12 +4,13 @@ import { getMetadata } from "@/lib/seo-utils";
 
 // Centralized metadata for admin layout
 export const metadata = getMetadata({
-  title: "Admin – Flavor Studios",
-  description: "Secure admin area for managing all Flavor Studios content and tools.",
+  title: "Admin Console – Flavor Studios",
+  description: "Secure admin console for managing all Flavor Studios content and studio tools.",
   path: "/admin",
+  robots: "noindex, nofollow",
   openGraph: {
-    title: "Admin – Flavor Studios",
-    description: "Secure admin area for managing all Flavor Studios content and tools.",
+    title: "Admin Console – Flavor Studios",
+    description: "Secure admin console for managing all Flavor Studios content and studio tools.",
     url: "https://flavorstudios.in/admin",
     type: "website",
     site_name: "Flavor Studios",
@@ -25,15 +26,15 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Admin – Flavor Studios",
-    description: "Secure admin area for managing all Flavor Studios content and tools.",
+    title: "Admin Console – Flavor Studios",
+    description: "Secure admin console for managing all Flavor Studios content and studio tools.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "Admin – Flavor Studios",
-    description: "Secure admin area for managing all Flavor Studios content and tools.",
+    name: "Admin Console – Flavor Studios",
+    description: "Secure admin console for managing all Flavor Studios content and studio tools.",
     url: "https://flavorstudios.in/admin",
     applicationCategory: "AdministrativeApplication",
     publisher: {
@@ -57,7 +58,6 @@ export const metadata = getMetadata({
       ]
     },
   },
-  robots: "noindex, nofollow",
 });
 
 export default function AdminLayout({

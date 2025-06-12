@@ -10,7 +10,7 @@ export const metadata = getMetadata({
   description:
     "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
   path: "/404",
-  robots: "noindex, follow", // Correct for 404/error pages!
+  robots: "noindex, follow",
   openGraph: {
     title: "404 Not Found – Flavor Studios",
     description:
@@ -87,6 +87,7 @@ export default function NotFound() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex flex-col items-center justify-center p-4 sm:p-8">
       <div className="max-w-4xl mx-auto text-center py-12 sm:py-16">
+
         {/* 404 Animation */}
         <div className="mb-6 sm:mb-8">
           <div className="relative">
@@ -99,7 +100,7 @@ export default function NotFound() {
           </div>
         </div>
 
-        {/* Main Message */}
+        {/* Message */}
         <div className="mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">Oops! Page Not Found</h2>
           <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
@@ -107,7 +108,6 @@ export default function NotFound() {
             has plenty of original anime, news, and stories to explore!
           </p>
 
-          {/* Primary CTA */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
             <Button
               asChild

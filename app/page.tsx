@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
   path: "/",
+  robots: "index,follow", // Explicit for homepage/main entry
   openGraph: {
     title: "Flavor Studios | Anime News & Original Stories That Inspire",
     description:

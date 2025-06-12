@@ -5,6 +5,7 @@ export const metadata = getMetadata({
   description:
     "Explore the heart and vision of Flavor Studios — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.",
   path: "/about",
+  robots: "index,follow", // <-- Explicit robots rule added!
   openGraph: {
     title: "About Us – The Vision Behind Flavor Studios",
     description:

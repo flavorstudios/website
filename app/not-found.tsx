@@ -1,23 +1,20 @@
 import Link from "next/link"
-import { getMetadata } from "@/lib/seo-utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"
 
 // --- SEO Metadata for 404 Page ---
-export const metadata = getMetadata({
+export const metadata = {
   title: "404 Not Found – Flavor Studios",
   description:
     "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
-  path: "/404",
-  robots: "noindex, follow", // Correct for 404/error pages!
   openGraph: {
     title: "404 Not Found – Flavor Studios",
     description:
       "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
     url: "https://flavorstudios.in/404",
     type: "website",
-    site_name: "Flavor Studios",
+    siteName: "Flavor Studios",
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -35,15 +32,14 @@ export const metadata = getMetadata({
       "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: "404 Not Found – Flavor Studios",
-    description:
-      "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
-    url: "https://flavorstudios.in/404",
+  alternates: {
+    canonical: "https://flavorstudios.in/404",
   },
-})
+  robots: {
+    index: false,
+    follow: true,
+  },
+}
 
 export default function NotFound() {
   const quickLinks = [
@@ -103,7 +99,8 @@ export default function NotFound() {
         <div className="mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">Oops! Page Not Found</h2>
           <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
-            The page you're looking for seems to have wandered off into another dimension. Don’t worry—Flavor Studios has plenty of original anime, news, and stories to explore!
+            The page you're looking for seems to have wandered off into another dimension. Don't worry—Flavor Studios
+            has plenty of original anime, news, and stories to explore!
           </p>
 
           {/* Primary CTA */}
@@ -119,6 +116,7 @@ export default function NotFound() {
               </Link>
             </Button>
           </div>
+        </div>
 
         {/* Quick Links */}
         <div className="mb-6 sm:mb-8">

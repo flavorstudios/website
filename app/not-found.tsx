@@ -2,17 +2,19 @@ import Link from "next/link"
 import { getMetadata } from "@/lib/seo-utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Home, Search, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"
+import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"
 
 // --- SEO Metadata for 404 Page ---
 export const metadata = getMetadata({
   title: "404 Not Found – Flavor Studios",
-  description: "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
+  description:
+    "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
   path: "/404",
   robots: "noindex, follow", // Correct for 404/error pages!
   openGraph: {
     title: "404 Not Found – Flavor Studios",
-    description: "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
+    description:
+      "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
     url: "https://flavorstudios.in/404",
     type: "website",
     site_name: "Flavor Studios",
@@ -29,15 +31,17 @@ export const metadata = getMetadata({
     site: "@flavorstudios",
     creator: "@flavorstudios",
     title: "404 Not Found – Flavor Studios",
-    description: "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
+    description:
+      "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
   schema: {
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: "404 Not Found – Flavor Studios",
-    description: "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
-    url: "https://flavorstudios.in/404"
+    description:
+      "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
+    url: "https://flavorstudios.in/404",
   },
 })
 
@@ -114,14 +118,7 @@ export default function NotFound() {
                 Return to Home
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="w-full sm:w-auto border-blue-200 hover:bg-blue-50">
-              <Link href="/blog">
-                <Search className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                Search Our Content
-              </Link>
-            </Button>
           </div>
-        </div>
 
         {/* Quick Links */}
         <div className="mb-6 sm:mb-8">

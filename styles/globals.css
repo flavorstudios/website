@@ -93,14 +93,16 @@ body {
   }
 }
 
-/* === Universal Gradient Text Fallback for Windows Compatibility === */
-/* Place this block at the very end of your globals.css */
-
+/* Fix for gradient text in legacy browsers */
 .text-transparent.bg-clip-text,
 .bg-gradient-to-r.bg-clip-text.text-transparent,
 .bg-gradient-to-l.bg-clip-text.text-transparent,
 .bg-gradient-to-t.bg-clip-text.text-transparent,
 .bg-gradient-to-b.bg-clip-text.text-transparent,
+.bg-gradient-to-tr.bg-clip-text.text-transparent,
+.bg-gradient-to-tl.bg-clip-text.text-transparent,
+.bg-gradient-to-br.bg-clip-text.text-transparent,
+.bg-gradient-to-bl.bg-clip-text.text-transparent,
 .gradient-text {
   background: linear-gradient(90deg, #3c73df, #3ee8fa);
   -webkit-background-clip: text;
@@ -116,6 +118,10 @@ body {
   .bg-gradient-to-l.bg-clip-text.text-transparent,
   .bg-gradient-to-t.bg-clip-text.text-transparent,
   .bg-gradient-to-b.bg-clip-text.text-transparent,
+  .bg-gradient-to-tr.bg-clip-text.text-transparent,
+  .bg-gradient-to-tl.bg-clip-text.text-transparent,
+  .bg-gradient-to-br.bg-clip-text.text-transparent,
+  .bg-gradient-to-bl.bg-clip-text.text-transparent,
   .gradient-text {
     background: none !important;
     color: #3c73df !important;
@@ -129,10 +135,13 @@ body {
   .bg-gradient-to-l.bg-clip-text.text-transparent,
   .bg-gradient-to-t.bg-clip-text.text-transparent,
   .bg-gradient-to-b.bg-clip-text.text-transparent,
+  .bg-gradient-to-tr.bg-clip-text.text-transparent,
+  .bg-gradient-to-tl.bg-clip-text.text-transparent,
+  .bg-gradient-to-br.bg-clip-text.text-transparent,
+  .bg-gradient-to-bl.bg-clip-text.text-transparent,
   .gradient-text {
     background: none !important;
     color: #3c73df !important;
     -webkit-text-fill-color: initial;
   }
 }
-/* === END Universal Gradient Text Fallback === */

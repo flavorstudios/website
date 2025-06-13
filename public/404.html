@@ -38,14 +38,11 @@
         .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         .bg-clip-text { -webkit-background-clip: text; background-clip: text; }
         .text-transparent { color: transparent; }
-        html, body { height: 100%; margin: 0; padding: 0; }
-        body { display: flex; flex-direction: column; }
-        .container-wrapper { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-    <div class="container-wrapper px-4">
-        <div class="max-w-4xl mx-auto text-center py-12 sm:py-16">
+<body>
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4">
+        <div class="max-w-4xl mx-auto text-center">
             <!-- 404 Animation -->
             <div class="mb-6 sm:mb-8">
                 <div class="relative">
@@ -66,10 +63,10 @@
                     has plenty of other amazing content to explore!
                 </p>
 
-                <!-- Primary CTA - Single Button -->
-                <div class="flex justify-center items-center mb-6 sm:mb-8">
-                    <a href="/" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 text-base sm:text-lg font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg shadow-lg transition-all duration-200">
-                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- Primary CTA -->
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
+                    <a href="/" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg shadow-lg transition-all duration-200">
+                        <svg class="mr-2 h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                         </svg>
                         Return to Home

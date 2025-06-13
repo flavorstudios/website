@@ -107,3 +107,50 @@
 .admin-scroll::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* === Universal Gradient Text Fallback for Windows Compatibility (Jarvis Edition) === */
+/* This covers all standard gradient text combos (Tailwind, custom, admin) */
+
+.text-transparent.bg-clip-text,
+.bg-gradient-to-r.bg-clip-text.text-transparent,
+.bg-gradient-to-l.bg-clip-text.text-transparent,
+.bg-gradient-to-t.bg-clip-text.text-transparent,
+.bg-gradient-to-b.bg-clip-text.text-transparent,
+.gradient-text,
+.admin-gradient-text {
+  background: linear-gradient(90deg, #3c73df, #3ee8fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+@supports not (-webkit-background-clip: text) {
+  .text-transparent.bg-clip-text,
+  .bg-gradient-to-r.bg-clip-text.text-transparent,
+  .bg-gradient-to-l.bg-clip-text.text-transparent,
+  .bg-gradient-to-t.bg-clip-text.text-transparent,
+  .bg-gradient-to-b.bg-clip-text.text-transparent,
+  .gradient-text,
+  .admin-gradient-text {
+    background: none !important;
+    color: #3c73df !important;  /* fallback to your primary blue */
+    -webkit-text-fill-color: initial;
+  }
+}
+
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+  .text-transparent.bg-clip-text,
+  .bg-gradient-to-r.bg-clip-text.text-transparent,
+  .bg-gradient-to-l.bg-clip-text.text-transparent,
+  .bg-gradient-to-t.bg-clip-text.text-transparent,
+  .bg-gradient-to-b.bg-clip-text.text-transparent,
+  .gradient-text,
+  .admin-gradient-text {
+    background: none !important;
+    color: #3c73df !important;
+    -webkit-text-fill-color: initial;
+  }
+}
+/* === END Universal Gradient Text Fallback === */

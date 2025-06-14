@@ -47,6 +47,16 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Custom gradient variables */
+    --gradient-blue-purple: linear-gradient(135deg, #4f46e5, #7c3aed);
+    --gradient-blue-cyan: linear-gradient(135deg, #3b82f6, #06b6d4);
+    --gradient-purple-pink: linear-gradient(135deg, #8b5cf6, #ec4899);
+    --gradient-green-teal: linear-gradient(135deg, #10b981, #14b8a6);
+    --gradient-orange-red: linear-gradient(135deg, #f97316, #ef4444);
+    --gradient-indigo-purple: linear-gradient(135deg, #6366f1, #a855f7);
+    --gradient-emerald-cyan: linear-gradient(135deg, #059669, #0891b2);
+    --gradient-rose-pink: linear-gradient(135deg, #f43f5e, #d946ef);
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -93,7 +103,7 @@ body {
   }
 }
 
-/* Fix for gradient text in legacy browsers */
+/* Fix for gradient text in legacy browsers - Default Blue to Purple */
 .text-transparent.bg-clip-text,
 .bg-gradient-to-r.bg-clip-text.text-transparent,
 .bg-gradient-to-l.bg-clip-text.text-transparent,
@@ -104,7 +114,7 @@ body {
 .bg-gradient-to-br.bg-clip-text.text-transparent,
 .bg-gradient-to-bl.bg-clip-text.text-transparent,
 .gradient-text {
-  background: linear-gradient(90deg, #3c73df, #3ee8fa);
+  background: var(--gradient-blue-purple);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -112,6 +122,71 @@ body {
   font-weight: 700;
 }
 
+/* Specific gradient variations */
+.gradient-text-blue-cyan {
+  background: var(--gradient-blue-cyan);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+.gradient-text-purple-pink {
+  background: var(--gradient-purple-pink);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+.gradient-text-green-teal {
+  background: var(--gradient-green-teal);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+.gradient-text-orange-red {
+  background: var(--gradient-orange-red);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+.gradient-text-indigo-purple {
+  background: var(--gradient-indigo-purple);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+.gradient-text-emerald-cyan {
+  background: var(--gradient-emerald-cyan);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+.gradient-text-rose-pink {
+  background: var(--gradient-rose-pink);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+/* Legacy browser fallbacks */
 @supports not (-webkit-background-clip: text) {
   .text-transparent.bg-clip-text,
   .bg-gradient-to-r.bg-clip-text.text-transparent,
@@ -124,8 +199,30 @@ body {
   .bg-gradient-to-bl.bg-clip-text.text-transparent,
   .gradient-text {
     background: none !important;
-    color: #3c73df !important;
+    color: #4f46e5 !important;
     -webkit-text-fill-color: initial;
+  }
+
+  .gradient-text-blue-cyan {
+    color: #3b82f6 !important;
+  }
+  .gradient-text-purple-pink {
+    color: #8b5cf6 !important;
+  }
+  .gradient-text-green-teal {
+    color: #10b981 !important;
+  }
+  .gradient-text-orange-red {
+    color: #f97316 !important;
+  }
+  .gradient-text-indigo-purple {
+    color: #6366f1 !important;
+  }
+  .gradient-text-emerald-cyan {
+    color: #059669 !important;
+  }
+  .gradient-text-rose-pink {
+    color: #f43f5e !important;
   }
 }
 
@@ -141,7 +238,29 @@ body {
   .bg-gradient-to-bl.bg-clip-text.text-transparent,
   .gradient-text {
     background: none !important;
-    color: #3c73df !important;
+    color: #4f46e5 !important;
     -webkit-text-fill-color: initial;
+  }
+
+  .gradient-text-blue-cyan {
+    color: #3b82f6 !important;
+  }
+  .gradient-text-purple-pink {
+    color: #8b5cf6 !important;
+  }
+  .gradient-text-green-teal {
+    color: #10b981 !important;
+  }
+  .gradient-text-orange-red {
+    color: #f97316 !important;
+  }
+  .gradient-text-indigo-purple {
+    color: #6366f1 !important;
+  }
+  .gradient-text-emerald-cyan {
+    color: #059669 !important;
+  }
+  .gradient-text-rose-pink {
+    color: #f43f5e !important;
   }
 }

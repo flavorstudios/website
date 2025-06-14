@@ -1,4 +1,4 @@
-name: Bing URL Submitter
+name: Bing + IndexNow Submitter
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  submit-to-bing:
+  submit-urls:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -21,8 +21,9 @@ jobs:
       - name: Install dependencies
         run: npm install xml2js dotenv
 
-      - name: Run Bing submission script
+      - name: Run Bing+IndexNow script
         env:
           BING_API_KEY: ${{ secrets.BING_API_KEY }}
           SITE_URL: ${{ secrets.SITE_URL }}
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
         run: node scripts/bingSubmit.js

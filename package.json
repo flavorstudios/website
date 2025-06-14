@@ -51,6 +51,7 @@
     "next": "15.2.4",
     "next-pwa": "^5.6.0",
     "next-themes": "latest",
+    "node-fetch": "^3.3.2",
     "path": "latest",
     "react": "^19",
     "react-day-picker": "latest",
@@ -62,6 +63,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "latest",
+    "xml2js": "^0.6.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {

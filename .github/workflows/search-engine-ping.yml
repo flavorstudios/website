@@ -1,0 +1,29 @@
+name: Bing + IndexNow + Google + Yandex Submitter
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  submit-urls:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Install dependencies
+        run: npm install xml2js dotenv node-fetch
+
+      - name: Run Ultimate Search Engine Ping Script
+        env:
+          BING_API_KEY: ${{ secrets.BING_API_KEY }}
+          SITE_URL: ${{ secrets.SITE_URL }}
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: node scripts/pingAllSearchEngines.js

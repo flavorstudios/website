@@ -8,8 +8,8 @@ import { Menu, Coffee } from "lucide-react"
 import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
+import { InstallAppButton } from "@/components/InstallAppButton" // << Added this line
 import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
-import { InstallAppButton } from "@/components/InstallAppButton" // <--- Added
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -117,7 +117,11 @@ export function Header() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <MegaMenu items={menuItems} />
-            <SearchFeature />
+            {/* Group search and install button together */}
+            <div className="flex items-center gap-2">
+              <SearchFeature />
+              <InstallAppButton />
+            </div>
           </div>
 
           {/* Mobile Navigation */}
@@ -138,11 +142,8 @@ export function Header() {
             </SheetContent>
           </Sheet>
 
-          {/* CTA Buttons */}
-          <div className="hidden md:flex items-center gap-2">
-            {/* Install App Button (shows only when available) */}
-            <InstallAppButton />
-            {/* Buy Me a Coffee */}
+          {/* CTA Button */}
+          <div className="hidden md:flex">
             <Button asChild className="bg-orange-600 hover:bg-orange-700">
               <Link href="/support">
                 <Coffee className="mr-2 h-4 w-4" />

@@ -37,10 +37,10 @@ export function InstallAppButton() {
       onClick={handleClick}
       className="flex flex-row items-center gap-2 px-4 py-2 rounded bg-yellow-400 hover:bg-yellow-300 text-black font-semibold transition shadow-sm"
       title="Install the Flavor Studios App"
-      style={{ minWidth: "120px" }} // Ensures enough space for text
+      style={{ minWidth: "120px" }} // Optional: ensures enough space for both
     >
       <InstallIcon />
-      <span className="block">Install App</span>
+      <span>Install App</span>
     </button>
   );
 }

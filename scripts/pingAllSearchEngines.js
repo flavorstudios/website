@@ -19,31 +19,51 @@ const sitemaps = [
 async function getUrlsFromSitemaps() {
   let urls = [];
   for (const sitemap of sitemaps) {
-    const res = await fetch(sitemap);
-    const xml = await res.text();
-    const parsed = await xml2js.parseStringPromise(xml);
-    const locs =
-      parsed.urlset.url
-        ?.map(u => u.loc[0])
-        .filter(Boolean) || [];
-    urls = urls.concat(locs);
+    try {
+      const res = await fetch(sitemap);
+      const xml = await res.text();
+      const parsed = await xml2js.parseStringPromise(xml);
+      const locs =
+        parsed.urlset.url
+          ?.map(u => u.loc[0])
+          .filter(Boolean) || [];
+      urls = urls.concat(locs);
+    } catch (err) {
+      console.error(`[Sitemap] Error fetching or parsing ${sitemap}:`, err);
+    }
   }
   return Array.from(new Set(urls));
 }
 
-// 2. Submit URLs to Bing
+// 2. Submit URLs to Bing (with quota handling)
 async function submitBing(urls) {
+  const BING_DAILY_QUOTA = 8;
+  const urlsToSubmit = urls.slice(0, BING_DAILY_QUOTA);
+  const skippedUrls = urls.slice(BING_DAILY_QUOTA);
+
+  if (urlsToSubmit.length === 0) {
+    console.log('[Bing] No URLs to submit today (quota exhausted).');
+    return;
+  }
+
   try {
     const response = await fetch(
       `https://ssl.bing.com/webmaster/api.svc/json/SubmitUrlBatch?apikey=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json; charset=utf-8' },
-        body: JSON.stringify({ siteUrl, urlList: urls }),
+        body: JSON.stringify({ siteUrl, urlList: urlsToSubmit }),
       }
     );
     const data = await response.json();
-    console.log(`\n[Bing] API Response for ${urls.length} URLs:`, data);
+    console.log(`\n[Bing] API Response for ${urlsToSubmit.length} URLs:`, data);
+
+    if (skippedUrls.length > 0) {
+      console.log(
+        `[Bing] Skipped ${skippedUrls.length} URLs due to daily quota. They will not be submitted today:`,
+        skippedUrls
+      );
+    }
   } catch (err) {
     console.error('[Bing] Submission Error:', err);
   }
@@ -97,7 +117,7 @@ async function pingSitemaps() {
     return;
   }
 
-  // Bing (batch)
+  // Bing (batch, up to daily quota)
   await submitBing(urls);
 
   // IndexNow (individually)

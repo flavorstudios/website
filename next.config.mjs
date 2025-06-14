@@ -6,8 +6,8 @@ const withPWA = nextPwa({
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
   fallbacks: {
-    document: '/offline.html',
-    image: '/icons/icon-192x192.png',
+    document: '/offline.html',             // Offline fallback page
+    image: '/icons/icon-192x192.png',      // Image fallback path
   },
 });
 
@@ -22,6 +22,7 @@ const nextConfig = {
   images: {
     unoptimized: false, // Image optimization ENABLED!
   },
+  // You can add more Next.js config options here if needed
 };
 
 export default withPWA(nextConfig);

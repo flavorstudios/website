@@ -63,6 +63,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                 onClick={() => toggleExpanded(item.label)}
                 aria-expanded={expandedItems.has(item.label)}
                 aria-controls={`mobile-submenu-${item.label}`}
+                type="button"
               >
                 <span>{item.label}</span>
                 {item.subItems && (

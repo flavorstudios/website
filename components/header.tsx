@@ -31,20 +31,28 @@ const BLOG_DESCRIPTIONS: Record<string, string> = {
   "opinion": "Staff picks & essays",
 }
 
+// --------- KEY PART: Match these exactly to your actual slugs ---------
 const WATCH_LABELS: Record<string, string> = {
   "original-series": "Originals",
-  "shorts": "Shorts",
-  "movies": "Movies",
   "trailers": "Trailers",
-  "behind-the-scenes": "Behind the Scenes",
+  "shorts": "Shorts",
+  "behind-scenes": "Behind the Scenes",
+  "fan-edits": "Fan Edits",
+  "interviews": "Interviews",
+  "podcast": "Podcasts",
+  "highlights": "Highlights",
 }
 const WATCH_DESCRIPTIONS: Record<string, string> = {
   "original-series": "Original anime series",
-  "shorts": "Anime shorts & clips",
-  "movies": "Full-length anime movies",
   "trailers": "Latest anime trailers",
-  "behind-the-scenes": "BTS & production stories",
+  "shorts": "Anime shorts & clips",
+  "behind-scenes": "BTS & production stories",
+  "fan-edits": "AMVs & remixes",
+  "interviews": "Creator & cast interviews",
+  "podcast": "Anime podcasts & talks",
+  "highlights": "Epic scenes & compilations",
 }
+// ----------------------------------------------------------------------
 
 const BLOG_LIMIT = 6
 const WATCH_LIMIT = 6
@@ -58,8 +66,12 @@ export function Header() {
       try {
         const response = await fetch("/api/admin/categories")
         const data = await response.json()
+        console.log("categories response", data)
+
         const blogCategories = data.categories?.blog || []
-        const watchCategories = data.categories?.watch || []
+        // Use the 'video' key, fallback to 'watch' just in case
+        const watchCategories = data.categories?.video || data.categories?.watch || []
+        console.log("video slugs", watchCategories.map((c: any) => c.slug))
 
         // Blog Menu
         const mappedBlog = blogCategories
@@ -91,7 +103,7 @@ export function Header() {
             : []),
         ]
 
-        // Watch Menu (use correct slugs!)
+        // Watch Menu (KEY FIX)
         const mappedWatch = watchCategories
           .filter((category: any) => WATCH_LABELS[category.slug])
           .map((category: any) => ({
@@ -100,6 +112,7 @@ export function Header() {
             tooltip: WATCH_DESCRIPTIONS[category.slug] || category.meta?.description || "",
             description: WATCH_DESCRIPTIONS[category.slug] || category.meta?.description || "",
           }))
+        console.log("Mapped watch categories", mappedWatch)
 
         const watchMenuItems = [
           {

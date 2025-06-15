@@ -53,6 +53,16 @@ export interface Comment {
   userAgent: string
 }
 
+export interface Category {
+  id: string
+  type: "blog" | "video"
+  slug: string
+  name: string
+  description: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface PageContent {
   id: string
   page: string
@@ -126,9 +136,7 @@ export const blogStore = {
   async update(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
     const posts = await this.getAll()
     const index = posts.findIndex((p) => p.id === id)
-
     if (index === -1) return null
-
     posts[index] = {
       ...posts[index],
       ...updates,
@@ -141,9 +149,7 @@ export const blogStore = {
   async delete(id: string): Promise<boolean> {
     const posts = await this.getAll()
     const filtered = posts.filter((p) => p.id !== id)
-
     if (filtered.length === posts.length) return false
-
     await writeJsonFile("blogs.json", filtered)
     return true
   },
@@ -172,9 +178,7 @@ export const videoStore = {
   async update(id: string, updates: Partial<Video>): Promise<Video | null> {
     const videos = await this.getAll()
     const index = videos.findIndex((v) => v.id === id)
-
     if (index === -1) return null
-
     videos[index] = {
       ...videos[index],
       ...updates,
@@ -187,9 +191,7 @@ export const videoStore = {
   async delete(id: string): Promise<boolean> {
     const videos = await this.getAll()
     const filtered = videos.filter((v) => v.id !== id)
-
     if (filtered.length === videos.length) return false
-
     await writeJsonFile("videos.json", filtered)
     return true
   },
@@ -204,9 +206,7 @@ export const commentStore = {
   async updateStatus(id: string, status: Comment["status"]): Promise<Comment | null> {
     const comments = await this.getAll()
     const index = comments.findIndex((c) => c.id === id)
-
     if (index === -1) return null
-
     comments[index].status = status
     await writeJsonFile("comments.json", comments)
     return comments[index]
@@ -215,9 +215,7 @@ export const commentStore = {
   async delete(id: string): Promise<boolean> {
     const comments = await this.getAll()
     const filtered = comments.filter((c) => c.id !== id)
-
     if (filtered.length === comments.length) return false
-
     await writeJsonFile("comments.json", filtered)
     return true
   },
@@ -232,7 +230,6 @@ export const pageStore = {
   async update(page: string, section: string, content: Record<string, any>, updatedBy: string): Promise<PageContent> {
     const pages = await this.getAll()
     const index = pages.findIndex((p) => p.page === page && p.section === section)
-
     const updatedPage: PageContent = {
       id: `${page}_${section}`,
       page,
@@ -241,15 +238,59 @@ export const pageStore = {
       updatedAt: new Date().toISOString(),
       updatedBy,
     }
-
     if (index === -1) {
       pages.push(updatedPage)
     } else {
       pages[index] = updatedPage
     }
-
     await writeJsonFile("pages.json", pages)
     return updatedPage
+  },
+}
+
+// Category management
+export const categoryStore = {
+  async getAll(): Promise<Category[]> {
+    return readJsonFile<Category>("categories.json")
+  },
+
+  async getBySlug(slug: string): Promise<Category | null> {
+    const categories = await this.getAll()
+    return categories.find((c) => c.slug === slug) || null
+  },
+
+  async create(input: Omit<Category, "id" | "createdAt" | "updatedAt">): Promise<Category> {
+    const categories = await this.getAll()
+    const newCategory: Category = {
+      ...input,
+      id: `cat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    categories.unshift(newCategory)
+    await writeJsonFile("categories.json", categories)
+    return newCategory
+  },
+
+  async update(id: string, updates: Partial<Category>): Promise<Category | null> {
+    const categories = await this.getAll()
+    const index = categories.findIndex((c) => c.id === id)
+    if (index === -1) return null
+    categories[index] = {
+      ...categories[index],
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    }
+    await writeJsonFile("categories.json", categories)
+    return categories[index]
+  },
+
+  async delete(id: string): Promise<boolean> {
+    const categories = await this.getAll()
+    const filtered = categories.filter((c) => c.id !== id)
+    if (filtered.length === categories.length) return false
+    await writeJsonFile("categories.json", filtered)
+    return true
   },
 }
 
@@ -261,39 +302,16 @@ export const systemStore = {
       videoStore.getAll(),
       commentStore.getAll(),
     ])
-
     return {
       totalPosts: blogs.length,
       totalVideos: videos.length,
       totalComments: comments.length,
       pendingComments: comments.filter((c) => c.status === "pending").length,
       totalViews:
-        blogs.reduce((sum, post) => sum + post.views, 0) + videos.reduce((sum, video) => sum + video.views, 0),
+        blogs.reduce((sum, post) => sum + post.views, 0) +
+        videos.reduce((sum, video) => sum + video.views, 0),
       lastBackup: "Never",
       storageUsed: "2.4 MB",
     }
   },
-}
-
-// Initialize sample data if files don't exist
-export async function initializeSampleData() {
-  const [blogs, videos, comments] = await Promise.all([blogStore.getAll(), videoStore.getAll(), commentStore.getAll()])
-
-  // Only add sample data if collections are empty
-  if (blogs.length === 0) {
-    const { sampleBlogs } = await import("./sample-data")
-    for (const blog of sampleBlogs) {
-      await writeJsonFile("blogs.json", sampleBlogs)
-    }
-  }
-
-  if (videos.length === 0) {
-    const { sampleVideos } = await import("./sample-data")
-    await writeJsonFile("videos.json", sampleVideos)
-  }
-
-  if (comments.length === 0) {
-    const { sampleComments } = await import("./sample-data")
-    await writeJsonFile("comments.json", sampleComments)
-  }
 }

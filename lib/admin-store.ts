@@ -113,12 +113,10 @@ export const blogStore = {
   async getAll(): Promise<BlogPost[]> {
     return readJsonFile<BlogPost>("blogs.json")
   },
-
   async getById(id: string): Promise<BlogPost | null> {
     const posts = await this.getAll()
     return posts.find((p) => p.id === id) || null
   },
-
   async create(post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "views">): Promise<BlogPost> {
     const posts = await this.getAll()
     const newPost: BlogPost = {
@@ -132,20 +130,14 @@ export const blogStore = {
     await writeJsonFile("blogs.json", posts)
     return newPost
   },
-
   async update(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
     const posts = await this.getAll()
     const index = posts.findIndex((p) => p.id === id)
     if (index === -1) return null
-    posts[index] = {
-      ...posts[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    }
+    posts[index] = { ...posts[index], ...updates, updatedAt: new Date().toISOString() }
     await writeJsonFile("blogs.json", posts)
     return posts[index]
   },
-
   async delete(id: string): Promise<boolean> {
     const posts = await this.getAll()
     const filtered = posts.filter((p) => p.id !== id)
@@ -160,7 +152,6 @@ export const videoStore = {
   async getAll(): Promise<Video[]> {
     return readJsonFile<Video>("videos.json")
   },
-
   async create(video: Omit<Video, "id" | "createdAt" | "updatedAt" | "views">): Promise<Video> {
     const videos = await this.getAll()
     const newVideo: Video = {
@@ -174,20 +165,14 @@ export const videoStore = {
     await writeJsonFile("videos.json", videos)
     return newVideo
   },
-
   async update(id: string, updates: Partial<Video>): Promise<Video | null> {
     const videos = await this.getAll()
     const index = videos.findIndex((v) => v.id === id)
     if (index === -1) return null
-    videos[index] = {
-      ...videos[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    }
+    videos[index] = { ...videos[index], ...updates, updatedAt: new Date().toISOString() }
     await writeJsonFile("videos.json", videos)
     return videos[index]
   },
-
   async delete(id: string): Promise<boolean> {
     const videos = await this.getAll()
     const filtered = videos.filter((v) => v.id !== id)
@@ -202,7 +187,6 @@ export const commentStore = {
   async getAll(): Promise<Comment[]> {
     return readJsonFile<Comment>("comments.json")
   },
-
   async updateStatus(id: string, status: Comment["status"]): Promise<Comment | null> {
     const comments = await this.getAll()
     const index = comments.findIndex((c) => c.id === id)
@@ -211,7 +195,6 @@ export const commentStore = {
     await writeJsonFile("comments.json", comments)
     return comments[index]
   },
-
   async delete(id: string): Promise<boolean> {
     const comments = await this.getAll()
     const filtered = comments.filter((c) => c.id !== id)
@@ -221,12 +204,11 @@ export const commentStore = {
   },
 }
 
-// Page content management
+// Page content
 export const pageStore = {
   async getAll(): Promise<PageContent[]> {
     return readJsonFile<PageContent>("pages.json")
   },
-
   async update(page: string, section: string, content: Record<string, any>, updatedBy: string): Promise<PageContent> {
     const pages = await this.getAll()
     const index = pages.findIndex((p) => p.page === page && p.section === section)
@@ -238,27 +220,22 @@ export const pageStore = {
       updatedAt: new Date().toISOString(),
       updatedBy,
     }
-    if (index === -1) {
-      pages.push(updatedPage)
-    } else {
-      pages[index] = updatedPage
-    }
+    if (index === -1) pages.push(updatedPage)
+    else pages[index] = updatedPage
     await writeJsonFile("pages.json", pages)
     return updatedPage
   },
 }
 
-// Category management
+// Category store
 export const categoryStore = {
   async getAll(): Promise<Category[]> {
     return readJsonFile<Category>("categories.json")
   },
-
   async getBySlug(slug: string): Promise<Category | null> {
     const categories = await this.getAll()
     return categories.find((c) => c.slug === slug) || null
   },
-
   async create(input: Omit<Category, "id" | "createdAt" | "updatedAt">): Promise<Category> {
     const categories = await this.getAll()
     const newCategory: Category = {
@@ -271,20 +248,14 @@ export const categoryStore = {
     await writeJsonFile("categories.json", categories)
     return newCategory
   },
-
   async update(id: string, updates: Partial<Category>): Promise<Category | null> {
     const categories = await this.getAll()
     const index = categories.findIndex((c) => c.id === id)
     if (index === -1) return null
-    categories[index] = {
-      ...categories[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    }
+    categories[index] = { ...categories[index], ...updates, updatedAt: new Date().toISOString() }
     await writeJsonFile("categories.json", categories)
     return categories[index]
   },
-
   async delete(id: string): Promise<boolean> {
     const categories = await this.getAll()
     const filtered = categories.filter((c) => c.id !== id)
@@ -315,3 +286,31 @@ export const systemStore = {
     }
   },
 }
+
+// ✅ Sample Data Initialization
+export async function initializeSampleData() {
+  await writeJsonFile("categories.json", [
+    {
+      id: "cat_1",
+      type: "blog",
+      slug: "anime-news",
+      name: "Anime News",
+      description: "Latest Anime News, Updates & Releases",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: "cat_2",
+      type: "video",
+      slug: "original-anime",
+      name: "Original Anime",
+      description: "Watch our original anime creations",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  ])
+}
+
+// ✅ Constants (Optional)
+export const VALID_BLOG_CATEGORIES = ["anime-news", "reviews", "guides", "features", "community"]
+export const VALID_WATCH_CATEGORIES = ["original-anime", "trailers", "behind-the-scenes"]

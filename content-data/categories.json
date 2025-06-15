@@ -1,6 +1,60 @@
 {
   "blog": [
     {
+      "slug": "all-posts",
+      "title": "All Blog Posts",
+      "meta": {
+        "description": "Browse every blog post published by Flavor Studios, across all categories and topics.",
+        "canonicalUrl": "https://flavorstudios.in/blog",
+        "robots": "index,follow"
+      },
+      "openGraph": {
+        "title": "All Blog Posts",
+        "description": "Explore the complete Flavor Studios blog archive—anime news, reviews, guides, and more.",
+        "url": "https://flavorstudios.in/blog",
+        "type": "website",
+        "site_name": "Flavor Studios",
+        "images": [
+          {
+            "url": "https://flavorstudios.in/cover.jpg",
+            "width": 1200,
+            "height": 630
+          }
+        ]
+      },
+      "twitter": {
+        "card": "summary_large_image",
+        "site": "@flavorstudios",
+        "title": "All Blog Posts",
+        "description": "Discover every Flavor Studios blog post in one place—always fresh and organized.",
+        "images": ["https://flavorstudios.in/cover.jpg"]
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "All Blog Posts",
+        "description": "All anime blog posts published by Flavor Studios.",
+        "url": "https://flavorstudios.in/blog",
+        "about": "Comprehensive collection of all anime-related blog articles and content categories.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/blog"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Flavor Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "icon": "https://flavorstudios.in/favicon.ico",
+      "accessibleLabel": "All Blog Posts"
+    },
+    {
       "slug": "anime-news",
       "title": "Latest Anime News, Industry Updates & Release Schedules",
       "meta": {
@@ -12,7 +66,7 @@
         "title": "Latest Anime News, Industry Updates & Release Schedules",
         "description": "Up-to-the-minute anime news, studio announcements, new show premieres, and more—direct from Flavor Studios.",
         "url": "https://flavorstudios.in/blog/category/anime-news",
-        "type": "article",
+        "type": "website",
         "site_name": "Flavor Studios",
         "images": [
           {
@@ -35,12 +89,19 @@
         "name": "Anime News",
         "description": "Anime news, updates, and industry coverage curated by Flavor Studios.",
         "url": "https://flavorstudios.in/blog/category/anime-news",
+        "about": "Stay updated with the latest anime news, industry updates, and release schedules.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/blog/category/anime-news"
+        },
         "publisher": {
           "@type": "Organization",
           "name": "Flavor Studios",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://flavorstudios.in/logo.png"
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
           }
         }
       },
@@ -59,7 +120,7 @@
         "title": "In-Depth Anime Reviews, Ratings & Critical Opinions",
         "description": "Discover honest anime reviews and in-depth analysis from the Flavor Studios team.",
         "url": "https://flavorstudios.in/blog/category/reviews",
-        "type": "article",
+        "type": "website",
         "site_name": "Flavor Studios",
         "images": [
           {
@@ -82,12 +143,19 @@
         "name": "Anime Reviews",
         "description": "Comprehensive anime reviews and ratings from Flavor Studios.",
         "url": "https://flavorstudios.in/blog/category/reviews",
+        "about": "Expert opinions, critical analysis, and honest ratings of anime series and films.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/blog/category/reviews"
+        },
         "publisher": {
           "@type": "Organization",
           "name": "Flavor Studios",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://flavorstudios.in/logo.png"
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
           }
         }
       },
@@ -106,7 +174,7 @@
         "title": "Anime Guides & Watch Orders – The Ultimate Viewing Roadmap",
         "description": "Start your anime journey right. Find guides and watch orders for popular and complex series.",
         "url": "https://flavorstudios.in/blog/category/guides",
-        "type": "article",
+        "type": "website",
         "site_name": "Flavor Studios",
         "images": [
           {
@@ -129,12 +197,19 @@
         "name": "Anime Guides & Watch Orders",
         "description": "Guides for anime series, watch orders, and viewing recommendations by Flavor Studios.",
         "url": "https://flavorstudios.in/blog/category/guides",
+        "about": "In-depth guides for anime fans including watch orders, beginner tips, and curated recommendations.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/blog/category/guides"
+        },
         "publisher": {
           "@type": "Organization",
           "name": "Flavor Studios",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://flavorstudios.in/logo.png"
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
           }
         }
       },
@@ -153,7 +228,7 @@
         "title": "Features & Editorials: Top 10s, Interviews, Lists & Insights",
         "description": "Get unique perspectives and thoughtful anime articles from our passionate creators.",
         "url": "https://flavorstudios.in/blog/category/features",
-        "type": "article",
+        "type": "website",
         "site_name": "Flavor Studios",
         "images": [
           {
@@ -176,12 +251,19 @@
         "name": "Anime Features & Editorials",
         "description": "Exclusive anime features, interviews, and in-depth lists by Flavor Studios.",
         "url": "https://flavorstudios.in/blog/category/features",
+        "about": "Editorials, interviews, top 10s, lists, and deep dives into anime culture.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/blog/category/features"
+        },
         "publisher": {
           "@type": "Organization",
           "name": "Flavor Studios",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://flavorstudios.in/logo.png"
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
           }
         }
       },
@@ -189,18 +271,18 @@
       "accessibleLabel": "Anime Features & Editorials"
     },
     {
-      "slug": "explainers",
-      "title": "Anime Lore & Explainers – Dive Into Worlds, Plots & Powers",
+      "slug": "explained",
+      "title": "Anime Explained – Worlds, Plots & Power Systems",
       "meta": {
         "description": "Unlock deep lore, world-building secrets, and character mysteries from popular anime. Easy-to-understand explainers by Flavor Studios for dedicated fans.",
-        "canonicalUrl": "https://flavorstudios.in/blog/category/explainers",
+        "canonicalUrl": "https://flavorstudios.in/blog/category/explained",
         "robots": "index,follow"
       },
       "openGraph": {
-        "title": "Anime Lore & Explainers – Dive Into Worlds, Plots & Powers",
+        "title": "Anime Explained – Worlds, Plots & Power Systems",
         "description": "Confused by anime plot twists or lore? We break down stories, powers, and worlds in plain language.",
-        "url": "https://flavorstudios.in/blog/category/explainers",
-        "type": "article",
+        "url": "https://flavorstudios.in/blog/category/explained",
+        "type": "website",
         "site_name": "Flavor Studios",
         "images": [
           {
@@ -213,41 +295,48 @@
       "twitter": {
         "card": "summary_large_image",
         "site": "@flavorstudios",
-        "title": "Anime Lore & Explainers – Dive Into Worlds, Plots & Powers",
+        "title": "Anime Explained – Worlds, Plots & Power Systems",
         "description": "Understand your favorite anime universes with our expert explainers and worldbuilding guides.",
         "images": ["https://flavorstudios.in/cover.jpg"]
       },
       "schema": {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        "name": "Anime Lore & Explainers",
+        "name": "Anime Explained",
         "description": "Anime explainers, world-building, and lore analysis by Flavor Studios.",
-        "url": "https://flavorstudios.in/blog/category/explainers",
+        "url": "https://flavorstudios.in/blog/category/explained",
+        "about": "In-depth anime explainers, worldbuilding guides, and plot analysis.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/blog/category/explained"
+        },
         "publisher": {
           "@type": "Organization",
           "name": "Flavor Studios",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://flavorstudios.in/logo.png"
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
           }
         }
       },
       "icon": "https://flavorstudios.in/favicon.ico",
-      "accessibleLabel": "Anime Lore & Explainers"
+      "accessibleLabel": "Anime Explained"
     },
     {
-      "slug": "culture",
-      "title": "Anime Culture & Community: Cosplay, Events, Fandom & More",
+      "slug": "community",
+      "title": "Anime Community & Culture: Cosplay, Events, Fandom & More",
       "meta": {
-        "description": "Explore anime culture, community events, cosplay, memes, and trends. Join Flavor Studios for the best of the anime world beyond the screen.",
-        "canonicalUrl": "https://flavorstudios.in/blog/category/culture",
+        "description": "Explore anime community events, cosplay, memes, and trends. Join Flavor Studios for the best of the anime world beyond the screen.",
+        "canonicalUrl": "https://flavorstudios.in/blog/category/community",
         "robots": "index,follow"
       },
       "openGraph": {
-        "title": "Anime Culture & Community: Cosplay, Events, Fandom & More",
+        "title": "Anime Community & Culture: Cosplay, Events, Fandom & More",
         "description": "From conventions to cosplay, Flavor Studios connects you with the heartbeat of anime fandom.",
-        "url": "https://flavorstudios.in/blog/category/culture",
-        "type": "article",
+        "url": "https://flavorstudios.in/blog/category/community",
+        "type": "website",
         "site_name": "Flavor Studios",
         "images": [
           {
@@ -260,30 +349,199 @@
       "twitter": {
         "card": "summary_large_image",
         "site": "@flavorstudios",
-        "title": "Anime Culture & Community: Cosplay, Events, Fandom & More",
+        "title": "Anime Community & Culture: Cosplay, Events, Fandom & More",
         "description": "Get the latest on anime conventions, cosplay trends, and community news with Flavor Studios.",
         "images": ["https://flavorstudios.in/cover.jpg"]
       },
       "schema": {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        "name": "Anime Culture & Community",
-        "description": "Anime culture, community, and fandom events from Flavor Studios.",
-        "url": "https://flavorstudios.in/blog/category/culture",
+        "name": "Anime Community & Culture",
+        "description": "Anime community, culture, and fandom events from Flavor Studios.",
+        "url": "https://flavorstudios.in/blog/category/community",
+        "about": "All things anime community, fan events, culture, cosplay, and more.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/blog/category/community"
+        },
         "publisher": {
           "@type": "Organization",
           "name": "Flavor Studios",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://flavorstudios.in/logo.png"
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
           }
         }
       },
       "icon": "https://flavorstudios.in/favicon.ico",
-      "accessibleLabel": "Anime Culture & Community"
+      "accessibleLabel": "Anime Community & Culture"
+    },
+    {
+      "slug": "merch",
+      "title": "Merch & Collectibles – Figures, Apparel & More",
+      "meta": {
+        "description": "News, reviews, and guides on anime figures, merchandise, apparel, and collectibles for passionate fans.",
+        "canonicalUrl": "https://flavorstudios.in/blog/category/merch",
+        "robots": "index,follow"
+      },
+      "openGraph": {
+        "title": "Merch & Collectibles – Figures, Apparel & More",
+        "description": "Explore the world of anime merch—figures, apparel, plushies, and more from Flavor Studios.",
+        "url": "https://flavorstudios.in/blog/category/merch",
+        "type": "website",
+        "site_name": "Flavor Studios",
+        "images": [
+          {
+            "url": "https://flavorstudios.in/cover.jpg",
+            "width": 1200,
+            "height": 630
+          }
+        ]
+      },
+      "twitter": {
+        "card": "summary_large_image",
+        "site": "@flavorstudios",
+        "title": "Merch & Collectibles – Figures, Apparel & More",
+        "description": "Stay up to date on the latest anime figures and collectible merch from Flavor Studios.",
+        "images": ["https://flavorstudios.in/cover.jpg"]
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Merch & Collectibles",
+        "description": "Anime merchandise, figure reviews, and collectibles by Flavor Studios.",
+        "url": "https://flavorstudios.in/blog/category/merch",
+        "about": "Anime merchandise, collectibles, figures, apparel, and related news.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/blog/category/merch"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Flavor Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "icon": "https://flavorstudios.in/favicon.ico",
+      "accessibleLabel": "Merch & Collectibles"
+    },
+    {
+      "slug": "opinion",
+      "title": "Opinion & Editorials – Essays, Staff Picks & Debates",
+      "meta": {
+        "description": "Thought-provoking articles, critical essays, and editorial perspectives on all things anime from the Flavor Studios team.",
+        "canonicalUrl": "https://flavorstudios.in/blog/category/opinion",
+        "robots": "index,follow"
+      },
+      "openGraph": {
+        "title": "Opinion & Editorials – Essays, Staff Picks & Debates",
+        "description": "Explore in-depth anime opinions, editorials, and debates from Flavor Studios writers.",
+        "url": "https://flavorstudios.in/blog/category/opinion",
+        "type": "website",
+        "site_name": "Flavor Studios",
+        "images": [
+          {
+            "url": "https://flavorstudios.in/cover.jpg",
+            "width": 1200,
+            "height": 630
+          }
+        ]
+      },
+      "twitter": {
+        "card": "summary_large_image",
+        "site": "@flavorstudios",
+        "title": "Opinion & Editorials – Essays, Staff Picks & Debates",
+        "description": "Read thoughtful anime opinions, editorials, and staff picks at Flavor Studios.",
+        "images": ["https://flavorstudios.in/cover.jpg"]
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Opinion & Editorials",
+        "description": "Opinion and editorial articles on anime topics by Flavor Studios.",
+        "url": "https://flavorstudios.in/blog/category/opinion",
+        "about": "Staff opinions, essays, and critical debates about anime and otaku culture.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/blog/category/opinion"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Flavor Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "icon": "https://flavorstudios.in/favicon.ico",
+      "accessibleLabel": "Opinion & Editorials"
     }
   ],
   "watch": [
+    {
+      "slug": "all-videos",
+      "title": "All Videos",
+      "meta": {
+        "description": "Browse every video uploaded by Flavor Studios, across all anime series, shorts, trailers, and more.",
+        "canonicalUrl": "https://flavorstudios.in/watch",
+        "robots": "index,follow"
+      },
+      "openGraph": {
+        "title": "All Videos",
+        "description": "Watch every Flavor Studios video—series, shorts, behind the scenes, and more.",
+        "url": "https://flavorstudios.in/watch",
+        "type": "website",
+        "site_name": "Flavor Studios",
+        "images": [
+          {
+            "url": "https://flavorstudios.in/cover.jpg",
+            "width": 1200,
+            "height": 630
+          }
+        ]
+      },
+      "twitter": {
+        "card": "summary_large_image",
+        "site": "@flavorstudios",
+        "title": "All Videos",
+        "description": "Explore the full Flavor Studios video library—always fresh, always creative.",
+        "images": ["https://flavorstudios.in/cover.jpg"]
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "All Videos",
+        "description": "All anime videos uploaded by Flavor Studios.",
+        "url": "https://flavorstudios.in/watch",
+        "about": "Comprehensive collection of all videos and series from Flavor Studios.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/watch"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Flavor Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "icon": "https://flavorstudios.in/favicon.ico",
+      "accessibleLabel": "All Videos"
+    },
     {
       "slug": "original-series",
       "title": "Flavor Studios Original Series – New Anime & Exclusive Stories",
@@ -319,111 +577,24 @@
         "name": "Flavor Studios Original Series",
         "description": "Watch original anime series by Flavor Studios, exclusively for our audience.",
         "url": "https://flavorstudios.in/watch/category/original-series",
+        "about": "Exclusive original anime series created by Flavor Studios.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/watch/category/original-series"
+        },
         "publisher": {
           "@type": "Organization",
           "name": "Flavor Studios",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://flavorstudios.in/logo.png"
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
           }
         }
       },
       "icon": "https://flavorstudios.in/favicon.ico",
       "accessibleLabel": "Flavor Studios Original Series"
-    },
-    {
-      "slug": "shorts",
-      "title": "Animated Shorts & Mini-Stories – Quick Bites of Anime Creativity",
-      "meta": {
-        "description": "Enjoy bite-sized anime shorts and creative mini-stories from Flavor Studios. Perfect for quick inspiration, laughs, or a taste of new animation concepts.",
-        "canonicalUrl": "https://flavorstudios.in/watch/category/shorts",
-        "robots": "index,follow"
-      },
-      "openGraph": {
-        "title": "Animated Shorts & Mini-Stories – Quick Bites of Anime Creativity",
-        "description": "Experience quick bursts of anime creativity with short films and mini-episodes by Flavor Studios.",
-        "url": "https://flavorstudios.in/watch/category/shorts",
-        "type": "video.episode",
-        "site_name": "Flavor Studios",
-        "images": [
-          {
-            "url": "https://flavorstudios.in/cover.jpg",
-            "width": 1200,
-            "height": 630
-          }
-        ]
-      },
-      "twitter": {
-        "card": "summary_large_image",
-        "site": "@flavorstudios",
-        "title": "Animated Shorts & Mini-Stories – Quick Bites of Anime Creativity",
-        "description": "Catch bite-sized anime shorts and creative mini-stories from the Flavor Studios team.",
-        "images": ["https://flavorstudios.in/cover.jpg"]
-      },
-      "schema": {
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        "name": "Animated Shorts & Mini-Stories",
-        "description": "Short-form anime and creative mini-stories by Flavor Studios.",
-        "url": "https://flavorstudios.in/watch/category/shorts",
-        "publisher": {
-          "@type": "Organization",
-          "name": "Flavor Studios",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://flavorstudios.in/logo.png"
-          }
-        }
-      },
-      "icon": "https://flavorstudios.in/favicon.ico",
-      "accessibleLabel": "Animated Shorts & Mini-Stories"
-    },
-    {
-      "slug": "movies",
-      "title": "Films & Specials – Full-Length Anime and Exclusive One-Offs",
-      "meta": {
-        "description": "Stream full-length anime films, exclusive specials, and one-shot movies created by Flavor Studios. Experience cinematic storytelling and unique animation.",
-        "canonicalUrl": "https://flavorstudios.in/watch/category/movies",
-        "robots": "index,follow"
-      },
-      "openGraph": {
-        "title": "Films & Specials – Full-Length Anime and Exclusive One-Offs",
-        "description": "Enjoy cinematic anime experiences—movies, OVAs, and exclusive specials—only from Flavor Studios.",
-        "url": "https://flavorstudios.in/watch/category/movies",
-        "type": "video.movie",
-        "site_name": "Flavor Studios",
-        "images": [
-          {
-            "url": "https://flavorstudios.in/cover.jpg",
-            "width": 1200,
-            "height": 630
-          }
-        ]
-      },
-      "twitter": {
-        "card": "summary_large_image",
-        "site": "@flavorstudios",
-        "title": "Films & Specials – Full-Length Anime and Exclusive One-Offs",
-        "description": "Stream full-length anime movies and exclusive specials by Flavor Studios.",
-        "images": ["https://flavorstudios.in/cover.jpg"]
-      },
-      "schema": {
-        "@context": "https://schema.org",
-        "@type": "CollectionPage",
-        "name": "Films & Specials",
-        "description": "Anime movies, specials, and exclusive OVAs by Flavor Studios.",
-        "url": "https://flavorstudios.in/watch/category/movies",
-        "publisher": {
-          "@type": "Organization",
-          "name": "Flavor Studios",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://flavorstudios.in/logo.png"
-          }
-        }
-      },
-      "icon": "https://flavorstudios.in/favicon.ico",
-      "accessibleLabel": "Films & Specials"
     },
     {
       "slug": "trailers",
@@ -437,7 +608,7 @@
         "title": "Trailers & Previews – Sneak Peeks of Upcoming Anime Releases",
         "description": "Catch exclusive anime trailers and previews for all the latest Flavor Studios releases.",
         "url": "https://flavorstudios.in/watch/category/trailers",
-        "type": "video.other",
+        "type": "website",
         "site_name": "Flavor Studios",
         "images": [
           {
@@ -460,12 +631,19 @@
         "name": "Trailers & Previews",
         "description": "Official trailers, teasers, and previews of upcoming anime by Flavor Studios.",
         "url": "https://flavorstudios.in/watch/category/trailers",
+        "about": "Sneak peeks at upcoming anime—trailers, teasers, and previews.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/watch/category/trailers"
+        },
         "publisher": {
           "@type": "Organization",
           "name": "Flavor Studios",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://flavorstudios.in/logo.png"
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
           }
         }
       },
@@ -473,18 +651,72 @@
       "accessibleLabel": "Trailers & Previews"
     },
     {
-      "slug": "behind-the-scenes",
+      "slug": "shorts",
+      "title": "Animated Shorts & Mini-Stories – Quick Bites of Anime Creativity",
+      "meta": {
+        "description": "Enjoy bite-sized anime shorts and creative mini-stories from Flavor Studios. Perfect for quick inspiration, laughs, or a taste of new animation concepts.",
+        "canonicalUrl": "https://flavorstudios.in/watch/category/shorts",
+        "robots": "index,follow"
+      },
+      "openGraph": {
+        "title": "Animated Shorts & Mini-Stories – Quick Bites of Anime Creativity",
+        "description": "Experience quick bursts of anime creativity with short films and mini-episodes by Flavor Studios.",
+        "url": "https://flavorstudios.in/watch/category/shorts",
+        "type": "website",
+        "site_name": "Flavor Studios",
+        "images": [
+          {
+            "url": "https://flavorstudios.in/cover.jpg",
+            "width": 1200,
+            "height": 630
+          }
+        ]
+      },
+      "twitter": {
+        "card": "summary_large_image",
+        "site": "@flavorstudios",
+        "title": "Animated Shorts & Mini-Stories – Quick Bites of Anime Creativity",
+        "description": "Catch bite-sized anime shorts and creative mini-stories from the Flavor Studios team.",
+        "images": ["https://flavorstudios.in/cover.jpg"]
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Animated Shorts & Mini-Stories",
+        "description": "Short-form anime and creative mini-stories by Flavor Studios.",
+        "url": "https://flavorstudios.in/watch/category/shorts",
+        "about": "Short-form anime, creative mini-episodes, and quick animations.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/watch/category/shorts"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Flavor Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "icon": "https://flavorstudios.in/favicon.ico",
+      "accessibleLabel": "Animated Shorts & Mini-Stories"
+    },
+    {
+      "slug": "behind-scenes",
       "title": "Behind the Scenes – Making of Anime, Animator Insights & More",
       "meta": {
         "description": "Go behind the scenes with the creators at Flavor Studios. Explore the making of our anime, animator interviews, technique breakdowns, and creative processes.",
-        "canonicalUrl": "https://flavorstudios.in/watch/category/behind-the-scenes",
+        "canonicalUrl": "https://flavorstudios.in/watch/category/behind-scenes",
         "robots": "index,follow"
       },
       "openGraph": {
         "title": "Behind the Scenes – Making of Anime, Animator Insights & More",
         "description": "Discover what goes into making great anime. Behind the scenes with the artists, animators, and directors of Flavor Studios.",
-        "url": "https://flavorstudios.in/watch/category/behind-the-scenes",
-        "type": "video.other",
+        "url": "https://flavorstudios.in/watch/category/behind-scenes",
+        "type": "website",
         "site_name": "Flavor Studios",
         "images": [
           {
@@ -506,18 +738,241 @@
         "@type": "CollectionPage",
         "name": "Behind the Scenes",
         "description": "Behind the scenes of anime production, animator interviews, and more at Flavor Studios.",
-        "url": "https://flavorstudios.in/watch/category/behind-the-scenes",
+        "url": "https://flavorstudios.in/watch/category/behind-scenes",
+        "about": "Making-of features, animator interviews, and creative process breakdowns.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/watch/category/behind-scenes"
+        },
         "publisher": {
           "@type": "Organization",
           "name": "Flavor Studios",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://flavorstudios.in/logo.png"
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
           }
         }
       },
       "icon": "https://flavorstudios.in/favicon.ico",
       "accessibleLabel": "Behind the Scenes"
+    },
+    {
+      "slug": "fan-edits",
+      "title": "Fan Edits – Anime Music Videos, Remixes & Tributes",
+      "meta": {
+        "description": "Enjoy anime music videos, creative remixes, and stylish fan edits curated by Flavor Studios.",
+        "canonicalUrl": "https://flavorstudios.in/watch/category/fan-edits",
+        "robots": "index,follow"
+      },
+      "openGraph": {
+        "title": "Fan Edits – Anime Music Videos, Remixes & Tributes",
+        "description": "Watch fan-made anime edits, AMVs, and creative tributes from the Flavor Studios community.",
+        "url": "https://flavorstudios.in/watch/category/fan-edits",
+        "type": "website",
+        "site_name": "Flavor Studios",
+        "images": [
+          {
+            "url": "https://flavorstudios.in/cover.jpg",
+            "width": 1200,
+            "height": 630
+          }
+        ]
+      },
+      "twitter": {
+        "card": "summary_large_image",
+        "site": "@flavorstudios",
+        "title": "Fan Edits – Anime Music Videos, Remixes & Tributes",
+        "description": "Creative anime edits, AMVs, and fan tributes, only at Flavor Studios.",
+        "images": ["https://flavorstudios.in/cover.jpg"]
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Fan Edits",
+        "description": "Anime fan edits, music videos, and tributes by Flavor Studios.",
+        "url": "https://flavorstudios.in/watch/category/fan-edits",
+        "about": "Fan-made anime edits, music videos, and tributes.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/watch/category/fan-edits"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Flavor Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "icon": "https://flavorstudios.in/favicon.ico",
+      "accessibleLabel": "Fan Edits"
+    },
+    {
+      "slug": "interviews",
+      "title": "Interviews – Creators, Voice Actors & Industry Pros",
+      "meta": {
+        "description": "Exclusive interviews with anime creators, voice actors, animators, and industry professionals brought to you by Flavor Studios.",
+        "canonicalUrl": "https://flavorstudios.in/watch/category/interviews",
+        "robots": "index,follow"
+      },
+      "openGraph": {
+        "title": "Interviews – Creators, Voice Actors & Industry Pros",
+        "description": "Go behind the mic with Flavor Studios’ interviews of anime creators and professionals.",
+        "url": "https://flavorstudios.in/watch/category/interviews",
+        "type": "website",
+        "site_name": "Flavor Studios",
+        "images": [
+          {
+            "url": "https://flavorstudios.in/cover.jpg",
+            "width": 1200,
+            "height": 630
+          }
+        ]
+      },
+      "twitter": {
+        "card": "summary_large_image",
+        "site": "@flavorstudios",
+        "title": "Interviews – Creators, Voice Actors & Industry Pros",
+        "description": "Watch interviews with the voices and minds behind your favorite anime, exclusively at Flavor Studios.",
+        "images": ["https://flavorstudios.in/cover.jpg"]
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Interviews",
+        "description": "Interviews with anime industry leaders by Flavor Studios.",
+        "url": "https://flavorstudios.in/watch/category/interviews",
+        "about": "Exclusive conversations with anime industry professionals, creators, and talent.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/watch/category/interviews"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Flavor Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "icon": "https://flavorstudios.in/favicon.ico",
+      "accessibleLabel": "Interviews"
+    },
+    {
+      "slug": "podcast",
+      "title": "Podcasts – Anime Discussions, News & Guest Chats",
+      "meta": {
+        "description": "Listen to the Flavor Studios podcast for anime discussions, industry news, guest interviews, and more. Your audio gateway to the anime world.",
+        "canonicalUrl": "https://flavorstudios.in/watch/category/podcast",
+        "robots": "index,follow"
+      },
+      "openGraph": {
+        "title": "Podcasts – Anime Discussions, News & Guest Chats",
+        "description": "Anime talk shows and podcast episodes by the Flavor Studios team and special guests.",
+        "url": "https://flavorstudios.in/watch/category/podcast",
+        "type": "website",
+        "site_name": "Flavor Studios",
+        "images": [
+          {
+            "url": "https://flavorstudios.in/cover.jpg",
+            "width": 1200,
+            "height": 630
+          }
+        ]
+      },
+      "twitter": {
+        "card": "summary_large_image",
+        "site": "@flavorstudios",
+        "title": "Podcasts – Anime Discussions, News & Guest Chats",
+        "description": "Tune in to the Flavor Studios podcast for the latest in anime, news, and fandom.",
+        "images": ["https://flavorstudios.in/cover.jpg"]
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Podcasts",
+        "description": "Anime podcast episodes, interviews, and audio discussions from Flavor Studios.",
+        "url": "https://flavorstudios.in/watch/category/podcast",
+        "about": "Official Flavor Studios podcasts and anime discussion shows.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/watch/category/podcast"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Flavor Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "icon": "https://flavorstudios.in/favicon.ico",
+      "accessibleLabel": "Podcasts"
+    },
+    {
+      "slug": "highlights",
+      "title": "Highlights – Iconic Scenes & Epic Moments",
+      "meta": {
+        "description": "Curated compilations of the most iconic, emotional, and action-packed moments in anime, handpicked by the Flavor Studios team.",
+        "canonicalUrl": "https://flavorstudios.in/watch/category/highlights",
+        "robots": "index,follow"
+      },
+      "openGraph": {
+        "title": "Highlights – Iconic Scenes & Epic Moments",
+        "description": "Watch the best anime highlights, epic battles, and emotional scenes selected by Flavor Studios.",
+        "url": "https://flavorstudios.in/watch/category/highlights",
+        "type": "website",
+        "site_name": "Flavor Studios",
+        "images": [
+          {
+            "url": "https://flavorstudios.in/cover.jpg",
+            "width": 1200,
+            "height": 630
+          }
+        ]
+      },
+      "twitter": {
+        "card": "summary_large_image",
+        "site": "@flavorstudios",
+        "title": "Highlights – Iconic Scenes & Epic Moments",
+        "description": "Relive the best anime moments—epic fights, emotional finales, and classic scenes.",
+        "images": ["https://flavorstudios.in/cover.jpg"]
+      },
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Highlights",
+        "description": "Best anime moments, highlights, and compilations by Flavor Studios.",
+        "url": "https://flavorstudios.in/watch/category/highlights",
+        "about": "Curated anime highlights, iconic scenes, and emotional moments.",
+        "mainEntity": {
+          "@type": "WebPage",
+          "@id": "https://flavorstudios.in/watch/category/highlights"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Flavor Studios",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://flavorstudios.in/logo.png",
+            "width": 512,
+            "height": 512
+          }
+        }
+      },
+      "icon": "https://flavorstudios.in/favicon.ico",
+      "accessibleLabel": "Highlights"
     }
   ]
 }

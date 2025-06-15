@@ -27,7 +27,6 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
     setExpandedItems(newExpanded)
   }
 
-  // Check if current path matches menu item
   const isActive = (href?: string) => {
     if (!href) return false
     if (href === "/" && pathname === "/") return true
@@ -103,7 +102,9 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                           <div>
                             <div className="font-medium">{subItem.label}</div>
                             {subItem.description && (
-                              <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                {subItem.description}
+                              </div>
                             )}
                           </div>
                           {subItem.isNew && (
@@ -121,6 +122,8 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
           )}
         </div>
       ))}
+
+      {/* CTA Button */}
       <div className="mt-4 pt-4 border-t border-gray-200">
         <Link
           href="/support"

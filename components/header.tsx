@@ -8,66 +8,129 @@ import { Menu, Coffee } from "lucide-react"
 import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
-import { InstallAppButton } from "@/components/InstallAppButton" // << Added this line
-import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
+
+const BLOG_LABELS: Record<string, string> = {
+  "anime-news": "Anime News", // ✅ Updated label
+  "reviews": "Reviews",
+  "guides": "Guides",
+  "features": "Features",
+  "explainers": "Insights",
+  "community": "Community",
+}
+
+const WATCH_LABELS: Record<string, string> = {
+  "original-series": "Originals",
+  "shorts": "Shorts",
+  "films": "Films",
+  "trailers": "Trailers",
+  "behind-the-scenes": "Behind",
+}
+
+const BLOG_DESCRIPTIONS: Record<string, string> = {
+  "anime-news": "Anime News posts and articles",
+  "reviews": "Reviews posts and articles",
+  "guides": "Guides, watch orders & tutorials",
+  "features": "Editorials, Top 10s, Interviews",
+  "explainers": "In-depth explainers & analysis",
+  "community": "Culture, Cosplay, Events",
+}
+
+const WATCH_DESCRIPTIONS: Record<string, string> = {
+  "original-series": "Original anime series",
+  "shorts": "Anime shorts & clips",
+  "films": "Full-length anime movies",
+  "trailers": "Latest anime trailers",
+  "behind-the-scenes": "BTS & production stories",
+}
+
+const BLOG_LIMIT = 6
+const WATCH_LIMIT = 6
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([
-    { label: "Home", href: "/" },
-    { label: "Blog", href: "/blog" },
-    { label: "Watch", href: "/watch" },
-    { label: "Play", href: "/play" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
-  ])
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
 
   useEffect(() => {
     const loadMenuItems = async () => {
       try {
-        const { blogCategories, videoCategories } = await getCategoriesWithFallback()
+        const response = await fetch("/api/admin/categories")
+        const data = await response.json()
+        const blogCategories = data.categories?.blog || []
+        const videoCategories = data.categories?.video || []
+
+        const mappedBlog = blogCategories
+          .filter((category: any) => BLOG_LABELS[category.slug])
+          .map((category: any) => ({
+            label: BLOG_LABELS[category.slug] || category.title || category.name,
+            href: `/blog?category=${category.slug}`,
+            tooltip:
+              (category.title || BLOG_LABELS[category.slug] || "") +
+              (category.meta?.description ? `: ${category.meta.description}` : ""),
+            description: BLOG_DESCRIPTIONS[category.slug] || "",
+          }))
+
+        const blogMenuItems = [
+          {
+            label: "All Posts",
+            href: "/blog",
+            description: "Browse all our blog content",
+            tooltip: "Browse all our blog content",
+          },
+          ...mappedBlog.slice(0, BLOG_LIMIT),
+          ...(mappedBlog.length > BLOG_LIMIT
+            ? [
+                {
+                  label: "All Categories",
+                  href: "/blog/categories",
+                  description: "Browse all blog categories",
+                  tooltip: "Browse all blog categories",
+                },
+              ]
+            : []),
+        ]
+
+        const mappedWatch = videoCategories
+          .filter((category: any) => WATCH_LABELS[category.slug])
+          .map((category: any) => ({
+            label: WATCH_LABELS[category.slug] || category.title || category.name,
+            href: `/watch?category=${category.slug}`,
+            tooltip:
+              (category.title || WATCH_LABELS[category.slug] || "") +
+              (category.meta?.description ? `: ${category.meta.description}` : ""),
+            description: WATCH_DESCRIPTIONS[category.slug] || "",
+          }))
+
+        const watchMenuItems = [
+          {
+            label: "All Videos",
+            href: "/watch",
+            description: "Browse our complete video library",
+            tooltip: "Browse our complete video library",
+          },
+          ...mappedWatch.slice(0, WATCH_LIMIT),
+          ...(mappedWatch.length > WATCH_LIMIT
+            ? [
+                {
+                  label: "All Categories",
+                  href: "/watch/categories",
+                  description: "Browse all video categories",
+                  tooltip: "Browse all video categories",
+                },
+              ]
+            : []),
+        ]
 
         const dynamicMenuItems: MenuItem[] = [
-          {
-            label: "Home",
-            href: "/",
-          },
+          { label: "Home", href: "/" },
           {
             label: "Blog",
-            href: "/blog",
-            subItems: [
-              {
-                label: "All Posts",
-                href: "/blog",
-                description: "Browse all our blog content",
-              },
-              ...blogCategories.slice(0, 6).map((category) => ({
-                label: category.name,
-                href: `/blog?category=${category.slug}`,
-                description: `${category.name} posts and articles${category.count > 0 ? ` (${category.count})` : ""}`,
-              })),
-            ],
+            subItems: blogMenuItems,
           },
           {
             label: "Watch",
-            href: "/watch",
-            subItems: [
-              {
-                label: "All Videos",
-                href: "/watch",
-                description: "Browse our complete video library",
-              },
-              ...videoCategories.slice(0, 6).map((category) => ({
-                label: category.name,
-                href: `/watch?category=${category.slug}`,
-                description: `${category.name} videos and content${category.count > 0 ? ` (${category.count})` : ""}`,
-              })),
-            ],
+            subItems: watchMenuItems,
           },
-          {
-            label: "Play",
-            href: "/play",
-          },
+          { label: "Play", href: "/play" },
           {
             label: "About",
             subItems: [
@@ -88,16 +151,12 @@ export function Header() {
               },
             ],
           },
-          {
-            label: "Contact",
-            href: "/contact",
-          },
+          { label: "Contact", href: "/contact" },
         ]
 
         setMenuItems(dynamicMenuItems)
       } catch (error) {
         console.error("Failed to load dynamic menu items:", error)
-        // Keep the fallback menu items that were set in useState
       }
     }
 
@@ -116,11 +175,18 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <MegaMenu items={menuItems} />
-            {/* Group search and install button together */}
+            <MegaMenu
+              items={menuItems}
+              dropdownProps={{
+                className:
+                  "max-h-[420px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-200 relative",
+                itemClassName: "relative group font-bold",
+                tooltip: true,
+                fade: true,
+              }}
+            />
             <div className="flex items-center gap-2">
               <SearchFeature />
-              <InstallAppButton />
             </div>
           </div>
 

@@ -1,233 +1,137 @@
-import { promises as fs } from "fs"
-import path from "path"
+import { promises as fs } from "fs";
+import path from "path";
 
-const DATA_DIR = path.join(process.cwd(), "content-data")
+// Category file config
+const DATA_DIR = path.join(process.cwd(), "content-data");
+const CATEGORY_FILE = "categories.json";
+
+export type CategorySection = "blog" | "video" | "watch"; // You can use "video" OR "watch" for flexibility
 
 export interface Category {
-  id: string
-  name: string
-  slug: string
-  type: "blog" | "video"
-  description?: string
-  color?: string
-  icon?: string
-  order: number
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-  postCount: number
+  slug: string;
+  title: string;
+  meta: any;
+  openGraph: any;
+  twitter: any;
+  schema: any;
+  icon: string;
+  accessibleLabel: string;
+  order?: number;
+  isActive?: boolean;
 }
+
+// --- UTILS ---
 
 async function ensureDataDir() {
   try {
-    await fs.access(DATA_DIR)
+    await fs.access(DATA_DIR);
   } catch {
-    console.log("Creating data directory:", DATA_DIR)
-    await fs.mkdir(DATA_DIR, { recursive: true })
+    await fs.mkdir(DATA_DIR, { recursive: true });
   }
 }
 
-async function readJsonFile<T>(filename: string): Promise<T[]> {
-  await ensureDataDir()
-  const filePath = path.join(DATA_DIR, filename)
+async function readJsonFile() {
+  await ensureDataDir();
+  const filePath = path.join(DATA_DIR, CATEGORY_FILE);
   try {
-    const data = await fs.readFile(filePath, "utf-8")
-    const parsed = JSON.parse(data)
-    return Array.isArray(parsed) ? parsed : []
-  } catch (error) {
-    console.warn(`Failed to read ${filename}, returning empty array:`, error)
-    return []
+    const data = await fs.readFile(filePath, "utf-8");
+    return JSON.parse(data);
+  } catch {
+    // Return empty structure if file not found
+    return { blog: [], video: [] };
   }
 }
 
-async function writeJsonFile<T>(filename: string, data: T[]): Promise<void> {
-  await ensureDataDir()
-  const filePath = path.join(DATA_DIR, filename)
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2))
+async function writeJsonFile(data: any) {
+  await ensureDataDir();
+  const filePath = path.join(DATA_DIR, CATEGORY_FILE);
+  await fs.writeFile(filePath, JSON.stringify(data, null, 2));
 }
 
-// Category Store - EXPORTED AS NAMED EXPORT
+// --- MAIN CATEGORY STORE ---
+
 export const categoryStore = {
-  async getAll(): Promise<Category[]> {
-    const categories = await readJsonFile<Category>("categories.json")
-    return categories
+  // Get all categories (both blog & video)
+  async getAll(): Promise<{ blog: Category[]; video: Category[] }> {
+    const all = await readJsonFile();
+    // Normalize for both keys (video/watch)
+    if (!all.video && all.watch) all.video = all.watch;
+    if (!all.watch && all.video) all.watch = all.video;
+    return {
+      blog: Array.isArray(all.blog) ? all.blog : [],
+      video: Array.isArray(all.video) ? all.video : [],
+    };
   },
 
-  async getByType(type: "blog" | "video"): Promise<Category[]> {
-    const categories = await this.getAll()
-    return categories.filter((cat) => cat.type === type && cat.isActive).sort((a, b) => a.order - b.order)
+  // Get categories by type (blog or video)
+  async getByType(type: CategorySection): Promise<Category[]> {
+    const all = await this.getAll();
+    const key = type === "blog" ? "blog" : "video";
+    return Array.isArray(all[key]) ? all[key].filter((c) => c.isActive !== false) : [];
   },
 
-  async getById(id: string): Promise<Category | null> {
-    const categories = await this.getAll()
-    return categories.find((cat) => cat.id === id) || null
+  // Get category by slug
+  async getBySlug(type: CategorySection, slug: string): Promise<Category | undefined> {
+    const cats = await this.getByType(type);
+    return cats.find((cat) => cat.slug === slug);
   },
 
-  async getBySlug(slug: string, type: "blog" | "video"): Promise<Category | null> {
-    const categories = await this.getAll()
-    return categories.find((cat) => cat.slug === slug && cat.type === type) || null
+  // Get by accessibleLabel (for accessibility)
+  async getByAccessibleLabel(type: CategorySection, label: string): Promise<Category | undefined> {
+    const cats = await this.getByType(type);
+    return cats.find((cat) => cat.accessibleLabel === label);
   },
 
-  async create(category: Omit<Category, "id" | "createdAt" | "updatedAt" | "postCount">): Promise<Category> {
-    const categories = await this.getAll()
-
-    // Check for duplicate names within the same type
-    const existingCategory = categories.find(
-      (cat) => cat.name.toLowerCase() === category.name.toLowerCase() && cat.type === category.type,
-    )
-    if (existingCategory) {
-      throw new Error(`Category "${category.name}" already exists for ${category.type}`)
-    }
-
-    const newCategory: Category = {
-      ...category,
-      id: `cat_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      slug: category.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, ""),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      postCount: 0,
-    }
-
-    categories.push(newCategory)
-    await writeJsonFile("categories.json", categories)
-    return newCategory
+  // Add new category
+  async create(type: CategorySection, category: Omit<Category, "order" | "isActive">) {
+    const all = await readJsonFile();
+    const key = type === "blog" ? "blog" : "video";
+    if (!all[key]) all[key] = [];
+    const exists = all[key].find((cat: Category) => cat.slug === category.slug);
+    if (exists) throw new Error(`Category with slug "${category.slug}" already exists`);
+    all[key].push({ ...category, order: all[key].length, isActive: true });
+    await writeJsonFile(all);
   },
 
-  async update(id: string, updates: Partial<Category>): Promise<Category | null> {
-    const categories = await this.getAll()
-    const index = categories.findIndex((cat) => cat.id === id)
-    if (index === -1) return null
-
-    // Check for duplicate names if name is being updated
-    if (updates.name) {
-      const existingCategory = categories.find(
-        (cat) =>
-          cat.name.toLowerCase() === updates.name!.toLowerCase() &&
-          cat.type === categories[index].type &&
-          cat.id !== id,
-      )
-      if (existingCategory) {
-        throw new Error(`Category "${updates.name}" already exists`)
-      }
-
-      // Update slug if name changes
-      updates.slug = updates.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")
-    }
-
-    categories[index] = {
-      ...categories[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    }
-
-    await writeJsonFile("categories.json", categories)
-    return categories[index]
+  // Update a category by slug
+  async update(type: CategorySection, slug: string, updates: Partial<Category>) {
+    const all = await readJsonFile();
+    const key = type === "blog" ? "blog" : "video";
+    if (!all[key]) throw new Error(`No category section: ${type}`);
+    const idx = all[key].findIndex((cat: Category) => cat.slug === slug);
+    if (idx === -1) throw new Error(`Category with slug "${slug}" not found`);
+    all[key][idx] = { ...all[key][idx], ...updates };
+    await writeJsonFile(all);
+    return all[key][idx];
   },
 
-  async delete(id: string): Promise<boolean> {
-    const categories = await this.getAll()
-    const category = categories.find((cat) => cat.id === id)
-    if (!category) return false
-
-    // Check if category is being used
-    if (category.postCount > 0) {
-      throw new Error(`Cannot delete category "${category.name}" because it has ${category.postCount} posts`)
-    }
-
-    const filtered = categories.filter((cat) => cat.id !== id)
-    await writeJsonFile("categories.json", filtered)
-    return true
+  // Delete a category by slug
+  async delete(type: CategorySection, slug: string) {
+    const all = await readJsonFile();
+    const key = type === "blog" ? "blog" : "video";
+    if (!all[key]) throw new Error(`No category section: ${type}`);
+    all[key] = all[key].filter((cat: Category) => cat.slug !== slug);
+    await writeJsonFile(all);
   },
 
-  async updatePostCounts(): Promise<void> {
-    const categories = await this.getAll()
-    const { blogStore, videoStore } = await import("./content-store")
-
-    const [blogs, videos] = await Promise.all([
-      blogStore.getAllRaw().catch(() => []),
-      videoStore.getAllRaw().catch(() => []),
-    ])
-
-    // Count posts for each category
-    for (const category of categories) {
-      if (category.type === "blog") {
-        category.postCount = blogs.filter((post) => post.category === category.name).length
-      } else {
-        category.postCount = videos.filter((video) => video.category === category.name).length
-      }
-    }
-
-    await writeJsonFile("categories.json", categories)
+  // Reorder categories (for drag-drop in admin UI)
+  async reorder(type: CategorySection, slugs: string[]) {
+    const cats = await this.getByType(type);
+    // Sort by order of slugs array
+    const newCats = slugs
+      .map((slug, i) => {
+        const c = cats.find((cat) => cat.slug === slug);
+        return c ? { ...c, order: i } : null;
+      })
+      .filter(Boolean);
+    const all = await readJsonFile();
+    const key = type === "blog" ? "blog" : "video";
+    all[key] = newCats;
+    await writeJsonFile(all);
   },
+};
 
-  async reorder(categoryIds: string[]): Promise<void> {
-    const categories = await this.getAll()
-
-    // Update order based on array position
-    categoryIds.forEach((id, index) => {
-      const category = categories.find((cat) => cat.id === id)
-      if (category) {
-        category.order = index
-        category.updatedAt = new Date().toISOString()
-      }
-    })
-
-    await writeJsonFile("categories.json", categories)
-  },
-}
-
-// Initialize default categories - EXACTLY matching your screenshot: Episodes, Shorts, Behind the Scenes, Tutorials
-export async function initializeDefaultCategories() {
-  try {
-    await ensureDataDir()
-    const categories = await categoryStore.getAll()
-
-    if (categories.length === 0) {
-      console.log("Initializing default categories...")
-      // EXACT 4 CATEGORIES from your screenshot
-      const exactCategories = ["Anime News", "Reviews", "Behind the Scenes", "Tutorials"]
-
-      // Create blog categories
-      for (let i = 0; i < exactCategories.length; i++) {
-        try {
-          await categoryStore.create({
-            name: exactCategories[i],
-            type: "blog",
-            description: `Blog content related to ${exactCategories[i].toLowerCase()}`,
-            color: `hsl(${(i * 90) % 360}, 70%, 50%)`,
-            order: i,
-            isActive: true,
-          })
-        } catch (error) {
-          console.warn(`Failed to create blog category ${exactCategories[i]}:`, error)
-        }
-      }
-
-      // Create video categories with same names
-      for (let i = 0; i < exactCategories.length; i++) {
-        try {
-          await categoryStore.create({
-            name: exactCategories[i],
-            type: "video",
-            description: `Video content related to ${exactCategories[i].toLowerCase()}`,
-            color: `hsl(${(i * 90) % 360}, 70%, 50%)`,
-            order: i,
-            isActive: true,
-          })
-        } catch (error) {
-          console.warn(`Failed to create video category ${exactCategories[i]}:`, error)
-        }
-      }
-
-      console.log("Default categories initialized successfully")
-    }
-  } catch (error) {
-    console.error("Failed to initialize default categories:", error)
-  }
+// --- OPTIONAL: Initialize with default categories (admin/seed only) ---
+export async function initializeDefaultCategories(defaultCategories: { blog: Category[]; video: Category[] }) {
+  await writeJsonFile(defaultCategories);
 }

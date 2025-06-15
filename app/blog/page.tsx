@@ -5,17 +5,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
 import { blogStore } from "@/lib/content-store";
-import { getDynamicCategories } from "@/lib/dynamic-categories";
+import { categoryStore } from "@/lib/category-store"; // UPDATED: direct import
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { NewsletterSignup } from "@/components/newsletter-signup";
 
-// === SEO METADATA BLOCK (Centralized for Next.js 15+) ===
+// === SEO METADATA BLOCK ===
 export const metadata = getMetadata({
   title: "Flavor Studios Blog | Anime News, Insights & Studio Stories",
   description:
     "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
   path: "/blog",
-  robots: "index,follow", // Explicit and perfect
+  robots: "index,follow",
   openGraph: {
     title: "Flavor Studios Blog | Anime News, Insights & Studio Stories",
     description:
@@ -62,11 +62,11 @@ export const metadata = getMetadata({
 // --- DATA FETCHING ---
 async function getBlogData() {
   try {
-    const [posts, { blogCategories }] = await Promise.all([
+    const [posts, categories] = await Promise.all([
       blogStore.getPublished(),
-      getDynamicCategories(),
+      categoryStore.getByType("blog"), // Use only the store!
     ]);
-    return { posts, categories: blogCategories };
+    return { posts, categories };
   } catch (error) {
     console.error("Failed to fetch blog data:", error);
     return { posts: [], categories: [] };
@@ -84,6 +84,7 @@ export default async function BlogPage({
   const currentPage = Number.parseInt(searchParams.page || "1");
   const postsPerPage = 9;
 
+  // --- CENTRALIZED CATEGORY FILTER ---
   const filteredPosts =
     selectedCategory === "all"
       ? posts
@@ -117,24 +118,21 @@ export default async function BlogPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Enhanced Header */}
+      {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center">
-            {/* Blue Badge */}
             <div className="inline-flex items-center gap-2 bg-blue-600 text-white rounded-full px-4 sm:px-6 py-2 mb-4 sm:mb-6 text-sm font-medium shadow-lg">
               <BookOpen className="h-4 w-4" />
               Studio Insights & Stories
             </div>
-            {/* Gradient Heading */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 leading-relaxed px-4 pb-2">
               Flavor Studios Blog
             </h1>
-            {/* Italic Subtitle */}
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 italic font-light max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
               Behind the scenes of anime creation—one story at a time.
             </p>
-            {/* Enhanced Stats */}
+            {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 border border-blue-100">
                 <div className="text-xl sm:text-2xl font-bold text-blue-600">{posts.length}</div>
@@ -158,7 +156,15 @@ export default async function BlogPage({
       </div>
 
       {/* Dynamic Category Tabs */}
-      <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/blog" type="blog" />
+      <CategoryTabs
+        categories={categories.map((cat) => ({
+          slug: cat.slug,
+          name: cat.accessibleLabel || cat.title || cat.slug,
+        }))}
+        selectedCategory={selectedCategory}
+        basePath="/blog"
+        type="blog"
+      />
 
       {/* Featured Posts */}
       {featuredPosts.length > 0 && (
@@ -185,7 +191,7 @@ export default async function BlogPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                 {selectedCategory === "all"
                   ? "Latest Posts"
-                  : `${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory} Posts`}
+                  : `${categories.find((c) => c.slug === selectedCategory)?.accessibleLabel || selectedCategory} Posts`}
               </h2>
               <p className="text-gray-600 text-sm sm:text-base">
                 {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""} found
@@ -207,8 +213,6 @@ export default async function BlogPage({
                   <BlogPostCard key={post.id} post={post} />
                 ))}
               </div>
-
-              {/* Pagination */}
               {totalPages > 1 && (
                 <Pagination currentPage={currentPage} totalPages={totalPages} selectedCategory={selectedCategory} />
               )}

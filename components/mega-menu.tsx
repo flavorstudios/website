@@ -14,7 +14,7 @@ export interface MenuItem {
   subItems?: Array<{
     label: string
     href: string
-    description?: string
+    description?: string // <- will be used for short description
     isNew?: boolean
   }>
 }
@@ -162,6 +162,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           >
             <div className="flex items-center justify-between">
               <div>
+                {/* Main short label */}
                 <div className={cn("font-medium", isActive(subItem.href) ? "text-blue-600" : "text-gray-900")}>
                   {subItem.label}
                   {subItem.isNew && (
@@ -170,7 +171,10 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                     </span>
                   )}
                 </div>
-                {subItem.description && <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>}
+                {/* Short description */}
+                {subItem.description && (
+                  <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>
+                )}
               </div>
             </div>
           </Link>

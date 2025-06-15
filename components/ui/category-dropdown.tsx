@@ -4,7 +4,13 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ChevronDown, Filter } from "lucide-react"
-import type { CategoryData } from "@/lib/dynamic-categories"
+
+// Matches your API: { name, slug, count }
+export interface CategoryData {
+  name: string
+  slug: string
+  count: number
+}
 
 interface CategoryDropdownProps {
   categories: CategoryData[]
@@ -25,6 +31,7 @@ export function CategoryDropdown({
 }: CategoryDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
 
+  // "All Categories" option for filters
   const allCategories = showAll ? [{ name: "All Categories", slug: "all", count: 0 }, ...categories] : categories
 
   const selectedCategoryData = allCategories.find((cat) => cat.slug === selectedCategory)
@@ -35,7 +42,7 @@ export function CategoryDropdown({
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className={`justify-between min-w-[180px] ${className}`}
+          className={`justify-between min-w-[180px] ${className || ""}`}
           aria-label="Filter by category"
         >
           <div className="flex items-center gap-2">
@@ -58,7 +65,9 @@ export function CategoryDropdown({
             <div className="flex items-center justify-between w-full">
               <span>{category.name}</span>
               {category.count > 0 && (
-                <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">{category.count}</span>
+                <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                  {category.count}
+                </span>
               )}
             </div>
           </DropdownMenuItem>

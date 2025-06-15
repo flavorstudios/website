@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server"
-import { blogStore, videoStore, VALID_BLOG_CATEGORIES, VALID_WATCH_CATEGORIES } from "@/lib/content-store"
+import {
+  blogStore,
+  videoStore,
+  VALID_BLOG_CATEGORIES,
+  VALID_WATCH_CATEGORIES,
+} from "@/lib/admin-store"
 
 export async function POST() {
   try {
-    // Get current counts before cleanup
+    // Get current data
     const allBlogs = await blogStore.getAll()
     const allVideos = await videoStore.getAll()
 
-    // Filter out any dummy/test content
     const dummyBlogKeywords = [
       "lorem ipsum",
       "test",
@@ -31,7 +35,7 @@ export async function POST() {
       "demo",
       "example",
       "coming soon",
-      "dQw4w9WgXcQ", // Rick Roll video ID
+      "dQw4w9WgXcQ", // Rick Roll
       "showreel",
       "akira",
       "studio tour",
@@ -62,8 +66,7 @@ export async function POST() {
         (keyword) =>
           video.title.toLowerCase().includes(keyword) ||
           video.description.toLowerCase().includes(keyword) ||
-          video.youtubeId.includes(keyword) ||
-          video.slug?.toLowerCase().includes(keyword),
+          video.youtubeId.includes(keyword),
       )
 
       if (isDummy) {
@@ -72,15 +75,9 @@ export async function POST() {
       }
     }
 
-    // Clean up invalid categories (this returns the count of deleted items)
-    const deletedBlogCategories = await blogStore.cleanupInvalidCategories()
-    const deletedVideoCategories = await videoStore.cleanupInvalidCategories()
-
     const report = {
       blogPostsDeleted: deletedBlogs,
-      blogCategoriesDeleted: deletedBlogCategories,
       watchVideosDeleted: deletedVideos,
-      watchCategoriesDeleted: deletedVideoCategories,
       validBlogCategories: VALID_BLOG_CATEGORIES,
       validWatchCategories: VALID_WATCH_CATEGORIES,
       timestamp: new Date().toISOString(),

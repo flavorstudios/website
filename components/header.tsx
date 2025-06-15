@@ -9,23 +9,17 @@ import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
 
+// Short Labels & Descriptions for concise menu
 const BLOG_LABELS: Record<string, string> = {
-  "anime-news": "Anime News", // ✅ Updated label
+  "anime-news": "Anime News",
   "reviews": "Reviews",
   "guides": "Guides",
   "features": "Features",
-  "explainers": "Insights",
+  "explainers": "Explained",
   "community": "Community",
+  "merch": "Merch",
+  "opinion": "Opinion",
 }
-
-const WATCH_LABELS: Record<string, string> = {
-  "original-series": "Originals",
-  "shorts": "Shorts",
-  "films": "Films",
-  "trailers": "Trailers",
-  "behind-the-scenes": "Behind",
-}
-
 const BLOG_DESCRIPTIONS: Record<string, string> = {
   "anime-news": "Anime News posts and articles",
   "reviews": "Reviews posts and articles",
@@ -33,12 +27,21 @@ const BLOG_DESCRIPTIONS: Record<string, string> = {
   "features": "Editorials, Top 10s, Interviews",
   "explainers": "In-depth explainers & analysis",
   "community": "Culture, Cosplay, Events",
+  "merch": "Figures, collectibles & merch",
+  "opinion": "Staff picks & essays",
 }
 
+const WATCH_LABELS: Record<string, string> = {
+  "original-series": "Originals",
+  "shorts": "Shorts",
+  "movies": "Movies",
+  "trailers": "Trailers",
+  "behind-the-scenes": "Behind the Scenes",
+}
 const WATCH_DESCRIPTIONS: Record<string, string> = {
   "original-series": "Original anime series",
   "shorts": "Anime shorts & clips",
-  "films": "Full-length anime movies",
+  "movies": "Full-length anime movies",
   "trailers": "Latest anime trailers",
   "behind-the-scenes": "BTS & production stories",
 }
@@ -56,17 +59,16 @@ export function Header() {
         const response = await fetch("/api/admin/categories")
         const data = await response.json()
         const blogCategories = data.categories?.blog || []
-        const videoCategories = data.categories?.video || []
+        const watchCategories = data.categories?.watch || []
 
+        // Blog Menu
         const mappedBlog = blogCategories
           .filter((category: any) => BLOG_LABELS[category.slug])
           .map((category: any) => ({
             label: BLOG_LABELS[category.slug] || category.title || category.name,
             href: `/blog?category=${category.slug}`,
-            tooltip:
-              (category.title || BLOG_LABELS[category.slug] || "") +
-              (category.meta?.description ? `: ${category.meta.description}` : ""),
-            description: BLOG_DESCRIPTIONS[category.slug] || "",
+            tooltip: BLOG_DESCRIPTIONS[category.slug] || category.meta?.description || "",
+            description: BLOG_DESCRIPTIONS[category.slug] || category.meta?.description || "",
           }))
 
         const blogMenuItems = [
@@ -89,15 +91,14 @@ export function Header() {
             : []),
         ]
 
-        const mappedWatch = videoCategories
+        // Watch Menu (use correct slugs!)
+        const mappedWatch = watchCategories
           .filter((category: any) => WATCH_LABELS[category.slug])
           .map((category: any) => ({
             label: WATCH_LABELS[category.slug] || category.title || category.name,
             href: `/watch?category=${category.slug}`,
-            tooltip:
-              (category.title || WATCH_LABELS[category.slug] || "") +
-              (category.meta?.description ? `: ${category.meta.description}` : ""),
-            description: WATCH_DESCRIPTIONS[category.slug] || "",
+            tooltip: WATCH_DESCRIPTIONS[category.slug] || category.meta?.description || "",
+            description: WATCH_DESCRIPTIONS[category.slug] || category.meta?.description || "",
           }))
 
         const watchMenuItems = [

@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -14,7 +13,7 @@ export interface MenuItem {
   subItems?: Array<{
     label: string
     href: string
-    description?: string // <- will be used for short description
+    description?: string
     isNew?: boolean
   }>
 }
@@ -119,6 +118,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
     return false
   }
 
+  // --- SCROLLABLE DROPDOWN ---
   const renderDropdown = (item: MenuItem) => {
     if (!item.subItems || item.subItems.length === 0) return null
 
@@ -130,55 +130,60 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           "transform transition-all duration-200 ease-out",
           activeMenu === item.label ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible",
         )}
+        style={{ minWidth: 280, maxHeight: 350 }}
         role="menu"
         aria-label={`${item.label} submenu`}
         onMouseEnter={() => debouncedMouseEnter(item.label)}
         onMouseLeave={handleMouseLeave}
       >
-        {item.subItems.map((subItem, index) => (
-          <Link
-            key={index}
-            href={subItem.href}
-            role="menuitem"
-            tabIndex={focusedIndex === index ? 0 : -1}
-            className={cn(
-              "block px-4 py-3 text-sm transition-colors duration-150",
-              "hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50",
-              "focus:bg-gradient-to-r focus:from-blue-50 focus:to-cyan-50 focus:outline-none",
-              "border-b border-gray-100 last:border-b-0",
-              isActive(subItem.href) && "bg-blue-50 text-blue-600",
-              focusedIndex === index && "bg-gradient-to-r from-blue-50 to-cyan-50",
-            )}
-            onClick={() => {
-              setActiveMenu(null)
-              setFocusedIndex(-1)
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault()
-                window.location.href = subItem.href
-              }
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                {/* Main short label */}
-                <div className={cn("font-medium", isActive(subItem.href) ? "text-blue-600" : "text-gray-900")}>
-                  {subItem.label}
-                  {subItem.isNew && (
-                    <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                      New
-                    </span>
+        {/* Fading gradient overlays */}
+        <div className="pointer-events-none absolute top-0 left-0 w-full h-4 z-10 bg-gradient-to-b from-white via-white/80 to-transparent" />
+        <div className="pointer-events-none absolute bottom-0 left-0 w-full h-4 z-10 bg-gradient-to-t from-white via-white/80 to-transparent" />
+        {/* Scrollable subitems */}
+        <div className="max-h-[300px] overflow-y-auto scrollbar-thin pr-1">
+          {item.subItems.map((subItem, index) => (
+            <Link
+              key={index}
+              href={subItem.href}
+              role="menuitem"
+              tabIndex={focusedIndex === index ? 0 : -1}
+              className={cn(
+                "block px-4 py-3 text-sm transition-colors duration-150",
+                "hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50",
+                "focus:bg-gradient-to-r focus:from-blue-50 focus:to-cyan-50 focus:outline-none",
+                "border-b border-gray-100 last:border-b-0",
+                isActive(subItem.href) && "bg-blue-50 text-blue-600",
+                focusedIndex === index && "bg-gradient-to-r from-blue-50 to-cyan-50",
+              )}
+              onClick={() => {
+                setActiveMenu(null)
+                setFocusedIndex(-1)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  window.location.href = subItem.href
+                }
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className={cn("font-medium", isActive(subItem.href) ? "text-blue-600" : "text-gray-900")}>
+                    {subItem.label}
+                    {subItem.isNew && (
+                      <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                        New
+                      </span>
+                    )}
+                  </div>
+                  {subItem.description && (
+                    <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>
                   )}
                 </div>
-                {/* Short description */}
-                {subItem.description && (
-                  <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>
-                )}
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
       </div>
     )
   }

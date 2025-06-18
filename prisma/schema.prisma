@@ -8,32 +8,33 @@ datasource db {
 }
 
 model Category {
-  id                String   @id @default(uuid())
-  type              String   // "blog" or "watch" (or "video" if you prefer)
-  slug              String   @unique
-  title             String
-  description       String
-  accessibleLabel   String?      // For accessibility in menus
-  icon              String?      // Favicon or category-specific icon
-  order             Int      @default(0)      // Sort order for menu/UI
-  isActive          Boolean  @default(true)   // Easy toggling of visibility
-  postCount         Int      @default(0)      // Dynamic: update as content added
-  metaTitle         String              // Used for SEO <title>
-  metaDescription   String              // SEO meta description
-  canonicalUrl      String              // Canonical URL for SEO
-  robots            String?             // Meta robots
-  ogTitle           String              // Open Graph title
-  ogDescription     String              // Open Graph description
-  ogUrl             String              // OG canonical URL
-  ogType            String              // OG type (e.g., "website", "video.series")
-  ogSiteName        String              // OG site name (from global config)
-  ogImages          Json                // Array for OG images (allows multiple)
-  twitterCard       String              // Twitter card type ("summary_large_image")
-  twitterSite       String              // Twitter handle (from global config)
-  twitterTitle      String
-  twitterDescription String
-  twitterImages     Json                // Array for Twitter images (allows multiple)
-  schema            Json                // Store JSON-LD schema for each category
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                  String   @id @default(uuid())
+  type                String   // "blog" or "watch" (or "video" if you prefer)
+  slug                String   @unique
+  title               String
+  description         String
+  menuDescription     String?      // <--- NEW: Short/clean description for menu/tooltip
+  accessibleLabel     String?      // For accessibility in menus
+  icon                String?      // Favicon or category-specific icon
+  order               Int      @default(0)      // Sort order for menu/UI
+  isActive            Boolean  @default(true)   // Easy toggling of visibility
+  postCount           Int      @default(0)      // Dynamic: update as content added
+  metaTitle           String              // Used for SEO <title>
+  metaDescription     String              // SEO meta description
+  canonicalUrl        String              // Canonical URL for SEO
+  robots              String?             // Meta robots
+  ogTitle             String              // Open Graph title
+  ogDescription       String              // Open Graph description
+  ogUrl               String              // OG canonical URL
+  ogType              String              // OG type (e.g., "website", "video.series")
+  ogSiteName          String              // OG site name (from global config)
+  ogImages            Json                // Array for OG images (allows multiple)
+  twitterCard         String              // Twitter card type ("summary_large_image")
+  twitterSite         String              // Twitter handle (from global config)
+  twitterTitle        String
+  twitterDescription  String
+  twitterImages       Json                // Array for Twitter images (allows multiple)
+  schema              Json                // Store JSON-LD schema for each category
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt @default(now())  // <--- THIS LINE IS CRUCIAL!
 }

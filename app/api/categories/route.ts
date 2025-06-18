@@ -1,37 +1,53 @@
 import { NextResponse } from "next/server";
-import { PrismaClient, Category as PrismaCategory } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import globalConfig from "@/content-data/global-config.json";
 
 const prisma = new PrismaClient();
 
-type Category = PrismaCategory & typeof globalConfig;
-
-function mergeWithGlobal(category: PrismaCategory): Category {
-  // Merge: category fields take precedence, fallback to global config where missing
-  return {
-    ...globalConfig,
-    ...category,
-    publisher: globalConfig.publisher,
-    icon: category.icon || globalConfig.icon,
-    twitterSite: globalConfig.twitterSite,
-    ogSiteName: globalConfig.ogSiteName,
-  };
-}
-
 export async function GET() {
   try {
     const categories = await prisma.category.findMany({
-      orderBy: { id: "asc" }, // Change to 'order' if your model has it
+      orderBy: { order: "asc" }, // Always sort by 'order'
+    });
+
+    // Utility to flatten category for menu/SEO usage
+    const shapeCategory = (cat: any) => ({
+      id: cat.id,
+      slug: cat.slug,
+      label: cat.accessibleLabel || cat.title,
+      title: cat.title,
+      description: cat.description,
+      menuDescription: cat.menuDescription || "", // <-- NEW: short description for menu/tooltips
+      icon: cat.icon || globalConfig.icon,
+      order: cat.order,
+      isActive: cat.isActive,
+      // All SEO fields below are needed for page meta/rendering:
+      metaTitle: cat.metaTitle,
+      metaDescription: cat.metaDescription,
+      canonicalUrl: cat.canonicalUrl,
+      robots: cat.robots,
+      ogTitle: cat.ogTitle,
+      ogDescription: cat.ogDescription,
+      ogUrl: cat.ogUrl,
+      ogType: cat.ogType,
+      ogSiteName: cat.ogSiteName || globalConfig.ogSiteName,
+      ogImages: cat.ogImages,
+      twitterCard: cat.twitterCard,
+      twitterSite: cat.twitterSite || globalConfig.twitterSite,
+      twitterTitle: cat.twitterTitle,
+      twitterDescription: cat.twitterDescription,
+      twitterImages: cat.twitterImages,
+      schema: cat.schema,
+      postCount: cat.postCount,
     });
 
     const blogCategories = categories
       .filter((c) => c.type === "blog")
-      .map(mergeWithGlobal);
+      .map(shapeCategory);
 
-    // Accept both "video" or "watch" as your type
     const videoCategories = categories
       .filter((c) => c.type === "video" || c.type === "watch")
-      .map(mergeWithGlobal);
+      .map(shapeCategory);
 
     return NextResponse.json({
       success: true,

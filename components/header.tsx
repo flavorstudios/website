@@ -9,51 +9,6 @@ import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
 
-// Short Labels & Descriptions for concise menu
-const BLOG_LABELS: Record<string, string> = {
-  "anime-news": "Anime News",
-  "reviews": "Reviews",
-  "guides": "Guides",
-  "features": "Features",
-  "explainers": "Explained",
-  "community": "Community",
-  "merch": "Merch",
-  "opinion": "Opinion",
-}
-const BLOG_DESCRIPTIONS: Record<string, string> = {
-  "anime-news": "Anime News posts and articles",
-  "reviews": "Reviews posts and articles",
-  "guides": "Guides, watch orders & tutorials",
-  "features": "Editorials, Top 10s, Interviews",
-  "explainers": "In-depth explainers & analysis",
-  "community": "Culture, Cosplay, Events",
-  "merch": "Figures, collectibles & merch",
-  "opinion": "Staff picks & essays",
-}
-
-// --------- KEY PART: Match these exactly to your actual slugs ---------
-const WATCH_LABELS: Record<string, string> = {
-  "original-series": "Originals",
-  "trailers": "Trailers",
-  "shorts": "Shorts",
-  "behind-scenes": "Behind the Scenes",
-  "fan-edits": "Fan Edits",
-  "interviews": "Interviews",
-  "podcast": "Podcasts",
-  "highlights": "Highlights",
-}
-const WATCH_DESCRIPTIONS: Record<string, string> = {
-  "original-series": "Original anime series",
-  "trailers": "Latest anime trailers",
-  "shorts": "Anime shorts & clips",
-  "behind-scenes": "BTS & production stories",
-  "fan-edits": "AMVs & remixes",
-  "interviews": "Creator & cast interviews",
-  "podcast": "Anime podcasts & talks",
-  "highlights": "Epic scenes & compilations",
-}
-// ----------------------------------------------------------------------
-
 const BLOG_LIMIT = 6
 const WATCH_LIMIT = 6
 
@@ -66,21 +21,16 @@ export function Header() {
       try {
         const response = await fetch("/api/admin/categories")
         const data = await response.json()
-        console.log("categories response", data)
 
+        // Map Blog Categories for Dropdown
         const blogCategories = data.categories?.blog || []
-        // Use the 'video' key, fallback to 'watch' just in case
-        const watchCategories = data.categories?.video || data.categories?.watch || []
-        console.log("video slugs", watchCategories.map((c: any) => c.slug))
-
-        // Blog Menu
         const mappedBlog = blogCategories
-          .filter((category: any) => BLOG_LABELS[category.slug])
+          .slice(0, BLOG_LIMIT) // Only show first N categories, rest are not shown (no "All Categories")
           .map((category: any) => ({
-            label: BLOG_LABELS[category.slug] || category.title || category.name,
+            label: category.accessibleLabel || category.title || category.name,
             href: `/blog?category=${category.slug}`,
-            tooltip: BLOG_DESCRIPTIONS[category.slug] || category.meta?.description || "",
-            description: BLOG_DESCRIPTIONS[category.slug] || category.meta?.description || "",
+            tooltip: category.menuDescription || category.description || "",
+            description: category.menuDescription || category.description || "",
           }))
 
         const blogMenuItems = [
@@ -90,29 +40,19 @@ export function Header() {
             description: "Browse all our blog content",
             tooltip: "Browse all our blog content",
           },
-          ...mappedBlog.slice(0, BLOG_LIMIT),
-          ...(mappedBlog.length > BLOG_LIMIT
-            ? [
-                {
-                  label: "All Categories",
-                  href: "/blog/categories",
-                  description: "Browse all blog categories",
-                  tooltip: "Browse all blog categories",
-                },
-              ]
-            : []),
+          ...mappedBlog,
         ]
 
-        // Watch Menu (KEY FIX)
+        // Map Watch Categories for Dropdown
+        const watchCategories = data.categories?.watch || data.categories?.video || []
         const mappedWatch = watchCategories
-          .filter((category: any) => WATCH_LABELS[category.slug])
+          .slice(0, WATCH_LIMIT)
           .map((category: any) => ({
-            label: WATCH_LABELS[category.slug] || category.title || category.name,
+            label: category.accessibleLabel || category.title || category.name,
             href: `/watch?category=${category.slug}`,
-            tooltip: WATCH_DESCRIPTIONS[category.slug] || category.meta?.description || "",
-            description: WATCH_DESCRIPTIONS[category.slug] || category.meta?.description || "",
+            tooltip: category.menuDescription || category.description || "",
+            description: category.menuDescription || category.description || "",
           }))
-        console.log("Mapped watch categories", mappedWatch)
 
         const watchMenuItems = [
           {
@@ -121,17 +61,7 @@ export function Header() {
             description: "Browse our complete video library",
             tooltip: "Browse our complete video library",
           },
-          ...mappedWatch.slice(0, WATCH_LIMIT),
-          ...(mappedWatch.length > WATCH_LIMIT
-            ? [
-                {
-                  label: "All Categories",
-                  href: "/watch/categories",
-                  description: "Browse all video categories",
-                  tooltip: "Browse all video categories",
-                },
-              ]
-            : []),
+          ...mappedWatch,
         ]
 
         const dynamicMenuItems: MenuItem[] = [

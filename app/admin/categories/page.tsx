@@ -36,7 +36,7 @@ export default function AdminCategoriesPage() {
     fetchCategories();
   }, []);
 
-  // Handle Add/Edit form submit
+  // Handle Add/Edit form submit (now includes menuDescription)
   const handleFormSubmit = async (formData: Partial<Category>) => {
     setFormLoading(true);
     try {
@@ -48,7 +48,11 @@ export default function AdminCategoriesPage() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          // Ensure menuDescription is sent
+          menuDescription: formData.menuDescription || "",
+        }),
       });
       const data = await res.json();
 
@@ -143,6 +147,7 @@ export default function AdminCategoriesPage() {
               initialData={editData || {}}
               onSubmit={handleFormSubmit}
               isLoading={formLoading}
+              // Now passes menuDescription to the form!
             />
             <button
               className="mt-4 text-sm text-gray-500 hover:text-gray-700"

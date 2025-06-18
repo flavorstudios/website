@@ -56,19 +56,35 @@ export function CategoryForm({ initialData = {}, onSubmit, isLoading, error }: P
           required
         >
           <option value="blog">Blog</option>
-          <option value="watch">Watch</option>
+          <option value="video">Watch</option>
         </select>
       </div>
-      {/* Add more fields as your model grows! Example: */}
-      {/* <div>
-        <label className="block font-medium mb-1">Description</label>
+      <div>
+        <label className="block font-medium mb-1">Short Description (Menu Tooltip)</label>
+        <input
+          className="border rounded p-2 w-full"
+          name="menuDescription"
+          value={form.menuDescription || ""}
+          onChange={handleChange}
+          placeholder="Eg: Latest news, guides, reviews, etc."
+        />
+        <span className="text-xs text-gray-500">
+          Shows as tooltip in menu and for accessibility. Keep it short!
+        </span>
+      </div>
+      <div>
+        <label className="block font-medium mb-1">Long Description</label>
         <textarea
           className="border rounded p-2 w-full"
           name="description"
           value={form.description || ""}
           onChange={handleChange}
+          rows={3}
+          placeholder="Full description for category pages or SEO"
         />
-      </div> */}
+      </div>
+      {/* Add more fields as needed! */}
+
       {error && (
         <div className="bg-red-100 text-red-700 px-2 py-1 rounded">{error}</div>
       )}

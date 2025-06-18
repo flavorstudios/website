@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChevronDown, Coffee } from "lucide-react"
@@ -106,6 +106,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="font-medium">{subItem.label}</div>
+                            {/* Show the menuDescription as description */}
                             {subItem.description && (
                               <div className="text-xs text-gray-500 mt-1">
                                 {subItem.description}

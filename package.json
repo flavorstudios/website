@@ -11,6 +11,7 @@
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "^3.9.1",
+    "@prisma/client": "^6.10.0",
     "@radix-ui/react-accordion": "latest",
     "@radix-ui/react-alert-dialog": "latest",
     "@radix-ui/react-aspect-ratio": "latest",
@@ -54,6 +55,7 @@
     "next-themes": "latest",
     "node-fetch": "^3.3.2",
     "path": "latest",
+    "prisma": "^6.10.0",
     "react": "^19",
     "react-day-picker": "latest",
     "react-dom": "^19",

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChevronDown, Coffee } from "lucide-react"
@@ -80,13 +80,17 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                 <div
                   id={`mobile-submenu-${item.label}`}
                   className={cn(
-                    "overflow-hidden transition-all duration-300 ease-in-out",
+                    "relative overflow-hidden transition-all duration-300 ease-in-out",
                     expandedItems.has(item.label) ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
                   )}
                   role="region"
                   aria-label={`${item.label} submenu`}
                 >
-                  <div className="py-2 pl-4 space-y-1">
+                  {/* Top/Bottom gradient overlays for scroll hint */}
+                  <div className="pointer-events-none absolute top-0 left-0 w-full h-4 z-10 bg-gradient-to-b from-blue-50 via-white/90 to-transparent" />
+                  <div className="pointer-events-none absolute bottom-0 left-0 w-full h-4 z-10 bg-gradient-to-t from-blue-50 via-white/90 to-transparent" />
+                  {/* Scrollable subitem list */}
+                  <div className="py-2 pl-4 space-y-1 max-h-[250px] overflow-y-auto scrollbar-thin pr-1">
                     {item.subItems.map((subItem, index) => (
                       <Link
                         key={index}

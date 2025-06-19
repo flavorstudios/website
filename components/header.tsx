@@ -10,6 +10,8 @@ import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
 import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
 
+// No scroll limit or scroll styles, dropdown always fits content
+
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const [menuItems, setMenuItems] = useState<MenuItem[]>([
@@ -24,49 +26,48 @@ export function Header() {
   useEffect(() => {
     const loadMenuItems = async () => {
       try {
-        const { blogCategories, videoCategories } = await getCategoriesWithFallback()
+        // Use fallback method for dynamic categories (if you have API, you can replace here)
+        const { blogCategories = [], videoCategories = [] } = await getCategoriesWithFallback()
+
+        const blogMenuItems = [
+          {
+            label: "All Posts",
+            href: "/blog",
+            description: "Browse all our blog content",
+          },
+          ...blogCategories.slice(0, 6).map((category) => ({
+            label: category.name,
+            href: `/blog?category=${category.slug}`,
+            description: `${category.name} posts and articles${category.count > 0 ? ` (${category.count})` : ""}`,
+          })),
+        ]
+
+        const watchMenuItems = [
+          {
+            label: "All Videos",
+            href: "/watch",
+            description: "Browse our complete video library",
+          },
+          ...videoCategories.slice(0, 6).map((category) => ({
+            label: category.name,
+            href: `/watch?category=${category.slug}`,
+            description: `${category.name} videos and content${category.count > 0 ? ` (${category.count})` : ""}`,
+          })),
+        ]
 
         const dynamicMenuItems: MenuItem[] = [
-          {
-            label: "Home",
-            href: "/",
-          },
+          { label: "Home", href: "/" },
           {
             label: "Blog",
             href: "/blog",
-            subItems: [
-              {
-                label: "All Posts",
-                href: "/blog",
-                description: "Browse all our blog content",
-              },
-              ...blogCategories.slice(0, 6).map((category) => ({
-                label: category.name,
-                href: `/blog?category=${category.slug}`,
-                description: `${category.name} posts and articles${category.count > 0 ? ` (${category.count})` : ""}`,
-              })),
-            ],
+            subItems: blogMenuItems,
           },
           {
             label: "Watch",
             href: "/watch",
-            subItems: [
-              {
-                label: "All Videos",
-                href: "/watch",
-                description: "Browse our complete video library",
-              },
-              ...videoCategories.slice(0, 6).map((category) => ({
-                label: category.name,
-                href: `/watch?category=${category.slug}`,
-                description: `${category.name} videos and content${category.count > 0 ? ` (${category.count})` : ""}`,
-              })),
-            ],
+            subItems: watchMenuItems,
           },
-          {
-            label: "Play",
-            href: "/play",
-          },
+          { label: "Play", href: "/play" },
           {
             label: "About",
             subItems: [
@@ -74,29 +75,29 @@ export function Header() {
                 label: "Our Story",
                 href: "/about",
                 description: "Learn about Flavor Studios",
+                tooltip: "Learn about Flavor Studios",
               },
               {
                 label: "Careers",
                 href: "/career",
                 description: "Join our creative team",
+                tooltip: "Join our creative team",
               },
               {
                 label: "FAQ",
                 href: "/faq",
                 description: "Frequently asked questions",
+                tooltip: "Frequently asked questions",
               },
             ],
           },
-          {
-            label: "Contact",
-            href: "/contact",
-          },
+          { label: "Contact", href: "/contact" },
         ]
 
         setMenuItems(dynamicMenuItems)
       } catch (error) {
         console.error("Failed to load dynamic menu items:", error)
-        // Keep the fallback menu items that were set in useState
+        // Fallback menuItems remain
       }
     }
 
@@ -115,8 +116,18 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <MegaMenu items={menuItems} />
-            <SearchFeature />
+            <MegaMenu
+              items={menuItems}
+              dropdownProps={{
+                className: "relative", // No scroll or max-height
+                itemClassName: "relative group font-bold",
+                tooltip: true,
+                fade: true,
+              }}
+            />
+            <div className="flex items-center gap-2">
+              <SearchFeature />
+            </div>
           </div>
 
           {/* Mobile Navigation */}

@@ -119,7 +119,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
     return false
   }
 
-  // --- SCROLLABLE DROPDOWN with TOOLTIP ---
+  // --- DROPDOWN WITHOUT SCROLL OR OVERLAYS ---
   const renderDropdown = (item: MenuItem) => {
     if (!item.subItems || item.subItems.length === 0) return null
 
@@ -130,79 +130,73 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           "transform transition-all duration-200 ease-out",
           activeMenu === item.label ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible"
         )}
-        style={{ minWidth: 280, maxHeight: 350 }}
+        // No maxHeight, no overflow, no scrollbars!
         role="menu"
         aria-label={`${item.label} submenu`}
         onMouseEnter={() => debouncedMouseEnter(item.label)}
         onMouseLeave={handleMouseLeave}
       >
-        {/* Fading gradient overlays */}
-        <div className="pointer-events-none absolute top-0 left-0 w-full h-4 z-10 bg-gradient-to-b from-white via-white/80 to-transparent" />
-        <div className="pointer-events-none absolute bottom-0 left-0 w-full h-4 z-10 bg-gradient-to-t from-white via-white/80 to-transparent" />
-        {/* Scrollable subitems */}
-        <div className="max-h-[300px] overflow-y-auto scrollbar-thin pr-1">
-          {item.subItems.map((subItem, index) => (
-            <div
-              key={index}
-              className="relative"
-              onMouseEnter={() => setHoveredTooltip(index)}
-              onMouseLeave={() => setHoveredTooltip(null)}
-              onFocus={() => setHoveredTooltip(index)}
-              onBlur={() => setHoveredTooltip(null)}
+        {item.subItems.map((subItem, index) => (
+          <div
+            key={index}
+            className="relative"
+            onMouseEnter={() => setHoveredTooltip(index)}
+            onMouseLeave={() => setHoveredTooltip(null)}
+            onFocus={() => setHoveredTooltip(index)}
+            onBlur={() => setHoveredTooltip(null)}
+          >
+            <Link
+              href={subItem.href}
+              role="menuitem"
+              tabIndex={focusedIndex === index ? 0 : -1}
+              className={cn(
+                "block px-4 py-3 text-sm transition-colors duration-150",
+                "hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50",
+                "focus:bg-gradient-to-r focus:from-blue-50 focus:to-cyan-50 focus:outline-none",
+                "border-b border-gray-100 last:border-b-0",
+                isActive(subItem.href) && "bg-blue-50 text-blue-600",
+                focusedIndex === index && "bg-gradient-to-r from-blue-50 to-cyan-50"
+              )}
+              onClick={() => {
+                setActiveMenu(null)
+                setFocusedIndex(-1)
+                setHoveredTooltip(null)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  window.location.href = subItem.href
+                }
+              }}
             >
-              <Link
-                href={subItem.href}
-                role="menuitem"
-                tabIndex={focusedIndex === index ? 0 : -1}
-                className={cn(
-                  "block px-4 py-3 text-sm transition-colors duration-150",
-                  "hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50",
-                  "focus:bg-gradient-to-r focus:from-blue-50 focus:to-cyan-50 focus:outline-none",
-                  "border-b border-gray-100 last:border-b-0",
-                  isActive(subItem.href) && "bg-blue-50 text-blue-600",
-                  focusedIndex === index && "bg-gradient-to-r from-blue-50 to-cyan-50"
-                )}
-                onClick={() => {
-                  setActiveMenu(null)
-                  setFocusedIndex(-1)
-                  setHoveredTooltip(null)
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault()
-                    window.location.href = subItem.href
-                  }
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className={cn("font-medium", isActive(subItem.href) ? "text-blue-600" : "text-gray-900")}>
-                      {subItem.label}
-                      {subItem.isNew && (
-                        <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                          New
-                        </span>
-                      )}
-                    </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className={cn("font-medium", isActive(subItem.href) ? "text-blue-600" : "text-gray-900")}>
+                    {subItem.label}
+                    {subItem.isNew && (
+                      <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                        New
+                      </span>
+                    )}
                   </div>
                 </div>
-              </Link>
-              {/* Tooltip (shows only on hover/focus and if description is set) */}
-              {subItem.description && hoveredTooltip === index && (
-                <div
-                  className={cn(
-                    "absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 rounded-lg bg-gray-900 text-white text-xs shadow-lg",
-                    "whitespace-pre-line pointer-events-none z-50",
-                    "opacity-90 animate-fade-in"
-                  )}
-                  style={{ minWidth: 180, maxWidth: 300 }}
-                >
-                  {subItem.description}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+              </div>
+            </Link>
+            {/* Tooltip (shows only on hover/focus and if description is set) */}
+            {subItem.description && hoveredTooltip === index && (
+              <div
+                className={cn(
+                  "absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 rounded-lg bg-gray-900 text-white text-xs shadow-lg",
+                  "whitespace-pre-line pointer-events-none z-50",
+                  "opacity-90 animate-fade-in"
+                )}
+                style={{ minWidth: 180, maxWidth: 300 }}
+              >
+                {subItem.description}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     )
   }

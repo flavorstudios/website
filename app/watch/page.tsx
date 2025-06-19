@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react";
-import { videoStore } from "@/lib/content-store";
-import { categoryStore } from "@/lib/category-store"; // Centralized!
+import { videoStore } from "@/lib/prisma-video-store";
+import { categoryStore } from "@/lib/category-store";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 
 // === SEO METADATA (Centralized for Next.js 15+) ===
@@ -61,10 +61,9 @@ export const metadata = getMetadata({
 // --- DATA FETCHING ---
 async function getWatchData() {
   try {
-    // Fetch videos and categories in parallel
     const [videos, categories] = await Promise.all([
       videoStore.getPublished(),
-      categoryStore.getByType("watch"), // This is the only source now!
+      categoryStore.getByType("watch"),
     ]);
     return { videos, categories };
   } catch (error) {
@@ -74,11 +73,9 @@ async function getWatchData() {
 }
 
 // --- MAIN PAGE COMPONENT ---
-export default async function WatchPage({
-  searchParams,
-}: {
-  searchParams: { category?: string; page?: string };
-}) {
+// Do NOT destructure searchParams in the function signature!
+export default async function WatchPage(props: any) {
+  const { searchParams = {} } = props || {};
   const { videos, categories } = await getWatchData();
   const selectedCategory = searchParams.category || "all";
   const currentPage = Number.parseInt(searchParams.page || "1");
@@ -209,8 +206,6 @@ export default async function WatchPage({
                   <VideoCard key={video.id} video={video} />
                 ))}
               </div>
-
-              {/* Pagination */}
               {totalPages > 1 && (
                 <Pagination currentPage={currentPage} totalPages={totalPages} selectedCategory={selectedCategory} />
               )}

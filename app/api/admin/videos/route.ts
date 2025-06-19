@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server"
-import { videoStore } from "@/lib/content-store"
+import { NextResponse } from "next/server";
+import { videoStore } from "@/lib/prisma-video-store"; // ✅ Switched to Prisma store
 
 export async function GET() {
   try {
-    const videos = await videoStore.getAll()
+    const videos = await videoStore.getAll();
 
     const formattedVideos = videos.map((video) => ({
       id: video.id,
@@ -22,56 +22,59 @@ export async function GET() {
       createdAt: video.createdAt,
       views: video.views,
       featured: video.featured,
-    }))
+    }));
 
-    return NextResponse.json({ videos: formattedVideos }, { status: 200 })
+    return NextResponse.json({ videos: formattedVideos }, { status: 200 });
   } catch (error) {
-    console.error("Error fetching videos:", error)
+    console.error("Error fetching videos:", error);
     return NextResponse.json(
       {
         error: "Failed to fetch videos",
-        videos: [], // Return empty array as fallback
+        videos: [],
       },
-      { status: 500 },
-    )
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const videoData = await request.json()
+    const videoData = await request.json();
 
-    // Validate required fields
     if (!videoData.title || !videoData.youtubeId) {
       return NextResponse.json(
-        {
-          error: "Title and YouTube ID are required",
-        },
-        { status: 400 },
-      )
+        { error: "Title and YouTube ID are required" },
+        { status: 400 }
+      );
     }
 
     const video = await videoStore.create({
       title: videoData.title,
+      slug:
+        videoData.slug ||
+        videoData.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, ""),
       description: videoData.description || "",
       youtubeId: videoData.youtubeId,
-      thumbnail: videoData.thumbnail || `https://img.youtube.com/vi/${videoData.youtubeId}/maxresdefault.jpg`,
+      thumbnail:
+        videoData.thumbnail ||
+        `https://img.youtube.com/vi/${videoData.youtubeId}/maxresdefault.jpg`,
       duration: videoData.duration || "0:00",
       category: videoData.category || "Episodes",
       tags: videoData.tags || [],
       status: videoData.status || "draft",
       publishedAt: videoData.publishedAt || new Date().toISOString(),
       featured: videoData.featured || false,
-    })
+    });
 
-    return NextResponse.json({ video }, { status: 201 })
+    return NextResponse.json({ video }, { status: 201 });
   } catch (error) {
-    console.error("Error creating video:", error)
+    console.error("Error creating video:", error);
     return NextResponse.json(
-      {
-        error: "Failed to create video",
-      },
-      { status: 500 },
-    )
+      { error: "Failed to create video" },
+      { status: 500 }
+    );
   }
 }

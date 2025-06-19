@@ -8,73 +8,65 @@ import { Menu, Coffee } from "lucide-react"
 import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
-
-const BLOG_LIMIT = 6
-const WATCH_LIMIT = 6
+import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([])
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([
+    { label: "Home", href: "/" },
+    { label: "Blog", href: "/blog" },
+    { label: "Watch", href: "/watch" },
+    { label: "Play", href: "/play" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
+  ])
 
   useEffect(() => {
     const loadMenuItems = async () => {
       try {
-        const response = await fetch("/api/admin/categories")
-        const data = await response.json()
-
-        // Map Blog Categories for Dropdown
-        const blogCategories = data.categories?.blog || []
-        const mappedBlog = blogCategories
-          .slice(0, BLOG_LIMIT) // Only show first N categories, rest are not shown (no "All Categories")
-          .map((category: any) => ({
-            label: category.accessibleLabel || category.title || category.name,
-            href: `/blog?category=${category.slug}`,
-            tooltip: category.menuDescription || category.description || "",
-            description: category.menuDescription || category.description || "",
-          }))
-
-        const blogMenuItems = [
-          {
-            label: "All Posts",
-            href: "/blog",
-            description: "Browse all our blog content",
-            tooltip: "Browse all our blog content",
-          },
-          ...mappedBlog,
-        ]
-
-        // Map Watch Categories for Dropdown
-        const watchCategories = data.categories?.watch || data.categories?.video || []
-        const mappedWatch = watchCategories
-          .slice(0, WATCH_LIMIT)
-          .map((category: any) => ({
-            label: category.accessibleLabel || category.title || category.name,
-            href: `/watch?category=${category.slug}`,
-            tooltip: category.menuDescription || category.description || "",
-            description: category.menuDescription || category.description || "",
-          }))
-
-        const watchMenuItems = [
-          {
-            label: "All Videos",
-            href: "/watch",
-            description: "Browse our complete video library",
-            tooltip: "Browse our complete video library",
-          },
-          ...mappedWatch,
-        ]
+        const { blogCategories, videoCategories } = await getCategoriesWithFallback()
 
         const dynamicMenuItems: MenuItem[] = [
-          { label: "Home", href: "/" },
+          {
+            label: "Home",
+            href: "/",
+          },
           {
             label: "Blog",
-            subItems: blogMenuItems,
+            href: "/blog",
+            subItems: [
+              {
+                label: "All Posts",
+                href: "/blog",
+                description: "Browse all our blog content",
+              },
+              ...blogCategories.slice(0, 6).map((category) => ({
+                label: category.name,
+                href: `/blog?category=${category.slug}`,
+                description: `${category.name} posts and articles${category.count > 0 ? ` (${category.count})` : ""}`,
+              })),
+            ],
           },
           {
             label: "Watch",
-            subItems: watchMenuItems,
+            href: "/watch",
+            subItems: [
+              {
+                label: "All Videos",
+                href: "/watch",
+                description: "Browse our complete video library",
+              },
+              ...videoCategories.slice(0, 6).map((category) => ({
+                label: category.name,
+                href: `/watch?category=${category.slug}`,
+                description: `${category.name} videos and content${category.count > 0 ? ` (${category.count})` : ""}`,
+              })),
+            ],
           },
-          { label: "Play", href: "/play" },
+          {
+            label: "Play",
+            href: "/play",
+          },
           {
             label: "About",
             subItems: [
@@ -95,12 +87,16 @@ export function Header() {
               },
             ],
           },
-          { label: "Contact", href: "/contact" },
+          {
+            label: "Contact",
+            href: "/contact",
+          },
         ]
 
         setMenuItems(dynamicMenuItems)
       } catch (error) {
         console.error("Failed to load dynamic menu items:", error)
+        // Keep the fallback menu items that were set in useState
       }
     }
 
@@ -119,19 +115,8 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <MegaMenu
-              items={menuItems}
-              dropdownProps={{
-                className:
-                  "max-h-[420px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-200 relative",
-                itemClassName: "relative group font-bold",
-                tooltip: true,
-                fade: true,
-              }}
-            />
-            <div className="flex items-center gap-2">
-              <SearchFeature />
-            </div>
+            <MegaMenu items={menuItems} />
+            <SearchFeature />
           </div>
 
           {/* Mobile Navigation */}

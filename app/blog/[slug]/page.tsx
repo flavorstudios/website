@@ -1,4 +1,4 @@
-// --- BLOG POST PAGE WITH ADVANCED CATEGORY-AWARE SEO ---
+// --- BLOG POST PAGE WITH SEO-COMPLIANT METADATA ---
 
 import { notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,9 +7,7 @@ import { Calendar, Eye, User, Clock } from "lucide-react";
 import CommentSection from "./components/comment-section";
 import SocialShare from "./components/social-share";
 import { getMetadata } from "@/lib/seo-utils";
-import { categoryStore } from "@/lib/category-store";
 
-// Fetch blog post by slug (same as before)
 async function getBlogPost(slug: string) {
   try {
     const response = await fetch(
@@ -30,15 +28,14 @@ interface BlogPostPageProps {
   params: { slug: string };
 }
 
-// --- ENHANCED METADATA GENERATION ---
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const post = await getBlogPost(params.slug);
 
   if (!post) {
-    // Fallback SEO for missing post
     const fallbackUrl = `https://flavorstudios.in/blog/${params.slug}`;
     const fallbackTitle = "Post Not Found – Flavor Studios";
     const fallbackDesc = "This blog post could not be found.";
+
     return {
       title: fallbackTitle,
       description: fallbackDesc,
@@ -70,23 +67,16 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     };
   }
 
-  // Fetch the category object (by name or slug) for extra SEO fields
-  const category =
-    post.category
-      ? await categoryStore.getBySlug(post.category.toLowerCase().replace(/ /g, "-"), "blog")
-      : null;
-
   const canonicalUrl = `https://flavorstudios.in/blog/${post.slug}`;
-  const ogImage = post.coverImage || category?.openGraph?.images?.[0]?.url || "https://flavorstudios.in/cover.jpg";
-  const seoTitle = post.seoTitle || post.title || category?.openGraph?.title;
-  const seoDescription = post.seoDescription || post.excerpt || category?.openGraph?.description;
+  const ogImage = post.coverImage || "https://flavorstudios.in/cover.jpg";
+  const seoTitle = post.seoTitle || post.title;
+  const seoDescription = post.seoDescription || post.excerpt;
 
-  // Merge with category SEO if any post field missing (robust fallback)
   return getMetadata({
     title: `${seoTitle} – Flavor Studios`,
     description: seoDescription,
     path: `/blog/${post.slug}`,
-    robots: "index,follow",
+    robots: "index,follow", // <-- Explicit for published posts
     openGraph: {
       images: [
         {
@@ -132,20 +122,16 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
         "@type": "WebPage",
         "@id": canonicalUrl,
       },
-      // Add more schema fields as needed
     },
   });
 }
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const post = await getBlogPost(params.slug);
-  if (!post) notFound();
 
-  // Fetch category (for rendering or showing badge color, etc.)
-  const category =
-    post.category
-      ? await categoryStore.getBySlug(post.category.toLowerCase().replace(/ /g, "-"), "blog")
-      : null;
+  if (!post) {
+    notFound();
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -153,17 +139,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         {/* Header */}
         <header className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <Badge
-              variant="outline"
-              style={{
-                background: category?.color || undefined,
-                color: "#333",
-                border: category?.color ? "none" : undefined,
-              }}
-              title={category?.accessibleLabel || post.category}
-            >
-              {category?.title || post.category}
-            </Badge>
+            <Badge variant="outline">{post.category}</Badge>
             <span className="text-sm text-gray-500 flex items-center gap-1">
               <Calendar className="h-3 w-3" />
               {new Date(post.publishedAt).toLocaleDateString()}

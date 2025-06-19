@@ -27,6 +27,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
     setExpandedItems(newExpanded)
   }
 
+  // Check if current path matches menu item
   const isActive = (href?: string) => {
     if (!href) return false
     if (href === "/" && pathname === "/") return true
@@ -63,7 +64,6 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                 onClick={() => toggleExpanded(item.label)}
                 aria-expanded={expandedItems.has(item.label)}
                 aria-controls={`mobile-submenu-${item.label}`}
-                type="button"
               >
                 <span>{item.label}</span>
                 {item.subItems && (
@@ -80,8 +80,8 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                 <div
                   id={`mobile-submenu-${item.label}`}
                   className={cn(
-                    "relative overflow-hidden transition-all duration-300 ease-in-out",
-                    expandedItems.has(item.label) ? "max-h-full opacity-100" : "max-h-0 opacity-0",
+                    "overflow-hidden transition-all duration-300 ease-in-out",
+                    expandedItems.has(item.label) ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
                   )}
                   role="region"
                   aria-label={`${item.label} submenu`}
@@ -102,11 +102,8 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="font-medium">{subItem.label}</div>
-                            {/* Show the menuDescription as description */}
                             {subItem.description && (
-                              <div className="text-xs text-gray-500 mt-1">
-                                {subItem.description}
-                              </div>
+                              <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>
                             )}
                           </div>
                           {subItem.isNew && (
@@ -124,8 +121,6 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
           )}
         </div>
       ))}
-
-      {/* CTA Button */}
       <div className="mt-4 pt-4 border-t border-gray-200">
         <Link
           href="/support"

@@ -1,4 +1,4 @@
-// --- WATCH PAGE WITH ADVANCED CATEGORY-AWARE SEO ---
+// --- WATCH PAGE WITH SEO-COMPLIANT METADATA ---
 
 import { notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Eye, Youtube, Clock, Share2, ThumbsUp } from "lucide-react";
 import { getMetadata } from "@/lib/seo-utils";
-import { categoryStore } from "@/lib/category-store";
 
 interface VideoPageProps {
   params: { slug: string };
@@ -37,11 +36,11 @@ export async function generateMetadata({ params }: VideoPageProps) {
   const video = await getVideo(params.slug);
 
   if (!video) {
-    // Fallback SEO for missing video
     const fallbackTitle = "Video Not Found – Flavor Studios";
     const fallbackDescription = "Sorry, this video could not be found. Explore more inspiring anime videos at Flavor Studios.";
     const fallbackUrl = `https://flavorstudios.in/watch/${params.slug}`;
     const fallbackImage = "https://flavorstudios.in/cover.jpg";
+
     return {
       title: fallbackTitle,
       description: fallbackDescription,
@@ -72,27 +71,16 @@ export async function generateMetadata({ params }: VideoPageProps) {
     };
   }
 
-  // Fetch the category object for extra SEO and badge color
-  const category =
-    video.category
-      ? await categoryStore.getBySlug(video.category.toLowerCase().replace(/ /g, "-"), "video")
-      : null;
-
   const canonicalUrl = `https://flavorstudios.in/watch/${video.slug || params.slug}`;
   const thumbnailUrl =
-    video.thumbnail ||
-    category?.openGraph?.images?.[0]?.url ||
-    (video.youtubeId ? `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg` : "https://flavorstudios.in/cover.jpg");
-
-  const seoTitle = video.seoTitle || video.title || category?.openGraph?.title || "Watch Anime Video – Flavor Studios";
+    video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
+  const seoTitle = `${video.title} – Watch | Flavor Studios`;
   const seoDescription =
-    video.seoDescription ||
     video.description ||
-    category?.openGraph?.description ||
     "Watch original anime content crafted by Flavor Studios — emotionally driven storytelling, 3D animation, and passion for creative expression.";
 
   return getMetadata({
-    title: `${seoTitle} – Flavor Studios`,
+    title: seoTitle,
     description: seoDescription,
     path: `/watch/${video.slug || params.slug}`,
     robots: "index,follow",
@@ -125,9 +113,7 @@ export async function generateMetadata({ params }: VideoPageProps) {
       thumbnailUrl: [thumbnailUrl],
       uploadDate: video.publishedAt,
       duration: video.duration,
-      embedUrl: video.youtubeId
-        ? `https://www.youtube.com/embed/${video.youtubeId}`
-        : undefined,
+      embedUrl: `https://www.youtube.com/embed/${video.youtubeId}`,
       interactionStatistic: {
         "@type": "InteractionCounter",
         interactionType: { "@type": "WatchAction" },
@@ -147,20 +133,13 @@ export async function generateMetadata({ params }: VideoPageProps) {
 
 export default async function VideoPage({ params }: VideoPageProps) {
   const video = await getVideo(params.slug);
-  if (!video) notFound();
 
-  // Fetch category (for badge color, accessibility label, etc.)
-  const category =
-    video.category
-      ? await categoryStore.getBySlug(video.category.toLowerCase().replace(/ /g, "-"), "video")
-      : null;
+  if (!video) {
+    notFound();
+  }
 
-  const embedUrl = video.youtubeId
-    ? `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`
-    : "";
-  const youtubeUrl = video.youtubeId
-    ? `https://www.youtube.com/watch?v=${video.youtubeId}`
-    : "#";
+  const embedUrl = `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`;
+  const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtubeId}`;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -170,31 +149,19 @@ export default async function VideoPage({ params }: VideoPageProps) {
           <div className="lg:col-span-2 space-y-6">
             <Card className="overflow-hidden">
               <div className="relative aspect-video">
-                {embedUrl && (
-                  <iframe
-                    src={embedUrl}
-                    title={video.title}
-                    className="w-full h-full"
-                    allowFullScreen
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  />
-                )}
+                <iframe
+                  src={embedUrl}
+                  title={video.title}
+                  className="w-full h-full"
+                  allowFullScreen
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                />
               </div>
             </Card>
 
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Badge
-                  variant="outline"
-                  style={{
-                    background: category?.color || undefined,
-                    color: "#333",
-                    border: category?.color ? "none" : undefined,
-                  }}
-                  title={category?.accessibleLabel || video.category}
-                >
-                  {category?.title || video.category}
-                </Badge>
+                <Badge variant="outline">{video.category}</Badge>
                 <span className="text-sm text-gray-500 flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   {new Date(video.publishedAt).toLocaleDateString()}
@@ -207,7 +174,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
-                    {video.views?.toLocaleString() ?? 0} views
+                    {video.views.toLocaleString()} views
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-4 w-4" />
@@ -309,21 +276,11 @@ export default async function VideoPage({ params }: VideoPageProps) {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Views</span>
-                    <span className="font-medium">{video.views?.toLocaleString() ?? 0}</span>
+                    <span className="font-medium">{video.views.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Category</span>
-                    <Badge
-                      variant="secondary"
-                      style={{
-                        background: category?.color || undefined,
-                        color: "#333",
-                        border: category?.color ? "none" : undefined,
-                      }}
-                      title={category?.accessibleLabel || video.category}
-                    >
-                      {category?.title || video.category}
-                    </Badge>
+                    <Badge variant="secondary">{video.category}</Badge>
                   </div>
                 </div>
               </CardContent>

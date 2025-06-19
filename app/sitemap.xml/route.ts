@@ -8,39 +8,33 @@ const BASE_URL = "https://flavorstudios.in";
 
 export async function GET() {
   try {
-    // Fetch all published blogs and videos
+    // Fetch published blog and video content
     const [blogs, videos] = await Promise.all([
       blogStore.getPublished().catch(() => []),
       videoStore.getPublished().catch(() => []),
     ]);
 
-    // Blog pages (only published and valid slugs)
     const blogPages = blogs
-      .filter((b: any) => b.slug && b.status === "published")
+      .filter((b: any) => b.slug)
       .map((blog: any) => ({
         url: `/blog/${blog.slug}`,
         changefreq: "weekly",
-        priority: "0.7",
+        priority: "0.8",
         lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
       }));
 
-    // Video pages (only published and valid slugs)
     const videoPages = videos
-      .filter((v: any) => v.slug && v.status === "published")
+      .filter((v: any) => v.slug)
       .map((video: any) => ({
         url: `/watch/${video.slug}`,
         changefreq: "weekly",
-        priority: "0.7",
+        priority: "0.8",
         lastmod: video.updatedAt || video.publishedAt || video.createdAt,
       }));
 
-    // Static pages (centralized in lib/sitemap-utils)
     const staticPages = getStaticPages();
-
-    // Merge all sitemap entries
     const allPages = [...staticPages, ...blogPages, ...videoPages];
 
-    // Generate XML
     const xml = generateSitemapXML(BASE_URL, allPages);
 
     return new NextResponse(xml, {
@@ -53,12 +47,32 @@ export async function GET() {
   } catch (error) {
     console.error("Sitemap generation failed:", error);
 
-    // Fallback: Only home, about, watch, blog
+    // Fallback: minimal sitemap
     const fallbackXml = generateSitemapXML(BASE_URL, [
-      { url: "/", changefreq: "daily", priority: "1.0", lastmod: new Date().toISOString() },
-      { url: "/about", changefreq: "monthly", priority: "0.8", lastmod: new Date().toISOString() },
-      { url: "/watch", changefreq: "daily", priority: "0.9", lastmod: new Date().toISOString() },
-      { url: "/blog", changefreq: "daily", priority: "0.9", lastmod: new Date().toISOString() },
+      {
+        url: "/",
+        changefreq: "daily",
+        priority: "1.0",
+        lastmod: new Date().toISOString(),
+      },
+      {
+        url: "/about",
+        changefreq: "monthly",
+        priority: "0.8",
+        lastmod: new Date().toISOString(),
+      },
+      {
+        url: "/watch",
+        changefreq: "daily",
+        priority: "0.9",
+        lastmod: new Date().toISOString(),
+      },
+      {
+        url: "/blog",
+        changefreq: "daily",
+        priority: "0.9",
+        lastmod: new Date().toISOString(),
+      },
     ]);
 
     return new NextResponse(fallbackXml, {

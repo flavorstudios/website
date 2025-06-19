@@ -4,8 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react";
-import { videoStore } from "@/lib/prisma-video-store";
-import { categoryStore } from "@/lib/category-store";
+import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 
 // === SEO METADATA (Centralized for Next.js 15+) ===
@@ -14,7 +13,7 @@ export const metadata = getMetadata({
   description:
     "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
   path: "/watch",
-  robots: "index,follow",
+  robots: "index,follow", // Explicitly set
   openGraph: {
     title: "Flavor Studios Videos | Original Anime, Studio Films & More",
     description:
@@ -61,11 +60,20 @@ export const metadata = getMetadata({
 // --- DATA FETCHING ---
 async function getWatchData() {
   try {
-    const [videos, categories] = await Promise.all([
-      videoStore.getPublished(),
-      categoryStore.getByType("watch"),
+    const [videosResponse, { videoCategories }] = await Promise.all([
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`, {
+        cache: "no-store",
+      }).catch(() => ({ ok: false, json: () => Promise.resolve({ videos: [] }) })),
+      getDynamicCategories(),
     ]);
-    return { videos, categories };
+
+    let videos = [];
+    if (videosResponse.ok) {
+      const videosData = await videosResponse.json();
+      videos = (videosData.videos || []).filter((video: any) => video.status === "published");
+    }
+
+    return { videos, categories: videoCategories };
   } catch (error) {
     console.error("Failed to fetch watch data:", error);
     return { videos: [], categories: [] };
@@ -73,9 +81,11 @@ async function getWatchData() {
 }
 
 // --- MAIN PAGE COMPONENT ---
-// Do NOT destructure searchParams in the function signature!
-export default async function WatchPage(props: any) {
-  const { searchParams = {} } = props || {};
+export default async function WatchPage({
+  searchParams,
+}: {
+  searchParams: { category?: string; page?: string };
+}) {
   const { videos, categories } = await getWatchData();
   const selectedCategory = searchParams.category || "all";
   const currentPage = Number.parseInt(searchParams.page || "1");
@@ -115,17 +125,20 @@ export default async function WatchPage(props: any) {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center">
+            {/* Blue Badge */}
             <div className="inline-flex items-center gap-2 bg-blue-600 text-white rounded-full px-4 sm:px-6 py-2 mb-4 sm:mb-6 text-sm font-medium shadow-lg">
               <Video className="h-4 w-4" />
               Original Content & Series
             </div>
+            {/* Gradient Heading */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 leading-relaxed px-4 pb-2">
               Watch Our Stories
             </h1>
+            {/* Italic Subtitle */}
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 italic font-light max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
               Bringing anime to life—one frame at a time.
             </p>
-            {/* Stats */}
+            {/* Enhanced Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 border border-blue-100">
                 <div className="text-xl sm:text-2xl font-bold text-blue-600">{videos.length}</div>
@@ -149,15 +162,7 @@ export default async function WatchPage(props: any) {
       </div>
 
       {/* Dynamic Category Tabs */}
-      <CategoryTabs
-        categories={categories.map((cat) => ({
-          slug: cat.slug,
-          name: cat.accessibleLabel || cat.title || cat.slug,
-        }))}
-        selectedCategory={selectedCategory}
-        basePath="/watch"
-        type="watch"
-      />
+      <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/watch" type="video" />
 
       {/* Featured Videos */}
       {featuredVideos.length > 0 && (
@@ -184,7 +189,7 @@ export default async function WatchPage(props: any) {
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                 {selectedCategory === "all"
                   ? "Latest Videos"
-                  : `${categories.find((c) => c.slug === selectedCategory)?.accessibleLabel || selectedCategory} Videos`}
+                  : `${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory} Videos`}
               </h2>
               <p className="text-gray-600 text-sm sm:text-base">
                 {filteredVideos.length} video{filteredVideos.length !== 1 ? "s" : ""} found
@@ -206,6 +211,8 @@ export default async function WatchPage(props: any) {
                   <VideoCard key={video.id} video={video} />
                 ))}
               </div>
+
+              {/* Pagination */}
               {totalPages > 1 && (
                 <Pagination currentPage={currentPage} totalPages={totalPages} selectedCategory={selectedCategory} />
               )}

@@ -3,45 +3,25 @@
 # dependencies
 /node_modules
 
-# Next.js build output
+# next.js
 /.next/
 /out/
 
-# production build
+# production
 /build
 
-# debug logs
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (never commit secrets!)
+# env files
 .env*
 
-# Vercel deployment config
+# vercel
 .vercel
 
-# TypeScript
+# typescript
 *.tsbuildinfo
 next-env.d.ts
-
-# Editor config (optional, but useful if you use VSCode/JetBrains)
-/.idea/
-/.vscode/
-
-# OS junk (safe to ignore)
-.DS_Store
-Thumbs.db
-
-# Coverage reports (if you ever use Jest or test coverage)
-/coverage
-
-# Prisma generated client (usually not needed if you use the default location)
-# /prisma/generated
-
-# REMOVE unless you have actual generated files here (rare)
-# /lib/generated/prisma
-
-# Optional: ignore migrations if you DON’T want migration SQL in git (not recommended for production)
-/prisma/migrations/

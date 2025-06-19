@@ -10,8 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CategoryDropdown } from "@/components/ui/category-dropdown"
-// --- Removed old import ---
-// import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
+import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
 
 interface Video {
   id: string
@@ -46,9 +45,9 @@ export function VideoManager() {
 
   const loadData = async () => {
     try {
-      const [videosResponse, categoriesResponse] = await Promise.all([
+      const [videosResponse, categoriesData] = await Promise.all([
         fetch("/api/admin/videos").catch(() => ({ ok: false, json: () => Promise.resolve({ videos: [] }) })),
-        fetch("/api/admin/categories").then((res) => res.ok ? res.json() : { videoCategories: [] }),
+        getCategoriesWithFallback(),
       ])
 
       let videosData = { videos: [] }
@@ -57,7 +56,7 @@ export function VideoManager() {
       }
 
       setVideos(videosData.videos || [])
-      setCategories(categoriesResponse.videoCategories || [])
+      setCategories(categoriesData.videoCategories || [])
     } catch (error) {
       console.error("Failed to load data:", error)
     } finally {
@@ -251,7 +250,7 @@ function VideoForm({
 
   useEffect(() => {
     if (categories.length > 0 && !formData.category) {
-      setFormData((prev) => ({ ...prev, category: categories[0].slug }))
+      setFormData((prev) => ({ ...prev, category: categories[0].name }))
     }
   }, [categories])
 
@@ -330,7 +329,7 @@ function VideoForm({
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
-                      <SelectItem key={category.slug} value={category.slug}>
+                      <SelectItem key={category.name} value={category.name}>
                         {category.name}
                       </SelectItem>
                     ))}

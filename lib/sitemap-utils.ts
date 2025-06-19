@@ -2,21 +2,21 @@
 
 // Sitemap entry interface
 export interface SitemapUrl {
-  url: string;
-  priority: string;
-  changefreq: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
-  lastmod?: string;
+  url: string
+  priority: string
+  changefreq: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never"
+  lastmod?: string
 }
 
 // Generate the XML for any list of URLs (for all sitemaps)
 export function generateSitemapXML(baseUrl: string, urls: SitemapUrl[]): string {
   const sitemapEntries = urls.map((page) => `
-    <url>
-      <loc>${baseUrl}${page.url}</loc>
-      <lastmod>${new Date(page.lastmod || new Date()).toISOString()}</lastmod>
-      <changefreq>${page.changefreq}</changefreq>
-      <priority>${page.priority}</priority>
-    </url>`).join("");
+  <url>
+    <loc>${baseUrl}${page.url}</loc>
+    <lastmod>${new Date(page.lastmod || new Date()).toISOString()}</lastmod>
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
+  </url>`).join("");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -47,62 +47,60 @@ export function getStaticPages(): SitemapUrl[] {
     { url: "/disclaimer", priority: "0.3", changefreq: "yearly" },
     { url: "/dmca", priority: "0.3", changefreq: "yearly" },
     { url: "/media-usage-policy", priority: "0.3", changefreq: "yearly" },
-  ];
+  ]
 }
 
 // Dynamically fetch blog and video pages for the sitemap
 export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]> {
-  const dynamicPages: SitemapUrl[] = [];
+  const dynamicPages: SitemapUrl[] = []
 
-  // --- Fetch Published Blogs ---
   try {
     const blogsResponse = await fetch(`${baseUrl}/api/admin/blogs`, {
       headers: { "Cache-Control": "no-cache" },
-    });
+    })
 
     if (blogsResponse.ok) {
-      const blogsData = await blogsResponse.json();
-      const blogs = blogsData.blogs || [];
+      const blogsData = await blogsResponse.json()
+      const blogs = blogsData.blogs || []
 
       blogs.forEach((blog: any) => {
-        if (blog.slug && blog.status === "published") {
+        if (blog.slug && blog.published) {
           dynamicPages.push({
             url: `/blog/${blog.slug}`,
             priority: "0.7",
             changefreq: "weekly",
             lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
-          });
+          })
         }
-      });
+      })
     }
   } catch (error) {
-    console.error("Error fetching blogs for sitemap:", error);
+    console.error("Error fetching blogs for sitemap:", error)
   }
 
-  // --- Fetch Published Videos ---
   try {
     const videosResponse = await fetch(`${baseUrl}/api/admin/videos`, {
       headers: { "Cache-Control": "no-cache" },
-    });
+    })
 
     if (videosResponse.ok) {
-      const videosData = await videosResponse.json();
-      const videos = videosData.videos || [];
+      const videosData = await videosResponse.json()
+      const videos = videosData.videos || []
 
       videos.forEach((video: any) => {
-        if (video.slug && video.status === "published") {
+        if (video.slug && video.published) {
           dynamicPages.push({
             url: `/watch/${video.slug}`,
             priority: "0.7",
             changefreq: "weekly",
             lastmod: video.updatedAt || video.publishedAt || video.createdAt,
-          });
+          })
         }
-      });
+      })
     }
   } catch (error) {
-    console.error("Error fetching videos for sitemap:", error);
+    console.error("Error fetching videos for sitemap:", error)
   }
 
-  return dynamicPages;
+  return dynamicPages
 }

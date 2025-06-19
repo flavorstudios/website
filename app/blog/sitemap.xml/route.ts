@@ -6,30 +6,29 @@ const BASE_URL = "https://flavorstudios.in";
 
 export async function GET() {
   try {
-    // Fetch all published blog posts
     const blogs = await blogStore.getPublished();
 
-    // Build all <url> entries for the blog
-    const blogPages = Array.isArray(blogs)
-      ? blogs
-          .filter((b: any) => b.slug && b.status === "published")
-          .map((blog: any) => ({
-            url: `/blog/${blog.slug}`,
-            changefreq: "weekly",
-            priority: "0.7",
-            lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
-          }))
-      : [];
+    // Always include /blog root page
+    const blogPages =
+      Array.isArray(blogs) && blogs.length > 0
+        ? blogs
+            .filter((b: any) => b.slug)
+            .map((blog: any) => ({
+              url: `/blog/${blog.slug}`,
+              changefreq: "weekly",
+              priority: "0.8",
+              lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
+            }))
+        : [];
 
-    // Always include the /blog root, even if there are no posts
+    // Always include /blog even if no posts exist
     blogPages.unshift({
       url: "/blog",
       changefreq: "weekly",
-      priority: "0.8",
+      priority: "0.5",
       lastmod: new Date().toISOString(),
     });
 
-    // Generate XML
     const xml = generateSitemapXML(BASE_URL, blogPages);
 
     return new NextResponse(xml, {
@@ -40,19 +39,16 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Blog sitemap generation failed:", error);
-
-    // Fallback: Just the /blog root
-    const fallbackXml = generateSitemapXML(BASE_URL, [
+    // Fallback: minimal, valid sitemap with only /blog
+    const xml = generateSitemapXML(BASE_URL, [
       {
         url: "/blog",
         changefreq: "weekly",
-        priority: "0.8",
+        priority: "0.5",
         lastmod: new Date().toISOString(),
       },
     ]);
-
-    return new NextResponse(fallbackXml, {
+    return new NextResponse(xml, {
       status: 200,
       headers: {
         "Content-Type": "application/xml",

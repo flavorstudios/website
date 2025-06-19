@@ -1,9 +1,0 @@
-# *
-User-agent: *
-Allow: /
-
-# Host
-Host: https://flavorstudios.in
-
-# Sitemaps
-Sitemap: https://flavorstudios.in/sitemap.xml

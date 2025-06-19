@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
-import { blogStore } from "@/lib/content-store";
-import { categoryStore } from "@/lib/category-store"; // UPDATED: direct import
+import { blogStore } from "@/lib/prisma-blog-store";
+import { categoryStore } from "@/lib/category-store";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { NewsletterSignup } from "@/components/newsletter-signup";
 
@@ -64,7 +64,7 @@ async function getBlogData() {
   try {
     const [posts, categories] = await Promise.all([
       blogStore.getPublished(),
-      categoryStore.getByType("blog"), // Use only the store!
+      categoryStore.getByType("blog"),
     ]);
     return { posts, categories };
   } catch (error) {
@@ -74,11 +74,9 @@ async function getBlogData() {
 }
 
 // --- MAIN PAGE COMPONENT ---
-export default async function BlogPage({
-  searchParams,
-}: {
-  searchParams: { category?: string; page?: string };
-}) {
+// NOTE: Do not destructure searchParams in the function signature!
+export default async function BlogPage(props: any) {
+  const { searchParams = {} } = props || {};
   const { posts, categories } = await getBlogData();
   const selectedCategory = searchParams.category || "all";
   const currentPage = Number.parseInt(searchParams.page || "1");
@@ -110,7 +108,8 @@ export default async function BlogPage({
     posts.length > 0
       ? Math.round(
           posts.reduce(
-            (sum: number, post: any) => sum + Number.parseInt(post.readTime?.replace(" min read", "") || "5"),
+            (sum: number, post: any) =>
+              sum + Number.parseInt(post.readTime?.replace(" min read", "") || "5"),
             0,
           ) / posts.length,
         )

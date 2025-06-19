@@ -18,12 +18,15 @@ async function main() {
   ];
 
   for (const cat of allCategories) {
+    // Prefer menuDescription, then tooltip, then description
+    const menuDescription = cat.menuDescription || cat.tooltip || cat.description || "";
+
     await prisma.category.upsert({
       where: { slug: cat.slug },
       update: {
         title: cat.title,
         description: cat.description,
-        menuDescription: cat.menuDescription || "",   // <-- NEW FIELD
+        menuDescription,   // <-- Always populated
         accessibleLabel: cat.accessibleLabel,
         icon: cat.icon,
         order: cat.order,
@@ -52,7 +55,7 @@ async function main() {
         slug: cat.slug,
         title: cat.title,
         description: cat.description,
-        menuDescription: cat.menuDescription || "",   // <-- NEW FIELD
+        menuDescription,   // <-- Always populated
         accessibleLabel: cat.accessibleLabel,
         icon: cat.icon,
         order: cat.order,

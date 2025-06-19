@@ -72,53 +72,43 @@
   overflow: hidden;
 }
 
-/* ---- Universal Modern Thin Scrollbar ---- */
-.scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f9fafb;
-}
-.scrollbar-thin::-webkit-scrollbar {
-  width: 7px;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 8px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: #f9fafb;
-  border-radius: 8px;
-}
-
-/* ----- Admin Panel Specific Styles ----- */
+/* Admin Panel Specific Styles */
 .admin-gradient {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
+
 .admin-card {
   @apply bg-white/95 backdrop-blur-sm border border-white/20 shadow-xl;
 }
+
 .admin-sidebar {
   background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
 }
+
 .admin-hover {
   @apply transition-all duration-200 hover:scale-105 hover:shadow-lg;
 }
+
 /* Custom scrollbar for admin */
 .admin-scroll::-webkit-scrollbar {
   width: 6px;
 }
+
 .admin-scroll::-webkit-scrollbar-track {
   background: #f1f5f9;
   border-radius: 3px;
 }
+
 .admin-scroll::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
 }
+
 .admin-scroll::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 
-/* ---- Fix for gradient text in legacy browsers ---- */
+/* Fix for gradient text in legacy browsers */
 .text-transparent.bg-clip-text,
 .bg-gradient-to-r.bg-clip-text.text-transparent,
 .bg-gradient-to-l.bg-clip-text.text-transparent,
@@ -136,6 +126,7 @@
   color: transparent;
   font-weight: 700;
 }
+
 @supports not (-webkit-background-clip: text) {
   .text-transparent.bg-clip-text,
   .bg-gradient-to-r.bg-clip-text.text-transparent,
@@ -152,6 +143,7 @@
     -webkit-text-fill-color: initial;
   }
 }
+
 @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
   .text-transparent.bg-clip-text,
   .bg-gradient-to-r.bg-clip-text.text-transparent,

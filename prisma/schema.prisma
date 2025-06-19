@@ -8,33 +8,75 @@ datasource db {
 }
 
 model Category {
-  id                  String   @id @default(uuid())
-  type                String   // "blog" or "watch" (or "video" if you prefer)
-  slug                String   @unique
+  id                  String    @id @default(uuid())
+  type                String    // "blog" or "video"
+  slug                String    @unique
   title               String
   description         String
-  menuDescription     String?      // <--- NEW: Short/clean description for menu/tooltip
-  accessibleLabel     String?      // For accessibility in menus
-  icon                String?      // Favicon or category-specific icon
-  order               Int      @default(0)      // Sort order for menu/UI
-  isActive            Boolean  @default(true)   // Easy toggling of visibility
-  postCount           Int      @default(0)      // Dynamic: update as content added
-  metaTitle           String              // Used for SEO <title>
-  metaDescription     String              // SEO meta description
-  canonicalUrl        String              // Canonical URL for SEO
-  robots              String?             // Meta robots
-  ogTitle             String              // Open Graph title
-  ogDescription       String              // Open Graph description
-  ogUrl               String              // OG canonical URL
-  ogType              String              // OG type (e.g., "website", "video.series")
-  ogSiteName          String              // OG site name (from global config)
-  ogImages            Json                // Array for OG images (allows multiple)
-  twitterCard         String              // Twitter card type ("summary_large_image")
-  twitterSite         String              // Twitter handle (from global config)
+  menuDescription     String?
+  accessibleLabel     String?
+  icon                String?
+  order               Int       @default(0)
+  isActive            Boolean   @default(true)
+  postCount           Int       @default(0)
+  metaTitle           String
+  metaDescription     String
+  canonicalUrl        String
+  robots              String?
+  ogTitle             String
+  ogDescription       String
+  ogUrl               String
+  ogType              String
+  ogSiteName          String
+  ogImages            Json
+  twitterCard         String
+  twitterSite         String
   twitterTitle        String
   twitterDescription  String
-  twitterImages       Json                // Array for Twitter images (allows multiple)
-  schema              Json                // Store JSON-LD schema for each category
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt @default(now())  // <--- THIS LINE IS CRUCIAL!
+  twitterImages       Json
+  schema              Json
+  posts               Post[]    // Blog relation
+  videos              Video[]   // Video relation
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model Post {
+  id            String    @id @default(uuid())
+  title         String
+  slug          String    @unique
+  content       String
+  excerpt       String?
+  status        String    // "draft" or "published"
+  categoryId    String
+  category      Category  @relation(fields: [categoryId], references: [id])
+  tags          Json      // e.g. ["news", "review"]
+  featuredImage String?
+  seoTitle      String
+  seoDescription String
+  author        String
+  publishedAt   DateTime?
+  readTime      String?
+  views         Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Video {
+  id           String    @id @default(uuid())
+  title        String
+  slug         String    @unique
+  description  String?
+  coverImage   String?
+  videoUrl     String?
+  categoryId   String
+  category     Category  @relation(fields: [categoryId], references: [id])
+  isPublished  Boolean   @default(false)
+  featured     Boolean   @default(false)
+  author       String?
+  publishedAt  DateTime?
+  views        Int       @default(0)
+  readTime     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }

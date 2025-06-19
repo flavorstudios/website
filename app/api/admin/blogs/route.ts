@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server"
-import { blogStore } from "@/lib/content-store"
+import { NextResponse } from "next/server";
+import { blogStore } from "@/lib/prisma-blog-store"; // ✅ Updated to Prisma-based store
 
 export async function GET() {
   try {
-    const blogs = await blogStore.getAll()
+    const blogs = await blogStore.getAll();
 
     const formattedBlogs = blogs.map((blog) => ({
       id: blog.id,
@@ -23,42 +23,35 @@ export async function GET() {
       updatedAt: blog.updatedAt,
       views: blog.views,
       readTime: blog.readTime,
-    }))
+    }));
 
-    return NextResponse.json({ posts: formattedBlogs }, { status: 200 })
+    return NextResponse.json({ posts: formattedBlogs }, { status: 200 });
   } catch (error) {
-    console.error("Error fetching blogs:", error)
+    console.error("Error fetching blogs:", error);
     return NextResponse.json(
-      {
-        error: "Failed to fetch blogs",
-        posts: [], // Return empty array as fallback
-      },
-      { status: 500 },
-    )
+      { error: "Failed to fetch blogs", posts: [] },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const blogData = await request.json()
+    const blogData = await request.json();
 
-    // Validate required fields
     if (!blogData.title || !blogData.content) {
       return NextResponse.json(
-        {
-          error: "Title and content are required",
-        },
-        { status: 400 },
-      )
+        { error: "Title and content are required" },
+        { status: 400 }
+      );
     }
 
-    // Generate slug if not provided
     const slug =
       blogData.slug ||
       blogData.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")
+        .replace(/(^-|-$)/g, "");
 
     const blog = await blogStore.create({
       title: blogData.title,
@@ -74,16 +67,14 @@ export async function POST(request: Request) {
       author: blogData.author || "Flavor Studios",
       publishedAt: blogData.publishedAt || new Date().toISOString(),
       readTime: blogData.readTime || "5 min read",
-    })
+    });
 
-    return NextResponse.json({ blog }, { status: 201 })
+    return NextResponse.json({ blog }, { status: 201 });
   } catch (error) {
-    console.error("Error creating blog:", error)
+    console.error("Error creating blog:", error);
     return NextResponse.json(
-      {
-        error: "Failed to create blog",
-      },
-      { status: 500 },
-    )
+      { error: "Failed to create blog" },
+      { status: 500 }
+    );
   }
 }

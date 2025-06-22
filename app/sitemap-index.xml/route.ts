@@ -1,32 +1,51 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { categoryStore } from "@/lib/category-store";
 
-const BASE_URL = "https://flavorstudios.in";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL || "https://flavorstudios.in";
+
+interface Category {
+  slug?: string;
+  name: string;
+  updatedAt?: string;
+  createdAt?: string;
+  published?: boolean;
+}
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    // To include category sitemaps in the index, uncomment below:
+    // Optional: Include category sitemaps
     // const categories = await categoryStore.getAll();
-    // const categorySitemaps = categories.map((category: any) => {
-    //   const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-");
-    //   return {
-    //     url: `${BASE_URL}/category/${slug}/sitemap.xml`,
-    //     lastModified: new Date(category.updatedAt || category.createdAt || new Date()),
-    //   };
-    // });
+    // const categorySitemaps =
+    //   categories
+    //     .filter((cat: Category) => cat.published !== false)
+    //     .map((category: Category) => {
+    //       const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-");
+    //       return {
+    //         url: `${BASE_URL}/category/${slug}/sitemap.xml`,
+    //         lastModified: new Date(category.updatedAt || category.createdAt || new Date()),
+    //       };
+    //     });
 
     // Main sitemaps (always present)
     const sitemaps = [
       { url: `${BASE_URL}/sitemap.xml`, lastModified: new Date() },
       { url: `${BASE_URL}/blog/sitemap.xml`, lastModified: new Date() },
       { url: `${BASE_URL}/watch/sitemap.xml`, lastModified: new Date() },
-      // ...(categorySitemaps || []) // Uncomment if/when category sitemaps exist!
+      // ...(categorySitemaps || []),
     ];
+
+    // Remove duplicates (just in case)
+    const seen = new Set<string>();
+    const dedupedSitemaps = sitemaps.filter(sm => {
+      if (seen.has(sm.url)) return false;
+      seen.add(sm.url);
+      return true;
+    });
 
     // Build sitemap index XML
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${sitemaps
+${dedupedSitemaps
   .map(
     (sitemap) => `  <sitemap>
     <loc>${sitemap.url}</loc>
@@ -39,7 +58,7 @@ ${sitemaps
     return new NextResponse(xml, {
       status: 200,
       headers: {
-        "Content-Type": "application/xml",
+        "Content-Type": "application/xml; charset=utf-8",
         "Cache-Control": "public, max-age=3600, s-maxage=3600",
       },
     });
@@ -58,7 +77,7 @@ ${sitemaps
     return new NextResponse(fallbackXml, {
       status: 200,
       headers: {
-        "Content-Type": "application/xml",
+        "Content-Type": "application/xml; charset=utf-8",
         "Cache-Control": "public, max-age=3600, s-maxage=3600",
       },
     });

@@ -23,7 +23,8 @@ jobs:
 
       - name: Run Ultimate Search Engine Ping Script
         env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
           BING_API_KEY: ${{ secrets.BING_API_KEY }}
-          SITE_URL: ${{ secrets.SITE_URL }}
-          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+          INDEXNOW_API_KEY: ${{ secrets.INDEXNOW_API_KEY }}
         run: node scripts/pingAllSearchEngines.js

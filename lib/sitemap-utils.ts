@@ -1,6 +1,5 @@
 // lib/sitemap-utils.ts
 
-// Sitemap entry interface
 export interface SitemapUrl {
   url: string
   priority: string
@@ -8,15 +7,27 @@ export interface SitemapUrl {
   lastmod?: string
 }
 
-// Generate the XML for any list of URLs (for all sitemaps)
+// Normalize URL joining (avoid double slash)
+function joinUrl(base: string, path: string): string {
+  if (base.endsWith('/') && path.startsWith('/')) return base + path.slice(1)
+  if (!base.endsWith('/') && !path.startsWith('/')) return base + '/' + path
+  return base + path
+}
+
 export function generateSitemapXML(baseUrl: string, urls: SitemapUrl[]): string {
-  const sitemapEntries = urls.map((page) => `
+  const sitemapEntries = urls.map((page) => {
+    const loc = joinUrl(baseUrl, page.url)
+    const lastmodTag = page.lastmod
+      ? `<lastmod>${new Date(page.lastmod).toISOString()}</lastmod>`
+      : ''
+    return `
   <url>
-    <loc>${baseUrl}${page.url}</loc>
-    <lastmod>${new Date(page.lastmod || new Date()).toISOString()}</lastmod>
+    <loc>${loc}</loc>
+    ${lastmodTag}
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
-  </url>`).join("");
+  </url>`
+  }).join("")
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -26,7 +37,7 @@ export function generateSitemapXML(baseUrl: string, urls: SitemapUrl[]): string 
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 ${sitemapEntries}
-</urlset>`;
+</urlset>`
 }
 
 // Static pages to always include in the main sitemap
@@ -50,53 +61,58 @@ export function getStaticPages(): SitemapUrl[] {
   ]
 }
 
-// Dynamically fetch blog and video pages for the sitemap
 export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]> {
   const dynamicPages: SitemapUrl[] = []
 
+  // --- Fetch Blogs ---
   try {
-    const blogsResponse = await fetch(`${baseUrl}/api/admin/blogs`, {
+    const blogsResponse = await fetch(joinUrl(baseUrl, '/api/admin/blogs'), {
       headers: { "Cache-Control": "no-cache" },
     })
 
     if (blogsResponse.ok) {
       const blogsData = await blogsResponse.json()
-      const blogs = blogsData.blogs || []
+      const blogs = Array.isArray(blogsData.blogs) ? blogsData.blogs : []
 
-      blogs.forEach((blog: any) => {
+      blogs.forEach((blog: Record<string, unknown>) => {
         if (blog.slug && blog.published) {
           dynamicPages.push({
             url: `/blog/${blog.slug}`,
             priority: "0.7",
             changefreq: "weekly",
-            lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
+            lastmod: String(blog.updatedAt || blog.publishedAt || blog.createdAt || ''),
           })
         }
       })
+    } else {
+      console.error("Error: Blog API returned status", blogsResponse.status)
     }
   } catch (error) {
     console.error("Error fetching blogs for sitemap:", error)
   }
 
+  // --- Fetch Videos ---
   try {
-    const videosResponse = await fetch(`${baseUrl}/api/admin/videos`, {
+    const videosResponse = await fetch(joinUrl(baseUrl, '/api/admin/videos'), {
       headers: { "Cache-Control": "no-cache" },
     })
 
     if (videosResponse.ok) {
       const videosData = await videosResponse.json()
-      const videos = videosData.videos || []
+      const videos = Array.isArray(videosData.videos) ? videosData.videos : []
 
-      videos.forEach((video: any) => {
+      videos.forEach((video: Record<string, unknown>) => {
         if (video.slug && video.published) {
           dynamicPages.push({
             url: `/watch/${video.slug}`,
             priority: "0.7",
             changefreq: "weekly",
-            lastmod: video.updatedAt || video.publishedAt || video.createdAt,
+            lastmod: String(video.updatedAt || video.publishedAt || video.createdAt || ''),
           })
         }
       })
+    } else {
+      console.error("Error: Video API returned status", videosResponse.status)
     }
   } catch (error) {
     console.error("Error fetching videos for sitemap:", error)

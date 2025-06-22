@@ -1,0 +1,59 @@
+"use client"
+import { useState } from "react"
+import { getMessaging, getToken, isSupported } from "firebase/messaging"
+import app from "@/lib/firebase"
+
+export default function EnableNotificationsButton() {
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState("")
+
+  const handleEnableNotifications = async () => {
+    setLoading(true)
+    setResult("")
+    try {
+      const supported = await isSupported()
+      if (!supported) {
+        setResult("Notifications are not supported in this browser.")
+        return
+      }
+      const messaging = getMessaging(app)
+      const swReg = await navigator.serviceWorker.register("/firebase-messaging-sw.js")
+      const token = await getToken(messaging, {
+        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+        serviceWorkerRegistration: swReg,
+      })
+      if (token) {
+        // --- New: Send token to backend ---
+        await fetch("/api/notifications/register-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        })
+        setResult("Push enabled! Token stored for notifications.")
+      } else {
+        setResult("Permission granted, but no token returned.")
+      }
+    } catch (err: any) {
+      setResult("Failed: " + (err?.message || "Unknown error"))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="my-8 flex flex-col items-center">
+      <button
+        onClick={handleEnableNotifications}
+        disabled={loading}
+        className="px-6 py-3 rounded bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold shadow hover:from-purple-700 hover:to-blue-700 transition"
+      >
+        {loading ? "Enabling..." : "Enable Push Notifications"}
+      </button>
+      {result && (
+        <div className="mt-4 p-3 bg-gray-100 rounded border text-sm text-gray-700 max-w-lg break-all">
+          {result}
+        </div>
+      )}
+    </div>
+  )
+}

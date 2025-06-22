@@ -1,5 +1,8 @@
 // public/sw-custom.js
 
+// Workbox will inject the precache manifest here!
+self.__WB_MANIFEST;
+
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
@@ -8,7 +11,7 @@ self.addEventListener('message', (event) => {
 
 // Listen for fetch events (custom offline logic)
 self.addEventListener('fetch', (event) => {
-  // Example: Serve offline.html for navigation when offline
+  // Serve offline.html for navigation when offline
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() => caches.match('/offline.html'))

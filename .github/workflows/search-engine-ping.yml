@@ -37,7 +37,7 @@ jobs:
           echo "✅ SEO audit complete."
 
       - name: 📤 Upload SEO Audit Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4 # ✅ Updated to fix deprecated v3 error
         with:
           name: seo-audit-logs
           path: audit-results/

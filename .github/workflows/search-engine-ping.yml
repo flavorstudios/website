@@ -1,4 +1,4 @@
-name: Bing + IndexNow + Google + Yandex Submitter
+name: Bing + IndexNow + Google + Yandex + SEO Audit
 
 on:
   push:
@@ -7,24 +7,37 @@ on:
   workflow_dispatch:
 
 jobs:
-  submit-urls:
+  submit-and-audit:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: 📦 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: 🧰 Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22.x'
 
-      - name: Install dependencies
-        run: npm install xml2js dotenv node-fetch
+      - name: 📥 Install dependencies
+        run: npm install
 
-      - name: Run Ultimate Search Engine Ping Script
+      - name: 🚀 Submit URLs to Search Engines
         env:
           BASE_URL: ${{ secrets.BASE_URL }}
           NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
           BING_API_KEY: ${{ secrets.BING_API_KEY }}
           INDEXNOW_API_KEY: ${{ secrets.INDEXNOW_API_KEY }}
         run: node scripts/pingAllSearchEngines.js
+
+      - name: 🔍 Run SEO Indexability Audit
+        run: |
+          mkdir -p audit-results
+          node scripts/audit-indexability.js > audit-results/seo-audit-$(date +'%Y-%m-%d_%H-%M').log
+          echo "✅ SEO audit complete."
+
+      - name: 📤 Upload SEO Audit Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: seo-audit-logs
+          path: audit-results/

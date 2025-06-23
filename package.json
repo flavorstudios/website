@@ -66,6 +66,7 @@
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
+    "typeface-poppins": "^1.1.13",
     "vaul": "latest",
     "xml2js": "^0.6.2",
     "zod": "^3.24.1"

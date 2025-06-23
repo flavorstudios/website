@@ -1,19 +1,11 @@
 import type React from "react";
 import "./globals.css";
-import { Poppins } from "next/font/google";
+import "./fonts/poppins.css"; // ✅ Local Poppins font (relative path, always works)
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 import { Metadata } from "next";
 import { headers } from "next/headers";
-
-// Font setup
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "600"],
-  variable: "--font-poppins",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Flavor Studios | Anime News & Original Stories That Inspire",
@@ -43,7 +35,7 @@ export default function RootLayout({
   const schema = headersList.get("x-jsonld-schema");
 
   return (
-    <html lang="en" className={poppins.variable}>
+    <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>
       <head>
         {/* === Favicon === */}
         <link rel="icon" href="/favicon.ico" />
@@ -88,7 +80,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         />
         {/* === END GTM (HEAD) === */}
       </head>
-      <body className={`${poppins.className} antialiased`}>
+      <body className="antialiased">
         {/* === GTM (NOSCRIPT) === */}
         <noscript>
           <iframe

@@ -42,10 +42,6 @@ export function getMetadata({
 
   const canonical = getCanonicalUrl(path);
 
-  // Extra meta fields (e.g., robots)
-  const other: Record<string, string>[] = [];
-  if (robots) other.push({ name: "robots", content: robots });
-
   // Defaults (OG, Twitter)
   const defaultOpenGraph = {
     title: fullTitle,
@@ -64,7 +60,6 @@ export function getMetadata({
     images: [ogImage],
   };
 
-  // Merge defaults + overrides, always images as array
   const mergedOpenGraph = {
     ...defaultOpenGraph,
     ...openGraph,
@@ -91,7 +86,7 @@ export function getMetadata({
     },
     openGraph: mergedOpenGraph,
     twitter: mergedTwitter,
-    other,
-    ...(schema && { schema }), // Make sure your _layout renders this as <script type="application/ld+json">
+    robots, // ✅ Official Next.js field (replaces earlier `other.push`)
+    ...(schema && { schema }), // ✅ Still passed for layout to inject
   };
 }

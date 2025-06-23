@@ -4,32 +4,33 @@ import { Poppins } from "next/font/google";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
+import { Metadata } from "next";
+import { headers } from "next/headers";
 
 // Font setup
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "600"], // Add more weights if needed
+  weight: ["400", "600"],
   variable: "--font-poppins",
   display: "swap",
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Flavor Studios | Anime News & Original Stories That Inspire",
   description:
     "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
   metadataBase: new URL("https://flavorstudios.in"),
   robots: "index,follow",
   icons: {
-    icon: "/favicon.ico", // Favicon (keep at /public)
+    icon: "/favicon.ico",
     shortcut: "/favicon.ico",
-    apple: "/icons/apple-touch-icon.png", // Apple PWA icon (from /public/icons)
+    apple: "/icons/apple-touch-icon.png",
   },
   other: {
     "fediverse:creator": "@flavorstudios@mastodon.social",
     generator: "v0.dev",
     me: "https://mastodon.social/@flavorstudios",
   },
-  // openGraph, twitter, and robots handled per-page!
 };
 
 export default function RootLayout({
@@ -37,6 +38,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // Read dynamic metadata injected by each page (if present)
+  const headersList = headers();
+  const schema = headersList.get("x-jsonld-schema");
+
   return (
     <html lang="en" className={poppins.variable}>
       <head>
@@ -58,6 +63,16 @@ export default function RootLayout({
 
         {/* === Mastodon Verification === */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
+
+        {/* === Inject JSON-LD Schema if present === */}
+        {schema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: schema,
+            }}
+          />
+        )}
 
         {/* === Google Tag Manager (HEAD) === */}
         <script

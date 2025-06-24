@@ -5,14 +5,14 @@ export const metadata = getMetadata({
   description:
     "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
   path: "/cookie-policy",
-  robots: "noindex, nofollow", // Correct: Policy/legal pages are not for search indexing
+  robots: "noindex, nofollow", // Policy/legal pages must NOT be indexed
   openGraph: {
     title: "Cookie Policy – Flavor Studios",
     description:
       "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
     url: "https://flavorstudios.in/cookie-policy",
     type: "website",
-    site_name: "Flavor Studios",
+    site_name: "Flavor Studios", // Always present!
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -30,34 +30,7 @@ export const metadata = getMetadata({
       "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: "Cookie Policy",
-    description:
-      "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
-    url: "https://flavorstudios.in/cookie-policy",
-    publisher: {
-      "@type": "Organization",
-      name: "Flavor Studios",
-      url: "https://flavorstudios.in",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png",
-      },
-      sameAs: [
-        "https://www.youtube.com/@flavorstudios",
-        "https://www.instagram.com/flavorstudios",
-        "https://twitter.com/flavor_studios",
-        "https://www.facebook.com/flavourstudios",
-        "https://www.threads.net/@flavorstudios",
-        "https://discord.com/channels/@flavorstudios",
-        "https://t.me/flavorstudios",
-        "https://www.reddit.com/r/flavorstudios/",
-        "https://bsky.app/profile/flavorstudios.bsky.social"
-      ]
-    },
-  },
+  // JSON-LD/schema REMOVED; now in head.tsx only
 });
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

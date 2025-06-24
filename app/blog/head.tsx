@@ -1,3 +1,5 @@
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+
 export default function Head() {
   return (
     <>
@@ -7,17 +9,17 @@ export default function Head() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Blog",
-            "name": "Flavor Studios Blog",
+            "name": `${SITE_NAME} Blog`,
             "description":
-              "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
-            "url": "https://flavorstudios.in/blog",
+              `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
+            "url": `${SITE_URL}/blog`,
             "publisher": {
               "@type": "Organization",
-              "name": "Flavor Studios",
-              "url": "https://flavorstudios.in",
+              "name": SITE_NAME,
+              "url": SITE_URL,
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://flavorstudios.in/logo.png",
+                "url": `${SITE_URL}/logo.png`,
               },
             },
           }),

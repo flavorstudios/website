@@ -1,3 +1,17 @@
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+
+const SOCIAL_LINKS = [
+  "https://www.youtube.com/@flavorstudios",
+  "https://www.instagram.com/flavorstudios",
+  "https://twitter.com/flavor_studios",
+  "https://www.facebook.com/flavourstudios",
+  "https://www.threads.net/@flavorstudios",
+  "https://discord.com/channels/@flavorstudios",
+  "https://t.me/flavorstudios",
+  "https://www.reddit.com/r/flavorstudios/",
+  "https://bsky.app/profile/flavorstudios.bsky.social"
+];
+
 export default function Head() {
   return (
     <>
@@ -9,27 +23,17 @@ export default function Head() {
             "@type": "WebPage",
             "name": "DMCA Takedown Policy",
             "description":
-              "Learn how to file a DMCA takedown notice with Flavor Studios. Understand your rights and our copyright policy for protecting original content.",
-            "url": "https://flavorstudios.in/dmca",
+              `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
+            "url": `${SITE_URL}/dmca`,
             "publisher": {
               "@type": "Organization",
-              "name": "Flavor Studios",
-              "url": "https://flavorstudios.in",
+              "name": SITE_NAME,
+              "url": SITE_URL,
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://flavorstudios.in/logo.png",
+                "url": `${SITE_URL}/logo.png`,
               },
-              "sameAs": [
-                "https://www.youtube.com/@flavorstudios",
-                "https://www.instagram.com/flavorstudios",
-                "https://twitter.com/flavor_studios",
-                "https://www.facebook.com/flavourstudios",
-                "https://www.threads.net/@flavorstudios",
-                "https://discord.com/channels/@flavorstudios",
-                "https://t.me/flavorstudios",
-                "https://www.reddit.com/r/flavorstudios/",
-                "https://bsky.app/profile/flavorstudios.bsky.social"
-              ]
+              "sameAs": SOCIAL_LINKS,
             },
           }),
         }}

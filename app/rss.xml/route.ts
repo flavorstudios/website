@@ -11,14 +11,34 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Error generating RSS feed:", error);
-    // Fully DRY: Use the utility's own fallback
-    const rssXml = await generateRssFeed(); // Utility will return a valid empty feed if it encounters an error
-    return new NextResponse(rssXml, {
-      headers: {
-        "Content-Type": "application/rss+xml; charset=utf-8",
-        "Cache-Control": "public, max-age=1800, s-maxage=1800",
-      },
-    });
+    console.error("[RSS] Error generating RSS feed (primary attempt):", error);
+    // Fully DRY: Use the utility's own fallback logic, which returns a minimal valid feed
+    try {
+      const rssXml = await generateRssFeed();
+      return new NextResponse(rssXml, {
+        headers: {
+          "Content-Type": "application/rss+xml; charset=utf-8",
+          "Cache-Control": "public, max-age=1800, s-maxage=1800",
+        },
+      });
+    } catch (fallbackError) {
+      // If even the fallback fails, log and serve a last-resort minimal RSS string (extremely rare)
+      console.error("[RSS] Fallback attempt failed:", fallbackError);
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in";
+      return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Flavor Studios</title>
+    <description>Anime Creation & Stories</description>
+    <link>${baseUrl}</link>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+  </channel>
+</rss>`, {
+        headers: {
+          "Content-Type": "application/rss+xml; charset=utf-8",
+          "Cache-Control": "public, max-age=900, s-maxage=900",
+        },
+      });
+    }
   }
 }

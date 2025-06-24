@@ -1,6 +1,7 @@
 "use client";
 
 import { use } from "react";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 async function getVideo(slug) {
   try {
@@ -27,10 +28,10 @@ export default function Head({ params }) {
 
   if (!video) return null; // No schema for not-found
 
-  const seoTitle = `${video.title} – Watch | Flavor Studios`;
+  const seoTitle = `${video.title} – Watch | ${SITE_NAME}`;
   const seoDescription =
     video.description ||
-    "Watch original anime content crafted by Flavor Studios — emotionally driven storytelling, 3D animation, and passion for creative expression.";
+    `Watch original anime content crafted by ${SITE_NAME} — emotionally driven storytelling, 3D animation, and passion for creative expression.`;
   const thumbnailUrl =
     video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
 
@@ -54,10 +55,10 @@ export default function Head({ params }) {
           },
           publisher: {
             "@type": "Organization",
-            name: "Flavor Studios",
+            name: SITE_NAME,
             logo: {
               "@type": "ImageObject",
-              url: "https://flavorstudios.in/logo.png",
+              url: `${SITE_URL}/logo.png`,
             },
           },
         }),

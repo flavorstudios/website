@@ -1,16 +1,18 @@
 // app/head.tsx
 
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+
 export default function Head() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Flavor Studios",
-    url: "https://flavorstudios.in/",
+    name: SITE_NAME,
+    url: SITE_URL + "/",
     description:
       "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
     logo: {
       "@type": "ImageObject",
-      url: "https://flavorstudios.in/logo.png",
+      url: SITE_URL + "/logo.png",
     },
     sameAs: [
       "https://www.youtube.com/@flavorstudios",
@@ -47,13 +49,13 @@ export default function Head() {
       <link rel="me" href="https://mastodon.social/@flavorstudios" />
 
       {/* === Open Graph Site Name (fixes og:site_name not provided) === */}
-      <meta property="og:site_name" content="Flavor Studios" />
+      <meta property="og:site_name" content={SITE_NAME} />
 
       {/* === JSON-LD Schema === */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(schema)
+          __html: JSON.stringify(schema),
         }}
       />
 

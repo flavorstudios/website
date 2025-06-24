@@ -1,3 +1,5 @@
+// app/layout.tsx
+
 import type React from "react";
 import "./globals.css";
 import "./fonts/poppins.css"; // ✅ Local Poppins font (relative path, always works)
@@ -5,7 +7,6 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 import { Metadata } from "next";
-import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Flavor Studios | Anime News & Original Stories That Inspire",
@@ -30,10 +31,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Read dynamic metadata injected by each page (if present)
-  const headersList = headers();
-  const schema = headersList.get("x-jsonld-schema");
-
   return (
     <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>
       <head>
@@ -55,16 +52,6 @@ export default function RootLayout({
 
         {/* === Mastodon Verification === */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
-
-        {/* === Inject JSON-LD Schema if present === */}
-        {schema && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: schema,
-            }}
-          />
-        )}
 
         {/* === Google Tag Manager (HEAD) === */}
         <script

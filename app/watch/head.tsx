@@ -1,3 +1,5 @@
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+
 export default function Head() {
   return (
     <script
@@ -6,17 +8,17 @@ export default function Head() {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: "Flavor Studios Videos",
+          name: `${SITE_NAME} Videos`,
           description:
-            "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
-          url: "https://flavorstudios.in/watch",
+            `Watch original anime, studio films, and exclusive video content from ${SITE_NAME}. Discover our creative world—stream the latest now.`,
+          url: `${SITE_URL}/watch`,
           publisher: {
             "@type": "Organization",
-            name: "Flavor Studios",
-            url: "https://flavorstudios.in",
+            name: SITE_NAME,
+            url: SITE_URL,
             logo: {
               "@type": "ImageObject",
-              url: "https://flavorstudios.in/logo.png",
+              url: `${SITE_URL}/logo.png`,
             },
           },
         }),

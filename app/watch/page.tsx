@@ -13,13 +13,14 @@ export const metadata = getMetadata({
   description:
     "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
   path: "/watch",
-  robots: "index,follow", // Explicitly set
+  robots: "index,follow",
   openGraph: {
     title: "Flavor Studios Videos | Original Anime, Studio Films & More",
     description:
       "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
     url: "https://flavorstudios.in/watch",
     type: "website",
+    site_name: "Flavor Studios", // Always included!
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -38,23 +39,7 @@ export const metadata = getMetadata({
       "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Flavor Studios Videos",
-    description:
-      "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
-    url: "https://flavorstudios.in/watch",
-    publisher: {
-      "@type": "Organization",
-      name: "Flavor Studios",
-      url: "https://flavorstudios.in",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png",
-      },
-    },
-  },
+  // Schema/JSON-LD removed; now in head.tsx
 });
 
 // --- DATA FETCHING ---

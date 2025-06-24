@@ -1,3 +1,5 @@
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+
 export default function Head() {
   return (
     <>
@@ -7,19 +9,19 @@ export default function Head() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "Admin Login – Flavor Studios",
-            "description": "Login securely to manage Flavor Studios content, blogs, and creative assets.",
-            "url": "https://flavorstudios.in/admin/login",
-            "applicationCategory": "AdministrativeApplication",
-            "publisher": {
+            name: `Admin Login – ${SITE_NAME}`,
+            description: `Login securely to manage ${SITE_NAME} content, blogs, and creative assets.`,
+            url: `${SITE_URL}/admin/login`,
+            applicationCategory: "AdministrativeApplication",
+            publisher: {
               "@type": "Organization",
-              "name": "Flavor Studios",
-              "url": "https://flavorstudios.in",
-              "logo": {
+              name: SITE_NAME,
+              url: SITE_URL,
+              logo: {
                 "@type": "ImageObject",
-                "url": "https://flavorstudios.in/logo.png",
+                url: `${SITE_URL}/logo.png`,
               },
-              "sameAs": [
+              sameAs: [
                 "https://www.youtube.com/@flavorstudios",
                 "https://www.instagram.com/flavorstudios",
                 "https://twitter.com/flavor_studios",

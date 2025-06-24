@@ -28,6 +28,9 @@ export interface RSSChannel {
     width: number
     height: number
   }
+  webMaster?: string
+  managingEditor?: string
+  copyright?: string
 }
 
 export function formatRSSDate(date: string | Date): string {
@@ -39,6 +42,7 @@ export function stripHtml(html: string): string {
 }
 
 export function truncateDescription(text: string, maxLength = 200): string {
+  if (!text) return ""
   if (text.length <= maxLength) return text
   return text.substring(0, maxLength).trim() + "..."
 }
@@ -53,15 +57,20 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
       <pubDate>${item.pubDate}</pubDate>
       <category><![CDATA[${item.category || "General"}]]></category>
       <author><![CDATA[${item.author || "Flavor Studios"}]]></author>
-      <guid isPermaLink="true">${item.guid || item.link}</guid>
-      ${
+      <guid isPermaLink="true">${item.guid || item.link}</guid>${
         item.enclosure
-          ? `<enclosure url="${item.enclosure.url}" type="${item.enclosure.type}" length="${item.enclosure.length}"/>`
+          ? `
+      <enclosure url="${item.enclosure.url}" type="${item.enclosure.type}" length="${item.enclosure.length}"/>`
           : ""
       }
     </item>`,
     )
     .join("\n")
+
+  // Normalize trailing slash for atom:link
+  const atomLink = channel.link.endsWith("/")
+    ? `${channel.link}rss.xml`
+    : `${channel.link}/rss.xml`
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -73,7 +82,7 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
     <lastBuildDate>${channel.lastBuildDate}</lastBuildDate>
     <pubDate>${channel.pubDate}</pubDate>
     <ttl>${channel.ttl}</ttl>
-    <atom:link href="${channel.link}/rss.xml" rel="self" type="application/rss+xml"/>
+    <atom:link href="${atomLink}" rel="self" type="application/rss+xml"/>
     ${
       channel.image
         ? `<image>
@@ -83,6 +92,21 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
       <width>${channel.image.width}</width>
       <height>${channel.image.height}</height>
     </image>`
+        : ""
+    }
+    ${
+      channel.webMaster
+        ? `<webMaster>${channel.webMaster}</webMaster>`
+        : ""
+    }
+    ${
+      channel.managingEditor
+        ? `<managingEditor>${channel.managingEditor}</managingEditor>`
+        : ""
+    }
+    ${
+      channel.copyright
+        ? `<copyright>${channel.copyright}</copyright>`
         : ""
     }
     <generator>Flavor Studios RSS Generator</generator>
@@ -140,7 +164,7 @@ export async function generateRssFeed(): Promise<string> {
     // Limit to most recent 50 items
     const recentItems = allItems.slice(0, 50)
 
-    // Channel configuration
+    // Channel configuration (add/adjust as you wish)
     const channel: RSSChannel = {
       title: "Flavor Studios - Anime Creation Stories",
       description:
@@ -157,6 +181,9 @@ export async function generateRssFeed(): Promise<string> {
         width: 144,
         height: 144,
       },
+      webMaster: "contact@flavorstudios.in (Support)",
+      managingEditor: "admin@flavorstudios.in (Admin)",
+      copyright: `Copyright ${new Date().getFullYear()} Flavor Studios. All rights reserved.`,
     }
 
     // Generate RSS XML

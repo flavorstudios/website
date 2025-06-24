@@ -12,7 +12,7 @@ export const metadata = getMetadata({
       "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
     url: "https://flavorstudios.in/",
     type: "website",
-    site_name: "Flavor Studios",
+    site_name: "Flavor Studios", // Always present!
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -30,7 +30,7 @@ export const metadata = getMetadata({
       "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  // schema: { ... }   // <-- This line is REMOVED
+  // No schema/JSON-LD here (handled in head.tsx)
 });
 
 import { Suspense } from "react"

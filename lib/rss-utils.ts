@@ -9,28 +9,19 @@ function getMimeType(url: string): string {
   return "application/octet-stream";
 }
 
-// Helper: Get byte length of local (public/) or remote file
-async function getFileSize(url: string): Promise<string> {
-  // Local/public file
+// Helper: Get byte length of local (public/) file, omit for remote
+async function getFileSize(url: string): Promise<string | undefined> {
   if (url.startsWith("/")) {
     try {
       const filePath = path.join(process.cwd(), "public", url);
-      const stat = fs.statSync(filePath);
+      const stat = await fs.promises.stat(filePath); // async!
       return stat.size.toString();
     } catch {
-      return "0";
+      return undefined;
     }
   }
-  // Remote file
-  try {
-    const res = await fetch(url, { method: "HEAD" });
-    if (res.ok && res.headers.has("content-length")) {
-      return res.headers.get("content-length") || "0";
-    }
-    return "0";
-  } catch {
-    return "0";
-  }
+  // Remote: omit length for speed
+  return undefined;
 }
 
 export interface RSSItem {
@@ -44,7 +35,7 @@ export interface RSSItem {
   enclosure?: {
     url: string
     type: string
-    length: string
+    length?: string // Now optional!
   }
 }
 
@@ -95,7 +86,7 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
       <guid isPermaLink="true">${item.guid || item.link}</guid>${
         item.enclosure
           ? `
-      <enclosure url="${item.enclosure.url}" type="${item.enclosure.type}" length="${item.enclosure.length}"/>`
+      <enclosure url="${item.enclosure.url}" type="${item.enclosure.type}"${item.enclosure.length ? ` length="${item.enclosure.length}"` : ""}/>`
           : ""
       }
     </item>`,
@@ -178,11 +169,11 @@ export async function generateRssFeed(): Promise<string> {
         let enclosure;
         if (video.thumbnail) {
           const type = getMimeType(video.thumbnail);
-          const length = await getFileSize(video.thumbnail);
+          const length = await getFileSize(video.thumbnail); // async and may be undefined
           enclosure = {
             url: video.thumbnail,
             type,
-            length,
+            ...(length ? { length } : {}) // Only add length if present
           };
         }
         return {

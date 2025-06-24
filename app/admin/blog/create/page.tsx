@@ -4,11 +4,13 @@ import { BlogEditor } from "../../dashboard/components/blog-editor";
 // === SEO METADATA (ADMIN - NOINDEX) ===
 export const metadata = getMetadata({
   title: "Blog Editor – Admin Panel | Flavor Studios",
-  description: "Use the admin panel to create and publish original anime news, blog stories, and updates for Flavor Studios.",
+  description:
+    "Use the admin panel to create and publish original anime news, blog stories, and updates for Flavor Studios.",
   path: "/admin/blog/create",
   openGraph: {
     title: "Blog Editor – Admin Panel | Flavor Studios",
-    description: "Use the admin panel to create and publish original anime news, blog stories, and updates for Flavor Studios.",
+    description:
+      "Use the admin panel to create and publish original anime news, blog stories, and updates for Flavor Studios.",
     url: "https://flavorstudios.in/admin/blog/create",
     type: "website",
     site_name: "Flavor Studios",
@@ -25,37 +27,12 @@ export const metadata = getMetadata({
     site: "@flavorstudios",
     creator: "@flavorstudios",
     title: "Blog Editor – Admin Panel | Flavor Studios",
-    description: "Use the admin panel to create and publish original anime news, blog stories, and updates for Flavor Studios.",
+    description:
+      "Use the admin panel to create and publish original anime news, blog stories, and updates for Flavor Studios.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  robots: "noindex, nofollow",
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: "Blog Editor – Admin Panel",
-    description: "Admin-only page for publishing original anime news, blog stories, and updates on Flavor Studios.",
-    url: "https://flavorstudios.in/admin/blog/create",
-    publisher: {
-      "@type": "Organization",
-      name: "Flavor Studios",
-      url: "https://flavorstudios.in",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png",
-      },
-      sameAs: [
-        "https://www.youtube.com/@flavorstudios",
-        "https://www.instagram.com/flavorstudios",
-        "https://twitter.com/flavor_studios",
-        "https://www.facebook.com/flavourstudios",
-        "https://www.threads.net/@flavorstudios",
-        "https://discord.com/channels/@flavorstudios",
-        "https://t.me/flavorstudios",
-        "https://www.reddit.com/r/flavorstudios/",
-        "https://bsky.app/profile/flavorstudios.bsky.social"
-      ]
-    }
-  }
+  robots: "noindex, nofollow", // Admin pages should not be indexed
+  // Schema/JSON-LD intentionally removed (now in head.tsx)
 });
 
 export default function CreateBlogPage() {

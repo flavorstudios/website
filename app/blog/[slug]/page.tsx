@@ -1,4 +1,4 @@
-// --- BLOG POST PAGE WITH SEO-COMPLIANT METADATA ---
+// --- BLOG POST PAGE WITH SEO-COMPLIANT METADATA (NO JSON-LD) ---
 
 import { notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -76,7 +76,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     title: `${seoTitle} – Flavor Studios`,
     description: seoDescription,
     path: `/blog/${post.slug}`,
-    robots: "index,follow", // <-- Explicit for published posts
+    robots: "index,follow", // Explicit for published posts
     openGraph: {
       images: [
         {
@@ -98,31 +98,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
       title: seoTitle,
       description: seoDescription,
     },
-    schema: {
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
-      headline: seoTitle,
-      description: seoDescription,
-      image: ogImage,
-      author: {
-        "@type": "Person",
-        name: post.author || "Flavor Studios",
-      },
-      datePublished: post.publishedAt,
-      dateModified: post.updatedAt || post.publishedAt,
-      publisher: {
-        "@type": "Organization",
-        name: "Flavor Studios",
-        logo: {
-          "@type": "ImageObject",
-          url: "https://flavorstudios.in/logo.png",
-        },
-      },
-      mainEntityOfPage: {
-        "@type": "WebPage",
-        "@id": canonicalUrl,
-      },
-    },
+    // No schema here! It's moved to head.tsx
   });
 }
 

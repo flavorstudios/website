@@ -55,23 +55,29 @@ export function getMetadata({
   const defaultTwitter = {
     card: "summary_large_image",
     site: "@flavorstudios",
+    creator: "@flavorstudios",
     title: fullTitle,
     description,
     images: [ogImage],
   };
 
+  // Merge Open Graph and always force site_name to "Flavor Studios"
   const mergedOpenGraph = {
     ...defaultOpenGraph,
     ...openGraph,
+    site_name: "Flavor Studios", // <-- Hard enforced, never overwritten
     images:
       Array.isArray(openGraph.images) && openGraph.images.length > 0
         ? openGraph.images
         : defaultOpenGraph.images,
   };
 
+  // Merge Twitter and always force site/creator to @flavorstudios
   const mergedTwitter = {
     ...defaultTwitter,
     ...twitter,
+    site: "@flavorstudios",
+    creator: "@flavorstudios",
     images:
       Array.isArray(twitter.images) && twitter.images.length > 0
         ? twitter.images
@@ -87,6 +93,6 @@ export function getMetadata({
     openGraph: mergedOpenGraph,
     twitter: mergedTwitter,
     robots, // ✅ Official Next.js field (replaces earlier `other.push`)
-    ...(schema && { schema }), // ✅ Still passed for layout to inject
+    ...(schema && { schema }), // ✅ Still passed for layout to inject (but not exported in metadata)
   };
 }

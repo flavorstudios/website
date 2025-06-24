@@ -1,6 +1,10 @@
-const BASE_URL = "https://flavorstudios.in";
+// lib/seo-utils.ts
+
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+
+const BASE_URL = SITE_URL;
 const DEFAULT_OG_IMAGE = `${BASE_URL}/cover.jpg`;
-const DEFAULT_TITLE_SUFFIX = "– Flavor Studios";
+const DEFAULT_TITLE_SUFFIX = `– ${SITE_NAME}`;
 
 /**
  * Returns a canonical, SEO-optimized URL for any path.
@@ -34,9 +38,9 @@ export function getMetadata({
   openGraph?: Record<string, any>;
   twitter?: Record<string, any>;
 }) {
-  // Suffix "– Flavor Studios" if not present at the end (avoiding double/awkward titles)
+  // Suffix with "– Flavor Studios" if not present at the end
   const fullTitle =
-    title.trim().toLowerCase().includes("flavor studios")
+    title.trim().toLowerCase().includes(SITE_NAME.toLowerCase())
       ? title.trim()
       : `${title} ${DEFAULT_TITLE_SUFFIX}`.replace(/ +/g, " ").trim();
 
@@ -48,7 +52,7 @@ export function getMetadata({
     description,
     url: canonical,
     type: "website",
-    site_name: "Flavor Studios",
+    site_name: SITE_NAME,
     images: [{ url: ogImage, width: 1200, height: 630 }],
   };
 
@@ -61,11 +65,11 @@ export function getMetadata({
     images: [ogImage],
   };
 
-  // Merge Open Graph and always force site_name to "Flavor Studios"
+  // Merge Open Graph and always force site_name to SITE_NAME
   const mergedOpenGraph = {
     ...defaultOpenGraph,
     ...openGraph,
-    site_name: "Flavor Studios", // <-- Hard enforced, never overwritten
+    site_name: SITE_NAME, // <-- Hard enforced, never overwritten
     images:
       Array.isArray(openGraph.images) && openGraph.images.length > 0
         ? openGraph.images
@@ -92,7 +96,7 @@ export function getMetadata({
     },
     openGraph: mergedOpenGraph,
     twitter: mergedTwitter,
-    robots, // ✅ Official Next.js field (replaces earlier `other.push`)
-    ...(schema && { schema }), // ✅ Still passed for layout to inject (but not exported in metadata)
+    robots,
+    ...(schema && { schema }),
   };
 }

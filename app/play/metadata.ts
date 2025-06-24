@@ -19,3 +19,16 @@ export const metadata = getMetadata({
         width: 1200,
         height: 630,
       },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@flavorstudios",
+    creator: "@flavorstudios",
+    title: "Play Anime-Inspired Games Online | Flavor Studios",
+    description:
+      "Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on Flavor Studios.",
+    images: ["https://flavorstudios.in/cover.jpg"],
+  },
+  // JSON-LD/schema REMOVED; now in head.tsx only
+});

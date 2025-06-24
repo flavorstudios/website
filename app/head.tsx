@@ -9,7 +9,7 @@ export default function Head() {
     name: SITE_NAME,
     url: SITE_URL + "/",
     description:
-      "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
+      `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
     logo: {
       "@type": "ImageObject",
       url: SITE_URL + "/logo.png",

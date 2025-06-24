@@ -12,7 +12,7 @@ export const metadata = getMetadata({
       "Explore creative roles in animation, writing, and voice acting. Join our talent list and shape the future of storytelling at Flavor Studios.",
     url: "https://flavorstudios.in/career",
     type: "website",
-    site_name: "Flavor Studios",
+    site_name: "Flavor Studios", // Always present!
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -30,23 +30,7 @@ export const metadata = getMetadata({
       "Animation, writing, voice acting, and more—join our creative network at Flavor Studios and stay connected for future roles.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: "Careers at Flavor Studios",
-    description:
-      "Discover animation, writing, and voice acting opportunities at Flavor Studios. Join our talent list and be part of something original.",
-    url: "https://flavorstudios.in/career",
-    publisher: {
-      "@type": "Organization",
-      name: "Flavor Studios",
-      url: "https://flavorstudios.in",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png",
-      },
-    },
-  },
+  // JSON-LD/schema REMOVED; see head.tsx below
 });
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

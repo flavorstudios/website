@@ -29,33 +29,7 @@ export const metadata = getMetadata({
     description: "Internal admin test page for verifying authentication. Not publicly indexed.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: "Admin Test – Flavor Studios",
-    description: "Internal admin test page for verifying authentication. Not publicly indexed.",
-    url: "https://flavorstudios.in/admin/test",
-    publisher: {
-      "@type": "Organization",
-      name: "Flavor Studios",
-      url: "https://flavorstudios.in",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png",
-      },
-      sameAs: [
-        "https://www.youtube.com/@flavorstudios",
-        "https://www.instagram.com/flavorstudios",
-        "https://twitter.com/flavor_studios",
-        "https://www.facebook.com/flavourstudios",
-        "https://www.threads.net/@flavorstudios",
-        "https://discord.com/channels/@flavorstudios",
-        "https://t.me/flavorstudios",
-        "https://www.reddit.com/r/flavorstudios/",
-        "https://bsky.app/profile/flavorstudios.bsky.social"
-      ]
-    },
-  },
+  // Schema/JSON-LD intentionally removed (now in head.tsx)
 });
 
 export default async function AdminTest() {

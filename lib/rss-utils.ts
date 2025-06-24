@@ -217,7 +217,7 @@ export async function generateRssFeed(): Promise<string> {
       pubDate: recentItems.length > 0 ? recentItems[0].pubDate : formatRSSDate(new Date()),
       ttl: 60,
       image: {
-        url: `${baseUrl}/placeholder.svg?height=144&width=144&text=Flavor+Studios`,
+        url: `${baseUrl}/placeholder.png?height=144&width=144&text=Flavor+Studios`,
         title: "Flavor Studios",
         link: baseUrl,
         width: 144,

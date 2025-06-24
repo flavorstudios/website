@@ -14,7 +14,7 @@ export const metadata = {
       "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
     url: "https://flavorstudios.in/404",
     type: "website",
-    siteName: "Flavor Studios",
+    site_name: "Flavor Studios", // <-- Always present and correct key!
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",

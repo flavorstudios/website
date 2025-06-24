@@ -5,7 +5,7 @@ export const metadata = getMetadata({
   description:
     "Explore the heart and vision of Flavor Studios — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.",
   path: "/about",
-  robots: "index,follow", // <-- Explicit robots rule added!
+  robots: "index,follow", // Page is indexable
   openGraph: {
     title: "About Us – The Vision Behind Flavor Studios",
     description:
@@ -30,23 +30,7 @@ export const metadata = getMetadata({
       "We’re an indie animation studio fueled by storytelling, emotion, and community. Discover our journey and purpose.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "AboutPage",
-    name: "About Flavor Studios",
-    description:
-      "Explore the heart and vision of Flavor Studios — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.",
-    url: "https://flavorstudios.in/about",
-    publisher: {
-      "@type": "Organization",
-      name: "Flavor Studios",
-      url: "https://flavorstudios.in",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png",
-      },
-    },
-  },
+  // Schema/JSON-LD is intentionally removed from here (now in head.tsx)
 });
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

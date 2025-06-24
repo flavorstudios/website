@@ -1,4 +1,5 @@
-import { getBlogPost } from "./page"; // Use the correct path to your getBlogPost function
+import { getBlogPost } from "./page";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 interface HeadProps {
   params: { slug: string };
@@ -11,32 +12,32 @@ export default async function Head({ params }: HeadProps) {
   // Fallback: If not found or unpublished, do not output JSON-LD
   if (!post) return null;
 
-  const canonicalUrl = `https://flavorstudios.in/blog/${post.slug}`;
-  const ogImage = post.coverImage || "https://flavorstudios.in/cover.jpg";
+  const canonicalUrl = `${SITE_URL}/blog/${post.slug}`;
+  const ogImage = post.coverImage || `${SITE_URL}/cover.jpg`;
   const seoTitle = post.seoTitle || post.title;
   const seoDescription = post.seoDescription || post.excerpt;
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "headline": seoTitle,
-    "description": seoDescription,
-    "image": ogImage,
-    "author": {
+    headline: seoTitle,
+    description: seoDescription,
+    image: ogImage,
+    author: {
       "@type": "Person",
-      "name": post.author || "Flavor Studios",
+      name: post.author || SITE_NAME,
     },
-    "datePublished": post.publishedAt,
-    "dateModified": post.updatedAt || post.publishedAt,
-    "publisher": {
+    datePublished: post.publishedAt,
+    dateModified: post.updatedAt || post.publishedAt,
+    publisher: {
       "@type": "Organization",
-      "name": "Flavor Studios",
-      "logo": {
+      name: SITE_NAME,
+      logo: {
         "@type": "ImageObject",
-        "url": "https://flavorstudios.in/logo.png",
+        url: `${SITE_URL}/logo.png`,
       },
     },
-    "mainEntityOfPage": {
+    mainEntityOfPage: {
       "@type": "WebPage",
       "@id": canonicalUrl,
     },

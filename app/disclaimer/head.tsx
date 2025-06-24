@@ -1,3 +1,5 @@
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+
 export default function Head() {
   return (
     <>
@@ -7,17 +9,17 @@ export default function Head() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebPage",
-            "name": "Disclaimer",
-            "url": "https://flavorstudios.in/disclaimer",
-            "description":
+            name: "Disclaimer",
+            url: `${SITE_URL}/disclaimer`,
+            description:
               "Read Flavor Studios' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies.",
-            "publisher": {
+            publisher: {
               "@type": "Organization",
-              "name": "Flavor Studios",
-              "url": "https://flavorstudios.in",
-              "logo": {
+              name: SITE_NAME,
+              url: SITE_URL,
+              logo: {
                 "@type": "ImageObject",
-                "url": "https://flavorstudios.in/logo.png",
+                url: `${SITE_URL}/logo.png`,
               },
             },
           }),

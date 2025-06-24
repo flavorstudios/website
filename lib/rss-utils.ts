@@ -208,16 +208,16 @@ export async function generateRssFeed(): Promise<string> {
 
     // Channel configuration (add/adjust as you wish)
     const channel: RSSChannel = {
-      title: "Flavor Studios - Anime Creation Stories",
+      title: "Flavor Studios | Anime News, Original Stories & Creative Insights",
       description:
-        "Behind the scenes of anime creation—one story at a time. Discover exclusive content, industry insights, and creative processes from Flavor Studios.",
+        "Step behind the scenes with Flavor Studios, your gateway to anime news, original stories, and the creative journey of anime production. Explore exclusive episodes, in-depth industry insights, and the artistry behind every animation.",
       link: baseUrl,
       language: "en-US",
       lastBuildDate: formatRSSDate(new Date()),
       pubDate: recentItems.length > 0 ? recentItems[0].pubDate : formatRSSDate(new Date()),
       ttl: 60,
       image: {
-        url: `${baseUrl}/placeholder.png?height=144&width=144&text=Flavor+Studios`,
+        url: `${baseUrl}/placeholder.png`,
         title: "Flavor Studios",
         link: baseUrl,
         width: 144,

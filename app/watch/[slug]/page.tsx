@@ -1,38 +1,28 @@
-// --- WATCH PAGE WITH SEO-COMPLIANT METADATA ---
-
-import { notFound } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar, Eye, Youtube, Clock, Share2, ThumbsUp } from "lucide-react";
 import { getMetadata } from "@/lib/seo-utils";
 
-interface VideoPageProps {
-  params: { slug: string };
-}
-
-async function getVideo(slug: string) {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`,
-      { cache: "no-store" }
-    );
-    if (!response.ok) return null;
-    const data = await response.json();
-    const videos = data.videos || [];
-    return (
-      videos.find(
-        (video: any) =>
-          (video.slug === slug || video.id === slug) && video.status === "published"
-      ) || null
-    );
-  } catch (error) {
-    console.error("Failed to fetch video:", error);
-    return null;
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  // --- Fetch video ---
+  async function getVideo(slug: string) {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`,
+        { cache: "no-store" }
+      );
+      if (!response.ok) return null;
+      const data = await response.json();
+      const videos = data.videos || [];
+      return (
+        videos.find(
+          (video: any) =>
+            (video.slug === slug || video.id === slug) && video.status === "published"
+        ) || null
+      );
+    } catch (error) {
+      console.error("Failed to fetch video:", error);
+      return null;
+    }
   }
-}
 
-export async function generateMetadata({ params }: VideoPageProps) {
   const video = await getVideo(params.slug);
 
   if (!video) {
@@ -52,6 +42,7 @@ export async function generateMetadata({ params }: VideoPageProps) {
         description: fallbackDescription,
         url: fallbackUrl,
         type: "website",
+        site_name: "Flavor Studios",
         images: [
           {
             url: fallbackImage,
@@ -63,6 +54,8 @@ export async function generateMetadata({ params }: VideoPageProps) {
       },
       twitter: {
         card: "summary_large_image",
+        site: "@flavorstudios",
+        creator: "@flavorstudios",
         title: fallbackTitle,
         description: fallbackDescription,
         images: [fallbackImage],
@@ -85,6 +78,11 @@ export async function generateMetadata({ params }: VideoPageProps) {
     path: `/watch/${video.slug || params.slug}`,
     robots: "index,follow",
     openGraph: {
+      title: seoTitle,
+      description: seoDescription,
+      url: canonicalUrl,
+      type: "video.other",
+      site_name: "Flavor Studios", // ALWAYS included for SEO!
       images: [
         {
           url: thumbnailUrl,
@@ -92,42 +90,16 @@ export async function generateMetadata({ params }: VideoPageProps) {
           height: 720,
         },
       ],
-      type: "video.other",
-      url: canonicalUrl,
-      title: seoTitle,
-      description: seoDescription,
     },
     twitter: {
       card: "summary_large_image",
       site: "@flavorstudios",
       creator: "@flavorstudios",
-      images: [thumbnailUrl],
       title: seoTitle,
       description: seoDescription,
+      images: [thumbnailUrl],
     },
-    schema: {
-      "@context": "https://schema.org",
-      "@type": "VideoObject",
-      name: seoTitle,
-      description: seoDescription,
-      thumbnailUrl: [thumbnailUrl],
-      uploadDate: video.publishedAt,
-      duration: video.duration,
-      embedUrl: `https://www.youtube.com/embed/${video.youtubeId}`,
-      interactionStatistic: {
-        "@type": "InteractionCounter",
-        interactionType: { "@type": "WatchAction" },
-        userInteractionCount: video.views,
-      },
-      publisher: {
-        "@type": "Organization",
-        name: "Flavor Studios",
-        logo: {
-          "@type": "ImageObject",
-          url: "https://flavorstudios.in/logo.png",
-        },
-      },
-    },
+    // JSON-LD/schema removed and handled in head.tsx
   });
 }
 

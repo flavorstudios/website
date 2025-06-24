@@ -1,3 +1,5 @@
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+
 export default function Head() {
   return (
     <>
@@ -7,17 +9,17 @@ export default function Head() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "FAQPage",
-            "name": "Flavor Studios FAQ",
-            "url": "https://flavorstudios.in/faq",
+            "name": `${SITE_NAME} FAQ`,
+            "url": `${SITE_URL}/faq`,
             "description":
-              "Find answers to common questions about Flavor Studios, animation, support, and our creative process.",
+              `Find answers to common questions about ${SITE_NAME}, animation, support, and our creative process.`,
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "What is Flavor Studios?",
+                "name": `What is ${SITE_NAME}?`,
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Flavor Studios is a creative studio focused on producing high-quality anime-inspired content. We craft original videos, blog posts, and interactive experiences designed for anime fans across the globe.",
+                  "text": `${SITE_NAME} is a creative studio focused on producing high-quality anime-inspired content. We craft original videos, blog posts, and interactive experiences designed for anime fans across the globe.`,
                 },
               },
               // ... Add all other FAQ entries here
@@ -32,11 +34,11 @@ export default function Head() {
             ],
             "publisher": {
               "@type": "Organization",
-              "name": "Flavor Studios",
-              "url": "https://flavorstudios.in",
+              "name": SITE_NAME,
+              "url": SITE_URL,
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://flavorstudios.in/logo.png",
+                "url": `${SITE_URL}/logo.png`,
               },
             },
           }),

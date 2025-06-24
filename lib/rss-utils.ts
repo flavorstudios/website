@@ -1,3 +1,38 @@
+import fs from "fs";
+import path from "path";
+
+// Helper: Detect MIME type from file extension
+function getMimeType(url: string): string {
+  if (url.endsWith(".png")) return "image/png";
+  if (url.endsWith(".webp")) return "image/webp";
+  if (url.endsWith(".jpg") || url.endsWith(".jpeg")) return "image/jpeg";
+  return "application/octet-stream";
+}
+
+// Helper: Get byte length of local (public/) or remote file
+async function getFileSize(url: string): Promise<string> {
+  // Local/public file
+  if (url.startsWith("/")) {
+    try {
+      const filePath = path.join(process.cwd(), "public", url);
+      const stat = fs.statSync(filePath);
+      return stat.size.toString();
+    } catch {
+      return "0";
+    }
+  }
+  // Remote file
+  try {
+    const res = await fetch(url, { method: "HEAD" });
+    if (res.ok && res.headers.has("content-length")) {
+      return res.headers.get("content-length") || "0";
+    }
+    return "0";
+  } catch {
+    return "0";
+  }
+}
+
 export interface RSSItem {
   title: string
   description: string
@@ -118,7 +153,6 @@ ${xmlItems}
 export async function generateRssFeed(): Promise<string> {
   try {
     const { blogStore, videoStore } = await import("./content-store")
-    // --- Always .in, never .com! ---
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
 
     // Fetch published content
@@ -138,31 +172,39 @@ export async function generateRssFeed(): Promise<string> {
       guid: `${baseUrl}/blog/${post.slug}`,
     }))
 
-    // Convert videos to RSS items
-    const videoItems: RSSItem[] = videos.map((video: any) => ({
-      title: video.title,
-      description: truncateDescription(stripHtml(video.description)),
-      link: `${baseUrl}/watch/${video.slug || video.id}`,
-      pubDate: formatRSSDate(video.publishedAt),
-      category: video.category || "General",
-      author: "Flavor Studios",
-      guid: `${baseUrl}/watch/${video.slug || video.id}`,
-      enclosure: video.thumbnail
-        ? {
+    // Convert videos to RSS items (with async enclosure)
+    const videoItems: RSSItem[] = await Promise.all(
+      videos.map(async (video: any) => {
+        let enclosure;
+        if (video.thumbnail) {
+          const type = getMimeType(video.thumbnail);
+          const length = await getFileSize(video.thumbnail);
+          enclosure = {
             url: video.thumbnail,
-            type: "image/jpeg",
-            length: "0",
-          }
-        : undefined,
-    }))
+            type,
+            length,
+          };
+        }
+        return {
+          title: video.title,
+          description: truncateDescription(stripHtml(video.description)),
+          link: `${baseUrl}/watch/${video.slug || video.id}`,
+          pubDate: formatRSSDate(video.publishedAt),
+          category: video.category || "General",
+          author: "Flavor Studios",
+          guid: `${baseUrl}/watch/${video.slug || video.id}`,
+          enclosure,
+        };
+      })
+    );
 
     // Combine and sort all items by publication date
     const allItems = [...blogItems, ...videoItems].sort(
       (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime(),
-    )
+    );
 
     // Limit to most recent 50 items
-    const recentItems = allItems.slice(0, 50)
+    const recentItems = allItems.slice(0, 50);
 
     // Channel configuration (add/adjust as you wish)
     const channel: RSSChannel = {
@@ -173,7 +215,7 @@ export async function generateRssFeed(): Promise<string> {
       language: "en-US",
       lastBuildDate: formatRSSDate(new Date()),
       pubDate: recentItems.length > 0 ? recentItems[0].pubDate : formatRSSDate(new Date()),
-      ttl: 60, // 1 hour
+      ttl: 60,
       image: {
         url: `${baseUrl}/placeholder.svg?height=144&width=144&text=Flavor+Studios`,
         title: "Flavor Studios",
@@ -184,15 +226,14 @@ export async function generateRssFeed(): Promise<string> {
       webMaster: "contact@flavorstudios.in (Support)",
       managingEditor: "admin@flavorstudios.in (Admin)",
       copyright: `Copyright ${new Date().getFullYear()} Flavor Studios. All rights reserved.`,
-    }
+    };
 
     // Generate RSS XML
-    return generateRSSXML(channel, recentItems)
+    return generateRSSXML(channel, recentItems);
   } catch (error) {
-    console.error("Error generating RSS feed:", error)
+    console.error("Error generating RSS feed:", error);
 
-    // --- Fallback: always .in domain! ---
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in";
     return generateRSSXML(
       {
         title: "Flavor Studios",
@@ -204,6 +245,6 @@ export async function generateRssFeed(): Promise<string> {
         ttl: 60,
       },
       [],
-    )
+    );
   }
 }

@@ -1,3 +1,5 @@
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+
 export default function Head() {
   return (
     <>
@@ -7,18 +9,18 @@ export default function Head() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebPage",
-            "name": "Blog Editor – Admin Panel",
-            "description": "Admin-only page for publishing original anime news, blog stories, and updates on Flavor Studios.",
-            "url": "https://flavorstudios.in/admin/blog/create",
-            "publisher": {
+            name: "Blog Editor – Admin Panel",
+            description: `Admin-only page for publishing original anime news, blog stories, and updates on ${SITE_NAME}.`,
+            url: `${SITE_URL}/admin/blog/create`,
+            publisher: {
               "@type": "Organization",
-              "name": "Flavor Studios",
-              "url": "https://flavorstudios.in",
-              "logo": {
+              name: SITE_NAME,
+              url: SITE_URL,
+              logo: {
                 "@type": "ImageObject",
-                "url": "https://flavorstudios.in/logo.png",
+                url: `${SITE_URL}/logo.png`,
               },
-              "sameAs": [
+              sameAs: [
                 "https://www.youtube.com/@flavorstudios",
                 "https://www.instagram.com/flavorstudios",
                 "https://twitter.com/flavor_studios",

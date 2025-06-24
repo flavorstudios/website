@@ -12,7 +12,7 @@ export const metadata = getMetadata({
       "Help Flavor Studios grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.",
     url: "https://flavorstudios.in/support",
     type: "website",
-    site_name: "Flavor Studios",
+    site_name: "Flavor Studios", // Always present!
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -30,23 +30,7 @@ export const metadata = getMetadata({
       "Help Flavor Studios grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    name: "Support Flavor Studios",
-    url: "https://flavorstudios.in/support",
-    description:
-      "Help Flavor Studios grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.",
-    publisher: {
-      "@type": "Organization",
-      name: "Flavor Studios",
-      url: "https://flavorstudios.in",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png",
-      },
-    },
-  },
+  // JSON-LD/schema REMOVED; now in head.tsx only
 });
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

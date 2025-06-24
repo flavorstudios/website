@@ -1,3 +1,5 @@
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+
 export default function Head() {
   return (
     <>
@@ -8,16 +10,16 @@ export default function Head() {
             "@context": "https://schema.org",
             "@type": "WebPage",
             "name": "Play Games",
-            "url": "https://flavorstudios.in/play",
+            "url": `${SITE_URL}/play`,
             "description":
-              "Enjoy interactive games including Tic-Tac-Toe with AI and multiplayer options on Flavor Studios. Experience classic fun with a modern twist.",
+              `Enjoy interactive games including Tic-Tac-Toe with AI and multiplayer options on ${SITE_NAME}. Experience classic fun with a modern twist.`,
             "publisher": {
               "@type": "Organization",
-              "name": "Flavor Studios",
-              "url": "https://flavorstudios.in",
+              "name": SITE_NAME,
+              "url": SITE_URL,
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://flavorstudios.in/logo.png",
+                "url": `${SITE_URL}/logo.png`,
               },
             },
           }),

@@ -12,7 +12,7 @@ export const metadata = getMetadata({
       "Have a question or proposal? Contact Flavor Studios for support, collaborations, or general inquiries. We respond within 24–48 hours.",
     url: "https://flavorstudios.in/contact",
     type: "website",
-    site_name: "Flavor Studios",
+    site_name: "Flavor Studios", // Always present!
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -30,29 +30,5 @@ export const metadata = getMetadata({
       "Have a question or proposal? Contact Flavor Studios for support, collaborations, or general inquiries. We respond within 24–48 hours.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "ContactPage",
-    name: "Contact Flavor Studios",
-    description:
-      "Contact Flavor Studios for support, collaborations, or inquiries. We typically respond within 24 to 48 hours.",
-    url: "https://flavorstudios.in/contact",
-    publisher: {
-      "@type": "Organization",
-      name: "Flavor Studios",
-      url: "https://flavorstudios.in",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png",
-      },
-      contactPoint: [
-        {
-          "@type": "ContactPoint",
-          email: "contact@flavorstudios.in",
-          contactType: "customer support",
-          url: "https://flavorstudios.in/contact",
-        },
-      ],
-    },
-  },
+  // JSON-LD/schema REMOVED; now in head.tsx only!
 });

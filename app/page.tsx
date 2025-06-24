@@ -1,11 +1,11 @@
-import { getMetadata } from "@/lib/seo-utils"
+import { getMetadata } from "@/lib/seo-utils";
 
 export const metadata = getMetadata({
   title: "Flavor Studios | Anime News & Original Stories That Inspire",
   description:
     "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
   path: "/",
-  robots: "index,follow", // Explicit for homepage/main entry
+  robots: "index,follow",
   openGraph: {
     title: "Flavor Studios | Anime News & Original Stories That Inspire",
     description:
@@ -30,29 +30,7 @@ export const metadata = getMetadata({
       "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "Flavor Studios",
-    url: "https://flavorstudios.in/",
-    description:
-      "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
-    logo: {
-      "@type": "ImageObject",
-      url: "https://flavorstudios.in/logo.png",
-    },
-    sameAs: [
-      "https://www.youtube.com/@flavorstudios",
-      "https://www.instagram.com/flavorstudios",
-      "https://twitter.com/flavor_studios",
-      "https://www.facebook.com/flavourstudios",
-      "https://www.threads.net/@flavorstudios",
-      "https://discord.com/channels/@flavorstudios",
-      "https://t.me/flavorstudios",
-      "https://www.reddit.com/r/flavorstudios/",
-      "https://bsky.app/profile/flavorstudios.bsky.social"
-    ]
-  },
+  // schema: { ... }   // <-- This line is REMOVED
 });
 
 import { Suspense } from "react"

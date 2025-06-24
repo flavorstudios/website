@@ -15,13 +15,14 @@ export const metadata = getMetadata({
   description:
     "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
   path: "/blog",
-  robots: "index,follow", // Explicit and perfect
+  robots: "index,follow",
   openGraph: {
     title: "Flavor Studios Blog | Anime News, Insights & Studio Stories",
     description:
       "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
     url: "https://flavorstudios.in/blog",
     type: "website",
+    site_name: "Flavor Studios", // <-- FIXED: og:site_name always present
     images: [
       {
         url: "https://flavorstudios.in/cover.jpg",
@@ -40,23 +41,7 @@ export const metadata = getMetadata({
       "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
     images: ["https://flavorstudios.in/cover.jpg"],
   },
-  schema: {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    name: "Flavor Studios Blog",
-    description:
-      "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
-    url: "https://flavorstudios.in/blog",
-    publisher: {
-      "@type": "Organization",
-      name: "Flavor Studios",
-      url: "https://flavorstudios.in",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://flavorstudios.in/logo.png",
-      },
-    },
-  },
+  // JSON-LD/schema REMOVED (see head.tsx)
 });
 
 // --- DATA FETCHING ---

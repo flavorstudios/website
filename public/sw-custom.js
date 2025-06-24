@@ -9,12 +9,16 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Listen for fetch events (custom offline logic)
+// Network-first strategy for all navigation (homepage and all pages)
 self.addEventListener('fetch', (event) => {
-  // Serve offline.html for navigation when offline
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('/offline.html'))
+      fetch(event.request)
+        .then((response) => {
+          // Optionally, cache a copy of the response here if you want
+          return response;
+        })
+        .catch(() => caches.match('/offline.html'))
     );
   }
 });
@@ -22,7 +26,7 @@ self.addEventListener('fetch', (event) => {
 // Custom: Cache an offline page and other assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open('flavor-studios-v1').then((cache) => {
+    caches.open('flavor-studios-v2').then((cache) => { // <-- cache version bump!
       return cache.addAll([
         '/offline.html', // Make sure this file exists in /public
         '/icons/android-chrome-192x192.png',

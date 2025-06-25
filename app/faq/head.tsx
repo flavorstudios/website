@@ -4,18 +4,18 @@ export default function Head() {
   return (
     <>
       {/* Primary Meta Tags */}
-      <title>Flavor Studios FAQ – Anime & Support Help</title>
+      <title>{SITE_NAME} FAQ – Anime & Support Help</title>
       <meta name="description" content="Get answers to frequently asked questions about Flavor Studios, supporting us, using our content, and how we create original anime and stories." />
-      <link rel="canonical" href="https://flavorstudios.in/faq" />
+      <link rel="canonical" href={`${SITE_URL}/faq`} />
       <meta name="robots" content="index,follow" />
 
       {/* Open Graph / Facebook */}
-      <meta property="og:title" content="Flavor Studios FAQ – Anime & Support Help" />
+      <meta property="og:title" content={`${SITE_NAME} FAQ – Anime & Support Help`} />
       <meta property="og:description" content="Get answers to frequently asked questions about Flavor Studios, supporting us, using our content, and how we create original anime and stories." />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://flavorstudios.in/faq" />
-      <meta property="og:site_name" content="Flavor Studios" />
-      <meta property="og:image" content="https://flavorstudios.in/cover.jpg" />
+      <meta property="og:url" content={`${SITE_URL}/faq`} />
+      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:image" content={`${SITE_URL}/cover.jpg`} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
 
@@ -23,9 +23,9 @@ export default function Head() {
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@flavorstudios" />
       <meta name="twitter:creator" content="@flavorstudios" />
-      <meta name="twitter:title" content="Flavor Studios FAQ – Anime & Support Help" />
+      <meta name="twitter:title" content={`${SITE_NAME} FAQ – Anime & Support Help`} />
       <meta name="twitter:description" content="Get answers to frequently asked questions about Flavor Studios, supporting us, using our content, and how we create original anime and stories." />
-      <meta name="twitter:image" content="https://flavorstudios.in/cover.jpg" />
+      <meta name="twitter:image" content={`${SITE_URL}/cover.jpg`} />
 
       {/* JSON-LD Schema.org for FAQPage */}
       <script

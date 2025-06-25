@@ -4,18 +4,18 @@ export default function Head() {
   return (
     <>
       {/* Primary Meta Tags */}
-      <title>Play Anime-Inspired Games Online | Flavor Studios</title>
-      <meta name="description" content="Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on Flavor Studios." />
-      <link rel="canonical" href="https://flavorstudios.in/play" />
+      <title>Play Anime-Inspired Games Online | {SITE_NAME}</title>
+      <meta name="description" content="Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on {SITE_NAME}." />
+      <link rel="canonical" href={`${SITE_URL}/play`} />
       <meta name="robots" content="index,follow" />
 
       {/* Open Graph / Facebook */}
-      <meta property="og:title" content="Play Anime-Inspired Games Online | Flavor Studios" />
-      <meta property="og:description" content="Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on Flavor Studios." />
+      <meta property="og:title" content={`Play Anime-Inspired Games Online | ${SITE_NAME}`} />
+      <meta property="og:description" content="Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on {SITE_NAME}." />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://flavorstudios.in/play" />
-      <meta property="og:site_name" content="Flavor Studios" />
-      <meta property="og:image" content="https://flavorstudios.in/cover.jpg" />
+      <meta property="og:url" content={`${SITE_URL}/play`} />
+      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:image" content={`${SITE_URL}/cover.jpg`} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
 
@@ -23,9 +23,9 @@ export default function Head() {
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site" content="@flavorstudios" />
       <meta name="twitter:creator" content="@flavorstudios" />
-      <meta name="twitter:title" content="Play Anime-Inspired Games Online | Flavor Studios" />
-      <meta name="twitter:description" content="Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on Flavor Studios." />
-      <meta name="twitter:image" content="https://flavorstudios.in/cover.jpg" />
+      <meta name="twitter:title" content={`Play Anime-Inspired Games Online | ${SITE_NAME}`} />
+      <meta name="twitter:description" content="Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on {SITE_NAME}." />
+      <meta name="twitter:image" content={`${SITE_URL}/cover.jpg`} />
 
       {/* JSON-LD Schema.org for Play Page */}
       <script

@@ -5,13 +5,13 @@ export default function Head() {
     <>
       {/* Primary Meta Tags */}
       <title>{SITE_NAME} FAQ – Anime & Support Help</title>
-      <meta name="description" content="Get answers to frequently asked questions about Flavor Studios, supporting us, using our content, and how we create original anime and stories." />
+      <meta name="description" content={`Get answers to frequently asked questions about ${SITE_NAME}, supporting us, using our content, and how we create original anime and stories.`} />
       <link rel="canonical" href={`${SITE_URL}/faq`} />
       <meta name="robots" content="index,follow" />
 
       {/* Open Graph / Facebook */}
       <meta property="og:title" content={`${SITE_NAME} FAQ – Anime & Support Help`} />
-      <meta property="og:description" content="Get answers to frequently asked questions about Flavor Studios, supporting us, using our content, and how we create original anime and stories." />
+      <meta property="og:description" content={`Get answers to frequently asked questions about ${SITE_NAME}, supporting us, using our content, and how we create original anime and stories.`} />
       <meta property="og:type" content="website" />
       <meta property="og:url" content={`${SITE_URL}/faq`} />
       <meta property="og:site_name" content={SITE_NAME} />
@@ -24,7 +24,7 @@ export default function Head() {
       <meta name="twitter:site" content="@flavorstudios" />
       <meta name="twitter:creator" content="@flavorstudios" />
       <meta name="twitter:title" content={`${SITE_NAME} FAQ – Anime & Support Help`} />
-      <meta name="twitter:description" content="Get answers to frequently asked questions about Flavor Studios, supporting us, using our content, and how we create original anime and stories." />
+      <meta name="twitter:description" content={`Get answers to frequently asked questions about ${SITE_NAME}, supporting us, using our content, and how we create original anime and stories.`} />
       <meta name="twitter:image" content={`${SITE_URL}/cover.jpg`} />
 
       {/* JSON-LD Schema.org for FAQPage */}

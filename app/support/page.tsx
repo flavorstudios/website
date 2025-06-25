@@ -1,21 +1,22 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 export const metadata = getMetadata({
-  title: "Support Flavor Studios – Fuel Anime & Stories",
+  title: `${SITE_NAME} – Fuel Anime & Stories`,
   description:
-    "Help Flavor Studios grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.",
+    `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
   path: "/support",
   robots: "index,follow", // Public-facing: encourage indexing
   openGraph: {
-    title: "Support Flavor Studios – Fuel Anime & Stories",
+    title: `${SITE_NAME} – Fuel Anime & Stories`,
     description:
-      "Help Flavor Studios grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.",
-    url: "https://flavorstudios.in/support",
+      `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
+    url: `${SITE_URL}/support`,
     type: "website",
-    site_name: "Flavor Studios", // Always present!
+    site_name: SITE_NAME, // Always present, no hardcoded value
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
       },
@@ -25,10 +26,10 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Support Flavor Studios – Fuel Anime & Stories",
+    title: `${SITE_NAME} – Fuel Anime & Stories`,
     description:
-      "Help Flavor Studios grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+      `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // JSON-LD/schema REMOVED; now in head.tsx only
 });

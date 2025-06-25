@@ -1,4 +1,6 @@
-import { getMetadata } from "@/lib/seo-utils";
+import { getMetadata, getCanonicalUrl } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+// ...other imports remain unchanged
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   // --- Fetch video ---
@@ -26,51 +28,43 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const video = await getVideo(params.slug);
 
   if (!video) {
-    const fallbackTitle = "Video Not Found – Flavor Studios";
-    const fallbackDescription = "Sorry, this video could not be found. Explore more inspiring anime videos at Flavor Studios.";
-    const fallbackUrl = `https://flavorstudios.in/watch/${params.slug}`;
-    const fallbackImage = "https://flavorstudios.in/cover.jpg";
+    const fallbackTitle = `Video Not Found – ${SITE_NAME}`;
+    const fallbackDescription = `Sorry, this video could not be found. Explore more inspiring anime videos at ${SITE_NAME}.`;
+    const fallbackUrl = getCanonicalUrl(`/watch/${params.slug}`);
+    const fallbackImage = `${SITE_URL}/cover.jpg`;
 
-    return {
+    return getMetadata({
       title: fallbackTitle,
       description: fallbackDescription,
-      alternates: {
-        canonical: fallbackUrl,
-      },
+      path: `/watch/${params.slug}`,
+      robots: "noindex, follow",
       openGraph: {
         title: fallbackTitle,
         description: fallbackDescription,
-        url: fallbackUrl,
-        type: "website",
-        site_name: "Flavor Studios",
         images: [
           {
             url: fallbackImage,
             width: 1200,
             height: 630,
-            alt: "Flavor Studios – Not Found",
+            alt: `${SITE_NAME} – Not Found`,
           },
         ],
       },
       twitter: {
-        card: "summary_large_image",
-        site: "@flavorstudios",
-        creator: "@flavorstudios",
         title: fallbackTitle,
         description: fallbackDescription,
         images: [fallbackImage],
       },
-      robots: "noindex, follow",
-    };
+    });
   }
 
-  const canonicalUrl = `https://flavorstudios.in/watch/${video.slug || params.slug}`;
+  const canonicalUrl = getCanonicalUrl(`/watch/${video.slug || params.slug}`);
   const thumbnailUrl =
     video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
-  const seoTitle = `${video.title} – Watch | Flavor Studios`;
+  const seoTitle = `${video.title} – Watch | ${SITE_NAME}`;
   const seoDescription =
     video.description ||
-    "Watch original anime content crafted by Flavor Studios — emotionally driven storytelling, 3D animation, and passion for creative expression.";
+    `Watch original anime content crafted by ${SITE_NAME} — emotionally driven storytelling, 3D animation, and passion for creative expression.`;
 
   return getMetadata({
     title: seoTitle,
@@ -80,9 +74,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     openGraph: {
       title: seoTitle,
       description: seoDescription,
-      url: canonicalUrl,
       type: "video.other",
-      site_name: "Flavor Studios", // ALWAYS included for SEO!
       images: [
         {
           url: thumbnailUrl,
@@ -92,14 +84,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       ],
     },
     twitter: {
-      card: "summary_large_image",
-      site: "@flavorstudios",
-      creator: "@flavorstudios",
       title: seoTitle,
       description: seoDescription,
       images: [thumbnailUrl],
     },
-    // JSON-LD/schema removed and handled in head.tsx
+    // JSON-LD/schema removed; now in head.tsx
   });
 }
 

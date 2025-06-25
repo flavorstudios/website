@@ -1,21 +1,20 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 export const metadata = getMetadata({
-  title: "Privacy Policy – Flavor Studios",
+  title: `Privacy Policy – ${SITE_NAME}`,
   description:
-    "Read how Flavor Studios collects, uses, and safeguards your personal data while using https://flavorstudios.in. Your privacy matters to us.",
+    `Read how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL}. Your privacy matters to us.`,
   path: "/privacy-policy",
   robots: "noindex, nofollow", // ✔️ Prevents indexing for legal/privacy policy
   openGraph: {
-    title: "Privacy Policy – Flavor Studios",
+    title: `Privacy Policy – ${SITE_NAME}`,
     description:
-      "Read how Flavor Studios collects, uses, and safeguards your personal data while using https://flavorstudios.in. Your privacy matters to us.",
-    url: "https://flavorstudios.in/privacy-policy",
+      `Read how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL}. Your privacy matters to us.`,
     type: "website",
-    site_name: "Flavor Studios", // Always present!
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
       },
@@ -24,10 +23,10 @@ export const metadata = getMetadata({
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
-    title: "Privacy Policy – Flavor Studios",
+    title: `Privacy Policy – ${SITE_NAME}`,
     description:
-      "Read how Flavor Studios collects, uses, and safeguards your personal data while using https://flavorstudios.in. Your privacy matters to us.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+      `Read how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL}. Your privacy matters to us.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // JSON-LD/schema REMOVED; now in head.tsx only
 });

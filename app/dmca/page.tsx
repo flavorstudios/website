@@ -1,34 +1,34 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 export const metadata = getMetadata({
-  title: "DMCA Takedown Policy – Flavor Studios",
+  title: `DMCA Takedown Policy – ${SITE_NAME}`,
   description:
-    "Learn how to file a DMCA takedown notice with Flavor Studios. Understand your rights and our copyright policy for protecting original content.",
+    `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
   path: "/dmca",
   robots: "noindex, nofollow", // Correct for legal/copyright policy pages
   openGraph: {
-    title: "DMCA Takedown Policy – Flavor Studios",
+    title: `DMCA Takedown Policy – ${SITE_NAME}`,
     description:
-      "Learn how to file a DMCA takedown notice with Flavor Studios. Understand your rights and our copyright policy for protecting original content.",
-    url: "https://flavorstudios.in/dmca",
+      `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
     type: "website",
-    site_name: "Flavor Studios", // Always present!
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
       },
     ],
+    // url and site_name omitted; helper will handle!
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "DMCA Takedown Policy – Flavor Studios",
+    title: `DMCA Takedown Policy – ${SITE_NAME}`,
     description:
-      "Learn how to file a DMCA takedown notice with Flavor Studios. Understand your rights and our copyright policy for protecting original content.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+      `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // JSON-LD/schema REMOVED; now in head.tsx only
 });

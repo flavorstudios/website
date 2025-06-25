@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Eye, User, Clock } from "lucide-react";
 import CommentSection from "./components/comment-section";
 import SocialShare from "./components/social-share";
-import { getMetadata } from "@/lib/seo-utils";
+import { getMetadata, getCanonicalUrl } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 async function getBlogPost(slug: string) {
   try {
@@ -32,9 +33,10 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
   const post = await getBlogPost(params.slug);
 
   if (!post) {
-    const fallbackUrl = `https://flavorstudios.in/blog/${params.slug}`;
-    const fallbackTitle = "Post Not Found – Flavor Studios";
+    const fallbackUrl = getCanonicalUrl(`/blog/${params.slug}`);
+    const fallbackTitle = `Post Not Found – ${SITE_NAME}`;
     const fallbackDesc = "This blog post could not be found.";
+    const fallbackImage = `${SITE_URL}/cover.jpg`;
 
     return {
       title: fallbackTitle,
@@ -49,7 +51,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
         type: "article",
         images: [
           {
-            url: "https://flavorstudios.in/cover.jpg",
+            url: fallbackImage,
             width: 1200,
             height: 630,
           },
@@ -61,19 +63,19 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
         creator: "@flavorstudios",
         title: fallbackTitle,
         description: fallbackDesc,
-        images: ["https://flavorstudios.in/cover.jpg"],
+        images: [fallbackImage],
       },
       robots: "noindex, follow",
     };
   }
 
-  const canonicalUrl = `https://flavorstudios.in/blog/${post.slug}`;
-  const ogImage = post.coverImage || "https://flavorstudios.in/cover.jpg";
+  const canonicalUrl = getCanonicalUrl(`/blog/${post.slug}`);
+  const ogImage = post.coverImage || `${SITE_URL}/cover.jpg`;
   const seoTitle = post.seoTitle || post.title;
   const seoDescription = post.seoDescription || post.excerpt;
 
   return getMetadata({
-    title: `${seoTitle} – Flavor Studios`,
+    title: `${seoTitle} – ${SITE_NAME}`,
     description: seoDescription,
     path: `/blog/${post.slug}`,
     robots: "index,follow", // Explicit for published posts
@@ -86,7 +88,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
         },
       ],
       type: "article",
-      url: canonicalUrl,
+      // url: canonicalUrl, // Omit; helper handles it
       title: seoTitle,
       description: seoDescription,
     },

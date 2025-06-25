@@ -3,31 +3,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/constants";
 export default function Head() {
   return (
     <>
-      {/* Primary Meta Tags */}
-      <title>{SITE_NAME} FAQ – Anime & Support Help</title>
-      <meta name="description" content={`Get answers to frequently asked questions about ${SITE_NAME}, supporting us, using our content, and how we create original anime and stories.`} />
-      <link rel="canonical" href={`${SITE_URL}/faq`} />
-      <meta name="robots" content="index,follow" />
-
-      {/* Open Graph / Facebook */}
-      <meta property="og:title" content={`${SITE_NAME} FAQ – Anime & Support Help`} />
-      <meta property="og:description" content={`Get answers to frequently asked questions about ${SITE_NAME}, supporting us, using our content, and how we create original anime and stories.`} />
-      <meta property="og:type" content="website" />
-      <meta property="og:url" content={`${SITE_URL}/faq`} />
-      <meta property="og:site_name" content={SITE_NAME} />
-      <meta property="og:image" content={`${SITE_URL}/cover.jpg`} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-
-      {/* Twitter */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:site" content="@flavorstudios" />
-      <meta name="twitter:creator" content="@flavorstudios" />
-      <meta name="twitter:title" content={`${SITE_NAME} FAQ – Anime & Support Help`} />
-      <meta name="twitter:description" content={`Get answers to frequently asked questions about ${SITE_NAME}, supporting us, using our content, and how we create original anime and stories.`} />
-      <meta name="twitter:image" content={`${SITE_URL}/cover.jpg`} />
-
-      {/* JSON-LD Schema.org for FAQPage */}
+      {/* JSON-LD Schema.org FAQPage Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -36,8 +12,7 @@ export default function Head() {
             "@type": "FAQPage",
             "name": `${SITE_NAME} FAQ`,
             "url": `${SITE_URL}/faq`,
-            "description":
-              `Find answers to common questions about ${SITE_NAME}, animation, support, and our creative process.`,
+            "description": `Find answers to common questions about ${SITE_NAME}, animation, support, and our creative process.`,
             "mainEntity": [
               {
                 "@type": "Question",
@@ -47,7 +22,6 @@ export default function Head() {
                   "text": `${SITE_NAME} is a creative studio focused on producing high-quality anime-inspired content. We craft original videos, blog posts, and interactive experiences designed for anime fans across the globe.`,
                 },
               },
-              // ... Add all other FAQ entries here
               {
                 "@type": "Question",
                 "name": "Is my personal data protected?",
@@ -56,6 +30,7 @@ export default function Head() {
                   "text": "Yes. We use modern data security protocols. See our Privacy Policy to understand how your data is collected and used.",
                 },
               },
+              // ...add additional questions/answers as needed
             ],
             "publisher": {
               "@type": "Organization",

@@ -18,7 +18,7 @@ self.addEventListener('fetch', (event) => {
           // Optionally, cache a copy of the response here if you want
           return response;
         })
-        .catch(() => caches.match('/offline.html'))
+        .catch(() => caches.match('/offline-404.html'))
     );
   }
 });
@@ -28,7 +28,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open('flavor-studios-v2').then((cache) => { // <-- cache version bump!
       return cache.addAll([
-        '/offline.html', // Make sure this file exists in /public
+        '/offline-404.html', // Make sure this file exists in /public
         '/icons/android-chrome-192x192.png',
         '/icons/android-chrome-512x512.png',
       ]);

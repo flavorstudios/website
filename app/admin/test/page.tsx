@@ -1,21 +1,22 @@
 import { cookies } from "next/headers";
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 // --- SEO: Block search engines & keep internal-only metadata ---
 export const metadata = getMetadata({
-  title: "Admin Test – Flavor Studios",
-  description: "Internal admin test page for verifying authentication. Not publicly indexed.",
+  title: `Admin Test – ${SITE_NAME}`,
+  description: `Internal admin test page for verifying authentication. Not publicly indexed.`,
   path: "/admin/test",
   robots: "noindex, nofollow", // Explicit and correct!
   openGraph: {
-    title: "Admin Test – Flavor Studios",
-    description: "Internal admin test page for verifying authentication. Not publicly indexed.",
-    url: "https://flavorstudios.in/admin/test",
+    title: `Admin Test – ${SITE_NAME}`,
+    description: `Internal admin test page for verifying authentication. Not publicly indexed.`,
+    url: `${SITE_URL}/admin/test`, // Dynamically generated URL
     type: "website",
-    site_name: "Flavor Studios",
+    site_name: SITE_NAME, // Automatically handled by the helper
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`, // Dynamically generated URL
         width: 1200,
         height: 630,
       },
@@ -25,9 +26,9 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Admin Test – Flavor Studios",
-    description: "Internal admin test page for verifying authentication. Not publicly indexed.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+    title: `Admin Test – ${SITE_NAME}`,
+    description: `Internal admin test page for verifying authentication. Not publicly indexed.`,
+    images: [`${SITE_URL}/cover.jpg`], // Dynamically generated URL
   },
   // Schema/JSON-LD intentionally removed (now in head.tsx)
 });

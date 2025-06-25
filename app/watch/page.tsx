@@ -1,4 +1,5 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,35 +10,34 @@ import { CategoryTabs } from "@/components/ui/category-tabs";
 
 // === SEO METADATA (Centralized for Next.js 15+) ===
 export const metadata = getMetadata({
-  title: "Flavor Studios Videos | Original Anime, Studio Films & More",
+  title: `${SITE_NAME} Videos | Original Anime, Studio Films & More`,
   description:
-    "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
+    `Watch original anime, studio films, and exclusive video content from ${SITE_NAME}. Discover our creative world—stream the latest now.`,
   path: "/watch",
   robots: "index,follow",
   openGraph: {
-    title: "Flavor Studios Videos | Original Anime, Studio Films & More",
+    title: `${SITE_NAME} Videos | Original Anime, Studio Films & More`,
     description:
-      "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
-    url: "https://flavorstudios.in/watch",
+      `Watch original anime, studio films, and exclusive video content from ${SITE_NAME}. Discover our creative world—stream the latest now.`,
     type: "website",
-    site_name: "Flavor Studios", // Always included!
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
-        alt: "Flavor Studios Videos – Original Anime, Studio Films & More",
+        alt: `${SITE_NAME} Videos – Original Anime, Studio Films & More`,
       },
     ],
+    // url and site_name are omitted: helper will compute them
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Flavor Studios Videos | Original Anime, Studio Films & More",
+    title: `${SITE_NAME} Videos | Original Anime, Studio Films & More`,
     description:
-      "Watch original anime, studio films, and exclusive video content from Flavor Studios. Discover our creative world—stream the latest now.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+      `Watch original anime, studio films, and exclusive video content from ${SITE_NAME}. Discover our creative world—stream the latest now.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // Schema/JSON-LD removed; now in head.tsx
 });

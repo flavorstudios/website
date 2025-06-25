@@ -1,21 +1,20 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 export const metadata = getMetadata({
-  title: "Terms of Service – Flavor Studios",
+  title: `Terms of Service – ${SITE_NAME}`,
   description:
-    "Review the Terms of Service for using Flavor Studios’ website, original content, and community features. Stay informed and protected.",
+    `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
   path: "/terms-of-service",
   robots: "noindex, nofollow", // ✔️ Block search bots from indexing and following
   openGraph: {
-    title: "Terms of Service – Flavor Studios",
+    title: `Terms of Service – ${SITE_NAME}`,
     description:
-      "Review the Terms of Service for using Flavor Studios’ website, original content, and community features. Stay informed and protected.",
-    url: "https://flavorstudios.in/terms-of-service",
+      `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
     type: "website",
-    site_name: "Flavor Studios", // Always present!
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
       },
@@ -25,10 +24,10 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Terms of Service – Flavor Studios",
+    title: `Terms of Service – ${SITE_NAME}`,
     description:
-      "Review the Terms of Service for using Flavor Studios’ website, original content, and community features. Stay informed and protected.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+      `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // JSON-LD/schema REMOVED; now in head.tsx only
 });

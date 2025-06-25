@@ -1,7 +1,7 @@
 // app/faq/page.tsx
 
-import FAQPageClient from "./faq-page-client";
+import FaqPageClient from "./FaqPageClient";
 
 export default function FAQPage() {
-  return <FAQPageClient />;
+  return <FaqPageClient />;
 }

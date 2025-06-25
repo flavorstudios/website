@@ -1,34 +1,34 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 export const metadata = getMetadata({
-  title: "Disclaimer – Legal Notice | Flavor Studios",
+  title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
   description:
-    "Read Flavor Studios' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.",
+    `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
   path: "/disclaimer",
   robots: "noindex, nofollow", // Required for legal/policy pages
   openGraph: {
-    title: "Disclaimer – Legal Notice | Flavor Studios",
+    title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
     description:
-      "Read Flavor Studios' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.",
-    url: "https://flavorstudios.in/disclaimer",
+      `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
     type: "website",
-    site_name: "Flavor Studios", // Always present!
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
       },
     ],
+    // site_name is already handled in getMetadata helper
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Disclaimer – Legal Notice | Flavor Studios",
+    title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
     description:
-      "Read Flavor Studios' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+      `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // JSON-LD/schema REMOVED; now in head.tsx only
 });

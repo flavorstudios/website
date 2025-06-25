@@ -27,6 +27,8 @@ export async function GET() {
     } catch (fallbackError) {
       // If fallback fails, return the minimal feed with the domain replaced by SITE_URL
       console.error("[RSS] Fallback attempt failed:", fallbackError);
+      
+      // Construct the minimal RSS feed with SITE_URL constant
       return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>

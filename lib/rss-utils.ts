@@ -1,3 +1,4 @@
+import { SITE_URL, SITE_NAME } from "@/lib/constants"; // Import SITE_URL and SITE_NAME constants
 import fs from "fs";
 import path from "path";
 
@@ -25,52 +26,52 @@ async function getFileSize(url: string): Promise<string | undefined> {
 }
 
 export interface RSSItem {
-  title: string
-  description: string
-  link: string
-  pubDate: string
-  category?: string
-  author?: string
-  guid?: string
+  title: string;
+  description: string;
+  link: string;
+  pubDate: string;
+  category?: string;
+  author?: string;
+  guid?: string;
   enclosure?: {
-    url: string
-    type: string
-    length?: string // Now optional!
-  }
+    url: string;
+    type: string;
+    length?: string; // Now optional!
+  };
 }
 
 export interface RSSChannel {
-  title: string
-  description: string
-  link: string
-  language: string
-  lastBuildDate: string
-  pubDate: string
-  ttl: number
+  title: string;
+  description: string;
+  link: string;
+  language: string;
+  lastBuildDate: string;
+  pubDate: string;
+  ttl: number;
   image?: {
-    url: string
-    title: string
-    link: string
-    width: number
-    height: number
-  }
-  webMaster?: string
-  managingEditor?: string
-  copyright?: string
+    url: string;
+    title: string;
+    link: string;
+    width: number;
+    height: number;
+  };
+  webMaster?: string;
+  managingEditor?: string;
+  copyright?: string;
 }
 
 export function formatRSSDate(date: string | Date): string {
-  return new Date(date).toUTCString()
+  return new Date(date).toUTCString();
 }
 
 export function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, "").trim()
+  return html.replace(/<[^>]*>/g, "").trim();
 }
 
 export function truncateDescription(text: string, maxLength = 200): string {
-  if (!text) return ""
-  if (text.length <= maxLength) return text
-  return text.substring(0, maxLength).trim() + "..."
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength).trim() + "...";
 }
 
 export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
@@ -82,21 +83,23 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
       <link>${item.link}</link>
       <pubDate>${item.pubDate}</pubDate>
       <category><![CDATA[${item.category || "General"}]]></category>
-      <author><![CDATA[${item.author || "Flavor Studios"}]]></author>
+      <author><![CDATA[${item.author || SITE_NAME}]]></author>
       <guid isPermaLink="true">${item.guid || item.link}</guid>${
         item.enclosure
           ? `
-      <enclosure url="${item.enclosure.url}" type="${item.enclosure.type}"${item.enclosure.length ? ` length="${item.enclosure.length}"` : ""}/>`
+      <enclosure url="${item.enclosure.url}" type="${item.enclosure.type}"${
+              item.enclosure.length ? ` length="${item.enclosure.length}"` : ""
+            }/>`
           : ""
       }
     </item>`,
     )
-    .join("\n")
+    .join("\n");
 
   // Normalize trailing slash for atom:link
   const atomLink = channel.link.endsWith("/")
     ? `${channel.link}rss.xml`
-    : `${channel.link}/rss.xml`
+    : `${channel.link}/rss.xml`;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -135,22 +138,22 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
         ? `<copyright>${channel.copyright}</copyright>`
         : ""
     }
-    <generator>Flavor Studios RSS Generator</generator>
+    <generator>${SITE_NAME} RSS Generator</generator>
 ${xmlItems}
   </channel>
-</rss>`
+</rss>`;
 }
 
 export async function generateRssFeed(): Promise<string> {
   try {
-    const { blogStore, videoStore } = await import("./content-store")
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in"
+    const { blogStore, videoStore } = await import("./content-store");
+    const baseUrl = SITE_URL;
 
     // Fetch published content
     const [blogPosts, videos] = await Promise.all([
       blogStore.getPublished().catch(() => []),
       videoStore.getPublished().catch(() => []),
-    ])
+    ]);
 
     // Convert blog posts to RSS items
     const blogItems: RSSItem[] = blogPosts.map((post: any) => ({
@@ -159,9 +162,9 @@ export async function generateRssFeed(): Promise<string> {
       link: `${baseUrl}/blog/${post.slug}`,
       pubDate: formatRSSDate(post.publishedAt),
       category: post.category || "General",
-      author: post.author || "Flavor Studios",
+      author: post.author || SITE_NAME,
       guid: `${baseUrl}/blog/${post.slug}`,
-    }))
+    }));
 
     // Convert videos to RSS items (with async enclosure)
     const videoItems: RSSItem[] = await Promise.all(
@@ -173,7 +176,7 @@ export async function generateRssFeed(): Promise<string> {
           enclosure = {
             url: video.thumbnail,
             type,
-            ...(length ? { length } : {}) // Only add length if present
+            ...(length ? { length } : {}), // Only add length if present
           };
         }
         return {
@@ -182,7 +185,7 @@ export async function generateRssFeed(): Promise<string> {
           link: `${baseUrl}/watch/${video.slug || video.id}`,
           pubDate: formatRSSDate(video.publishedAt),
           category: video.category || "General",
-          author: "Flavor Studios",
+          author: SITE_NAME,
           guid: `${baseUrl}/watch/${video.slug || video.id}`,
           enclosure,
         };
@@ -199,9 +202,9 @@ export async function generateRssFeed(): Promise<string> {
 
     // Channel configuration (add/adjust as you wish)
     const channel: RSSChannel = {
-      title: "Flavor Studios | Anime News, Original Stories & Creative Insights",
+      title: `${SITE_NAME} | Anime News, Original Stories & Creative Insights`,
       description:
-        "Step behind the scenes with Flavor Studios, your gateway to anime news, original stories, and the creative journey of anime production. Explore exclusive episodes, in-depth industry insights, and the artistry behind every animation.",
+        `Step behind the scenes with ${SITE_NAME}, your gateway to anime news, original stories, and the creative journey of anime production. Explore exclusive episodes, in-depth industry insights, and the artistry behind every animation.`,
       link: baseUrl,
       language: "en-US",
       lastBuildDate: formatRSSDate(new Date()),
@@ -209,14 +212,14 @@ export async function generateRssFeed(): Promise<string> {
       ttl: 60,
       image: {
         url: `${baseUrl}/placeholder.png`,
-        title: "Flavor Studios",
+        title: SITE_NAME,
         link: baseUrl,
         width: 144,
         height: 144,
       },
       webMaster: "contact@flavorstudios.in (Support)",
       managingEditor: "admin@flavorstudios.in (Admin)",
-      copyright: `Copyright ${new Date().getFullYear()} Flavor Studios. All rights reserved.`,
+      copyright: `Copyright ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.`,
     };
 
     // Generate RSS XML
@@ -224,12 +227,11 @@ export async function generateRssFeed(): Promise<string> {
   } catch (error) {
     console.error("Error generating RSS feed:", error);
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in";
     return generateRSSXML(
       {
-        title: "Flavor Studios",
+        title: SITE_NAME,
         description: "Anime creation stories and insights",
-        link: baseUrl,
+        link: SITE_URL,
         language: "en-US",
         lastBuildDate: formatRSSDate(new Date()),
         pubDate: formatRSSDate(new Date()),

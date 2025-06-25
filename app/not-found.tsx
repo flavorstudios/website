@@ -1,7 +1,5 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"
+import { SITE_URL } from "@/lib/constants";
+import { getCanonicalUrl } from "@/lib/seo-utils"
 
 // --- SEO Metadata for 404 Page ---
 export const metadata = {
@@ -12,12 +10,12 @@ export const metadata = {
     title: "404 Not Found – Flavor Studios",
     description:
       "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
-    url: "https://flavorstudios.in/404",
+    url: `${SITE_URL}/404`, // Using SITE_URL
     type: "website",
-    siteName: "Flavor Studios",
+    siteName: SITE_URL, // Using SITE_URL
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`, // Using SITE_URL
         width: 1200,
         height: 630,
       },
@@ -30,10 +28,10 @@ export const metadata = {
     title: "404 Not Found – Flavor Studios",
     description:
       "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [`${SITE_URL}/cover.jpg`], // Using SITE_URL
   },
   alternates: {
-    canonical: "https://flavorstudios.in/404",
+    canonical: getCanonicalUrl("/404"), // Using getCanonicalUrl() for canonical
   },
   robots: {
     index: false,

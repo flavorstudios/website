@@ -1,21 +1,24 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 export const metadata = getMetadata({
-  title: "About Us – The Vision Behind Flavor Studios",
+  title: `About Us – The Vision Behind ${SITE_NAME}`,
   description:
-    "Explore the heart and vision of Flavor Studios — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.",
+    `Explore the heart and vision of ${SITE_NAME} — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.`,
   path: "/about",
   robots: "index,follow", // Page is indexable
+
+  // You don't need to specify openGraph.url or site_name; getMetadata enforces this automatically.
   openGraph: {
-    title: "About Us – The Vision Behind Flavor Studios",
+    title: `About Us – The Vision Behind ${SITE_NAME}`,
     description:
-      "Learn what drives Flavor Studios. Discover our mission, creative values, and passion for telling original stories through anime and 3D animation.",
-    url: "https://flavorstudios.in/about",
+      `Learn what drives ${SITE_NAME}. Discover our mission, creative values, and passion for telling original stories through anime and 3D animation.`,
+    // url: `${SITE_URL}/about`,             // OMITTED; helper generates canonical
+    // site_name: SITE_NAME,                 // OMITTED; helper enforces this
     type: "website",
-    site_name: "Flavor Studios",
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
       },
@@ -25,10 +28,10 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "About Us – The Vision Behind Flavor Studios",
+    title: `About Us – The Vision Behind ${SITE_NAME}`,
     description:
       "We’re an indie animation studio fueled by storytelling, emotion, and community. Discover our journey and purpose.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // Schema/JSON-LD is intentionally removed from here (now in head.tsx)
 });

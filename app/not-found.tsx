@@ -1,18 +1,22 @@
-import { SITE_URL } from "@/lib/constants";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"
+import { SITE_NAME, SITE_URL } from "@/lib/constants"
 import { getCanonicalUrl } from "@/lib/seo-utils"
 
 // --- SEO Metadata for 404 Page ---
 export const metadata = {
-  title: "404 Not Found – Flavor Studios",
+  title: "404 Not Found – " + SITE_NAME,
   description:
-    "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
+    "This page does not exist. Discover original anime, news, and stories on " + SITE_NAME + " or explore our popular sections.",
   openGraph: {
-    title: "404 Not Found – Flavor Studios",
+    title: "404 Not Found – " + SITE_NAME,
     description:
-      "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
+      "This page does not exist. Discover original anime, news, and stories on " + SITE_NAME + " or explore our popular sections.",
     url: `${SITE_URL}/404`, // Using SITE_URL
     type: "website",
-    siteName: SITE_URL, // Using SITE_URL
+    site_name: SITE_NAME, // Using SITE_NAME
     images: [
       {
         url: `${SITE_URL}/cover.jpg`, // Using SITE_URL
@@ -25,13 +29,13 @@ export const metadata = {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "404 Not Found – Flavor Studios",
+    title: "404 Not Found – " + SITE_NAME,
     description:
-      "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
+      "This page does not exist. Discover original anime, news, and stories on " + SITE_NAME + " or explore our popular sections.",
     images: [`${SITE_URL}/cover.jpg`], // Using SITE_URL
   },
   alternates: {
-    canonical: getCanonicalUrl("/404"), // Using getCanonicalUrl() for canonical
+    canonical: getCanonicalUrl("/404"), // Using getCanonicalUrl() for the 404 path
   },
   robots: {
     index: false,
@@ -97,7 +101,7 @@ export default function NotFound() {
         <div className="mb-8 sm:mb-12">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">Oops! Page Not Found</h2>
           <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
-            The page you're looking for seems to have wandered off into another dimension. Don't worry—Flavor Studios
+            The page you're looking for seems to have wandered off into another dimension. Don't worry—{SITE_NAME}
             has plenty of original anime, news, and stories to explore!
           </p>
 
@@ -172,7 +176,7 @@ export default function NotFound() {
 
         {/* Footer Message */}
         <div className="mt-6 sm:mt-8 text-xs sm:text-sm text-gray-500">
-          <p>Error Code: 404 • Page Not Found • Flavor Studios</p>
+          <p>Error Code: 404 • Page Not Found • {SITE_NAME}</p>
         </div>
       </div>
     </div>

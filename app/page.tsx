@@ -1,34 +1,34 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 export const metadata = getMetadata({
-  title: "Flavor Studios | Anime News & Original Stories That Inspire",
+  title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
   description:
-    "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
+    `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
   path: "/",
   robots: "index,follow",
   openGraph: {
-    title: "Flavor Studios | Anime News & Original Stories That Inspire",
+    title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
     description:
-      "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
-    url: "https://flavorstudios.in/",
+      `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
     type: "website",
-    site_name: "Flavor Studios", // Always present!
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
       },
     ],
+    // url and site_name are omitted: helper will handle them
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Flavor Studios | Anime News & Original Stories That Inspire",
+    title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
     description:
-      "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+      `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // No schema/JSON-LD here (handled in head.tsx)
 });

@@ -3,6 +3,31 @@ import { SITE_NAME, SITE_URL } from "@/lib/constants";
 export default function Head() {
   return (
     <>
+      {/* Primary Meta Tags */}
+      <title>Flavor Studios FAQ – Anime & Support Help</title>
+      <meta name="description" content="Get answers to frequently asked questions about Flavor Studios, supporting us, using our content, and how we create original anime and stories." />
+      <link rel="canonical" href="https://flavorstudios.in/faq" />
+      <meta name="robots" content="index,follow" />
+
+      {/* Open Graph / Facebook */}
+      <meta property="og:title" content="Flavor Studios FAQ – Anime & Support Help" />
+      <meta property="og:description" content="Get answers to frequently asked questions about Flavor Studios, supporting us, using our content, and how we create original anime and stories." />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://flavorstudios.in/faq" />
+      <meta property="og:site_name" content="Flavor Studios" />
+      <meta property="og:image" content="https://flavorstudios.in/cover.jpg" />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+
+      {/* Twitter */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content="@flavorstudios" />
+      <meta name="twitter:creator" content="@flavorstudios" />
+      <meta name="twitter:title" content="Flavor Studios FAQ – Anime & Support Help" />
+      <meta name="twitter:description" content="Get answers to frequently asked questions about Flavor Studios, supporting us, using our content, and how we create original anime and stories." />
+      <meta name="twitter:image" content="https://flavorstudios.in/cover.jpg" />
+
+      {/* JSON-LD Schema.org for FAQPage */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

@@ -1,5 +1,8 @@
-import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"
 
 // --- SEO Metadata for 404 Page ---
 export const metadata = getMetadata({
@@ -38,7 +41,7 @@ export const metadata = getMetadata({
     index: false,
     follow: true,
   },
-}
+})
 
 export default function NotFound() {
   const quickLinks = [
@@ -173,7 +176,7 @@ export default function NotFound() {
 
         {/* Footer Message */}
         <div className="mt-6 sm:mt-8 text-xs sm:text-sm text-gray-500">
-          <p>Error Code: 404 • Page Not Found • Flavor Studios</p>
+          <p>Error Code: 404 • Page Not Found • {SITE_NAME}</p>
         </div>
       </div>
     </div>

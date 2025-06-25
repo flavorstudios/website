@@ -1,20 +1,21 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import AdminLoginForm from "./AdminLoginForm";
 
 export const metadata = getMetadata({
-  title: "Admin Login – Flavor Studios",
-  description: "Login securely to manage Flavor Studios content, blogs, and creative assets.",
+  title: `Admin Login – ${SITE_NAME}`,
+  description: `Login securely to manage ${SITE_NAME} content, blogs, and creative assets.`,
   path: "/admin/login",
   robots: "noindex, nofollow", // Explicit and correct for admin login
   openGraph: {
-    title: "Admin Login – Flavor Studios",
-    description: "Login securely to manage Flavor Studios content, blogs, and creative assets.",
-    url: "https://flavorstudios.in/admin/login",
+    title: `Admin Login – ${SITE_NAME}`,
+    description: `Login securely to manage ${SITE_NAME} content, blogs, and creative assets.`,
+    url: `${SITE_URL}/admin/login`, // Dynamically constructed URL
     type: "website",
-    site_name: "Flavor Studios",
+    site_name: SITE_NAME, // Automatically handled by the helper
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`, // Dynamically generated URL
         width: 1200,
         height: 630,
       },
@@ -24,9 +25,9 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Admin Login – Flavor Studios",
-    description: "Login securely to manage Flavor Studios content, blogs, and creative assets.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+    title: `Admin Login – ${SITE_NAME}`,
+    description: `Login securely to manage ${SITE_NAME} content, blogs, and creative assets.`,
+    images: [`${SITE_URL}/cover.jpg`], // Dynamically generated URL
   },
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   // Schema/JSON-LD intentionally removed (now in head.tsx)

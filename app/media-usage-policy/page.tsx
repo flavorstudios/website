@@ -1,21 +1,21 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 export const metadata = getMetadata({
-  title: "Media Usage Policy – Copyright & Attribution | Flavor Studios",
+  title: `Media Usage Policy – Copyright & Attribution | ${SITE_NAME}`,
   description:
-    "Understand how you can use Flavor Studios' media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.",
+    `Understand how you can use ${SITE_NAME}'s media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.`,
   path: "/media-usage-policy",
-  robots: "noindex, nofollow", // Correct: media usage/copyright policy should NOT be indexed
+  robots: "noindex, nofollow", // Policy should NOT be indexed
   openGraph: {
-    title: "Media Usage Policy – Copyright & Attribution | Flavor Studios",
+    title: `Media Usage Policy – Copyright & Attribution | ${SITE_NAME}`,
     description:
-      "Understand how you can use Flavor Studios' media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.",
-    url: "https://flavorstudios.in/media-usage-policy",
+      `Understand how you can use ${SITE_NAME}'s media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.`,
     type: "website",
-    site_name: "Flavor Studios", // Always present!
+    // No need to specify url or site_name; the helper adds them automatically!
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
       },
@@ -25,10 +25,10 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Media Usage Policy – Copyright & Attribution | Flavor Studios",
+    title: `Media Usage Policy – Copyright & Attribution | ${SITE_NAME}`,
     description:
-      "Understand how you can use Flavor Studios' media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+      `Understand how you can use ${SITE_NAME}'s media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // JSON-LD/schema REMOVED; now in head.tsx only
 });

@@ -1,23 +1,22 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"
+import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 // --- SEO Metadata for 404 Page ---
-export const metadata = {
-  title: "404 Not Found – Flavor Studios",
+export const metadata = getMetadata({
+  title: `404 Not Found – ${SITE_NAME}`,
   description:
     "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
+  path: "/404", // Dynamic path for 404 page
   openGraph: {
-    title: "404 Not Found – Flavor Studios",
+    title: `404 Not Found – ${SITE_NAME}`,
     description:
       "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
-    url: "https://flavorstudios.in/404",
+    url: `${SITE_URL}/404`, // Dynamically generated URL using SITE_URL
     type: "website",
-    site_name: "Flavor Studios", // <-- Always present and correct key!
+    site_name: SITE_NAME, // Automatically handled by the helper
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`, // Dynamically generated URL
         width: 1200,
         height: 630,
       },
@@ -27,13 +26,13 @@ export const metadata = {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "404 Not Found – Flavor Studios",
+    title: `404 Not Found – ${SITE_NAME}`,
     description:
       "This page does not exist. Discover original anime, news, and stories on Flavor Studios or explore our popular sections.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+    images: [`${SITE_URL}/cover.jpg`], // Dynamically generated URL
   },
   alternates: {
-    canonical: "https://flavorstudios.in/404",
+    canonical: `${SITE_URL}/404`, // Dynamically generated canonical URL
   },
   robots: {
     index: false,

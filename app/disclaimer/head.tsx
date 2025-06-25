@@ -12,7 +12,7 @@ export default function Head() {
             name: "Disclaimer",
             url: `${SITE_URL}/disclaimer`,
             description:
-              "Read Flavor Studios' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies.",
+              `Read ${SITE_NAME}' official disclaimer outlining legal limitations, liability, third-party links, and content usage policies.`,
             publisher: {
               "@type": "Organization",
               name: SITE_NAME,

@@ -1,5 +1,3 @@
-"use client";
-
 import { use } from "react";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
@@ -24,16 +22,20 @@ async function getVideo(slug) {
 }
 
 export default function Head({ params }) {
+  // ⚠️ This is a server component – DO NOT add "use client"!
   const video = use(getVideo(params.slug));
 
-  if (!video) return null; // No schema for not-found
+  if (!video) return null; // Don't render schema if not found
 
   const seoTitle = `${video.title} – Watch | ${SITE_NAME}`;
   const seoDescription =
     video.description ||
     `Watch original anime content crafted by ${SITE_NAME} — emotionally driven storytelling, 3D animation, and passion for creative expression.`;
   const thumbnailUrl =
-    video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
+    video.thumbnail ||
+    (video.youtubeId
+      ? `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
+      : `${SITE_URL}/cover.jpg`);
 
   return (
     <script
@@ -42,12 +44,14 @@ export default function Head({ params }) {
         __html: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "VideoObject",
-          name: seoTitle,
+          name: video.title,
           description: seoDescription,
           thumbnailUrl: [thumbnailUrl],
           uploadDate: video.publishedAt,
           duration: video.duration,
-          embedUrl: `https://www.youtube.com/embed/${video.youtubeId}`,
+          embedUrl: video.youtubeId
+            ? `https://www.youtube.com/embed/${video.youtubeId}`
+            : undefined,
           interactionStatistic: {
             "@type": "InteractionCounter",
             interactionType: { "@type": "WatchAction" },

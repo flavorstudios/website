@@ -1,21 +1,20 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 export const metadata = getMetadata({
-  title: "Cookie Policy – Flavor Studios",
+  title: `Cookie Policy – ${SITE_NAME}`,
   description:
-    "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
+    `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
   path: "/cookie-policy",
   robots: "noindex, nofollow", // Policy/legal pages must NOT be indexed
   openGraph: {
-    title: "Cookie Policy – Flavor Studios",
+    title: `Cookie Policy – ${SITE_NAME}`,
     description:
-      "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
-    url: "https://flavorstudios.in/cookie-policy",
+      `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
     type: "website",
-    site_name: "Flavor Studios", // Always present!
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
       },
@@ -25,10 +24,10 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Cookie Policy – Flavor Studios",
+    title: `Cookie Policy – ${SITE_NAME}`,
     description:
-      "Understand how Flavor Studios uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on flavorstudios.in.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+      `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // JSON-LD/schema REMOVED; now in head.tsx only
 });

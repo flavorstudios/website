@@ -1,45 +1,37 @@
 import { getMetadata } from "@/lib/seo-utils";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
-import { blogStore } from "@/lib/content-store";
-import { getDynamicCategories } from "@/lib/dynamic-categories";
-import { CategoryTabs } from "@/components/ui/category-tabs";
-import { NewsletterSignup } from "@/components/newsletter-signup";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+// ...other imports
 
 // === SEO METADATA BLOCK (Centralized for Next.js 15+) ===
 export const metadata = getMetadata({
-  title: "Flavor Studios Blog | Anime News, Insights & Studio Stories",
+  title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
   description:
-    "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
+    `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
   path: "/blog",
   robots: "index,follow",
   openGraph: {
-    title: "Flavor Studios Blog | Anime News, Insights & Studio Stories",
+    title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
     description:
-      "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
-    url: "https://flavorstudios.in/blog",
+      `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
     type: "website",
-    site_name: "Flavor Studios", // <-- FIXED: og:site_name always present
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
-        alt: "Flavor Studios Blog – Anime News, Insights & Studio Stories",
+        alt: `${SITE_NAME} Blog – Anime News, Insights & Studio Stories`,
       },
     ],
+    // url and site_name are omitted; helper fills these in!
   },
   twitter: {
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Flavor Studios Blog | Anime News, Insights & Studio Stories",
+    title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
     description:
-      "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+      `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // JSON-LD/schema REMOVED (see head.tsx)
 });

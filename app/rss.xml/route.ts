@@ -14,8 +14,8 @@ export async function GET() {
     });
   } catch (error) {
     console.error("[RSS] Error generating RSS feed (primary attempt):", error);
-    
-    // Use the utility's fallback logic which will return a minimal valid feed
+
+    // Use the utility's fallback logic, which will return a minimal valid feed
     try {
       const rssXml = await generateRssFeed();
       return new NextResponse(rssXml, {
@@ -27,9 +27,9 @@ export async function GET() {
     } catch (fallbackError) {
       // If fallback fails, return the minimal feed with the domain replaced by SITE_URL
       console.error("[RSS] Fallback attempt failed:", fallbackError);
-      
-      // Construct the minimal RSS feed with SITE_URL constant
-      return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?>
+
+      // Use the SITE_URL constant in the minimal RSS feed to avoid hardcoding the domain
+      const rssMinimal = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
     <title>${SITE_URL}</title>
@@ -37,7 +37,9 @@ export async function GET() {
     <link>${SITE_URL}</link>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
   </channel>
-</rss>`, {
+</rss>`;
+
+      return new NextResponse(rssMinimal, {
         headers: {
           "Content-Type": "application/rss+xml; charset=utf-8",
           "Cache-Control": "public, max-age=900, s-maxage=900",

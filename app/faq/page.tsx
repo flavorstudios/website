@@ -1,10 +1,13 @@
 // app/faq/page.tsx
+import FaqPageClient from "./FaqPageClient"
 
-import dynamic from "next/dynamic"
-
-// IMPORTANT: Import name and path matches your real file name and case
-const FaqPageClient = dynamic(() => import("./FaqPageClient"), { ssr: false })
+export const metadata = {
+  title: "FAQ | Flavor Studios",
+  description: "Frequently asked questions about Flavor Studios, anime content, donations, legal info, and more."
+  // ...other SEO stuff if you need it
+}
 
 export default function FAQPage() {
+  // SSR-friendly shell, renders client FAQ
   return <FaqPageClient />
 }

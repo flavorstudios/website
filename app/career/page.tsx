@@ -1,21 +1,23 @@
 import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 export const metadata = getMetadata({
-  title: "Join Our Team – Careers at Flavor Studios",
+  title: `Join Our Team – Careers at ${SITE_NAME}`,
   description:
-    "Discover animation, writing, and voice acting opportunities at Flavor Studios. Join our talent list and be part of something original.",
+    `Discover animation, writing, and voice acting opportunities at ${SITE_NAME}. Join our talent list and be part of something original.`,
   path: "/career",
   robots: "index,follow", // Explicit: Careers should be indexed!
+
   openGraph: {
-    title: "Join Our Team – Careers at Flavor Studios",
+    title: `Join Our Team – Careers at ${SITE_NAME}`,
     description:
-      "Explore creative roles in animation, writing, and voice acting. Join our talent list and shape the future of storytelling at Flavor Studios.",
-    url: "https://flavorstudios.in/career",
+      `Explore creative roles in animation, writing, and voice acting. Join our talent list and shape the future of storytelling at ${SITE_NAME}.`,
+    // url: `${SITE_URL}/career`,         // OMITTED; helper builds this
+    // site_name: SITE_NAME,              // OMITTED; helper enforces
     type: "website",
-    site_name: "Flavor Studios", // Always present!
     images: [
       {
-        url: "https://flavorstudios.in/cover.jpg",
+        url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
       },
@@ -25,10 +27,10 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: "@flavorstudios",
     creator: "@flavorstudios",
-    title: "Join Our Team – Careers at Flavor Studios",
+    title: `Join Our Team – Careers at ${SITE_NAME}`,
     description:
-      "Animation, writing, voice acting, and more—join our creative network at Flavor Studios and stay connected for future roles.",
-    images: ["https://flavorstudios.in/cover.jpg"],
+      `Animation, writing, voice acting, and more—join our creative network at ${SITE_NAME} and stay connected for future roles.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // JSON-LD/schema REMOVED; see head.tsx below
 });

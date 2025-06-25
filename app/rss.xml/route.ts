@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { generateRssFeed } from "@/lib/rss-utils";
+import { SITE_URL } from "@/lib/constants";
 
 export async function GET() {
   try {
+    // Primary attempt to generate the RSS feed
     const rssXml = await generateRssFeed();
     return new NextResponse(rssXml, {
       headers: {
@@ -12,7 +14,8 @@ export async function GET() {
     });
   } catch (error) {
     console.error("[RSS] Error generating RSS feed (primary attempt):", error);
-    // Fully DRY: Use the utility's own fallback logic, which returns a minimal valid feed
+    
+    // Use the utility's fallback logic which will return a minimal valid feed
     try {
       const rssXml = await generateRssFeed();
       return new NextResponse(rssXml, {
@@ -22,15 +25,14 @@ export async function GET() {
         },
       });
     } catch (fallbackError) {
-      // If even the fallback fails, log and serve a last-resort minimal RSS string (extremely rare)
+      // If fallback fails, return the minimal feed with the domain replaced by SITE_URL
       console.error("[RSS] Fallback attempt failed:", fallbackError);
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://flavorstudios.in";
       return new NextResponse(`<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>Flavor Studios</title>
+    <title>${SITE_URL}</title>
     <description>Anime Creation & Stories</description>
-    <link>${baseUrl}</link>
+    <link>${SITE_URL}</link>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
   </channel>
 </rss>`, {

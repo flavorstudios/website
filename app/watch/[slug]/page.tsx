@@ -1,36 +1,68 @@
-import { getMetadata, getCanonicalUrl } from "@/lib/seo-utils";
+// app/watch/[slug]/page.tsx
+
+import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
-// ...other imports remain unchanged
+import { StructuredData } from "@/components/StructuredData";
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  // --- Fetch video ---
-  async function getVideo(slug: string) {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`,
-        { cache: "no-store" }
-      );
-      if (!response.ok) return null;
-      const data = await response.json();
-      const videos = data.videos || [];
-      return (
-        videos.find(
-          (video: any) =>
-            (video.slug === slug || video.id === slug) && video.status === "published"
-        ) || null
-      );
-    } catch (error) {
-      console.error("Failed to fetch video:", error);
-      return null;
-    }
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Eye,
+  Clock,
+  ThumbsUp,
+  Share2,
+  Youtube,
+  Calendar,
+} from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+// --- Helper: Convert duration string to ISO 8601 (PT#M#S) ---
+function toIsoDuration(duration: string): string | undefined {
+  // Basic support for "MM:SS" or "HH:MM:SS"
+  const parts = duration.split(":").map(Number);
+  if (parts.length === 2) {
+    const [mm, ss] = parts;
+    return `PT${mm}M${ss}S`;
+  } else if (parts.length === 3) {
+    const [hh, mm, ss] = parts;
+    return `PT${hh}H${mm}M${ss}S`;
   }
+  // If not in expected format, return undefined (let schema.org fallback)
+  return undefined;
+}
 
+// --- Fetch video utility ---
+async function getVideo(slug: string) {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`,
+      { cache: "no-store" }
+    );
+    if (!response.ok) return null;
+    const data = await response.json();
+    const videos = data.videos || [];
+    return (
+      videos.find(
+        (video: any) =>
+          (video.slug === slug || video.id === slug) && video.status === "published"
+      ) || null
+    );
+  } catch (error) {
+    console.error("Failed to fetch video:", error);
+    return null;
+  }
+}
+
+// === DYNAMIC METADATA ===
+export async function generateMetadata({ params }: { params: { slug: string } }) {
   const video = await getVideo(params.slug);
 
+  // Not Found SEO fallback
   if (!video) {
     const fallbackTitle = `Video Not Found – ${SITE_NAME}`;
     const fallbackDescription = `Sorry, this video could not be found. Explore more inspiring anime videos at ${SITE_NAME}.`;
-    const fallbackUrl = getCanonicalUrl(`/watch/${params.slug}`);
     const fallbackImage = `${SITE_URL}/cover.jpg`;
 
     return getMetadata({
@@ -55,12 +87,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         description: fallbackDescription,
         images: [fallbackImage],
       },
+      alternates: {
+        canonical: getCanonicalUrl(`/watch/${params.slug}`),
+      },
     });
   }
 
   const canonicalUrl = getCanonicalUrl(`/watch/${video.slug || params.slug}`);
-  const thumbnailUrl =
-    video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
+  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
   const seoTitle = `${video.title} – Watch | ${SITE_NAME}`;
   const seoDescription =
     video.description ||
@@ -88,22 +122,49 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       description: seoDescription,
       images: [thumbnailUrl],
     },
-    // JSON-LD/schema removed; now in head.tsx
+    alternates: {
+      canonical: canonicalUrl,
+    },
   });
 }
 
-export default async function VideoPage({ params }: VideoPageProps) {
+// === PAGE COMPONENT ===
+export default async function VideoPage({ params }: { params: { slug: string } }) {
   const video = await getVideo(params.slug);
 
   if (!video) {
     notFound();
   }
 
+  const canonicalUrl = getCanonicalUrl(`/watch/${video.slug || params.slug}`);
+  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
   const embedUrl = `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`;
   const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtubeId}`;
+  const youtubeChannelUrl = "https://www.youtube.com/@flavorstudios";
+
+  // --- JSON-LD Article/VideoObject Schema ---
+  const schema = getSchema({
+    type: "VideoObject",
+    path: `/watch/${video.slug || params.slug}`,
+    name: video.title,
+    description: video.description,
+    thumbnailUrl: [thumbnailUrl],
+    uploadDate: video.publishedAt,
+    duration: toIsoDuration(video.duration) || video.duration,
+    embedUrl,
+    contentUrl: youtubeUrl,
+    publisher: {
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    ...(video.tags?.length > 0 ? { keywords: video.tags.join(",") } : {}),
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* === SEO: Inject JSON-LD Schema === */}
+      <StructuredData schema={schema} />
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Video Content */}
@@ -124,7 +185,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
               <div className="flex items-center gap-2">
                 <Badge variant="outline">{video.category}</Badge>
                 <span className="text-sm text-gray-500 flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
+                  <Calendar className="h-3 w-3" aria-hidden="true" />
                   {new Date(video.publishedAt).toLocaleDateString()}
                 </span>
               </div>
@@ -134,30 +195,30 @@ export default async function VideoPage({ params }: VideoPageProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span className="flex items-center gap-1">
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-4 w-4" aria-hidden="true" />
                     {video.views.toLocaleString()} views
                   </span>
                   <span className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
+                    <Clock className="h-4 w-4" aria-hidden="true" />
                     {video.duration}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm">
-                    <ThumbsUp className="h-4 w-4 mr-2" />
+                    <ThumbsUp className="h-4 w-4 mr-2" aria-hidden="true" />
                     Like
                   </Button>
                   <Button variant="outline" size="sm" asChild>
                     <a
                       href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
-                        `https://flavorstudios.in/watch/${video.slug || params.slug}`
+                        canonicalUrl
                       )}&text=${encodeURIComponent(
-                        `Watch \"${video.title}\" on Flavor Studios!`
+                        `Watch "${video.title}" on Flavor Studios!`
                       )}&hashtags=Anime,Animation`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Share2 className="h-4 w-4 mr-2" />
+                      <Share2 className="h-4 w-4 mr-2" aria-hidden="true" />
                       Share
                     </a>
                   </Button>
@@ -189,14 +250,14 @@ export default async function VideoPage({ params }: VideoPageProps) {
           <div className="space-y-6">
             <Card>
               <CardContent className="p-6 text-center">
-                <Youtube className="h-12 w-12 text-red-600 mx-auto mb-4" />
+                <Youtube className="h-12 w-12 text-red-600 mx-auto mb-4" aria-hidden="true" />
                 <h3 className="text-lg font-semibold mb-2">Watch on YouTube</h3>
                 <p className="text-gray-600 text-sm mb-4">
                   Like, comment, and subscribe on our YouTube channel for more content!
                 </p>
                 <Button asChild className="w-full bg-red-600 hover:bg-red-700">
                   <a href={youtubeUrl} target="_blank" rel="noopener noreferrer">
-                    <Youtube className="h-4 w-4 mr-2" />
+                    <Youtube className="h-4 w-4 mr-2" aria-hidden="true" />
                     Open in YouTube
                   </a>
                 </Button>
@@ -211,7 +272,7 @@ export default async function VideoPage({ params }: VideoPageProps) {
                 </p>
                 <Button asChild variant="outline" className="w-full">
                   <a
-                    href="https://www.youtube.com/@flavorstudios"
+                    href={youtubeChannelUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

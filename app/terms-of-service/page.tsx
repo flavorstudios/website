@@ -23,7 +23,7 @@ import {
   UserX,
   Gavel,
   Eye,
-} from "lucide-react"; // All necessary Lucide icons are correctly imported.
+} from "lucide-react";
 import Link from "next/link";
 
 // === SEO METADATA (using centralized handler) ===
@@ -31,7 +31,7 @@ export const metadata = getMetadata({
   title: `Terms of Service – ${SITE_NAME}`,
   description: `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
   path: "/terms-of-service",
-  robots: "index,follow", // CORRECTED: Public legal/terms pages should be indexed.
+  robots: "index,follow", // ✅ Now indexed & followed by search bots.
   openGraph: {
     title: `Terms of Service – ${SITE_NAME}`,
     description: `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
@@ -47,7 +47,7 @@ export const metadata = getMetadata({
   twitter: {
     card: "summary_large_image",
     site: SITE_BRAND_TWITTER,
-    creator: SITE_BRAND_TWITTER, // Ensures consistency from constants.
+    creator: SITE_BRAND_TWITTER,
     title: `Terms of Service – ${SITE_NAME}`,
     description: `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
     images: [`${SITE_URL}/cover.jpg`],
@@ -63,7 +63,7 @@ const schema = getSchema({
   path: "/terms-of-service",
   title: `Terms of Service – ${SITE_NAME}`,
   description: `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
-  image: `${SITE_URL}/cover.jpg`, // You could consider SITE_LOGO_URL here, but cover is fine.
+  image: `${SITE_URL}/cover.jpg`,
   publisher: {
     name: SITE_NAME,
     logo: SITE_LOGO_URL,
@@ -71,7 +71,6 @@ const schema = getSchema({
 });
 
 export default function TermsOfServicePage() {
-  // --- Sections data ---
   const sections = [
     {
       id: "use-of-site",
@@ -190,13 +189,13 @@ export default function TermsOfServicePage() {
       <StructuredData schema={schema} />
 
       <div className="container mx-auto max-w-4xl px-3 sm:px-4 md:px-6">
-        {/* Header Section */}
+        {/* Header */}
         <div className="mb-8 sm:mb-12 md:mb-16">
           <Badge className="mb-3 sm:mb-4 bg-blue-100 text-blue-800 text-xs sm:text-sm">Legal Document</Badge>
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Terms of Service</h1>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex items-start gap-3">
-              <Gavel className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+              <Gavel className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm sm:text-base text-blue-800 font-medium mb-2">Effective Date: May 9, 2025</p>
                 <p className="text-sm sm:text-base text-blue-700 leading-relaxed sm:leading-loose">
@@ -209,7 +208,7 @@ export default function TermsOfServicePage() {
           </div>
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+              <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm sm:text-base text-amber-800 font-medium mb-2">Agreement to Terms</p>
                 <p className="text-sm sm:text-base text-amber-700 leading-relaxed sm:leading-loose">
@@ -221,14 +220,14 @@ export default function TermsOfServicePage() {
           </div>
         </div>
 
-        {/* Main Sections (Use of Site, IP, User Content, Moderation, etc.) */}
+        {/* Main Sections */}
         <div className="space-y-4 sm:space-y-6 md:space-y-8 mb-8 sm:mb-12 md:mb-16">
           {sections.map((section, index) => (
             <Card key={index} id={section.id} className="scroll-mt-20 mb-6 sm:mb-8 md:mb-12">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
                   <div className="p-2 bg-blue-100 rounded-lg">
-                    <section.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <section.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
                   </div>
                   {section.title}
                 </CardTitle>
@@ -236,20 +235,14 @@ export default function TermsOfServicePage() {
               <CardContent className="space-y-4 sm:space-y-6">
                 {section.content.map((item, itemIndex) => (
                   <div key={itemIndex}>
-                    {/* Subtitle is handled here */}
-                    {item.subtitle && ( // Check if subtitle exists before rendering h4
-                      <h4 className="font-semibold text-sm sm:text-base md:text-lg text-gray-900 mb-2">
-                        {item.subtitle}
-                      </h4>
-                    )}
                     <p className="text-sm sm:text-base text-gray-700 leading-relaxed sm:leading-loose mb-3">
                       {item.text}
                     </p>
-                    {item.list && ( // Check if list exists before rendering ul
+                    {item.list && (
                       <ul className="space-y-2 ml-4">
                         {item.list.map((listItem, listIndex) => (
                           <li key={listIndex} className="flex items-start gap-2">
-                            <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div> {/* Added aria-hidden */}
+                            <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                             <span className="text-sm sm:text-base text-gray-700 leading-relaxed sm:leading-loose">
                               {listItem}
                             </span>
@@ -264,7 +257,7 @@ export default function TermsOfServicePage() {
           ))}
         </div>
 
-        {/* Legal Provisions Section (Limitation of Liability, Indemnification, etc.) */}
+        {/* Legal Sections */}
         <div className="space-y-4 sm:space-y-6 md:space-y-8 mb-8 sm:mb-12 md:mb-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Legal Provisions</h2>
           <div className="grid gap-6 sm:gap-8">
@@ -273,7 +266,7 @@ export default function TermsOfServicePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
                     <div className="p-2 bg-blue-100 rounded-lg">
-                      <section.icon className="h-5 w-5 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                      <section.icon className="h-5 w-5 text-blue-600" aria-hidden="true" />
                     </div>
                     {section.title}
                   </CardTitle>
@@ -286,12 +279,12 @@ export default function TermsOfServicePage() {
           </div>
         </div>
 
-        {/* Important Legal Notice Section */}
+        {/* Important Notice */}
         <Card className="mb-8 sm:mb-12 md:mb-16 bg-red-50 border-red-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-red-900">
               <div className="p-2 bg-red-100 rounded-lg">
-                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" aria-hidden="true" />
               </div>
               Important Legal Notice
             </CardTitle>
@@ -319,7 +312,7 @@ export default function TermsOfServicePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-blue-900">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
               </div>
               Contact Us
             </CardTitle>
@@ -332,7 +325,7 @@ export default function TermsOfServicePage() {
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
-                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="font-semibold text-blue-900 text-sm sm:text-base">Flavor Studios</p>
@@ -342,7 +335,7 @@ export default function TermsOfServicePage() {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                   <Link href="/contact">
-                    <Phone className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
                     Contact Us
                   </Link>
                 </Button>
@@ -351,8 +344,8 @@ export default function TermsOfServicePage() {
                   variant="outline"
                   className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm"
                 >
-                  <Link href={`mailto:contact@flavorstudios.in`}>
-                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <Link href="mailto:contact@flavorstudios.in">
+                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
                     Email Us
                   </Link>
                 </Button>
@@ -385,31 +378,31 @@ export default function TermsOfServicePage() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
               <Link href="/privacy-policy">
-                <Lock className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Using Lock icon for Privacy Policy link */}
+                <Lock className="mr-2 h-4 w-4" aria-hidden="true" />
                 Privacy Policy
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
               <Link href="/dmca">
-                <FileText className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Corrected icon for DMCA Policy */}
+                <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
                 DMCA Policy
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
               <Link href="/cookie-policy">
-                <Cookie className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Corrected icon for Cookie Policy */}
+                <Shield className="mr-2 h-4 w-4" aria-hidden="true" />
                 Cookie Policy
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
               <Link href="/disclaimer">
-                <AlertCircle className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Corrected icon for Disclaimer */}
+                <AlertCircle className="mr-2 h-4 w-4" aria-hidden="true" />
                 Disclaimer
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
               <Link href="/media-usage-policy">
-                <Eye className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Corrected icon for Media Usage Policy */}
+                <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
                 Media Usage Policy
               </Link>
             </Button>

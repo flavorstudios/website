@@ -17,4 +17,8 @@ export const SITE_DEFAULT_IMAGE = `${SITE_URL}/cover.jpg`; // 1200x630 recommend
 // Official Twitter/X handle (used in metadata)
 export const SITE_BRAND_TWITTER = "@flavor_studios";
 
+// Site logo (ideal for schema.org publisher/logo, PWA, favicon, etc.)
+// Recommended: Transparent PNG, square (eg. 512x512) or as per your brand guidelines
+export const SITE_LOGO_URL = `${SITE_URL}/logo.png`; // Make sure this file exists in your public/ folder
+
 // Add more constants as needed

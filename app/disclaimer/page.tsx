@@ -1,60 +1,52 @@
-import { getMetadata } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+// app/disclaimer/page.tsx
 
+import { getMetadata, getSchema } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_LOGO_URL } from "@/lib/constants";
+import { StructuredData } from "@/components/StructuredData";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Mail, Shield, AlertTriangle, ExternalLink, Copyright, Users, Bot,
+  Briefcase, FileText, Phone, Globe, AlertCircle, Eye, Scale, RefreshCw, Cookie,
+} from "lucide-react"; // All necessary Lucide icons are correctly imported.
+import Link from "next/link";
+
+// --- SEO Metadata: all handlers, all meta, dynamic canonical ---
 export const metadata = getMetadata({
   title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
-  description:
-    `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
+  description: `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
   path: "/disclaimer",
-  robots: "noindex, nofollow", // Required for legal/policy pages
+  robots: "index,follow", // CORRECT: Public legal documents should be indexed and followed.
   openGraph: {
     title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
-    description:
-      `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
-    type: "website",
-    images: [
-      {
-        url: `${SITE_URL}/cover.jpg`,
-        width: 1200,
-        height: 630,
-      },
-    ],
-    // site_name is already handled in getMetadata helper
+    description: `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
+    type: "website", // Appropriate type for a general policy page.
+    images: [{ url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }], // Main OG image.
   },
   twitter: {
     card: "summary_large_image",
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
     title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
-    description:
-      `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
-    images: [`${SITE_URL}/cover.jpg`],
+    description: `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
+    images: [`${SITE_URL}/cover.jpg`], // Main Twitter card image.
   },
-  // JSON-LD/schema REMOVED; now in head.tsx only
 });
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Mail,
-  Shield,
-  AlertTriangle,
-  ExternalLink,
-  Copyright,
-  Users,
-  Bot,
-  Briefcase,
-  FileText,
-  Phone,
-  Globe,
-  AlertCircle,
-  Eye,
-  Scale,
-  RefreshCw,
-  Cookie,
-} from "lucide-react"
-import Link from "next/link"
+// --- WebPage Schema: attaches JSON-LD with canonical, logo, etc ---
+// Provides structured data for rich snippets in search results.
+const schema = getSchema({
+  type: "WebPage", // Suitable schema type for a legal policy page.
+  path: "/disclaimer",
+  title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
+  description: `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
+  image: SITE_LOGO_URL, // Using the site's logo for the page's image in schema is a good practice for legal documents.
+  publisher: {
+    name: SITE_NAME,
+    logo: SITE_LOGO_URL, // Explicitly linking the publisher's logo.
+  },
+});
 
 export default function DisclaimerPage() {
   const disclaimerSections = [
@@ -106,7 +98,7 @@ export default function DisclaimerPage() {
       content:
         "To maintain a safe and respectful environment, we use automated tools — including Google's Perspective API — to help detect and manage harmful, toxic, or spammy comments. While these tools assist in moderation, we do not guarantee 100% accuracy in filtering content. We reserve the right to edit, block, or remove any user submissions at our discretion.",
     },
-  ]
+  ];
 
   const additionalSections = [
     {
@@ -127,7 +119,7 @@ export default function DisclaimerPage() {
       content:
         "We may update this Disclaimer from time to time. Changes will take effect immediately upon posting the revised version to this page. Continued use of the Site signifies your acceptance of the updated terms.",
     },
-  ]
+  ];
 
   const riskFactors = [
     "Content accuracy and completeness",
@@ -136,12 +128,15 @@ export default function DisclaimerPage() {
     "Automated moderation limitations",
     "External service availability",
     "Information currency and updates",
-  ]
+  ];
 
   return (
     <div className="min-h-screen py-8 sm:py-12">
+      {/* SEO: Inject JSON-LD for WebPage */}
+      <StructuredData schema={schema} />
+
       <div className="container mx-auto max-w-4xl px-4 sm:px-6">
-        {/* Header */}
+        {/* Header Section */}
         <div className="mb-12 sm:mb-16">
           <Badge className="mb-3 sm:mb-4 bg-blue-100 text-blue-800 text-xs sm:text-sm">Legal Document</Badge>
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Disclaimer</h1>
@@ -239,7 +234,7 @@ export default function DisclaimerPage() {
           </CardContent>
         </Card>
 
-        {/* Fair Use Notice */}
+        {/* Fair Use and Copyright Notice */}
         <Card className="mb-12 sm:mb-16 bg-green-50 border-green-200 p-4">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-green-900">
@@ -318,13 +313,14 @@ export default function DisclaimerPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-blue-900 text-sm sm:text-base">Flavor Studios</p>
-                  <p className="text-blue-700 text-sm sm:text-base">Website: https://flavorstudios.in</p>
+                  {/* Using SITE_URL constant for consistency */}
+                  <p className="text-blue-700 text-sm sm:text-base">Website: {SITE_URL}</p>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-xs sm:text-sm">
                   <Link href="/contact">
-                    <Phone className="mr-2 h-4 w-4" />
+                    <Mail className="mr-2 h-4 w-4" />
                     Contact Us
                   </Link>
                 </Button>
@@ -373,7 +369,7 @@ export default function DisclaimerPage() {
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/dmca">
-                <Copyright className="mr-2 h-4 w-4" />
+                <Copyright className="mr-2 h-4 w-4" /> {/* Corrected icon */}
                 DMCA Policy
               </Link>
             </Button>
@@ -400,5 +396,5 @@ export default function DisclaimerPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

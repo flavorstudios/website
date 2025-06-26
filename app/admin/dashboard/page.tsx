@@ -1,17 +1,13 @@
-import AdminDashboardPageClient from "./AdminDashboardPageClient"
-import { SITE_NAME, SITE_URL } from "@/lib/constants"
+import AdminDashboardPageClient from "./AdminDashboardPageClient";
+import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 
-// --- SEO Elements (except JSON-LD/Schema) ---
-export const metadata = {
+// === SEO METADATA (ADMIN - NOINDEX) ===
+export const metadata = getMetadata({
   title: `${SITE_NAME} Admin Dashboard`,
   description: `Access all admin tools to manage posts, videos, comments, and more for ${SITE_NAME} from a single secure dashboard.`,
-  alternates: {
-    canonical: `${SITE_URL}/admin/dashboard`,
-  },
-  robots: {
-    index: false,
-    follow: false,
-  },
+  path: "/admin/dashboard",
+  robots: "noindex, nofollow", // Secure: admin/internal page
   openGraph: {
     title: `${SITE_NAME} Admin Dashboard`,
     description: `Access all admin tools to manage posts, videos, comments, and more for ${SITE_NAME} from a single secure dashboard.`,
@@ -29,15 +25,15 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
     title: `${SITE_NAME} Admin Dashboard`,
     description: `Access all admin tools to manage posts, videos, comments, and more for ${SITE_NAME} from a single secure dashboard.`,
     images: [`${SITE_URL}/cover.jpg`]
-  }
-}
+  },
+  // No schema for admin/noindex pages
+});
 
-// --- Server Component ---
 export default function AdminDashboardPage() {
-  return <AdminDashboardPageClient />
+  return <AdminDashboardPageClient />;
 }

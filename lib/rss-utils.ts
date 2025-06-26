@@ -1,4 +1,7 @@
-import { SITE_URL, SITE_NAME } from "@/lib/constants"; // Import SITE_URL and SITE_NAME constants
+// lib/rss-utils.ts
+
+import { SITE_URL, SITE_NAME } from "@/lib/constants";
+import { getCanonicalUrl } from "@/lib/seo-utils";
 import fs from "fs";
 import path from "path";
 
@@ -10,18 +13,18 @@ function getMimeType(url: string): string {
   return "application/octet-stream";
 }
 
-// Helper: Get byte length of local (public/) file, omit for remote
+// Helper: Get byte length of local (public/) file. Returns undefined for remote files.
 async function getFileSize(url: string): Promise<string | undefined> {
   if (url.startsWith("/")) {
     try {
       const filePath = path.join(process.cwd(), "public", url);
-      const stat = await fs.promises.stat(filePath); // async!
+      const stat = await fs.promises.stat(filePath);
       return stat.size.toString();
-    } catch {
+    } catch (error) {
+      console.warn(`Could not get file size for local asset: ${url}. Error: ${error}`);
       return undefined;
     }
   }
-  // Remote: omit length for speed
   return undefined;
 }
 
@@ -36,7 +39,7 @@ export interface RSSItem {
   enclosure?: {
     url: string;
     type: string;
-    length?: string; // Now optional!
+    length?: string;
   };
 }
 
@@ -61,7 +64,12 @@ export interface RSSChannel {
 }
 
 export function formatRSSDate(date: string | Date): string {
-  return new Date(date).toUTCString();
+  const d = new Date(date);
+  if (isNaN(d.getTime())) {
+    console.warn(`Invalid date provided for RSS formatting: ${date}. Returning current date.`);
+    return new Date().toUTCString();
+  }
+  return d.toUTCString();
 }
 
 export function stripHtml(html: string): string {
@@ -92,26 +100,24 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
             }/>`
           : ""
       }
-    </item>`,
+    </item>`
     )
     .join("\n");
 
-  // Normalize trailing slash for atom:link
-  const atomLink = channel.link.endsWith("/")
-    ? `${channel.link}rss.xml`
-    : `${channel.link}/rss.xml`;
+  // Canonicalize feed self-link for atom:link
+  const atomLinkHref = getCanonicalUrl("/rss.xml");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title><![CDATA[${channel.title}]]></title>
     <description><![CDATA[${channel.description}]]></description>
-    <link>${channel.link}</link>
+    <link>${getCanonicalUrl("/")}</link>
     <language>${channel.language}</language>
     <lastBuildDate>${channel.lastBuildDate}</lastBuildDate>
     <pubDate>${channel.pubDate}</pubDate>
     <ttl>${channel.ttl}</ttl>
-    <atom:link href="${atomLink}" rel="self" type="application/rss+xml"/>
+    <atom:link href="${atomLinkHref}" rel="self" type="application/rss+xml"/>
     ${
       channel.image
         ? `<image>
@@ -123,97 +129,84 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
     </image>`
         : ""
     }
-    ${
-      channel.webMaster
-        ? `<webMaster>${channel.webMaster}</webMaster>`
-        : ""
-    }
-    ${
-      channel.managingEditor
-        ? `<managingEditor>${channel.managingEditor}</managingEditor>`
-        : ""
-    }
-    ${
-      channel.copyright
-        ? `<copyright>${channel.copyright}</copyright>`
-        : ""
-    }
+    ${channel.webMaster ? `<webMaster>${channel.webMaster}</webMaster>` : ""}
+    ${channel.managingEditor ? `<managingEditor>${channel.managingEditor}</managingEditor>` : ""}
+    ${channel.copyright ? `<copyright>${channel.copyright}</copyright>` : ""}
     <generator>${SITE_NAME} RSS Generator</generator>
 ${xmlItems}
   </channel>
 </rss>`;
 }
 
+// Main function to generate the complete RSS feed.
 export async function generateRssFeed(): Promise<string> {
   try {
     const { blogStore, videoStore } = await import("./content-store");
-    const baseUrl = SITE_URL;
 
-    // Fetch published content
+    // Fetch published blog posts and videos concurrently.
     const [blogPosts, videos] = await Promise.all([
       blogStore.getPublished().catch(() => []),
       videoStore.getPublished().catch(() => []),
     ]);
 
-    // Convert blog posts to RSS items
+    // Blogs
     const blogItems: RSSItem[] = blogPosts.map((post: any) => ({
       title: post.title,
       description: truncateDescription(stripHtml(post.excerpt || post.content)),
-      link: `${baseUrl}/blog/${post.slug}`,
+      link: getCanonicalUrl(`/blog/${post.slug}`),
       pubDate: formatRSSDate(post.publishedAt),
       category: post.category || "General",
       author: post.author || SITE_NAME,
-      guid: `${baseUrl}/blog/${post.slug}`,
+      guid: getCanonicalUrl(`/blog/${post.slug}`),
     }));
 
-    // Convert videos to RSS items (with async enclosure)
+    // Videos
     const videoItems: RSSItem[] = await Promise.all(
       videos.map(async (video: any) => {
         let enclosure;
         if (video.thumbnail) {
           const type = getMimeType(video.thumbnail);
-          const length = await getFileSize(video.thumbnail); // async and may be undefined
+          const length = await getFileSize(video.thumbnail);
           enclosure = {
-            url: video.thumbnail,
+            url: video.thumbnail.startsWith("http")
+              ? video.thumbnail
+              : getCanonicalUrl(video.thumbnail),
             type,
-            ...(length ? { length } : {}), // Only add length if present
+            ...(length ? { length } : {}),
           };
         }
         return {
           title: video.title,
           description: truncateDescription(stripHtml(video.description)),
-          link: `${baseUrl}/watch/${video.slug || video.id}`,
+          link: getCanonicalUrl(`/watch/${video.slug || video.id}`),
           pubDate: formatRSSDate(video.publishedAt),
           category: video.category || "General",
           author: SITE_NAME,
-          guid: `${baseUrl}/watch/${video.slug || video.id}`,
+          guid: getCanonicalUrl(`/watch/${video.slug || video.id}`),
           enclosure,
         };
       })
     );
 
-    // Combine and sort all items by publication date
+    // Combine and sort
     const allItems = [...blogItems, ...videoItems].sort(
-      (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime(),
+      (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
     );
-
-    // Limit to most recent 50 items
     const recentItems = allItems.slice(0, 50);
 
-    // Channel configuration (add/adjust as you wish)
+    // Channel info
     const channel: RSSChannel = {
       title: `${SITE_NAME} | Anime News, Original Stories & Creative Insights`,
-      description:
-        `Step behind the scenes with ${SITE_NAME}, your gateway to anime news, original stories, and the creative journey of anime production. Explore exclusive episodes, in-depth industry insights, and the artistry behind every animation.`,
-      link: baseUrl,
+      description: `Step behind the scenes with ${SITE_NAME}, your gateway to anime news, original stories, and the creative journey of anime production. Explore exclusive episodes, in-depth industry insights, and the artistry behind every animation.`,
+      link: getCanonicalUrl("/"),
       language: "en-US",
       lastBuildDate: formatRSSDate(new Date()),
       pubDate: recentItems.length > 0 ? recentItems[0].pubDate : formatRSSDate(new Date()),
       ttl: 60,
       image: {
-        url: `${baseUrl}/placeholder.png`,
+        url: getCanonicalUrl("/placeholder.png"), // Canonicalized image
         title: SITE_NAME,
-        link: baseUrl,
+        link: getCanonicalUrl("/"),
         width: 144,
         height: 144,
       },
@@ -222,7 +215,6 @@ export async function generateRssFeed(): Promise<string> {
       copyright: `Copyright ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.`,
     };
 
-    // Generate RSS XML
     return generateRSSXML(channel, recentItems);
   } catch (error) {
     console.error("Error generating RSS feed:", error);
@@ -231,7 +223,7 @@ export async function generateRssFeed(): Promise<string> {
       {
         title: SITE_NAME,
         description: "Anime creation stories and insights",
-        link: SITE_URL,
+        link: getCanonicalUrl("/"),
         language: "en-US",
         lastBuildDate: formatRSSDate(new Date()),
         pubDate: formatRSSDate(new Date()),

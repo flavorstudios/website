@@ -1,16 +1,34 @@
-import { getMetadata } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+// app/page.tsx
 
+import { Suspense } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Play, Calendar, Eye, Clock, ArrowRight } from "lucide-react";
+import { NewsletterSignup } from "@/components/newsletter-signup";
+import { StructuredData } from "@/components/StructuredData";
+
+import {
+  SITE_NAME,
+  SITE_URL,
+  SITE_LOGO_URL,
+  SITE_BRAND_TWITTER,
+} from "@/lib/constants";
+
+import { getMetadata } from "@/lib/seo/metadata";
+import { getCanonicalUrl } from "@/lib/seo/canonical";
+import { getSchema } from "@/lib/seo/schema";
+
+// --- SEO: Metadata for Home Page ---
 export const metadata = getMetadata({
   title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
-  description:
-    `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+  description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
   path: "/",
   robots: "index,follow",
   openGraph: {
     title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
-    description:
-      `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+    description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
     type: "website",
     images: [
       {
@@ -19,80 +37,58 @@ export const metadata = getMetadata({
         height: 630,
       },
     ],
-    // url and site_name are omitted: helper will handle them
   },
   twitter: {
     card: "summary_large_image",
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
     title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
-    description:
-      `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+    description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  // No schema/JSON-LD here (handled in head.tsx)
+  alternates: {
+    canonical: getCanonicalUrl("/"),
+  },
 });
 
-import { Suspense } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Play, Calendar, Eye, Clock, ArrowRight } from "lucide-react"
-import { NewsletterSignup } from "@/components/newsletter-signup"
-import { BackToTop } from "@/components/back-to-top"
+// --- JSON-LD WebPage Schema ---
+const schema = getSchema({
+  type: "WebPage",
+  path: "/",
+  title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
+  description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+  image: `${SITE_URL}/cover.jpg`,
+  publisher: {
+    name: SITE_NAME,
+    logo: SITE_LOGO_URL,
+  },
+});
 
 async function getHomePageContent() {
   const fallbackContent = {
     latestBlogs: [],
     featuredVideos: [],
     stats: null,
-  }
-
-  // In development, return fallback content
-  if (process.env.NODE_ENV === "development") {
-    return fallbackContent
-  }
-
+  };
+  if (process.env.NODE_ENV === "development") return fallbackContent;
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-
-    // Use Promise.allSettled to handle partial failures
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
     const [statsResult, videosResult, blogsResult] = await Promise.allSettled([
-      fetch(`${baseUrl}/api/admin/stats`, {
-        cache: "no-store",
-        next: { revalidate: 0 },
-      }).then((res) => (res.ok ? res.json() : null)),
-      fetch(`${baseUrl}/api/admin/videos`, {
-        cache: "no-store",
-        next: { revalidate: 0 },
-      }).then((res) => (res.ok ? res.json() : null)),
-      fetch(`${baseUrl}/api/admin/blogs`, {
-        cache: "no-store",
-        next: { revalidate: 0 },
-      }).then((res) => (res.ok ? res.json() : null)),
-    ])
-
-    const stats = statsResult.status === "fulfilled" && statsResult.value ? statsResult.value.stats : null
-
-    const videos =
-      videosResult.status === "fulfilled" && videosResult.value
-        ? videosResult.value.videos?.filter((v: any) => v.status === "published") || []
-        : []
-
-    const blogs =
-      blogsResult.status === "fulfilled" && blogsResult.value
-        ? blogsResult.value.posts?.filter((p: any) => p.status === "published").slice(0, 6) || []
-        : []
-
-    return {
-      stats,
-      featuredVideos: videos,
-      latestBlogs: blogs,
-    }
+      fetch(`${baseUrl}/api/admin/stats`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
+      fetch(`${baseUrl}/api/admin/videos`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
+      fetch(`${baseUrl}/api/admin/blogs`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
+    ]);
+    const stats = statsResult.status === "fulfilled" && statsResult.value ? statsResult.value.stats : null;
+    const videos = videosResult.status === "fulfilled" && videosResult.value
+      ? videosResult.value.videos?.filter((v: any) => v.status === "published") || []
+      : [];
+    const blogs = blogsResult.status === "fulfilled" && blogsResult.value
+      ? blogsResult.value.posts?.filter((p: any) => p.status === "published").slice(0, 6) || []
+      : [];
+    return { stats, featuredVideos: videos, latestBlogs: blogs };
   } catch (error) {
-    console.error("Failed to fetch homepage content:", error)
-    return fallbackContent
+    console.error("Failed to fetch homepage content:", error);
+    return fallbackContent;
   }
 }
 
@@ -101,7 +97,7 @@ function ErrorFallback({ section }: { section: string }) {
     <div className="text-center py-12">
       <p className="text-gray-500">Unable to load {section} content. Please try again later.</p>
     </div>
-  )
+  );
 }
 
 function BlogsSkeleton() {
@@ -124,7 +120,7 @@ function BlogsSkeleton() {
         </Card>
       ))}
     </div>
-  )
+  );
 }
 
 function VideosSkeleton() {
@@ -145,7 +141,7 @@ function VideosSkeleton() {
         </Card>
       ))}
     </div>
-  )
+  );
 }
 
 function StatsSkeleton() {
@@ -162,14 +158,16 @@ function StatsSkeleton() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 export default async function HomePage() {
-  const content = await getHomePageContent()
-
+  const content = await getHomePageContent();
   return (
     <div className="min-h-screen">
+      {/* SEO: Inject JSON-LD */}
+      <StructuredData schema={schema} />
+
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
@@ -181,7 +179,6 @@ export default async function HomePage() {
                   Independent Anime Studio
                 </Badge>
               </div>
-
               <div className="space-y-6">
                 <h1 className="text-5xl md:text-7xl font-bold leading-tight">
                   Creating Stories That{" "}
@@ -189,13 +186,11 @@ export default async function HomePage() {
                     Inspire
                   </span>
                 </h1>
-
                 <p className="text-xl md:text-2xl text-gray-300 leading-relaxed mx-auto">
                   Welcome to Flavor Studios, where imagination meets animation. We craft original anime content, share
                   industry insights, and bring unique stories to life through the art of animation.
                 </p>
               </div>
-
               <div className="flex justify-center">
                 <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
                   <Link href="/blog">
@@ -209,7 +204,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section - Only show if real stats are available */}
+      {/* Stats Section */}
       {content.stats && (
         <Suspense fallback={<StatsSkeleton />}>
           <section className="py-16 bg-white">
@@ -252,7 +247,6 @@ export default async function HomePage() {
               Dive into our latest articles covering anime reviews, industry insights, and creative storytelling.
             </p>
           </div>
-
           <Suspense fallback={<BlogsSkeleton />}>
             {content.latestBlogs.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
@@ -263,7 +257,7 @@ export default async function HomePage() {
                         <div className="relative h-48 overflow-hidden">
                           <img
                             src={post.coverImage || "/placeholder.svg"}
-                            alt={`Cover image for ${post.title}`}
+                            alt={post.title || "Anime blog cover"}
                             className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                             loading="lazy"
                           />
@@ -275,10 +269,13 @@ export default async function HomePage() {
                             {post.category}
                           </Badge>
                           <span className="text-sm text-gray-500 flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
+                            <Calendar className="h-3 w-3" aria-hidden="true" />
                             {new Date(post.publishedAt).toLocaleDateString()}
                           </span>
-                          <span className="text-sm text-gray-500">{post.readingTime || "5 min read"}</span>
+                          <span className="text-sm text-gray-500 flex items-center gap-1">
+                            <Clock className="h-3 w-3" aria-hidden="true" />
+                            {post.readingTime || "5 min read"}
+                          </span>
                         </div>
                         <CardTitle className="line-clamp-2 text-lg leading-tight">{post.title}</CardTitle>
                       </CardHeader>
@@ -293,12 +290,11 @@ export default async function HomePage() {
               <ErrorFallback section="blog posts" />
             )}
           </Suspense>
-
           <div className="text-center">
             <Button asChild size="lg" variant="outline" className="px-8">
               <Link href="/blog">
                 View All Posts
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
               </Link>
             </Button>
           </div>
@@ -317,23 +313,21 @@ export default async function HomePage() {
                   content delivered straight to your inbox.
                 </p>
               </div>
-
               <div className="max-w-md mx-auto relative">
                 <NewsletterSignup />
                 <p className="text-sm text-blue-200 mt-3">Join 10,000+ anime enthusiasts. Unsubscribe anytime.</p>
               </div>
-
               <div className="flex flex-wrap justify-center gap-6 text-sm text-blue-200">
                 <span className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-green-400 rounded-full" aria-hidden="true"></div>
                   Weekly Updates
                 </span>
                 <span className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-green-400 rounded-full" aria-hidden="true"></div>
                   Exclusive Content
                 </span>
                 <span className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-green-400 rounded-full" aria-hidden="true"></div>
                   No Spam
                 </span>
               </div>
@@ -351,51 +345,54 @@ export default async function HomePage() {
               Experience our original anime content, behind-the-scenes footage, and exclusive video content.
             </p>
           </div>
-
           <Suspense fallback={<VideosSkeleton />}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              {content.featuredVideos.slice(0, 6).map((video: any) => (
-                <Link key={video.id} href={`/watch/${video.id}`}>
-                  <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-                    <div className="relative">
-                      <img
-                        src={video.thumbnail || "/placeholder.svg"}
-                        alt={video.title}
-                        className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <Play className="h-12 w-12 text-white" />
+            {content.featuredVideos.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                {content.featuredVideos.slice(0, 6).map((video: any) => (
+                  <Link key={video.id} href={`/watch/${video.id}`}>
+                    <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                      <div className="relative">
+                        <img
+                          src={video.thumbnail || "/placeholder.svg"}
+                          alt={video.title || "Anime video thumbnail"}
+                          className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                          <Play className="h-12 w-12 text-white" aria-hidden="true" />
+                        </div>
+                        <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-sm">
+                          {video.duration || "—"}
+                        </div>
                       </div>
-                      <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-sm">
-                        {video.duration}
-                      </div>
-                    </div>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg line-clamp-2 leading-tight">{video.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Eye className="h-3 w-3" />
-                          {video.views?.toLocaleString() || "0"}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {new Date(video.publishedAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg line-clamp-2 leading-tight">{video.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Eye className="h-3 w-3" aria-hidden="true" />
+                            {(video.views || 0).toLocaleString()} views
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" aria-hidden="true" />
+                            {video.publishedAt ? new Date(video.publishedAt).toLocaleDateString() : ""}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <ErrorFallback section="video content" />
+            )}
           </Suspense>
-
           <div className="text-center">
             <Button asChild size="lg" variant="outline" className="px-8">
               <Link href="/watch">
                 View All Videos
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
               </Link>
             </Button>
           </div>
@@ -415,20 +412,17 @@ export default async function HomePage() {
                 </span>{" "}
                 to Life
               </h2>
-
               <p className="text-xl md:text-2xl text-gray-300 leading-relaxed mx-auto">
                 Ready to start your creative journey? Whether you want to collaborate, learn more about our process, or
                 support our mission, we're here to help bring stories to life.
               </p>
-
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                 <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
                   <Link href="/contact">
                     Contact Us
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                   </Link>
                 </Button>
-
                 <Button
                   asChild
                   size="lg"
@@ -437,7 +431,7 @@ export default async function HomePage() {
                 >
                   <Link href="/support">
                     Support Us
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
                   </Link>
                 </Button>
               </div>
@@ -445,8 +439,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-
-      <BackToTop />
     </div>
-  )
+  );
 }

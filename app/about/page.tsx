@@ -1,20 +1,19 @@
 import { getMetadata } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import {
+  SITE_NAME,
+  SITE_URL,
+  SITE_BRAND_TWITTER,
+} from "@/lib/constants";
 
 export const metadata = getMetadata({
   title: `About Us – The Vision Behind ${SITE_NAME}`,
-  description:
-    `Explore the heart and vision of ${SITE_NAME} — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.`,
+  description: `Explore the heart and vision of ${SITE_NAME} — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.`,
   path: "/about",
-  robots: "index,follow", // Page is indexable
+  robots: "index,follow",
 
-  // You don't need to specify openGraph.url or site_name; getMetadata enforces this automatically.
   openGraph: {
     title: `About Us – The Vision Behind ${SITE_NAME}`,
-    description:
-      `Learn what drives ${SITE_NAME}. Discover our mission, creative values, and passion for telling original stories through anime and 3D animation.`,
-    // url: `${SITE_URL}/about`,             // OMITTED; helper generates canonical
-    // site_name: SITE_NAME,                 // OMITTED; helper enforces this
+    description: `Learn what drives ${SITE_NAME}. Discover our mission, creative values, and passion for telling original stories through anime and 3D animation.`,
     type: "website",
     images: [
       {
@@ -24,16 +23,17 @@ export const metadata = getMetadata({
       },
     ],
   },
+
   twitter: {
     card: "summary_large_image",
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
     title: `About Us – The Vision Behind ${SITE_NAME}`,
-    description:
-      "We’re an indie animation studio fueled by storytelling, emotion, and community. Discover our journey and purpose.",
+    description: "We’re an indie animation studio fueled by storytelling, emotion, and community. Discover our journey and purpose.",
     images: [`${SITE_URL}/cover.jpg`],
   },
-  // Schema/JSON-LD is intentionally removed from here (now in head.tsx)
+
+  // Schema/JSON-LD should be added in head.tsx
 });
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

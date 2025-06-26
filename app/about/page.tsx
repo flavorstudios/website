@@ -2,8 +2,25 @@
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
-import { StructuredData } from "@/components/StructuredData"; // Import reusable component
+import { StructuredData } from "@/components/StructuredData";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Heart,
+  Target,
+  Users,
+  Lightbulb,
+  Calendar,
+  CheckCircle,
+  Coffee,
+  Youtube,
+  HelpCircle,
+  Phone,
+} from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
+// --- Metadata Export for Next.js 15 App Router ---
 export const metadata = getMetadata({
   title: `About Us – The Vision Behind ${SITE_NAME}`,
   description: `Explore the heart and vision of ${SITE_NAME} — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.`,
@@ -42,37 +59,6 @@ export default function AboutPage() {
     image: `${SITE_URL}/cover.jpg`,
   });
 
-  return (
-    <main>
-      <h1>About Us</h1>
-      <p>
-        This is the actual content for the About page of Flavor Studios.
-        Here you can detail your company's history, mission, values, team, etc.
-      </p>
-      {/* Modular, reusable structured data injection */}
-      <StructuredData schema={schema} />
-      {/* ... more about us content ... */}
-    </main>
-  );
-}
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import {
-  Heart,
-  Target,
-  Users,
-  Lightbulb,
-  Calendar,
-  CheckCircle,
-  Coffee,
-  Youtube,
-  HelpCircle,
-  Phone,
-} from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-
   const values = [
     {
       icon: Target,
@@ -94,7 +80,7 @@ import { Button } from "@/components/ui/button"
       title: "Creative Excellence",
       description: "A commitment to creativity, authenticity, and excellence in every single frame we create.",
     },
-  ]
+  ];
 
   const timeline = [
     {
@@ -127,10 +113,13 @@ import { Button } from "@/components/ui/button"
       description: "Studio officially launched. Creating original anime and stories.",
       status: "current",
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen py-6 sm:py-8 lg:py-12">
+      {/* Inject JSON-LD structured data for SEO */}
+      <StructuredData schema={schema} />
+
       <div className="container mx-auto max-w-6xl px-3 sm:px-4 lg:px-6">
         {/* Hero Section */}
         <div className="mb-8 sm:mb-12 lg:mb-16 text-center">
@@ -201,14 +190,13 @@ import { Button } from "@/components/ui/button"
           </Card>
         </div>
 
-        {/* Our Journey Timeline - Mobile Optimized */}
+        {/* Our Journey Timeline */}
         <div className="mb-8 sm:mb-12 lg:mb-16 text-center">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-6 sm:mb-8 lg:mb-12">Our Journey</h2>
           <div className="max-w-4xl mx-auto">
             <div className="relative">
               {/* Timeline line - Hidden on mobile, shown on larger screens */}
               <div className="hidden md:block absolute left-6 lg:left-8 top-0 bottom-0 w-0.5 bg-blue-200"></div>
-
               <div className="space-y-4 sm:space-y-6 lg:space-y-12">
                 {timeline.map((milestone, index) => (
                   <div key={index} className="relative flex items-start">
@@ -228,7 +216,6 @@ import { Button } from "@/components/ui/button"
                         )}
                       </div>
                     </div>
-
                     {/* Content */}
                     <div className="ml-3 sm:ml-4 lg:ml-8 flex-1">
                       <Card className="hover:shadow-lg transition-shadow">
@@ -314,7 +301,6 @@ import { Button } from "@/components/ui/button"
               Every contribution, no matter the size, helps us bring our creative vision to life.
             </p>
           </div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
             {/* Join the Team */}
             <Card className="text-center hover:shadow-lg transition-shadow">
@@ -333,7 +319,6 @@ import { Button } from "@/components/ui/button"
                 </Button>
               </CardContent>
             </Card>
-
             {/* Watch & Subscribe */}
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3 sm:pb-4">
@@ -357,7 +342,6 @@ import { Button } from "@/components/ui/button"
                 </Button>
               </CardContent>
             </Card>
-
             {/* Support Our Mission */}
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3 sm:pb-4">
@@ -379,7 +363,6 @@ import { Button } from "@/components/ui/button"
                 </Button>
               </CardContent>
             </Card>
-
             {/* Have Questions */}
             <Card className="text-center hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3 sm:pb-4">
@@ -399,7 +382,6 @@ import { Button } from "@/components/ui/button"
                 </Button>
               </CardContent>
             </Card>
-
             {/* Get in Touch */}
             <Card className="text-center hover:shadow-lg transition-shadow sm:col-span-2 lg:col-span-2">
               <CardHeader className="pb-3 sm:pb-4">
@@ -421,5 +403,5 @@ import { Button } from "@/components/ui/button"
         </section>
       </div>
     </div>
-  )
+  );
 }

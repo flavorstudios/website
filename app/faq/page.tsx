@@ -1,40 +1,34 @@
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
-import FaqPageClient from "./FaqPageClient";
+// app/faq/page.tsx (Inside FAQPage component or as a separate schema function)
+// Assume faqQuestions is an array like [{ question: "...", answer: "..." }]
+const faqQuestions = [
+    { question: "What is Flavor Studios?", answer: "Flavor Studios is an indie animation studio..." },
+    // ... more FAQs
+];
 
-export const metadata = {
-  title: `${SITE_NAME} FAQ – Anime & Support Help`,
-  description: `Get answers to frequently asked questions about ${SITE_NAME}, supporting us, using our content, and how we create original anime and stories.`,
-  alternates: {
-    canonical: `${SITE_URL}/faq`,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  openGraph: {
+const faqSchema = getSchema({
+    type: "FAQPage",
+    path: "/faq",
     title: `${SITE_NAME} FAQ – Anime & Support Help`,
-    description: `Get answers to frequently asked questions about ${SITE_NAME}, supporting us, using our content, and how we create original anime and stories.`,
-    url: `${SITE_URL}/faq`,
-    siteName: SITE_NAME,
-    type: "website",
-    images: [
-      {
-        url: `${SITE_URL}/cover.jpg`,
-        width: 1200,
-        height: 630,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
-    title: `${SITE_NAME} FAQ – Anime & Support Help`,
-    description: `Get answers to frequently asked questions about ${SITE_NAME}, supporting us, using our content, and how we create original anime and stories.`,
-    images: [`${SITE_URL}/cover.jpg`],
-  },
-};
+    description: `Get answers to frequently asked questions...`,
+    image: SITE_LOGO_URL,
+    publisher: {
+        name: SITE_NAME,
+        logo: SITE_LOGO_URL,
+    },
+    // This is the key part for FAQPage schema
+    mainEntity: faqQuestions.map(item => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: {
+            "@type": "Answer",
+            text: item.answer,
+        },
+    })),
+});
 
-export default function FAQPage() {
-  return <FaqPageClient />;
-}
+return (
+    <>
+        <StructuredData schema={faqSchema} />
+        <FaqPageClient faqData={faqQuestions} /> {/* Pass data to client component */}
+    </>
+);

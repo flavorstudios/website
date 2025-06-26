@@ -5,7 +5,7 @@ import { getCanonicalUrl } from "@/lib/seo-utils";
 import fs from "fs";
 import path from "path";
 
-// Helper: Detect MIME type from file extension
+// Detects MIME type from file extension
 function getMimeType(url: string): string {
   if (url.endsWith(".png")) return "image/png";
   if (url.endsWith(".webp")) return "image/webp";
@@ -13,7 +13,7 @@ function getMimeType(url: string): string {
   return "application/octet-stream";
 }
 
-// Helper: Get byte length of local (public/) file. Returns undefined for remote files.
+// Gets byte length for local (public/) files; undefined for remote
 async function getFileSize(url: string): Promise<string | undefined> {
   if (url.startsWith("/")) {
     try {
@@ -66,7 +66,7 @@ export interface RSSChannel {
 export function formatRSSDate(date: string | Date): string {
   const d = new Date(date);
   if (isNaN(d.getTime())) {
-    console.warn(`Invalid date provided for RSS formatting: ${date}. Returning current date.`);
+    console.warn(`Invalid date for RSS formatting: ${date}. Returning now.`);
     return new Date().toUTCString();
   }
   return d.toUTCString();
@@ -82,6 +82,7 @@ export function truncateDescription(text: string, maxLength = 200): string {
   return text.substring(0, maxLength).trim() + "...";
 }
 
+// RSS 2.0 XML builder (SEO-friendly, always canonical URLs)
 export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
   const xmlItems = items
     .map(
@@ -104,7 +105,7 @@ export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
     )
     .join("\n");
 
-  // Canonicalize feed self-link for atom:link
+  // Atom-compliant, canonicalized self-link
   const atomLinkHref = getCanonicalUrl("/rss.xml");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -138,18 +139,18 @@ ${xmlItems}
 </rss>`;
 }
 
-// Main function to generate the complete RSS feed.
+// Main generator: always canonicalizes links, ready for SEO/schema injection if needed
 export async function generateRssFeed(): Promise<string> {
   try {
     const { blogStore, videoStore } = await import("./content-store");
 
-    // Fetch published blog posts and videos concurrently.
+    // Fetch concurrently for best performance
     const [blogPosts, videos] = await Promise.all([
       blogStore.getPublished().catch(() => []),
       videoStore.getPublished().catch(() => []),
     ]);
 
-    // Blogs
+    // Blogs (always canonical URLs)
     const blogItems: RSSItem[] = blogPosts.map((post: any) => ({
       title: post.title,
       description: truncateDescription(stripHtml(post.excerpt || post.content)),
@@ -160,7 +161,7 @@ export async function generateRssFeed(): Promise<string> {
       guid: getCanonicalUrl(`/blog/${post.slug}`),
     }));
 
-    // Videos
+    // Videos (with thumbnail enclosure, canonical URLs)
     const videoItems: RSSItem[] = await Promise.all(
       videos.map(async (video: any) => {
         let enclosure;
@@ -188,13 +189,13 @@ export async function generateRssFeed(): Promise<string> {
       })
     );
 
-    // Combine and sort
+    // Sort newest first, limit to 50
     const allItems = [...blogItems, ...videoItems].sort(
       (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
     );
     const recentItems = allItems.slice(0, 50);
 
-    // Channel info
+    // Channel block (all canonical)
     const channel: RSSChannel = {
       title: `${SITE_NAME} | Anime News, Original Stories & Creative Insights`,
       description: `Step behind the scenes with ${SITE_NAME}, your gateway to anime news, original stories, and the creative journey of anime production. Explore exclusive episodes, in-depth industry insights, and the artistry behind every animation.`,
@@ -204,7 +205,7 @@ export async function generateRssFeed(): Promise<string> {
       pubDate: recentItems.length > 0 ? recentItems[0].pubDate : formatRSSDate(new Date()),
       ttl: 60,
       image: {
-        url: getCanonicalUrl("/placeholder.png"), // Canonicalized image
+        url: getCanonicalUrl("/placeholder.png"),
         title: SITE_NAME,
         link: getCanonicalUrl("/"),
         width: 144,
@@ -219,6 +220,7 @@ export async function generateRssFeed(): Promise<string> {
   } catch (error) {
     console.error("Error generating RSS feed:", error);
 
+    // Fallback: minimal feed with canonical home URL
     return generateRSSXML(
       {
         title: SITE_NAME,

@@ -66,12 +66,10 @@ const orgSchema = getSchema({
   description:
     `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
   image: SITE_LOGO_URL, // Your official brand logo for the organization
-  publisher: { // For Organization schema, the publisher is typically the organization itself.
-    name: SITE_NAME,
-    logo: SITE_LOGO_URL,
-  },
+  // REMOVED: The 'publisher' property is invalid when the type is 'Organization'.
+  // An Organization is a publisher, it doesn't *have* a publisher property.
   sameAs: [ // Official social media and other web profiles for your organization.
-    // CORRECTED: YouTube Channel URL from your screenshot.
+    // CORRECTED: Using the canonical YouTube channel URL from your screenshot.
     "https://www.youtube.com/@flavorstudios",
     "https://www.instagram.com/flavorstudios",
     "https://twitter.com/flavor_studios", // Correct and consistent Twitter URL.

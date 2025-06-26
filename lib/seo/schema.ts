@@ -1,12 +1,7 @@
 // lib/seo/schema.ts
 
-import {
-  SITE_NAME,
-  SITE_URL,
-  SITE_DEFAULT_IMAGE,
-} from "@/lib/constants";
-import { getCanonicalUrl } from "./canonical"; // Assuming your improved getCanonicalUrl
-
+import { SITE_NAME, SITE_URL, SITE_DEFAULT_IMAGE } from "@/lib/constants";
+import { getCanonicalUrl } from "./canonical";
 import type { WithContext, Thing, ImageObject } from "schema-dts";
 
 const OG_IMAGE_DEFAULT_WIDTH = 1200;
@@ -14,25 +9,13 @@ const OG_IMAGE_DEFAULT_HEIGHT = 630;
 const LOGO_DEFAULT_WIDTH = 600;
 const LOGO_DEFAULT_HEIGHT = 60;
 
+// Extend ImageObject to optionally include caption/alt for legacy compatibility
+type ImageObjectWithCaption = ImageObject & { caption?: string; alt?: string };
+
 /**
- * JSON-LD structured data schema generator.
- * Provides a flexible way to generate various Schema.org types with common properties.
- *
- * @template T - Additional properties type.
- * @param {object} options - Options for schema generation.
- * @param {string} [options.type='WebPage'] - The Schema.org type (e.g., 'WebPage', 'Article', 'Product').
- * @param {string} [options.path='/'] - The path of the current page.
- * @param {string} options.title - The title of the page/entity.
- * @param {string} options.description - The description of the page/entity.
- * @param {string | Partial<ImageObject>} [options.image=SITE_DEFAULT_IMAGE] - The main image URL or an ImageObject.
- * @param {string} [options.logoUrl=`${SITE_URL}/logo.png`] - The URL for the organization's logo.
- * @param {string} [options.organizationName=SITE_NAME] - The name of the publishing organization.
- * @param {string} [options.organizationUrl=SITE_URL] - The URL of the publishing organization.
- * @param {string} [options.authorName] - The name of the author (useful for Article type).
- * @param {string} [options.datePublished] - The publication date (ISO 8601 string, useful for Article type).
- * @param {string} [options.dateModified] - The last modified date (ISO 8601 string, useful for Article type).
- * @param {T} [options.additionalProperties={}] - Any additional properties specific to the schema type.
- * @returns {WithContext<Thing>} The generated JSON-LD schema object.
+ * Generate Schema.org JSON-LD for any SEO context (WebPage, Article, etc.)
+ * @template T Additional schema.org properties
+ * @returns {WithContext<Thing>} JSON-LD schema object
  */
 export function getSchema<T extends Record<string, any>>({
   type = "WebPage",
@@ -43,16 +26,16 @@ export function getSchema<T extends Record<string, any>>({
   logoUrl = `${SITE_URL}/logo.png`,
   organizationName = SITE_NAME,
   organizationUrl = SITE_URL,
-  authorName, // New: For Article type
-  datePublished, // New: For Article type
-  dateModified, // New: For Article type
+  authorName,
+  datePublished,
+  dateModified,
   additionalProperties = {},
 }: {
   type?: string;
   path?: string;
   title: string;
   description: string;
-  image?: string | Partial<ImageObject>; // Use Partial<ImageObject> from schema-dts
+  image?: string | Partial<ImageObjectWithCaption>;
   logoUrl?: string;
   organizationName?: string;
   organizationUrl?: string;
@@ -61,39 +44,49 @@ export function getSchema<T extends Record<string, any>>({
   dateModified?: string;
   additionalProperties?: T;
 }): WithContext<Thing> {
+  // Canonical URL for the page
   const url = getCanonicalUrl(path);
 
-  // 1. Process the main image for schema
+  // Canonicalize image
   let schemaImage: ImageObject;
-  if (typeof image === 'string') {
+  if (typeof image === "string") {
     schemaImage = {
       "@type": "ImageObject",
-      url: image,
+      url: getCanonicalUrl(image),
       width: OG_IMAGE_DEFAULT_WIDTH,
       height: OG_IMAGE_DEFAULT_HEIGHT,
-      alt: description, // Fallback alt text
+      caption: description,
+    };
+  } else if (typeof image === "object" && image !== null && "url" in image) {
+    const img = image as Partial<ImageObjectWithCaption>;
+    schemaImage = {
+      "@type": "ImageObject",
+      url: getCanonicalUrl(img.url!),
+      width: img.width || OG_IMAGE_DEFAULT_WIDTH,
+      height: img.height || OG_IMAGE_DEFAULT_HEIGHT,
+      caption: img.caption || img.alt || description,
     };
   } else {
     schemaImage = {
-      "@type": "ImageObject", // Ensure type is set even if partially provided
-      ...image,
-      url: image.url, // URL is mandatory
-      width: image.width || OG_IMAGE_DEFAULT_WIDTH,
-      height: image.height || OG_IMAGE_DEFAULT_HEIGHT,
-      alt: image.alt || description, // Use description as fallback
+      "@type": "ImageObject",
+      url: getCanonicalUrl(SITE_DEFAULT_IMAGE),
+      width: OG_IMAGE_DEFAULT_WIDTH,
+      height: OG_IMAGE_DEFAULT_HEIGHT,
+      caption: description,
     };
   }
 
-  // 2. Process the organization logo for schema
+  // Canonicalize logo
   const schemaLogo: ImageObject = {
     "@type": "ImageObject",
-    url: logoUrl,
-    width: LOGO_DEFAULT_WIDTH, // Fixed width for consistency
-    height: LOGO_DEFAULT_HEIGHT, // Fixed height for consistency
-    alt: `${organizationName} logo`, // Good alt text for logo
+    url: getCanonicalUrl(logoUrl),
+    width: LOGO_DEFAULT_WIDTH,
+    height: LOGO_DEFAULT_HEIGHT,
+    caption: `${organizationName} logo`,
   };
 
-  const baseSchema: Thing = { // Explicitly type baseSchema as Thing
+  // Base schema object (merge additionalProperties last for full override)
+  const baseSchema: Thing = {
     "@context": "https://schema.org",
     "@type": type,
     name: title,
@@ -103,46 +96,37 @@ export function getSchema<T extends Record<string, any>>({
     publisher: {
       "@type": "Organization",
       name: organizationName,
-      url: organizationUrl,
+      url: getCanonicalUrl(organizationUrl),
       logo: schemaLogo,
     },
-  };
-
-  // 3. Conditional properties based on type (more specific)
-  if (type === "WebPage") {
-    // Add WebPage specific properties, often just mainEntityOfPage
-    Object.assign(baseSchema, {
+    ...(type === "WebPage" && {
       mainEntityOfPage: {
         "@type": "WebPage",
         "@id": url,
       },
-    });
-  } else if (type === "Article") {
-    // Article schema requires more details like author and dates
-    Object.assign(baseSchema, {
+    }),
+    ...(type === "Article" && {
       mainEntityOfPage: {
         "@type": "WebPage",
         "@id": url,
       },
       ...(authorName && {
         author: {
-          "@type": "Person", // Assuming author is a person
+          "@type": "Person",
           name: authorName,
         },
       }),
       ...(datePublished && { datePublished }),
       ...(dateModified && { dateModified }),
-      // Consider adding potential headline, articleBody, etc. depending on depth needed
-      // headline: title, // Often matches the page title
-      // articleBody: description, // Or actual article content snippet
-    });
-  }
-  // Add more `else if` blocks for other specific types like 'Product', 'Event', etc.
-  // if (type === "Product") { /* add product specific schema */ }
+      headline: title,
+      // You may also add: articleBody, wordCount, etc.
+    }),
+    // Extend for Product, FAQPage, VideoObject, etc. as needed
+  };
 
-  // 4. Merge additionalProperties last to allow full override
+  // Return as a schema.org WithContext object
   return {
     ...baseSchema,
     ...additionalProperties,
-  } as WithContext<Thing>; // Cast to WithContext<Thing> for final return
+  } as WithContext<Thing>;
 }

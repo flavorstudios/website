@@ -1,55 +1,80 @@
+// app/sitemap.xml/route.ts (Sitemap Index Route)
+
 import { type NextRequest, NextResponse } from "next/server";
-import { categoryStore } from "@/lib/category-store";
+import { getCanonicalUrl } from "@/lib/seo-utils";
+import { SITE_URL } from "@/lib/constants";
+// import { categoryStore } from "@/lib/category-store"; // Uncomment if/when category sitemaps go live
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL || "https://flavorstudios.in";
+const BASE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  process.env.BASE_URL ||
+  SITE_URL ||
+  "https://flavorstudios.in";
 
-interface Category {
-  slug?: string;
-  name: string;
-  updatedAt?: string;
-  createdAt?: string;
-  published?: boolean;
-}
+// Optional: Type for categories, in case you expand to dynamic category sitemaps
+// interface Category {
+//   slug?: string;
+//   name: string;
+//   updatedAt?: string;
+//   createdAt?: string;
+//   published?: boolean;
+// }
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(_request: NextRequest): Promise<NextResponse> {
   try {
-    // Optional: Include category sitemaps
-    // const categories = await categoryStore.getAll();
+    // --- Optionally fetch category sitemaps ---
+    // const categories = await categoryStore.getAll().catch(() => []);
     // const categorySitemaps =
-    //   categories
-    //     .filter((cat: Category) => cat.published !== false)
-    //     .map((category: Category) => {
-    //       const slug = category.slug || category.name.toLowerCase().replace(/\s+/g, "-");
-    //       return {
-    //         url: `${BASE_URL}/category/${slug}/sitemap.xml`,
-    //         lastModified: new Date(category.updatedAt || category.createdAt || new Date()),
-    //       };
-    //     });
+    //   Array.isArray(categories) && categories.length > 0
+    //     ? categories
+    //         .filter((cat) => cat.published !== false)
+    //         .map((category) => {
+    //           const slug =
+    //             category.slug ||
+    //             category.name
+    //               .toLowerCase()
+    //               .replace(/\s+/g, "-")
+    //               .replace(/[^a-z0-9\-]/g, "");
+    //           return {
+    //             url: getCanonicalUrl(`/category/${slug}/sitemap.xml`),
+    //             lastModified: new Date(category.updatedAt || category.createdAt || Date.now()).toISOString(),
+    //           };
+    //         })
+    //     : [];
 
-    // Main sitemaps (always present)
+    // Always include the main sitemaps
     const sitemaps = [
-      { url: `${BASE_URL}/sitemap.xml`, lastModified: new Date() },
-      { url: `${BASE_URL}/blog/sitemap.xml`, lastModified: new Date() },
-      { url: `${BASE_URL}/watch/sitemap.xml`, lastModified: new Date() },
-      // ...(categorySitemaps || []),
+      {
+        url: getCanonicalUrl("/sitemap.xml"),
+        lastModified: new Date().toISOString(),
+      },
+      {
+        url: getCanonicalUrl("/blog/sitemap.xml"),
+        lastModified: new Date().toISOString(),
+      },
+      {
+        url: getCanonicalUrl("/watch/sitemap.xml"),
+        lastModified: new Date().toISOString(),
+      },
+      // ...(categorySitemaps || []), // Enable when category sitemaps are live
     ];
 
-    // Remove duplicates (just in case)
+    // Deduplicate URLs just in case
     const seen = new Set<string>();
-    const dedupedSitemaps = sitemaps.filter(sm => {
+    const dedupedSitemaps = sitemaps.filter((sm) => {
       if (seen.has(sm.url)) return false;
       seen.add(sm.url);
       return true;
     });
 
-    // Build sitemap index XML
+    // XML sitemap index string (canonical URLs only)
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${dedupedSitemaps
   .map(
     (sitemap) => `  <sitemap>
     <loc>${sitemap.url}</loc>
-    <lastmod>${sitemap.lastModified.toISOString()}</lastmod>
+    <lastmod>${sitemap.lastModified}</lastmod>
   </sitemap>`
   )
   .join("\n")}
@@ -59,17 +84,18 @@ ${dedupedSitemaps
       status: 200,
       headers: {
         "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=3600, s-maxage=3600",
+        // 1 hour cache, can serve stale while revalidating for up to a day
+        "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
       },
     });
   } catch (error) {
     console.error("Error generating sitemap index:", error);
 
-    // Fallback: only main sitemap
+    // Fallback: at least return main sitemap
     const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>${BASE_URL}/sitemap.xml</loc>
+    <loc>${getCanonicalUrl("/sitemap.xml")}</loc>
     <lastmod>${new Date().toISOString()}</lastmod>
   </sitemap>
 </sitemapindex>`;
@@ -78,7 +104,7 @@ ${dedupedSitemaps
       status: 200,
       headers: {
         "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=3600, s-maxage=3600",
+        "Cache-Control": "public, max-age=1800, s-maxage=1800, stale-while-revalidate=3600",
       },
     });
   }

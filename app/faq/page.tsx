@@ -3,9 +3,9 @@
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_LOGO_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
-import FaqPageClient from "./FaqPageClient";
+import FaqPageClient from "./FaqPageClient"; // Assuming FaqPageClient accepts faqData prop
 
-// ---- FULL FAQ DATA ----
+// ---- FULL FAQ DATA (This data will be used for both rendering and Schema.org) ----
 const faqData = [
   // Most Popular Questions
   {
@@ -139,6 +139,7 @@ const faqData = [
   },
 ];
 
+
 // --- SEO Metadata
 export const metadata = getMetadata({
   title: `${SITE_NAME} FAQ – Anime & Support Help`,
@@ -161,17 +162,21 @@ export const metadata = getMetadata({
   },
 });
 
-// --- JSON-LD FAQPage Schema
+// --- JSON-LD FAQPage Schema ---
+// This schema correctly uses the faqData to build the mainEntity property,
+// making the page eligible for FAQ rich results in Google Search.
 const faqPageSchema = getSchema({
-  type: "FAQPage",
+  type: "FAQPage", // CRITICAL: Specify FAQPage type
   path: "/faq",
   title: `${SITE_NAME} FAQ – Anime & Support Help`,
   description: `Get answers to frequently asked questions about ${SITE_NAME}, supporting us, using our content, and how we create original anime and stories.`,
-  image: SITE_LOGO_URL,
+  image: SITE_LOGO_URL, // Use SITE_LOGO_URL for the main image of the FAQPage schema
   publisher: {
     name: SITE_NAME,
-    logo: SITE_LOGO_URL,
+    logo: SITE_LOGO_URL, // Use SITE_LOGO_URL for the publisher's logo
   },
+  // CRITICAL: This is the missing 'mainEntity' property that Google requires for FAQPage rich results.
+  // It maps your faqData into the required Question and Answer structure.
   mainEntity: faqData.map(item => ({
     "@type": "Question",
     name: item.question,
@@ -182,11 +187,13 @@ const faqPageSchema = getSchema({
   })),
 });
 
-// --- FAQ Page Component ---
+// --- FAQ Page Component (Server Component) ---
 export default function FAQPage() {
   return (
     <>
+      {/* Inject the generated FAQPage JSON-LD schema */}
       <StructuredData schema={faqPageSchema} />
+      {/* Pass the faqData to the client component for rendering the visible FAQ UI */}
       <FaqPageClient faqData={faqData} />
     </>
   );

@@ -1,47 +1,52 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"
-import { SITE_NAME, SITE_URL } from "@/lib/constants"
-import { getCanonicalUrl } from "@/lib/seo-utils"
+// app/not-found.tsx
 
-// --- SEO Metadata for 404 Page ---
-export const metadata = {
-  title: "404 Not Found – " + SITE_NAME,
-  description:
-    "This page does not exist. Discover original anime, news, and stories on " + SITE_NAME + " or explore our popular sections.",
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+
+// --- SEO imports ---
+import { getMetadata } from "@/lib/seo/metadata";
+import { getSchema } from "@/lib/seo/schema";
+import { getCanonicalUrl } from "@/lib/seo/canonical";
+import { StructuredData } from "@/components/StructuredData";
+
+// --- Metadata API for Next.js (fully dynamic) ---
+export const metadata = getMetadata({
+  title: `404 Not Found – ${SITE_NAME}`,
+  description: `This page does not exist. Discover original anime, news, and stories on ${SITE_NAME} or explore our popular sections.`,
+  path: "/404",
+  robots: "noindex,follow", // Error pages should not be indexed, but links followed
   openGraph: {
-    title: "404 Not Found – " + SITE_NAME,
-    description:
-      "This page does not exist. Discover original anime, news, and stories on " + SITE_NAME + " or explore our popular sections.",
-    url: `${SITE_URL}/404`, // Using SITE_URL
+    title: `404 Not Found – ${SITE_NAME}`,
+    description: `This page does not exist. Discover original anime, news, and stories on ${SITE_NAME} or explore our popular sections.`,
     type: "website",
-    site_name: SITE_NAME, // Using SITE_NAME
-    images: [
-      {
-        url: `${SITE_URL}/cover.jpg`, // Using SITE_URL
-        width: 1200,
-        height: 630,
-      },
-    ],
+    images: [{ url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
-    title: "404 Not Found – " + SITE_NAME,
-    description:
-      "This page does not exist. Discover original anime, news, and stories on " + SITE_NAME + " or explore our popular sections.",
-    images: [`${SITE_URL}/cover.jpg`], // Using SITE_URL
+    title: `404 Not Found – ${SITE_NAME}`,
+    description: `This page does not exist. Discover original anime, news, and stories on ${SITE_NAME} or explore our popular sections.`,
+    images: [`${SITE_URL}/cover.jpg`],
   },
   alternates: {
-    canonical: getCanonicalUrl("/404"), // Using getCanonicalUrl() for the 404 path
+    canonical: getCanonicalUrl("/404"),
   },
-  robots: {
-    index: false,
-    follow: true,
+});
+
+// --- JSON-LD Schema ---
+const schema = getSchema({
+  type: "WebPage",
+  path: "/404",
+  title: `404 Not Found – ${SITE_NAME}`,
+  description: `This page does not exist. Discover original anime, news, and stories on ${SITE_NAME} or explore our popular sections.`,
+  image: `${SITE_URL}/cover.jpg`,
+  publisher: {
+    name: SITE_NAME,
+    logo: `${SITE_URL}/logo.png`,
   },
-}
+});
 
 export default function NotFound() {
   const quickLinks = [
@@ -80,10 +85,12 @@ export default function NotFound() {
       icon: Phone,
       color: "from-indigo-500 to-purple-500",
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4">
+      {/* SEO: Inject JSON-LD */}
+      <StructuredData schema={schema} />
       <div className="max-w-4xl mx-auto text-center">
         {/* 404 Animation */}
         <div className="mb-6 sm:mb-8">
@@ -104,8 +111,6 @@ export default function NotFound() {
             The page you're looking for seems to have wandered off into another dimension. Don't worry—{SITE_NAME}
             has plenty of original anime, news, and stories to explore!
           </p>
-
-          {/* Primary CTA */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
             <Button
               asChild
@@ -180,5 +185,5 @@ export default function NotFound() {
         </div>
       </div>
     </div>
-  )
+  );
 }

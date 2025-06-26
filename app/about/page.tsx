@@ -1,16 +1,14 @@
-import { getMetadata } from "@/lib/seo-utils";
-import {
-  SITE_NAME,
-  SITE_URL,
-  SITE_BRAND_TWITTER,
-} from "@/lib/constants";
+// app/about/page.tsx
+
+import { getMetadata, getSchema } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { StructuredData } from "@/components/StructuredData"; // Import reusable component
 
 export const metadata = getMetadata({
   title: `About Us – The Vision Behind ${SITE_NAME}`,
   description: `Explore the heart and vision of ${SITE_NAME} — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.`,
   path: "/about",
   robots: "index,follow",
-
   openGraph: {
     title: `About Us – The Vision Behind ${SITE_NAME}`,
     description: `Learn what drives ${SITE_NAME}. Discover our mission, creative values, and passion for telling original stories through anime and 3D animation.`,
@@ -20,21 +18,43 @@ export const metadata = getMetadata({
         url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
+        alt: `Cover image for ${SITE_NAME}`,
       },
     ],
   },
-
   twitter: {
     card: "summary_large_image",
     site: SITE_BRAND_TWITTER,
     creator: SITE_BRAND_TWITTER,
     title: `About Us – The Vision Behind ${SITE_NAME}`,
-    description: "We’re an indie animation studio fueled by storytelling, emotion, and community. Discover our journey and purpose.",
+    description:
+      "We’re an indie animation studio fueled by storytelling, emotion, and community. Discover our journey and purpose.",
     images: [`${SITE_URL}/cover.jpg`],
   },
-
-  // Schema/JSON-LD should be added in head.tsx
 });
+
+export default function AboutPage() {
+  const schema = getSchema({
+    type: "WebPage",
+    path: "/about",
+    title: `About Us – The Vision Behind ${SITE_NAME}`,
+    description: `Explore the heart and vision of ${SITE_NAME} — an indie animation studio crafting emotionally rich anime and 3D stories powered by creativity and community.`,
+    image: `${SITE_URL}/cover.jpg`,
+  });
+
+  return (
+    <main>
+      <h1>About Us</h1>
+      <p>
+        This is the actual content for the About page of Flavor Studios.
+        Here you can detail your company's history, mission, values, team, etc.
+      </p>
+      {/* Modular, reusable structured data injection */}
+      <StructuredData schema={schema} />
+      {/* ... more about us content ... */}
+    </main>
+  );
+}
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

@@ -1,46 +1,26 @@
-import { getMetadata } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+// app/career/page.tsx
 
-export const metadata = getMetadata({
-  title: `Join Our Team – Careers at ${SITE_NAME}`,
-  description:
-    `Discover animation, writing, and voice acting opportunities at ${SITE_NAME}. Join our talent list and be part of something original.`,
-  path: "/career",
-  robots: "index,follow", // Explicit: Careers should be indexed!
-
-  openGraph: {
-    title: `Join Our Team – Careers at ${SITE_NAME}`,
-    description:
-      `Explore creative roles in animation, writing, and voice acting. Join our talent list and shape the future of storytelling at ${SITE_NAME}.`,
-    // url: `${SITE_URL}/career`,         // OMITTED; helper builds this
-    // site_name: SITE_NAME,              // OMITTED; helper enforces
-    type: "website",
-    images: [
-      {
-        url: `${SITE_URL}/cover.jpg`,
-        width: 1200,
-        height: 630,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
-    title: `Join Our Team – Careers at ${SITE_NAME}`,
-    description:
-      `Animation, writing, voice acting, and more—join our creative network at ${SITE_NAME} and stay connected for future roles.`,
-    images: [`${SITE_URL}/cover.jpg`],
-  },
-  // JSON-LD/schema REMOVED; see head.tsx below
-});
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
+import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
+import {
+  SITE_NAME,
+  SITE_URL,
+  SITE_BRAND_TWITTER,
+  SITE_DEFAULT_IMAGE,
+  SITE_LOGO_URL, // Make sure this is defined in your constants.ts as discussed!
+} from "@/lib/constants";
+import { StructuredData } from "@/components/StructuredData";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Heart,
   MapPin,
@@ -52,86 +32,138 @@ import {
   Star,
   MessageCircle,
   UserPlus,
-} from "lucide-react"
-import Link from "next/link"
+} from "lucide-react";
+import Link from "next/link";
 
+// --- SEO METADATA & SCHEMA (WebPage) ---
+export const metadata = getMetadata({
+  title: `Join Our Team – Careers at ${SITE_NAME}`,
+  description: `Discover animation, writing, and voice acting opportunities at ${SITE_NAME}. Join our talent list and be part of something original.`,
+  path: "/career",
+  robots: "index,follow",
+  openGraph: {
+    title: `Join Our Team – Careers at ${SITE_NAME}`,
+    description: `Explore creative roles in animation, writing, and voice acting. Join our talent list and shape the future of storytelling at ${SITE_NAME}.`,
+    type: "website",
+    images: [
+      {
+        url: `${SITE_URL}/cover.jpg`,
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
+    title: `Join Our Team – Careers at ${SITE_NAME}`,
+    description: `Animation, writing, voice acting, and more—join our creative network at ${SITE_NAME} and stay connected for future roles.`,
+    images: [`${SITE_URL}/cover.jpg`],
+  },
+});
+
+// --- WEBPAGE SCHEMA JSON-LD ---
+const schema = getSchema({
+  type: "WebPage",
+  path: "/career",
+  title: `Join Our Team – Careers at ${SITE_NAME}`,
+  description: `Careers, job opportunities, and creative roles at ${SITE_NAME}. Join our talent pool and follow us for future openings.`,
+  image: SITE_DEFAULT_IMAGE,
+  publisher: {
+    name: SITE_NAME,
+    logo: SITE_LOGO_URL,
+  },
+});
+
+// --- DATA: Closed Positions and Social Links ---
+const closedPositions = [
+  {
+    title: "2D Animator",
+    type: "Full-time",
+    location: "Remote",
+    status: "Closed",
+    description:
+      "Create stunning 2D animations for our original anime series and short-form content.",
+  },
+  {
+    title: "Scriptwriter",
+    type: "Contract",
+    location: "Remote",
+    status: "Closed",
+    description:
+      "Develop compelling scripts and storylines for our anime projects and educational content.",
+  },
+  {
+    title: "Voiceover Artist",
+    type: "Project-based",
+    location: "Remote",
+    status: "Closed",
+    description:
+      "Bring characters to life with professional voice acting for our animated series.",
+  },
+  {
+    title: "Anime Content Creator",
+    type: "Full-time",
+    location: "Remote",
+    status: "Closed",
+    description:
+      "Create engaging anime-related content for our YouTube channel and social media platforms.",
+  },
+  {
+    title: "Web Developer",
+    type: "Contract",
+    location: "Remote",
+    status: "Closed",
+    description:
+      "Develop and maintain our website and digital platforms using modern web technologies.",
+  },
+  {
+    title: "Digital Marketing Specialist",
+    type: "Part-time",
+    location: "Remote",
+    status: "Closed",
+    description:
+      "Drive our digital marketing efforts across social media, YouTube, and other platforms.",
+  },
+];
+
+const stayConnectedOptions = [
+  {
+    title: "Join Our Talent List",
+    description: "Be the first to know about new opportunities",
+    icon: UserPlus,
+    action: "Join List",
+    href: "#talent-form",
+    color: "bg-blue-600 hover:bg-blue-700",
+  },
+  {
+    title: "Follow Us on Instagram",
+    description: "Stay updated with our latest projects and behind-the-scenes content",
+    icon: Instagram,
+    action: "Follow Instagram",
+    href: "https://www.instagram.com/flavorstudios",
+    external: true,
+    color: "bg-pink-600 hover:bg-pink-700",
+  },
+  {
+    title: "Subscribe on YouTube",
+    description: "Watch our content and see our creative process in action",
+    icon: Youtube,
+    action: "Subscribe",
+    href: "https://www.youtube.com/@flavorstudios",
+    external: true,
+    color: "bg-red-600 hover:bg-red-700",
+  },
+];
+
+// --- PAGE COMPONENT ---
 export default function CareerPage() {
-  const closedPositions = [
-    {
-      title: "2D Animator",
-      type: "Full-time",
-      location: "Remote",
-      status: "Closed",
-      description: "Create stunning 2D animations for our original anime series and short-form content.",
-    },
-    {
-      title: "Scriptwriter",
-      type: "Contract",
-      location: "Remote",
-      status: "Closed",
-      description: "Develop compelling scripts and storylines for our anime projects and educational content.",
-    },
-    {
-      title: "Voiceover Artist",
-      type: "Project-based",
-      location: "Remote",
-      status: "Closed",
-      description: "Bring characters to life with professional voice acting for our animated series.",
-    },
-    {
-      title: "Anime Content Creator",
-      type: "Full-time",
-      location: "Remote",
-      status: "Closed",
-      description: "Create engaging anime-related content for our YouTube channel and social media platforms.",
-    },
-    {
-      title: "Web Developer",
-      type: "Contract",
-      location: "Remote",
-      status: "Closed",
-      description: "Develop and maintain our website and digital platforms using modern web technologies.",
-    },
-    {
-      title: "Digital Marketing Specialist",
-      type: "Part-time",
-      location: "Remote",
-      status: "Closed",
-      description: "Drive our digital marketing efforts across social media, YouTube, and other platforms.",
-    },
-  ]
-
-  const stayConnectedOptions = [
-    {
-      title: "Join Our Talent List",
-      description: "Be the first to know about new opportunities",
-      icon: UserPlus,
-      action: "Join List",
-      href: "#talent-form",
-      color: "bg-blue-600 hover:bg-blue-700",
-    },
-    {
-      title: "Follow Us on Instagram",
-      description: "Stay updated with our latest projects and behind-the-scenes content",
-      icon: Instagram,
-      action: "Follow Instagram",
-      href: "https://www.instagram.com/flavorstudios",
-      external: true,
-      color: "bg-pink-600 hover:bg-pink-700",
-    },
-    {
-      title: "Subscribe on YouTube",
-      description: "Watch our content and see our creative process in action",
-      icon: Youtube,
-      action: "Subscribe",
-      href: "https://www.youtube.com/@flavorstudios",
-      external: true,
-      color: "bg-red-600 hover:bg-red-700",
-    },
-  ]
-
   return (
     <div className="min-h-screen py-8 sm:py-12">
+      {/* Inject WebPage JSON-LD schema */}
+      <StructuredData schema={schema} />
+
       <div className="container mx-auto max-w-6xl px-4 sm:px-6">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
@@ -398,5 +430,5 @@ export default function CareerPage() {
         </section>
       </div>
     </div>
-  )
+  );
 }

@@ -1,58 +1,51 @@
-import { getMetadata } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+// app/dmca/page.tsx
 
+import { getMetadata, getSchema } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_LOGO_URL } from "@/lib/constants";
+import { StructuredData } from "@/components/StructuredData";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Mail, Shield, FileText, AlertTriangle, Phone, Globe, Copyright,
+  UserX, Scale, AlertCircle, CheckCircle, Clock, Gavel, Eye, Cookie // Ensure Cookie icon is imported
+} from "lucide-react"; // All necessary Lucide icons are correctly imported.
+import Link from "next/link";
+
+// --- SEO Metadata: all dynamic, all helpers ---
 export const metadata = getMetadata({
   title: `DMCA Takedown Policy – ${SITE_NAME}`,
-  description:
-    `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
+  description: `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
   path: "/dmca",
-  robots: "noindex, nofollow", // Correct for legal/copyright policy pages
+  robots: "index,follow", // CORRECT: DMCA/legal pages should be indexed for transparency and compliance.
   openGraph: {
     title: `DMCA Takedown Policy – ${SITE_NAME}`,
-    description:
-      `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
-    type: "website",
-    images: [
-      {
-        url: `${SITE_URL}/cover.jpg`,
-        width: 1200,
-        height: 630,
-      },
-    ],
-    // url and site_name omitted; helper will handle!
+    description: `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
+    type: "website", // Standard type for a general policy page.
+    images: [{ url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
     title: `DMCA Takedown Policy – ${SITE_NAME}`,
-    description:
-      `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
+    description: `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  // JSON-LD/schema REMOVED; now in head.tsx only
 });
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Mail,
-  Shield,
-  FileText,
-  AlertTriangle,
-  Phone,
-  Globe,
-  Copyright,
-  UserX,
-  Scale,
-  AlertCircle,
-  CheckCircle,
-  Clock,
-  Gavel,
-  Eye,
-} from "lucide-react"
-import Link from "next/link"
+// --- WebPage Schema (JSON-LD) for SEO ---
+const schema = getSchema({
+  type: "WebPage",
+  path: "/dmca",
+  title: `DMCA Takedown Policy – ${SITE_NAME}`,
+  description: `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
+  image: SITE_LOGO_URL, // Using the site's logo for the page's image in schema is a good practice for legal documents.
+  publisher: {
+    name: SITE_NAME,
+    logo: SITE_LOGO_URL, // Explicitly linking the publisher's logo.
+  },
+});
 
 export default function DMCAPage() {
   const dmcaSteps = [
@@ -80,7 +73,7 @@ export default function DMCAPage() {
       description: "We will review your notice and take appropriate action within a reasonable timeframe.",
       icon: CheckCircle,
     },
-  ]
+  ];
 
   const requiredElements = [
     "A physical or electronic signature of the copyright owner or authorized representative",
@@ -89,7 +82,7 @@ export default function DMCAPage() {
     "Your name, address, telephone number, and email address",
     "A good faith belief statement that the use is not authorized",
     "A statement under penalty of perjury that the information is accurate and you are authorized to act",
-  ]
+  ];
 
   const counterNoticeElements = [
     "Your physical or electronic signature",
@@ -97,12 +90,15 @@ export default function DMCAPage() {
     "A statement under penalty of perjury that removal was due to mistake or misidentification",
     "Your name, address, telephone number, and email address",
     "Consent to jurisdiction of courts in India and acceptance of service of process",
-  ]
+  ];
 
   return (
     <div className="min-h-screen py-8 sm:py-12">
+      {/* --- SEO JSON-LD for Google/Bing --- */}
+      <StructuredData schema={schema} />
+
       <div className="container mx-auto max-w-4xl px-4 sm:px-6">
-        {/* Header */}
+        {/* Header Section */}
         <div className="mb-12 sm:mb-16">
           <Badge className="mb-3 sm:mb-4 bg-blue-100 text-blue-800 text-xs sm:text-sm">Legal Document</Badge>
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">DMCA Policy</h1>
@@ -112,10 +108,7 @@ export default function DMCAPage() {
               <div>
                 <p className="text-sm sm:text-base text-blue-800 font-medium mb-2">Effective Date: May 9, 2025</p>
                 <p className="text-sm sm:text-base text-blue-700 leading-relaxed">
-                  Flavor Studios ("we," "us," or "our") respects the intellectual property rights of others and expects
-                  its users to do the same. It is our policy to respond to clear notices of alleged copyright
-                  infringement in accordance with the Digital Millennium Copyright Act ("DMCA") and other applicable
-                  intellectual property laws.
+                  Flavor Studios ("we," "us," or "our") respects the intellectual property rights of others and expects its users to do the same. It is our policy to respond to clear notices of alleged copyright infringement in accordance with the Digital Millennium Copyright Act ("DMCA") and other applicable intellectual property laws.
                 </p>
               </div>
             </div>
@@ -126,22 +119,19 @@ export default function DMCAPage() {
               <div>
                 <p className="text-sm sm:text-base text-amber-800 font-medium mb-2">Policy Overview</p>
                 <p className="text-sm sm:text-base text-amber-700 leading-relaxed">
-                  This DMCA Notice and Takedown Policy outlines the procedures for reporting claims of copyright
-                  infringement and how we handle such notices.
+                  This DMCA Notice and Takedown Policy outlines the procedures for reporting claims of copyright infringement and how we handle such notices.
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* DMCA Process Steps */}
+        {/* DMCA Process Steps Section */}
         <section className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">DMCA Notice Process</h2>
           <div className="max-w-4xl mx-auto">
             <div className="relative">
-              {/* Timeline line - Hidden on mobile, shown on larger screens */}
               <div className="hidden md:block absolute left-6 md:left-8 top-0 bottom-0 w-0.5 bg-blue-200"></div>
-
               <div className="space-y-4 sm:space-y-6 md:space-y-12">
                 {dmcaSteps.map((step, index) => (
                   <div key={index} className="relative flex items-start">
@@ -151,8 +141,6 @@ export default function DMCAPage() {
                         {step.step}
                       </div>
                     </div>
-
-                    {/* Content */}
                     <div className="ml-3 sm:ml-4 md:ml-8 flex-1">
                       <Card className="hover:shadow-lg transition-shadow">
                         <CardHeader className="pb-3 sm:pb-4">
@@ -175,7 +163,7 @@ export default function DMCAPage() {
           </div>
         </section>
 
-        {/* Filing a DMCA Notice */}
+        {/* Filing a DMCA Notice Section */}
         <Card className="mb-8 sm:mb-12" id="filing-notice">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
@@ -187,11 +175,8 @@ export default function DMCAPage() {
           </CardHeader>
           <CardContent className="space-y-4 sm:space-y-6">
             <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-              If you believe that your copyrighted work has been copied in a way that constitutes copyright infringement
-              and is accessible on our website, please submit a written DMCA notice to our Designated Agent that
-              includes the following:
+              If you believe that your copyrighted work has been copied in a way that constitutes copyright infringement and is accessible on our website, please submit a written DMCA notice to our Designated Agent that includes the following:
             </p>
-
             <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
               <h4 className="font-semibold text-base sm:text-lg text-gray-900 mb-3 sm:mb-4">Required Elements:</h4>
               <ul className="space-y-2 sm:space-y-3">
@@ -203,7 +188,6 @@ export default function DMCAPage() {
                 ))}
               </ul>
             </div>
-
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6">
               <h4 className="font-semibold text-blue-900 mb-3 text-base sm:text-lg">Submit DMCA Notices to:</h4>
               <div className="space-y-2">
@@ -218,7 +202,7 @@ export default function DMCAPage() {
           </CardContent>
         </Card>
 
-        {/* Counter Notification */}
+        {/* Counter Notification Section */}
         <Card className="mb-8 sm:mb-12" id="counter-notification">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
@@ -230,10 +214,8 @@ export default function DMCAPage() {
           </CardHeader>
           <CardContent className="space-y-4 sm:space-y-6">
             <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-              If you believe your content was removed (or access to it was disabled) in error or misidentification, you
-              may submit a written counter-notification to our Designated Agent that includes:
+              If you believe your content was removed (or access to it was disabled) in error or misidentification, you may submit a written counter-notification to our Designated Agent that includes:
             </p>
-
             <div className="bg-gray-50 rounded-lg p-4 sm:p-6">
               <h4 className="font-semibold text-base sm:text-lg text-gray-900 mb-3 sm:mb-4">Required Elements:</h4>
               <ul className="space-y-2 sm:space-y-3">
@@ -245,15 +227,13 @@ export default function DMCAPage() {
                 ))}
               </ul>
             </div>
-
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-6">
               <div className="flex items-start gap-3">
                 <Clock className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <h4 className="font-semibold text-green-900 mb-2 text-base sm:text-lg">Restoration Timeline</h4>
                   <p className="text-sm sm:text-base text-green-800 leading-relaxed">
-                    Upon receipt of a valid counter-notification, we may restore the removed content within 10–14
-                    business days unless the original complainant files a court action.
+                    Upon receipt of a valid counter-notification, we may restore the removed content within 10–14 business days unless the original complainant files a court action.
                   </p>
                 </div>
               </div>
@@ -261,9 +241,8 @@ export default function DMCAPage() {
           </CardContent>
         </Card>
 
-        {/* Additional Policies */}
+        {/* Additional Policies Section */}
         <div className="grid gap-6 sm:gap-8 mb-12 sm:mb-16">
-          {/* Repeat Infringer Policy */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
@@ -275,13 +254,10 @@ export default function DMCAPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                Flavor Studios has a zero-tolerance policy for repeat copyright infringers. If a user is found to
-                repeatedly violate copyright laws, we reserve the right to terminate their access to our services.
+                Flavor Studios has a zero-tolerance policy for repeat copyright infringers. If a user is found to repeatedly violate copyright laws, we reserve the right to terminate their access to our services.
               </p>
             </CardContent>
           </Card>
-
-          {/* Misuse Warning */}
           <Card className="border-amber-200 bg-amber-50">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-amber-900">
@@ -293,8 +269,7 @@ export default function DMCAPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm sm:text-base text-amber-800 leading-relaxed">
-                Submitting false or misleading DMCA notices or counter-notices can result in legal liability. We
-                strongly recommend that you consult a legal professional before submitting any claim.
+                Submitting false or misleading DMCA notices or counter-notices can result in legal liability. We strongly recommend that you consult a legal professional before submitting any claim.
               </p>
             </CardContent>
           </Card>
@@ -321,13 +296,14 @@ export default function DMCAPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-blue-900 text-sm sm:text-base">Flavor Studios</p>
-                  <p className="text-blue-700 text-sm sm:text-base">Website: https://flavorstudios.in</p>
+                  {/* Using SITE_URL constant for consistency */}
+                  <p className="text-blue-700 text-sm sm:text-base">Website: {SITE_URL}</p>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-xs sm:text-sm">
                   <Link href="/contact">
-                    <Phone className="mr-2 h-4 w-4" />
+                    <Phone className="mr-2 h-4 w-4" /> {/* Changed icon to Phone for "Contact Us" button */}
                     Contact Us
                   </Link>
                 </Button>
@@ -346,7 +322,7 @@ export default function DMCAPage() {
           </CardContent>
         </Card>
 
-        {/* Important Legal Notice */}
+        {/* Important Legal Notice Section */}
         <Card className="mb-12 sm:mb-16 bg-red-50 border-red-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-red-900">
@@ -359,25 +335,23 @@ export default function DMCAPage() {
           <CardContent>
             <div className="space-y-3 sm:space-y-4">
               <p className="text-sm sm:text-base text-red-800 leading-relaxed">
-                <strong>Jurisdiction:</strong> This DMCA policy is governed by the laws of India. Counter-notifications
-                must include consent to Indian court jurisdiction.
+                <strong>Jurisdiction:</strong> This DMCA policy is governed by the laws of India. Counter-notifications must include consent to Indian court jurisdiction.
               </p>
               <p className="text-sm sm:text-base text-red-800 leading-relaxed">
-                <strong>Legal Consequences:</strong> False DMCA claims may result in liability for damages, including
-                costs and attorney fees under Section 512(f) of the DMCA.
+                <strong>Legal Consequences:</strong> False DMCA claims may result in liability for damages, including costs and attorney fees under Section 512(f) of the DMCA.
               </p>
               <p className="text-sm sm:text-base text-red-800 leading-relaxed">
-                <strong>Professional Advice:</strong> We recommend consulting with a qualified attorney before filing
-                any DMCA notice or counter-notice.
+                <strong>Professional Advice:</strong> We recommend consulting with a qualified attorney before filing any DMCA notice or counter-notice.
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Quick Navigation */}
+        {/* Quick Navigation Section */}
         <div className="text-center mb-8 sm:mb-12">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Quick Navigation</h3>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+            {/* Quick navigation to main DMCA sections */}
             <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm">
               <Link href="#filing-notice">Filing Notice</Link>
             </Button>
@@ -387,7 +361,7 @@ export default function DMCAPage() {
           </div>
         </div>
 
-        {/* Related Legal Documents */}
+        {/* Related Legal Documents Section */}
         <div className="text-center">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Related Legal Documents</h3>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
@@ -405,7 +379,7 @@ export default function DMCAPage() {
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/cookie-policy">
-                <Copyright className="mr-2 h-4 w-4" />
+                <Cookie className="mr-2 h-4 w-4" /> {/* Corrected icon for Cookie Policy */}
                 Cookie Policy
               </Link>
             </Button>
@@ -432,5 +406,5 @@ export default function DMCAPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

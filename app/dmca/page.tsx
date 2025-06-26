@@ -8,20 +8,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Mail, Shield, FileText, AlertTriangle, Phone, Globe, Copyright,
-  UserX, Scale, AlertCircle, CheckCircle, Clock, Gavel, Eye, Cookie // Ensure Cookie icon is imported
-} from "lucide-react"; // All necessary Lucide icons are correctly imported.
+  UserX, Scale, AlertCircle, CheckCircle, Clock, Gavel, Eye, Cookie
+} from "lucide-react";
 import Link from "next/link";
 
-// --- SEO Metadata: all dynamic, all helpers ---
+// --- SEO Metadata: dynamic, centralized ---
 export const metadata = getMetadata({
   title: `DMCA Takedown Policy – ${SITE_NAME}`,
   description: `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
   path: "/dmca",
-  robots: "index,follow", // CORRECT: DMCA/legal pages should be indexed for transparency and compliance.
+  robots: "index,follow", // This policy page should be publicly indexable.
   openGraph: {
     title: `DMCA Takedown Policy – ${SITE_NAME}`,
     description: `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
-    type: "website", // Standard type for a general policy page.
+    type: "website",
     images: [{ url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }],
   },
   twitter: {
@@ -34,17 +34,14 @@ export const metadata = getMetadata({
   },
 });
 
-// --- WebPage Schema (JSON-LD) for SEO ---
+// --- SEO JSON-LD Schema (WebPage) ---
 const schema = getSchema({
   type: "WebPage",
   path: "/dmca",
   title: `DMCA Takedown Policy – ${SITE_NAME}`,
   description: `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
-  image: SITE_LOGO_URL, // Using the site's logo for the page's image in schema is a good practice for legal documents.
-  publisher: {
-    name: SITE_NAME,
-    logo: SITE_LOGO_URL, // Explicitly linking the publisher's logo.
-  },
+  image: SITE_LOGO_URL,
+  publisher: { name: SITE_NAME, logo: SITE_LOGO_URL },
 });
 
 export default function DMCAPage() {
@@ -94,13 +91,12 @@ export default function DMCAPage() {
 
   return (
     <div className="min-h-screen py-8 sm:py-12">
-      {/* --- SEO JSON-LD for Google/Bing --- */}
       <StructuredData schema={schema} />
-
       <div className="container mx-auto max-w-4xl px-4 sm:px-6">
-        {/* Header Section */}
+
+        {/* Header */}
         <div className="mb-12 sm:mb-16">
-          <Badge className="mb-3 sm:mb-4 bg-blue-100 text-blue-800 text-xs sm:text-sm">Legal Document</Badge>
+          <Badge className="mb-3 sm:mb-4 bg-blue-100 text-blue-800 text-xs sm:text-sm" aria-label="Legal Document">Legal Document</Badge>
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">DMCA Policy</h1>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex items-start gap-3">
@@ -126,16 +122,15 @@ export default function DMCAPage() {
           </div>
         </div>
 
-        {/* DMCA Process Steps Section */}
+        {/* DMCA Process Steps */}
         <section className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">DMCA Notice Process</h2>
           <div className="max-w-4xl mx-auto">
             <div className="relative">
-              <div className="hidden md:block absolute left-6 md:left-8 top-0 bottom-0 w-0.5 bg-blue-200"></div>
+              <div className="hidden md:block absolute left-6 md:left-8 top-0 bottom-0 w-0.5 bg-blue-200" aria-hidden="true"></div>
               <div className="space-y-4 sm:space-y-6 md:space-y-12">
                 {dmcaSteps.map((step, index) => (
                   <div key={index} className="relative flex items-start">
-                    {/* Timeline dot */}
                     <div className="relative z-10 flex-shrink-0">
                       <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-base sm:text-lg md:text-xl font-bold shadow-lg">
                         {step.step}
@@ -163,7 +158,7 @@ export default function DMCAPage() {
           </div>
         </section>
 
-        {/* Filing a DMCA Notice Section */}
+        {/* Filing a DMCA Notice */}
         <Card className="mb-8 sm:mb-12" id="filing-notice">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
@@ -202,7 +197,7 @@ export default function DMCAPage() {
           </CardContent>
         </Card>
 
-        {/* Counter Notification Section */}
+        {/* Counter Notification */}
         <Card className="mb-8 sm:mb-12" id="counter-notification">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
@@ -241,7 +236,7 @@ export default function DMCAPage() {
           </CardContent>
         </Card>
 
-        {/* Additional Policies Section */}
+        {/* Additional Policies */}
         <div className="grid gap-6 sm:gap-8 mb-12 sm:mb-16">
           <Card>
             <CardHeader>
@@ -296,14 +291,13 @@ export default function DMCAPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-blue-900 text-sm sm:text-base">Flavor Studios</p>
-                  {/* Using SITE_URL constant for consistency */}
                   <p className="text-blue-700 text-sm sm:text-base">Website: {SITE_URL}</p>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-xs sm:text-sm">
-                  <Link href="/contact">
-                    <Phone className="mr-2 h-4 w-4" /> {/* Changed icon to Phone for "Contact Us" button */}
+                  <Link href="/contact" aria-label="Contact Flavor Studios">
+                    <Phone className="mr-2 h-4 w-4" />
                     Contact Us
                   </Link>
                 </Button>
@@ -312,7 +306,7 @@ export default function DMCAPage() {
                   variant="outline"
                   className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white h-9 sm:h-10 text-xs sm:text-sm"
                 >
-                  <Link href="mailto:contact@flavorstudios.in">
+                  <Link href="mailto:contact@flavorstudios.in" aria-label="Email DMCA Agent">
                     <Mail className="mr-2 h-4 w-4" />
                     Send DMCA Notice
                   </Link>
@@ -322,7 +316,7 @@ export default function DMCAPage() {
           </CardContent>
         </Card>
 
-        {/* Important Legal Notice Section */}
+        {/* Important Legal Notice */}
         <Card className="mb-12 sm:mb-16 bg-red-50 border-red-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-red-900">
@@ -347,53 +341,37 @@ export default function DMCAPage() {
           </CardContent>
         </Card>
 
-        {/* Quick Navigation Section */}
+        {/* Quick Navigation */}
         <div className="text-center mb-8 sm:mb-12">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Quick Navigation</h3>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-            {/* Quick navigation to main DMCA sections */}
-            <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm">
+            <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm" aria-label="Jump to Filing Notice">
               <Link href="#filing-notice">Filing Notice</Link>
             </Button>
-            <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm">
+            <Button variant="outline" size="sm" asChild className="text-xs sm:text-sm" aria-label="Jump to Counter Notice">
               <Link href="#counter-notification">Counter Notice</Link>
             </Button>
           </div>
         </div>
 
-        {/* Related Legal Documents Section */}
+        {/* Related Legal Documents */}
         <div className="text-center">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Related Legal Documents</h3>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
-              <Link href="/privacy-policy">
-                <Shield className="mr-2 h-4 w-4" />
-                Privacy Policy
-              </Link>
+              <Link href="/privacy-policy"><Shield className="mr-2 h-4 w-4" />Privacy Policy</Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
-              <Link href="/terms-of-service">
-                <FileText className="mr-2 h-4 w-4" />
-                Terms of Service
-              </Link>
+              <Link href="/terms-of-service"><FileText className="mr-2 h-4 w-4" />Terms of Service</Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
-              <Link href="/cookie-policy">
-                <Cookie className="mr-2 h-4 w-4" /> {/* Corrected icon for Cookie Policy */}
-                Cookie Policy
-              </Link>
+              <Link href="/cookie-policy"><Cookie className="mr-2 h-4 w-4" />Cookie Policy</Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
-              <Link href="/disclaimer">
-                <AlertCircle className="mr-2 h-4 w-4" />
-                Disclaimer
-              </Link>
+              <Link href="/disclaimer"><AlertCircle className="mr-2 h-4 w-4" />Disclaimer</Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
-              <Link href="/media-usage-policy">
-                <Eye className="mr-2 h-4 w-4" />
-                Media Usage Policy
-              </Link>
+              <Link href="/media-usage-policy"><Eye className="mr-2 h-4 w-4" />Media Usage Policy</Link>
             </Button>
           </div>
         </div>

@@ -1,9 +1,13 @@
 // lib/seo-utils.ts
 
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import {
+  SITE_NAME,
+  SITE_URL,
+  SITE_BRAND_TWITTER,
+  SITE_DEFAULT_IMAGE,
+} from "@/lib/constants";
 
 const BASE_URL = SITE_URL;
-const DEFAULT_OG_IMAGE = `${BASE_URL}/cover.jpg`;
 const DEFAULT_TITLE_SUFFIX = `– ${SITE_NAME}`;
 
 /**
@@ -17,13 +21,13 @@ export function getCanonicalUrl(path: string): string {
 /**
  * SEO Metadata helper for Flavor Studios.
  * Supports title, description, canonical, Open Graph, Twitter, Schema, and robots meta.
- * Accepts per-page openGraph and twitter overrides (images always correct format).
+ * Accepts per-page openGraph and twitter overrides.
  */
 export function getMetadata({
   title,
   description,
   path,
-  ogImage = DEFAULT_OG_IMAGE,
+  ogImage = SITE_DEFAULT_IMAGE,
   schema,
   robots,
   openGraph = {},
@@ -38,7 +42,6 @@ export function getMetadata({
   openGraph?: Record<string, any>;
   twitter?: Record<string, any>;
 }) {
-  // Suffix with "– Flavor Studios" if not present at the end
   const fullTitle =
     title.trim().toLowerCase().includes(SITE_NAME.toLowerCase())
       ? title.trim()
@@ -46,42 +49,39 @@ export function getMetadata({
 
   const canonical = getCanonicalUrl(path);
 
-  // Defaults (OG, Twitter)
   const defaultOpenGraph = {
     title: fullTitle,
     description,
     url: canonical,
     type: "website",
-    site_name: SITE_NAME,
+    siteName: SITE_NAME, // ✅ fixed: siteName (camelCase) for Next.js compatibility
     images: [{ url: ogImage, width: 1200, height: 630 }],
   };
 
   const defaultTwitter = {
     card: "summary_large_image",
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
     title: fullTitle,
     description,
     images: [ogImage],
   };
 
-  // Merge Open Graph and always force site_name to SITE_NAME
   const mergedOpenGraph = {
     ...defaultOpenGraph,
     ...openGraph,
-    site_name: SITE_NAME, // <-- Hard enforced, never overwritten
+    siteName: SITE_NAME, // ✅ enforce correct case
     images:
       Array.isArray(openGraph.images) && openGraph.images.length > 0
         ? openGraph.images
         : defaultOpenGraph.images,
   };
 
-  // Merge Twitter and always force site/creator to @flavorstudios
   const mergedTwitter = {
     ...defaultTwitter,
     ...twitter,
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
     images:
       Array.isArray(twitter.images) && twitter.images.length > 0
         ? twitter.images

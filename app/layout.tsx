@@ -6,6 +6,7 @@ import "./fonts/poppins.css";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
+import PwaServiceWorker from "@/components/PwaServiceWorker"; // <-- Added import
 
 export default function RootLayout({
   children,
@@ -31,6 +32,7 @@ export default function RootLayout({
         <main>{children}</main>
         <Footer />
         <BackToTop />
+        <PwaServiceWorker /> {/* <-- Register your PWA Service Worker here */}
       </body>
     </html>
   );

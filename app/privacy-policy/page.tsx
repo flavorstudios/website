@@ -1,12 +1,24 @@
-import { getMetadata } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+// app/privacy-policy/page.tsx
 
+import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL, SITE_LOGO_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { StructuredData } from "@/components/StructuredData";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Mail, Shield, Eye, Lock, Users, FileText, AlertCircle, Phone, Cookie, Copyright
+} from "lucide-react"; // All necessary Lucide icons are correctly imported.
+import Link from "next/link";
+
+// === SEO METADATA (using centralized handler) ===
 export const metadata = getMetadata({
   title: `Privacy Policy – ${SITE_NAME}`,
   description:
     `Read how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL}. Your privacy matters to us.`,
   path: "/privacy-policy",
-  robots: "noindex, nofollow", // ✔️ Prevents indexing for legal/privacy policy
+  robots: "index,follow", // CORRECTED: Public legal/privacy page should be indexed.
   openGraph: {
     title: `Privacy Policy – ${SITE_NAME}`,
     description:
@@ -22,20 +34,30 @@ export const metadata = getMetadata({
   },
   twitter: {
     card: "summary_large_image",
-    site: "@flavorstudios",
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER, // ADDED: For consistency and completeness.
     title: `Privacy Policy – ${SITE_NAME}`,
     description:
       `Read how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL}. Your privacy matters to us.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  // JSON-LD/schema REMOVED; now in head.tsx only
+  alternates: {
+    canonical: getCanonicalUrl("/privacy-policy"),
+  },
 });
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Mail, Shield, Eye, Lock, Users, FileText, AlertCircle, Phone, Cookie, Copyright } from "lucide-react"
-import Link from "next/link"
+// === JSON-LD WebPage Schema for Privacy Policy (Structured Data) ===
+const schema = getSchema({
+  type: "WebPage",
+  path: "/privacy-policy",
+  title: `Privacy Policy – ${SITE_NAME}`,
+  description: `Read how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL}. Your privacy matters to us.`,
+  image: `${SITE_URL}/cover.jpg`, // You could consider SITE_LOGO_URL here for consistency with publisher, but cover is fine.
+  publisher: {
+    name: SITE_NAME,
+    logo: SITE_LOGO_URL,
+  },
+});
 
 export default function PrivacyPolicyPage() {
   const sections = [
@@ -54,7 +76,7 @@ export default function PrivacyPolicyPage() {
         },
         {
           subtitle: "Cookies",
-          text: "Small files placed on your device to enhance your browsing experience, remember preferences, and analyze website traffic.",
+          text: "Small files placed on your device to enhance your Browse experience, remember preferences, and analyze website traffic.",
         },
       ],
     },
@@ -134,7 +156,7 @@ export default function PrivacyPolicyPage() {
         },
       ],
     },
-  ]
+  ];
 
   const additionalSections = [
     {
@@ -159,18 +181,21 @@ export default function PrivacyPolicyPage() {
       title: "Changes to This Privacy Policy",
       text: 'We may update this Privacy Policy periodically. Any changes will be posted on this page with an updated "Effective Date." We encourage you to review this Privacy Policy regularly.',
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen py-6 sm:py-8 md:py-12">
+      {/* === SEO: Inject JSON-LD Schema === */}
+      <StructuredData schema={schema} />
+
       <div className="container mx-auto max-w-4xl px-3 sm:px-4 md:px-6">
-        {/* Header */}
+        {/* Header Section */}
         <div className="mb-8 sm:mb-12 md:mb-16">
           <Badge className="mb-3 sm:mb-4 bg-blue-100 text-blue-800 text-xs sm:text-sm">Legal Document</Badge>
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Privacy Policy</h1>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex items-start gap-3">
-              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" />
+              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
               <div>
                 <p className="text-sm sm:text-base md:text-lg text-blue-800 font-medium mb-2">
                   Effective Date: May 9, 2025
@@ -185,7 +210,7 @@ export default function PrivacyPolicyPage() {
           </div>
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
               <div>
                 <p className="text-sm sm:text-base md:text-lg text-amber-800 font-medium mb-2">Important Notice</p>
                 <p className="text-sm sm:text-base md:text-lg text-amber-700 leading-relaxed sm:leading-loose">
@@ -197,14 +222,14 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* Main Sections */}
+        {/* Main Sections (Information We Collect, How We Use, Disclosure, etc.) */}
         <div className="space-y-4 sm:space-y-6 md:space-y-8 mb-6 sm:mb-8 md:mb-12">
           {sections.map((section, index) => (
             <Card key={index} id={section.id} className="scroll-mt-20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
                   <div className="p-2 bg-blue-100 rounded-lg">
-                    <section.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                    <section.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
                   </div>
                   {section.title}
                 </CardTitle>
@@ -224,7 +249,7 @@ export default function PrivacyPolicyPage() {
                       <ul className="space-y-2 ml-4">
                         {item.list.map((listItem, listIndex) => (
                           <li key={listIndex} className="flex items-start gap-2">
-                            <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                            <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div> {/* Added aria-hidden */}
                             <span className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose">
                               {listItem}
                             </span>
@@ -239,7 +264,7 @@ export default function PrivacyPolicyPage() {
           ))}
         </div>
 
-        {/* Additional Sections */}
+        {/* Additional Sections (Retention, Your Rights, Children's Privacy, Changes) */}
         <div className="space-y-6 sm:space-y-8 mb-12 sm:mb-16">
           {additionalSections.map((section, index) => (
             <Card key={index}>
@@ -254,7 +279,7 @@ export default function PrivacyPolicyPage() {
                   <ul className="space-y-2 ml-4 mb-4">
                     {section.list.map((listItem, listIndex) => (
                       <li key={listIndex} className="flex items-start gap-2">
-                        <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div> {/* Added aria-hidden */}
                         <span className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose">
                           {listItem}
                         </span>
@@ -273,11 +298,11 @@ export default function PrivacyPolicyPage() {
         </div>
 
         {/* Contact Section */}
-        <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+        <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 mb-12 sm:mb-16">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-blue-900">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
               </div>
               Contact Us
             </CardTitle>
@@ -290,17 +315,17 @@ export default function PrivacyPolicyPage() {
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
-                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
                 </div>
                 <div>
                   <p className="font-semibold text-blue-900 text-sm sm:text-base md:text-lg">Flavor Studios</p>
-                  <p className="text-blue-700 text-sm sm:text-base md:text-lg">Website: https://flavorstudios.in</p>
+                  <p className="text-blue-700 text-sm sm:text-base md:text-lg">Website: {SITE_URL}</p>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                   <Link href="/contact">
-                    <Phone className="mr-2 h-4 w-4" />
+                    <Phone className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                     Contact Us
                   </Link>
                 </Button>
@@ -309,8 +334,8 @@ export default function PrivacyPolicyPage() {
                   variant="outline"
                   className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm"
                 >
-                  <Link href="mailto:contact@flavorstudios.in">
-                    <Mail className="mr-2 h-4 w-4" />
+                  <Link href={`mailto:contact@flavorstudios.in`}>
+                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                     Email Us
                   </Link>
                 </Button>
@@ -323,7 +348,7 @@ export default function PrivacyPolicyPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-blue-900">
-              <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+              <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
               Related Legal Documents
             </CardTitle>
           </CardHeader>
@@ -334,26 +359,32 @@ export default function PrivacyPolicyPage() {
             <div className="flex flex-wrap gap-2">
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/terms-of-service">
-                  <FileText className="mr-2 h-4 w-4" />
+                  <FileText className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                   Terms of Service
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/cookie-policy">
-                  <Cookie className="mr-2 h-4 w-4" />
+                  <Cookie className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                   Cookie Policy
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/dmca">
-                  <Copyright className="mr-2 h-4 w-4" />
+                  <Copyright className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                   DMCA Policy
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/disclaimer">
-                  <Shield className="mr-2 h-4 w-4" />
+                  <AlertCircle className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                   Disclaimer
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
+                <Link href="/media-usage-policy">
+                  <Eye className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                  Media Usage Policy
                 </Link>
               </Button>
             </div>
@@ -380,5 +411,5 @@ export default function PrivacyPolicyPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

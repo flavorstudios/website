@@ -5,7 +5,7 @@
 
 export const SITE_NAME = "Flavor Studios";
 export const SITE_URL = "https://flavorstudios.in";
-export const SITE_BRAND = SITE_NAME; // Brand alias, if needed
+export const SITE_BRAND = SITE_NAME;
 
 // Email constants
 export const SUPPORT_EMAIL = "contact@flavorstudios.in";
@@ -18,7 +18,21 @@ export const SITE_DEFAULT_IMAGE = `${SITE_URL}/cover.jpg`; // 1200x630 recommend
 export const SITE_BRAND_TWITTER = "@flavor_studios";
 
 // Site logo (ideal for schema.org publisher/logo, PWA, favicon, etc.)
-// Recommended: Transparent PNG, square (eg. 512x512) or as per your brand guidelines
 export const SITE_LOGO_URL = `${SITE_URL}/logo.png`; // Make sure this file exists in your public/ folder
 
-// Add more constants as needed
+// --- Official Social Media Links ---
+export const SOCIAL_LINKS = {
+  youtube: "https://www.youtube.com/@flavorstudios",
+  facebook: "https://www.facebook.com/flavourstudios",   // Note: spelling is "flavour"
+  instagram: "https://www.instagram.com/flavorstudios",
+  twitter: "https://twitter.com/flavor_studios",
+  threads: "https://www.threads.net/@flavorstudios",
+  telegram: "https://t.me/flavorstudios",
+  discord: "https://discord.gg/agSZAAeRzn", // Discord invite link (best for joining)
+  discordChannel: "https://discord.com/channels/@flavorstudios", // Direct channel/user link (optional)
+  github: "https://github.com/flavorstudios",
+  reddit: "https://www.reddit.com/r/flavorstudios/",
+  linkedin: "https://www.linkedin.com/company/flavorstudios",
+  // Add new links below as needed
+};
+

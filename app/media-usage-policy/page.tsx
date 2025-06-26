@@ -18,7 +18,7 @@ export const metadata = getMetadata({
   title: `Media Usage Policy – Copyright & Attribution | ${SITE_NAME}`,
   description: `Understand how you can use ${SITE_NAME}'s media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.`,
   path: "/media-usage-policy",
-  robots: "index,follow", // Legal pages should be indexed and followed.
+  robots: "index,follow",
   openGraph: {
     title: `Media Usage Policy – Copyright & Attribution | ${SITE_NAME}`,
     description: `Understand how you can use ${SITE_NAME}'s media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.`,
@@ -74,7 +74,10 @@ export default function MediaUsagePolicyPage() {
   const attributionExamples = [
     { context: "Blog Post", example: `Image courtesy of Flavor Studios (${SITE_URL})` },
     { context: "Video Review", example: `Footage courtesy of Flavor Studios - ${SITE_URL}` },
-    { context: "Social Media", example: `Credit: ${SITE_BRAND_TWITTER} | ${SITE_URL.replace(/^https?:\/\//, '')}` },
+    {
+      context: "Social Media",
+      example: `Credit: ${SITE_BRAND_TWITTER} | ${SITE_URL.replace(/^https?:\/\//, '')}`,
+    },
     { context: "Academic Paper", example: `Source: Flavor Studios. Retrieved from ${SITE_URL}` },
   ];
 

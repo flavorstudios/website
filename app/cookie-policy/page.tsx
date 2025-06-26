@@ -1,150 +1,96 @@
-import { getMetadata } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+// app/cookie-policy/page.tsx
 
+import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
+import {
+  SITE_NAME,
+  SITE_URL,
+  SITE_BRAND_TWITTER,
+  SITE_DEFAULT_IMAGE,
+  SITE_LOGO_URL, // Make sure this is defined in your constants.ts!
+} from "@/lib/constants";
+import { StructuredData } from "@/components/StructuredData";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Mail, Shield, Settings, BarChart3, User, Zap, Globe,
+  Phone, FileText, AlertCircle, ExternalLink, Cookie, Eye,
+  Wrench, TrendingUp, Users,
+} from "lucide-react";
+import Link from "next/link";
+
+// --- SEO Metadata: Use handler for all canonical, OG, Twitter, robots, etc. ---
 export const metadata = getMetadata({
   title: `Cookie Policy – ${SITE_NAME}`,
-  description:
-    `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
+  description: `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
   path: "/cookie-policy",
-  robots: "noindex, nofollow", // Policy/legal pages must NOT be indexed
+  robots: "index,follow", // CORRECTED: Public legal pages should be indexed and followed.
   openGraph: {
     title: `Cookie Policy – ${SITE_NAME}`,
-    description:
-      `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
+    description: `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
     type: "website",
     images: [
-      {
-        url: `${SITE_URL}/cover.jpg`,
-        width: 1200,
-        height: 630,
-      },
+      { url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }
     ],
   },
   twitter: {
     card: "summary_large_image",
-    site: "@flavorstudios",
-    creator: "@flavorstudios",
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
     title: `Cookie Policy – ${SITE_NAME}`,
-    description:
-      `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
+    description: `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  // JSON-LD/schema REMOVED; now in head.tsx only
 });
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  Mail,
-  Shield,
-  Settings,
-  BarChart3,
-  User,
-  Zap,
-  Globe,
-  Phone,
-  FileText,
-  AlertCircle,
-  ExternalLink,
-  Cookie,
-  Eye,
-  Wrench,
-  TrendingUp,
-  Users,
-} from "lucide-react"
-import Link from "next/link"
+// --- WebPage Schema (JSON-LD): Attach with publisher logo for SEO compliance ---
+const schema = getSchema({
+  type: "WebPage",
+  path: "/cookie-policy",
+  title: `Cookie Policy – ${SITE_NAME}`,
+  description: `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
+  image: `${SITE_URL}/cover.jpg`, // You could consider SITE_LOGO_URL here for consistency with publisher, but cover is fine.
+  publisher: {
+    name: SITE_NAME,
+    logo: SITE_LOGO_URL,
+  },
+});
 
+// --- Main Page Component ---
 export default function CookiePolicyPage() {
   const cookieTypes = [
-    {
-      title: "Essential Cookies",
-      icon: Zap,
-      color: "bg-red-100 text-red-600",
-      description: "Necessary for the website to function properly.",
-      examples: ["Session management", "Security features", "Basic site functionality"],
-      canDisable: false,
-    },
-    {
-      title: "Performance Cookies",
-      icon: BarChart3,
-      color: "bg-blue-100 text-blue-600",
-      description: "Help us understand how visitors interact with our website.",
-      examples: ["Page load times", "Error tracking", "Site performance metrics"],
-      canDisable: true,
-    },
-    {
-      title: "Functionality Cookies",
-      icon: User,
-      color: "bg-green-100 text-green-600",
-      description: "Remember your choices to personalize the experience.",
-      examples: ["Language preferences", "Theme settings", "User preferences"],
-      canDisable: true,
-    },
-    {
-      title: "Analytical Cookies",
-      icon: TrendingUp,
-      color: "bg-purple-100 text-purple-600",
-      description: "Track visitor behavior to improve website performance.",
-      examples: ["Google Analytics", "User journey tracking", "Content engagement"],
-      canDisable: true,
-    },
-    {
-      title: "Third-party Cookies",
-      icon: Globe,
-      color: "bg-orange-100 text-orange-600",
-      description: "Cookies from integrated third-party services like analytics and embedded content.",
-      examples: ["YouTube embeds", "Social media widgets", "External analytics"],
-      canDisable: true,
-    },
-  ]
-
+    { title: "Essential Cookies", icon: Zap, color: "bg-red-100 text-red-600", description: "Necessary for the website to function properly.", examples: ["Session management", "Security features", "Basic site functionality"], canDisable: false },
+    { title: "Performance Cookies", icon: BarChart3, color: "bg-blue-100 text-blue-600", description: "Help us understand how visitors interact with our website.", examples: ["Page load times", "Error tracking", "Site performance metrics"], canDisable: true },
+    { title: "Functionality Cookies", icon: User, color: "bg-green-100 text-green-600", description: "Remember your choices to personalize the experience.", examples: ["Language preferences", "Theme settings", "User preferences"], canDisable: true },
+    { title: "Analytical Cookies", icon: TrendingUp, color: "bg-purple-100 text-purple-600", description: "Track visitor behavior to improve website performance.", examples: ["Google Analytics", "User journey tracking", "Content engagement"], canDisable: true },
+    { title: "Third-party Cookies", icon: Globe, color: "bg-orange-100 text-orange-600", description: "Cookies from integrated third-party services like analytics and embedded content.", examples: ["YouTube embeds", "Social media widgets", "External analytics"], canDisable: true },
+  ];
   const usagePurposes = [
-    {
-      icon: Wrench,
-      title: "Enhance Functionality",
-      description: "Improve user experience and website functionality",
-    },
-    {
-      icon: Eye,
-      title: "Analyze Site Usage",
-      description: "Understand how visitors use our site to improve content",
-    },
-    {
-      icon: User,
-      title: "Remember Preferences",
-      description: "Personalize your browsing experience based on your choices",
-    },
-    {
-      icon: TrendingUp,
-      title: "Optimize Performance",
-      description: "Monitor and improve website speed and performance",
-    },
-  ]
-
+    { icon: Wrench, title: "Enhance Functionality", description: "Improve user experience and website functionality" },
+    { icon: Eye, title: "Analyze Site Usage", description: "Understand how visitors use our site to improve content" },
+    { icon: User, title: "Remember Preferences", description: "Personalize your Browse experience based on your choices" },
+    { icon: TrendingUp, title: "Optimize Performance", description: "Monitor and improve website speed and performance" },
+  ];
   const browserInstructions = [
-    {
-      browser: "Chrome",
-      steps: "Settings > Privacy and security > Cookies and other site data",
-    },
-    {
-      browser: "Firefox",
-      steps: "Settings > Privacy & Security > Cookies and Site Data",
-    },
-    {
-      browser: "Safari",
-      steps: "Preferences > Privacy > Manage Website Data",
-    },
-    {
-      browser: "Edge",
-      steps: "Settings > Cookies and site permissions > Cookies and site data",
-    },
-  ]
+    { browser: "Chrome", steps: "Settings > Privacy and security > Cookies and other site data" },
+    { browser: "Firefox", steps: "Settings > Privacy & Security > Cookies and Site Data" },
+    { browser: "Safari", steps: "Preferences > Privacy > Manage Website Data" },
+    { browser: "Edge", steps: "Settings > Cookies and site permissions > Cookies and site data" },
+  ];
 
   return (
     <div className="min-h-screen py-8 sm:py-12">
+      {/* --- JSON-LD SCHEMA for Google/Bing/etc --- */}
+      <StructuredData schema={schema} />
       <div className="container mx-auto max-w-4xl px-4 sm:px-6">
-        {/* Header */}
+
+        {/* Header Section */}
         <div className="mb-12 sm:mb-16">
           <Badge className="mb-3 sm:mb-4 bg-blue-100 text-blue-800 text-xs sm:text-sm">Legal Document</Badge>
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Cookie Policy</h1>
@@ -154,7 +100,7 @@ export default function CookiePolicyPage() {
               <div>
                 <p className="text-sm sm:text-base text-blue-800 font-medium mb-2">Effective Date: May 9, 2025</p>
                 <p className="text-sm sm:text-base text-blue-700 leading-relaxed">
-                  Flavor Studios ("we," "us," or "our") uses cookies and similar technologies to enhance your browsing
+                  Flavor Studios ("we," "us," or "our") uses cookies and similar technologies to enhance your Browse
                   experience on our website. This Cookie Policy explains what cookies are, how we use them, and your
                   choices regarding their use.
                 </p>
@@ -163,7 +109,7 @@ export default function CookiePolicyPage() {
           </div>
         </div>
 
-        {/* What Are Cookies */}
+        {/* What Are Cookies Section */}
         <Card className="mb-8 sm:mb-12">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
@@ -181,7 +127,7 @@ export default function CookiePolicyPage() {
           </CardContent>
         </Card>
 
-        {/* Types of Cookies */}
+        {/* Types of Cookies We Use Section */}
         <section className="mb-12 sm:mb-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Types of Cookies We Use</h2>
           <div className="grid gap-4 sm:gap-6 md:gap-8">
@@ -225,7 +171,7 @@ export default function CookiePolicyPage() {
           </div>
         </section>
 
-        {/* How We Use Cookies */}
+        {/* How We Use Cookies Section */}
         <Card className="mb-8 sm:mb-12">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
@@ -252,7 +198,7 @@ export default function CookiePolicyPage() {
           </CardContent>
         </Card>
 
-        {/* Managing Cookies */}
+        {/* Managing Your Cookies Section */}
         <Card className="mb-8 sm:mb-12">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
@@ -270,6 +216,7 @@ export default function CookiePolicyPage() {
                 href="https://www.aboutcookies.org"
                 target="_blank"
                 className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                rel="noopener noreferrer" // Added rel for security
               >
                 www.aboutcookies.org
                 <ExternalLink className="h-3 w-3" />
@@ -308,7 +255,7 @@ export default function CookiePolicyPage() {
           </CardContent>
         </Card>
 
-        {/* Third-Party Content */}
+        {/* Third-Party Content Section */}
         <Card className="mb-8 sm:mb-12">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
@@ -350,7 +297,7 @@ export default function CookiePolicyPage() {
           </CardContent>
         </Card>
 
-        {/* Changes to Policy */}
+        {/* Changes to Policy Section */}
         <Card className="mb-8 sm:mb-12">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
@@ -395,7 +342,7 @@ export default function CookiePolicyPage() {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-xs sm:text-sm">
                   <Link href="/contact">
-                    <Phone className="mr-2 h-4 w-4" />
+                    <Mail className="mr-2 h-4 w-4" />
                     Contact Us
                   </Link>
                 </Button>
@@ -414,7 +361,7 @@ export default function CookiePolicyPage() {
           </CardContent>
         </Card>
 
-        {/* Cookie Management Tools */}
+        {/* Cookie Management Tools / Your Privacy Rights Section */}
         <Card className="mb-12 sm:mb-16 bg-green-50 border-green-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-green-900">
@@ -447,7 +394,7 @@ export default function CookiePolicyPage() {
           </CardContent>
         </Card>
 
-        {/* Related Legal Documents */}
+        {/* Related Legal Documents Section */}
         <div className="text-center mb-8 sm:mb-12">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Related Legal Documents</h3>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
@@ -492,5 +439,5 @@ export default function CookiePolicyPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

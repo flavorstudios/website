@@ -1,7 +1,7 @@
 // app/watch/[slug]/page.tsx
 
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { SITE_NAME, SITE_URL, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,12 +15,26 @@ import {
   Youtube,
   Calendar,
 } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
-// --- Helper: Convert duration string to ISO 8601 (PT#M#S) ---
+// --- Type for video object
+export interface Video {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  publishedAt: string; // ISO 8601 string
+  youtubeId: string;
+  duration: string;
+  views: number;
+  thumbnail?: string;
+  status: "published" | "draft";
+  tags?: string[];
+}
+
+// --- Convert duration string to ISO 8601 (PT#M#S) ---
 function toIsoDuration(duration: string): string | undefined {
-  // Basic support for "MM:SS" or "HH:MM:SS"
   const parts = duration.split(":").map(Number);
   if (parts.length === 2) {
     const [mm, ss] = parts;
@@ -29,28 +43,30 @@ function toIsoDuration(duration: string): string | undefined {
     const [hh, mm, ss] = parts;
     return `PT${hh}H${mm}M${ss}S`;
   }
-  // If not in expected format, return undefined (let schema.org fallback)
   return undefined;
 }
 
 // --- Fetch video utility ---
-async function getVideo(slug: string) {
+async function getVideo(slug: string): Promise<Video | null> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`,
+      `${process.env.NEXT_PUBLIC_BASE_URL || SITE_URL}/api/admin/videos`,
       { cache: "no-store" }
     );
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error(`Failed to fetch videos: ${response.status} ${response.statusText}`);
+      return null;
+    }
     const data = await response.json();
-    const videos = data.videos || [];
+    const videos: Video[] = data.videos || [];
     return (
       videos.find(
-        (video: any) =>
+        (video) =>
           (video.slug === slug || video.id === slug) && video.status === "published"
       ) || null
     );
   } catch (error) {
-    console.error("Failed to fetch video:", error);
+    console.error("Failed to fetch video due to exception:", error);
     return null;
   }
 }
@@ -59,7 +75,6 @@ async function getVideo(slug: string) {
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const video = await getVideo(params.slug);
 
-  // Not Found SEO fallback
   if (!video) {
     const fallbackTitle = `Video Not Found – ${SITE_NAME}`;
     const fallbackDescription = `Sorry, this video could not be found. Explore more inspiring anime videos at ${SITE_NAME}.`;
@@ -81,6 +96,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
             alt: `${SITE_NAME} – Not Found`,
           },
         ],
+        type: "video.other",
       },
       twitter: {
         title: fallbackTitle,
@@ -140,24 +156,22 @@ export default async function VideoPage({ params }: { params: { slug: string } }
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
   const embedUrl = `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`;
   const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtubeId}`;
-  const youtubeChannelUrl = "https://www.youtube.com/@flavorstudios";
+  const youtubeChannelUrl = "https://www.youtube.com/channel/UC5dNbnWOG-gTlpS8iGimAag"; // <-- Your actual channel
 
-  // --- JSON-LD Article/VideoObject Schema ---
+  // --- JSON-LD VideoObject Schema ---
   const schema = getSchema({
     type: "VideoObject",
     path: `/watch/${video.slug || params.slug}`,
     name: video.title,
-    description: video.description,
+    description: video.description || "No description available.",
     thumbnailUrl: [thumbnailUrl],
     uploadDate: video.publishedAt,
     duration: toIsoDuration(video.duration) || video.duration,
     embedUrl,
     contentUrl: youtubeUrl,
-    publisher: {
-      name: SITE_NAME,
-      url: SITE_URL,
-    },
-    ...(video.tags?.length > 0 ? { keywords: video.tags.join(",") } : {}),
+    ...(video.tags && video.tags.filter(Boolean).length > 0
+      ? { keywords: video.tags.filter(Boolean).join(",") }
+      : {}),
   });
 
   return (
@@ -196,7 +210,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <span className="flex items-center gap-1">
                     <Eye className="h-4 w-4" aria-hidden="true" />
-                    {video.views.toLocaleString()} views
+                    {(video.views || 0).toLocaleString()} views
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-4 w-4" aria-hidden="true" />
@@ -213,7 +227,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
                       href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
                         canonicalUrl
                       )}&text=${encodeURIComponent(
-                        `Watch "${video.title}" on Flavor Studios!`
+                        `Watch "${video.title}" on ${SITE_NAME}!`
                       )}&hashtags=Anime,Animation`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -234,7 +248,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
                   <div className="mt-6">
                     <h4 className="text-sm font-medium text-gray-900 mb-2">Tags</h4>
                     <div className="flex flex-wrap gap-2">
-                      {video.tags.map((tag: string) => (
+                      {video.tags.filter(Boolean).map((tag: string) => (
                         <Badge key={tag} variant="secondary" className="text-xs">
                           {tag}
                         </Badge>
@@ -298,7 +312,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Views</span>
-                    <span className="font-medium">{video.views.toLocaleString()}</span>
+                    <span className="font-medium">{(video.views || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Category</span>

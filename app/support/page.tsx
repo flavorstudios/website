@@ -93,7 +93,7 @@ export default function SupportPage() {
       icon: Youtube,
       action: "Visit YouTube",
       // CORRECTED: Using the canonical YouTube Channel URL.
-      href: "https://www.youtube.com/@YourChannelName4", // This is the canonical Channel URL from screenshot
+      href: "https://www.youtube.com/@flavorstudios", // This is the canonical Channel URL from screenshot
       external: true,
     },
     {

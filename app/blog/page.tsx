@@ -1,21 +1,19 @@
-// app/blog/page.tsx
-
-import { getMetadata } from "@/lib/seo-utils";
-import { getCanonicalUrl } from "@/lib/seo/canonical";
-import { getSchema } from "@/lib/seo/schema";
-import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
-import { StructuredData } from "@/components/StructuredData";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
-import { NewsletterSignup } from "@/components/newsletter-signup";
 import { blogStore } from "@/lib/content-store";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
+import { NewsletterSignup } from "@/components/newsletter-signup";
+import { getMetadata } from "@/lib/seo-utils";
+import { getCanonicalUrl } from "@/lib/seo/canonical";
+import { getSchema } from "@/lib/seo/schema";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { StructuredData } from "@/components/StructuredData";
 
-// === SEO METADATA (Centralized, canonical, modular) ===
+// --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
   title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
   description:
@@ -50,7 +48,7 @@ export const metadata = getMetadata({
   },
 });
 
-// === JSON-LD Blog Schema (WebPage) ===
+// --- JSON-LD Schema.org (WebPage schema, logo only in publisher) ---
 const schema = getSchema({
   type: "WebPage",
   path: "/blog",
@@ -65,6 +63,7 @@ const schema = getSchema({
   },
   organizationName: SITE_NAME,
   organizationUrl: SITE_URL,
+  // logo ONLY here, schema.ts will attach under publisher/org not Thing root
 });
 
 // --- DATA FETCHING ---
@@ -81,7 +80,6 @@ async function getBlogData() {
   }
 }
 
-// --- MAIN PAGE COMPONENT ---
 export default async function BlogPage({
   searchParams,
 }: {
@@ -92,7 +90,6 @@ export default async function BlogPage({
   const currentPage = Number.parseInt(searchParams.page || "1");
   const postsPerPage = 9;
 
-  // Filter posts by category (slugify)
   const filteredPosts =
     selectedCategory === "all"
       ? posts
@@ -126,7 +123,7 @@ export default async function BlogPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* SEO JSON-LD Schema */}
+      {/* --- SEO JSON-LD Schema --- */}
       <StructuredData schema={schema} />
 
       {/* Header */}
@@ -239,7 +236,7 @@ export default async function BlogPage({
   );
 }
 
-// --- COMPONENTS ---
+// --- COMPONENTS (unchanged, as before) ---
 
 function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
   return (
@@ -385,7 +382,6 @@ function Pagination({
           <Link href={getPageUrl(currentPage - 1)}>Previous</Link>
         </Button>
       )}
-
       {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
         let page: number;
         if (totalPages <= 5) {
@@ -397,14 +393,12 @@ function Pagination({
         } else {
           page = currentPage - 2 + i;
         }
-
         return (
           <Button key={page} asChild variant={page === currentPage ? "default" : "outline"} size="sm">
             <Link href={getPageUrl(page)}>{page}</Link>
           </Button>
         );
       })}
-
       {currentPage < totalPages && (
         <Button asChild variant="outline" size="sm">
           <Link href={getPageUrl(currentPage + 1)}>Next</Link>

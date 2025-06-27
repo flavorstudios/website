@@ -1,3 +1,30 @@
+Next Steps:
+1.	Update lib/seo/schema.ts with the new code provided in Step 1.
+2.	Go through each of your page files (app/layout.tsx, app/page.tsx, app/faq/page.tsx, app/blog/[slug]/page.tsx, app/watch/[slug]/page.tsx, and any other pages that call getSchema) and update their getSchema calls as shown in Step 2 (Examples).
+3.	Perform a full, clean rebuild and redeploy of your Next.js application.
+4.	Re-run the Google Rich Results Test for your homepage and FAQ page.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // app/layout.tsx
 
 import type React from "react";

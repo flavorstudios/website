@@ -76,42 +76,45 @@ const schema = getSchema({
   title: `Play Anime-Inspired Games Online | ${SITE_NAME}`,
   description: `Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on ${SITE_NAME}.`,
   image: `${SITE_URL}/cover.jpg`, // Main image for the WebPage schema.
-  publisher: {
-    name: SITE_NAME,
-    logo: SITE_LOGO_URL,
-  },
-  // IMPORTANT: mainEntity as ItemList for multiple games.
-  additionalProperties: {
-    mainEntity: {
-      "@type": "ItemList",
-      itemListElement: gamesData.map((game, index) => ({
-        "@type": "ListItem",
-        position: index + 1, // List position
-        item: {
-          "@type": "VideoGame", // Each item is a VideoGame
-          name: game.name,
-          description: game.description,
-          url: game.url,
-          image: game.thumbnail, // Game-specific thumbnail
-          genre: game.genre,
-          // Use specific Schema.org PlayMode/GamePlatform enums if exact matches are available.
-          // Otherwise, string literals are acceptable.
-          playMode: game.playModes.map(mode => `http://schema.org/${mode}`), // e.g., http://schema.org/SinglePlayer
-          gamePlatform: game.platforms.map(platform => `http://schema.org/${platform}`), // e.g., http://schema.org/WebPlatform
-          // If you have ratings, add: aggregateRating: { "@type": "AggregateRating", ratingValue: "4.5", reviewCount: "100" },
-          // If you have a specific developer/publisher for the game itself, define here:
-          publisher: { "@type": "Organization", name: SITE_NAME, logo: SITE_LOGO_URL },
-          releasedEvent: {
-            "@type": "PublicationEvent",
-            startDate: game.releaseDate,
-            location: {
-              "@type": "Place",
-              name: "Flavor Studios Official Website"
-            }
+  // REMOVED: Top-level publisher object removed. getSchema now adds it automatically for WebPage types.
+  // publisher: {
+  //   name: SITE_NAME,
+  //   logo: SITE_LOGO_URL,
+  // },
+  // CORRECTED: mainEntity is now passed directly, not wrapped in additionalProperties.
+  mainEntity: {
+    "@type": "ItemList",
+    itemListElement: gamesData.map((game, index) => ({
+      "@type": "ListItem",
+      position: index + 1, // List position
+      item: {
+        "@type": "VideoGame", // Each item is a VideoGame
+        name: game.name,
+        description: game.description,
+        url: game.url,
+        image: game.thumbnail, // Game-specific thumbnail
+        genre: game.genre,
+        // CORRECTED: PlayMode and GamePlatform now use direct enum names, not full URLs.
+        playMode: game.playModes as (
+          | "SinglePlayer"
+          | "MultiPlayer"
+          | "CoOp"
+          | "Persistent"
+        )[], // Cast to valid Schema.org enum types
+        gamePlatform: game.platforms as ("WebPlatform" | "AndroidPlatform" | "IOSPlatform" | "WindowsPlatform" | "MacOSPlatform" | "LinuxPlatform")[], // Cast to valid Schema.org enum types
+        // If you have ratings, add: aggregateRating: { "@type": "AggregateRating", ratingValue: "4.5", reviewCount: "100" },
+        // If you have a specific developer/publisher for the game itself, define here:
+        publisher: { "@type": "Organization", name: SITE_NAME, url: SITE_URL, logo: { "@type": "ImageObject", url: SITE_LOGO_URL, width: 600, height: 60, caption: `${SITE_NAME} logo` } }, // Explicit publisher for each game.
+        releasedEvent: {
+          "@type": "PublicationEvent",
+          startDate: game.releaseDate,
+          location: {
+            "@type": "Place",
+            name: "Flavor Studios Official Website"
           }
-        },
-      })),
-    },
+        }
+      },
+    })),
   },
 });
 

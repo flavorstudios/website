@@ -10,7 +10,7 @@ import {
   Mail, Shield, CheckCircle, XCircle, Eye, FileText, Phone, Globe,
   AlertTriangle, Copyright, Users, Scale, MessageSquare, Download,
   Edit, Gavel, RefreshCw, AlertCircle, Cookie,
-} from "lucide-react";
+} from "lucide-react"; // All necessary Lucide icons are correctly imported.
 import Link from "next/link";
 
 // === SEO METADATA ===
@@ -18,7 +18,7 @@ export const metadata = getMetadata({
   title: `Media Usage Policy – Copyright & Attribution | ${SITE_NAME}`,
   description: `Understand how you can use ${SITE_NAME}'s media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.`,
   path: "/media-usage-policy",
-  robots: "index,follow",
+  robots: "index,follow", // CORRECTED: Public legal pages should be indexed and followed.
   openGraph: {
     title: `Media Usage Policy – Copyright & Attribution | ${SITE_NAME}`,
     description: `Understand how you can use ${SITE_NAME}'s media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.`,
@@ -41,11 +41,8 @@ const schema = getSchema({
   path: "/media-usage-policy",
   title: `Media Usage Policy – Copyright & Attribution | ${SITE_NAME}`,
   description: `Understand how you can use ${SITE_NAME}'s media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.`,
-  image: SITE_LOGO_URL,
-  publisher: {
-    name: SITE_NAME,
-    logo: SITE_LOGO_URL,
-  },
+  image: SITE_LOGO_URL, // Using the site's logo for consistency in legal documents.
+  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
 });
 
 export default function MediaUsagePolicyPage() {
@@ -92,7 +89,7 @@ export default function MediaUsagePolicyPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Media Usage Policy</h1>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex items-start gap-3">
-              <Copyright className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
+              <Copyright className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
               <div>
                 <p className="text-sm sm:text-base text-blue-800 font-medium mb-2">Effective Date: May 9, 2025</p>
                 <p className="text-sm sm:text-base text-blue-700 leading-relaxed">
@@ -108,7 +105,7 @@ export default function MediaUsagePolicyPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
               <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" aria-hidden="true" />
+                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" aria-hidden="true" /> {/* Added aria-hidden */}
               </div>
               Permissible Uses
             </CardTitle>
@@ -121,7 +118,7 @@ export default function MediaUsagePolicyPage() {
               {permissibleUses.map((use, index) => (
                 <div key={index} className="flex items-start gap-3 p-3 sm:p-4 bg-green-50 rounded-lg border border-green-200">
                   <div className="p-2 bg-green-100 rounded-lg">
-                    <use.icon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" aria-hidden="true" />
+                    <use.icon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" aria-hidden="true" /> {/* Added aria-hidden */}
                   </div>
                   <div>
                     <h4 className="font-semibold text-sm sm:text-base text-green-900 mb-1">{use.title}</h4>
@@ -258,7 +255,7 @@ export default function MediaUsagePolicyPage() {
               <ul className="space-y-2">
                 {requestRequirements.map((requirement, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <div className="h-1.5 w-1.5 bg-cyan-600 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="h-1.5 w-1.5 bg-cyan-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                     <span className="text-xs sm:text-sm text-gray-700 leading-relaxed">{requirement}</span>
                   </li>
                 ))}

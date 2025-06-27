@@ -22,18 +22,19 @@ import {
   Mail, Shield, Settings, BarChart3, User, Zap, Globe,
   Phone, FileText, AlertCircle, ExternalLink, Cookie, Eye,
   Wrench, TrendingUp, Users,
+  Copyright // ADDED: Import Copyright icon here
 } from "lucide-react"; // All necessary Lucide icons are correctly imported.
 import Link from "next/link";
 
-// --- SEO Metadata: Use handler for all canonical, OG, Twitter, robots, etc. ---
+// === SEO Metadata: Use handler for all canonical, OG, Twitter, robots, etc. ---
 export const metadata = getMetadata({
   title: `Cookie Policy – ${SITE_NAME}`,
-  description: `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
+  description: `Understand how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL.replace(/^https?:\/\//, '')}. Your privacy matters to us.`,
   path: "/cookie-policy",
   robots: "index,follow", // CORRECTED: Public legal pages should be indexed and followed.
   openGraph: {
     title: `Cookie Policy – ${SITE_NAME}`,
-    description: `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
+    description: `Understand how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL.replace(/^https?:\/\//, '')}. Your privacy matters to us.`,
     type: "website",
     images: [
       { url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }
@@ -49,7 +50,7 @@ export const metadata = getMetadata({
   },
 });
 
-// --- WebPage Schema (JSON-LD): Attach with publisher logo for SEO compliance ---
+// === WebPage Schema (JSON-LD): Attach with publisher logo for SEO compliance ---
 const schema = getSchema({
   type: "WebPage",
   path: "/cookie-policy",
@@ -239,7 +240,7 @@ export default function CookiePolicyPage() {
 
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
                 <div>
                   <h4 className="font-semibold text-amber-900 mb-2 text-sm sm:text-base">Important Note</h4>
                   <p className="text-xs sm:text-sm text-amber-800 leading-relaxed">

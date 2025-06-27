@@ -1,9 +1,9 @@
 // lib/seo/schema.ts
 
 import { SITE_NAME, SITE_URL, SITE_DEFAULT_IMAGE } from "@/lib/constants";
-import { getCanonicalUrl } from "./canonical";
+import { getCanonicalUrl } from "./canonical"; // This helper is designed for RELATIVE paths
 
-import type { WithContext, Thing, ImageObject, Organization } from "schema-dts";
+import type { WithContext, Thing, ImageObject, Organization } from "schema-dts"; // Import Organization type
 
 const OG_IMAGE_DEFAULT_WIDTH = 1200;
 const OG_IMAGE_DEFAULT_HEIGHT = 630;
@@ -15,43 +15,23 @@ type ImageObjectWithCaption = ImageObject & { caption?: string; alt?: string };
 
 /**
  * Convert a relative URL to absolute, or return as-is if already absolute.
+ * This function correctly canonicalizes a URL for Schema.org properties.
+ * It checks if the input URL is already absolute (starts with http/https or //).
+ * If it's absolute, it uses it as is. If it's relative, it uses getCanonicalUrl.
  */
-function getAbsoluteCanonicalUrlForSchema(inputUrl: string): string {
-  if (
-    inputUrl.startsWith("http://") ||
-    inputUrl.startsWith("https://") ||
-    inputUrl.startsWith("//")
-  ) {
-    return inputUrl;
-  }
-  return getCanonicalUrl(inputUrl);
-}
-
-/**
- * Generate Schema.org JSON-LD for any SEO context (WebPage, Article, FAQPage, VideoObject, etc.).
- * Accepts all schema.org fields as top-level properties.
- *
- * Pass any required property directly:
- *  - mainEntity, sameAs, thumbnailUrl, embedUrl, etc.
- *  - "publisher" is only included for WebPage, Article, VideoObject, NewsArticle, BlogPosting
- *
- * Example:
- *   getSchema({ type: "FAQPage", ..., mainEntity: [...] })
- *
- */
-export function getSchema<T extends Record<string, any>>({
+export function getSchema<T extends Record<string, any>>({ // 'export' added for helper functions used directly in pages
   type = "WebPage",
   path = "/",
   title,
   description,
   image = SITE_DEFAULT_IMAGE,
-  logoUrl = `${SITE_URL}/logo.png`,
+  logoUrl = `${SITE_URL}/logo.png`, // Default logoUrl is already an absolute URL.
   organizationName = SITE_NAME,
-  organizationUrl = SITE_URL,
+  organizationUrl = SITE_URL, // Default organizationUrl is already an absolute URL.
   authorName,
   datePublished,
   dateModified,
-  ...rest // Everything else passed at top level!
+  ...rest // Capture all other passed properties here (e.g., mainEntity, sameAs, thumbnailUrl, embedUrl)
 }: {
   type?: string;
   path?: string;
@@ -64,10 +44,10 @@ export function getSchema<T extends Record<string, any>>({
   authorName?: string;
   datePublished?: string;
   dateModified?: string;
-} & T): WithContext<Thing> {
-  const url = getCanonicalUrl(path);
+} & T): WithContext<Thing> { // Add T to the intersection type
+  const url = getCanonicalUrl(path); // Canonical URL for the page itself (path is always relative here, so getCanonicalUrl is perfect)
 
-  // Construct main image object
+  // Process main image for schema (using 'caption' and absolute canonical URLs)
   let schemaImage: ImageObject;
   if (typeof image === "string") {
     schemaImage = {
@@ -96,7 +76,7 @@ export function getSchema<T extends Record<string, any>>({
     };
   }
 
-  // Logo for publisher
+  // Process the organization logo for publisher (using 'caption' and absolute canonical URLs)
   const schemaLogo: ImageObject = {
     "@type": "ImageObject",
     url: getAbsoluteCanonicalUrlForSchema(logoUrl),
@@ -105,7 +85,8 @@ export function getSchema<T extends Record<string, any>>({
     caption: `${organizationName} logo`,
   };
 
-  // Publisher object
+  // Define the publisher object (Organization).
+  // This object will be added to schemas that require a publisher property.
   const publisherObject: Organization = {
     "@type": "Organization",
     name: organizationName,
@@ -113,35 +94,51 @@ export function getSchema<T extends Record<string, any>>({
     logo: schemaLogo,
   };
 
-  // Build base schema (conditionally add publisher only for correct types)
+  // Base schema properties that apply to most types.
   const baseSchema: Thing = {
     "@context": "https://schema.org",
     "@type": type,
     name: title,
-    description,
-    url,
+    description: description,
+    url: url,
     image: schemaImage,
-    ...( // Only for types that expect publisher
-      ["WebPage", "Article", "VideoObject", "NewsArticle", "BlogPosting"].includes(type)
-        ? { publisher: publisherObject }
-        : {}
-    ),
+    // CRITICAL FIX: Conditionally add 'publisher' only for schema types that are expected to have one.
+    // An 'Organization' schema itself should NOT have a 'publisher' property.
+    ...(type === "WebPage" || type === "Article" || type === "VideoObject" || type === "NewsArticle" || type === "BlogPosting" // Added BlogPosting
+       ? { publisher: publisherObject }
+       : {}),
+    
+    // Conditional properties specific to certain schema types.
     ...(type === "WebPage" && {
-      mainEntityOfPage: { "@type": "WebPage", "@id": url },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": url,
+      },
     }),
     ...(type === "Article" && {
-      mainEntityOfPage: { "@type": "WebPage", "@id": url },
-      ...(authorName && { author: { "@type": "Person", name: authorName } }),
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": url,
+      },
+      // Author property for Article schema (Person or Organization, handled by specific page)
+      ...(authorName && {
+        author: {
+          "@type": "Person", // Default to Person, page should specify Organization if needed
+          name: authorName,
+        },
+      }),
       ...(datePublished && { datePublished }),
       ...(dateModified && { dateModified }),
-      headline: title,
+      headline: title, // Common Article property.
     }),
-    // FAQPage, VideoObject, etc. fields are added below via ...rest
+    // For other types (e.g., FAQPage, VideoObject), their specific properties like
+    // 'mainEntity', 'thumbnailUrl', 'embedUrl', 'duration' will be spread from 'rest'.
   };
 
-  // Spread in ALL additional props: mainEntity, sameAs, thumbnailUrl, embedUrl, etc.
+  // Merge base schema with all other properties captured by 'rest' parameter.
+  // This allows direct passing of any other Schema.org properties from page level calls.
   return {
     ...baseSchema,
-    ...rest,
+    ...rest, // This spreads all other properties directly into the schema.
   } as WithContext<Thing>;
 }

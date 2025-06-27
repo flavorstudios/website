@@ -11,7 +11,6 @@ import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE, SITE_LOGO_
 import { StructuredData } from "@/components/StructuredData";
 import Link from "next/link";
 
-// BlogPost type
 interface BlogPost {
   id: string;
   slug: string;
@@ -31,14 +30,16 @@ interface BlogPost {
   tags?: string[];
 }
 
-// Fetch post by slug
 async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_URL || SITE_URL}/api/admin/blogs`,
       { next: { revalidate: 3600 } }
     );
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.error(`Failed to fetch blog posts: ${response.status} ${response.statusText}`);
+      return null;
+    }
     const data = await response.json();
     const posts: BlogPost[] = data.posts || [];
     return posts.find((post) => post.slug === slug && post.status === "published") || null;
@@ -52,24 +53,24 @@ interface BlogPostPageProps {
   params: { slug: string };
 }
 
-// SEO metadata (dynamic per post)
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const post = await getBlogPost(params.slug);
 
+  // Fallback metadata for posts not found or not published (noindex, follow)
   if (!post) {
-    const fallbackUrl = getCanonicalUrl(`/blog/${params.slug}`);
     const fallbackTitle = `Post Not Found – ${SITE_NAME}`;
-    const fallbackDesc = "This blog post could not be found or is not yet published.";
+    const fallbackDescription = `Sorry, this blog post could not be found. Explore more inspiring anime blog posts at ${SITE_NAME}.`;
     const fallbackImage = `${SITE_URL}/cover.jpg`;
 
-    return {
+    return getMetadata({
       title: fallbackTitle,
-      description: fallbackDesc,
-      alternates: { canonical: fallbackUrl },
+      description: fallbackDescription,
+      path: `/blog/${params.slug}`,
+      robots: "noindex, follow",
       openGraph: {
         title: fallbackTitle,
-        description: fallbackDesc,
-        url: fallbackUrl,
+        description: fallbackDescription, // FIXED
+        url: getCanonicalUrl(`/blog/${params.slug}`),
         type: "article",
         images: [{ url: fallbackImage, width: 1200, height: 630 }],
       },
@@ -78,11 +79,10 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
         site: SITE_BRAND_TWITTER,
         creator: SITE_BRAND_TWITTER,
         title: fallbackTitle,
-        description: fallbackDesc,
+        description: fallbackDescription, // FIXED
         images: [fallbackImage],
       },
-      robots: "noindex, follow",
-    };
+    });
   }
 
   const ogImage = post.coverImage || SITE_DEFAULT_IMAGE;
@@ -111,7 +111,6 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
   });
 }
 
-// Main BlogPost page (server component)
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const post = await getBlogPost(params.slug);
 
@@ -131,10 +130,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
     author: articleAuthorSchema,
-    publisher: {
-      name: SITE_NAME,
-      logo: SITE_LOGO_URL, // Uses your centralized logo constant
-    },
     headline: post.title,
   });
 
@@ -143,12 +138,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       <StructuredData schema={articleSchema} />
 
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Header Section */}
         <header className="mb-8">
           <div className="flex items-center gap-2 mb-4">
             {post.category && <Badge variant="outline">{post.category}</Badge>}
             {post.publishedAt && (
               <span className="text-sm text-gray-500 flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
+                <Calendar className="h-3 w-3" aria-hidden="true" />
                 {new Date(post.publishedAt).toLocaleDateString("en-US", {
                   year: "numeric",
                   month: "long",
@@ -162,23 +158,24 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="flex items-center gap-4 text-sm text-gray-500">
             {post.author && (
               <span className="flex items-center gap-1">
-                <User className="h-4 w-4" />
+                <User className="h-4 w-4" aria-hidden="true" />
                 {post.author}
               </span>
             )}
             <span className="flex items-center gap-1">
-              <Eye className="h-4 w-4" />
+              <Eye className="h-4 w-4" aria-hidden="true" />
               {(post.views || 0).toLocaleString()} views
             </span>
             {post.readTime && (
               <span className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
+                <Clock className="h-4 w-4" aria-hidden="true" />
                 {post.readTime}
               </span>
             )}
           </div>
         </header>
 
+        {/* Featured Image Section */}
         {post.coverImage && (
           <div className="mb-8">
             <img
@@ -189,6 +186,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         )}
 
+        {/* Blog Post Content */}
         <Card className="mb-12">
           <CardContent className="p-8">
             <div
@@ -198,6 +196,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </CardContent>
         </Card>
 
+        {/* Social Share Component */}
         <SocialShare
           title={post.title}
           excerpt={post.excerpt}
@@ -205,11 +204,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           image={post.coverImage}
         />
 
+        {/* Tags Section */}
         {post.tags && Array.isArray(post.tags) && post.tags.length > 0 && (
           <div className="mb-12">
             <h3 className="text-lg font-semibold mb-4 text-gray-900">Tags</h3>
             <div className="flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
+              {post.tags.map((tag: string) => (
                 <Badge key={tag} variant="secondary">
                   <Link href={`/blog/tag/${encodeURIComponent(tag)}`} className="hover:underline">
                     {tag}
@@ -220,6 +220,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         )}
 
+        {/* Comment Section Component */}
         <CommentSection postId={post.id} postSlug={post.slug} />
       </article>
     </div>

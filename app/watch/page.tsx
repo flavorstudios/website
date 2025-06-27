@@ -52,10 +52,12 @@ const schema = getSchema({
   name: `${SITE_NAME} Videos`,
   description: `Watch original anime, studio films, and exclusive video content from ${SITE_NAME}. Discover our creative world—stream the latest now.`,
   url: getCanonicalUrl("/watch"),
-  publisher: {
-    name: SITE_NAME,
-    logo: SITE_LOGO_URL,
-  },
+  // REMOVED: Explicit publisher object. The getSchema utility is now responsible
+  // for adding the correct publisher (with ImageObject for logo) for WebPage types.
+  // publisher: {
+  //   name: SITE_NAME,
+  //   logo: SITE_LOGO_URL,
+  // },
 });
 
 // --- DATA FETCHING ---

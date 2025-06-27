@@ -53,10 +53,7 @@ const schema = getSchema({
   title: `Privacy Policy – ${SITE_NAME}`,
   description: `Read how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL}. Your privacy matters to us.`,
   image: `${SITE_URL}/cover.jpg`, // You could consider SITE_LOGO_URL here for consistency with publisher, but cover is fine.
-  publisher: {
-    name: SITE_NAME,
-    logo: SITE_LOGO_URL,
-  },
+  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
 });
 
 export default function PrivacyPolicyPage() {
@@ -245,7 +242,7 @@ export default function PrivacyPolicyPage() {
                     <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose mb-3">
                       {item.text}
                     </p>
-                    {item.list && (
+                    {item.list && ( // Check if list exists before rendering ul
                       <ul className="space-y-2 ml-4">
                         {item.list.map((listItem, listIndex) => (
                           <li key={listIndex} className="flex items-start gap-2">
@@ -275,7 +272,7 @@ export default function PrivacyPolicyPage() {
                 <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose mb-3">
                   {section.text}
                 </p>
-                {section.list && (
+                {section.list && ( // Check if list exists before rendering ul
                   <ul className="space-y-2 ml-4 mb-4">
                     {section.list.map((listItem, listIndex) => (
                       <li key={listIndex} className="flex items-start gap-2">
@@ -308,7 +305,7 @@ export default function PrivacyPolicyPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm sm:text-base md:text-lg text-blue-800 leading-relaxed sm:leading-loose mb-4 sm:mb-6">
+            <p className="text-sm sm:text-base text-blue-800 leading-relaxed sm:leading-loose mb-4 sm:mb-6">
               If you have any questions, concerns, or requests regarding this Privacy Policy or the handling of your
               personal information, please reach out to us through our Contact Page.
             </p>

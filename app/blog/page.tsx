@@ -1,30 +1,19 @@
-// app/blog/page.tsx
+import { getMetadata } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+// ...other imports
 
-import { getCanonicalUrl, getMetadata, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL, SITE_LOGO_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
-import { StructuredData } from "@/components/StructuredData";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
-import { NewsletterSignup } from "@/components/newsletter-signup";
-import { blogStore } from "@/lib/content-store";
-import { getDynamicCategories } from "@/lib/dynamic-categories";
-import { CategoryTabs } from "@/components/ui/category-tabs";
-
-// --- SEO METADATA (centralized and dynamic) ---
+// === SEO METADATA BLOCK (Centralized for Next.js 15+) ===
 export const metadata = getMetadata({
   title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
-  description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
+  description:
+    `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
   path: "/blog",
   robots: "index,follow",
   openGraph: {
     title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
-    description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
+    description:
+      `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
     type: "website",
-    url: getCanonicalUrl("/blog"),
-    siteName: SITE_NAME,
     images: [
       {
         url: `${SITE_URL}/cover.jpg`,
@@ -33,46 +22,19 @@ export const metadata = getMetadata({
         alt: `${SITE_NAME} Blog – Anime News, Insights & Studio Stories`,
       },
     ],
+    // url and site_name are omitted; helper fills these in!
   },
   twitter: {
     card: "summary_large_image",
-    site: SITE_BRAND_TWITTER,
-    creator: SITE_BRAND_TWITTER,
+    site: "@flavorstudios",
+    creator: "@flavorstudios",
     title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
-    description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
+    description:
+      `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  alternates: {
-    canonical: getCanonicalUrl("/blog"),
-  },
+  // JSON-LD/schema REMOVED (see head.tsx)
 });
-
-// --- JSON-LD Schema for Blog Page (Blog + WebPage) ---
-const schema = [
-  getSchema({
-    type: "Blog",
-    path: "/blog",
-    name: `${SITE_NAME} Blog`,
-    description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
-    url: getCanonicalUrl("/blog"),
-    publisher: {
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: SITE_URL,
-      logo: {
-        "@type": "ImageObject",
-        url: SITE_LOGO_URL,
-      },
-    },
-  }),
-  getSchema({
-    type: "WebPage",
-    name: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
-    description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
-    url: getCanonicalUrl("/blog"),
-    isPartOf: SITE_URL,
-  }),
-];
 
 // --- DATA FETCHING ---
 async function getBlogData() {
@@ -132,23 +94,24 @@ export default async function BlogPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* SEO JSON-LD Schema */}
-      <StructuredData schema={schema} />
-
       {/* Enhanced Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center">
+            {/* Blue Badge */}
             <div className="inline-flex items-center gap-2 bg-blue-600 text-white rounded-full px-4 sm:px-6 py-2 mb-4 sm:mb-6 text-sm font-medium shadow-lg">
               <BookOpen className="h-4 w-4" />
               Studio Insights & Stories
             </div>
+            {/* Gradient Heading */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 leading-relaxed px-4 pb-2">
               Flavor Studios Blog
             </h1>
+            {/* Italic Subtitle */}
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 italic font-light max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
               Behind the scenes of anime creation—one story at a time.
             </p>
+            {/* Enhanced Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 border border-blue-100">
                 <div className="text-xl sm:text-2xl font-bold text-blue-600">{posts.length}</div>
@@ -171,7 +134,7 @@ export default async function BlogPage({
         </div>
       </div>
 
-      {/* Category Tabs */}
+      {/* Dynamic Category Tabs */}
       <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/blog" type="blog" />
 
       {/* Featured Posts */}
@@ -221,6 +184,8 @@ export default async function BlogPage({
                   <BlogPostCard key={post.id} post={post} />
                 ))}
               </div>
+
+              {/* Pagination */}
               {totalPages > 1 && (
                 <Pagination currentPage={currentPage} totalPages={totalPages} selectedCategory={selectedCategory} />
               )}

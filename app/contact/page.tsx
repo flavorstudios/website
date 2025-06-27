@@ -1,6 +1,6 @@
 // app/contact/page.tsx
 
-import { getMetadata, getSchema } from "@/lib/seo-utils";
+import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_LOGO_URL } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData"; // Assumes you have this for JSON-LD
 import ContactPageClient from "./ContactPageClient";
@@ -47,11 +47,7 @@ export default function ContactPage() {
     description:
       `Have a question or proposal? Contact ${SITE_NAME} for support, collaborations, or general inquiries. We respond within 24–48 hours.`,
     image: `${SITE_URL}/cover.jpg`,
-    // 'url' property removed as getSchema constructs it from 'path'
-    publisher: {
-      name: SITE_NAME,
-      logo: SITE_LOGO_URL,
-    },
+    // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
   });
 
   return (

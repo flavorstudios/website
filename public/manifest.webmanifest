@@ -3,11 +3,13 @@
   "short_name": "Flavor Studios",
   "description": "Anime News & Original Stories That Inspire",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
   "scope": "/",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/android-chrome-192x192.png",
@@ -15,7 +17,7 @@
       "sizes": "192x192"
     },
     {
-      "src": "/icons/android-chrome-256x256.png",   // <-- Optional, if you have it
+      "src": "/icons/android-chrome-256x256.png",
       "type": "image/png",
       "sizes": "256x256"
     },

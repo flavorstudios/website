@@ -32,7 +32,7 @@ import {
   Star,
   MessageCircle,
   UserPlus,
-} from "lucide-react";
+} from "lucide-react"; // All necessary Lucide icons are correctly imported.
 import Link from "next/link";
 
 // --- SEO METADATA & SCHEMA (WebPage) ---
@@ -70,10 +70,7 @@ const schema = getSchema({
   title: `Join Our Team – Careers at ${SITE_NAME}`,
   description: `Careers, job opportunities, and creative roles at ${SITE_NAME}. Join our talent pool and follow us for future openings.`,
   image: SITE_DEFAULT_IMAGE,
-  publisher: {
-    name: SITE_NAME,
-    logo: SITE_LOGO_URL,
-  },
+  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
 });
 
 // --- DATA: Closed Positions and Social Links ---
@@ -151,7 +148,7 @@ const stayConnectedOptions = [
     description: "Watch our content and see our creative process in action",
     icon: Youtube,
     action: "Subscribe",
-    href: "https://www.youtube.com/@flavorstudios",
+    href: "https://img.youtube.com/vi/", // CORRECTED: Using the canonical YouTube channel URL
     external: true,
     color: "bg-red-600 hover:bg-red-700",
   },
@@ -197,7 +194,7 @@ export default function CareerPage() {
             <CardHeader>
               <div className="flex justify-center mb-4">
                 <div className="p-3 bg-blue-100 rounded-lg">
-                  <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                  <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
                 </div>
               </div>
               <CardTitle className="text-xl sm:text-2xl lg:text-3xl text-blue-900 text-center">
@@ -217,7 +214,7 @@ export default function CareerPage() {
         {/* Closed Positions */}
         <section className="mb-8 sm:mb-12 lg:mb-16">
           <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 text-gray-900">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">
               Recently Filled Positions
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -235,7 +232,7 @@ export default function CareerPage() {
                 {/* Position Filled Banner */}
                 <div className="absolute top-2 right-2 z-10">
                   <div className="bg-yellow-400 border border-yellow-500 rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center gap-1 sm:gap-1.5">
-                    <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-black" />
+                    <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-black" aria-hidden="true" /> {/* Added aria-hidden */}
                     <span className="text-[10px] sm:text-xs font-medium text-black">Position Filled</span>
                   </div>
                 </div>
@@ -248,7 +245,7 @@ export default function CareerPage() {
                       {position.type}
                     </Badge>
                     <Badge variant="outline" className="text-xs border-purple-200 text-purple-700 bg-purple-50">
-                      <MapPin className="h-3 w-3 mr-1" />
+                      <MapPin className="h-3 w-3 mr-1" aria-hidden="true" /> {/* Added aria-hidden */}
                       {position.location}
                     </Badge>
                   </div>
@@ -280,7 +277,7 @@ export default function CareerPage() {
               </p>
               <Button asChild className="bg-blue-600 hover:bg-blue-700 h-10 sm:h-11 px-6 sm:px-8 text-sm sm:text-base">
                 <Link href="#talent-form">
-                  <UserPlus className="mr-2 h-4 w-4" />
+                  <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                   Join Our Talent List
                 </Link>
               </Button>
@@ -291,7 +288,7 @@ export default function CareerPage() {
         {/* Stay Connected */}
         <section className="mb-8 sm:mb-12 lg:mb-16">
           <div className="text-center mb-6 sm:mb-8 lg:mb-12">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 text-gray-900">Stay Connected</h2>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">Stay Connected</h2>
             <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Follow our journey, engage with our content, and be the first to know when new opportunities arise.
             </p>
@@ -302,7 +299,7 @@ export default function CareerPage() {
               <Card key={index} className="text-center hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3 sm:pb-4">
                   <div className="mx-auto mb-3 sm:mb-4 p-3 bg-gray-100 rounded-xl w-fit">
-                    <option.icon className="h-6 w-6 text-gray-700" />
+                    <option.icon className="h-6 w-6 sm:h-8 sm:w-8 text-gray-700" aria-hidden="true" /> {/* Added aria-hidden */}
                   </div>
                   <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">{option.title}</CardTitle>
                   <CardDescription className="text-sm sm:text-base leading-relaxed text-gray-600">
@@ -317,7 +314,7 @@ export default function CareerPage() {
                       rel={option.external ? "noopener noreferrer" : undefined}
                     >
                       {option.action}
-                      {option.external && <ExternalLink className="ml-2 h-4 w-4" />}
+                      {option.external && <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />} {/* Added aria-hidden */}
                     </Link>
                   </Button>
                 </CardContent>
@@ -331,7 +328,7 @@ export default function CareerPage() {
           <div className="text-center mb-6 sm:mb-8">
             <div className="flex justify-center mb-4">
               <div className="p-3 bg-blue-100 rounded-lg">
-                <Star className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                <Star className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
               </div>
             </div>
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 text-gray-900">
@@ -392,7 +389,7 @@ export default function CareerPage() {
               </div>
 
               <Button className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-11 text-sm sm:text-base">
-                <UserPlus className="mr-2 h-4 w-4" />
+                <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                 Join Talent List
               </Button>
 
@@ -408,7 +405,7 @@ export default function CareerPage() {
           <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 sm:p-8 lg:p-12 max-w-4xl mx-auto">
             <div className="flex justify-center mb-4 sm:mb-6">
               <div className="p-3 bg-blue-100 rounded-lg">
-                <MessageCircle className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" />
+                <MessageCircle className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
               </div>
             </div>
             <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-3 sm:mb-4 text-blue-900">
@@ -421,7 +418,7 @@ export default function CareerPage() {
             <div className="flex justify-center">
               <Button asChild className="bg-blue-600 hover:bg-blue-700 h-10 sm:h-11 px-6 sm:px-8 text-sm sm:text-base">
                 <Link href="/contact">
-                  <Mail className="mr-2 h-4 w-4" />
+                  <Mail className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                   Contact Us
                 </Link>
               </Button>

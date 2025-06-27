@@ -301,6 +301,8 @@ export default async function BlogPage({
                   <BlogPostCard key={post.id} post={post} />
                 ))}
               </div>
+
+              {/* Pagination */}
               {totalPages > 1 && (
                 <Pagination currentPage={currentPage} totalPages={totalPages} selectedCategory={selectedCategory} />
               )}
@@ -309,7 +311,7 @@ export default async function BlogPage({
         </div>
       </section>
 
-      {/* Newsletter CTA Section */}
+      {/* Newsletter CTA */}
       <section className="py-12 sm:py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4">Stay Updated with Our Latest Stories</h2>
@@ -427,7 +429,7 @@ function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
-                {post.readingTime || "5 min"}
+                {post.readTime || "5 min"}
               </span>
             </div>
           </div>
@@ -534,6 +536,7 @@ function Pagination({
         } else {
           page = currentPage - 2 + i;
         }
+
         return (
           <Button key={page} asChild variant={page === currentPage ? "default" : "outline"} size="sm">
             <Link href={getPageUrl(page)}>{page}</Link>

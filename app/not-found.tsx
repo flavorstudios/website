@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react";
+import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"; // All necessary Lucide icons are correctly imported.
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 // --- SEO imports ---
@@ -42,10 +42,7 @@ const schema = getSchema({
   title: `404 Not Found – ${SITE_NAME}`,
   description: `This page does not exist. Discover original anime, news, and stories on ${SITE_NAME} or explore our popular sections.`,
   image: `${SITE_URL}/cover.jpg`,
-  publisher: {
-    name: SITE_NAME,
-    logo: `${SITE_URL}/logo.png`,
-  },
+  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
 });
 
 export default function NotFound() {
@@ -118,7 +115,7 @@ export default function NotFound() {
               className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
             >
               <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> {/* Added aria-hidden */}
                 Return to Home
               </Link>
             </Button>
@@ -138,7 +135,7 @@ export default function NotFound() {
                     <div
                       className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r ${link.color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
                     >
-                      <link.icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                      <link.icon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" /> {/* Added aria-hidden */}
                     </div>
                     <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors text-sm sm:text-base">
                       {link.title}
@@ -160,19 +157,19 @@ export default function NotFound() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button asChild variant="outline" className="border-blue-200 hover:bg-blue-50">
               <Link href="/contact">
-                <Phone className="mr-2 h-4 w-4" />
+                <Phone className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                 Contact Support
               </Link>
             </Button>
             <Button asChild variant="outline" className="border-blue-200 hover:bg-blue-50">
               <Link href="/faq">
-                <BookOpen className="mr-2 h-4 w-4" />
+                <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                 Check FAQ
               </Link>
             </Button>
             <Button asChild variant="outline" className="border-orange-200 hover:bg-orange-50">
               <Link href="/support">
-                <Coffee className="mr-2 h-4 w-4" />
+                <Coffee className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                 Support Us
               </Link>
             </Button>

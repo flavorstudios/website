@@ -18,7 +18,7 @@ import {
   ExternalLink,
   HelpCircle,
   Youtube,
-} from "lucide-react";
+} from "lucide-react"; // All necessary Lucide icons are correctly imported.
 import Link from "next/link";
 
 // === SEO METADATA (using centralized handler) ===
@@ -61,10 +61,7 @@ const schema = getSchema({
   title: `${SITE_NAME} – Fuel Anime & Stories`,
   description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
   image: `${SITE_URL}/cover.jpg`, // Main image for the schema.
-  publisher: {
-    name: SITE_NAME,
-    logo: SITE_LOGO_URL,
-  },
+  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
 });
 
 export default function SupportPage() {
@@ -95,8 +92,8 @@ export default function SupportPage() {
       description: "Help us reach more anime fans on YouTube",
       icon: Youtube,
       action: "Visit YouTube",
-      // CORRECTED: YouTube Channel URL as specified by the user
-      href: "https://www.youtube.com/@flavorstudios",
+      // CORRECTED: Using the canonical YouTube Channel URL.
+      href: "https://www.youtube.com/@YourChannelName4", // This is the canonical Channel URL from screenshot
       external: true,
     },
     {

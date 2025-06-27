@@ -35,17 +35,13 @@ export const metadata = getMetadata({
 });
 
 // --- WebPage Schema: attaches JSON-LD with canonical, logo, etc ---
-// Provides structured data for rich snippets in search results.
 const schema = getSchema({
   type: "WebPage", // Suitable schema type for a legal policy page.
   path: "/disclaimer",
   title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
   description: `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
   image: SITE_LOGO_URL, // Using the site's logo for the page's image in schema is a good practice for legal documents.
-  publisher: {
-    name: SITE_NAME,
-    logo: SITE_LOGO_URL, // Explicitly linking the publisher's logo.
-  },
+  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
 });
 
 export default function DisclaimerPage() {
@@ -138,11 +134,11 @@ export default function DisclaimerPage() {
       <div className="container mx-auto max-w-4xl px-4 sm:px-6">
         {/* Header Section */}
         <div className="mb-12 sm:mb-16">
-          <Badge className="mb-3 sm:mb-4 bg-blue-100 text-blue-800 text-xs sm:text-sm">Legal Document</Badge>
+          <Badge className="mb-3 sm:mb-4 bg-blue-100 text-blue-800 text-xs sm:text-sm" aria-label="Legal Document">Legal Document</Badge>
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Disclaimer</h1>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex items-start gap-3">
-              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" />
+              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
               <div>
                 <p className="text-sm sm:text-base text-blue-800 font-medium mb-2">Effective Date: May 9, 2025</p>
                 <p className="text-sm sm:text-base text-blue-700 leading-relaxed">
@@ -156,7 +152,7 @@ export default function DisclaimerPage() {
           </div>
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" />
+              <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
               <div>
                 <p className="text-sm sm:text-base text-amber-800 font-medium mb-2">Important Notice</p>
                 <p className="text-sm sm:text-base text-amber-700 leading-relaxed">
@@ -175,7 +171,7 @@ export default function DisclaimerPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-base sm:text-xl">
                   <div className={`p-2 rounded-lg ${section.color}`}>
-                    <section.icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <section.icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> {/* Added aria-hidden */}
                   </div>
                   {section.title}
                 </CardTitle>
@@ -196,7 +192,7 @@ export default function DisclaimerPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
                     <div className="p-2 bg-gray-100 rounded-lg">
-                      <section.icon className="h-5 w-5 text-gray-600" />
+                      <section.icon className="h-5 w-5 text-gray-600" aria-hidden="true" /> {/* Added aria-hidden */}
                     </div>
                     {section.title}
                   </CardTitle>
@@ -214,7 +210,7 @@ export default function DisclaimerPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-red-900">
               <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+                <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" aria-hidden="true" /> {/* Added aria-hidden */}
               </div>
               Use at Your Own Risk
             </CardTitle>
@@ -226,7 +222,7 @@ export default function DisclaimerPage() {
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
               {riskFactors.map((risk, index) => (
                 <div key={index} className="flex items-start gap-2">
-                  <div className="h-1.5 w-1.5 bg-red-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <div className="h-1.5 w-1.5 bg-red-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div> {/* Added aria-hidden */}
                   <span className="text-xs sm:text-sm text-red-800 leading-relaxed">{risk}</span>
                 </div>
               ))}
@@ -239,7 +235,7 @@ export default function DisclaimerPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-green-900">
               <div className="p-2 bg-green-100 rounded-lg">
-                <Scale className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
+                <Scale className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" aria-hidden="true" />
               </div>
               Fair Use and Copyright Notice
             </CardTitle>
@@ -268,7 +264,7 @@ export default function DisclaimerPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-cyan-900">
               <div className="p-2 bg-cyan-100 rounded-lg">
-                <Bot className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-600" />
+                <Bot className="h-5 w-5 sm:h-6 sm:w-6 text-cyan-600" aria-hidden="true" />
               </div>
               Automated Moderation Technology
             </CardTitle>
@@ -296,7 +292,7 @@ export default function DisclaimerPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-blue-900">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
               </div>
               Contact Us
             </CardTitle>
@@ -309,18 +305,17 @@ export default function DisclaimerPage() {
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
-                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="font-semibold text-blue-900 text-sm sm:text-base">Flavor Studios</p>
-                  {/* Using SITE_URL constant for consistency */}
                   <p className="text-blue-700 text-sm sm:text-base">Website: {SITE_URL}</p>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-xs sm:text-sm">
-                  <Link href="/contact">
-                    <Mail className="mr-2 h-4 w-4" />
+                  <Link href="/contact" aria-label="Contact Flavor Studios">
+                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
                     Contact Us
                   </Link>
                 </Button>
@@ -329,8 +324,8 @@ export default function DisclaimerPage() {
                   variant="outline"
                   className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white h-9 sm:h-10 text-xs sm:text-sm"
                 >
-                  <Link href="mailto:contact@flavorstudios.in">
-                    <Mail className="mr-2 h-4 w-4" />
+                  <Link href="mailto:contact@flavorstudios.in" aria-label="Email Us">
+                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
                     Email Us
                   </Link>
                 </Button>
@@ -343,8 +338,23 @@ export default function DisclaimerPage() {
         <div className="text-center mb-8 sm:mb-12">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Quick Navigation</h3>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-            {disclaimerSections.slice(0, 4).map((section, index) => (
-              <Button key={index} variant="outline" size="sm" asChild className="text-xs sm:text-sm">
+            {/* Assuming these sections have corresponding IDs in your content */}
+            {[
+              { id: "limitation-liability", title: "Limitation of Liability" },
+              { id: "external-links", title: "External Links" },
+              { id: "media-ip", title: "Media & IP" },
+              { id: "third-party-content", title: "Third-Party Content" },
+              { id: "user-content", title: "User Content" },
+              { id: "automated-moderation", title: "Automated Moderation" },
+              { id: "no-professional-advice", title: "No Professional Advice" }, // Assuming an ID for this section
+              { id: "accuracy-information", title: "Accuracy of Info" }, // Assuming an ID for this section
+              { id: "changes-to-disclaimer", title: "Policy Changes" }, // Assuming an ID for this section
+              { id: "risk-acknowledgment", title: "Use at Own Risk" }, // Assuming an ID for this section
+              { id: "fair-use-copyright", title: "Fair Use" }, // Assuming an ID for this section
+              { id: "moderation-technology", title: "Moderation Tech" }, // Assuming an ID for this section
+              { id: "contact-disclaimer", title: "Contact" }, // Assuming an ID for this section
+            ].map((section, index) => (
+              <Button key={index} variant="outline" size="sm" asChild className="text-xs sm:text-sm px-3 py-2">
                 <Link href={`#${section.id}`}>{section.title}</Link>
               </Button>
             ))}
@@ -357,31 +367,31 @@ export default function DisclaimerPage() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/privacy-policy">
-                <Shield className="mr-2 h-4 w-4" />
+                <Shield className="mr-2 h-4 w-4" aria-hidden="true" />
                 Privacy Policy
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/terms-of-service">
-                <FileText className="mr-2 h-4 w-4" />
+                <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
                 Terms of Service
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/dmca">
-                <Copyright className="mr-2 h-4 w-4" /> {/* Corrected icon */}
+                <Copyright className="mr-2 h-4 w-4" aria-hidden="true" />
                 DMCA Policy
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/cookie-policy">
-                <Cookie className="mr-2 h-4 w-4" />
+                <Cookie className="mr-2 h-4 w-4" aria-hidden="true" />
                 Cookie Policy
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/media-usage-policy">
-                <Eye className="mr-2 h-4 w-4" />
+                <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
                 Media Usage Policy
               </Link>
             </Button>
@@ -389,7 +399,7 @@ export default function DisclaimerPage() {
         </div>
 
         {/* Footer Note */}
-        <div className="text-center">
+        <div className="mt-12 sm:mt-16 text-center">
           <p className="text-xs sm:text-sm text-gray-500">
             Last updated: May 9, 2025 • This Disclaimer is effective immediately upon posting.
           </p>

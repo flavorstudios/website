@@ -1,37 +1,43 @@
 // lib/seo/schema.ts
 
 import { SITE_NAME, SITE_URL, SITE_DEFAULT_IMAGE } from "@/lib/constants";
-import { getCanonicalUrl } from "./canonical"; // This helper is designed for RELATIVE paths
+import { getCanonicalUrl } from "./canonical";
 
-import type { WithContext, Thing, ImageObject } from "schema-dts";
+import type { WithContext, Thing, ImageObject, Organization } from "schema-dts";
 
 const OG_IMAGE_DEFAULT_WIDTH = 1200;
 const OG_IMAGE_DEFAULT_HEIGHT = 630;
 const LOGO_DEFAULT_WIDTH = 600;
 const LOGO_DEFAULT_HEIGHT = 60;
 
-// Extend ImageObject to optionally include caption/alt for legacy compatibility
+// Add optional caption/alt for legacy
 type ImageObjectWithCaption = ImageObject & { caption?: string; alt?: string };
 
-// --- NEW HELPER FUNCTION TO AVOID DOUBLE DOMAINS IN SCHEMA.ORG URLS ---
-// This function correctly canonicalizes a URL for Schema.org properties.
-// It checks if the input URL is already absolute (starts with http/https or //).
-// If it's absolute, it uses it as is. If it's relative, it uses getCanonicalUrl.
+/**
+ * Convert a relative URL to absolute, or return as-is if already absolute.
+ */
 function getAbsoluteCanonicalUrlForSchema(inputUrl: string): string {
-  // Check if the URL is already absolute
-  if (inputUrl.startsWith("http://") || inputUrl.startsWith("https://") || inputUrl.startsWith("//")) {
-    return inputUrl; // If already absolute, use it directly.
+  if (
+    inputUrl.startsWith("http://") ||
+    inputUrl.startsWith("https://") ||
+    inputUrl.startsWith("//")
+  ) {
+    return inputUrl;
   }
-  // If it's a relative path, use getCanonicalUrl to make it absolute from SITE_URL.
   return getCanonicalUrl(inputUrl);
 }
-// --- END NEW HELPER ---
-
 
 /**
- * Generate Schema.org JSON-LD for any SEO context (WebPage, Article, etc.)
- * @template T Additional schema.org properties
- * @returns {WithContext<Thing>} JSON-LD schema object
+ * Generate Schema.org JSON-LD for any SEO context (WebPage, Article, FAQPage, VideoObject, etc.).
+ * Accepts all schema.org fields as top-level properties.
+ *
+ * Pass any required property directly:
+ *  - mainEntity, sameAs, thumbnailUrl, embedUrl, etc.
+ *  - "publisher" is only included for WebPage, Article, VideoObject, NewsArticle, BlogPosting
+ *
+ * Example:
+ *   getSchema({ type: "FAQPage", ..., mainEntity: [...] })
+ *
  */
 export function getSchema<T extends Record<string, any>>({
   type = "WebPage",
@@ -39,13 +45,13 @@ export function getSchema<T extends Record<string, any>>({
   title,
   description,
   image = SITE_DEFAULT_IMAGE,
-  logoUrl = `${SITE_URL}/logo.png`, // Default logoUrl is already an absolute URL.
+  logoUrl = `${SITE_URL}/logo.png`,
   organizationName = SITE_NAME,
-  organizationUrl = SITE_URL, // Default organizationUrl is already an absolute URL.
+  organizationUrl = SITE_URL,
   authorName,
   datePublished,
   dateModified,
-  additionalProperties = {},
+  ...rest // Everything else passed at top level!
 }: {
   type?: string;
   path?: string;
@@ -58,17 +64,15 @@ export function getSchema<T extends Record<string, any>>({
   authorName?: string;
   datePublished?: string;
   dateModified?: string;
-  additionalProperties?: T;
-}): WithContext<Thing> {
-  // Canonical URL for the page itself (path is always relative here, so getCanonicalUrl is perfect)
+} & T): WithContext<Thing> {
   const url = getCanonicalUrl(path);
 
-  // 1. Process the main image for schema
+  // Construct main image object
   let schemaImage: ImageObject;
   if (typeof image === "string") {
     schemaImage = {
       "@type": "ImageObject",
-      url: getAbsoluteCanonicalUrlForSchema(image), // Use the new helper for image URL
+      url: getAbsoluteCanonicalUrlForSchema(image),
       width: OG_IMAGE_DEFAULT_WIDTH,
       height: OG_IMAGE_DEFAULT_HEIGHT,
       caption: description,
@@ -77,7 +81,7 @@ export function getSchema<T extends Record<string, any>>({
     const img = image as Partial<ImageObjectWithCaption>;
     schemaImage = {
       "@type": "ImageObject",
-      url: getAbsoluteCanonicalUrlForSchema(img.url!), // Use the new helper for image URL
+      url: getAbsoluteCanonicalUrlForSchema(img.url!),
       width: img.width || OG_IMAGE_DEFAULT_WIDTH,
       height: img.height || OG_IMAGE_DEFAULT_HEIGHT,
       caption: img.caption || img.alt || description,
@@ -85,62 +89,59 @@ export function getSchema<T extends Record<string, any>>({
   } else {
     schemaImage = {
       "@type": "ImageObject",
-      url: getAbsoluteCanonicalUrlForSchema(SITE_DEFAULT_IMAGE), // Use the new helper for default image URL
+      url: getAbsoluteCanonicalUrlForSchema(SITE_DEFAULT_IMAGE),
       width: OG_IMAGE_DEFAULT_WIDTH,
       height: OG_IMAGE_DEFAULT_HEIGHT,
       caption: description,
     };
   }
 
-  // 2. Process the organization logo for schema
+  // Logo for publisher
   const schemaLogo: ImageObject = {
     "@type": "ImageObject",
-    url: getAbsoluteCanonicalUrlForSchema(logoUrl), // Use the new helper for logo URL
+    url: getAbsoluteCanonicalUrlForSchema(logoUrl),
     width: LOGO_DEFAULT_WIDTH,
     height: LOGO_DEFAULT_HEIGHT,
     caption: `${organizationName} logo`,
   };
 
-  // Base schema object (merge additionalProperties last for full override)
+  // Publisher object
+  const publisherObject: Organization = {
+    "@type": "Organization",
+    name: organizationName,
+    url: getAbsoluteCanonicalUrlForSchema(organizationUrl),
+    logo: schemaLogo,
+  };
+
+  // Build base schema (conditionally add publisher only for correct types)
   const baseSchema: Thing = {
     "@context": "https://schema.org",
     "@type": type,
     name: title,
     description,
-    url, // This 'url' is correctly generated by getCanonicalUrl(path)
+    url,
     image: schemaImage,
-    publisher: {
-      "@type": "Organization",
-      name: organizationName,
-      url: getAbsoluteCanonicalUrlForSchema(organizationUrl), // Use the new helper for publisher URL
-      logo: schemaLogo,
-    },
+    ...( // Only for types that expect publisher
+      ["WebPage", "Article", "VideoObject", "NewsArticle", "BlogPosting"].includes(type)
+        ? { publisher: publisherObject }
+        : {}
+    ),
     ...(type === "WebPage" && {
-      mainEntityOfPage: {
-        "@type": "WebPage",
-        "@id": url, // This 'url' is correctly generated by getCanonicalUrl(path)
-      },
+      mainEntityOfPage: { "@type": "WebPage", "@id": url },
     }),
     ...(type === "Article" && {
-      mainEntityOfPage: {
-        "@type": "WebPage",
-        "@id": url, // This 'url' is correctly generated by getCanonicalUrl(path)
-      },
-      ...(authorName && {
-        author: {
-          "@type": "Person",
-          name: authorName,
-        },
-      }),
+      mainEntityOfPage: { "@type": "WebPage", "@id": url },
+      ...(authorName && { author: { "@type": "Person", name: authorName } }),
       ...(datePublished && { datePublished }),
       ...(dateModified && { dateModified }),
       headline: title,
     }),
+    // FAQPage, VideoObject, etc. fields are added below via ...rest
   };
 
-  // Return as a schema.org WithContext object
+  // Spread in ALL additional props: mainEntity, sameAs, thumbnailUrl, embedUrl, etc.
   return {
     ...baseSchema,
-    ...additionalProperties,
+    ...rest,
   } as WithContext<Thing>;
 }

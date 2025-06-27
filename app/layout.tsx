@@ -69,7 +69,7 @@ const orgSchema = getSchema({
   // REMOVED: The 'publisher' property is invalid when the type is 'Organization'.
   // An Organization is a publisher, it doesn't *have* a publisher property.
   sameAs: [ // Official social media and other web profiles for your organization.
-    // CORRECTED: Using the canonical YouTube channel URL from your screenshot.
+    // User requested to keep this specific YouTube URL.
     "https://www.youtube.com/@flavorstudios",
     "https://www.instagram.com/flavorstudios",
     "https://twitter.com/flavor_studios", // Correct and consistent Twitter URL.

@@ -3,7 +3,7 @@ const withPWA = require("next-pwa")({
   dest: "public",
   register: true,
   skipWaiting: true,
-  swSrc: "public/sw-custom.js", // Custom service worker logic (this is all you need!)
+  swSrc: "public/service-worker.js", // Updated: Point to your main SW file!
   disable: process.env.NODE_ENV === "development", // Only enable PWA in production
 });
 

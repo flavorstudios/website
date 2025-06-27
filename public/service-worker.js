@@ -1,31 +1,13 @@
+self.__WB_MANIFEST;
+
 const CACHE_NAME = "flavor-pwa-v1";
 const OFFLINE_URL = "/offline.html";
-const PRECACHE_ASSETS = [
-  "/",
-  "/offline.html",
-  "/manifest.webmanifest",
-  "/favicon.ico",
-  "/icons/android-chrome-192x192.png",
-  "/icons/android-chrome-512x512.png",
-  "/icons/apple-touch-icon.png"
-];
 
-// Install: Cache essential static assets and offline fallback
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE_ASSETS))
-  );
-  self.skipWaiting();
-});
-
-// Activate: Remove outdated caches
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
-    )
-  );
-  self.clients.claim();
+// Allow manual update of the service worker (optional, best practice)
+self.addEventListener("message", event => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 // Fetch: Serve navigation requests network-first, fallback to offline.html
@@ -42,17 +24,5 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // For all other requests: cache-first, then network
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
-});
-
-// Allow manual update of the service worker (optional, best practice)
-self.addEventListener("message", event => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
+  // For all other requests: let Workbox (precache) or browser cache handle it
 });

@@ -7,7 +7,7 @@ import "./fonts/poppins.css"; // Custom font
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
-import PwaServiceWorker from "@/components/PwaServiceWorker"; // PWA service worker registration
+// import PwaServiceWorker from "@/components/PwaServiceWorker"; // Removed: now handled by next-pwa
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -130,7 +130,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <main>{children}</main>
         <Footer />
         <BackToTop />
-        <PwaServiceWorker />
+        {/* <PwaServiceWorker />  Removed: next-pwa now handles registration automatically */}
       </body>
     </html>
   );

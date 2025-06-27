@@ -92,8 +92,8 @@ export default function SupportPage() {
       description: "Help us reach more anime fans on YouTube",
       icon: Youtube,
       action: "Visit YouTube",
-      // CORRECTED: Using the canonical YouTube Channel URL.
-      href: "https://www.youtube.com/@flavorstudios", // This is the canonical Channel URL from screenshot
+      // REVERTED: YouTube Channel URL to the user-specified value.
+      href: "https://www.youtube.com/@flavorstudios",
       external: true,
     },
     {

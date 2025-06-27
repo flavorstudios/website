@@ -7,11 +7,36 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
+import { Calendar, User, Eye, BookOpen, Clock, Star, ArrowRight } from "lucide-react"; // ArrowRight for consistency
 import { NewsletterSignup } from "@/components/newsletter-signup";
 import { blogStore } from "@/lib/content-store";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
+// Import the helper needed for canonicalizing URLs in schema publisher
+import { getAbsoluteCanonicalUrlForSchema } from "@/lib/seo/schema"; // Ensure this path is correct if schema.ts is lib/seo/schema.ts
+
+// === TYPES ===
+interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  coverImage?: string;
+  category?: string;
+  publishedAt: string;
+  excerpt?: string;
+  readingTime?: string;
+  status?: string;
+}
+
+interface Video {
+  id: string;
+  title: string;
+  thumbnail?: string;
+  duration?: string;
+  views?: number;
+  publishedAt?: string;
+  status?: string;
+}
 
 // --- SEO METADATA (Centralized, dynamic) ---
 export const metadata = getMetadata({
@@ -51,16 +76,27 @@ export const metadata = getMetadata({
 });
 
 // --- JSON-LD Blog Schema ---
+// For 'Blog' type, getSchema does NOT automatically add publisher.
+// So, we explicitly add it here with correct @type and canonical URLs for its properties.
 const schema = getSchema({
-  type: "Blog",
+  type: "Blog", // Schema.org Blog type (not BlogPosting)
   path: "/blog",
-  name: "Flavor Studios Blog",
+  name: "Flavor Studios Blog", // 'name' maps to title for Blog type
   description:
     "Explore the latest anime news, creative industry insights, and original studio stories from Flavor Studios. Go behind the scenes with our team.",
   url: getCanonicalUrl("/blog"),
-  publisher: {
+  // Explicitly defining publisher for Blog type as getSchema doesn't auto-add it for 'Blog'
+  publisher: { // CRITICAL: Must be a full Organization object for schema validator
+    "@type": "Organization", // CRITICAL: Specify @type for the publisher
     name: SITE_NAME,
-    logo: SITE_LOGO_URL,
+    url: getAbsoluteCanonicalUrlForSchema(SITE_URL), // Use canonical helper for URL
+    logo: {
+      "@type": "ImageObject",
+      url: getAbsoluteCanonicalUrlForSchema(SITE_LOGO_URL), // Use canonical helper for logo URL
+      width: 600, // Standard logo width
+      height: 60, // Standard logo height
+      caption: `${SITE_NAME} logo`, // Description for the logo
+    },
   },
 });
 
@@ -68,8 +104,8 @@ const schema = getSchema({
 async function getBlogData() {
   try {
     const [posts, { blogCategories }] = await Promise.all([
-      blogStore.getPublished(),
-      getDynamicCategories(),
+      blogStore.getPublished().catch(() => []),
+      getDynamicCategories().catch(() => ({ blogCategories: [] })), // Added catch for getDynamicCategories
     ]);
     return { posts, categories: blogCategories };
   } catch (error) {
@@ -77,6 +113,69 @@ async function getBlogData() {
     return { posts: [], categories: [] };
   }
 }
+
+// --- Error/Loading Fallback Components ---
+const ErrorFallback = ({ section }: { section: string }) => (
+  <div className="text-center py-12">
+    <p className="text-gray-500">Unable to load {section} content. Please try again later.</p>
+  </div>
+);
+
+const BlogsSkeleton = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {[...Array(6)].map((_, i) => (
+      <Card key={i} className="overflow-hidden">
+        <div className="h-48 bg-gray-200 animate-pulse"></div>
+        <CardHeader>
+          <div className="h-4 bg-gray-200 animate-pulse rounded mb-2"></div>
+          <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+            <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+            <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3"></div>
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
+
+const VideosSkeleton = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {[...Array(6)].map((_, i) => (
+      <Card key={i} className="overflow-hidden">
+        <div className="h-48 bg-gray-200 animate-pulse"></div>
+        <CardHeader>
+          <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2"></div>
+          </div>
+        </CardContent>
+      </Card>
+    ))}
+  </div>
+);
+
+const StatsSkeleton = () => (
+  <section className="py-16 bg-white">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="text-center">
+            <div className="h-12 bg-gray-200 animate-pulse rounded mb-2"></div>
+            <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 
 // --- MAIN PAGE COMPONENT ---
 export default async function BlogPage({
@@ -89,7 +188,6 @@ export default async function BlogPage({
   const currentPage = Number.parseInt(searchParams.page || "1");
   const postsPerPage = 9;
 
-  // Filter posts by category (slugify for match)
   const filteredPosts =
     selectedCategory === "all"
       ? posts
@@ -109,7 +207,7 @@ export default async function BlogPage({
   const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3);
   const regularPosts = paginatedPosts.filter((post: any) => !post.featured);
 
-  // Analytics
+  // Analytics data
   const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0);
   const avgReadTime =
     posts.length > 0
@@ -123,15 +221,15 @@ export default async function BlogPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* SEO JSON-LD Schema */}
+      {/* --- SEO JSON-LD Schema --- */}
       <StructuredData schema={schema} />
 
-      {/* Header */}
+      {/* Enhanced Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-blue-600 text-white rounded-full px-4 sm:px-6 py-2 mb-4 sm:mb-6 text-sm font-medium shadow-lg">
-              <BookOpen className="h-4 w-4" aria-hidden="true" />
+              <BookOpen className="h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
               Studio Insights & Stories
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 leading-relaxed px-4 pb-2">
@@ -150,19 +248,19 @@ export default async function BlogPage({
         </div>
       </div>
 
-      {/* Category Tabs */}
+      {/* Dynamic Category Tabs */}
       <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/blog" type="blog" />
 
-      {/* Featured Posts */}
+      {/* Featured Posts Section */}
       {featuredPosts.length > 0 && (
         <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-gray-50 to-blue-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2 mb-6 sm:mb-8">
-              <Star className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-500" aria-hidden="true" />
+              <Star className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-500" aria-hidden="true" /> {/* Added aria-hidden */}
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Featured Posts</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {featuredPosts.map((post: any, index: number) => (
+              {featuredPosts.map((post: BlogPost, index: number) => (
                 <FeaturedPostCard key={post.id} post={post} priority={index === 0} />
               ))}
             </div>
@@ -170,7 +268,7 @@ export default async function BlogPage({
         </section>
       )}
 
-      {/* All Posts */}
+      {/* All Posts Section */}
       <section className="py-8 sm:py-12 lg:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
@@ -196,7 +294,7 @@ export default async function BlogPage({
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-                {regularPosts.map((post: any) => (
+                {regularPosts.map((post: BlogPost) => (
                   <BlogPostCard key={post.id} post={post} />
                 ))}
               </div>
@@ -208,7 +306,7 @@ export default async function BlogPage({
         </div>
       </section>
 
-      {/* Newsletter CTA */}
+      {/* Newsletter CTA Section */}
       <section className="py-12 sm:py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4">Stay Updated with Our Latest Stories</h2>
@@ -219,9 +317,18 @@ export default async function BlogPage({
             <NewsletterSignup />
           </div>
           <div className="flex flex-wrap justify-center gap-6 text-sm text-blue-200 mt-6">
-            <BadgeDot>Weekly Updates</BadgeDot>
-            <BadgeDot>Exclusive Content</BadgeDot>
-            <BadgeDot>No Spam</BadgeDot>
+            <span className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full" aria-hidden="true"></div> {/* Added aria-hidden */}
+              Weekly Updates
+            </span>
+            <span className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full" aria-hidden="true"></div> {/* Added aria-hidden */}
+              Exclusive Content
+            </span>
+            <span className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full" aria-hidden="true"></div> {/* Added aria-hidden */}
+              No Spam
+            </span>
           </div>
         </div>
       </section>
@@ -249,23 +356,25 @@ function StatCard({ label, value, color }: { label: string; value: string | numb
 function BadgeDot({ children }: { children: React.ReactNode }) {
   return (
     <span className="flex items-center gap-2">
-      <div className="w-2 h-2 bg-green-400 rounded-full" aria-hidden="true" />
+      <div className="w-2 h-2 bg-green-400 rounded-full" aria-hidden="true" /> {/* Added aria-hidden */}
       {children}
     </span>
   );
 }
 
 // --- FeaturedPostCard ---
-function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
+function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority?: boolean }) {
   return (
     <Link href={`/blog/${post.slug}`} className="group">
       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full bg-gradient-to-br from-white to-gray-50">
         <div className="relative h-40 sm:h-48 lg:h-56 overflow-hidden">
           <img
-            src={post.featuredImage || post.coverImage || "/placeholder.svg?height=256&width=512&text=Featured+Post"}
-            alt={post.title ? post.title : "Flavor Studios blog post"}
+            src={post.coverImage || "/placeholder.svg?height=256&width=512&text=Featured+Post"}
+            alt={post.title || "Featured blog post cover"}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading={priority ? "eager" : "lazy"}
+            decoding="async"
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
           <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
             <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-900 shadow-lg text-xs">
@@ -313,7 +422,7 @@ function FeaturedPostCard({ post, priority = false }: { post: any; priority?: bo
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
-                {post.readTime || "5 min"}
+                {post.readingTime || "5 min"}
               </span>
             </div>
           </div>
@@ -324,16 +433,18 @@ function FeaturedPostCard({ post, priority = false }: { post: any; priority?: bo
 }
 
 // --- BlogPostCard ---
-function BlogPostCard({ post }: { post: any }) {
+function BlogPostCard({ post }: { post: BlogPost }) {
   return (
     <Link href={`/blog/${post.slug}`} className="group">
       <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 bg-white">
         <div className="relative h-40 sm:h-48 overflow-hidden">
           <img
-            src={post.featuredImage || post.coverImage || "/placeholder.svg?height=192&width=384&text=Blog+Post"}
-            alt={post.title ? post.title : "Flavor Studios blog post"}
+            src={post.coverImage || "/placeholder.svg?height=192&width=384&text=Blog+Post"}
+            alt={post.title || "Blog post cover"}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
             loading="lazy"
+            decoding="async"
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
           <div
             className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -450,7 +561,7 @@ function EmptyState({ selectedCategory }: { selectedCategory: string }) {
         <p className="text-gray-600 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
           {selectedCategory === "all"
             ? "We're working on exciting content about anime, storytelling, and behind-the-scenes insights. Check back soon!"
-            : "No posts have been published in this category yet. Try selecting a different category or check back later."}
+            : `No posts have been published in this category yet. Try selecting a different category or check back later.`}
         </p>
         <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 sm:p-6">
           <p className="text-blue-800 text-sm">

@@ -1,7 +1,9 @@
+self.__WB_MANIFEST; // Required for next-pwa/Workbox to inject the precache list
+
 const CACHE_NAME = "flavor-pwa-v1";
 const OFFLINE_URL = "/offline.html";
 
-// Install: cache offline page
+// Install: cache the offline fallback page
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll([
@@ -11,14 +13,14 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Allow manual update of the service worker
+// Allow manual update of the service worker (for update flow)
 self.addEventListener("message", event => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
 
-// Fetch: network-first for navigations, offline fallback
+// Network-first for navigation requests, offline fallback
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
@@ -31,5 +33,5 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // All other requests: let default caching handle them
+  // Let default or precache caching handle other requests (static assets, APIs, etc.)
 });

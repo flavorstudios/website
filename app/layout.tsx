@@ -9,6 +9,8 @@ import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 // import PwaServiceWorker from "@/components/PwaServiceWorker"; // Removed: now handled by next-pwa
 
+import ConvertKitPopup from "@/components/ConvertKitPopup"; // <--- ADDED HERE
+
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
   SITE_NAME,
@@ -130,6 +132,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <main>{children}</main>
         <Footer />
         <BackToTop />
+
+        <ConvertKitPopup /> {/* <--- ADDED HERE, just above closing body tag */}
+
         {/* <PwaServiceWorker />  Removed: next-pwa now handles registration automatically */}
       </body>
     </html>

@@ -116,7 +116,7 @@ export default async function BlogPage({
             0,
           ) / posts.length,
         )
-      : 0
+      : 0; // <-- THIS SEMICOLON FIXES YOUR BUILD
 
   return (
     <div className="min-h-screen bg-gray-50">

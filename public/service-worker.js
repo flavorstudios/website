@@ -1,20 +1,27 @@
-self.__WB_MANIFEST;
-
 const CACHE_NAME = "flavor-pwa-v1";
 const OFFLINE_URL = "/offline.html";
 
-// Allow manual update of the service worker (optional, best practice)
+// Install: cache offline page
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll([
+      OFFLINE_URL
+    ]))
+  );
+  self.skipWaiting();
+});
+
+// Allow manual update of the service worker
 self.addEventListener("message", event => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
 
-// Fetch: Serve navigation requests network-first, fallback to offline.html
+// Fetch: network-first for navigations, offline fallback
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
-  // For page navigations
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request)
@@ -24,5 +31,5 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // For all other requests: let Workbox (precache) or browser cache handle it
+  // All other requests: let default caching handle them
 });

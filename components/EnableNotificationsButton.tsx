@@ -11,19 +11,22 @@ export default function EnableNotificationsButton() {
     setLoading(true)
     setResult("")
     try {
+      // Check browser support for notifications and service worker
       const supported = await isSupported()
-      if (!supported) {
+      if (!supported || !("serviceWorker" in navigator)) {
         setResult("Notifications are not supported in this browser.")
         return
       }
+      // Register the unified service worker (handles PWA & push)
+      const swReg = await navigator.serviceWorker.register("/sw.js")
       const messaging = getMessaging(app)
-      const swReg = await navigator.serviceWorker.register("/firebase-messaging-sw.js")
+      // Request permission and get FCM token
       const token = await getToken(messaging, {
         vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
         serviceWorkerRegistration: swReg,
       })
       if (token) {
-        // --- New: Send token to backend ---
+        // Send the token to your backend for storage
         await fetch("/api/notifications/register-token", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

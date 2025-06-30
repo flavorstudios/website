@@ -6,13 +6,12 @@ export default function PwaServiceWorker() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
   useEffect(() => {
-    if (
-      typeof window !== 'undefined' &&
-      'serviceWorker' in navigator
-    ) {
-      let newWorker: ServiceWorker | null = null;
+    let refreshing = false;
+    let newWorker: ServiceWorker | null = null;
 
-      window.addEventListener('load', () => {
+    if ('serviceWorker' in navigator) {
+      // Register service worker on page load
+      const onLoad = () => {
         navigator.serviceWorker
           .register('/sw.js')
           .then(registration => {
@@ -22,7 +21,7 @@ export default function PwaServiceWorker() {
               if (newWorker) {
                 newWorker.onstatechange = () => {
                   if (newWorker?.state === 'installed') {
-                    // New update available!
+                    // If there is already a controlling service worker, a new update is available.
                     if (navigator.serviceWorker.controller) {
                       setUpdateAvailable(true);
                     }
@@ -32,19 +31,33 @@ export default function PwaServiceWorker() {
             };
           })
           .catch(error => {
-            // Optional: You can log or display errors here
-            console.error('Service worker registration failed:', error);
+            if (process.env.NODE_ENV === 'development') {
+              // Only log in development to avoid exposing errors in production
+              console.error('Service worker registration failed:', error);
+            }
           });
-      });
+      };
 
-      // Optional: Listen for skipWaiting messages for instant updates
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        window.location.reload();
-      });
+      window.addEventListener('load', onLoad);
+
+      // Listen for controllerchange and reload ONCE when a new SW activates
+      const onControllerChange = () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      };
+      navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
+
+      // Cleanup to prevent memory leaks
+      return () => {
+        window.removeEventListener('load', onLoad);
+        navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+      };
     }
   }, []);
 
-  // Optional: Show a notification/toast to user for update
+  // Handles update prompt
   const handleUpdate = () => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistration().then(reg => {

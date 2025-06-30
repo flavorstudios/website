@@ -1,5 +1,7 @@
-// Tell Workbox where to inject its precache manifest:
-self.__WB_MANIFEST;
+// --- Workbox Precaching ---
+// Workbox injects __WB_MANIFEST here at build time!
+import { precacheAndRoute } from 'workbox-precaching';
+precacheAndRoute(self.__WB_MANIFEST);
 
 // --- Firebase Cloud Messaging for Push Notifications ---
 importScripts('https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js');
@@ -22,15 +24,13 @@ messaging.onBackgroundMessage(function(payload) {
   });
 });
 
-// --- Optional: PWA Offline Fallback ---
+// --- PWA Offline Fallback ---
 const CACHE_NAME = "flavor-pwa-v1";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll([
-      OFFLINE_URL
-    ]))
+    caches.open(CACHE_NAME).then(cache => cache.addAll([OFFLINE_URL]))
   );
   self.skipWaiting();
 });
@@ -52,5 +52,5 @@ self.addEventListener("fetch", event => {
     );
     return;
   }
-  // All other requests let Workbox handle!
+  // Other fetches are handled by Workbox precaching.
 });

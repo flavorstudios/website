@@ -6,19 +6,18 @@ import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
 import { blogStore } from "@/lib/content-store";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 import { getMetadata } from "@/lib/seo-utils";
 import { getCanonicalUrl } from "@/lib/seo/canonical";
 import { getSchema } from "@/lib/seo/schema";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
-// Import the new reusable newsletter component
-import { NewsletterSection } from "@/components/newsletter-signup";
-
-// --- SEO METADATA ---
+// --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
   title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
-  description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
+  description:
+    `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
   path: "/blog",
   robots: "index,follow",
   openGraph: {
@@ -49,12 +48,13 @@ export const metadata = getMetadata({
   },
 });
 
-// --- JSON-LD Schema.org ---
+// --- JSON-LD Schema.org (WebPage schema, logo only in publisher) ---
 const schema = getSchema({
   type: "WebPage",
   path: "/blog",
   title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
-  description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
+  description:
+    `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
   image: {
     url: `${SITE_URL}/cover.jpg`,
     width: 1200,
@@ -63,6 +63,7 @@ const schema = getSchema({
   },
   organizationName: SITE_NAME,
   organizationUrl: SITE_URL,
+  // logo ONLY here, schema.ts will attach under publisher/org not Thing root
 });
 
 // --- DATA FETCHING ---
@@ -115,8 +116,8 @@ export default async function BlogPage({
       ? Math.round(
           posts.reduce(
             (sum: number, post: any) => sum + Number.parseInt(post.readTime?.replace(" min read", "") || "5"),
-            0
-          ) / posts.length
+            0,
+          ) / posts.length,
         )
       : 0;
 
@@ -219,13 +220,23 @@ export default async function BlogPage({
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <NewsletterSection />
+      {/* Newsletter CTA */}
+      <section className="py-12 sm:py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4">Stay Updated with Our Latest Stories</h2>
+          <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 opacity-90">
+            Get exclusive behind-the-scenes content and industry insights delivered to your inbox.
+          </p>
+          <div className="max-w-md mx-auto">
+            <NewsletterSignup />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
 
-// --- COMPONENTS ---
+// --- COMPONENTS (unchanged, as before) ---
 
 function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
   return (
@@ -291,7 +302,6 @@ function FeaturedPostCard({ post, priority = false }: { post: any; priority?: bo
   );
 }
 
-// THIS WAS THE MISSING COMPONENT
 function BlogPostCard({ post }: { post: any }) {
   return (
     <Link href={`/blog/${post.slug}`} className="group">

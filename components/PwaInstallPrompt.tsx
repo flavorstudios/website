@@ -3,11 +3,15 @@
 import { useEffect, useState } from "react";
 
 export default function PwaInstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  // Store the beforeinstallprompt event
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const handler = (e) => {
+    // Only run in browser
+    if (typeof window === "undefined") return;
+
+    const handler = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setShow(true);
@@ -21,11 +25,14 @@ export default function PwaInstallPrompt() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      // You can track outcome here if needed
+      // Optionally, you can log outcome here
       setDeferredPrompt(null);
       setShow(false);
     }
   };
+
+  // Allow user to dismiss prompt
+  const handleClose = () => setShow(false);
 
   if (!show) return null;
 
@@ -39,19 +46,41 @@ export default function PwaInstallPrompt() {
       borderRadius: 12,
       padding: "1rem 2rem",
       zIndex: 9999,
-      boxShadow: "0 6px 24px rgba(0,0,0,.25)"
+      boxShadow: "0 6px 24px rgba(0,0,0,.25)",
+      maxWidth: 340,
+      display: "flex",
+      alignItems: "center"
     }}>
       <span style={{ marginRight: 12 }}>Install Flavor Studios on your device!</span>
-      <button onClick={handleInstall} style={{
-        background: "#fff",
-        color: "#000",
-        borderRadius: 8,
-        padding: "0.5rem 1rem",
-        fontWeight: "bold",
-        border: "none",
-        cursor: "pointer"
-      }}>
+      <button
+        onClick={handleInstall}
+        aria-label="Install app"
+        style={{
+          background: "#fff",
+          color: "#000",
+          borderRadius: 8,
+          padding: "0.5rem 1rem",
+          fontWeight: "bold",
+          border: "none",
+          cursor: "pointer",
+          marginRight: 8
+        }}
+      >
         Install
+      </button>
+      <button
+        onClick={handleClose}
+        aria-label="Close install prompt"
+        style={{
+          background: "transparent",
+          color: "#fff",
+          fontSize: "1.5rem",
+          border: "none",
+          cursor: "pointer",
+          lineHeight: 1
+        }}
+      >
+        ×
       </button>
     </div>
   );

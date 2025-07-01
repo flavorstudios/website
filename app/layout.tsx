@@ -1,112 +1,98 @@
 // app/layout.tsx
 
-import type React from "react";
+import type { ReactNode } from "react";
 import "./globals.css"; // Global styles
 import "./fonts/poppins.css"; // Custom font
-
-// REMOVED: The empty 'import' statement that caused a syntax error.
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
-import PwaServiceWorker from "@/components/PwaServiceWorker"; // PWA service worker registration
+import PwaServiceWorker from "@/components/PwaServiceWorker"; // Registers PWA SW
+import PwaInstallPrompt from "@/components/PwaInstallPrompt"; // Custom PWA install UI
 
 import { getMetadata, getSchema } from "@/lib/seo-utils"; // Centralized SEO helpers
-import { SITE_NAME, SITE_URL, SITE_LOGO_URL, SITE_BRAND_TWITTER } from "@/lib/constants"; // Site-wide constants
+import {
+  SITE_NAME,
+  SITE_URL,
+  SITE_LOGO_URL,
+  SITE_BRAND_TWITTER,
+} from "@/lib/constants";
 
 // --- SEO Default Metadata (App Router global metadata) ---
-// This object defines the default metadata for the entire application.
-// Next.js automatically injects these into the <head> of every page.
 export const metadata = getMetadata({
-  title: SITE_NAME, // Default title for pages that don't specify one
-  description:
-    `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
-  path: "/", // Base path for the entire site (used by getMetadata for canonical URL)
-  robots: "index,follow", // Default robots directive for public pages
+  title: SITE_NAME,
+  description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+  path: "/",
+  robots: "index,follow",
   openGraph: {
     title: SITE_NAME,
-    description:
-      `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
-    type: "website", // Standard Open Graph type for a general website
+    description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+    type: "website",
     images: [
-      { url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }, // Default Open Graph image
+      { url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 },
     ],
-    appId: "1404440770881914", // Facebook Open Graph App ID (managed by Next.js Metadata API)
+    appId: "1404440770881914",
   },
   twitter: {
-    card: "summary_large_image", // Preferred Twitter card type
-    site: SITE_BRAND_TWITTER, // Consistent Twitter handle from constants (e.g., "@flavor_studios")
-    creator: SITE_BRAND_TWITTER, // Consistent Twitter handle from constants
+    card: "summary_large_image",
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
     title: SITE_NAME,
-    description:
-      `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+    description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  metadataBase: new URL(SITE_URL), // Essential for resolving relative metadata URLs to absolute URLs.
-  manifest: "/manifest.webmanifest", // PWA manifest link (managed by Next.js Metadata API)
-  themeColor: "#000000", // Theme color for PWA (managed by Next.js Metadata API)
-  icons: { // Favicons and Apple Touch Icons (managed by Next.js Metadata API)
+  metadataBase: new URL(SITE_URL),
+  manifest: "/manifest.webmanifest",
+  themeColor: "#000000",
+  icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
     apple: "/icons/apple-touch-icon.png",
   },
-  appleWebApp: { // Apple PWA specific settings (managed by Next.js Metadata API)
+  appleWebApp: {
     capable: true,
     statusBarStyle: "black",
   },
 });
 
 // --- Global Organization Schema (JSON-LD) ---
-// This schema defines your organization globally for search engines.
-// ALL social links below should be live/official and canonical URLs for best SEO results.
 const orgSchema = getSchema({
   type: "Organization",
-  path: "/", // Applied to the root of the site
+  path: "/",
   title: SITE_NAME,
-  description:
-    `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
-  image: SITE_LOGO_URL, // Your official brand logo for the organization
-  // REMOVED: The 'publisher' property is invalid when the type is 'Organization'.
-  // An Organization is a publisher, it doesn't *have* a publisher property.
-  sameAs: [ // Official social media and other web profiles for your organization.
-    // User requested to keep this specific YouTube URL.
+  description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+  image: SITE_LOGO_URL,
+  sameAs: [
     "https://www.youtube.com/@flavorstudios",
     "https://www.instagram.com/flavorstudios",
-    "https://twitter.com/flavor_studios", // Correct and consistent Twitter URL.
+    "https://twitter.com/flavor_studios",
     "https://www.facebook.com/flavourstudios",
     "https://www.linkedin.com/company/flavorstudios",
     "https://www.threads.net/@flavorstudios",
-    "https://discord.gg/agSZAAeRzn", // Valid Discord invite link.
+    "https://discord.gg/agSZAAeRzn",
     "https://t.me/flavorstudios",
     "https://www.reddit.com/r/flavorstudios/",
-    "https://bsky.app/profile/flavorstudios.bsky.social"
-  ]
+    "https://bsky.app/profile/flavorstudios.bsky.social",
+  ],
 });
 
-// RootLayout is a Server Component that wraps the entire application.
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>
       <head>
-        {/*
-          NOTE: Most <head> tags are now managed by `export const metadata` above.
-          Only highly specific or script-based tags (like GTM or rel="me") are placed here.
-        */}
+        {/* -- Most metadata is handled by `export const metadata` -- */}
 
-        {/* === Mastodon Verification (if strictly required) === */}
-        {/* Next.js Metadata API doesn't directly support rel="me". Keep manually if needed. */}
+        {/* Mastodon Verification (manual) */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
 
-        {/* === Global Organization JSON-LD Schema === */}
-        {/* This JSON-LD defines your organization for search engines globally. */}
+        {/* Global Organization JSON-LD Schema */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
-          suppressHydrationWarning // Prevents hydration warnings for static JSON-LD script.
+          suppressHydrationWarning
         />
 
-        {/* === Google Tag Manager (HEAD - GTM's recommended placement) === */}
-        {/* This script initiates Google Tag Manager for analytics and tracking. */}
+        {/* Google Tag Manager (HEAD) */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -117,29 +103,29 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-WMTGR7NM');
             `,
           }}
-          suppressHydrationWarning // Prevents hydration warnings for GTM script.
+          suppressHydrationWarning
         />
-        {/* === END GTM (HEAD) === */}
+        {/* END GTM (HEAD) */}
       </head>
       <body className="antialiased">
-        {/* === GTM (NOSCRIPT - GTM's recommended placement) === */}
-        {/* Fallback for users with JavaScript disabled, for Google Tag Manager. */}
+        {/* GTM (NOSCRIPT) */}
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
             height="0"
             width="0"
             style={{ display: "none", visibility: "hidden" }}
-            title="Google Tag Manager NoScript" // Added title for accessibility
+            title="Google Tag Manager NoScript"
           />
         </noscript>
-        {/* === END GTM (NOSCRIPT) === */}
+        {/* END GTM (NOSCRIPT) */}
 
         <Header />
         <main>{children}</main>
         <Footer />
         <BackToTop />
-        <PwaServiceWorker /> {/* PWA Service Worker registration */}
+        <PwaServiceWorker /> {/* Registers and handles PWA Service Worker & update UI */}
+        <PwaInstallPrompt /> {/* Custom PWA install banner/prompt */}
       </body>
     </html>
   );

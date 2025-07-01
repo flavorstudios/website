@@ -5,7 +5,7 @@ const withPWA = require('next-pwa')({
   skipWaiting: true,
   swSrc: 'app/sw.js', // This is your service worker source template!
   disable: process.env.NODE_ENV === 'development',
-  // 💡 This guarantees /offline is ALWAYS precached (so offline fallback never fails)
+  // 💡 Ensures /offline is ALWAYS precached for robust offline fallback
   additionalManifestEntries: [
     { url: '/offline', revision: null },
   ],
@@ -15,7 +15,7 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: false },
-  // Add more Next.js config if needed!
+  // Add any other Next.js config here!
 };
 
 module.exports = withPWA(nextConfig);

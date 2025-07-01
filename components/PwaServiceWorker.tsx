@@ -9,19 +9,20 @@ export default function PwaServiceWorker() {
     let refreshing = false;
     let newWorker: ServiceWorker | null = null;
 
+    // Ensure service worker API is supported
     if ('serviceWorker' in navigator) {
-      // Register service worker on page load
+      // Register the service worker after window 'load'
       const onLoad = () => {
         navigator.serviceWorker
           .register('/sw.js')
           .then(registration => {
-            // Listen for updates to the service worker
+            // Listen for updates
             registration.onupdatefound = () => {
               newWorker = registration.installing;
               if (newWorker) {
                 newWorker.onstatechange = () => {
                   if (newWorker?.state === 'installed') {
-                    // If there is already a controlling service worker, a new update is available.
+                    // Show prompt only if page is already controlled by a SW
                     if (navigator.serviceWorker.controller) {
                       setUpdateAvailable(true);
                     }
@@ -32,7 +33,7 @@ export default function PwaServiceWorker() {
           })
           .catch(error => {
             if (process.env.NODE_ENV === 'development') {
-              // Only log in development to avoid exposing errors in production
+              // Only log in development
               console.error('Service worker registration failed:', error);
             }
           });
@@ -40,7 +41,7 @@ export default function PwaServiceWorker() {
 
       window.addEventListener('load', onLoad);
 
-      // Listen for controllerchange and reload ONCE when a new SW activates
+      // Listen for SW controller changes, and reload once after update
       const onControllerChange = () => {
         if (!refreshing) {
           refreshing = true;
@@ -49,7 +50,7 @@ export default function PwaServiceWorker() {
       };
       navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
 
-      // Cleanup to prevent memory leaks
+      // Cleanup on unmount
       return () => {
         window.removeEventListener('load', onLoad);
         navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
@@ -57,11 +58,13 @@ export default function PwaServiceWorker() {
     }
   }, []);
 
-  // Handles update prompt
+  // Trigger update by sending SKIP_WAITING to the waiting SW
   const handleUpdate = () => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistration().then(reg => {
-        reg?.waiting?.postMessage({ type: 'SKIP_WAITING' });
+        if (reg && reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
       });
     }
   };
@@ -81,14 +84,18 @@ export default function PwaServiceWorker() {
             borderRadius: 12,
             zIndex: 1000,
             boxShadow: '0 4px 24px rgba(0,0,0,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
           }}
+          role="alert"
+          aria-live="polite"
         >
           <span>
             🔄&nbsp;A new version of Flavor Studios is available.
           </span>
           <button
             style={{
-              marginLeft: 16,
               background: '#fbbf24',
               border: 'none',
               padding: '0.5em 1.2em',
@@ -96,8 +103,10 @@ export default function PwaServiceWorker() {
               cursor: 'pointer',
               color: '#222',
               fontWeight: 600,
+              marginLeft: 8,
             }}
             onClick={handleUpdate}
+            aria-label="Update and reload the website"
           >
             Update Now
           </button>

@@ -4,15 +4,17 @@
 // 1. Import Workbox (required for next-pwa features)
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js');
 
-// 2. Precache Next.js assets (next-pwa will inject manifest here)
+// 2. Take immediate control after activation (fixes double-refresh bugs)
 if (self.workbox) {
+  workbox.core.clientsClaim();
+
+  // 3. Precache Next.js assets (next-pwa injects manifest here)
   workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
 
-  // 3. Offline fallback for navigations (uses Next.js /offline route!)
+  // 4. Offline fallback for navigations (Next.js /offline route)
   const { registerRoute, NavigationRoute } = workbox.routing;
-  const { NetworkFirst } = workbox.strategies;
+  const { NetworkFirst, StaleWhileRevalidate, CacheFirst } = workbox.strategies;
 
-  // Always use "/offline" for Next.js App Router offline fallback
   const OFFLINE_FALLBACK = '/offline';
 
   registerRoute(
@@ -32,37 +34,37 @@ if (self.workbox) {
     )
   );
 
-  // Optional: Precache Google Fonts, etc. (add more runtime caching here if you need)
-  // Example for Google Fonts styles:
+  // 5. Cache Google Fonts (recommended)
   registerRoute(
     ({ url }) => url.origin === 'https://fonts.googleapis.com',
-    new workbox.strategies.StaleWhileRevalidate({ cacheName: 'google-fonts-stylesheets' })
+    new StaleWhileRevalidate({ cacheName: 'google-fonts-stylesheets' })
   );
   registerRoute(
     ({ url }) => url.origin === 'https://fonts.gstatic.com',
-    new workbox.strategies.CacheFirst({
+    new CacheFirst({
       cacheName: 'google-fonts-webfonts',
       plugins: [
         new workbox.cacheable_response.CacheableResponsePlugin({ statuses: [0, 200] }),
         new workbox.expiration.ExpirationPlugin({
           maxEntries: 30,
-          maxAgeSeconds: 60 * 60 * 24 * 365,
+          maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
         }),
       ],
     })
   );
 
-  // Clean up outdated caches
+  // 6. Clean up outdated caches
   workbox.precaching.cleanupOutdatedCaches();
 }
 
-// 4. Firebase Cloud Messaging (push notifications)
-// It's OK to use the latest compat version
-importScripts('https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.11.0/firebase-messaging-compat.js');
+// 7. Firebase Cloud Messaging (push notifications)
+// --- USE LOCAL FILES! ---
+// Download firebase-app-compat.js and firebase-messaging-compat.js
+// Place in: public/vendor/firebase-app-compat.js & public/vendor/firebase-messaging-compat.js
+importScripts('/vendor/firebase-app-compat.js');
+importScripts('/vendor/firebase-messaging-compat.js');
 
 try {
-  // Only initialize if not already initialized
   if (typeof firebase !== 'undefined' && (!firebase.apps || firebase.apps.length === 0)) {
     firebase.initializeApp({
       apiKey: "AIzaSyDqHI05mdV1vS-d9XJzcrUBNM1GCDNbBRo",
@@ -75,18 +77,21 @@ try {
 
   if (typeof firebase !== 'undefined' && firebase.messaging) {
     const messaging = firebase.messaging();
-    messaging.onBackgroundMessage(function(payload) {
-      self.registration.showNotification(payload.notification.title, {
-        body: payload.notification.body,
-        icon: "/icons/android-chrome-512x512.png" // update this path if needed!
-      });
+    messaging.onBackgroundMessage((payload) => {
+      const notificationTitle = payload?.notification?.title || "New Notification";
+      const notificationOptions = {
+        body: payload?.notification?.body || "",
+        icon: "/icons/android-chrome-512x512.png", // Make sure this icon exists!
+      };
+      self.registration.showNotification(notificationTitle, notificationOptions);
     });
   }
 } catch (e) {
-  // No-op in production, but you can log if you want for debug
+  // Optionally log errors for debugging
+  // console.error('Firebase SW init error', e);
 }
 
-// 5. "skip waiting" support for instant SW updates
+// 8. Enable "skip waiting" for instant updates
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();

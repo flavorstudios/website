@@ -1,16 +1,17 @@
 {
   "name": "Flavor Studios",
   "short_name": "Flavor Studios",
-  "description": "Anime News & Original Stories That Inspire",
+  "description": "Anime News & Original Stories That Inspire. Stay up-to-date with the latest anime news, watch exclusive animated stories, and play interactive games — all in one app.",
   "lang": "en-IN",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
-  "scope": "/",
   "prefer_related_applications": false,
+
   "icons": [
     {
       "src": "/icons/android-chrome-192x192.png",
@@ -38,5 +39,60 @@
       "sizes": "512x512",
       "purpose": "any maskable"
     }
-  ]
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Anime News",
+      "short_name": "Anime News",
+      "description": "Browse the latest anime news",
+      "url": "/blog",
+      "icons": [{ "src": "/icons/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Watch Originals",
+      "short_name": "Originals",
+      "description": "Watch our original anime episodes",
+      "url": "/watch",
+      "icons": [{ "src": "/icons/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Play Games",
+      "short_name": "Games",
+      "description": "Play interactive games",
+      "url": "/play",
+      "icons": [{ "src": "/icons/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Support Us",
+      "short_name": "Support",
+      "description": "Support Flavor Studios via donations or membership",
+      "url": "/support",
+      "icons": [{ "src": "/icons/android-chrome-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+
+  "screenshots": [
+    {
+      "src": "/screenshots/app-home.png",
+      "sizes": "1080x2340",
+      "type": "image/png",
+      "label": "Home — Latest Anime News & Originals"
+    },
+    {
+      "src": "/screenshots/app-episode.png",
+      "sizes": "1080x2340",
+      "type": "image/png",
+      "label": "Watch — Original Animated Episodes"
+    },
+    {
+      "src": "/screenshots/app-play.png",
+      "sizes": "1080x2340",
+      "type": "image/png",
+      "label": "Play — Interactive Anime Games"
+    }
+  ],
+
+  "related_applications": [],
+  "id": "/"
 }

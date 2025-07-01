@@ -13,7 +13,7 @@ import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
 // Import the new reusable newsletter component
-import { NewsletterSection } from "@/components/shared/NewsletterSection";
+import { NewsletterSection } from "@/components/newsletter-signup";
 
 // --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({

@@ -34,7 +34,7 @@ function FeatureCard({
 }) {
   return (
     <div className="group">
-      <div className="h-full bg-white rounded-lg border border-gray-200 p-4 sm:p-6 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
+      <div className="h-full bg-white rounded-lg border border-gray-200 p-4 sm:p-5 text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25"> {/* Reduced sm:p-6 to sm:p-5 for tighter spacing */}
         <div
           className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r ${gradient} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
         >
@@ -65,15 +65,15 @@ export default function MaintenancePageClient() {
   return (
     <>
       <JsonLdSchema />
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4">
-        <div className="max-w-4xl mx-auto text-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4 py-8"> {/* Added py-8 for vertical padding */}
+        <div className="max-w-4xl mx-auto text-center w-full"> {/* Added w-full */}
           {/* Heading */}
           <div className="mb-6 sm:mb-8">
             <div className="relative">
-              <h1 className="text-6xl sm:text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 animate-pulse">
+              <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 animate-pulse">
                 UPGRADING
               </h1>
-              <div className="absolute inset-0 text-6xl sm:text-8xl md:text-9xl font-bold text-blue-100 -z-10 transform translate-x-1 translate-y-1 sm:translate-x-2 sm:translate-y-2">
+              <div className="absolute inset-0 text-5xl sm:text-7xl md:text-8xl font-bold text-blue-100 -z-10 transform translate-x-1 translate-y-1 sm:translate-x-2 sm:translate-y-2">
                 UPGRADING
               </div>
             </div>
@@ -81,12 +81,12 @@ export default function MaintenancePageClient() {
 
           {/* Message */}
           <div className="mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              We're Making Things Better
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              We&apos;re Making Things Better
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
               Our website is currently undergoing scheduled maintenance to improve
-              your experience. We'll be back online shortly with exciting new
+              your experience. We&apos;ll be back online shortly with exciting new
               features and improvements!
             </p>
 
@@ -142,7 +142,7 @@ export default function MaintenancePageClient() {
           {/* Features Coming */}
           <div className="mb-6 sm:mb-8">
             <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
-              What's coming after maintenance:
+              What&apos;s coming after maintenance:
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
               <FeatureCard

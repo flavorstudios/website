@@ -1,23 +1,17 @@
 /** @type {import('next').NextConfig} */
-const withPWA = require("next-pwa")({
-  dest: "public",
+const withPWA = require('next-pwa')({
+  dest: 'public',
   register: true,
   skipWaiting: true,
-  swSrc: "public/sw.js", // Correct: points to your real, combined SW!
-  disable: process.env.NODE_ENV === "development", // Only enable PWA in production
+  swSrc: 'app/sw.js', // This is your source template!
+  disable: process.env.NODE_ENV === 'development',
 });
 
-const nextConfig = withPWA({
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  images: {
-    unoptimized: false, // Image optimization ENABLED!
-  },
-  // Add more Next.js config as needed, nothing removed!
-});
+const nextConfig = {
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
+  images: { unoptimized: false },
+  // Add more Next.js config if needed!
+};
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig);

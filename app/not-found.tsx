@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react";
+import { BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"; // Home is not used as a quick link icon directly
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 // --- SEO imports ---
@@ -45,7 +45,6 @@ const schema = getSchema({
 });
 
 export default function NotFound() {
-  // CORRECTED: Removed duplicate 'Home' and 'Contact' links.
   const quickLinks = [
     {
       title: "Blog",
@@ -71,17 +70,17 @@ export default function NotFound() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4 py-8"> {/* Added py-8 for vertical padding */}
       {/* SEO: Inject JSON-LD */}
       <StructuredData schema={schema} />
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="max-w-4xl mx-auto text-center w-full"> {/* Added w-full */}
         {/* 404 Animation */}
         <div className="mb-6 sm:mb-8">
           <div className="relative">
-            <h1 className="text-6xl sm:text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 animate-pulse">
+            <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 animate-pulse">
               404
             </h1>
-            <div className="absolute inset-0 text-6xl sm:text-8xl md:text-9xl font-bold text-blue-100 -z-10 transform translate-x-1 translate-y-1 sm:translate-x-2 sm:translate-y-2">
+            <div className="absolute inset-0 text-5xl sm:text-7xl md:text-8xl font-bold text-blue-100 -z-10 transform translate-x-1 translate-y-1 sm:translate-x-2 sm:translate-y-2">
               404
             </div>
           </div>
@@ -89,9 +88,9 @@ export default function NotFound() {
 
         {/* Main Message */}
         <div className="mb-8 sm:mb-12">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">Oops! Page Not Found</h2>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
-            The page you're looking for seems to have wandered off into another dimension. Don't worry—{SITE_NAME}
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4">Oops! Page Not Found</h2>
+          <p className="text-base sm:text-lg text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
+            The page you&apos;re looking for seems to have wandered off into another dimension. Don&apos;t worry—{SITE_NAME}
             has plenty of original anime, news, and stories to explore!
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
@@ -113,11 +112,11 @@ export default function NotFound() {
           <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
             Or explore these popular sections:
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"> {/* Adjusted grid columns */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"> {/* Adjusted grid columns for better layout */}
             {quickLinks.map((link) => (
               <Link key={link.href} href={link.href} className="group">
                 <Card className="h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
-                  <CardContent className="p-4 sm:p-6 text-center">
+                  <CardContent className="p-4 sm:p-5 text-center"> {/* Adjusted sm:p-6 to sm:p-5 */}
                     <div
                       className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r ${link.color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
                     >
@@ -136,9 +135,9 @@ export default function NotFound() {
 
         {/* Help Section */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-blue-100 shadow-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Still can't find what you're looking for?</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Still can&apos;t find what you&apos;re looking for?</h3>
           <p className="text-gray-600 mb-6">
-            Our team is here to help! Reach out to us and we'll get you back on track.
+            Our team is here to help! Reach out to us and we&apos;ll get you back on track.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button asChild variant="outline" className="border-blue-200 hover:bg-blue-50">

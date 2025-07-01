@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react"; // All necessary Lucide icons are correctly imported.
+import { Home, BookOpen, Play, Phone, ArrowLeft, Compass, Coffee } from "lucide-react";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 // --- SEO imports ---
@@ -17,7 +17,7 @@ export const metadata = getMetadata({
   title: `404 Not Found – ${SITE_NAME}`,
   description: `This page does not exist. Discover original anime, news, and stories on ${SITE_NAME} or explore our popular sections.`,
   path: "/404",
-  robots: "noindex,follow", // Error pages should not be indexed, but links followed
+  robots: "noindex,follow",
   openGraph: {
     title: `404 Not Found – ${SITE_NAME}`,
     description: `This page does not exist. Discover original anime, news, and stories on ${SITE_NAME} or explore our popular sections.`,
@@ -42,18 +42,11 @@ const schema = getSchema({
   title: `404 Not Found – ${SITE_NAME}`,
   description: `This page does not exist. Discover original anime, news, and stories on ${SITE_NAME} or explore our popular sections.`,
   image: `${SITE_URL}/cover.jpg`,
-  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
 });
 
 export default function NotFound() {
+  // CORRECTED: Removed duplicate 'Home' and 'Contact' links.
   const quickLinks = [
-    {
-      title: "Home",
-      description: "Return to our homepage",
-      href: "/",
-      icon: Home,
-      color: "from-blue-500 to-cyan-500",
-    },
     {
       title: "Blog",
       description: "Read our latest stories",
@@ -74,13 +67,6 @@ export default function NotFound() {
       href: "/about",
       icon: Compass,
       color: "from-orange-500 to-red-500",
-    },
-    {
-      title: "Contact",
-      description: "Get in touch with us",
-      href: "/contact",
-      icon: Phone,
-      color: "from-indigo-500 to-purple-500",
     },
   ];
 
@@ -115,7 +101,7 @@ export default function NotFound() {
               className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
             >
               <Link href="/">
-                <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> {/* Added aria-hidden */}
+                <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                 Return to Home
               </Link>
             </Button>
@@ -127,7 +113,7 @@ export default function NotFound() {
           <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
             Or explore these popular sections:
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"> {/* Adjusted grid columns */}
             {quickLinks.map((link) => (
               <Link key={link.href} href={link.href} className="group">
                 <Card className="h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
@@ -135,7 +121,7 @@ export default function NotFound() {
                     <div
                       className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r ${link.color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
                     >
-                      <link.icon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" /> {/* Added aria-hidden */}
+                      <link.icon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
                     </div>
                     <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors text-sm sm:text-base">
                       {link.title}
@@ -157,19 +143,19 @@ export default function NotFound() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button asChild variant="outline" className="border-blue-200 hover:bg-blue-50">
               <Link href="/contact">
-                <Phone className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
                 Contact Support
               </Link>
             </Button>
             <Button asChild variant="outline" className="border-blue-200 hover:bg-blue-50">
               <Link href="/faq">
-                <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" />
                 Check FAQ
               </Link>
             </Button>
             <Button asChild variant="outline" className="border-orange-200 hover:bg-orange-50">
               <Link href="/support">
-                <Coffee className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Coffee className="mr-2 h-4 w-4" aria-hidden="true" />
                 Support Us
               </Link>
             </Button>

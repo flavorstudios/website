@@ -12,8 +12,8 @@ import { getSchema } from "@/lib/seo/schema";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
-// CORRECT: Import the new reusable newsletter component
-import { NewsletterSection } from "@/components/shared/NewsletterSection";
+// Import the new reusable newsletter component
+import { NewsletterSection } from "@/components/newsletter-signup";
 
 // --- SEO METADATA ---
 export const metadata = getMetadata({
@@ -100,6 +100,7 @@ export default async function BlogPage({
           return categorySlug === selectedCategory;
         });
 
+  // Pagination
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   const startIndex = (currentPage - 1) * postsPerPage;
   const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
@@ -107,6 +108,7 @@ export default async function BlogPage({
   const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3);
   const regularPosts = paginatedPosts.filter((post: any) => !post.featured);
 
+  // Analytics data
   const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0);
   const avgReadTime =
     posts.length > 0
@@ -120,8 +122,10 @@ export default async function BlogPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* --- SEO JSON-LD Schema --- */}
       <StructuredData schema={schema} />
 
+      {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center">
@@ -157,8 +161,10 @@ export default async function BlogPage({
         </div>
       </div>
 
+      {/* Category Tabs */}
       <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/blog" type="blog" />
 
+      {/* Featured Posts */}
       {featuredPosts.length > 0 && (
         <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-gray-50 to-blue-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -175,6 +181,7 @@ export default async function BlogPage({
         </section>
       )}
 
+      {/* All Posts */}
       <section className="py-8 sm:py-12 lg:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
@@ -212,13 +219,13 @@ export default async function BlogPage({
         </div>
       </section>
 
-      {/* CORRECT: The old newsletter section is replaced with the new reusable component. */}
+      {/* Newsletter Section */}
       <NewsletterSection />
     </div>
   );
 }
 
-// --- COMPONENTS (These are untouched and preserved from your original file) ---
+// --- COMPONENTS ---
 
 function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
   return (
@@ -284,6 +291,7 @@ function FeaturedPostCard({ post, priority = false }: { post: any; priority?: bo
   );
 }
 
+// THIS WAS THE MISSING COMPONENT
 function BlogPostCard({ post }: { post: any }) {
   return (
     <Link href={`/blog/${post.slug}`} className="group">

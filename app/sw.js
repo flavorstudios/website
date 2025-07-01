@@ -1,10 +1,12 @@
 // app/sw.js
 // JARVIS EDITION: Next.js 15+ + next-pwa 5.x + Firebase Cloud Messaging + Custom Offline Route
 
-// 1. Import Workbox (required for next-pwa features)
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js');
+// 1. Import Workbox (LOCAL for offline support!)
+// Download workbox-sw.js from https://storage.googleapis.com/workbox-cdn/releases/6.5.4/workbox-sw.js
+// Place it in: public/vendor/workbox-sw.js
+importScripts('/vendor/workbox-sw.js');
 
-// 2. Take immediate control after activation (fixes double-refresh bugs)
+// 2. Take immediate control after activation (avoids double-refresh bugs)
 if (self.workbox) {
   workbox.core.clientsClaim();
 
@@ -34,7 +36,7 @@ if (self.workbox) {
     )
   );
 
-  // 5. Cache Google Fonts (recommended)
+  // 5. Cache Google Fonts (optional: comment out if not using CDN fonts)
   registerRoute(
     ({ url }) => url.origin === 'https://fonts.googleapis.com',
     new StaleWhileRevalidate({ cacheName: 'google-fonts-stylesheets' })
@@ -58,14 +60,15 @@ if (self.workbox) {
 }
 
 // 7. Firebase Cloud Messaging (push notifications)
-// --- USE LOCAL FILES! ---
-// Download firebase-app-compat.js and firebase-messaging-compat.js
-// Place in: public/vendor/firebase-app-compat.js & public/vendor/firebase-messaging-compat.js
+// Download BOTH files and place them in public/vendor/
 importScripts('/vendor/firebase-app-compat.js');
 importScripts('/vendor/firebase-messaging-compat.js');
 
 try {
-  if (typeof firebase !== 'undefined' && (!firebase.apps || firebase.apps.length === 0)) {
+  if (
+    typeof firebase !== 'undefined' &&
+    (!firebase.apps || firebase.apps.length === 0)
+  ) {
     firebase.initializeApp({
       apiKey: "AIzaSyDqHI05mdV1vS-d9XJzcrUBNM1GCDNbBRo",
       authDomain: "flavorstudios-a44b9.firebaseapp.com",
@@ -81,7 +84,7 @@ try {
       const notificationTitle = payload?.notification?.title || "New Notification";
       const notificationOptions = {
         body: payload?.notification?.body || "",
-        icon: "/icons/android-chrome-512x512.png", // Make sure this icon exists!
+        icon: "/icons/android-chrome-512x512.png",
       };
       self.registration.showNotification(notificationTitle, notificationOptions);
     });

@@ -25,15 +25,15 @@ export default function OfflinePageClient() {
   return (
     <>
       <JsonLdSchema />
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4">
-        <div className="max-w-4xl mx-auto text-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4 py-8"> {/* Added py-8 for vertical padding on smaller screens */}
+        <div className="max-w-4xl mx-auto text-center w-full"> {/* Added w-full to ensure it takes full width within max-w */}
           {/* Offline Animation Heading */}
           <div className="mb-6 sm:mb-8">
             <div className="relative">
-              <h1 className="text-6xl sm:text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 animate-pulse">
+              <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 animate-pulse">
                 Offline
               </h1>
-              <div className="absolute inset-0 text-6xl sm:text-8xl md:text-9xl font-bold text-blue-100 -z-10 transform translate-x-1 translate-y-1 sm:translate-x-2 sm:translate-y-2">
+              <div className="absolute inset-0 text-5xl sm:text-7xl md:text-8xl font-bold text-blue-100 -z-10 transform translate-x-1 translate-y-1 sm:translate-x-2 sm:translate-y-2">
                 Offline
               </div>
             </div>
@@ -41,12 +41,12 @@ export default function OfflinePageClient() {
 
           {/* Main Message */}
           <div className="mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              You're Currently Offline
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+              You&apos;re Currently Offline
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
-              It looks like you've lost your internet connection. Don't worry—once
-              you're back online, you'll be able to access all of our amazing
+            <p className="text-base sm:text-lg text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
+              It looks like you&apos;ve lost your internet connection. Don&apos;t worry—once
+              you&apos;re back online, you&apos;ll be able to access all of our amazing
               content again!
             </p>
             {/* Primary CTA Buttons */}

@@ -6,18 +6,19 @@ import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
 import { blogStore } from "@/lib/content-store";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
-import { NewsletterSignup } from "@/components/newsletter-signup";
 import { getMetadata } from "@/lib/seo-utils";
 import { getCanonicalUrl } from "@/lib/seo/canonical";
 import { getSchema } from "@/lib/seo/schema";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
-// --- SEO METADATA (centralized, canonical, modular) ---
+// CORRECT: Import the new reusable newsletter component
+import { NewsletterSection } from "@/components/shared/NewsletterSection";
+
+// --- SEO METADATA ---
 export const metadata = getMetadata({
   title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
-  description:
-    `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
+  description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
   path: "/blog",
   robots: "index,follow",
   openGraph: {
@@ -48,13 +49,12 @@ export const metadata = getMetadata({
   },
 });
 
-// --- JSON-LD Schema.org (WebPage schema, logo only in publisher) ---
+// --- JSON-LD Schema.org ---
 const schema = getSchema({
   type: "WebPage",
   path: "/blog",
   title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
-  description:
-    `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
+  description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
   image: {
     url: `${SITE_URL}/cover.jpg`,
     width: 1200,
@@ -63,7 +63,6 @@ const schema = getSchema({
   },
   organizationName: SITE_NAME,
   organizationUrl: SITE_URL,
-  // logo ONLY here, schema.ts will attach under publisher/org not Thing root
 });
 
 // --- DATA FETCHING ---
@@ -101,7 +100,6 @@ export default async function BlogPage({
           return categorySlug === selectedCategory;
         });
 
-  // Pagination
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
   const startIndex = (currentPage - 1) * postsPerPage;
   const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
@@ -109,24 +107,21 @@ export default async function BlogPage({
   const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3);
   const regularPosts = paginatedPosts.filter((post: any) => !post.featured);
 
-  // Analytics data
   const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0);
   const avgReadTime =
     posts.length > 0
       ? Math.round(
           posts.reduce(
             (sum: number, post: any) => sum + Number.parseInt(post.readTime?.replace(" min read", "") || "5"),
-            0,
-          ) / posts.length,
+            0
+          ) / posts.length
         )
       : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* --- SEO JSON-LD Schema --- */}
       <StructuredData schema={schema} />
 
-      {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center">
@@ -162,10 +157,8 @@ export default async function BlogPage({
         </div>
       </div>
 
-      {/* Category Tabs */}
       <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/blog" type="blog" />
 
-      {/* Featured Posts */}
       {featuredPosts.length > 0 && (
         <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-gray-50 to-blue-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -182,7 +175,6 @@ export default async function BlogPage({
         </section>
       )}
 
-      {/* All Posts */}
       <section className="py-8 sm:py-12 lg:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
@@ -220,23 +212,13 @@ export default async function BlogPage({
         </div>
       </section>
 
-      {/* Newsletter CTA */}
-      <section className="py-12 sm:py-16 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4">Stay Updated with Our Latest Stories</h2>
-          <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 opacity-90">
-            Get exclusive behind-the-scenes content and industry insights delivered to your inbox.
-          </p>
-          <div className="max-w-md mx-auto">
-            <NewsletterSignup />
-          </div>
-        </div>
-      </section>
+      {/* CORRECT: The old newsletter section is replaced with the new reusable component. */}
+      <NewsletterSection />
     </div>
   );
 }
 
-// --- COMPONENTS (unchanged, as before) ---
+// --- COMPONENTS (These are untouched and preserved from your original file) ---
 
 function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
   return (

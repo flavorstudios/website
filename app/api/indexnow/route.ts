@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const INDEXNOW_KEY = process.env.INDEXNOW_KEY!;
+// Use env variable, no hardcoded key
+const INDEXNOW_KEY = process.env.INDEXNOW_KEY;
 const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
 
 export async function POST(request: NextRequest) {
@@ -8,6 +9,9 @@ export async function POST(request: NextRequest) {
 
   if (!url) {
     return NextResponse.json({ error: "Missing URL in request body" }, { status: 400 });
+  }
+  if (!INDEXNOW_KEY) {
+    return NextResponse.json({ error: "IndexNow key missing in server environment" }, { status: 500 });
   }
 
   try {

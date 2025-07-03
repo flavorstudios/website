@@ -21,17 +21,19 @@ const sitemaps = [
   `${siteUrl}/watch/sitemap.xml`,
 ];
 
-// --- URL Cleaner ---
+// --- Final URL Cleaner ---
 function normalizeUrl(path) {
   try {
     const url = new URL(path);
-    return url.href; // Already absolute
+    return url.href; // Already absolute (http/https)
   } catch {
     // If path already starts with siteUrl, don't double it
     if (path.startsWith(siteUrl)) {
       return path;
     }
-    return `${siteUrl}${path.startsWith('/') ? path : '/' + path}`;
+    // Ensure leading slash
+    const cleanPath = path.startsWith('/') ? path : '/' + path;
+    return `${siteUrl}${cleanPath}`;
   }
 }
 

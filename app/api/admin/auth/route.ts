@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+// Admin credentials loaded from environment variables (no hardcoding)
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL!;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD!;
 
@@ -13,6 +14,7 @@ export async function POST(request: NextRequest) {
         user: { email, name: "Admin" },
       });
 
+      // Set a secure session cookie
       response.cookies.set("admin-session", "authenticated", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",

@@ -2,19 +2,25 @@
 
 export interface SitemapUrl {
   url: string;
-  priority: string; // Sitemap priority: "0.5", "1.0", etc.
+  priority: string; // e.g. "0.5", "1.0"
   changefreq: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   lastmod?: string; // ISO 8601 (e.g. "2024-06-27T07:09:00Z")
 }
 
-// ---- UTILITY: Normalized URL joining (avoids double slashes) ----
+// ---- UTILITY: Bulletproof URL joining (avoids double slashes/prefixes) ----
 function joinUrl(base: string, path: string): string {
-  const cleanBase = base.replace(/\/+$/, "");         // remove trailing slashes from base
-  const cleanPath = path.startsWith("/") ? path : `/${path}`; // ensure path starts with one slash
-  return `${cleanBase}${cleanPath}`;
+  try {
+    // If 'path' is already an absolute URL, return as-is
+    new URL(path);
+    return path;
+  } catch {
+    const cleanBase = base.replace(/\/*$/, "");              // Remove trailing slashes from base
+    const cleanPath = path.startsWith("/") ? path : `/${path}`; // Ensure single leading slash
+    return `${cleanBase}${cleanPath}`;
+  }
 }
 
-// ---- UTILITY: Cast any date-like value to valid ISO8601 string, or empty string ----
+// ---- UTILITY: Convert to ISO8601 date string, or empty ----
 function toISO8601(input: any): string {
   if (!input) return "";
   if (typeof input === "string" && !isNaN(Date.parse(input))) return new Date(input).toISOString();

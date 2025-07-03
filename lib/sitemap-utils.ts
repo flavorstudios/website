@@ -8,14 +8,26 @@ export interface SitemapUrl {
 }
 
 // ---- UTILITY: Bulletproof URL joining (avoids double slashes/prefixes) ----
+// Robustly joins a base URL with a path.
+// Handles accidental leading slashes before absolute URLs (e.g. "/https://site.com/page")
+// so you NEVER get double-domain entries in generated sitemaps.
 function joinUrl(base: string, path: string): string {
+  const trimmed = path.trim();
+
+  // If the path looks like an absolute URL, optionally prefixed with slashes,
+  // treat it as an absolute URL and return it (strip leading slashes).
+  if (/^\/?https?:\/\//i.test(trimmed)) {
+    return trimmed.replace(/^\/+/, "");
+  }
+
   try {
     // If 'path' is already an absolute URL, return as-is
     new URL(path);
     return path;
   } catch {
-    const cleanBase = base.replace(/\/*$/, "");              // Remove trailing slashes from base
-    const cleanPath = path.startsWith("/") ? path : `/${path}`; // Ensure single leading slash
+    // Relative path; join with base.
+    const cleanBase = base.replace(/\/*$/, "");
+    const cleanPath = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
     return `${cleanBase}${cleanPath}`;
   }
 }
@@ -131,7 +143,7 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
     console.error("Error fetching videos for sitemap:", error);
   }
 
-  // // --- Add more dynamic content here if needed (e.g., categories, paginated routes, etc.) ---
+  // --- Add more dynamic content here if needed (e.g., categories, paginated routes, etc.) ---
 
   return dynamicPages;
 }

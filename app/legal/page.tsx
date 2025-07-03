@@ -22,6 +22,8 @@ export const metadata = getMetadata({
         url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
+        // It's good practice to add an alt tag here too, though not strictly required for the error
+        alt: `${SITE_NAME} Legal Page Cover`,
       },
     ],
   },
@@ -42,10 +44,19 @@ const schema = getSchema({
   path: "/legal",
   title: `${SITE_NAME} | Legal Policies, Privacy & Terms`,
   description: `Access all ${SITE_NAME} legal documents: Privacy Policy, DMCA, Terms of Service, and more. Stay informed and protected with our up-to-date policies.`,
-  image: SITE_LOGO_URL,
+  image: {
+    "@type": "ImageObject", // Specify that this is an ImageObject
+    url: `${SITE_URL}/cover.jpg`, // Use a specific image for the page, or the logo if preferred
+    // You might want to add width and height here too for completeness
+  },
   publisher: {
+    "@type": "Organization", // Specify the type of publisher
     name: SITE_NAME,
-    logo: SITE_LOGO_URL,
+    logo: {
+      "@type": "ImageObject", // Logo itself is an ImageObject
+      url: SITE_LOGO_URL,
+      // Consider adding width and height for the logo as well
+    },
   },
 });
 

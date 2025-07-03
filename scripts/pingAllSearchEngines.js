@@ -5,9 +5,9 @@ const xml2js = require('xml2js');
 require('dotenv').config();
 
 const apiKey = process.env.BING_API_KEY;
-const indexnowKey = process.env.INDEXNOW_KEY; // renamed for consistency
-
+const indexnowKey = process.env.INDEXNOW_KEY;
 const siteUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL;
+
 if (!siteUrl) {
   console.error("❌ siteUrl is undefined. Please set BASE_URL or NEXT_PUBLIC_BASE_URL in your .env file.");
   process.exit(1);
@@ -20,6 +20,20 @@ const sitemaps = [
   `${siteUrl}/blog/sitemap.xml`,
   `${siteUrl}/watch/sitemap.xml`,
 ];
+
+// --- URL Cleaner ---
+function normalizeUrl(path) {
+  try {
+    const url = new URL(path);
+    return url.href; // Already absolute
+  } catch {
+    // If path already starts with siteUrl, don't double it
+    if (path.startsWith(siteUrl)) {
+      return path;
+    }
+    return `${siteUrl}${path.startsWith('/') ? path : '/' + path}`;
+  }
+}
 
 // --- STEP 1: Fetch URLs from sitemaps ---
 async function getUrlsFromSitemaps() {
@@ -37,19 +51,20 @@ async function getUrlsFromSitemaps() {
     }
   }
 
-  // Deduplicate and sanitize
+  // Normalize + deduplicate
   const deduped = Array.from(new Set(urls));
-  return deduped.filter(u => {
-    try {
-      new URL(u);
-      return u.startsWith("http");
-    } catch {
-      return false;
-    }
-  });
+  return deduped
+    .map(normalizeUrl)
+    .filter(u => {
+      try {
+        return u.startsWith("http") && Boolean(new URL(u));
+      } catch {
+        return false;
+      }
+    });
 }
 
-// --- STEP 2: Submit URLs to Bing ---
+// --- STEP 2: Submit to Bing ---
 async function submitBing(urls) {
   if (!apiKey) {
     console.log('[Bing] No API key set, skipping Bing submission.');
@@ -82,7 +97,7 @@ async function submitBing(urls) {
   }
 }
 
-// --- STEP 3: Submit to IndexNow individually ---
+// --- STEP 3: Submit to IndexNow ---
 async function submitIndexNow(urls) {
   if (!indexnowKey) {
     console.log('[IndexNow] No API key set, skipping IndexNow submission.');
@@ -93,11 +108,10 @@ async function submitIndexNow(urls) {
     try {
       const endpoint = `https://api.indexnow.org/indexnow?url=${encodeURIComponent(url)}&key=${indexnowKey}`;
       const res = await fetch(endpoint);
-      const status = res.status;
       if (res.ok) {
-        console.log(`[IndexNow] ✅ Submitted: ${url} | ${status}`);
+        console.log(`[IndexNow] ✅ Submitted: ${url} | ${res.status}`);
       } else {
-        console.warn(`[IndexNow] ❌ Failed: ${url} | ${status}`);
+        console.warn(`[IndexNow] ❌ Failed: ${url} | ${res.status}`);
       }
     } catch (err) {
       console.error('[IndexNow] Error:', err);
@@ -105,12 +119,11 @@ async function submitIndexNow(urls) {
   }
 }
 
-// --- STEP 4: Ping Google & Yandex for sitemap discovery ---
+// --- STEP 4: Ping Google & Yandex ---
 async function pingSitemaps() {
   for (const sitemap of sitemaps) {
     const encoded = encodeURIComponent(sitemap);
 
-    // Google
     try {
       const g = await fetch(`https://www.google.com/ping?sitemap=${encoded}`);
       console.log(`[Google] Pinged: ${sitemap} | ${g.status}`);
@@ -118,7 +131,6 @@ async function pingSitemaps() {
       console.error('[Google] Ping error:', err);
     }
 
-    // Yandex
     try {
       const y = await fetch(`https://yandex.com/ping?sitemap=${encoded}`);
       console.log(`[Yandex] Pinged: ${sitemap} | ${y.status}`);
@@ -128,7 +140,7 @@ async function pingSitemaps() {
   }
 }
 
-// --- RUN ALL ---
+// --- RUN ---
 (async () => {
   const urls = await getUrlsFromSitemaps();
 

@@ -5,9 +5,8 @@ const xml2js = require('xml2js');
 require('dotenv').config();
 
 const apiKey = process.env.BING_API_KEY;
-const indexnowKey = process.env.INDEXNOW_API_KEY || process.env.INDEXNOW_KEY;
+const indexnowKey = process.env.INDEXNOW_KEY; // renamed for consistency
 
-// LOAD SITE URL from .env (either BASE_URL or NEXT_PUBLIC_BASE_URL)
 const siteUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL;
 if (!siteUrl) {
   console.error("❌ siteUrl is undefined. Please set BASE_URL or NEXT_PUBLIC_BASE_URL in your .env file.");
@@ -16,14 +15,13 @@ if (!siteUrl) {
 
 console.log(`🔗 Using site URL: ${siteUrl}`);
 
-// List your sitemaps here
 const sitemaps = [
   `${siteUrl}/sitemap.xml`,
   `${siteUrl}/blog/sitemap.xml`,
   `${siteUrl}/watch/sitemap.xml`,
 ];
 
-// 1. Get all URLs from sitemaps (for Bing & IndexNow)
+// --- STEP 1: Fetch URLs from sitemaps ---
 async function getUrlsFromSitemaps() {
   let urls = [];
   for (const sitemap of sitemaps) {
@@ -32,27 +30,35 @@ async function getUrlsFromSitemaps() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const xml = await res.text();
       const parsed = await xml2js.parseStringPromise(xml);
-      const locs =
-        parsed.urlset.url
-          ?.map(u => u.loc[0])
-          .filter(Boolean) || [];
+      const locs = parsed.urlset.url?.map(u => u.loc[0]).filter(Boolean) || [];
       urls = urls.concat(locs);
     } catch (err) {
       console.error(`[Sitemap] Error fetching or parsing ${sitemap}:`, err);
     }
   }
-  return Array.from(new Set(urls));
+
+  // Deduplicate and sanitize
+  const deduped = Array.from(new Set(urls));
+  return deduped.filter(u => {
+    try {
+      new URL(u);
+      return u.startsWith("http");
+    } catch {
+      return false;
+    }
+  });
 }
 
-// 2. Submit URLs to Bing (with quota handling)
+// --- STEP 2: Submit URLs to Bing ---
 async function submitBing(urls) {
   if (!apiKey) {
     console.log('[Bing] No API key set, skipping Bing submission.');
     return;
   }
+
   const BING_DAILY_QUOTA = 8;
   const urlsToSubmit = urls.slice(0, BING_DAILY_QUOTA);
-  const skippedUrls = urls.slice(BING_DAILY_QUOTA);
+  const skipped = urls.slice(BING_DAILY_QUOTA);
 
   if (urlsToSubmit.length === 0) {
     console.log('[Bing] No URLs to submit today (quota exhausted).');
@@ -60,42 +66,38 @@ async function submitBing(urls) {
   }
 
   try {
-    const response = await fetch(
-      `https://ssl.bing.com/webmaster/api.svc/json/SubmitUrlBatch?apikey=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json; charset=utf-8' },
-        body: JSON.stringify({ siteUrl, urlList: urlsToSubmit }),
-      }
-    );
-    const data = await response.json();
-    console.log(`\n[Bing] API Response for ${urlsToSubmit.length} URLs:`, data);
+    const res = await fetch(`https://ssl.bing.com/webmaster/api.svc/json/SubmitUrlBatch?apikey=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({ siteUrl, urlList: urlsToSubmit }),
+    });
+    const data = await res.json();
+    console.log(`\n[Bing] Submitted ${urlsToSubmit.length} URLs:`, data);
 
-    if (skippedUrls.length > 0) {
-      console.log(
-        `[Bing] Skipped ${skippedUrls.length} URLs due to daily quota. They will not be submitted today:`,
-        skippedUrls
-      );
+    if (skipped.length > 0) {
+      console.log(`[Bing] Skipped ${skipped.length} due to quota:`, skipped);
     }
   } catch (err) {
     console.error('[Bing] Submission Error:', err);
   }
 }
 
-// 3. Submit URLs to IndexNow
+// --- STEP 3: Submit to IndexNow individually ---
 async function submitIndexNow(urls) {
   if (!indexnowKey) {
     console.log('[IndexNow] No API key set, skipping IndexNow submission.');
     return;
   }
+
   for (const url of urls) {
     try {
       const endpoint = `https://api.indexnow.org/indexnow?url=${encodeURIComponent(url)}&key=${indexnowKey}`;
-      const response = await fetch(endpoint);
-      if (response.ok) {
-        console.log(`[IndexNow] Submitted: ${url} | Status: ${response.status}`);
+      const res = await fetch(endpoint);
+      const status = res.status;
+      if (res.ok) {
+        console.log(`[IndexNow] ✅ Submitted: ${url} | ${status}`);
       } else {
-        console.log(`[IndexNow] Error: ${url} | Status: ${response.status}`);
+        console.warn(`[IndexNow] ❌ Failed: ${url} | ${status}`);
       }
     } catch (err) {
       console.error('[IndexNow] Error:', err);
@@ -103,45 +105,41 @@ async function submitIndexNow(urls) {
   }
 }
 
-// 4. Ping Google and Yandex with sitemaps
+// --- STEP 4: Ping Google & Yandex for sitemap discovery ---
 async function pingSitemaps() {
   for (const sitemap of sitemaps) {
-    // Google Ping
+    const encoded = encodeURIComponent(sitemap);
+
+    // Google
     try {
-      const gURL = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemap)}`;
-      const gRes = await fetch(gURL);
-      console.log(`[Google] Sitemap ping: ${sitemap} | Status: ${gRes.status}`);
+      const g = await fetch(`https://www.google.com/ping?sitemap=${encoded}`);
+      console.log(`[Google] Pinged: ${sitemap} | ${g.status}`);
     } catch (err) {
-      console.error('[Google] Sitemap ping error:', err);
+      console.error('[Google] Ping error:', err);
     }
 
-    // Yandex Ping
+    // Yandex
     try {
-      const yURL = `https://yandex.com/ping?sitemap=${encodeURIComponent(sitemap)}`;
-      const yRes = await fetch(yURL);
-      console.log(`[Yandex] Sitemap ping: ${sitemap} | Status: ${yRes.status}`);
+      const y = await fetch(`https://yandex.com/ping?sitemap=${encoded}`);
+      console.log(`[Yandex] Pinged: ${sitemap} | ${y.status}`);
     } catch (err) {
-      console.error('[Yandex] Sitemap ping error:', err);
+      console.error('[Yandex] Ping error:', err);
     }
   }
 }
 
+// --- RUN ALL ---
 (async () => {
   const urls = await getUrlsFromSitemaps();
 
   if (urls.length === 0) {
-    console.log('No URLs found in sitemaps.');
+    console.log('⚠️ No valid URLs found in sitemaps.');
     return;
   }
 
-  // Bing (batch, up to daily quota)
   await submitBing(urls);
-
-  // IndexNow (individually)
   await submitIndexNow(urls);
-
-  // Google & Yandex (sitemaps)
   await pingSitemaps();
 
-  console.log('\n🚀 All pings complete! SEO bots are on their way.');
+  console.log('\n🚀 All pings complete! SEO bots have been summoned.');
 })();

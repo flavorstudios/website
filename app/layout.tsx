@@ -1,5 +1,9 @@
 // app/layout.tsx
 
+export const viewport = {
+  themeColor: "#000000",
+};
+
 import type { ReactNode } from "react";
 import "./globals.css"; // Global styles
 import "./fonts/poppins.css"; // Custom font
@@ -19,7 +23,8 @@ import {
 } from "@/lib/constants";
 
 // --- SEO Default Metadata (App Router global metadata) ---
-export const metadata = getMetadata({
+// 1. Get SEO fields ONLY
+const baseMetadata = getMetadata({
   title: SITE_NAME,
   description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
   path: "/",
@@ -41,9 +46,14 @@ export const metadata = getMetadata({
     description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
+  // Don't add PWA fields here!
+});
+
+// 2. Compose FULL Metadata object with all PWA fields
+export const metadata = {
+  ...baseMetadata, // SEO + OpenGraph + Twitter + canonical
   metadataBase: new URL(SITE_URL),
   manifest: "/manifest.webmanifest",
-  themeColor: "#000000",
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
@@ -53,7 +63,7 @@ export const metadata = getMetadata({
     capable: true,
     statusBarStyle: "black",
   },
-});
+};
 
 // --- Global Organization Schema (JSON-LD) ---
 const orgSchema = getSchema({

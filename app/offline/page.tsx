@@ -1,4 +1,4 @@
-// app/offline/page.tsx
+export const dynamic = 'force-static'; // <-- Add this at the top!
 
 import type { Metadata } from 'next';
 import OfflinePageClient from './OfflinePageClient';

@@ -12,7 +12,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 import PwaServiceWorker from "@/components/PwaServiceWorker"; // Registers PWA SW
-import PwaInstallPrompt from "@/components/PwaInstallPrompt"; // Custom PWA install UI
+// import PwaInstallPrompt from "@/components/PwaInstallPrompt"; // (REMOVED) Custom PWA install UI
 
 import { getMetadata, getSchema } from "@/lib/seo-utils"; // Centralized SEO helpers
 import {
@@ -135,7 +135,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <Footer />
         <BackToTop />
         <PwaServiceWorker /> {/* Registers and handles PWA Service Worker & update UI */}
-        <PwaInstallPrompt /> {/* Custom PWA install banner/prompt */}
+        {/* <PwaInstallPrompt />  (REMOVED) */}
       </body>
     </html>
   );

@@ -37,7 +37,7 @@
       "src": "/icons/maskable-icon-512x512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
   ],
 
@@ -73,6 +73,13 @@
   ],
 
   "screenshots": [
+    {
+      "src": "/screenshots/app-desktop.png",
+      "sizes": "1200x900",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Homepage (Desktop)"
+    },
     {
       "src": "/screenshots/app-home.png",
       "sizes": "1080x2340",

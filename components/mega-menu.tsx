@@ -1,12 +1,11 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useRef, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getCategoriesWithFallback } from "@/lib/dynamic-categories" // Fetch categories dynamically
 
 export interface MenuItem {
   label: string
@@ -30,6 +29,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
   const timeoutRef = useRef<NodeJS.Timeout>()
   const menuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
+  const [categories, setCategories] = useState<{ name: string; slug: string; count: number }[]>([])
 
   // Debounced mouse enter handler
   const debouncedMouseEnter = useCallback((label: string) => {
@@ -118,6 +118,19 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
     if (href !== "/" && pathname.startsWith(href)) return true
     return false
   }
+
+  // Fetch categories dynamically
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const { blogCategories, videoCategories } = await getCategoriesWithFallback()
+        setCategories([...blogCategories, ...videoCategories])
+      } catch (error) {
+        console.error("Failed to load categories:", error)
+      }
+    }
+    loadCategories()
+  }, [])
 
   const renderDropdown = (item: MenuItem) => {
     if (!item.subItems || item.subItems.length === 0) return null

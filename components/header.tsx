@@ -8,11 +8,17 @@ import { Menu, Coffee } from "lucide-react"
 import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
-import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+  count: number
+}
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([ 
     { label: "Home", href: "/" },
     { label: "Blog", href: "/blog" },
     { label: "Watch", href: "/watch" },
@@ -24,7 +30,12 @@ export function Header() {
   useEffect(() => {
     const loadMenuItems = async () => {
       try {
-        const { blogCategories, videoCategories } = await getCategoriesWithFallback()
+        // Fetch blog and video categories from API (Prisma-based)
+        const response = await fetch("/api/admin/categories")
+        const data = await response.json()
+
+        const blogCategories = data.categories.filter((cat: Category) => cat.type === "BLOG")
+        const videoCategories = data.categories.filter((cat: Category) => cat.type === "VIDEO")
 
         const dynamicMenuItems: MenuItem[] = [
           {

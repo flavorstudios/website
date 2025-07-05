@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,7 +9,21 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CategoryDropdown } from "@/components/ui/category-dropdown"
-import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+  type: "BLOG" | "VIDEO"
+  description?: string
+  color?: string
+  icon?: string
+  order: number
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+  postCount: number
+}
 
 interface Video {
   id: string
@@ -37,28 +50,25 @@ export function VideoManager() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterCategory, setFilterCategory] = useState("all")
-  const [categories, setCategories] = useState<Array<{ name: string; slug: string; count: number }>>([])
+  const [categories, setCategories] = useState<Category[]>([])
 
   useEffect(() => {
     loadData()
   }, [])
 
   const loadData = async () => {
+    setLoading(true)
     try {
-      const [videosResponse, categoriesData] = await Promise.all([
-        fetch("/api/admin/videos").catch(() => ({ ok: false, json: () => Promise.resolve({ videos: [] }) })),
-        getCategoriesWithFallback(),
+      const [videosRes, categoriesRes] = await Promise.all([
+        fetch("/api/admin/videos"),
+        fetch("/api/admin/categories?type=video"),
       ])
-
-      let videosData = { videos: [] }
-      if (videosResponse.ok) {
-        videosData = await videosResponse.json()
-      }
-
-      setVideos(videosData.videos || [])
-      setCategories(categoriesData.videoCategories || [])
+      const videosData = (await videosRes.json()).videos || []
+      const categoriesData = (await categoriesRes.json()).categories || []
+      setVideos(videosData)
+      setCategories(categoriesData)
     } catch (error) {
-      console.error("Failed to load data:", error)
+      console.error("Failed to load videos or categories:", error)
     } finally {
       setLoading(false)
     }
@@ -153,7 +163,14 @@ export function VideoManager() {
           className="max-w-sm"
         />
         <CategoryDropdown
-          categories={categories}
+          categories={[
+            { name: "All", slug: "all", count: videos.length },
+            ...categories.map((cat) => ({
+              name: cat.name,
+              slug: cat.slug,
+              count: cat.postCount,
+            })),
+          ]}
           selectedCategory={filterCategory}
           onCategoryChange={setFilterCategory}
           type="video"
@@ -235,7 +252,7 @@ function VideoForm({
   video: Video | null
   onSave: (data: Partial<Video>) => void
   onCancel: () => void
-  categories: Array<{ name: string; slug: string; count: number }>
+  categories: Category[]
 }) {
   const [formData, setFormData] = useState({
     title: video?.title || "",
@@ -255,7 +272,7 @@ function VideoForm({
   }, [categories])
 
   const extractYouTubeId = (url: string) => {
-    const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
+    const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/ // keep for full coverage
     const match = url.match(regex)
     return match ? match[1] : url
   }
@@ -329,7 +346,7 @@ function VideoForm({
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
-                      <SelectItem key={category.name} value={category.name}>
+                      <SelectItem key={category.id} value={category.name}>
                         {category.name}
                       </SelectItem>
                     ))}

@@ -1,7 +1,8 @@
+import { PrismaClient, CategoryType } from "@prisma/client"
 import { promises as fs } from "fs"
 import path from "path"
-import { categoryStore } from "./category-store"
 
+const prisma = new PrismaClient()
 const DATA_DIR = path.join(process.cwd(), "content-data")
 
 export interface BlogPost {
@@ -118,13 +119,16 @@ async function writeSingleJsonFile<T>(filename: string, data: T): Promise<void> 
   await fs.writeFile(filePath, JSON.stringify(data, null, 2))
 }
 
-// ----------- CATEGORY HELPERS -----------
+// ----------- CATEGORY HELPERS (PRISMA-ONLY) -----------
 
-// Always fetch categories from Prisma now—no fallback constants
 async function getValidBlogCategories(): Promise<string[]> {
   try {
-    const categories = await categoryStore.getByType("blog")
-    return categories.filter((cat) => cat.isActive).map((cat) => cat.name)
+    const categories = await prisma.category.findMany({
+      where: { type: CategoryType.BLOG, isActive: true },
+      select: { name: true },
+      orderBy: { order: "asc" },
+    })
+    return categories.map((cat) => cat.name)
   } catch (error) {
     console.warn("Failed to load blog categories from Prisma:", error)
     return []
@@ -133,8 +137,12 @@ async function getValidBlogCategories(): Promise<string[]> {
 
 async function getValidVideoCategories(): Promise<string[]> {
   try {
-    const categories = await categoryStore.getByType("video")
-    return categories.filter((cat) => cat.isActive).map((cat) => cat.name)
+    const categories = await prisma.category.findMany({
+      where: { type: CategoryType.VIDEO, isActive: true },
+      select: { name: true },
+      orderBy: { order: "asc" },
+    })
+    return categories.map((cat) => cat.name)
   } catch (error) {
     console.warn("Failed to load video categories from Prisma:", error)
     return []
@@ -188,11 +196,6 @@ export const blogStore = {
     }
     posts.unshift(newPost)
     await writeJsonFile("blogs.json", posts)
-    try {
-      await categoryStore.updatePostCounts()
-    } catch (error) {
-      console.warn("Failed to update category post counts")
-    }
     return newPost
   },
 
@@ -212,11 +215,6 @@ export const blogStore = {
       updatedAt: new Date().toISOString(),
     }
     await writeJsonFile("blogs.json", posts)
-    try {
-      await categoryStore.updatePostCounts()
-    } catch (error) {
-      console.warn("Failed to update category post counts")
-    }
     return posts[index]
   },
 
@@ -225,11 +223,6 @@ export const blogStore = {
     const filtered = posts.filter((p) => p.id !== id)
     if (filtered.length === posts.length) return false
     await writeJsonFile("blogs.json", filtered)
-    try {
-      await categoryStore.updatePostCounts()
-    } catch (error) {
-      console.warn("Failed to update category post counts")
-    }
     return true
   },
 
@@ -295,11 +288,6 @@ export const videoStore = {
     }
     videos.unshift(newVideo)
     await writeJsonFile("videos.json", videos)
-    try {
-      await categoryStore.updatePostCounts()
-    } catch (error) {
-      console.warn("Failed to update category post counts")
-    }
     return newVideo
   },
 
@@ -319,11 +307,6 @@ export const videoStore = {
       updatedAt: new Date().toISOString(),
     }
     await writeJsonFile("videos.json", videos)
-    try {
-      await categoryStore.updatePostCounts()
-    } catch (error) {
-      console.warn("Failed to update category post counts")
-    }
     return videos[index]
   },
 
@@ -332,11 +315,6 @@ export const videoStore = {
     const filtered = videos.filter((v) => v.id !== id)
     if (filtered.length === videos.length) return false
     await writeJsonFile("videos.json", filtered)
-    try {
-      await categoryStore.updatePostCounts()
-    } catch (error) {
-      console.warn("Failed to update category post counts")
-    }
     return true
   },
 }
@@ -452,16 +430,10 @@ export async function initializeRealData() {
 }
 
 export async function initializeCleanData() {
-  try {
-    const { initializeDefaultCategories } = await import("./category-store")
-    await initializeDefaultCategories()
-  } catch (error) {
-    console.warn("Failed to initialize dynamic categories from Prisma")
-  }
-
+  // No longer initializes categories from a file or constant!
+  // Seed via Prisma, only for legacy empty data:
   const blogs = await blogStore.getAll()
   const videos = await videoStore.getAll()
-
   if (blogs.length === 0 && videos.length === 0) {
     await writeJsonFile("blogs.json", [])
     await writeJsonFile("videos.json", [])

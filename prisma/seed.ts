@@ -74,23 +74,35 @@ const categories = [
 ]
 
 async function main() {
-  for (const cat of categories) {
-    await prisma.category.upsert({
-      // KEY: Compound unique needs this exact shape!
-      where: { slug_type: { slug: cat.slug, type: cat.type } },
-      update: cat,
-      create: cat,
-    })
-  }
+  try {
+    // Check if categories already exist (by slug+type, should be 8)
+    const total = await prisma.category.count()
+    if (total >= categories.length) {
+      console.log(`ℹ️  Skipping seeding: Found ${total} categories (no action needed).`)
+      return
+    }
 
-  console.log('✅ Categories seeded successfully!')
+    let seeded = 0
+    for (const cat of categories) {
+      try {
+        await prisma.category.upsert({
+          where: { slug_type: { slug: cat.slug, type: cat.type } }, // Compound unique!
+          update: cat,
+          create: cat,
+        })
+        seeded++
+      } catch (err) {
+        console.error(`❌ Failed to upsert category [${cat.slug} / ${cat.type}]:`, err)
+      }
+    }
+
+    console.log(`✅ Categories seeded successfully! (${seeded} added or updated)`)
+  } catch (error) {
+    console.error("❌ Seed script error:", error)
+    process.exit(1)
+  } finally {
+    await prisma.$disconnect()
+  }
 }
 
 main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })

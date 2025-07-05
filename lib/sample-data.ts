@@ -1,10 +1,4 @@
-// All categories are now managed dynamically via Prisma—no hardcoded validBlogCategories or validWatchCategories!
-
-export const sampleBlogs: any[] = []
-
-export const sampleVideos: any[] = []
-
-export const sampleComments: any[] = []
+// All categories are now managed dynamically via Prisma—no more static arrays for seeding!
 
 export const initialStats = {
   youtubeSubscribers: "500K+",
@@ -13,3 +7,7 @@ export const initialStats = {
   yearsCreating: "5",
   lastUpdated: new Date().toISOString(),
 }
+
+// If you want demo/sample blog, video, or comment content for local/dev environments,
+// fetch/generate it directly via Prisma in your seed.ts or use separate JSON for migration purposes.
+// No more static arrays in the main codebase.

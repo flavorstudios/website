@@ -28,13 +28,12 @@ export function formatCategoryName(slug: string): string {
     .join(" ")
 }
 
-// Main function: always tries to fetch from API (Prisma-backed)
+// Always fetches from Prisma-backed API, no static fallback
 export async function getDynamicCategories(): Promise<DynamicCategoriesResult> {
   let blogCategories: CategoryData[] = []
   let videoCategories: CategoryData[] = []
 
   try {
-    // Fetch blog categories from API (should return array of categories from Prisma)
     const blogRes = await fetch("/api/admin/categories?type=blog", { cache: "no-store" })
     if (blogRes.ok) {
       const blogs = await blogRes.json()
@@ -49,7 +48,6 @@ export async function getDynamicCategories(): Promise<DynamicCategoriesResult> {
   }
 
   try {
-    // Fetch video categories from API (should return array of categories from Prisma)
     const videoRes = await fetch("/api/admin/categories?type=video", { cache: "no-store" })
     if (videoRes.ok) {
       const videos = await videoRes.json()

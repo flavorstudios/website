@@ -1,68 +1,44 @@
 import { NextResponse } from "next/server"
-import { blogStore, videoStore } from "@/lib/content-store"
+import { PrismaClient, CategoryType } from "@prisma/client"
+
+const prisma = new PrismaClient()
 
 export async function GET() {
   try {
-    // Get all published blog posts and videos
-    const [posts, videos] = await Promise.allSettled([
-      blogStore.getPublished().catch(() => []),
-      videoStore.getPublished().catch(() => []),
-    ])
+    // Fetch blog categories (type: BLOG)
+    const blogCategories = await prisma.category.findMany({
+      where: { type: CategoryType.BLOG, isActive: true },
+      orderBy: { order: "asc" },
+      select: {
+        name: true,
+        slug: true,
+        postCount: true,
+      },
+    })
 
-    let blogCategories: { name: string; slug: string; count: number }[] = []
-    let videoCategories: { name: string; slug: string; count: number }[] = []
-
-    // Helper to slugify and format names
-    const createCategorySlug = (name: string) =>
-      name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
-    const formatCategoryName = (slug: string) =>
-      slug
-        .split("-")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ")
-
-    // Blog categories
-    if (posts.status === "fulfilled" && posts.value.length > 0) {
-      const categoryMap = new Map<string, number>()
-      posts.value.forEach((post: any) => {
-        if (post.category) {
-          const slug = createCategorySlug(post.category)
-          categoryMap.set(slug, (categoryMap.get(slug) || 0) + 1)
-        }
-      })
-
-      blogCategories = Array.from(categoryMap.entries()).map(([slug, count]) => ({
-        name: formatCategoryName(slug),
-        slug,
-        count,
-      }))
-
-      blogCategories.sort((a, b) => (b.count !== a.count ? b.count - a.count : a.name.localeCompare(b.name)))
-    }
-
-    // Video categories
-    if (videos.status === "fulfilled" && videos.value.length > 0) {
-      const categoryMap = new Map<string, number>()
-      videos.value.forEach((video: any) => {
-        if (video.category) {
-          const slug = createCategorySlug(video.category)
-          categoryMap.set(slug, (categoryMap.get(slug) || 0) + 1)
-        }
-      })
-
-      videoCategories = Array.from(categoryMap.entries()).map(([slug, count]) => ({
-        name: formatCategoryName(slug),
-        slug,
-        count,
-      }))
-
-      videoCategories.sort((a, b) => (b.count !== a.count ? b.count - a.count : a.name.localeCompare(b.name)))
-    }
+    // Fetch video categories (type: VIDEO)
+    const videoCategories = await prisma.category.findMany({
+      where: { type: CategoryType.VIDEO, isActive: true },
+      orderBy: { order: "asc" },
+      select: {
+        name: true,
+        slug: true,
+        postCount: true,
+      },
+    })
 
     return NextResponse.json({
       success: true,
-      blogCategories,
-      videoCategories,
+      blogCategories: blogCategories.map((cat) => ({
+        name: cat.name,
+        slug: cat.slug,
+        count: cat.postCount ?? 0,
+      })),
+      videoCategories: videoCategories.map((cat) => ({
+        name: cat.name,
+        slug: cat.slug,
+        count: cat.postCount ?? 0,
+      })),
     })
   } catch (error) {
     console.error("Failed to get categories:", error)
@@ -75,5 +51,7 @@ export async function GET() {
       },
       { status: 500 },
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }

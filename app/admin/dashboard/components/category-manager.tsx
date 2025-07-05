@@ -13,40 +13,48 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Plus, Edit, Trash2 } from "lucide-react"
 
-interface Category {
+// ------ Matches your Prisma model ------
+export type CategoryType = "BLOG" | "VIDEO"
+
+export interface Category {
   id: string
   name: string
   slug: string
-  type: "blog" | "video"
-  description?: string
-  color?: string
-  icon?: string
+  type: CategoryType
+  description?: string | null
+  color?: string | null
+  icon?: string | null
   order: number
   isActive: boolean
   createdAt: string
   updatedAt: string
-  postCount: number
+  postCount?: number | null // Optional for legacy data, required for UI
 }
 
+// ------ Main Category Manager ------
 export function CategoryManager() {
   const [blogCategories, setBlogCategories] = useState<Category[]>([])
   const [videoCategories, setVideoCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [createType, setCreateType] = useState<"blog" | "video">("blog")
+  const [createType, setCreateType] = useState<CategoryType>("BLOG")
 
   useEffect(() => {
     loadCategories()
   }, [])
 
   const loadCategories = async () => {
+    setLoading(true)
     try {
       const response = await fetch("/api/admin/categories")
       const data = await response.json()
-      setBlogCategories(data.categories?.filter((cat: Category) => cat.type === "blog") || [])
-      setVideoCategories(data.categories?.filter((cat: Category) => cat.type === "video") || [])
+      const all: Category[] = data.categories || []
+      setBlogCategories(all.filter((cat) => cat.type === "BLOG"))
+      setVideoCategories(all.filter((cat) => cat.type === "VIDEO"))
     } catch (error) {
+      setBlogCategories([])
+      setVideoCategories([])
       console.error("Failed to load categories:", error)
     } finally {
       setLoading(false)
@@ -60,7 +68,6 @@ export function CategoryManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(categoryData),
       })
-
       if (response.ok) {
         await loadCategories()
         setShowCreateForm(false)
@@ -81,7 +88,6 @@ export function CategoryManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(categoryData),
       })
-
       if (response.ok) {
         await loadCategories()
         setEditingCategory(null)
@@ -97,12 +103,8 @@ export function CategoryManager() {
 
   const deleteCategory = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete the category "${name}"?`)) return
-
     try {
-      const response = await fetch(`/api/admin/categories/${id}`, {
-        method: "DELETE",
-      })
-
+      const response = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" })
       if (response.ok) {
         await loadCategories()
       } else {
@@ -145,26 +147,25 @@ export function CategoryManager() {
       </div>
 
       {/* Category Tabs */}
-      <Tabs defaultValue="blog" className="space-y-6">
+      <Tabs defaultValue="BLOG" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="blog">Blog Categories ({blogCategories.length})</TabsTrigger>
-          <TabsTrigger value="video">Video Categories ({videoCategories.length})</TabsTrigger>
+          <TabsTrigger value="BLOG">Blog Categories ({blogCategories.length})</TabsTrigger>
+          <TabsTrigger value="VIDEO">Video Categories ({videoCategories.length})</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="blog">
+        <TabsContent value="BLOG">
           <CategoryList
             categories={blogCategories}
-            type="blog"
+            type="BLOG"
             onEdit={setEditingCategory}
             onDelete={deleteCategory}
             onToggleStatus={toggleCategoryStatus}
           />
         </TabsContent>
-
-        <TabsContent value="video">
+        <TabsContent value="VIDEO">
           <CategoryList
             categories={videoCategories}
-            type="video"
+            type="VIDEO"
             onEdit={setEditingCategory}
             onDelete={deleteCategory}
             onToggleStatus={toggleCategoryStatus}
@@ -189,6 +190,7 @@ export function CategoryManager() {
   )
 }
 
+// ---------- CategoryList ----------
 function CategoryList({
   categories,
   type,
@@ -197,7 +199,7 @@ function CategoryList({
   onToggleStatus,
 }: {
   categories: Category[]
-  type: "blog" | "video"
+  type: CategoryType
   onEdit: (category: Category) => void
   onDelete: (id: string, name: string) => void
   onToggleStatus: (id: string, isActive: boolean) => void
@@ -212,14 +214,17 @@ function CategoryList({
           <CardHeader className="pb-3">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 rounded-full" style={{ backgroundColor: category.color || "#6366f1" }} />
+                <div
+                  className="w-4 h-4 rounded-full"
+                  style={{ backgroundColor: category.color || "#6366f1" }}
+                />
                 <div>
                   <CardTitle className="text-lg">{category.name}</CardTitle>
                   <p className="text-sm text-gray-500">/{category.slug}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="outline">{category.postCount} posts</Badge>
+                <Badge variant="outline">{category.postCount ?? 0} posts</Badge>
                 <Switch
                   checked={category.isActive}
                   onCheckedChange={(checked) => onToggleStatus(category.id, checked)}
@@ -232,7 +237,7 @@ function CategoryList({
                   size="sm"
                   onClick={() => onDelete(category.id, category.name)}
                   className="text-red-600 hover:text-red-700"
-                  disabled={category.postCount > 0}
+                  disabled={!!(category.postCount && category.postCount > 0)}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -246,16 +251,18 @@ function CategoryList({
           )}
         </Card>
       ))}
-
       {categories.length === 0 && (
         <Card className="p-8 text-center">
-          <p className="text-gray-500">No {type} categories yet. Create your first category to get started!</p>
+          <p className="text-gray-500">
+            No {type.toLowerCase()} categories yet. Create your first category to get started!
+          </p>
         </Card>
       )}
     </div>
   )
 }
 
+// ---------- CategoryForm ----------
 function CategoryForm({
   category,
   type,
@@ -264,10 +271,10 @@ function CategoryForm({
   onTypeChange,
 }: {
   category: Category | null
-  type: "blog" | "video"
+  type: CategoryType
   onSave: (data: Partial<Category>) => void
   onCancel: () => void
-  onTypeChange: (type: "blog" | "video") => void
+  onTypeChange: (type: CategoryType) => void
 }) {
   const [formData, setFormData] = useState({
     name: category?.name || "",
@@ -281,6 +288,7 @@ function CategoryForm({
     e.preventDefault()
     onSave({
       ...formData,
+      type: formData.type,
       order: category?.order || 0,
     })
   }
@@ -307,7 +315,7 @@ function CategoryForm({
               <label className="block text-sm font-medium mb-2">Type</label>
               <Select
                 value={formData.type}
-                onValueChange={(value: "blog" | "video") => {
+                onValueChange={(value: CategoryType) => {
                   setFormData((prev) => ({ ...prev, type: value }))
                   onTypeChange(value)
                 }}
@@ -317,8 +325,8 @@ function CategoryForm({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="blog">Blog Category</SelectItem>
-                  <SelectItem value="video">Video Category</SelectItem>
+                  <SelectItem value="BLOG">Blog Category</SelectItem>
+                  <SelectItem value="VIDEO">Video Category</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -326,7 +334,7 @@ function CategoryForm({
             <div>
               <label className="block text-sm font-medium mb-2">Description</label>
               <Textarea
-                value={formData.description}
+                value={formData.description ?? ""}
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                 rows={3}
                 placeholder="Optional description"
@@ -338,12 +346,12 @@ function CategoryForm({
               <div className="flex items-center gap-2">
                 <input
                   type="color"
-                  value={formData.color}
+                  value={formData.color ?? "#6366f1"}
                   onChange={(e) => setFormData((prev) => ({ ...prev, color: e.target.value }))}
                   className="w-12 h-10 rounded border"
                 />
                 <Input
-                  value={formData.color}
+                  value={formData.color ?? "#6366f1"}
                   onChange={(e) => setFormData((prev) => ({ ...prev, color: e.target.value }))}
                   placeholder="#6366f1"
                 />

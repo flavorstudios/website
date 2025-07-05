@@ -15,7 +15,7 @@
       "canonicalUrl": "https://flavorstudios.in/blog",
       "robots": "index,follow",
       "ogTitle": "All Posts",
-      "ogDescription": "Explore the complete Flavor Studios blog archive\u2014anime news, reviews, guides, and more.",
+      "ogDescription": "Explore the complete Flavor Studios blog archive—anime news, reviews, guides, and more.",
       "ogUrl": "https://flavorstudios.in/blog",
       "ogType": "website",
       "ogSiteName": "Flavor Studios",
@@ -29,7 +29,7 @@
       "twitterCard": "summary_large_image",
       "twitterSite": "@flavorstudios",
       "twitterTitle": "All Posts",
-      "twitterDescription": "Discover every Flavor Studios blog post in one place\u2014always fresh and organized.",
+      "twitterDescription": "Discover every Flavor Studios blog post in one place—always fresh and organized.",
       "twitterImages": [
         "https://flavorstudios.in/cover.jpg"
       ],
@@ -54,7 +54,8 @@
             "height": 512
           }
         }
-      }
+      },
+      "tooltip": "Browse all our blog content"
     },
     {
       "id": "aff120ca-14d7-4d52-8c05-4e9e407b12db",
@@ -111,7 +112,7 @@
           }
         }
       },
-      "tooltip": "Honest reviews of series, movies, and episodes"
+      "tooltip": "In-depth anime reviews and ratings"
     },
     {
       "id": "41c1fbab-30f9-4cb3-bdf3-a65c5a80ab4f",
@@ -168,7 +169,7 @@
           }
         }
       },
-      "tooltip": "Analysis of character arcs, plots, life lessons"
+      "tooltip": "Explore anime plots and life lessons"
     },
     {
       "id": "2f70ba3b-c22c-44fe-b6eb-4411b1b1fcf4",
@@ -225,7 +226,7 @@
           }
         }
       },
-      "tooltip": "Insights into animation techniques, tools like Blender, and indie creators"
+      "tooltip": "Animation tips, tools, and creator guides"
     },
     {
       "id": "989b5307-8635-4ea1-bd29-c36b26510b2f",
@@ -282,7 +283,7 @@
           }
         }
       },
-      "tooltip": "Featuring influential directors, animators, writers"
+      "tooltip": "Spotlight on top anime creators"
     },
     {
       "id": "37d7472e-0f15-4bc6-89d6-644d1b0e130f",
@@ -339,7 +340,7 @@
           }
         }
       },
-      "tooltip": "Exploring how anime reflects real-world emotions, values, and life lessons"
+      "tooltip": "Life lessons and values in anime"
     },
     {
       "id": "ac4fbf63-b1b7-4ec5-b24d-767eb4c13169",
@@ -396,7 +397,7 @@
           }
         }
       },
-      "tooltip": "Sharing your journey, tips for animators, Blender guides, etc."
+      "tooltip": "Animation tips and Blender guides"
     },
     {
       "id": "d115c4ec-f695-4305-ba6f-29d6545ba786",
@@ -453,24 +454,24 @@
           }
         }
       },
-      "tooltip": "Global releases, renewals, upcoming projects"
+      "tooltip": "Latest anime news and updates"
     },
     {
       "id": "323803ef-c410-48f8-94ec-06a9de3aa7de",
       "slug": "streaming-updates",
       "title": "Streaming Updates",
-      "description": "What\u2019s new on Crunchyroll, Netflix, Amazon, etc.",
+      "description": "What’s new on Crunchyroll, Netflix, Amazon, etc.",
       "accessibleLabel": "Streaming Updates",
       "icon": "https://flavorstudios.in/favicon.ico",
       "order": 9,
       "isActive": true,
       "postCount": 0,
       "metaTitle": "Streaming Updates | Flavor Studios",
-      "metaDescription": "What\u2019s new on Crunchyroll, Netflix, Amazon, etc.",
+      "metaDescription": "What’s new on Crunchyroll, Netflix, Amazon, etc.",
       "canonicalUrl": "https://flavorstudios.in/blog/category/streaming-updates",
       "robots": "index,follow",
       "ogTitle": "Streaming Updates",
-      "ogDescription": "What\u2019s new on Crunchyroll, Netflix, Amazon, etc.",
+      "ogDescription": "What’s new on Crunchyroll, Netflix, Amazon, etc.",
       "ogUrl": "https://flavorstudios.in/blog/category/streaming-updates",
       "ogType": "website",
       "ogSiteName": "Flavor Studios",
@@ -484,7 +485,7 @@
       "twitterCard": "summary_large_image",
       "twitterSite": "@flavorstudios",
       "twitterTitle": "Streaming Updates",
-      "twitterDescription": "What\u2019s new on Crunchyroll, Netflix, Amazon, etc.",
+      "twitterDescription": "What’s new on Crunchyroll, Netflix, Amazon, etc.",
       "twitterImages": [
         "https://flavorstudios.in/cover.jpg"
       ],
@@ -492,9 +493,9 @@
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         "name": "Streaming Updates",
-        "description": "What\u2019s new on Crunchyroll, Netflix, Amazon, etc.",
+        "description": "What’s new on Crunchyroll, Netflix, Amazon, etc.",
         "url": "https://flavorstudios.in/blog/category/streaming-updates",
-        "about": "What\u2019s new on Crunchyroll, Netflix, Amazon, etc.",
+        "about": "What’s new on Crunchyroll, Netflix, Amazon, etc.",
         "mainEntity": {
           "@type": "WebPage",
           "@id": "https://flavorstudios.in/blog/category/streaming-updates"
@@ -510,7 +511,7 @@
           }
         }
       },
-      "tooltip": "What\u2019s new on Crunchyroll, Netflix, Amazon, etc."
+      "tooltip": "New on Netflix, Crunchyroll, and more"
     },
     {
       "id": "4e9a39bd-18d9-4da4-8453-0d2b556e43d9",
@@ -567,7 +568,7 @@
           }
         }
       },
-      "tooltip": "Announcements from studios, events, award shows"
+      "tooltip": "Studio news, events, and awards"
     },
     {
       "id": "0a48e9c9-8196-43eb-8115-b3612b8dc0e5",
@@ -624,7 +625,7 @@
           }
         }
       },
-      "tooltip": "Release schedules, trailers, and key dates"
+      "tooltip": "Anime release dates and trailers"
     },
     {
       "id": "f1265b65-4262-4fd9-8932-cec3bbf67851",
@@ -681,7 +682,7 @@
           }
         }
       },
-      "tooltip": "Actor changes, staff updates, and interviews"
+      "tooltip": "Interviews and staff updates"
     },
     {
       "id": "f552b15a-cc0f-4cb7-b7da-05e0359abc20",
@@ -738,7 +739,7 @@
           }
         }
       },
-      "tooltip": "Anime-related festivals, Japan-exclusive updates, etc."
+      "tooltip": "Anime festivals and Japanese culture"
     }
   ],
   "watch": [
@@ -757,7 +758,7 @@
       "canonicalUrl": "https://flavorstudios.in/watch",
       "robots": "index,follow",
       "ogTitle": "All Videos",
-      "ogDescription": "Watch every Flavor Studios video\u2014series, shorts, behind the scenes, and more.",
+      "ogDescription": "Watch every Flavor Studios video—series, shorts, behind the scenes, and more.",
       "ogUrl": "https://flavorstudios.in/watch",
       "ogType": "website",
       "ogSiteName": "Flavor Studios",
@@ -771,7 +772,7 @@
       "twitterCard": "summary_large_image",
       "twitterSite": "@flavorstudios",
       "twitterTitle": "All Videos",
-      "twitterDescription": "Explore the full Flavor Studios video library\u2014always fresh, always creative.",
+      "twitterDescription": "Explore the full Flavor Studios video library—always fresh, always creative.",
       "twitterImages": [
         "https://flavorstudios.in/cover.jpg"
       ],
@@ -796,7 +797,8 @@
             "height": 512
           }
         }
-      }
+      },
+      "tooltip": "Browse all Flavor Studios videos"
     },
     {
       "id": "4a28db3b-0997-4e3f-ab0b-dc0e4636e3a6",
@@ -853,24 +855,24 @@
           }
         }
       },
-      "tooltip": "Explore all our original video content."
+      "tooltip": "See every original video upload"
     },
     {
       "id": "1132d00f-4a72-4dd5-bdb7-eeacbcd18ded",
       "slug": "original-series",
       "title": "Original Series",
-      "description": "Flavor Studios\u2019 exclusive anime creations.",
+      "description": "Flavor Studios’ exclusive anime creations.",
       "accessibleLabel": "Original Series",
       "icon": "https://flavorstudios.in/favicon.ico",
       "order": 3,
       "isActive": true,
       "postCount": 0,
       "metaTitle": "Original Series | Flavor Studios",
-      "metaDescription": "Flavor Studios\u2019 exclusive anime creations.",
+      "metaDescription": "Flavor Studios’ exclusive anime creations.",
       "canonicalUrl": "https://flavorstudios.in/watch/category/original-series",
       "robots": "index,follow",
       "ogTitle": "Original Series",
-      "ogDescription": "Flavor Studios\u2019 exclusive anime creations.",
+      "ogDescription": "Flavor Studios’ exclusive anime creations.",
       "ogUrl": "https://flavorstudios.in/watch/category/original-series",
       "ogType": "website",
       "ogSiteName": "Flavor Studios",
@@ -884,7 +886,7 @@
       "twitterCard": "summary_large_image",
       "twitterSite": "@flavorstudios",
       "twitterTitle": "Original Series",
-      "twitterDescription": "Flavor Studios\u2019 exclusive anime creations.",
+      "twitterDescription": "Flavor Studios’ exclusive anime creations.",
       "twitterImages": [
         "https://flavorstudios.in/cover.jpg"
       ],
@@ -892,9 +894,9 @@
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         "name": "Original Series",
-        "description": "Flavor Studios\u2019 exclusive anime creations.",
+        "description": "Flavor Studios’ exclusive anime creations.",
         "url": "https://flavorstudios.in/watch/category/original-series",
-        "about": "Flavor Studios\u2019 exclusive anime creations.",
+        "about": "Flavor Studios’ exclusive anime creations.",
         "mainEntity": {
           "@type": "WebPage",
           "@id": "https://flavorstudios.in/watch/category/original-series"
@@ -910,7 +912,7 @@
           }
         }
       },
-      "tooltip": "Flavor Studios\u2019 exclusive anime creations."
+      "tooltip": "Watch Flavor Studios originals"
     },
     {
       "id": "1e9da886-0982-465e-b1f8-30d5550c12e7",
@@ -967,7 +969,7 @@
           }
         }
       },
-      "tooltip": "First looks at upcoming releases."
+      "tooltip": "Latest anime trailers and previews"
     },
     {
       "id": "7de32971-2239-4980-a751-5332fb3de686",
@@ -1024,7 +1026,7 @@
           }
         }
       },
-      "tooltip": "Bite-sized animated stories with impact."
+      "tooltip": "Watch animated short films"
     },
     {
       "id": "0caa9897-7f14-4aa7-ac48-980e9e767718",
@@ -1081,7 +1083,7 @@
           }
         }
       },
-      "tooltip": "Production insights and animation workflows."
+      "tooltip": "Production workflows and making-of"
     },
     {
       "id": "a2226457-08ec-4b5a-8fc8-df0b886df4a6",
@@ -1138,7 +1140,7 @@
           }
         }
       },
-      "tooltip": "Curated remixes and tributes by the community."
+      "tooltip": "Best anime remixes and fan tributes"
     },
     {
       "id": "e8196c4d-2966-4fe2-b00f-3f174d3f30cb",
@@ -1195,7 +1197,7 @@
           }
         }
       },
-      "tooltip": "Conversations with creators, fans, and industry voices."
+      "tooltip": "Creator and industry interviews"
     },
     {
       "id": "4b2ef996-b294-4a82-8ecd-bfb2dec87180",
@@ -1252,7 +1254,7 @@
           }
         }
       },
-      "tooltip": "Audio shows on anime, art, and creative journeys."
+      "tooltip": "Anime podcasts and creative talks"
     },
     {
       "id": "fe763903-5403-4bb9-a9f2-9234dfd38f76",
@@ -1309,7 +1311,7 @@
           }
         }
       },
-      "tooltip": "Best moments, clips, and viral-worthy content."
+      "tooltip": "Top moments and viral highlights"
     }
   ]
 }

@@ -15,7 +15,7 @@ enum CategoryType {
 model Category {
   id                 String    @id @default(uuid())
   name               String
-  slug               String    @unique
+  slug               String
   type               CategoryType
   description        String?
   color              String?
@@ -51,4 +51,6 @@ model Category {
   postCount          Int?       // For dashboard/statistics
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
+
+  @@unique([slug, type], name: "slug_type")
 }

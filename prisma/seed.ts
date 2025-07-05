@@ -1,45 +1,85 @@
 // prisma/seed.ts
 
-import { PrismaClient } from '@prisma/client'
-import fs from 'fs'
-import path from 'path'
+import { PrismaClient, CategoryType } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+const categories = [
+  // BLOG categories
+  {
+    slug: "anime-news",
+    name: "Anime News",
+    type: CategoryType.BLOG,
+    description: "Latest anime news and updates",
+    isActive: true,
+    order: 1,
+  },
+  {
+    slug: "reviews",
+    name: "Reviews",
+    type: CategoryType.BLOG,
+    description: "Anime and manga reviews",
+    isActive: true,
+    order: 2,
+  },
+  {
+    slug: "behind-the-scenes",
+    name: "Behind the Scenes",
+    type: CategoryType.BLOG,
+    description: "Behind the scenes content",
+    isActive: true,
+    order: 3,
+  },
+  {
+    slug: "tutorials",
+    name: "Tutorials",
+    type: CategoryType.BLOG,
+    description: "How-to guides and tutorials",
+    isActive: true,
+    order: 4,
+  },
+  // VIDEO categories
+  {
+    slug: "anime-news",
+    name: "Anime News",
+    type: CategoryType.VIDEO,
+    description: "Latest anime news and updates",
+    isActive: true,
+    order: 1,
+  },
+  {
+    slug: "reviews",
+    name: "Reviews",
+    type: CategoryType.VIDEO,
+    description: "Anime and manga reviews",
+    isActive: true,
+    order: 2,
+  },
+  {
+    slug: "behind-the-scenes",
+    name: "Behind the Scenes",
+    type: CategoryType.VIDEO,
+    description: "Behind the scenes content",
+    isActive: true,
+    order: 3,
+  },
+  {
+    slug: "tutorials",
+    name: "Tutorials",
+    type: CategoryType.VIDEO,
+    description: "How-to guides and tutorials",
+    isActive: true,
+    order: 4,
+  },
+]
+
 async function main() {
-  const filePath = path.join(__dirname, '../content-data/categories.json')
-  const jsonData = JSON.parse(fs.readFileSync(filePath, 'utf-8'))
-
-  // Merge blog and watch categories into one array with correct 'type'
-  const categories = [
-    ...jsonData.blog.map((cat: any) => ({ ...cat, type: 'BLOG' })),
-    ...jsonData.watch.map((cat: any) => ({ ...cat, type: 'VIDEO' })),
-  ]
-
-  // Prisma model fields only
-  const allowedFields = [
-    "id", "name", "slug", "type", "description", "color", "icon", "order", "isActive",
-    "metaTitle", "metaDescription", "canonicalUrl", "robots", "ogTitle", "ogDescription",
-    "ogUrl", "ogType", "ogSiteName", "ogImages", "twitterCard", "twitterSite", "twitterTitle",
-    "twitterDescription", "twitterImages", "tooltip", "accessibleLabel", "schema", "postCount"
-  ]
-
   for (const cat of categories) {
-    // Map title -> name, and only use allowed fields for upsert
-    const mapped: any = { ...cat, name: cat.title }
-    delete mapped.title
-
-    // Remove any keys not in Prisma schema
-    Object.keys(mapped).forEach(key => {
-      if (!allowedFields.includes(key)) {
-        delete mapped[key]
-      }
-    })
-
     await prisma.category.upsert({
-      where: { slug: mapped.slug },   // Use slug as unique key!
-      update: mapped,
-      create: mapped,
+      // KEY: Compound unique needs this exact shape!
+      where: { slug_type: { slug: cat.slug, type: cat.type } },
+      update: cat,
+      create: cat,
     })
   }
 

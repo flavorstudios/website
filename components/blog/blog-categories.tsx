@@ -18,7 +18,11 @@ interface BlogCategoriesProps {
   onCategoryChange?: (category: string) => void
 }
 
-export function BlogCategories({ categories = [], activeCategory = "all", onCategoryChange }: BlogCategoriesProps) {
+export function BlogCategories({
+  categories = [],
+  activeCategory = "all",
+  onCategoryChange,
+}: BlogCategoriesProps) {
   const [selectedCategory, setSelectedCategory] = useState(activeCategory)
 
   useEffect(() => {
@@ -30,16 +34,11 @@ export function BlogCategories({ categories = [], activeCategory = "all", onCate
     onCategoryChange?.(categorySlug)
   }
 
-  // Default categories if none provided
-  const defaultCategories: Category[] = [
-    { id: "1", name: "All", slug: "all", count: 0 },
-    { id: "2", name: "Anime News", slug: "anime-news", count: 0 },
-    { id: "3", name: "Reviews", slug: "reviews", count: 0 },
-    { id: "4", name: "Behind the Scenes", slug: "behind-the-scenes", count: 0 },
-    { id: "5", name: "Tutorials", slug: "tutorials", count: 0 },
+  // Only use "All" as a minimal fallback if no categories loaded at all
+  const fallbackCategories: Category[] = [
+    { id: "all", name: "All", slug: "all", count: undefined },
   ]
-
-  const displayCategories = categories.length > 0 ? categories : defaultCategories
+  const displayCategories = categories.length > 0 ? categories : fallbackCategories
 
   return (
     <div className="mb-8">
@@ -54,7 +53,7 @@ export function BlogCategories({ categories = [], activeCategory = "all", onCate
             className="flex items-center gap-2"
           >
             {category.name}
-            {category.count !== undefined && category.count > 0 && (
+            {typeof category.count === "number" && category.count > 0 && (
               <Badge variant="secondary" className="ml-1 text-xs">
                 {category.count}
               </Badge>

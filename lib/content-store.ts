@@ -74,11 +74,7 @@ export interface SiteStats {
   lastUpdated: string
 }
 
-// EXACT CATEGORIES from your screenshot - Episodes, Shorts, Behind the Scenes, Tutorials
-export const VALID_CATEGORIES = ["Episodes", "Shorts", "Behind the Scenes", "Tutorials"]
-
-export const VALID_BLOG_CATEGORIES = VALID_CATEGORIES
-export const VALID_WATCH_CATEGORIES = VALID_CATEGORIES
+// ----------- DATA DIR HELPERS -----------
 
 async function ensureDataDir() {
   try {
@@ -122,37 +118,35 @@ async function writeSingleJsonFile<T>(filename: string, data: T): Promise<void> 
   await fs.writeFile(filePath, JSON.stringify(data, null, 2))
 }
 
-// Get valid categories dynamically with fallback to static
+// ----------- CATEGORY HELPERS -----------
+
+// Always fetch categories from Prisma now—no fallback constants
 async function getValidBlogCategories(): Promise<string[]> {
   try {
     const categories = await categoryStore.getByType("blog")
-    if (categories.length > 0) {
-      return categories.filter((cat) => cat.isActive).map((cat) => cat.name)
-    }
+    return categories.filter((cat) => cat.isActive).map((cat) => cat.name)
   } catch (error) {
-    console.warn("Failed to load dynamic blog categories, using static fallback")
+    console.warn("Failed to load blog categories from Prisma:", error)
+    return []
   }
-  return VALID_BLOG_CATEGORIES
 }
 
 async function getValidVideoCategories(): Promise<string[]> {
   try {
     const categories = await categoryStore.getByType("video")
-    if (categories.length > 0) {
-      return categories.filter((cat) => cat.isActive).map((cat) => cat.name)
-    }
+    return categories.filter((cat) => cat.isActive).map((cat) => cat.name)
   } catch (error) {
-    console.warn("Failed to load dynamic video categories, using static fallback")
+    console.warn("Failed to load video categories from Prisma:", error)
+    return []
   }
-  return VALID_WATCH_CATEGORIES
 }
 
-// Blog Store
+// ----------- BLOG STORE -----------
+
 export const blogStore = {
   async getAll(): Promise<BlogPost[]> {
     const posts = await readJsonFile<BlogPost>("blogs.json")
     const validCategories = await getValidBlogCategories()
-    // Filter out any posts with invalid categories
     return posts.filter((post) => validCategories.includes(post.category))
   },
 
@@ -180,12 +174,10 @@ export const blogStore = {
   },
 
   async create(post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "views">): Promise<BlogPost> {
-    // Validate category
     const validCategories = await getValidBlogCategories()
     if (!validCategories.includes(post.category)) {
       throw new Error(`Invalid blog category: ${post.category}. Valid categories: ${validCategories.join(", ")}`)
     }
-
     const posts = await this.getAllRaw()
     const newPost: BlogPost = {
       ...post,
@@ -196,44 +188,35 @@ export const blogStore = {
     }
     posts.unshift(newPost)
     await writeJsonFile("blogs.json", posts)
-
-    // Update category post counts if dynamic categories are available
     try {
       await categoryStore.updatePostCounts()
     } catch (error) {
       console.warn("Failed to update category post counts")
     }
-
     return newPost
   },
 
   async update(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
-    // Validate category if being updated
     if (updates.category) {
       const validCategories = await getValidBlogCategories()
       if (!validCategories.includes(updates.category)) {
         throw new Error(`Invalid blog category: ${updates.category}. Valid categories: ${validCategories.join(", ")}`)
       }
     }
-
     const posts = await this.getAllRaw()
     const index = posts.findIndex((p) => p.id === id)
     if (index === -1) return null
-
     posts[index] = {
       ...posts[index],
       ...updates,
       updatedAt: new Date().toISOString(),
     }
     await writeJsonFile("blogs.json", posts)
-
-    // Update category post counts if dynamic categories are available
     try {
       await categoryStore.updatePostCounts()
     } catch (error) {
       console.warn("Failed to update category post counts")
     }
-
     return posts[index]
   },
 
@@ -242,14 +225,11 @@ export const blogStore = {
     const filtered = posts.filter((p) => p.id !== id)
     if (filtered.length === posts.length) return false
     await writeJsonFile("blogs.json", filtered)
-
-    // Update category post counts if dynamic categories are available
     try {
       await categoryStore.updatePostCounts()
     } catch (error) {
       console.warn("Failed to update category post counts")
     }
-
     return true
   },
 
@@ -263,12 +243,12 @@ export const blogStore = {
   },
 }
 
-// Video Store
+// ----------- VIDEO STORE -----------
+
 export const videoStore = {
   async getAll(): Promise<Video[]> {
     const videos = await readJsonFile<Video>("videos.json")
     const validCategories = await getValidVideoCategories()
-    // Filter out any videos with invalid categories
     return videos.filter((video) => validCategories.includes(video.category))
   },
 
@@ -296,20 +276,15 @@ export const videoStore = {
   },
 
   async create(video: Omit<Video, "id" | "createdAt" | "updatedAt" | "views">): Promise<Video> {
-    // Validate category
     const validCategories = await getValidVideoCategories()
     if (!validCategories.includes(video.category)) {
       throw new Error(`Invalid video category: ${video.category}. Valid categories: ${validCategories.join(", ")}`)
     }
-
     const videos = await this.getAllRaw()
-
-    // Generate slug if not provided
     const slug = video.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
-
     const newVideo: Video = {
       ...video,
       id: `video_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -320,44 +295,35 @@ export const videoStore = {
     }
     videos.unshift(newVideo)
     await writeJsonFile("videos.json", videos)
-
-    // Update category post counts if dynamic categories are available
     try {
       await categoryStore.updatePostCounts()
     } catch (error) {
       console.warn("Failed to update category post counts")
     }
-
     return newVideo
   },
 
   async update(id: string, updates: Partial<Video>): Promise<Video | null> {
-    // Validate category if being updated
     if (updates.category) {
       const validCategories = await getValidVideoCategories()
       if (!validCategories.includes(updates.category)) {
         throw new Error(`Invalid video category: ${updates.category}. Valid categories: ${validCategories.join(", ")}`)
       }
     }
-
     const videos = await this.getAllRaw()
     const index = videos.findIndex((v) => v.id === id)
     if (index === -1) return null
-
     videos[index] = {
       ...videos[index],
       ...updates,
       updatedAt: new Date().toISOString(),
     }
     await writeJsonFile("videos.json", videos)
-
-    // Update category post counts if dynamic categories are available
     try {
       await categoryStore.updatePostCounts()
     } catch (error) {
       console.warn("Failed to update category post counts")
     }
-
     return videos[index]
   },
 
@@ -366,19 +332,17 @@ export const videoStore = {
     const filtered = videos.filter((v) => v.id !== id)
     if (filtered.length === videos.length) return false
     await writeJsonFile("videos.json", filtered)
-
-    // Update category post counts if dynamic categories are available
     try {
       await categoryStore.updatePostCounts()
     } catch (error) {
       console.warn("Failed to update category post counts")
     }
-
     return true
   },
 }
 
-// Page Content Store
+// ----------- PAGE CONTENT STORE -----------
+
 export const pageStore = {
   async getAll(): Promise<PageContent[]> {
     return readJsonFile<PageContent>("pages.json")
@@ -393,7 +357,6 @@ export const pageStore = {
   async update(page: string, section: string, content: Record<string, any>, updatedBy: string): Promise<PageContent> {
     const pages = await this.getAll()
     const index = pages.findIndex((p) => p.page === page && p.section === section)
-
     const updatedPage: PageContent = {
       id: `${page}_${section}`,
       page,
@@ -402,19 +365,18 @@ export const pageStore = {
       updatedAt: new Date().toISOString(),
       updatedBy,
     }
-
     if (index === -1) {
       pages.push(updatedPage)
     } else {
       pages[index] = updatedPage
     }
-
     await writeJsonFile("pages.json", pages)
     return updatedPage
   },
 }
 
-// Site Stats Store
+// ----------- SITE STATS STORE -----------
+
 export const statsStore = {
   async get(): Promise<SiteStats> {
     const stats = await readSingleJsonFile<SiteStats>("stats.json")
@@ -441,7 +403,8 @@ export const statsStore = {
   },
 }
 
-// Comment Store
+// ----------- COMMENT STORE -----------
+
 export const commentStore = {
   async getAll(): Promise<Comment[]> {
     return readJsonFile<Comment>("comments.json")
@@ -468,7 +431,6 @@ export const commentStore = {
     const comments = await this.getAll()
     const index = comments.findIndex((c) => c.id === id)
     if (index === -1) return null
-
     comments[index].status = status
     await writeJsonFile("comments.json", comments)
     return comments[index]
@@ -483,33 +445,28 @@ export const commentStore = {
   },
 }
 
-// Backward compatibility: Keep the old function name
+// ----------- DATA INITIALIZER -----------
+
 export async function initializeRealData() {
   return initializeCleanData()
 }
 
-// Initialize with clean data (no dummy content)
 export async function initializeCleanData() {
   try {
-    // Try to initialize dynamic categories
     const { initializeDefaultCategories } = await import("./category-store")
     await initializeDefaultCategories()
   } catch (error) {
-    console.warn("Failed to initialize dynamic categories, using static categories")
+    console.warn("Failed to initialize dynamic categories from Prisma")
   }
 
   const blogs = await blogStore.getAll()
   const videos = await videoStore.getAll()
 
-  // Only initialize if completely empty
   if (blogs.length === 0 && videos.length === 0) {
-    // Initialize empty files
     await writeJsonFile("blogs.json", [])
     await writeJsonFile("videos.json", [])
     await writeJsonFile("comments.json", [])
     await writeJsonFile("pages.json", [])
-
-    // Initialize stats
     await statsStore.update({
       youtubeSubscribers: "500K+",
       originalEpisodes: "50+",

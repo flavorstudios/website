@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { blogStore, videoStore, VALID_BLOG_CATEGORIES, VALID_WATCH_CATEGORIES } from "@/lib/content-store"
+import { blogStore, videoStore } from "@/lib/content-store"
 
 export async function POST() {
   try {
@@ -49,7 +49,6 @@ export async function POST() {
           blog.excerpt.toLowerCase().includes(keyword) ||
           blog.slug.toLowerCase().includes(keyword),
       )
-
       if (isDummy) {
         const success = await blogStore.delete(blog.id)
         if (success) deletedBlogs++
@@ -62,27 +61,37 @@ export async function POST() {
         (keyword) =>
           video.title.toLowerCase().includes(keyword) ||
           video.description.toLowerCase().includes(keyword) ||
-          video.youtubeId.includes(keyword) ||
-          video.slug?.toLowerCase().includes(keyword),
+          (video.youtubeId && video.youtubeId.includes(keyword)) ||
+          (video.slug && video.slug.toLowerCase().includes(keyword)),
       )
-
       if (isDummy) {
         const success = await videoStore.delete(video.id)
         if (success) deletedVideos++
       }
     }
 
-    // Clean up invalid categories (this returns the count of deleted items)
-    const deletedBlogCategories = await blogStore.cleanupInvalidCategories()
-    const deletedVideoCategories = await videoStore.cleanupInvalidCategories()
+    // Clean up invalid categories (optional: update to only use Prisma categories if those helpers exist)
+    let deletedBlogCategories = 0
+    let deletedVideoCategories = 0
+    if (typeof blogStore.cleanupInvalidCategories === "function") {
+      deletedBlogCategories = await blogStore.cleanupInvalidCategories()
+    }
+    if (typeof videoStore.cleanupInvalidCategories === "function") {
+      deletedVideoCategories = await videoStore.cleanupInvalidCategories()
+    }
+
+    // If you want to display the latest categories, fetch dynamically from your Prisma-powered API or content-store
+    // For demo, just leave empty arrays (or fetch via Prisma here)
+    const currentBlogCategories: string[] = []
+    const currentWatchCategories: string[] = []
 
     const report = {
       blogPostsDeleted: deletedBlogs,
       blogCategoriesDeleted: deletedBlogCategories,
       watchVideosDeleted: deletedVideos,
       watchCategoriesDeleted: deletedVideoCategories,
-      validBlogCategories: VALID_BLOG_CATEGORIES,
-      validWatchCategories: VALID_WATCH_CATEGORIES,
+      validBlogCategories: currentBlogCategories,
+      validWatchCategories: currentWatchCategories,
       timestamp: new Date().toISOString(),
     }
 

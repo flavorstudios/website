@@ -9,20 +9,6 @@ export interface DynamicCategoriesResult {
   videoCategories: CategoryData[]
 }
 
-// Static categories that ALWAYS appear - matching your screenshot exactly
-const STATIC_CATEGORIES: CategoryData[] = [
-  { name: "Anime News", slug: "anime-news", count: 0 },
-  { name: "Reviews", slug: "reviews", count: 0 },
-  { name: "Behind the Scenes", slug: "behind-the-scenes", count: 0 },
-  { name: "Tutorials", slug: "tutorials", count: 0 },
-]
-
-// Fallback categories for when API calls fail
-export const fallbackCategories: DynamicCategoriesResult = {
-  blogCategories: STATIC_CATEGORIES,
-  videoCategories: STATIC_CATEGORIES,
-}
-
 // Utility functions
 export function createCategorySlug(name: string): string {
   return name
@@ -42,108 +28,46 @@ export function formatCategoryName(slug: string): string {
     .join(" ")
 }
 
-// Simple function that works without environment variables
-export async function getCategoriesWithFallback(): Promise<DynamicCategoriesResult> {
+// Main function: always tries to fetch from API (Prisma-backed)
+export async function getDynamicCategories(): Promise<DynamicCategoriesResult> {
   let blogCategories: CategoryData[] = []
   let videoCategories: CategoryData[] = []
 
   try {
-    // Use relative URLs that work in all environments
-    const [blogsResponse, videosResponse] = await Promise.allSettled([
-      fetch("/api/admin/blogs", {
-        cache: "no-store",
-        next: { revalidate: 0 },
-      }).catch(() => null),
-      fetch("/api/admin/videos", {
-        cache: "no-store",
-        next: { revalidate: 0 },
-      }).catch(() => null),
-    ])
-
-    // Process blog categories
-    if (blogsResponse.status === "fulfilled" && blogsResponse.value?.ok) {
-      try {
-        const blogsData = await blogsResponse.value.json()
-        const posts = blogsData.posts || []
-
-        if (posts.length > 0) {
-          const categoryMap = new Map<string, number>()
-
-          posts
-            .filter((post: any) => post.status === "published")
-            .forEach((post: any) => {
-              if (post.category) {
-                const slug = createCategorySlug(post.category)
-                categoryMap.set(slug, (categoryMap.get(slug) || 0) + 1)
-              }
-            })
-
-          if (categoryMap.size > 0) {
-            blogCategories = Array.from(categoryMap.entries()).map(([slug, count]) => ({
-              name: formatCategoryName(slug),
-              slug,
-              count,
-            }))
-
-            blogCategories.sort((a, b) => {
-              if (b.count !== a.count) return b.count - a.count
-              return a.name.localeCompare(b.name)
-            })
-          }
-        }
-      } catch (error) {
-        console.warn("Error processing blog categories:", error)
-      }
-    }
-
-    // Process video categories
-    if (videosResponse.status === "fulfilled" && videosResponse.value?.ok) {
-      try {
-        const videosData = await videosResponse.value.json()
-        const videos = videosData.videos || []
-
-        if (videos.length > 0) {
-          const categoryMap = new Map<string, number>()
-
-          videos
-            .filter((video: any) => video.status === "published")
-            .forEach((video: any) => {
-              if (video.category) {
-                const slug = createCategorySlug(video.category)
-                categoryMap.set(slug, (categoryMap.get(slug) || 0) + 1)
-              }
-            })
-
-          if (categoryMap.size > 0) {
-            videoCategories = Array.from(categoryMap.entries()).map(([slug, count]) => ({
-              name: formatCategoryName(slug),
-              slug,
-              count,
-            }))
-
-            videoCategories.sort((a, b) => {
-              if (b.count !== a.count) return b.count - a.count
-              return a.name.localeCompare(b.name)
-            })
-          }
-        }
-      } catch (error) {
-        console.warn("Error processing video categories:", error)
-      }
+    // Fetch blog categories from API (should return array of categories from Prisma)
+    const blogRes = await fetch("/api/admin/categories?type=blog", { cache: "no-store" })
+    if (blogRes.ok) {
+      const blogs = await blogRes.json()
+      blogCategories = (Array.isArray(blogs) ? blogs : []).map((cat: any) => ({
+        name: cat.name,
+        slug: cat.slug,
+        count: cat.postCount ?? cat.count ?? 0,
+      }))
     }
   } catch (error) {
-    console.warn("Failed to fetch dynamic categories, using static fallback:", error)
+    console.warn("Failed to fetch blog categories from Prisma:", error)
   }
 
-  // Return dynamic categories if available, otherwise use static fallback
+  try {
+    // Fetch video categories from API (should return array of categories from Prisma)
+    const videoRes = await fetch("/api/admin/categories?type=video", { cache: "no-store" })
+    if (videoRes.ok) {
+      const videos = await videoRes.json()
+      videoCategories = (Array.isArray(videos) ? videos : []).map((cat: any) => ({
+        name: cat.name,
+        slug: cat.slug,
+        count: cat.postCount ?? cat.count ?? 0,
+      }))
+    }
+  } catch (error) {
+    console.warn("Failed to fetch video categories from Prisma:", error)
+  }
+
   return {
-    blogCategories: blogCategories.length > 0 ? blogCategories : STATIC_CATEGORIES,
-    videoCategories: videoCategories.length > 0 ? videoCategories : STATIC_CATEGORIES,
+    blogCategories,
+    videoCategories,
   }
 }
 
-// Server-side compatible function (alias for client function)
-export const getDynamicCategories = getCategoriesWithFallback
-
-// Client-side only function (alias for consistency)
-export const getDynamicCategoriesClient = getCategoriesWithFallback
+// Alias for legacy compatibility
+export const getDynamicCategoriesClient = getDynamicCategories

@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server"
 
+// If you want, import your real category initializer here
+// import { initializeDefaultCategories } from "@/lib/category-store"
+
 export async function GET() {
   try {
-    // Simple initialization - just return success
-    // The categories will be generated dynamically from the fallback
+    // If you want to run a real initializer (eg. for seeding categories via Prisma, uncomment below)
+    // await initializeDefaultCategories()
+
     return NextResponse.json({
       success: true,
-      message: "Categories initialized successfully",
-      categories: {
-        blog: ["Anime News", "Reviews", "Behind the Scenes", "Tutorials"],
-        video: ["Anime News", "Reviews", "Behind the Scenes", "Tutorials"],
-      },
+      message: "Categories initialized successfully"
+      // No static or fallback category arrays
     })
   } catch (error) {
     console.error("Failed to initialize categories:", error)

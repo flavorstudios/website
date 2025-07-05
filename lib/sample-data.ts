@@ -1,26 +1,4 @@
-export const validBlogCategories = [
-  "Anime Reviews",
-  "Storytelling & Themes",
-  "Behind the Frames",
-  "Creator Spotlights",
-  "Life Through Anime",
-  "Creative Process",
-  "Anime News",
-  "Streaming Updates",
-  "Industry Buzz",
-  "New & Upcoming Releases",
-  "Voice Actor & Crew Updates",
-  "Cultural Highlights",
-]
-
-export const validWatchCategories = [
-  "Original Anime",
-  "Short Films",
-  "Behind the Scenes",
-  "Tutorials & Guides",
-  "Anime Trailers",
-  "YouTube Highlights",
-]
+// All categories are now managed dynamically via Prisma—no hardcoded validBlogCategories or validWatchCategories!
 
 export const sampleBlogs: any[] = []
 

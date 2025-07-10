@@ -10,7 +10,7 @@ export async function GET() {
     // Fetch blog categories (type: BLOG)
     const blogCategories = await prisma.category.findMany({
       where: { type: CategoryType.BLOG, isActive: true },
-      orderBy: { order: { asc: "asc" } }, // Adjust if your schema just uses a string
+      orderBy: { order: "asc" }, // <-- Correct: string, not object
       select: {
         name: true,
         slug: true,
@@ -21,7 +21,7 @@ export async function GET() {
     // Fetch video categories (type: VIDEO)
     const videoCategories = await prisma.category.findMany({
       where: { type: CategoryType.VIDEO, isActive: true },
-      orderBy: { order: { asc: "asc" } },
+      orderBy: { order: "asc" }, // <-- Correct here too!
       select: {
         name: true,
         slug: true,

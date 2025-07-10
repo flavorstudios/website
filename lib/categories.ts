@@ -1,4 +1,4 @@
-// lib/categories.ts or types/category.ts
+// lib/categories.ts
 
 // --------- CATEGORY TYPE ---------
 export interface Category {
@@ -7,14 +7,15 @@ export interface Category {
   slug: string
   description?: string
   count?: number
-  type?: string // Optional: for future filtering (e.g., "BLOG" or "VIDEO")
+  type?: string // Optional: for future filtering ("BLOG" | "VIDEO")
 }
 
-// --------- CATEGORY FETCH (API-DRIVEN, NO HARDCODED FALLBACK) ---------
+// --------- CATEGORY FETCH (DEPRECATED, MERGES BLOG & VIDEO) ---------
 
 /**
- * DEPRECATED for menu/category logic: Use /lib/dynamic-categories.ts for blog/video separation.
- * This function merges blog and video categories if API returns them separately.
+ * @deprecated
+ * Use /lib/dynamic-categories.ts for blog/video separation.
+ * This legacy function merges blog and video categories if API returns them separately.
  */
 export async function getDynamicCategories(): Promise<Category[]> {
   try {
@@ -22,13 +23,11 @@ export async function getDynamicCategories(): Promise<Category[]> {
     if (response.ok) {
       const data = await response.json();
 
-      // If API returns flat array (legacy)
-      if (Array.isArray(data)) {
-        return data;
-      }
+      // If API returns a flat array (legacy)
+      if (Array.isArray(data)) return data;
 
       // If API returns { blogCategories, videoCategories }
-      if (data.blogCategories || data.videoCategories) {
+      if ("blogCategories" in data || "videoCategories" in data) {
         const blog = Array.isArray(data.blogCategories) ? data.blogCategories : [];
         const video = Array.isArray(data.videoCategories) ? data.videoCategories : [];
         return [...blog, ...video];
@@ -47,7 +46,8 @@ export async function getDynamicCategories(): Promise<Category[]> {
 // --------- DEPRECATED: STATIC CATEGORY FETCH ---------
 
 /**
- * @deprecated Always returns []. Update all components to use getDynamicCategories instead.
+ * @deprecated
+ * Always returns []. Migrate to dynamic category fetch.
  */
 export function getStaticCategories(): Category[] {
   return [];

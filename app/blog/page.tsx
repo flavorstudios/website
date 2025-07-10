@@ -67,7 +67,7 @@ const schema = getSchema({
 // --- DATA FETCHING ---
 async function getBlogData() {
   try {
-    // Always fetch blogCategories (never mixed with video!)
+    // Only blogCategories, never mix with video!
     const [posts, { blogCategories }] = await Promise.all([
       blogStore.getPublished(),
       getDynamicCategories(),

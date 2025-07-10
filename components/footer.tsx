@@ -18,7 +18,7 @@ export function Footer() {
   ]
 
   const companyLinks = [
-    { name: "Home", href: "/" },
+    { name: "Studio", href: "/" },
     { name: "About", href: "/about" },
     { name: "Career", href: "/career" },
     { name: "Contact", href: "/contact" },

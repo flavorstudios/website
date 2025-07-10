@@ -17,8 +17,8 @@ export function Footer() {
     { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/", icon: Users },
   ]
 
-  const studioLinks = [
-    { name: "Studio", href: "/" },
+  const companyLinks = [
+    { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Career", href: "/career" },
     { name: "Contact", href: "/contact" },

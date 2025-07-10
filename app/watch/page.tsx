@@ -1,5 +1,3 @@
-// app/watch/page.tsx
-
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_LOGO_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
@@ -52,18 +50,12 @@ const schema = getSchema({
   name: `${SITE_NAME} Videos`,
   description: `Watch original anime, studio films, and exclusive video content from ${SITE_NAME}. Discover our creative world—stream the latest now.`,
   url: getCanonicalUrl("/watch"),
-  // REMOVED: Explicit publisher object. The getSchema utility is now responsible
-  // for adding the correct publisher (with ImageObject for logo) for WebPage types.
-  // publisher: {
-  //   name: SITE_NAME,
-  //   logo: SITE_LOGO_URL,
-  // },
 });
 
-// --- DATA FETCHING ---
 async function getWatchData() {
   try {
-    const [videosResponse, { videoCategories }] = await Promise.all([
+    // Fetch videos and categories in parallel
+    const [videosRes, { videoCategories }] = await Promise.all([
       fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`, {
         next: { revalidate: 300 },
       }).catch(() => ({ ok: false, json: () => Promise.resolve({ videos: [] }) })),
@@ -71,12 +63,13 @@ async function getWatchData() {
     ]);
 
     let videos = [];
-    if (videosResponse.ok) {
-      const videosData = await videosResponse.json();
+    if (videosRes.ok) {
+      const videosData = await videosRes.json();
+      // Only use videos marked as published
       videos = (videosData.videos || []).filter((video: any) => video.status === "published");
     }
 
-    return { videos, categories: videoCategories };
+    return { videos, categories: videoCategories || [] };
   } catch (error) {
     console.error("Failed to fetch watch data:", error);
     return { videos: [], categories: [] };
@@ -94,14 +87,15 @@ export default async function WatchPage({
   const currentPage = Number.parseInt(searchParams.page || "1");
   const videosPerPage = 12;
 
+  // Slug normalization helper
+  const normalizeSlug = (name: string) =>
+    name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
   const filteredVideos =
     selectedCategory === "all"
       ? videos
       : videos.filter((video: any) => {
-          const categorySlug = video.category
-            ?.toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "");
+          const categorySlug = normalizeSlug(video.category);
           return categorySlug === selectedCategory || video.category === selectedCategory;
         });
 

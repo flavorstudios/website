@@ -36,71 +36,71 @@ export interface Category {
   slug: string
   description?: string
   count?: number
-  type?: string // Add if your API provides type ("BLOG" | "VIDEO")
+  type?: string // ("BLOG" | "VIDEO"), if provided by your API
 }
 
-// --------- CATEGORY FETCH (PRISMA-ONLY, API-DRIVEN) ---------
-// Always fetch categories from API (no local fallback)
+// --------- CATEGORY FETCH (UNIFIED & API-DRIVEN) ---------
 
+/**
+ * DEPRECATED: Use getDynamicCategories from /lib/dynamic-categories.ts for full category details and separation.
+ * This function merges blog and video categories for legacy use only.
+ */
 export async function getDynamicCategories(): Promise<Category[]> {
   try {
-    const response = await fetch("/api/categories", { // Updated to /api/categories
-      cache: "no-store",
-    })
+    const response = await fetch("/api/categories", { cache: "no-store" });
     if (response.ok) {
-      const data = await response.json()
-      // Support both new ({ blogCategories, videoCategories }) and old ([...categories]) API shapes
-      if (Array.isArray(data)) return data
+      const data = await response.json();
+      // If API returns { blogCategories, videoCategories }, merge them.
       if (data.blogCategories || data.videoCategories) {
-        const blog = Array.isArray(data.blogCategories) ? data.blogCategories : []
-        const video = Array.isArray(data.videoCategories) ? data.videoCategories : []
-        return [...blog, ...video]
+        const blog = Array.isArray(data.blogCategories) ? data.blogCategories : [];
+        const video = Array.isArray(data.videoCategories) ? data.videoCategories : [];
+        return [...blog, ...video];
       }
-      return []
+      // If API returns a flat array, return as-is.
+      if (Array.isArray(data)) return data;
+      return [];
     }
   } catch (error) {
-    console.warn("Failed to fetch dynamic categories from Prisma:", error)
+    console.warn("Failed to fetch dynamic categories from Prisma:", error);
   }
-  return []
+  return [];
 }
 
-// --------- BLOG POSTS FETCH (PRISMA-ONLY, API-DRIVEN) ---------
+// --------- BLOG POSTS FETCH (API-DRIVEN) ---------
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
-    const response = await fetch("/api/admin/blogs", {
-      cache: "no-store",
-    })
+    const response = await fetch("/api/admin/blogs", { cache: "no-store" });
     if (response.ok) {
-      const posts = await response.json()
-      return Array.isArray(posts) ? posts : []
+      const posts = await response.json();
+      return Array.isArray(posts) ? posts : [];
     }
   } catch (error) {
-    console.warn("Failed to fetch blog posts:", error)
+    console.warn("Failed to fetch blog posts:", error);
   }
-  return []
+  return [];
 }
 
-// --------- VIDEOS FETCH (PRISMA-ONLY, API-DRIVEN) ---------
+// --------- VIDEOS FETCH (API-DRIVEN) ---------
 
 export async function getVideos(): Promise<Video[]> {
   try {
-    const response = await fetch("/api/admin/videos", {
-      cache: "no-store",
-    })
+    const response = await fetch("/api/admin/videos", { cache: "no-store" });
     if (response.ok) {
-      const videos = await response.json()
-      return Array.isArray(videos) ? videos : []
+      const videos = await response.json();
+      return Array.isArray(videos) ? videos : [];
     }
   } catch (error) {
-    console.warn("Failed to fetch videos:", error)
+    console.warn("Failed to fetch videos:", error);
   }
-  return []
+  return [];
 }
 
 // --------- DEPRECATED: STATIC CATEGORY FETCH ---------
 
-/** @deprecated Use getDynamicCategories instead. Always returns []. */
+/**
+ * @deprecated Use getDynamicCategories from /lib/dynamic-categories.ts. Always returns [].
+ */
 export function getStaticCategories(): Category[] {
-  return []
+  return [];
 }

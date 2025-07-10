@@ -1,5 +1,6 @@
-// types/category.ts or lib/categories.ts
+// lib/categories.ts or types/category.ts
 
+// --------- CATEGORY TYPE ---------
 export interface Category {
   id: string
   name: string
@@ -9,39 +10,45 @@ export interface Category {
   type?: string // Optional: for future filtering (e.g., "BLOG" or "VIDEO")
 }
 
-// Always fetch categories from API/Prisma – no hardcoded fallback.
+// --------- CATEGORY FETCH (API-DRIVEN, NO HARDCODED FALLBACK) ---------
+
+/**
+ * DEPRECATED for menu/category logic: Use /lib/dynamic-categories.ts for blog/video separation.
+ * This function merges blog and video categories if API returns them separately.
+ */
 export async function getDynamicCategories(): Promise<Category[]> {
   try {
-    const response = await fetch("/api/categories", { // Update endpoint as per latest API design
-      cache: "no-store",
-    })
-
+    const response = await fetch("/api/categories", { cache: "no-store" });
     if (response.ok) {
-      // Supports both array and object (legacy and new API)
-      const data = await response.json()
+      const data = await response.json();
 
+      // If API returns flat array (legacy)
       if (Array.isArray(data)) {
-        // Legacy: return as is
-        return data
+        return data;
       }
-      // New: flatten blog + video categories if returned as object
+
+      // If API returns { blogCategories, videoCategories }
       if (data.blogCategories || data.videoCategories) {
-        const blog = Array.isArray(data.blogCategories) ? data.blogCategories : []
-        const video = Array.isArray(data.videoCategories) ? data.videoCategories : []
-        return [...blog, ...video]
+        const blog = Array.isArray(data.blogCategories) ? data.blogCategories : [];
+        const video = Array.isArray(data.videoCategories) ? data.videoCategories : [];
+        return [...blog, ...video];
       }
+
       // Edge case: fallback
-      return []
+      return [];
     }
   } catch (error) {
-    console.warn("Failed to fetch dynamic categories from Prisma:", error)
+    console.warn("Failed to fetch dynamic categories from Prisma:", error);
   }
-  // No fallback: return empty array if fetch fails.
-  return []
+  // No fallback: return empty array if fetch fails
+  return [];
 }
 
-// Deprecated: Always returns empty.
-// If any component uses getStaticCategories, update it to use getDynamicCategories instead.
+// --------- DEPRECATED: STATIC CATEGORY FETCH ---------
+
+/**
+ * @deprecated Always returns []. Update all components to use getDynamicCategories instead.
+ */
 export function getStaticCategories(): Category[] {
-  return []
+  return [];
 }

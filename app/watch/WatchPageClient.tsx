@@ -42,6 +42,7 @@ export function WatchPageClient({
 
   useEffect(() => {
     fetchWatchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchWatchData = async () => {
@@ -49,7 +50,7 @@ export function WatchPageClient({
       setLoading(true)
       const [videosResponse, categoriesResponse] = await Promise.all([
         fetch("/api/admin/videos", { cache: "no-store" }),
-        fetch("/api/admin/categories?type=video", { cache: "no-store" }),
+        fetch("/api/categories", { cache: "no-store" }),
       ])
 
       if (videosResponse.ok) {
@@ -60,7 +61,15 @@ export function WatchPageClient({
 
       if (categoriesResponse.ok) {
         const categoriesData = await categoriesResponse.json()
-        setCategories(categoriesData.categories || [])
+        // Pick videoCategories array from the canonical API
+        setCategories(
+          (categoriesData.videoCategories || []).map((cat: any) => ({
+            id: cat.id || cat.slug,
+            name: cat.name,
+            slug: cat.slug,
+            color: cat.color,
+          }))
+        )
       }
     } catch (error) {
       console.error("Failed to fetch watch data:", error)
@@ -70,7 +79,9 @@ export function WatchPageClient({
   }
 
   const filteredVideos =
-    selectedCategory === "all" ? videos : videos.filter((video) => video.category === selectedCategory)
+    selectedCategory === "all"
+      ? videos
+      : videos.filter((video) => video.category === selectedCategory || video.category === categories.find((c) => c.slug === selectedCategory)?.name)
 
   const featuredVideos = filteredVideos.filter((video) => video.featured)
   const regularVideos = filteredVideos.filter((video) => !video.featured)
@@ -86,17 +97,14 @@ export function WatchPageClient({
               <Video className="h-4 w-4" />
               Original Content & Series
             </div>
-
             {/* Gradient Heading */}
             <h1 className="text-5xl md:text-6xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800">
               Watch Our Stories
             </h1>
-
             {/* Italic Subtitle */}
             <p className="text-xl md:text-2xl text-gray-600 italic font-light max-w-3xl mx-auto">
               Bringing anime to life—one frame at a time.
             </p>
-
             {/* Stats */}
             <div className="mt-8 flex items-center justify-center gap-6 text-sm text-gray-500">
               <span className="flex items-center gap-2">
@@ -142,7 +150,9 @@ export function WatchPageClient({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-gray-900">
-              {selectedCategory === "all" ? "Latest Videos" : `${selectedCategory} Videos`}
+              {selectedCategory === "all"
+                ? "Latest Videos"
+                : `${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory} Videos`}
             </h2>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-500">
@@ -356,7 +366,7 @@ function CategoryFilter({ categories, selectedCategory }: CategoryFilterProps) {
       <SelectContent>
         <SelectItem value="all">All Categories</SelectItem>
         {categories.map((category) => (
-          <SelectItem key={category.id} value={category.name}>
+          <SelectItem key={category.id} value={category.slug}>
             {category.name}
           </SelectItem>
         ))}

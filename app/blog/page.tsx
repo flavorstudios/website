@@ -16,8 +16,7 @@ import { StructuredData } from "@/components/StructuredData";
 // --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
   title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
-  description:
-    `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
+  description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
   path: "/blog",
   robots: "index,follow",
   openGraph: {
@@ -53,8 +52,7 @@ const schema = getSchema({
   type: "WebPage",
   path: "/blog",
   title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
-  description:
-    `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
+  description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
   image: {
     url: `${SITE_URL}/cover.jpg`,
     width: 1200,
@@ -69,11 +67,12 @@ const schema = getSchema({
 // --- DATA FETCHING ---
 async function getBlogData() {
   try {
+    // Always fetch blogCategories (never mixed with video!)
     const [posts, { blogCategories }] = await Promise.all([
       blogStore.getPublished(),
       getDynamicCategories(),
     ]);
-    return { posts, categories: blogCategories };
+    return { posts, categories: blogCategories || [] };
   } catch (error) {
     console.error("Failed to fetch blog data:", error);
     return { posts: [], categories: [] };
@@ -90,14 +89,15 @@ export default async function BlogPage({
   const currentPage = Number.parseInt(searchParams.page || "1");
   const postsPerPage = 9;
 
+  // Clean/normalize the slug for filtering
+  const normalizeSlug = (name: string) =>
+    name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
   const filteredPosts =
     selectedCategory === "all"
       ? posts
       : posts.filter((post: any) => {
-          const categorySlug = post.category
-            ?.toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "");
+          const categorySlug = normalizeSlug(post.category);
           return categorySlug === selectedCategory;
         });
 
@@ -236,7 +236,7 @@ export default async function BlogPage({
   );
 }
 
-// --- COMPONENTS (unchanged, as before) ---
+// --- COMPONENTS (as before) ---
 
 function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
   return (

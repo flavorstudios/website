@@ -54,19 +54,22 @@ export function VideoManager() {
 
   useEffect(() => {
     loadData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadData = async () => {
     setLoading(true)
     try {
+      // Use unified categories endpoint
       const [videosRes, categoriesRes] = await Promise.all([
         fetch("/api/admin/videos"),
-        fetch("/api/admin/categories?type=video"),
+        fetch("/api/categories"),
       ])
       const videosData = (await videosRes.json()).videos || []
-      const categoriesData = (await categoriesRes.json()).categories || []
+      // Pick only video categories
+      const allCategories = (await categoriesRes.json()).videoCategories || []
       setVideos(videosData)
-      setCategories(categoriesData)
+      setCategories(allCategories)
     } catch (error) {
       console.error("Failed to load videos or categories:", error)
     } finally {
@@ -269,6 +272,7 @@ function VideoForm({
     if (categories.length > 0 && !formData.category) {
       setFormData((prev) => ({ ...prev, category: categories[0].name }))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories])
 
   const extractYouTubeId = (url: string) => {

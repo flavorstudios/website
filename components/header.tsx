@@ -13,7 +13,42 @@ interface Category {
   name: string
   slug: string
   count: number
-  type?: string // Not always needed but included for safety
+  type?: string
+}
+
+function ensureAllItem(
+  items: Category[],
+  label: string,
+  slug: string,
+  href: string,
+  description: string,
+  typeLabel: string
+) {
+  // Check if the 'All' category exists in DB (case-insensitive slug check)
+  const exists = items.some(
+    (cat) => cat.slug.toLowerCase() === slug.toLowerCase()
+  )
+  // If not present, add it manually
+  if (!exists) {
+    return [
+      {
+        label,
+        href,
+        description,
+      },
+      ...items.map((category) => ({
+        label: category.name,
+        href: `${href}?category=${category.slug}`,
+        description: `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
+      })),
+    ]
+  }
+  // If present, just map all categories as subitems (preserves DB order)
+  return items.map((category) => ({
+    label: category.name,
+    href: `${href}?category=${category.slug}`,
+    description: `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
+  }))
 }
 
 export function Header() {
@@ -34,51 +69,32 @@ export function Header() {
         const response = await fetch("/api/categories")
         const data = await response.json()
 
-        // If the endpoint returns { blogCategories, videoCategories }
         const blogCategories: Category[] = data.blogCategories ?? []
         const videoCategories: Category[] = data.videoCategories ?? []
 
+        const blogSubItems = ensureAllItem(
+          blogCategories,
+          "All Posts",
+          "all-posts",
+          "/blog",
+          "Browse all our blog content",
+          "posts"
+        )
+
+        const videoSubItems = ensureAllItem(
+          videoCategories,
+          "All Videos",
+          "all-videos",
+          "/watch",
+          "Browse our complete video library",
+          "videos"
+        )
+
         const dynamicMenuItems: MenuItem[] = [
-          {
-            label: "Home",
-            href: "/",
-          },
-          {
-            label: "Blog",
-            href: "/blog",
-            subItems: [
-              {
-                label: "All Posts",
-                href: "/blog",
-                description: "Browse all our blog content",
-              },
-              ...blogCategories.slice(0, 6).map((category) => ({
-                label: category.name,
-                href: `/blog?category=${category.slug}`,
-                description: `${category.name} posts${category.count > 0 ? ` (${category.count})` : ""}`,
-              })),
-            ],
-          },
-          {
-            label: "Watch",
-            href: "/watch",
-            subItems: [
-              {
-                label: "All Videos",
-                href: "/watch",
-                description: "Browse our complete video library",
-              },
-              ...videoCategories.slice(0, 6).map((category) => ({
-                label: category.name,
-                href: `/watch?category=${category.slug}`,
-                description: `${category.name} videos${category.count > 0 ? ` (${category.count})` : ""}`,
-              })),
-            ],
-          },
-          {
-            label: "Play",
-            href: "/play",
-          },
+          { label: "Home", href: "/" },
+          { label: "Blog", href: "/blog", subItems: blogSubItems },
+          { label: "Watch", href: "/watch", subItems: videoSubItems },
+          { label: "Play", href: "/play" },
           {
             label: "About",
             subItems: [
@@ -99,10 +115,7 @@ export function Header() {
               },
             ],
           },
-          {
-            label: "Contact",
-            href: "/contact",
-          },
+          { label: "Contact", href: "/contact" },
         ]
 
         setMenuItems(dynamicMenuItems)

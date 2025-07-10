@@ -10,7 +10,7 @@ export async function GET() {
     // Fetch blog categories (type: BLOG)
     const blogCategories = await prisma.category.findMany({
       where: { type: CategoryType.BLOG, isActive: true },
-      orderBy: { order: "asc" },
+      orderBy: { order: { asc: "asc" } }, // Adjust if your schema just uses a string
       select: {
         name: true,
         slug: true,
@@ -21,7 +21,7 @@ export async function GET() {
     // Fetch video categories (type: VIDEO)
     const videoCategories = await prisma.category.findMany({
       where: { type: CategoryType.VIDEO, isActive: true },
-      orderBy: { order: "asc" },
+      orderBy: { order: { asc: "asc" } },
       select: {
         name: true,
         slug: true,
@@ -29,7 +29,7 @@ export async function GET() {
       },
     })
 
-    // Response format matches what your front-end expects
+    // Response format matches front-end requirements
     return NextResponse.json({
       blogCategories: blogCategories.map((cat) => ({
         name: cat.name,
@@ -50,10 +50,10 @@ export async function GET() {
         videoCategories: [],
         error: "Failed to get categories",
       },
-      { status: 500 },
+      { status: 500 }
     )
   } finally {
-    // Safe disconnect
+    // Always disconnect Prisma after query
     await prisma.$disconnect()
   }
 }

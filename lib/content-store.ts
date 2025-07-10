@@ -5,6 +5,8 @@ import path from "path"
 const prisma = new PrismaClient()
 const DATA_DIR = path.join(process.cwd(), "content-data")
 
+// --- TYPES ---
+
 export interface BlogPost {
   id: string
   title: string
@@ -75,7 +77,7 @@ export interface SiteStats {
   lastUpdated: string
 }
 
-// ----------- DATA DIR HELPERS -----------
+// --- DATA DIR HELPERS ---
 
 async function ensureDataDir() {
   try {
@@ -119,7 +121,7 @@ async function writeSingleJsonFile<T>(filename: string, data: T): Promise<void> 
   await fs.writeFile(filePath, JSON.stringify(data, null, 2))
 }
 
-// ----------- CATEGORY HELPERS (PRISMA-ONLY) -----------
+// --- CATEGORY HELPERS (PRISMA ONLY, NO HARDCODED CATEGORIES) ---
 
 async function getValidBlogCategories(): Promise<string[]> {
   try {
@@ -149,7 +151,7 @@ async function getValidVideoCategories(): Promise<string[]> {
   }
 }
 
-// ----------- BLOG STORE -----------
+// --- BLOG STORE ---
 
 export const blogStore = {
   async getAll(): Promise<BlogPost[]> {
@@ -236,7 +238,7 @@ export const blogStore = {
   },
 }
 
-// ----------- VIDEO STORE -----------
+// --- VIDEO STORE ---
 
 export const videoStore = {
   async getAll(): Promise<Video[]> {
@@ -319,7 +321,7 @@ export const videoStore = {
   },
 }
 
-// ----------- PAGE CONTENT STORE -----------
+// --- PAGE CONTENT STORE ---
 
 export const pageStore = {
   async getAll(): Promise<PageContent[]> {
@@ -353,7 +355,7 @@ export const pageStore = {
   },
 }
 
-// ----------- SITE STATS STORE -----------
+// --- SITE STATS STORE ---
 
 export const statsStore = {
   async get(): Promise<SiteStats> {
@@ -381,7 +383,7 @@ export const statsStore = {
   },
 }
 
-// ----------- COMMENT STORE -----------
+// --- COMMENT STORE ---
 
 export const commentStore = {
   async getAll(): Promise<Comment[]> {
@@ -423,7 +425,7 @@ export const commentStore = {
   },
 }
 
-// ----------- DATA INITIALIZER -----------
+// --- DATA INITIALIZER ---
 
 export async function initializeRealData() {
   return initializeCleanData()

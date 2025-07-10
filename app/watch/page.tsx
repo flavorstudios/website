@@ -1,5 +1,5 @@
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL, SITE_LOGO_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,6 +52,24 @@ const schema = getSchema({
   url: getCanonicalUrl("/watch"),
 });
 
+// --- TYPES ---
+type VideoType = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  youtubeId?: string;
+  thumbnail?: string;
+  duration: string;
+  category: string;
+  tags: string[];
+  publishedAt: string;
+  views: number;
+  featured: boolean;
+  status: string;
+};
+
+// --- DATA FETCHING ---
 async function getWatchData() {
   try {
     // Fetch videos and categories in parallel
@@ -62,11 +80,11 @@ async function getWatchData() {
       getDynamicCategories(),
     ]);
 
-    let videos = [];
+    let videos: VideoType[] = [];
     if (videosRes.ok) {
       const videosData = await videosRes.json();
       // Only use videos marked as published
-      videos = (videosData.videos || []).filter((video: any) => video.status === "published");
+      videos = (videosData.videos || []).filter((video: VideoType) => video.status === "published");
     }
 
     return { videos, categories: videoCategories || [] };
@@ -94,7 +112,7 @@ export default async function WatchPage({
   const filteredVideos =
     selectedCategory === "all"
       ? videos
-      : videos.filter((video: any) => {
+      : videos.filter((video: VideoType) => {
           const categorySlug = normalizeSlug(video.category);
           return categorySlug === selectedCategory || video.category === selectedCategory;
         });
@@ -103,12 +121,12 @@ export default async function WatchPage({
   const startIndex = (currentPage - 1) * videosPerPage;
   const paginatedVideos = filteredVideos.slice(startIndex, startIndex + videosPerPage);
 
-  const featuredVideos = filteredVideos.filter((video: any) => video.featured).slice(0, 3);
-  const regularVideos = paginatedVideos.filter((video: any) => !video.featured);
+  const featuredVideos = filteredVideos.filter((video: VideoType) => video.featured).slice(0, 3);
+  const regularVideos = paginatedVideos.filter((video: VideoType) => !video.featured);
 
   // Analytics
-  const totalViews = videos.reduce((sum: number, video: any) => sum + (video.views || 0), 0);
-  const totalDuration = videos.reduce((sum: number, video: any) => {
+  const totalViews = videos.reduce((sum: number, video: VideoType) => sum + (video.views || 0), 0);
+  const totalDuration = videos.reduce((sum: number, video: VideoType) => {
     const duration = video.duration || "0:00";
     const [minutes, seconds] = duration.split(":").map(Number);
     return sum + (minutes || 0) + (seconds || 0) / 60;
@@ -156,7 +174,7 @@ export default async function WatchPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Featured Videos</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {featuredVideos.map((video: any, index: number) => (
+              {featuredVideos.map((video: VideoType, index: number) => (
                 <FeaturedVideoCard key={video.id} video={video} priority={index === 0} />
               ))}
             </div>
@@ -172,7 +190,7 @@ export default async function WatchPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                 {selectedCategory === "all"
                   ? "Latest Videos"
-                  : `${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory} Videos`}
+                  : `${categories.find((c: any) => c.slug === selectedCategory)?.name || selectedCategory} Videos`}
               </h2>
               <p className="text-gray-600 text-sm sm:text-base">
                 {filteredVideos.length} video{filteredVideos.length !== 1 ? "s" : ""} found
@@ -189,7 +207,7 @@ export default async function WatchPage({
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-                {regularVideos.map((video: any) => (
+                {regularVideos.map((video: VideoType) => (
                   <VideoCard key={video.id} video={video} />
                 ))}
               </div>
@@ -238,7 +256,7 @@ function StatCard({ label, value, color }: { label: string; value: string | numb
 }
 
 // --- FeaturedVideoCard ---
-function FeaturedVideoCard({ video, priority = false }: { video: any; priority?: boolean }) {
+function FeaturedVideoCard({ video, priority = false }: { video: VideoType; priority?: boolean }) {
   const thumbnailUrl =
     video.thumbnail ||
     (video.youtubeId ? `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg` : "/placeholder.svg?height=256&width=512&text=Featured+Video");
@@ -309,7 +327,7 @@ function FeaturedVideoCard({ video, priority = false }: { video: any; priority?:
 }
 
 // --- VideoCard ---
-function VideoCard({ video }: { video: any }) {
+function VideoCard({ video }: { video: VideoType }) {
   const thumbnailUrl =
     video.thumbnail ||
     (video.youtubeId ? `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg` : "/placeholder.svg?height=192&width=384&text=Video");

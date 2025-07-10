@@ -1,3 +1,7 @@
+// lib/data.ts or lib/dynamic-data.ts
+
+// --- DATA TYPES ---
+
 export interface BlogPost {
   id: string
   title: string
@@ -32,28 +36,36 @@ export interface Category {
   slug: string
   description?: string
   count?: number
+  type?: string // Add if your API provides type ("BLOG" | "VIDEO")
 }
 
-// --------- PRISMA-ONLY CATEGORY FETCH ---------
-// All categories must now be loaded dynamically via API/Prisma. No local fallback.
+// --------- CATEGORY FETCH (PRISMA-ONLY, API-DRIVEN) ---------
+// Always fetch categories from API (no local fallback)
 
 export async function getDynamicCategories(): Promise<Category[]> {
   try {
-    const response = await fetch("/api/admin/categories", {
+    const response = await fetch("/api/categories", { // Updated to /api/categories
       cache: "no-store",
     })
     if (response.ok) {
-      const categories = await response.json()
-      return Array.isArray(categories) ? categories : []
+      const data = await response.json()
+      // Support both new ({ blogCategories, videoCategories }) and old ([...categories]) API shapes
+      if (Array.isArray(data)) return data
+      if (data.blogCategories || data.videoCategories) {
+        const blog = Array.isArray(data.blogCategories) ? data.blogCategories : []
+        const video = Array.isArray(data.videoCategories) ? data.videoCategories : []
+        return [...blog, ...video]
+      }
+      return []
     }
   } catch (error) {
     console.warn("Failed to fetch dynamic categories from Prisma:", error)
   }
-  // No fallback! If failed, just return an empty array.
   return []
 }
 
-// --------- BLOG POSTS (from API/Prisma) ---------
+// --------- BLOG POSTS FETCH (PRISMA-ONLY, API-DRIVEN) ---------
+
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     const response = await fetch("/api/admin/blogs", {
@@ -69,7 +81,8 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
   return []
 }
 
-// --------- VIDEOS (from API/Prisma) ---------
+// --------- VIDEOS FETCH (PRISMA-ONLY, API-DRIVEN) ---------
+
 export async function getVideos(): Promise<Video[]> {
   try {
     const response = await fetch("/api/admin/videos", {
@@ -82,5 +95,12 @@ export async function getVideos(): Promise<Video[]> {
   } catch (error) {
     console.warn("Failed to fetch videos:", error)
   }
+  return []
+}
+
+// --------- DEPRECATED: STATIC CATEGORY FETCH ---------
+
+/** @deprecated Use getDynamicCategories instead. Always returns []. */
+export function getStaticCategories(): Category[] {
   return []
 }

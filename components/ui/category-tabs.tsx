@@ -12,7 +12,6 @@ interface CategoryTabsProps {
   selectedCategory: string
   onCategoryChange?: (category: string) => void
   basePath?: string
-  type?: string
   showAll?: boolean
   className?: string
 }
@@ -21,7 +20,7 @@ export function CategoryTabs({
   categories,
   selectedCategory,
   onCategoryChange,
-  basePath,
+  basePath = "/blog",
   showAll = true,
   className,
 }: CategoryTabsProps) {
@@ -29,14 +28,17 @@ export function CategoryTabs({
   const [canScrollRight, setCanScrollRight] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  const allCategories = showAll ? [{ name: "All", slug: "all", count: 0 }, ...categories] : categories
+  // Add "All" at the start if showAll is true
+  const allCategories = showAll
+    ? [{ name: "All", slug: "all", count: 0 }, ...categories]
+    : categories
 
+  // Update scroll button states
   const checkScrollButtons = () => {
     const container = scrollContainerRef.current
     if (!container) return
-
     setCanScrollLeft(container.scrollLeft > 0)
-    setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth)
+    setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth - 2)
   }
 
   useEffect(() => {
@@ -50,18 +52,16 @@ export function CategoryTabs({
         window.removeEventListener("resize", checkScrollButtons)
       }
     }
-  }, [categories])
+  }, [categories.length])
 
   const scroll = (direction: "left" | "right") => {
     const container = scrollContainerRef.current
     if (!container) return
-
     const scrollAmount = 200
-    const newScrollLeft =
-      direction === "left" ? container.scrollLeft - scrollAmount : container.scrollLeft + scrollAmount
-
     container.scrollTo({
-      left: newScrollLeft,
+      left: direction === "left"
+        ? container.scrollLeft - scrollAmount
+        : container.scrollLeft + scrollAmount,
       behavior: "smooth",
     })
   }
@@ -82,14 +82,14 @@ export function CategoryTabs({
           </Button>
         )}
 
-        {/* Category tabs container */}
+        {/* Tabs */}
         <div
           ref={scrollContainerRef}
           className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth px-8 md:px-0 py-2"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {allCategories.map((category) => {
-            return onCategoryChange ? (
+          {allCategories.map((category) =>
+            onCategoryChange ? (
               <Button
                 key={category.slug}
                 variant={selectedCategory === category.slug ? "default" : "outline"}
@@ -100,16 +100,7 @@ export function CategoryTabs({
                     ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
                     : "hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300",
                 )}
-                onClick={() => {
-                  if (onCategoryChange) {
-                    onCategoryChange(category.slug)
-                  } else if (basePath) {
-                    const params = new URLSearchParams()
-                    if (category.slug !== "all") params.set("category", category.slug)
-                    const url = `${basePath}${params.toString() ? `?${params.toString()}` : ""}`
-                    window.location.href = url
-                  }
-                }}
+                onClick={() => onCategoryChange(category.slug)}
               >
                 {category.name}
                 {category.count > 0 && (
@@ -147,7 +138,7 @@ export function CategoryTabs({
                 </Link>
               </Button>
             )
-          })}
+          )}
         </div>
 
         {/* Right scroll button */}

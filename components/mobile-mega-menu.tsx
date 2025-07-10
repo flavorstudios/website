@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChevronDown, Coffee } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
 
 export interface MenuItem {
   label: string
@@ -26,21 +25,7 @@ interface MobileMegaMenuProps {
 
 export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenuProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
-  const [categories, setCategories] = useState<{ name: string; slug: string; count: number }[]>([])
   const pathname = usePathname()
-
-  useEffect(() => {
-    // Optional: Remove this useEffect if you now handle categories elsewhere!
-    const loadCategories = async () => {
-      try {
-        const { blogCategories, videoCategories } = await getCategoriesWithFallback()
-        setCategories([...blogCategories, ...videoCategories])
-      } catch (error) {
-        console.error("Failed to load categories:", error)
-      }
-    }
-    loadCategories()
-  }, [])
 
   const toggleExpanded = (label: string) => {
     const newExpanded = new Set(expandedItems)
@@ -145,27 +130,6 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
           )}
         </div>
       ))}
-
-      {/* Categories as Menu (optional; remove if now handled inside menu items) */}
-      {categories.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <h3 className="px-4 text-sm font-semibold">Categories</h3>
-          {categories.map((category) => (
-            <Link
-              key={category.slug}
-              href={`/blog?category=${category.slug}`}
-              className={cn(
-                "flex items-center py-3 px-4 text-base font-medium transition-colors rounded-lg",
-                "hover:text-blue-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500",
-                isActive(`/blog?category=${category.slug}`) ? "text-blue-600 bg-blue-50" : "text-gray-700",
-              )}
-              onClick={onItemClick}
-            >
-              {category.name} ({category.count})
-            </Link>
-          ))}
-        </div>
-      )}
 
       {/* CTA Button */}
       <div className="mt-4 pt-4 border-t border-gray-200">

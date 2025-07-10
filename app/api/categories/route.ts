@@ -1,3 +1,5 @@
+// app/api/categories/route.ts
+
 import { NextResponse } from "next/server"
 import { PrismaClient, CategoryType } from "@prisma/client"
 
@@ -27,8 +29,8 @@ export async function GET() {
       },
     })
 
+    // Response format matches what your front-end expects
     return NextResponse.json({
-      success: true,
       blogCategories: blogCategories.map((cat) => ({
         name: cat.name,
         slug: cat.slug,
@@ -44,14 +46,14 @@ export async function GET() {
     console.error("Failed to get categories:", error)
     return NextResponse.json(
       {
-        success: false,
-        error: "Failed to get categories",
         blogCategories: [],
         videoCategories: [],
+        error: "Failed to get categories",
       },
       { status: 500 },
     )
   } finally {
+    // Safe disconnect
     await prisma.$disconnect()
   }
 }

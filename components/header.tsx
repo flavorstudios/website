@@ -10,15 +10,15 @@ import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
 
 interface Category {
-  id: string
   name: string
   slug: string
   count: number
+  type?: string // Not always needed but included for safety
 }
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([ 
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([
     { label: "Home", href: "/" },
     { label: "Blog", href: "/blog" },
     { label: "Watch", href: "/watch" },
@@ -30,12 +30,13 @@ export function Header() {
   useEffect(() => {
     const loadMenuItems = async () => {
       try {
-        // Fetch blog and video categories from API (Prisma-based)
-        const response = await fetch("/api/admin/categories")
+        // Fetch blog and video categories from the API
+        const response = await fetch("/api/categories")
         const data = await response.json()
 
-        const blogCategories = data.categories.filter((cat: Category) => cat.type === "BLOG")
-        const videoCategories = data.categories.filter((cat: Category) => cat.type === "VIDEO")
+        // If the endpoint returns { blogCategories, videoCategories }
+        const blogCategories: Category[] = data.blogCategories ?? []
+        const videoCategories: Category[] = data.videoCategories ?? []
 
         const dynamicMenuItems: MenuItem[] = [
           {
@@ -54,7 +55,7 @@ export function Header() {
               ...blogCategories.slice(0, 6).map((category) => ({
                 label: category.name,
                 href: `/blog?category=${category.slug}`,
-                description: `${category.name} posts and articles${category.count > 0 ? ` (${category.count})` : ""}`,
+                description: `${category.name} posts${category.count > 0 ? ` (${category.count})` : ""}`,
               })),
             ],
           },
@@ -70,7 +71,7 @@ export function Header() {
               ...videoCategories.slice(0, 6).map((category) => ({
                 label: category.name,
                 href: `/watch?category=${category.slug}`,
-                description: `${category.name} videos and content${category.count > 0 ? ` (${category.count})` : ""}`,
+                description: `${category.name} videos${category.count > 0 ? ` (${category.count})` : ""}`,
               })),
             ],
           },
@@ -107,7 +108,7 @@ export function Header() {
         setMenuItems(dynamicMenuItems)
       } catch (error) {
         console.error("Failed to load dynamic menu items:", error)
-        // Keep the fallback menu items that were set in useState
+        // Fallback menu stays as is
       }
     }
 

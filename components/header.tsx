@@ -24,11 +24,8 @@ function ensureAllItem(
   description: string,
   typeLabel: string
 ) {
-  // Check if the 'All' category exists in DB (case-insensitive slug check)
-  const exists = items.some(
-    (cat) => cat.slug.toLowerCase() === slug.toLowerCase()
-  )
-  // If not present, add it manually
+  // If DB already includes "All", don't add manually
+  const exists = items.some(cat => cat.slug.toLowerCase() === slug.toLowerCase())
   if (!exists) {
     return [
       {
@@ -36,15 +33,15 @@ function ensureAllItem(
         href,
         description,
       },
-      ...items.map((category) => ({
+      ...items.map(category => ({
         label: category.name,
         href: `${href}?category=${category.slug}`,
         description: `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
       })),
     ]
   }
-  // If present, just map all categories as subitems (preserves DB order)
-  return items.map((category) => ({
+  // Else: map DB categories only
+  return items.map(category => ({
     label: category.name,
     href: `${href}?category=${category.slug}`,
     description: `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
@@ -65,10 +62,8 @@ export function Header() {
   useEffect(() => {
     const loadMenuItems = async () => {
       try {
-        // Fetch blog and video categories from the API
         const response = await fetch("/api/categories")
         const data = await response.json()
-
         const blogCategories: Category[] = data.blogCategories ?? []
         const videoCategories: Category[] = data.videoCategories ?? []
 

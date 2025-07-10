@@ -1,6 +1,6 @@
-// lib/data.ts or lib/dynamic-data.ts
+// lib/data.ts
 
-// --- DATA TYPES ---
+// --------- DATA TYPES ---------
 
 export interface BlogPost {
   id: string
@@ -39,10 +39,11 @@ export interface Category {
   type?: string // ("BLOG" | "VIDEO"), if provided by your API
 }
 
-// --------- CATEGORY FETCH (UNIFIED & API-DRIVEN) ---------
+// --------- CATEGORY FETCH (DEPRECATED: USE /lib/dynamic-categories.ts) ---------
 
 /**
- * DEPRECATED: Use getDynamicCategories from /lib/dynamic-categories.ts for full category details and separation.
+ * @deprecated
+ * Use getDynamicCategories from /lib/dynamic-categories.ts for proper separation.
  * This function merges blog and video categories for legacy use only.
  */
 export async function getDynamicCategories(): Promise<Category[]> {
@@ -50,15 +51,14 @@ export async function getDynamicCategories(): Promise<Category[]> {
     const response = await fetch("/api/categories", { cache: "no-store" });
     if (response.ok) {
       const data = await response.json();
-      // If API returns { blogCategories, videoCategories }, merge them.
-      if (data.blogCategories || data.videoCategories) {
+      // API (modern): { blogCategories, videoCategories }
+      if ("blogCategories" in data || "videoCategories" in data) {
         const blog = Array.isArray(data.blogCategories) ? data.blogCategories : [];
         const video = Array.isArray(data.videoCategories) ? data.videoCategories : [];
         return [...blog, ...video];
       }
-      // If API returns a flat array, return as-is.
+      // API (legacy): flat array
       if (Array.isArray(data)) return data;
-      return [];
     }
   } catch (error) {
     console.warn("Failed to fetch dynamic categories from Prisma:", error);
@@ -66,7 +66,7 @@ export async function getDynamicCategories(): Promise<Category[]> {
   return [];
 }
 
-// --------- BLOG POSTS FETCH (API-DRIVEN) ---------
+// --------- BLOG POSTS FETCH ---------
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
@@ -81,7 +81,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
   return [];
 }
 
-// --------- VIDEOS FETCH (API-DRIVEN) ---------
+// --------- VIDEOS FETCH ---------
 
 export async function getVideos(): Promise<Video[]> {
   try {
@@ -99,7 +99,8 @@ export async function getVideos(): Promise<Video[]> {
 // --------- DEPRECATED: STATIC CATEGORY FETCH ---------
 
 /**
- * @deprecated Use getDynamicCategories from /lib/dynamic-categories.ts. Always returns [].
+ * @deprecated
+ * Always returns []. Use getDynamicCategories or /lib/dynamic-categories.ts.
  */
 export function getStaticCategories(): Category[] {
   return [];

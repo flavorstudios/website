@@ -31,9 +31,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
 
   // Debounced mouse enter handler
   const debouncedMouseEnter = useCallback((label: string) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
     timeoutRef.current = setTimeout(() => {
       setActiveMenu(label)
       setFocusedIndex(-1)
@@ -71,9 +69,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           break
         case "ArrowUp":
           e.preventDefault()
-          if (focusedIndex > 0) {
-            setFocusedIndex(focusedIndex - 1)
-          }
+          if (focusedIndex > 0) setFocusedIndex(focusedIndex - 1)
           break
         case "ArrowRight":
           e.preventDefault()
@@ -97,7 +93,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           break
       }
     },
-    [activeMenu, focusedIndex, items.length],
+    [activeMenu, focusedIndex, items.length]
   )
 
   // Click outside handler
@@ -108,7 +104,6 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
         setFocusedIndex(-1)
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
@@ -123,14 +118,12 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
 
   const renderDropdown = (item: MenuItem) => {
     if (!item.subItems || item.subItems.length === 0) return null
-
     return (
       <div
         className={cn(
-          "absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50",
-          "min-w-[280px] py-2",
+          "absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 min-w-[280px] py-2",
           "transform transition-all duration-200 ease-out",
-          activeMenu === item.label ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible",
+          activeMenu === item.label ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible"
         )}
         role="menu"
         aria-label={`${item.label} submenu`}
@@ -144,12 +137,10 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
             role="menuitem"
             tabIndex={focusedIndex === index ? 0 : -1}
             className={cn(
-              "block px-4 py-3 text-sm transition-colors duration-150",
-              "hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50",
-              "focus:bg-gradient-to-r focus:from-blue-50 focus:to-cyan-50 focus:outline-none",
-              "border-b border-gray-100 last:border-b-0",
+              "block px-4 py-3 text-sm transition-colors duration-150 border-b border-gray-100 last:border-b-0",
+              "hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 focus:bg-gradient-to-r focus:from-blue-50 focus:to-cyan-50 focus:outline-none",
               isActive(subItem.href) && "bg-blue-50 text-blue-600",
-              focusedIndex === index && "bg-gradient-to-r from-blue-50 to-cyan-50",
+              focusedIndex === index && "bg-gradient-to-r from-blue-50 to-cyan-50"
             )}
             onClick={() => {
               setActiveMenu(null)
@@ -172,7 +163,9 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                     </span>
                   )}
                 </div>
-                {subItem.description && <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>}
+                {subItem.description && (
+                  <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>
+                )}
               </div>
             </div>
           </Link>
@@ -182,7 +175,11 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
   }
 
   return (
-    <nav ref={menuRef} className={cn("flex items-center space-x-6", className)} role="menubar">
+    <nav
+      ref={menuRef}
+      className={cn("flex items-center space-x-6", className)}
+      role="menubar"
+    >
       {items.map((item, index) => (
         <div
           key={item.label}
@@ -196,7 +193,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               role="menuitem"
               className={cn(
                 "text-sm font-medium transition-colors hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1",
-                isActive(item.href) && "text-blue-600",
+                isActive(item.href) && "text-blue-600"
               )}
               aria-current={isActive(item.href) ? "page" : undefined}
             >
@@ -208,16 +205,21 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               aria-haspopup="true"
               aria-expanded={activeMenu === item.label}
               className={cn(
-                "flex items-center space-x-1 text-sm font-medium transition-colors hover:text-blue-600",
-                "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1",
-                activeMenu === item.label && "text-blue-600",
+                "flex items-center space-x-1 text-sm font-medium transition-colors hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1",
+                activeMenu === item.label && "text-blue-600"
               )}
               onKeyDown={(e) => handleKeyDown(e, item, index)}
+              tabIndex={0}
+              aria-label={item.label}
+              type="button"
             >
               <span>{item.label}</span>
               {item.subItems && (
                 <ChevronDown
-                  className={cn("h-4 w-4 transition-transform duration-200", activeMenu === item.label && "rotate-180")}
+                  className={cn(
+                    "h-4 w-4 transition-transform duration-200",
+                    activeMenu === item.label && "rotate-180"
+                  )}
                   aria-hidden="true"
                 />
               )}

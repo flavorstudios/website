@@ -7,23 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum CategoryType {
-  BLOG
-  VIDEO
-}
-
 model Category {
-  id                 String    @id @default(uuid())
+  id                 String       @id @default(uuid())
   name               String
   slug               String
   type               CategoryType
   description        String?
   color              String?
   icon               String?
-  order              Int       @default(0)
-  isActive           Boolean   @default(true)
-
-  // SEO & Metadata fields
+  order              Int          @default(0)
+  isActive           Boolean      @default(true)
   metaTitle          String?
   metaDescription    String?
   canonicalUrl       String?
@@ -33,24 +26,23 @@ model Category {
   ogUrl              String?
   ogType             String?
   ogSiteName         String?
-  ogImages           Json?      // Array: [{url, width, height}]
+  ogImages           Json?
   twitterCard        String?
   twitterSite        String?
   twitterTitle       String?
   twitterDescription String?
-  twitterImages      Json?      // Array: [url1, url2, ...]
-
-  // Tooltips & Accessibility
+  twitterImages      Json?
   tooltip            String?
   accessibleLabel    String?
-
-  // Schema.org JSON-LD
   schema             Json?
-
-  // Misc
-  postCount          Int?       // For dashboard/statistics
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  postCount          Int?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 
   @@unique([slug, type], name: "slug_type")
+}
+
+enum CategoryType {
+  BLOG
+  VIDEO
 }

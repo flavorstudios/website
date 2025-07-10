@@ -67,5 +67,6 @@ export async function getDynamicCategories(): Promise<DynamicCategoriesResult> {
   }
 }
 
-// Alias for legacy compatibility
+// Aliases for compatibility with all imports
 export const getDynamicCategoriesClient = getDynamicCategories
+export const getCategoriesWithFallback = getDynamicCategories

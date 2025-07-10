@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getCategoriesWithFallback } from "@/lib/dynamic-categories" // Fetch categories dynamically
+import { getCategoriesWithFallback } from "@/lib/dynamic-categories" // Uses the new alias for safety
 
 export interface MenuItem {
   label: string
@@ -29,7 +29,6 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
   const timeoutRef = useRef<NodeJS.Timeout>()
   const menuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
-  const [categories, setCategories] = useState<{ name: string; slug: string; count: number }[]>([])
 
   // Debounced mouse enter handler
   const debouncedMouseEnter = useCallback((label: string) => {
@@ -79,15 +78,19 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           break
         case "ArrowRight":
           e.preventDefault()
-          const nextIndex = (index + 1) % items.length
-          const nextButton = menuRef.current?.querySelectorAll('[role="menuitem"]')[nextIndex] as HTMLElement
-          nextButton?.focus()
+          {
+            const nextIndex = (index + 1) % items.length
+            const nextButton = menuRef.current?.querySelectorAll('[role="menuitem"]')[nextIndex] as HTMLElement
+            nextButton?.focus()
+          }
           break
         case "ArrowLeft":
           e.preventDefault()
-          const prevIndex = index === 0 ? items.length - 1 : index - 1
-          const prevButton = menuRef.current?.querySelectorAll('[role="menuitem"]')[prevIndex] as HTMLElement
-          prevButton?.focus()
+          {
+            const prevIndex = index === 0 ? items.length - 1 : index - 1
+            const prevButton = menuRef.current?.querySelectorAll('[role="menuitem"]')[prevIndex] as HTMLElement
+            prevButton?.focus()
+          }
           break
         case "Escape":
           setActiveMenu(null)
@@ -118,19 +121,6 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
     if (href !== "/" && pathname.startsWith(href)) return true
     return false
   }
-
-  // Fetch categories dynamically
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const { blogCategories, videoCategories } = await getCategoriesWithFallback()
-        setCategories([...blogCategories, ...videoCategories])
-      } catch (error) {
-        console.error("Failed to load categories:", error)
-      }
-    }
-    loadCategories()
-  }, [])
 
   const renderDropdown = (item: MenuItem) => {
     if (!item.subItems || item.subItems.length === 0) return null

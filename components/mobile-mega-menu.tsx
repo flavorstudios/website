@@ -1,11 +1,11 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChevronDown, Coffee } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getCategoriesWithFallback } from "@/lib/dynamic-categories" // Fetch dynamic categories
+import { getCategoriesWithFallback } from "@/lib/dynamic-categories"
 
 export interface MenuItem {
   label: string
@@ -26,15 +26,15 @@ interface MobileMegaMenuProps {
 
 export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenuProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set())
-  const [categories, setCategories] = useState<{ name: string; slug: string; count: number }[]>([]) // Categories state
+  const [categories, setCategories] = useState<{ name: string; slug: string; count: number }[]>([])
   const pathname = usePathname()
 
-  // Fetch categories dynamically
   useEffect(() => {
+    // Optional: Remove this useEffect if you now handle categories elsewhere!
     const loadCategories = async () => {
       try {
         const { blogCategories, videoCategories } = await getCategoriesWithFallback()
-        setCategories([...blogCategories, ...videoCategories]) // Merge both categories
+        setCategories([...blogCategories, ...videoCategories])
       } catch (error) {
         console.error("Failed to load categories:", error)
       }
@@ -52,7 +52,6 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
     setExpandedItems(newExpanded)
   }
 
-  // Check if current path matches menu item
   const isActive = (href?: string) => {
     if (!href) return false
     if (href === "/" && pathname === "/") return true
@@ -147,7 +146,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
         </div>
       ))}
 
-      {/* Categories as Menu */}
+      {/* Categories as Menu (optional; remove if now handled inside menu items) */}
       {categories.length > 0 && (
         <div className="mt-4 pt-4 border-t border-gray-200">
           <h3 className="px-4 text-sm font-semibold">Categories</h3>

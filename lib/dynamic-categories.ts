@@ -43,7 +43,6 @@ export async function getDynamicCategories(): Promise<DynamicCategoriesResult> {
     if (!res.ok) throw new Error("Failed to fetch categories");
     const { blogCategories, videoCategories } = await res.json();
 
-    // Defensive: fallback to empty arrays if API misbehaves
     return {
       blogCategories: Array.isArray(blogCategories) ? blogCategories : [],
       videoCategories: Array.isArray(videoCategories) ? videoCategories : [],
@@ -76,6 +75,6 @@ export function mapToMenuItems(
   }));
 }
 
-// Aliases for backward compatibility (avoid breaking other imports)
+// Aliases for backward compatibility (if any legacy code needs these)
 export const getDynamicCategoriesClient = getDynamicCategories
 export const getCategoriesWithFallback = getDynamicCategories

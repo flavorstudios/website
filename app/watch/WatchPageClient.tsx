@@ -15,7 +15,7 @@ interface VideoType {
   youtubeId: string
   thumbnail: string
   duration: string
-  category: string
+  category: string // Always slug!
   tags: string[]
   status: string
   publishedAt: string
@@ -24,10 +24,11 @@ interface VideoType {
 }
 
 interface Category {
-  id: string
+  id?: string
   name: string
   slug: string
   color?: string
+  tooltip?: string
 }
 
 export function WatchPageClient({
@@ -50,7 +51,7 @@ export function WatchPageClient({
       setLoading(true)
       const [videosResponse, categoriesResponse] = await Promise.all([
         fetch("/api/admin/videos", { cache: "no-store" }),
-        fetch("/api/categories", { cache: "no-store" }),
+        fetch("/api/categories?type=video", { cache: "no-store" }),
       ])
 
       if (videosResponse.ok) {
@@ -61,13 +62,14 @@ export function WatchPageClient({
 
       if (categoriesResponse.ok) {
         const categoriesData = await categoriesResponse.json()
-        // Pick videoCategories array from the canonical API
+        // Use categories array from API (already filtered by type)
         setCategories(
-          (categoriesData.videoCategories || []).map((cat: any) => ({
+          (categoriesData.categories || []).map((cat: any) => ({
             id: cat.id || cat.slug,
             name: cat.name,
             slug: cat.slug,
             color: cat.color,
+            tooltip: cat.tooltip,
           }))
         )
       }
@@ -78,34 +80,31 @@ export function WatchPageClient({
     }
   }
 
+  // Filter only by category SLUG (never name)
   const filteredVideos =
     selectedCategory === "all"
       ? videos
-      : videos.filter((video) => video.category === selectedCategory || video.category === categories.find((c) => c.slug === selectedCategory)?.name)
+      : videos.filter((video) => video.category === selectedCategory)
 
   const featuredVideos = filteredVideos.filter((video) => video.featured)
   const regularVideos = filteredVideos.filter((video) => !video.featured)
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Beautiful Header - Match screenshot style */}
+      {/* Beautiful Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
-            {/* Blue Badge */}
             <div className="inline-flex items-center gap-2 bg-blue-600 text-white rounded-full px-6 py-2 mb-6 text-sm font-medium">
               <Video className="h-4 w-4" />
               Original Content & Series
             </div>
-            {/* Gradient Heading */}
             <h1 className="text-5xl md:text-6xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800">
               Watch Our Stories
             </h1>
-            {/* Italic Subtitle */}
             <p className="text-xl md:text-2xl text-gray-600 italic font-light max-w-3xl mx-auto">
               Bringing anime to life—one frame at a time.
             </p>
-            {/* Stats */}
             <div className="mt-8 flex items-center justify-center gap-6 text-sm text-gray-500">
               <span className="flex items-center gap-2">
                 <span className="w-2 h-2 bg-red-500 rounded-full"></span>
@@ -366,8 +365,11 @@ function CategoryFilter({ categories, selectedCategory }: CategoryFilterProps) {
       <SelectContent>
         <SelectItem value="all">All Categories</SelectItem>
         {categories.map((category) => (
-          <SelectItem key={category.id} value={category.slug}>
+          <SelectItem key={category.slug} value={category.slug}>
             {category.name}
+            {category.tooltip && (
+              <span className="block text-xs text-gray-500 mt-1">{category.tooltip}</span>
+            )}
           </SelectItem>
         ))}
       </SelectContent>

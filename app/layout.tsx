@@ -86,7 +86,12 @@ const orgSchema = getSchema({
   ],
 });
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+// 👇 ONLY THIS PART CHANGES – load categories on server and pass to Header!
+import { getDynamicCategories } from "@/lib/dynamic-categories"
+
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const { blogCategories, videoCategories } = await getDynamicCategories();
+
   return (
     <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>
       <head>
@@ -130,7 +135,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </noscript>
         {/* END GTM (NOSCRIPT) */}
 
-        <Header />
+        {/* 👇 Pass categories as props to Header! */}
+        <Header blogCategories={blogCategories} videoCategories={videoCategories} />
+
         <main>{children}</main>
         <Footer />
         <BackToTop />

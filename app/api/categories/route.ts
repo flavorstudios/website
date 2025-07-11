@@ -1,45 +1,73 @@
 // app/api/categories/route.ts
 
-import { NextResponse } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
 import { PrismaClient, CategoryType } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Fetch blog categories (type: BLOG)
-    const blogCategories = await prisma.category.findMany({
-      where: { type: CategoryType.BLOG, isActive: true },
-      orderBy: { order: "asc" }, // <-- Correct: string, not object
-      select: {
-        name: true,
-        slug: true,
-        postCount: true,
-      },
-    })
+    const type = request.nextUrl.searchParams.get("type")
+    const select = { name: true, slug: true, postCount: true, tooltip: true }
 
-    // Fetch video categories (type: VIDEO)
-    const videoCategories = await prisma.category.findMany({
-      where: { type: CategoryType.VIDEO, isActive: true },
-      orderBy: { order: "asc" }, // <-- Correct here too!
-      select: {
-        name: true,
-        slug: true,
-        postCount: true,
-      },
-    })
+    if (type === "blog") {
+      const categories = await prisma.category.findMany({
+        where: { type: CategoryType.BLOG, isActive: true },
+        orderBy: { order: "asc" },
+        select,
+      })
+      return NextResponse.json({
+        categories: categories.map((cat) => ({
+          name: cat.name,
+          slug: cat.slug,
+          count: cat.postCount ?? 0,
+          tooltip: cat.tooltip ?? undefined,
+        })),
+      })
+    }
 
-    // Response format matches front-end requirements
+    if (type === "video") {
+      const categories = await prisma.category.findMany({
+        where: { type: CategoryType.VIDEO, isActive: true },
+        orderBy: { order: "asc" },
+        select,
+      })
+      return NextResponse.json({
+        categories: categories.map((cat) => ({
+          name: cat.name,
+          slug: cat.slug,
+          count: cat.postCount ?? 0,
+          tooltip: cat.tooltip ?? undefined,
+        })),
+      })
+    }
+
+    // No type: return both blog and video categories
+    const [blogCategories, videoCategories] = await Promise.all([
+      prisma.category.findMany({
+        where: { type: CategoryType.BLOG, isActive: true },
+        orderBy: { order: "asc" },
+        select,
+      }),
+      prisma.category.findMany({
+        where: { type: CategoryType.VIDEO, isActive: true },
+        orderBy: { order: "asc" },
+        select,
+      }),
+    ])
+
     return NextResponse.json({
       blogCategories: blogCategories.map((cat) => ({
         name: cat.name,
         slug: cat.slug,
         count: cat.postCount ?? 0,
+        tooltip: cat.tooltip ?? undefined,
       })),
       videoCategories: videoCategories.map((cat) => ({
         name: cat.name,
         slug: cat.slug,
         count: cat.postCount ?? 0,
+        tooltip: cat.tooltip ?? undefined,
       })),
     })
   } catch (error) {
@@ -53,7 +81,6 @@ export async function GET() {
       { status: 500 }
     )
   } finally {
-    // Always disconnect Prisma after query
     await prisma.$disconnect()
   }
 }

@@ -27,7 +27,7 @@ interface BlogPost {
   slug: string
   content: string
   excerpt: string
-  category: string
+  category: string // Always slug!
   tags: string[]
   featuredImage: string
   seoTitle: string
@@ -68,7 +68,7 @@ export function BlogEditor() {
   const [imageUploading, setImageUploading] = useState(false)
   const [tagInput, setTagInput] = useState("")
 
-  // Load blog categories (server filtered)
+  // Load blog categories (always use .categories from API)
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -88,20 +88,22 @@ export function BlogEditor() {
       } catch (error) {
         console.error("Failed to load categories:", error)
       }
+      // We do not set post here, only in the next effect!
     }
     loadCategories()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Auto-generate slug from title
+  // Auto-generate slug from title (unless user already edited slug)
   useEffect(() => {
-    if (post.title && !post.slug) {
+    if (post.title && (!post.slug || post.slug === "")) {
       const slug = post.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "")
       setPost((prev) => ({ ...prev, slug }))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post.title])
 
   // Calculate word count and read time
@@ -119,6 +121,7 @@ export function BlogEditor() {
       wordCount,
       readTime: `${readTime} min read`,
     }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post.content])
 
   // Auto-save functionality
@@ -128,7 +131,6 @@ export function BlogEditor() {
         await savePost(true)
       }
     }
-
     const interval = setInterval(autoSave, 30000)
     return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,7 +138,6 @@ export function BlogEditor() {
 
   const savePost = async (isAutoSave = false) => {
     if (!isAutoSave) setSaving(true)
-
     try {
       const response = await fetch("/api/admin/blog", {
         method: "POST",
@@ -147,12 +148,10 @@ export function BlogEditor() {
           scheduledFor: post.status === "scheduled" ? scheduledDate : undefined,
         }),
       })
-
       if (response.ok) {
         const savedPost = await response.json()
         setPost((prev) => ({ ...prev, id: savedPost.id }))
         setLastSaved(new Date())
-
         if (!isAutoSave) {
           // Show success message
           console.log("Post saved successfully!")
@@ -181,16 +180,13 @@ export function BlogEditor() {
 
   const handleImageUpload = async (file: File) => {
     setImageUploading(true)
-
     try {
       const formData = new FormData()
       formData.append("image", file)
-
       const response = await fetch("/api/admin/blog/upload-image", {
         method: "POST",
         body: formData,
       })
-
       if (response.ok) {
         const { url } = await response.json()
         setPost((prev) => ({ ...prev, featuredImage: url }))
@@ -272,7 +268,6 @@ export function BlogEditor() {
                   className="text-lg"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium mb-2">Slug</label>
                 <Input
@@ -281,7 +276,6 @@ export function BlogEditor() {
                   placeholder="url-friendly-slug"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium mb-2">Excerpt</label>
                 <Textarea
@@ -328,7 +322,6 @@ export function BlogEditor() {
                   placeholder="SEO optimized title..."
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium mb-2">
                   Meta Description ({post.seoDescription.length}/160)
@@ -356,7 +349,6 @@ export function BlogEditor() {
                 <span className="text-sm font-medium">Status</span>
                 <Badge variant={post.status === "published" ? "default" : "secondary"}>{post.status}</Badge>
               </div>
-
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Featured Post</span>
                 <Switch
@@ -364,7 +356,6 @@ export function BlogEditor() {
                   onCheckedChange={(featured) => setPost((prev) => ({ ...prev, featured }))}
                 />
               </div>
-
               <Popover open={showScheduler} onOpenChange={setShowScheduler}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full flex items-center gap-2">
@@ -431,7 +422,6 @@ export function BlogEditor() {
                   </div>
                 )}
               </div>
-
               <div>
                 <label className="block text-sm font-medium mb-2">Tags</label>
                 <div className="flex gap-2 mb-2">

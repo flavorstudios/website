@@ -9,13 +9,14 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CategoryDropdown } from "@/components/ui/category-dropdown"
+import { Info } from "lucide-react"
 
 interface Category {
   id: string
   name: string
   slug: string
   type: "BLOG" | "VIDEO"
-  description?: string
+  tooltip?: string
   color?: string
   icon?: string
   order: number
@@ -33,7 +34,7 @@ interface Video {
   youtubeId: string
   thumbnail: string
   duration: string
-  category: string
+  category: string // should be slug, not name
   tags: string[]
   status: "published" | "draft" | "unlisted"
   publishedAt: string
@@ -60,16 +61,15 @@ export function VideoManager() {
   const loadData = async () => {
     setLoading(true)
     try {
-      // Use unified categories endpoint
+      // Fetch videos and only VIDEO categories
       const [videosRes, categoriesRes] = await Promise.all([
         fetch("/api/admin/videos"),
-        fetch("/api/categories"),
+        fetch("/api/admin/categories?type=video"),
       ])
       const videosData = (await videosRes.json()).videos || []
-      // Pick only video categories
-      const allCategories = (await categoriesRes.json()).videoCategories || []
+      const videoCategories = (await categoriesRes.json()).categories || []
       setVideos(videosData)
-      setCategories(allCategories)
+      setCategories(videoCategories)
     } catch (error) {
       console.error("Failed to load videos or categories:", error)
     } finally {
@@ -133,14 +133,6 @@ export function VideoManager() {
     return matchesSearch && matchesCategory
   })
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -172,6 +164,7 @@ export function VideoManager() {
               name: cat.name,
               slug: cat.slug,
               count: cat.postCount,
+              tooltip: cat.tooltip,
             })),
           ]}
           selectedCategory={filterCategory}
@@ -203,7 +196,17 @@ export function VideoManager() {
               <CardTitle className="text-lg line-clamp-2">{video.title}</CardTitle>
               <div className="flex items-center gap-2">
                 <Badge variant={video.status === "published" ? "default" : "secondary"}>{video.status}</Badge>
-                <Badge variant="outline">{video.category}</Badge>
+                {/* Show category name and tooltip */}
+                <Badge variant="outline">
+                  {
+                    categories.find((cat) => cat.slug === video.category)?.name || video.category
+                  }
+                </Badge>
+                {categories.find((cat) => cat.slug === video.category)?.tooltip && (
+                  <span className="ml-1 text-xs text-gray-500" title={categories.find((cat) => cat.slug === video.category)?.tooltip}>
+                    <Info className="inline h-3 w-3" />
+                  </span>
+                )}
                 <span className="text-sm text-gray-500">{video.views.toLocaleString()} views</span>
               </div>
             </CardHeader>
@@ -261,7 +264,7 @@ function VideoForm({
     title: video?.title || "",
     description: video?.description || "",
     youtubeId: video?.youtubeId || "",
-    category: video?.category || "",
+    category: video?.category || (categories.length > 0 ? categories[0].slug : ""),
     status: video?.status || "draft",
     featured: video?.featured || false,
     episodeNumber: video?.episodeNumber || "",
@@ -269,8 +272,9 @@ function VideoForm({
   })
 
   useEffect(() => {
+    // Set default category (slug) if not already set
     if (categories.length > 0 && !formData.category) {
-      setFormData((prev) => ({ ...prev, category: categories[0].name }))
+      setFormData((prev) => ({ ...prev, category: categories[0].slug }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories])
@@ -301,6 +305,8 @@ function VideoForm({
       tags: ["anime", "flavor studios"],
     })
   }
+
+  const selectedCategoryObj = categories.find((cat) => cat.slug === formData.category)
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -350,12 +356,25 @@ function VideoForm({
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
-                      <SelectItem key={category.id} value={category.name}>
+                      <SelectItem
+                        key={category.slug}
+                        value={category.slug}
+                        title={category.tooltip}
+                        className="flex items-center gap-2"
+                      >
                         {category.name}
+                        {category.tooltip && (
+                          <Info className="ml-2 h-4 w-4 text-blue-400" title={category.tooltip} />
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedCategoryObj?.tooltip && (
+                  <div className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                    <Info className="h-3 w-3" /> {selectedCategoryObj.tooltip}
+                  </div>
+                )}
               </div>
 
               <div>

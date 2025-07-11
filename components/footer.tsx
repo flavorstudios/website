@@ -17,8 +17,9 @@ export function Footer() {
     { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/", icon: Users },
   ]
 
-  const studioLinks = [
-    { name: "Studio", href: "/" },
+  // UPDATED: Changed first link to Home, and Studio -> Company below
+  const companyLinks = [
+    { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Career", href: "/career" },
     { name: "Contact", href: "/contact" },
@@ -67,11 +68,11 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Studio Links */}
+          {/* Company Links (was Studio) */}
           <div>
-            <h3 className="font-semibold text-lg mb-4">Studio</h3>
+            <h3 className="font-semibold text-lg mb-4">Company</h3>
             <ul className="space-y-3">
-              {studioLinks.map((link) => (
+              {companyLinks.map((link) => (
                 <li key={link.name}>
                   <Link href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
                     {link.name}

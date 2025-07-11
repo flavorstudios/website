@@ -16,12 +16,9 @@ export interface DynamicCategoriesResult {
   videoCategories: CategoryData[]
 }
 
-// --- Prisma Instance for Server-side (optional) ---
-const prisma = typeof window === "undefined" ? new PrismaClient() : null
-
-// --- Server Helpers (if you want direct DB access, e.g., in layout.tsx) ---
+// --- Server Helpers (each gets its own PrismaClient instance) ---
 export async function getBlogCategories(): Promise<CategoryData[]> {
-  if (!prisma) return []
+  const prisma = new PrismaClient()
   try {
     const categories = await prisma.category.findMany({
       where: { type: CategoryType.BLOG, isActive: true },
@@ -37,11 +34,13 @@ export async function getBlogCategories(): Promise<CategoryData[]> {
   } catch (error) {
     console.warn("Failed to get blog categories:", error)
     return []
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 export async function getVideoCategories(): Promise<CategoryData[]> {
-  if (!prisma) return []
+  const prisma = new PrismaClient()
   try {
     const categories = await prisma.category.findMany({
       where: { type: CategoryType.VIDEO, isActive: true },
@@ -57,6 +56,8 @@ export async function getVideoCategories(): Promise<CategoryData[]> {
   } catch (error) {
     console.warn("Failed to get video categories:", error)
     return []
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
@@ -84,7 +85,6 @@ export function formatCategoryName(slug: string): string {
 /**
  * Canonical: Fetch all blog and video categories from API (unified source of truth)
  * - Fetches from /api/categories which returns { blogCategories, videoCategories }
- * - Returns shape: { blogCategories: CategoryData[], videoCategories: CategoryData[] }
  * - If type is provided, returns only that type as CategoryData[]
  */
 export async function getDynamicCategories(
@@ -92,20 +92,18 @@ export async function getDynamicCategories(
 ): Promise<DynamicCategoriesResult | CategoryData[]> {
   try {
     if (type === "blog") {
-      // Fetch only blog categories
       const res = await fetch("/api/categories?type=blog", { cache: "no-store" })
       if (!res.ok) throw new Error("Failed to fetch blog categories")
       const { categories } = await res.json()
       return Array.isArray(categories) ? categories : []
     }
     if (type === "video") {
-      // Fetch only video categories
       const res = await fetch("/api/categories?type=video", { cache: "no-store" })
       if (!res.ok) throw new Error("Failed to fetch video categories")
       const { categories } = await res.json()
       return Array.isArray(categories) ? categories : []
     }
-    // Fetch both types
+    // Fetch both
     const res = await fetch("/api/categories", { cache: "no-store" })
     if (!res.ok) throw new Error("Failed to fetch categories")
     const { blogCategories, videoCategories } = await res.json()

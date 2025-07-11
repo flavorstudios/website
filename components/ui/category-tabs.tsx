@@ -92,6 +92,7 @@ export function CategoryTabs({
             onCategoryChange ? (
               <Button
                 key={category.slug}
+                title={category.tooltip}
                 variant={selectedCategory === category.slug ? "default" : "outline"}
                 size="sm"
                 className={cn(
@@ -112,6 +113,7 @@ export function CategoryTabs({
             ) : (
               <Button
                 key={category.slug}
+                title={category.tooltip}
                 variant={selectedCategory === category.slug ? "default" : "outline"}
                 size="sm"
                 className={cn(
@@ -123,6 +125,7 @@ export function CategoryTabs({
                 asChild
               >
                 <Link
+                  title={category.tooltip}
                   href={(() => {
                     const params = new URLSearchParams()
                     if (category.slug !== "all") params.set("category", category.slug)

@@ -34,7 +34,7 @@ interface Video {
   youtubeId: string
   thumbnail: string
   duration: string
-  category: string // should be slug, not name
+  category: string // should be slug
   tags: string[]
   status: "published" | "draft" | "unlisted"
   publishedAt: string
@@ -61,7 +61,7 @@ export function VideoManager() {
   const loadData = async () => {
     setLoading(true)
     try {
-      // Fetch videos and only VIDEO categories
+      // Fetch videos and VIDEO categories
       const [videosRes, categoriesRes] = await Promise.all([
         fetch("/api/admin/videos"),
         fetch("/api/admin/categories?type=video"),
@@ -84,7 +84,6 @@ export function VideoManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(videoData),
       })
-
       if (response.ok) {
         await loadData()
         setShowCreateForm(false)
@@ -101,7 +100,6 @@ export function VideoManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(videoData),
       })
-
       if (response.ok) {
         await loadData()
         setEditingVideo(null)
@@ -118,7 +116,6 @@ export function VideoManager() {
       const response = await fetch(`/api/admin/videos/${id}`, {
         method: "DELETE",
       })
-
       if (response.ok) {
         await loadData()
       }
@@ -175,62 +172,63 @@ export function VideoManager() {
 
       {/* Videos Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVideos.map((video) => (
-          <Card key={video.id} className="hover:shadow-lg transition-shadow">
-            <div className="relative">
-              <img
-                src={video.thumbnail || "/placeholder.svg"}
-                alt={video.title}
-                className="w-full h-48 object-cover rounded-t-lg"
-              />
-              <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-sm">
-                {video.duration}
-              </div>
-              {video.featured && (
-                <div className="absolute top-2 left-2">
-                  <Badge className="bg-yellow-500">Featured</Badge>
+        {filteredVideos.map((video) => {
+          const catObj = categories.find((cat) => cat.slug === video.category)
+          return (
+            <Card key={video.id} className="hover:shadow-lg transition-shadow">
+              <div className="relative">
+                <img
+                  src={video.thumbnail || "/placeholder.svg"}
+                  alt={video.title}
+                  className="w-full h-48 object-cover rounded-t-lg"
+                />
+                <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded text-sm">
+                  {video.duration}
                 </div>
-              )}
-            </div>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg line-clamp-2">{video.title}</CardTitle>
-              <div className="flex items-center gap-2">
-                <Badge variant={video.status === "published" ? "default" : "secondary"}>{video.status}</Badge>
-                {/* Show category name and tooltip */}
-                <Badge variant="outline">
-                  {
-                    categories.find((cat) => cat.slug === video.category)?.name || video.category
-                  }
-                </Badge>
-                {categories.find((cat) => cat.slug === video.category)?.tooltip && (
-                  <span className="ml-1 text-xs text-gray-500" title={categories.find((cat) => cat.slug === video.category)?.tooltip}>
-                    <Info className="inline h-3 w-3" />
-                  </span>
+                {video.featured && (
+                  <div className="absolute top-2 left-2">
+                    <Badge className="bg-yellow-500">Featured</Badge>
+                  </div>
                 )}
-                <span className="text-sm text-gray-500">{video.views.toLocaleString()} views</span>
               </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">{video.description}</p>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">{new Date(video.publishedAt).toLocaleDateString()}</span>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setEditingVideo(video)}>
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => deleteVideo(video.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    Delete
-                  </Button>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg line-clamp-2">{video.title}</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Badge variant={video.status === "published" ? "default" : "secondary"}>{video.status}</Badge>
+                  {/* Show category name and tooltip */}
+                  <Badge variant="outline">
+                    {catObj?.name || video.category}
+                  </Badge>
+                  {catObj?.tooltip && (
+                    <span className="ml-1 text-xs text-gray-500" title={catObj.tooltip}>
+                      <Info className="inline h-3 w-3" />
+                    </span>
+                  )}
+                  <span className="text-sm text-gray-500">{video.views.toLocaleString()} views</span>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{video.description}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">{new Date(video.publishedAt).toLocaleDateString()}</span>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setEditingVideo(video)}>
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => deleteVideo(video.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
 
       {/* Create/Edit Form Modal */}
@@ -287,7 +285,6 @@ function VideoForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-
     const youtubeId = extractYouTubeId(formData.youtubeId)
     const slug = formData.title
       .toLowerCase()
@@ -405,7 +402,6 @@ function VideoForm({
                   placeholder="1"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium mb-2">Season</label>
                 <Input

@@ -13,7 +13,13 @@ import { Switch } from "@/components/ui/switch"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { RichTextEditor } from "./rich-text-editor"
-import { Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft } from "lucide-react"
+import { Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info } from "lucide-react"
+
+interface BlogCategory {
+  name: string
+  slug: string
+  tooltip?: string
+}
 
 interface BlogPost {
   id?: string
@@ -54,7 +60,7 @@ export function BlogEditor() {
     readTime: "1 min read",
   })
 
-  const [categories, setCategories] = useState<string[]>([])
+  const [categories, setCategories] = useState<BlogCategory[]>([])
   const [saving, setSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [showScheduler, setShowScheduler] = useState(false)
@@ -62,24 +68,29 @@ export function BlogEditor() {
   const [imageUploading, setImageUploading] = useState(false)
   const [tagInput, setTagInput] = useState("")
 
-  // Load categories
+  // Load blog categories (server filtered)
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const response = await fetch("/api/admin/categories")
+        const response = await fetch("/api/admin/categories?type=blog")
         const data = await response.json()
-        const blogCategories =
-          data.categories?.filter((cat: any) => cat.type === "blog" && cat.isActive)?.map((cat: any) => cat.name) || []
+        const blogCategories: BlogCategory[] = data.categories?.map((cat: any) => ({
+          name: cat.name,
+          slug: cat.slug,
+          tooltip: cat.tooltip ?? "",
+        })) || []
         setCategories(blogCategories)
 
+        // Set default category if unset
         if (!post.category && blogCategories.length > 0) {
-          setPost((prev) => ({ ...prev, category: blogCategories[0] }))
+          setPost((prev) => ({ ...prev, category: blogCategories[0].slug }))
         }
       } catch (error) {
         console.error("Failed to load categories:", error)
       }
     }
     loadCategories()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Auto-generate slug from title
@@ -118,8 +129,9 @@ export function BlogEditor() {
       }
     }
 
-    const interval = setInterval(autoSave, 30000) // Auto-save every 30 seconds
+    const interval = setInterval(autoSave, 30000)
     return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post])
 
   const savePost = async (isAutoSave = false) => {
@@ -206,6 +218,8 @@ export function BlogEditor() {
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
     }))
   }
+
+  const selectedCategoryObj = categories.find((cat) => cat.slug === post.category)
 
   return (
     <motion.div
@@ -386,18 +400,36 @@ export function BlogEditor() {
             <CardContent className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Category</label>
-                <Select value={post.category} onValueChange={(category) => setPost((prev) => ({ ...prev, category }))}>
+                <Select
+                  value={post.category}
+                  onValueChange={(categorySlug) =>
+                    setPost((prev) => ({ ...prev, category: categorySlug }))
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
+                      <SelectItem
+                        key={category.slug}
+                        value={category.slug}
+                        title={category.tooltip}
+                        className="flex items-center gap-2"
+                      >
+                        {category.name}
+                        {category.tooltip && (
+                          <Info className="ml-2 h-4 w-4 text-blue-400" title={category.tooltip} />
+                        )}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedCategoryObj?.tooltip && (
+                  <div className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+                    <Info className="h-3 w-3" /> {selectedCategoryObj.tooltip}
+                  </div>
+                )}
               </div>
 
               <div>

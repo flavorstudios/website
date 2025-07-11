@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -13,9 +13,11 @@ interface Category {
   name: string
   slug: string
   count: number
+  tooltip?: string
   type?: string
 }
 
+// Helper to map categories to menu sub-items, including tooltips if present
 function ensureAllItem(
   items: Category[],
   label: string,
@@ -24,7 +26,6 @@ function ensureAllItem(
   description: string,
   typeLabel: string
 ) {
-  // If DB already includes "All", don't add manually
   const exists = items.some(cat => cat.slug.toLowerCase() === slug.toLowerCase())
   if (!exists) {
     return [
@@ -36,92 +37,60 @@ function ensureAllItem(
       ...items.map(category => ({
         label: category.name,
         href: `${href}?category=${category.slug}`,
-        description: `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
+        description: category.tooltip ?? `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
       })),
     ]
   }
-  // Else: map DB categories only
   return items.map(category => ({
     label: category.name,
     href: `${href}?category=${category.slug}`,
-    description: `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
+    description: category.tooltip ?? `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
   }))
 }
 
-export function Header() {
+export function Header({
+  blogCategories = [],
+  videoCategories = [],
+}: {
+  blogCategories?: Category[]
+  videoCategories?: Category[]
+}) {
   const [isOpen, setIsOpen] = useState(false)
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([
+
+  // Precompute menuItems once using props (no fetching)
+  const blogSubItems = ensureAllItem(
+    blogCategories,
+    "All Posts",
+    "all-posts",
+    "/blog",
+    "Browse all our blog content",
+    "posts"
+  )
+
+  const videoSubItems = ensureAllItem(
+    videoCategories,
+    "All Videos",
+    "all-videos",
+    "/watch",
+    "Browse our complete video library",
+    "videos"
+  )
+
+  const menuItems: MenuItem[] = [
     { label: "Home", href: "/" },
-    { label: "Blog", href: "/blog" },
-    { label: "Watch", href: "/watch" },
+    { label: "Blog", href: "/blog", subItems: blogSubItems },
+    { label: "Watch", href: "/watch", subItems: videoSubItems },
     { label: "Play", href: "/play" },
-    { label: "About", href: "/about" },
+    {
+      label: "About",
+      subItems: [
+        { label: "Our Story", href: "/about", description: "Learn about Flavor Studios" },
+        { label: "Careers", href: "/career", description: "Join our creative team" },
+        { label: "FAQ", href: "/faq", description: "Frequently asked questions" },
+      ],
+    },
     { label: "Contact", href: "/contact" },
-  ])
-
-  useEffect(() => {
-    const loadMenuItems = async () => {
-      try {
-        const response = await fetch("/api/categories")
-        const data = await response.json()
-        const blogCategories: Category[] = data.blogCategories ?? []
-        const videoCategories: Category[] = data.videoCategories ?? []
-
-        const blogSubItems = ensureAllItem(
-          blogCategories,
-          "All Posts",
-          "all-posts",
-          "/blog",
-          "Browse all our blog content",
-          "posts"
-        )
-
-        const videoSubItems = ensureAllItem(
-          videoCategories,
-          "All Videos",
-          "all-videos",
-          "/watch",
-          "Browse our complete video library",
-          "videos"
-        )
-
-        const dynamicMenuItems: MenuItem[] = [
-          { label: "Home", href: "/" },
-          { label: "Blog", href: "/blog", subItems: blogSubItems },
-          { label: "Watch", href: "/watch", subItems: videoSubItems },
-          { label: "Play", href: "/play" },
-          {
-            label: "About",
-            subItems: [
-              {
-                label: "Our Story",
-                href: "/about",
-                description: "Learn about Flavor Studios",
-              },
-              {
-                label: "Careers",
-                href: "/career",
-                description: "Join our creative team",
-              },
-              {
-                label: "FAQ",
-                href: "/faq",
-                description: "Frequently asked questions",
-              },
-            ],
-          },
-          { label: "Contact", href: "/contact" },
-        ]
-
-        setMenuItems(dynamicMenuItems)
-      } catch (error) {
-        console.error("Failed to load dynamic menu items:", error)
-        // Fallback menu stays as is
-      }
-    }
-
-    loadMenuItems()
-  }, [])
+  ]
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

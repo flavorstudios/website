@@ -5,13 +5,14 @@ const withPWA = require('next-pwa')({
   skipWaiting: true,
   swSrc: 'app/sw.js', // This is your service worker source template!
   disable: process.env.NODE_ENV === 'development',
-  // 💡 Ensures /offline is ALWAYS precached for robust offline fallback
+  // Ensures /offline is ALWAYS precached for robust offline fallback
   additionalManifestEntries: [
     { url: '/offline', revision: null },
   ],
 });
 
 const nextConfig = {
+  reactStrictMode: true, // Add this for best practice, optional
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: false },

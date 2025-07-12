@@ -1,8 +1,9 @@
-// scripts/pingAllSearchEngines.js
+// Import required modules
+import fetch from 'node-fetch'; // ES module style
+import { parseStringPromise } from 'xml2js'; // ES module style
+import dotenv from 'dotenv'; // ES module style
 
-const fetch = global.fetch || require('node-fetch');
-const xml2js = require('xml2js');
-require('dotenv').config();
+dotenv.config();
 
 const apiKey = process.env.BING_API_KEY;
 const indexnowKey = process.env.INDEXNOW_KEY;
@@ -33,46 +34,33 @@ function normalizeUrl(urlPath) {
     let cleanedUrl = String(urlPath).trim();
 
     // Step 1: Remove duplicate siteUrl (e.g., https://flavorstudios.in/https://flavorstudios.in/...)
-    // This is the most critical part for your specific error.
     if (cleanedUrl.startsWith(`${siteUrl}/`)) {
-        // Only remove if it's truly a duplicate prefix, not just a valid URL part
-        // E.g., if siteUrl is example.com, and path is example.com/foo, it's a duplicate.
-        // We need to be careful not to remove valid paths like "example.com/about" from "https://example.com/about"
-        // This regex targets the exact pattern of double hostname after the protocol and first hostname.
         const regex = new RegExp(`^${siteUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\/(${siteUrlHostname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${siteUrlHostname.replace('www.', '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`);
         if (regex.test(cleanedUrl)) {
-             cleanedUrl = cleanedUrl.replace(regex, siteUrl); // Replace the double part with just the single siteUrl
+            cleanedUrl = cleanedUrl.replace(regex, siteUrl); // Replace the double part with just the single siteUrl
         }
     }
-    // General cleanup for paths like /flavorstudios.in/path
     else if (cleanedUrl.startsWith('/') && cleanedUrl.slice(1).startsWith(siteUrlHostname)) {
         cleanedUrl = siteUrl + cleanedUrl.slice(1 + siteUrlHostname.length);
     }
-    // Fallback: If it still starts with the hostname directly after a slash (e.g., /flavorstudios.in/legal)
     else if (cleanedUrl.startsWith('/') && cleanedUrl.slice(1).startsWith(siteUrlHostname)) {
         cleanedUrl = siteUrl + cleanedUrl.slice(1 + siteUrlHostname.length);
     }
 
     try {
         const url = new URL(cleanedUrl);
-        // Only return if it matches our site's origin. This is a final safety filter.
         if (url.origin === siteUrlOrigin) {
             return url.href;
         } else {
-            // If it's an external URL, let it pass through to be filtered out later.
-            // Or, if you only want internal URLs, you could return an empty string here.
             return url.href;
         }
     } catch {
-        // If it's not a valid absolute URL after initial cleanup, assume it's a relative path.
-        // Ensure a single leading slash
         if (cleanedUrl && !cleanedUrl.startsWith('/')) {
             cleanedUrl = '/' + cleanedUrl;
         }
         return siteUrl + cleanedUrl;
     }
 }
-
 
 // --- STEP 1: Fetch URLs from sitemaps ---
 async function getUrlsFromSitemaps() {
@@ -85,12 +73,11 @@ async function getUrlsFromSitemaps() {
                 continue;
             }
             const xml = await res.text();
-            const parsed = await xml2js.parseStringPromise(xml);
+            const parsed = await parseStringPromise(xml);
             const locs = parsed.urlset && parsed.urlset.url
                 ? parsed.urlset.url.map(u => u.loc[0]).filter(Boolean)
                 : [];
 
-            // DEBUGGING: Log the raw URLs obtained from the sitemap
             console.log(`[DEBUG] Raw URLs from ${sitemap}:`, locs);
 
             urls = urls.concat(locs);
@@ -106,14 +93,12 @@ async function getUrlsFromSitemaps() {
         .filter(u => {
             try {
                 const urlObj = new URL(u);
-                // Only keep URLs matching our site's origin
                 return urlObj.origin === siteUrlOrigin;
             } catch {
                 return false;
             }
         });
 
-    // DEBUGGING: Log the URLs after normalization and filtering
     console.log(`[DEBUG] URLs after normalization and filtering:`, normalizedUrls);
 
     return normalizedUrls;
@@ -145,7 +130,6 @@ async function submitBing(urls) {
         console.log(`\n[Bing] Submitted ${urlsToSubmit.length} URLs:`, data);
 
         if (skipped.length > 0) {
-            // Log the skipped URLs, which should now be correctly normalized
             console.log(`[Bing] Skipped ${skipped.length} due to quota:`, skipped);
         }
     } catch (err) {
@@ -160,7 +144,7 @@ async function submitIndexNow(urls) {
         return;
     }
 
-    for (const url of urls) { // 'url' here should now be properly normalized
+    for (const url of urls) { 
         try {
             const endpoint = `https://api.indexnow.org/indexnow?url=${encodeURIComponent(url)}&key=${indexnowKey}`;
             const res = await fetch(endpoint);

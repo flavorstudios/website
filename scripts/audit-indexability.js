@@ -1,9 +1,11 @@
+// Import the necessary modules with the correct ES module syntax
 import axios from 'axios';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';  // Updated to match the ES module import for cheerio
 import xml2js from 'xml2js';
 
 const sitemapUrl = 'https://flavorstudios.in/sitemap.xml';
 
+// Function to get URLs from the sitemap
 async function getUrlsFromSitemap() {
   try {
     const res = await axios.get(sitemapUrl);
@@ -16,6 +18,7 @@ async function getUrlsFromSitemap() {
   }
 }
 
+// Function to check if a URL is indexable
 async function checkIndexability(url) {
   try {
     const res = await axios.get(url);
@@ -32,6 +35,7 @@ async function checkIndexability(url) {
   }
 }
 
+// Main execution function
 (async () => {
   const urls = await getUrlsFromSitemap();
   if (urls.length === 0) {
@@ -41,11 +45,13 @@ async function checkIndexability(url) {
 
   console.log(`🔍 Checking ${urls.length} pages...\n`);
 
+  // Check the indexability of each URL
   const results = await Promise.all(urls.map(checkIndexability));
   const indexable = results.filter(r => r.status === '✅ Indexable');
   const noindex = results.filter(r => r.status === '❌ Not Indexable');
   const errors = results.filter(r => r.status.startsWith('⚠️'));
 
+  // Log the results
   console.log('\n✅ Indexable Pages:');
   indexable.forEach(r => console.log(`- ${r.url}`));
 

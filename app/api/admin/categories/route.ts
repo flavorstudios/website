@@ -6,10 +6,11 @@ const prisma = new PrismaClient()
 export async function GET(request: NextRequest) {
   try {
     const typeParam = request.nextUrl?.searchParams?.get("type")
-    let where = {}
-    if (typeParam === "blog") where = { type: CategoryType.BLOG }
-    else if (typeParam === "video") where = { type: CategoryType.VIDEO }
+    
+    // Initialize where filter
+    const where = typeParam ? { type: typeParam === "blog" ? CategoryType.BLOG : CategoryType.VIDEO } : {}
 
+    // Fetch categories based on type (blog/video)
     const categories = await prisma.category.findMany({
       where,
       orderBy: { order: "asc" },
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
         createdAt: true,
         updatedAt: true,
         postCount: true,
-        tooltip: true, // Make sure this field exists in your schema!
+        tooltip: true, // Ensure tooltip field is included in Prisma schema
       },
     })
     return NextResponse.json({ categories })
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
         slug,
         type,
         description: data.description || "",
-        tooltip: data.tooltip || "", // add this field if present
+        tooltip: data.tooltip || "", // Add this field if present
         color: data.color || null,
         icon: data.icon || null,
         order: typeof data.order === "number" ? data.order : 0,

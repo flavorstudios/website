@@ -1,6 +1,6 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
-const xml2js = require('xml2js');
+import axios from 'axios';
+import cheerio from 'cheerio';
+import xml2js from 'xml2js';
 
 const sitemapUrl = 'https://flavorstudios.in/sitemap.xml';
 

@@ -17,10 +17,10 @@ jobs:
       - name: 🧰 Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: '20.x'  # Use LTS version of Node.js for stability
 
       - name: 📥 Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile  # Ensure consistency with pnpm lockfile
 
       - name: 🚀 Submit URLs to Search Engines
         env:
@@ -28,16 +28,16 @@ jobs:
           NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
           BING_API_KEY: ${{ secrets.BING_API_KEY }}
           INDEXNOW_API_KEY: ${{ secrets.INDEXNOW_API_KEY }}
-        run: node --loader ts-node/esm scripts/pingAllSearchEngines.js # Use ts-node loader to handle ES module
+        run: node scripts/pingAllSearchEngines.mjs  # Fixed script path
 
       - name: 🔍 Run SEO Indexability Audit
         run: |
           mkdir -p audit-results
-          node --loader ts-node/esm scripts/audit-indexability.js > audit-results/seo-audit-$(date +'%Y-%m-%d_%H-%M').log
+          node scripts/audit-indexability.js > audit-results/seo-audit-$(date +'%Y-%m-%d_%H-%M').log
           echo "✅ SEO audit complete."
 
       - name: 📤 Upload SEO Audit Results
-        uses: actions/upload-artifact@v4 # ✅ Updated to fix deprecated v3 error
+        uses: actions/upload-artifact@v4  # Updated to fix deprecated v3 error
         with:
           name: seo-audit-logs
           path: audit-results/

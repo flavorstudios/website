@@ -1,7 +1,6 @@
-// Import required modules
-import fetch from 'node-fetch'; // ES module style
-import { parseStringPromise } from 'xml2js'; // ES module style
-import dotenv from 'dotenv'; // ES module style
+import fetch from 'node-fetch'; // Correct ES module import
+import { parseStringPromise } from 'xml2js'; // Correct ES module import
+import dotenv from 'dotenv'; // Correct ES module import
 
 dotenv.config();
 
@@ -27,21 +26,16 @@ const sitemaps = [
     `${siteUrl}/watch/sitemap.xml`,
 ];
 
-// --- Bulletproof URL Normalizer (Revised for Double Domain Issue) ---
 function normalizeUrl(urlPath) {
     if (!urlPath) return "";
 
     let cleanedUrl = String(urlPath).trim();
 
-    // Step 1: Remove duplicate siteUrl (e.g., https://flavorstudios.in/https://flavorstudios.in/...)
     if (cleanedUrl.startsWith(`${siteUrl}/`)) {
         const regex = new RegExp(`^${siteUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\/(${siteUrlHostname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${siteUrlHostname.replace('www.', '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`);
         if (regex.test(cleanedUrl)) {
             cleanedUrl = cleanedUrl.replace(regex, siteUrl); // Replace the double part with just the single siteUrl
         }
-    }
-    else if (cleanedUrl.startsWith('/') && cleanedUrl.slice(1).startsWith(siteUrlHostname)) {
-        cleanedUrl = siteUrl + cleanedUrl.slice(1 + siteUrlHostname.length);
     }
     else if (cleanedUrl.startsWith('/') && cleanedUrl.slice(1).startsWith(siteUrlHostname)) {
         cleanedUrl = siteUrl + cleanedUrl.slice(1 + siteUrlHostname.length);
@@ -62,7 +56,6 @@ function normalizeUrl(urlPath) {
     }
 }
 
-// --- STEP 1: Fetch URLs from sitemaps ---
 async function getUrlsFromSitemaps() {
     let urls = [];
     for (const sitemap of sitemaps) {
@@ -86,7 +79,6 @@ async function getUrlsFromSitemaps() {
         }
     }
 
-    // Normalize and deduplicate
     const deduped = Array.from(new Set(urls));
     const normalizedUrls = deduped
         .map(normalizeUrl)
@@ -104,14 +96,13 @@ async function getUrlsFromSitemaps() {
     return normalizedUrls;
 }
 
-// --- STEP 2: Submit to Bing ---
 async function submitBing(urls) {
     if (!apiKey) {
         console.log('[Bing] No API key set, skipping Bing submission.');
         return;
     }
 
-    const BING_DAILY_QUOTA = 5; // Use 5 to avoid quota errors!
+    const BING_DAILY_QUOTA = 5;
     const urlsToSubmit = urls.slice(0, BING_DAILY_QUOTA);
     const skipped = urls.slice(BING_DAILY_QUOTA);
 
@@ -137,7 +128,6 @@ async function submitBing(urls) {
     }
 }
 
-// --- STEP 3: Submit to IndexNow ---
 async function submitIndexNow(urls) {
     if (!indexnowKey) {
         console.log('[IndexNow] No API key set, skipping IndexNow submission.');
@@ -159,7 +149,6 @@ async function submitIndexNow(urls) {
     }
 }
 
-// --- STEP 4: Ping Google & Yandex ---
 async function pingSitemaps() {
     for (const sitemap of sitemaps) {
         const encoded = encodeURIComponent(sitemap);
@@ -180,7 +169,6 @@ async function pingSitemaps() {
     }
 }
 
-// --- RUN ---
 (async () => {
     const urls = await getUrlsFromSitemaps();
 

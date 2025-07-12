@@ -10,13 +10,14 @@ export async function GET(request: NextRequest) {
     const type = request.nextUrl.searchParams.get("type")
     const select = { name: true, slug: true, postCount: true, tooltip: true }
 
+    // Fetching categories based on type
     if (type === "blog") {
       const categories = await prisma.category.findMany({
         where: { type: CategoryType.BLOG, isActive: true },
         orderBy: { order: "asc" },
         select,
       })
-      return NextResponse.json({
+      const response = NextResponse.json({
         categories: categories.map((cat) => ({
           name: cat.name,
           slug: cat.slug,
@@ -24,6 +25,8 @@ export async function GET(request: NextRequest) {
           tooltip: cat.tooltip ?? undefined,
         })),
       })
+      response.headers.set("Cache-Control", "public, max-age=300") // Cache for 5 minutes
+      return response
     }
 
     if (type === "video") {
@@ -32,7 +35,7 @@ export async function GET(request: NextRequest) {
         orderBy: { order: "asc" },
         select,
       })
-      return NextResponse.json({
+      const response = NextResponse.json({
         categories: categories.map((cat) => ({
           name: cat.name,
           slug: cat.slug,
@@ -40,6 +43,8 @@ export async function GET(request: NextRequest) {
           tooltip: cat.tooltip ?? undefined,
         })),
       })
+      response.headers.set("Cache-Control", "public, max-age=300") // Cache for 5 minutes
+      return response
     }
 
     // No type: return both blog and video categories
@@ -56,7 +61,7 @@ export async function GET(request: NextRequest) {
       }),
     ])
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       blogCategories: blogCategories.map((cat) => ({
         name: cat.name,
         slug: cat.slug,
@@ -70,6 +75,8 @@ export async function GET(request: NextRequest) {
         tooltip: cat.tooltip ?? undefined,
       })),
     })
+    response.headers.set("Cache-Control", "public, max-age=300") // Cache for 5 minutes
+    return response
   } catch (error) {
     console.error("Failed to get categories:", error)
     return NextResponse.json(

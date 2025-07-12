@@ -1,10 +1,12 @@
+// app/blog/page.tsx
+
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
 import { blogStore } from "@/lib/content-store";
-import { getDynamicCategories } from "@/lib/dynamic-categories";
+import { getDynamicCategories } from "@/lib/dynamic-categories"; // Ensure this is updated to fetch only blog categories
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { NewsletterSignup } from "@/components/newsletter-signup";
 import { getMetadata } from "@/lib/seo-utils";
@@ -67,10 +69,10 @@ const schema = getSchema({
 // --- DATA FETCHING ---
 async function getBlogData() {
   try {
-    // Only blogCategories, never mix with video!
+    // Fetch only blogCategories (no mixing with video categories)
     const [posts, { blogCategories }] = await Promise.all([
       blogStore.getPublished(),
-      getDynamicCategories(),
+      getDynamicCategories('blog'), // Fetch only blog categories
     ]);
     return { posts, categories: blogCategories || [] };
   } catch (error) {
@@ -253,15 +255,6 @@ function FeaturedPostCard({ post, priority = false }: { post: any; priority?: bo
             <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-900 shadow-lg text-xs">
               ⭐ Featured
             </Badge>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="absolute bottom-3 sm:bottom-4 left-3 sm:left-4 right-3 sm:right-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-            <Badge variant="secondary" className="mb-2 bg-white/90 backdrop-blur-sm text-xs">
-              {post.category}
-            </Badge>
-            <h3 className="text-sm sm:text-lg font-bold text-white mb-2 line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              {post.title}
-            </h3>
           </div>
         </div>
         <CardHeader className="pb-3 p-4 sm:p-6">

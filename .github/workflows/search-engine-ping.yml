@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: '20.x'  # Use LTS version of Node.js for stability
 
+      - name: 📥 Install pnpm
+        run: npm install -g pnpm  # Install pnpm globally to ensure it's available
+
       - name: 📥 Install dependencies
         run: pnpm install --frozen-lockfile  # Ensure consistency with pnpm lockfile
 

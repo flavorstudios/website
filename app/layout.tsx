@@ -87,10 +87,10 @@ const orgSchema = getSchema({
 });
 
 // 👇 ONLY THIS PART CHANGES – load categories on server and pass to Header!
-import { getDynamicCategories } from "@/lib/dynamic-categories"
+import { getDynamicCategories } from "@/lib/dynamic-categories";
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const { blogCategories, videoCategories } = await getDynamicCategories();
+  const { blogCategories, videoCategories } = await getDynamicCategories('video'); // Fetch only video categories
 
   return (
     <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>

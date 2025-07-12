@@ -1,5 +1,8 @@
+// next.config.js
+import withPWA from 'next-pwa'
+
 /** @type {import('next').NextConfig} */
-const withPWA = require('next-pwa')({
+const nextConfig = withPWA({
   dest: 'public',
   register: true,
   skipWaiting: true,
@@ -9,13 +12,10 @@ const withPWA = require('next-pwa')({
   additionalManifestEntries: [
     { url: '/offline', revision: null },
   ],
-});
-
-const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: false },
   // Add any other Next.js config here!
-};
+})
 
-module.exports = withPWA(nextConfig);
+export default nextConfig

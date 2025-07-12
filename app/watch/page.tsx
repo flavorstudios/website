@@ -1,3 +1,5 @@
+// app/watch/page.tsx
+
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
@@ -77,7 +79,7 @@ async function getWatchData() {
       fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`, {
         next: { revalidate: 300 },
       }).catch(() => ({ ok: false, json: () => Promise.resolve({ videos: [] }) })),
-      getDynamicCategories(),
+      getDynamicCategories('video'), // Fetch only video categories
     ]);
 
     let videos: VideoType[] = [];

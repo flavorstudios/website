@@ -147,158 +147,134 @@ body {
   }
 }
 
-/* ========== Professional Desktop Scrollbar ========== */
-.professional-scrollbar {
+/* ========== Elegant Desktop Scrollbar ========== */
+.elegant-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
 }
 
-.professional-scrollbar::-webkit-scrollbar {
+.elegant-scrollbar::-webkit-scrollbar {
   width: 8px;
 }
 
-.professional-scrollbar::-webkit-scrollbar-track {
-  background: rgba(243, 244, 246, 0.5);
+.elegant-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.elegant-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.6));
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: all 0.3s ease;
+}
+
+.elegant-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.6), rgba(139, 92, 246, 0.8));
+  transform: scaleX(1.3);
+}
+
+.elegant-scrollbar::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, rgba(79, 70, 229, 0.7), rgba(124, 58, 237, 0.9));
+}
+
+/* ========== Elegant Mobile Scrollbar ========== */
+.mobile-elegant-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.4) rgba(243, 244, 246, 0.3);
+}
+
+.mobile-elegant-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mobile-elegant-scrollbar::-webkit-scrollbar-track {
+  background: rgba(243, 244, 246, 0.2);
   border-radius: 10px;
   margin: 4px 0;
 }
 
-.professional-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.6));
+.mobile-elegant-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.5), rgba(139, 92, 246, 0.7));
   border-radius: 10px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
 }
 
-.professional-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(37, 99, 235, 0.8));
-  transform: scaleX(1.2);
+.mobile-elegant-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.7), rgba(139, 92, 246, 0.9));
 }
 
-.professional-scrollbar::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(180deg, rgba(37, 99, 235, 0.7), rgba(29, 78, 216, 0.9));
-}
-
-/* ========== Professional Mobile Scrollbar ========== */
-.professional-scrollbar-mobile {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(59, 130, 246, 0.4) rgba(243, 244, 246, 0.3);
-}
-
-.professional-scrollbar-mobile::-webkit-scrollbar {
-  width: 6px;
-}
-
-.professional-scrollbar-mobile::-webkit-scrollbar-track {
-  background: rgba(243, 244, 246, 0.3);
-  border-radius: 8px;
-  margin: 2px 0;
-}
-
-.professional-scrollbar-mobile::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.5), rgba(37, 99, 235, 0.7));
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.2s ease;
-}
-
-.professional-scrollbar-mobile::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(59, 130, 246, 0.7), rgba(37, 99, 235, 0.9));
-}
-
-/* ========== Enhanced Menu Animations ========== */
-@keyframes menuSlideIn {
+/* ========== Smooth Animations ========== */
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(-10px) scale(0.95);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
-@keyframes menuSlideOut {
+@keyframes slideInRight {
   from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+    opacity: 0;
+    transform: translateX(20px);
   }
   to {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
-.menu-enter {
-  animation: menuSlideIn 0.2s ease-out forwards;
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out;
 }
 
-.menu-exit {
-  animation: menuSlideOut 0.15s ease-in forwards;
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
 }
 
-/* ========== Scroll Indicators ========== */
-.scroll-indicator {
-  position: relative;
+/* ========== Glassmorphism Effects ========== */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-.scroll-indicator::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.scroll-indicator::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.scroll-indicator.scrollable::before,
-.scroll-indicator.scrollable::after {
-  opacity: 1;
-}
-
-/* ========== Legacy Browser Support ========== */
-@supports not (backdrop-filter: blur(4px)) {
-  .backdrop-blur-sm {
-    background-color: rgba(255, 255, 255, 0.95) !important;
-  }
-}
-
-/* ========== High Contrast Mode Support ========== */
-@media (prefers-contrast: high) {
-  .professional-scrollbar::-webkit-scrollbar-thumb {
-    background: #000 !important;
-  }
-
-  .professional-scrollbar-mobile::-webkit-scrollbar-thumb {
-    background: #000 !important;
-  }
-}
-
-/* ========== Reduced Motion Support ========== */
+/* ========== Accessibility Improvements ========== */
 @media (prefers-reduced-motion: reduce) {
-  .professional-scrollbar::-webkit-scrollbar-thumb,
-  .professional-scrollbar-mobile::-webkit-scrollbar-thumb {
+  .elegant-scrollbar::-webkit-scrollbar-thumb,
+  .mobile-elegant-scrollbar::-webkit-scrollbar-thumb {
     transition: none !important;
   }
 
-  .menu-enter,
-  .menu-exit {
+  .animate-fade-in-up,
+  .animate-slide-in-right {
     animation: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .elegant-scrollbar::-webkit-scrollbar-thumb {
+    background: #000 !important;
+  }
+
+  .mobile-elegant-scrollbar::-webkit-scrollbar-thumb {
+    background: #000 !important;
+  }
+}
+
+/* ========== Focus Visible Improvements ========== */
+@supports selector(:focus-visible) {
+  *:focus {
+    outline: none;
+  }
+
+  *:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
   }
 }

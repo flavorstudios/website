@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronDown, Coffee } from "lucide-react"
+import { ChevronDown, Coffee, Sparkles, Grid3X3 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { MenuItem } from "./mega-menu"
 
@@ -30,116 +30,171 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
   }
 
   return (
-    <nav className={cn("space-y-1", className)} aria-label="Mobile menu">
-      {items.map((item) => (
-        <div key={item.label}>
-          {/* Single link, no subItems */}
-          {item.href && !item.subItems ? (
-            <Link
-              href={item.href}
-              className={cn(
-                "flex items-center py-3 px-4 text-base font-medium rounded-lg transition-colors",
-                "hover:text-blue-600 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500",
-                isActive(item.href) ? "text-blue-600 bg-blue-50" : "text-gray-700"
-              )}
-              onClick={onItemClick}
-              aria-current={isActive(item.href) ? "page" : undefined}
-            >
-              {item.label}
-            </Link>
-          ) : (
-            <>
-              <button
+    <div className="bg-gradient-to-b from-gray-50/80 to-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
+      <nav className={cn("p-4", className)} aria-label="Mobile menu">
+        {items.map((item, itemIndex) => (
+          <div key={item.label} className="mb-2 last:mb-0">
+            {/* Single link, no subItems */}
+            {item.href && !item.subItems ? (
+              <Link
+                href={item.href}
                 className={cn(
-                  "w-full flex items-center justify-between py-3 px-4 text-base font-medium rounded-lg transition-colors",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500 hover:text-blue-600 hover:bg-gray-50",
-                  expanded === item.label ? "text-blue-600 bg-blue-50" : "text-gray-700"
+                  "flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 group relative overflow-hidden",
+                  "hover:shadow-lg hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
+                  isActive(item.href)
+                    ? "text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
+                    : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-gray-900",
                 )}
-                onClick={() => toggleExpanded(item.label)}
-                aria-expanded={expanded === item.label}
-                aria-controls={`mobile-submenu-${item.label}`}
-                type="button"
+                onClick={onItemClick}
+                aria-current={isActive(item.href) ? "page" : undefined}
               >
-                <span>{item.label}</span>
-                {item.subItems && (
-                  <ChevronDown
-                    className={cn(
-                      "h-4 w-4 transition-transform duration-200",
-                      expanded === item.label && "rotate-180"
-                    )}
-                    aria-hidden="true"
-                  />
-                )}
-              </button>
-              {/* Submenu */}
-              {item.subItems && (
-                <div
-                  id={`mobile-submenu-${item.label}`}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative z-10">{item.label}</span>
+              </Link>
+            ) : (
+              <>
+                <button
                   className={cn(
-                    "overflow-hidden transition-all duration-300 ease-in-out",
+                    "w-full flex items-center justify-between py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 group relative overflow-hidden",
+                    "focus:outline-none focus:ring-2 focus:ring-blue-500/30 hover:shadow-lg hover:scale-[1.02]",
                     expanded === item.label
-                      ? (item.label === "Blog" || item.label === "Watch")
-                        ? "opacity-100" // <-- No max-h, let inner scroll handle height
-                        : "max-h-96 opacity-100"
-                      : "max-h-0 opacity-0"
+                      ? "text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
+                      : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-gray-900",
                   )}
-                  role="region"
-                  aria-label={`${item.label} submenu`}
+                  onClick={() => toggleExpanded(item.label)}
+                  aria-expanded={expanded === item.label}
+                  aria-controls={`mobile-submenu-${item.label}`}
+                  type="button"
                 >
-                  {/* [Scroll Update] Only for Blog & Watch */}
-                  <div
-                    className={cn(
-                      "py-2 pl-4 space-y-1",
-                      (item.label === "Blog" || item.label === "Watch") &&
-                        "max-h-[60vh] overflow-y-auto rounded-2xl shadow-lg pr-4 custom-scrollbar"
-                    )}
-                  >
-                    {item.subItems.map((subItem, idx) => (
-                      <Link
-                        key={idx}
-                        href={subItem.href}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="flex items-center space-x-3 relative z-10">
+                    <Grid3X3 className="w-5 h-5 opacity-70" />
+                    <span>{item.label}</span>
+                    {item.subItems && (
+                      <span
                         className={cn(
-                          "block py-2 px-4 text-sm rounded transition-colors",
-                          "hover:text-blue-600 hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500",
-                          isActive(subItem.href) ? "text-blue-600 bg-white" : "text-gray-600"
+                          "px-2.5 py-1 text-xs font-medium rounded-full transition-colors",
+                          expanded === item.label
+                            ? "bg-white/20 text-white"
+                            : "bg-gray-100 text-gray-600 group-hover:bg-white/80",
                         )}
-                        onClick={onItemClick}
-                        aria-current={isActive(subItem.href) ? "page" : undefined}
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-medium">{subItem.label}</div>
+                        {item.subItems.length}
+                      </span>
+                    )}
+                  </div>
+                  {item.subItems && (
+                    <ChevronDown
+                      className={cn(
+                        "h-5 w-5 transition-all duration-300 relative z-10",
+                        expanded === item.label && "rotate-180",
+                      )}
+                      aria-hidden="true"
+                    />
+                  )}
+                </button>
+
+                {/* Enhanced Submenu with Creative Design */}
+                {item.subItems && (
+                  <div
+                    id={`mobile-submenu-${item.label}`}
+                    className={cn(
+                      "overflow-hidden transition-all duration-500 ease-out",
+                      expanded === item.label ? "opacity-100 max-h-[2000px] mt-3" : "max-h-0 opacity-0",
+                    )}
+                    role="region"
+                    aria-label={`${item.label} submenu`}
+                  >
+                    {/* Creative scrollable container */}
+                    <div
+                      className={cn(
+                        "space-y-2 relative",
+                        (item.label === "Blog" || item.label === "Watch") &&
+                          "max-h-[60vh] overflow-y-auto mobile-elegant-scrollbar bg-gradient-to-b from-white/50 to-gray-50/80 rounded-2xl p-4 shadow-inner border border-gray-200/50 backdrop-blur-sm",
+                      )}
+                    >
+                      {/* Floating scroll indicator for long lists */}
+                      {(item.label === "Blog" || item.label === "Watch") && (
+                        <div className="sticky top-0 z-10 flex justify-center pb-2">
+                          <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full px-3 py-1 backdrop-blur-sm border border-white/30">
+                            <div className="flex items-center space-x-2">
+                              <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
+                              <span className="text-xs font-medium text-gray-600">Scroll to explore</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {item.subItems.map((subItem, idx) => (
+                        <Link
+                          key={idx}
+                          href={subItem.href}
+                          className={cn(
+                            "group flex items-center justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden",
+                            "hover:shadow-md hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
+                            isActive(subItem.href)
+                              ? "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border border-blue-200/50"
+                              : "text-gray-600 hover:text-gray-900 hover:bg-white/80 border border-transparent hover:border-gray-200/50",
+                          )}
+                          onClick={onItemClick}
+                          aria-current={isActive(subItem.href) ? "page" : undefined}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="flex-1 min-w-0 relative z-10">
+                            <div className="flex items-center space-x-2">
+                              <div className="font-medium truncate">{subItem.label}</div>
+                              {subItem.isNew && (
+                                <div className="flex items-center space-x-1">
+                                  <Sparkles className="w-3 h-3 text-amber-500" />
+                                  <span className="px-2 py-0.5 text-xs font-medium bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 rounded-full border border-amber-200">
+                                    New
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                             {subItem.description && (
-                              <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>
+                              <div className="text-xs text-gray-500 mt-1 group-hover:text-gray-600 transition-colors truncate">
+                                {subItem.description}
+                              </div>
                             )}
                           </div>
-                          {subItem.isNew && (
-                            <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                              New
-                            </span>
-                          )}
+                          <div className="ml-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 relative z-10">
+                            <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                          </div>
+                        </Link>
+                      ))}
+
+                      {/* Bottom fade indicator for scrollable sections */}
+                      {(item.label === "Blog" || item.label === "Watch") && (
+                        <div className="sticky bottom-0 flex justify-center pt-2">
+                          <div className="bg-gradient-to-r from-gray-500/20 to-gray-400/20 rounded-full px-3 py-1 backdrop-blur-sm border border-white/30">
+                            <span className="text-xs text-gray-500">End of {item.label.toLowerCase()} categories</span>
+                          </div>
                         </div>
-                      </Link>
-                    ))}
+                      )}
+                    </div>
                   </div>
-                  {/* [End Scroll Update] */}
-                </div>
-              )}
-            </>
-          )}
+                )}
+              </>
+            )}
+          </div>
+        ))}
+
+        {/* Enhanced CTA with Creative Design */}
+        <div className="mt-6 pt-4 border-t border-gray-200/50">
+          <Link
+            href="/support"
+            className="group flex items-center justify-center py-4 px-4 text-base font-medium text-white bg-gradient-to-r from-orange-500 via-orange-600 to-red-500 hover:from-orange-600 hover:via-orange-700 hover:to-red-600 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500/30 shadow-xl hover:shadow-2xl transform hover:scale-[1.02] relative overflow-hidden"
+            onClick={onItemClick}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <Coffee className="mr-3 h-5 w-5 relative z-10" />
+            <span className="relative z-10">Buy Me a Coffee</span>
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full"></div>
+          </Link>
         </div>
-      ))}
-      {/* CTA */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <Link
-          href="/support"
-          className="flex items-center justify-center py-3 px-4 text-base font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
-          onClick={onItemClick}
-        >
-          <Coffee className="mr-2 h-5 w-5" />
-          Buy Me a Coffee
-        </Link>
-      </div>
-    </nav>
+      </nav>
+    </div>
   )
 }

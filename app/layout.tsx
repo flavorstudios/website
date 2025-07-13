@@ -5,16 +5,15 @@ export const viewport = {
 };
 
 import type { ReactNode } from "react";
-import "./globals.css"; // Global styles
-import "./fonts/poppins.css"; // Custom font
+import "./globals.css";
+import "./fonts/poppins.css";
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
-import PwaServiceWorker from "@/components/PwaServiceWorker"; // Registers PWA SW
-// import PwaInstallPrompt from "@/components/PwaInstallPrompt"; // (REMOVED) Custom PWA install UI
+import PwaServiceWorker from "@/components/PwaServiceWorker";
 
-import { getMetadata, getSchema } from "@/lib/seo-utils"; // Centralized SEO helpers
+import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
   SITE_NAME,
   SITE_URL,
@@ -23,7 +22,6 @@ import {
 } from "@/lib/constants";
 
 // --- SEO Default Metadata (App Router global metadata) ---
-// 1. Get SEO fields ONLY
 const baseMetadata = getMetadata({
   title: SITE_NAME,
   description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
@@ -49,9 +47,8 @@ const baseMetadata = getMetadata({
   // Don't add PWA fields here!
 });
 
-// 2. Compose FULL Metadata object with all PWA fields
 export const metadata = {
-  ...baseMetadata, // SEO + OpenGraph + Twitter + canonical
+  ...baseMetadata,
   metadataBase: new URL(SITE_URL),
   manifest: "/manifest.webmanifest",
   icons: {
@@ -86,12 +83,17 @@ const orgSchema = getSchema({
   ],
 });
 
-// 👇 ONLY THIS PART CHANGES – load categories on server and pass to Header!
 import { getDynamicCategories } from "@/lib/dynamic-categories";
+import { headers } from "next/headers"; // <-- ADD THIS IMPORT
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  // 👇 FIX: Fetch BOTH blog and video categories for header/menu by calling with NO argument
-  const { blogCategories, videoCategories } = await getDynamicCategories();
+  const pathname = headers().get("next-url") || "";
+  const isAdmin = pathname.startsWith("/admin");
+
+  // 👇 Only fetch categories for non-admin routes
+  const { blogCategories, videoCategories } = isAdmin
+    ? { blogCategories: [], videoCategories: [] }
+    : await getDynamicCategories();
 
   return (
     <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>
@@ -136,13 +138,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </noscript>
         {/* END GTM (NOSCRIPT) */}
 
-        {/* 👇 Pass categories as props to Header! */}
-        <Header blogCategories={blogCategories} videoCategories={videoCategories} />
+        {/* Pass categories as props to Header, only if not /admin */}
+        {!isAdmin && (
+          <Header blogCategories={blogCategories} videoCategories={videoCategories} />
+        )}
 
         <main>{children}</main>
-        <Footer />
-        <BackToTop />
-        <PwaServiceWorker /> {/* Registers and handles PWA Service Worker & update UI */}
+        
+        {/* Only show Footer, BackToTop, and PWA if not /admin */}
+        {!isAdmin && (
+          <>
+            <Footer />
+            <BackToTop />
+            <PwaServiceWorker />
+          </>
+        )}
         {/* <PwaInstallPrompt />  (REMOVED) */}
       </body>
     </html>

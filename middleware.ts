@@ -4,9 +4,15 @@ import type { NextRequest } from "next/server"
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // --- Normalize admin login path (allow trailing slash and query) ---
+  const isLoginPage =
+    pathname === "/admin/login" ||
+    pathname === "/admin/login/" ||
+    pathname.startsWith("/admin/login?")
+
   if (pathname.startsWith("/admin")) {
-    // Allow access to login page
-    if (pathname === "/admin/login") {
+    // Allow access to login page (all variants)
+    if (isLoginPage) {
       const token = request.cookies.get("admin-session")
       // If already authenticated, redirect to dashboard
       if (token?.value === "authenticated") {

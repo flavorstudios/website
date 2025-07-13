@@ -1,29 +1,26 @@
 // app/admin/login/page.tsx
 
-import { getMetadata } from "@/lib/seo-utils"; // Only import what's directly used
+import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
-import AdminLoginForm from "./AdminLoginForm"; // Assuming this component exists and is correctly structured
+import AdminLoginForm from "./AdminLoginForm";
 
 // --- SEO METADATA: Admin pages must be noindex, nofollow ---
-// This metadata ensures that search engines will not index this admin page
-// and will not follow any links present on it.
 export const metadata = getMetadata({
   title: `Admin Login – ${SITE_NAME}`,
   description: `Login securely to manage ${SITE_NAME} content, blogs, and creative assets.`,
   path: "/admin/login",
-  robots: "noindex, nofollow", // Crucial for security and SEO hygiene on admin/internal pages
+  robots: "noindex, nofollow",
   openGraph: {
     title: `Admin Login – ${SITE_NAME}`,
     description: `Login securely to manage ${SITE_NAME} content, blogs, and creative assets.`,
-    // 'url' is automatically set by getMetadata based on 'path'
     type: "website",
-    siteName: SITE_NAME, // Use 'siteName' for consistency with Open Graph spec and Next.js types
+    siteName: SITE_NAME,
     images: [
       {
         url: `${SITE_URL}/cover.jpg`,
         width: 1200,
         height: 630,
-        alt: `Admin login cover for ${SITE_NAME}`, // Specific alt text for the admin context.
+        alt: `Admin login cover for ${SITE_NAME}`,
       },
     ],
   },
@@ -36,11 +33,9 @@ export const metadata = getMetadata({
     images: [`${SITE_URL}/cover.jpg`],
   },
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
-  // No JSON-LD/schema for admin pages; public schema is for indexable content.
+  // No JSON-LD/schema for admin pages
 });
 
-// This is the SINGLE default export for this Next.js App Router page.
-// It renders the AdminLoginForm component.
 export default function AdminLoginPage() {
   return <AdminLoginForm />;
 }

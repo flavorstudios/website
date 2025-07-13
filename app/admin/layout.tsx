@@ -12,7 +12,6 @@ export const metadata = getMetadata({
   description: `Secure admin console for managing all ${SITE_NAME} content and studio tools.`,
   path: "/admin", // Base path for this layout segment
   robots: "noindex, nofollow", // Crucial for admin pages: prevents indexing by search engines.
-                               // Also prevents crawlers from following links on these pages.
   openGraph: {
     title: `Admin Console – ${SITE_NAME}`,
     description: `Secure admin console for managing all ${SITE_NAME} content and studio tools.`,

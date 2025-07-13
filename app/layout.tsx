@@ -84,7 +84,7 @@ const orgSchema = getSchema({
 });
 
 import { getDynamicCategories } from "@/lib/dynamic-categories";
-import { headers } from "next/headers"; // <-- ADD THIS IMPORT
+import { headers } from "next/headers";
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const pathname = headers().get("next-url") || "";

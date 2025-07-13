@@ -87,10 +87,17 @@ import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { headers } from "next/headers";
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const pathname = headers().get("next-url") || "";
+  // --- Robust detection of /admin route across all hosts/middleware ---
+  const h = headers();
+  const pathname =
+    h.get("next-url") ||
+    h.get("x-invoke-path") ||
+    h.get("x-matched-path") ||
+    ""; // fallback
+
   const isAdmin = pathname.startsWith("/admin");
 
-  // 👇 Only fetch categories for non-admin routes
+  // Only fetch categories for non-admin routes
   const { blogCategories, videoCategories } = isAdmin
     ? { blogCategories: [], videoCategories: [] }
     : await getDynamicCategories();

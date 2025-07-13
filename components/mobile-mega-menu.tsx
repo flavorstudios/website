@@ -108,7 +108,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                     role="region"
                     aria-label={`${item.label} submenu`}
                   >
-                    {/* Fixed scrollable container for mobile */}
+                    {/* Fixed scrollable container for Blog, Watch, About */}
                     <div
                       className={cn(
                         "space-y-2",

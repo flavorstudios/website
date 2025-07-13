@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useRef, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronDown, Sparkles, Search } from "lucide-react"
+import { ChevronDown, Sparkles, Grid3X3 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export interface MenuItem {
@@ -118,7 +118,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
     return false
   }
 
-  // Clean dropdown design without extra spacing
+  // Desktop dropdown with mobile-inspired design
   const renderDropdown = (item: MenuItem) => {
     if (!item.subItems || item.subItems.length === 0) return null
 
@@ -132,14 +132,15 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           activeMenu === item.label
             ? "opacity-100 translate-y-0 visible scale-100"
             : "opacity-0 -translate-y-4 invisible scale-95",
-          isScrollableMenu && "max-h-[75vh]",
+          isScrollableMenu && "max-h-[70vh]",
         )}
         role="menu"
         aria-label={`${item.label} submenu`}
         onMouseEnter={() => debouncedMouseEnter(item.label)}
         onMouseLeave={handleMouseLeave}
       >
-        <div className={cn("p-4", isScrollableMenu ? "overflow-y-auto elegant-scrollbar max-h-[75vh]" : "")}>
+        {/* Scrollable content area */}
+        <div className={cn("p-3", isScrollableMenu ? "overflow-y-auto elegant-scrollbar max-h-[70vh]" : "")}>
           {item.subItems.map((subItem, index) => (
             <Link
               key={index}
@@ -147,8 +148,8 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               role="menuitem"
               tabIndex={focusedIndex === index ? 0 : -1}
               className={cn(
-                "group flex items-center justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden mb-2 last:mb-0 border border-transparent",
-                "hover:shadow-md hover:scale-[1.02] hover:bg-white/80 hover:border-gray-200/50",
+                "group flex items-start justify-between py-3 px-3 text-sm rounded-xl transition-all duration-300 relative overflow-hidden mb-1 last:mb-0 border border-transparent",
+                "hover:shadow-md hover:scale-[1.01] hover:bg-white/80 hover:border-gray-200/50",
                 "focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-gray-200/50",
                 isActive(subItem.href) &&
                   "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50",
@@ -167,10 +168,10 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="flex-1 min-w-0 relative z-10">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 mb-1">
                   <div
                     className={cn(
-                      "font-medium transition-colors truncate",
+                      "font-medium transition-colors",
                       isActive(subItem.href) ? "text-blue-700" : "text-gray-900 group-hover:text-gray-900",
                     )}
                   >
@@ -186,12 +187,12 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                   )}
                 </div>
                 {subItem.description && (
-                  <div className="text-xs text-gray-500 mt-1 group-hover:text-gray-600 transition-colors truncate">
+                  <div className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors leading-relaxed">
                     {subItem.description}
                   </div>
                 )}
               </div>
-              <div className="ml-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 relative z-10">
+              <div className="ml-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 relative z-10 flex-shrink-0">
                 <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
               </div>
             </Link>
@@ -202,7 +203,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
   }
 
   return (
-    <nav ref={menuRef} className={cn("flex items-center space-x-4", className)} role="menubar">
+    <nav ref={menuRef} className={cn("flex items-center space-x-3", className)} role="menubar">
       {items.map((item, index) => (
         <div
           key={item.label}
@@ -232,7 +233,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               aria-haspopup="true"
               aria-expanded={activeMenu === item.label}
               className={cn(
-                "flex items-center space-x-2 py-2 px-3 text-sm font-medium rounded-xl transition-all duration-300 group relative overflow-hidden",
+                "flex items-center justify-between py-2 px-3 text-sm font-medium rounded-xl transition-all duration-300 group relative overflow-hidden space-x-2",
                 "focus:outline-none focus:ring-2 focus:ring-blue-500/30 hover:shadow-lg hover:scale-[1.02]",
                 activeMenu === item.label
                   ? "text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
@@ -244,7 +245,22 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               type="button"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <span className="relative z-10">{item.label}</span>
+              <div className="flex items-center space-x-2 relative z-10">
+                <Grid3X3 className="w-4 h-4 opacity-70" />
+                <span>{item.label}</span>
+                {item.subItems && (
+                  <span
+                    className={cn(
+                      "px-2 py-0.5 text-xs font-medium rounded-full transition-colors",
+                      activeMenu === item.label
+                        ? "bg-white/20 text-white"
+                        : "bg-gray-100 text-gray-600 group-hover:bg-white/80",
+                    )}
+                  >
+                    {item.subItems.length}
+                  </span>
+                )}
+              </div>
               {item.subItems && (
                 <ChevronDown
                   className={cn(
@@ -259,14 +275,6 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           {renderDropdown(item)}
         </div>
       ))}
-
-      {/* Enhanced Search Icon */}
-      <div className="flex items-center space-x-3 ml-4">
-        <button className="group relative p-2.5 rounded-xl bg-gradient-to-r from-gray-100 to-gray-50 hover:from-blue-50 hover:to-purple-50 transition-all duration-300 hover:shadow-lg hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
-          <Search className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors duration-300" />
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </button>
-      </div>
     </nav>
   )
 }

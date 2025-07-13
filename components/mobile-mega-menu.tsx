@@ -94,31 +94,39 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                   )}
                 </button>
 
-                {/* Fixed Submenu with proper height and text display */}
+                {/* Enhanced Submenu with proper mobile scrolling */}
                 {item.subItems && (
                   <div
                     id={`mobile-submenu-${item.label}`}
                     className={cn(
                       "overflow-hidden transition-all duration-500 ease-out",
-                      expanded === item.label ? "opacity-100 max-h-[80vh] mt-3" : "max-h-0 opacity-0",
+                      expanded === item.label ? "opacity-100 mt-3" : "max-h-0 opacity-0",
                     )}
+                    style={{
+                      maxHeight: expanded === item.label ? "none" : "0px",
+                    }}
                     role="region"
                     aria-label={`${item.label} submenu`}
                   >
-                    {/* Enhanced scrollable container with better height management */}
+                    {/* Fixed scrollable container for mobile */}
                     <div
                       className={cn(
                         "space-y-2",
                         (item.label === "Blog" || item.label === "Watch") &&
-                          "max-h-[70vh] overflow-y-auto mobile-elegant-scrollbar bg-gradient-to-b from-white/50 to-gray-50/80 rounded-2xl p-4 shadow-inner border border-gray-200/50 backdrop-blur-sm",
+                          "max-h-[50vh] overflow-y-auto mobile-elegant-scrollbar bg-gradient-to-b from-white/50 to-gray-50/80 rounded-2xl p-4 shadow-inner border border-gray-200/50 backdrop-blur-sm",
                       )}
+                      style={{
+                        // Ensure proper scrolling on mobile devices
+                        WebkitOverflowScrolling: "touch",
+                        overscrollBehavior: "contain",
+                      }}
                     >
                       {item.subItems.map((subItem, idx) => (
                         <Link
                           key={idx}
                           href={subItem.href}
                           className={cn(
-                            "group flex items-start justify-between py-3 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden border border-transparent",
+                            "group flex items-start justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden border border-transparent",
                             "hover:shadow-md hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
                             isActive(subItem.href)
                               ? "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50"
@@ -128,11 +136,11 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                           aria-current={isActive(subItem.href) ? "page" : undefined}
                         >
                           <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <div className="flex-1 min-w-0 relative z-10">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <div className="font-medium">{subItem.label}</div>
+                          <div className="flex-1 min-w-0 relative z-10 pr-3">
+                            <div className="flex items-start space-x-2 mb-1">
+                              <div className="font-medium text-sm leading-tight">{subItem.label}</div>
                               {subItem.isNew && (
-                                <div className="flex items-center space-x-1">
+                                <div className="flex items-center space-x-1 flex-shrink-0">
                                   <Sparkles className="w-3 h-3 text-amber-500" />
                                   <span className="px-2 py-0.5 text-xs font-medium bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 rounded-full border border-amber-200">
                                     New
@@ -146,7 +154,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                               </div>
                             )}
                           </div>
-                          <div className="ml-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 relative z-10 flex-shrink-0">
+                          <div className="ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 relative z-10 flex-shrink-0">
                             <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
                           </div>
                         </Link>

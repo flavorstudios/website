@@ -77,7 +77,11 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                   id={`mobile-submenu-${item.label}`}
                   className={cn(
                     "overflow-hidden transition-all duration-300 ease-in-out",
-                    expanded === item.label ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                    expanded === item.label
+                      ? (item.label === "Blog" || item.label === "Watch")
+                        ? "opacity-100" // <-- No max-h, let inner scroll handle height
+                        : "max-h-96 opacity-100"
+                      : "max-h-0 opacity-0"
                   )}
                   role="region"
                   aria-label={`${item.label} submenu`}

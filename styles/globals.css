@@ -180,26 +180,26 @@ body {
   background: linear-gradient(180deg, rgba(79, 70, 229, 0.8), rgba(124, 58, 237, 1));
 }
 
-/* ========== Fixed Mobile Scrollbar ========== */
+/* ========== Enhanced Mobile Scrollbar ========== */
 .mobile-elegant-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(99, 102, 241, 0.4) rgba(243, 244, 246, 0.2);
 }
 
 .mobile-elegant-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .mobile-elegant-scrollbar::-webkit-scrollbar-track {
   background: rgba(243, 244, 246, 0.2);
-  border-radius: 8px;
-  margin: 8px 0;
+  border-radius: 10px;
+  margin: 10px 0;
 }
 
 .mobile-elegant-scrollbar::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, rgba(99, 102, 241, 0.6), rgba(139, 92, 246, 0.8));
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
 }
 

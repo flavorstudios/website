@@ -112,9 +112,9 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                     <div
                       className={cn(
                         "space-y-2",
-                        // Make Blog, Watch, and About always have max height and scroll
-                        (item.label === "Blog" || item.label === "Watch" || item.label === "About") &&
-                          "max-h-[50vh] overflow-y-auto mobile-elegant-scrollbar bg-gradient-to-b from-white/50 to-gray-50/80 rounded-2xl p-4 shadow-inner border border-gray-200/50 backdrop-blur-sm"
+                        item.label === "Blog" && "max-h-[50vh] overflow-y-auto mobile-elegant-scrollbar bg-gradient-to-b from-white/50 to-gray-50/80 rounded-2xl p-4 shadow-inner border border-gray-200/50 backdrop-blur-sm",
+                        item.label === "Watch" && "max-h-[50vh] overflow-y-auto mobile-elegant-scrollbar bg-gradient-to-b from-white/50 to-gray-50/80 rounded-2xl p-4 shadow-inner border border-gray-200/50 backdrop-blur-sm",
+                        item.label === "About" && "max-h-[120px] overflow-y-auto mobile-elegant-scrollbar bg-gradient-to-b from-white/50 to-gray-50/80 rounded-2xl p-4 shadow-inner border border-gray-200/50 backdrop-blur-sm"
                       )}
                       style={{
                         WebkitOverflowScrolling: "touch",

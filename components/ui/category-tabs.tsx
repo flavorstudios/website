@@ -28,8 +28,13 @@ export function CategoryTabs({
   const [canScrollRight, setCanScrollRight] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  // Add "All" at the start if showAll is true
-  const allCategories = showAll
+  // Only add a generic "All" tab if there isn't already a context-aware all-tab
+  const allSlugs = ["all", "all-posts", "all-videos"]
+  const hasCustomAll = categories.some(cat =>
+    allSlugs.includes(cat.slug.toLowerCase())
+  )
+
+  const allCategories = showAll && !hasCustomAll
     ? [{ name: "All", slug: "all", count: 0 }, ...categories]
     : categories
 

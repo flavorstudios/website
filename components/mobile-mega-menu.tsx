@@ -112,7 +112,8 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                     <div
                       className={cn(
                         "space-y-2",
-                        (item.label === "Blog" || item.label === "Watch") &&
+                        // === Only line updated below: "About" added ===
+                        (item.label === "Blog" || item.label === "Watch" || item.label === "About") &&
                           "max-h-[50vh] overflow-y-auto mobile-elegant-scrollbar bg-gradient-to-b from-white/50 to-gray-50/80 rounded-2xl p-4 shadow-inner border border-gray-200/50 backdrop-blur-sm",
                       )}
                       style={{

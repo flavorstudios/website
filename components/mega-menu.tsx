@@ -116,12 +116,16 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
     return false
   }
 
+  // --- [Scroll Update] Apply scrollable dropdown ONLY for Blog & Watch ---
   const renderDropdown = (item: MenuItem) => {
     if (!item.subItems || item.subItems.length === 0) return null
     return (
       <div
         className={cn(
-          "absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 min-w-[280px] py-2",
+          // Apply scroll, max-height, and custom-scrollbar for Blog/Watch menus
+          (item.label === "Blog" || item.label === "Watch")
+            ? "absolute top-full left-0 mt-1 bg-white border border-gray-200 z-50 min-w-[280px] max-h-[60vh] overflow-y-auto rounded-2xl shadow-lg p-2 custom-scrollbar"
+            : "absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 min-w-[280px] py-2",
           "transform transition-all duration-200 ease-out",
           activeMenu === item.label ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible"
         )}
@@ -173,6 +177,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
       </div>
     )
   }
+  // --- [End Scroll Update] ---
 
   return (
     <nav

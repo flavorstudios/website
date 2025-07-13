@@ -82,7 +82,14 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                   role="region"
                   aria-label={`${item.label} submenu`}
                 >
-                  <div className="py-2 pl-4 space-y-1">
+                  {/* [Scroll Update] Only for Blog & Watch */}
+                  <div
+                    className={cn(
+                      "py-2 pl-4 space-y-1",
+                      (item.label === "Blog" || item.label === "Watch") &&
+                        "max-h-[60vh] overflow-y-auto rounded-2xl shadow-lg pr-4 custom-scrollbar"
+                    )}
+                  >
                     {item.subItems.map((subItem, idx) => (
                       <Link
                         key={idx}
@@ -111,6 +118,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                       </Link>
                     ))}
                   </div>
+                  {/* [End Scroll Update] */}
                 </div>
               )}
             </>

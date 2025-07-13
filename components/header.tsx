@@ -17,7 +17,7 @@ interface Category {
   type?: string
 }
 
-// Helper: always include "All" menu entry, build description consistently
+// Helper: only include "All" if it's not present in the categories
 function buildCategorySubItems(
   categories: Category[],
   allLabel: string,
@@ -26,21 +26,21 @@ function buildCategorySubItems(
   allDescription: string,
   typeLabel: string
 ) {
-  // Always add "All ..." link as first subItem
-  const subItems = [
-    {
-      label: allLabel,
-      href: basePath,
-      description: allDescription,
-    },
-    ...(categories || []).map(category => ({
-      label: category.name,
-      href: `${basePath}?category=${category.slug}`,
-      description: category.tooltip ??
-        `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
-    }))
-  ]
-  return subItems
+  const mapped = (categories || []).map(category => ({
+    label: category.name,
+    href: `${basePath}?category=${category.slug}`,
+    description:
+      category.tooltip ??
+      `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
+  }))
+
+  const hasAll = categories.some(cat =>
+    cat.slug.toLowerCase() === allSlug.toLowerCase()
+  )
+
+  return hasAll
+    ? mapped
+    : [{ label: allLabel, href: basePath, description: allDescription }, ...mapped]
 }
 
 export function Header({
@@ -52,11 +52,11 @@ export function Header({
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
-  // Build menu with defensive fallbacks (always array, never undefined)
+  // Use the DB slugs here so we don't get a double "All" if present
   const blogSubItems = buildCategorySubItems(
     blogCategories,
     "All Posts",
-    "all",
+    "all-posts", // Use the actual slug present in your DB
     "/blog",
     "Browse all our blog content",
     "posts"
@@ -65,7 +65,7 @@ export function Header({
   const videoSubItems = buildCategorySubItems(
     videoCategories,
     "All Videos",
-    "all",
+    "all-videos", // Use the actual slug present in your DB
     "/watch",
     "Browse our complete video library",
     "videos"

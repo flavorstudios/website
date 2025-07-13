@@ -43,20 +43,13 @@ export const metadata = getMetadata({
  * Admin Layout Component.
  * This layout wraps all pages within the /admin route segment,
  * providing a common structure and applying shared metadata.
- *
- * @param {Object} props - The component props.
- * @param {ReactNode} props.children - The child components/pages to be rendered within this layout.
- * @returns {JSX.Element} The HTML structure for the admin section.
  */
 export default function AdminLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  return (
-    <html lang="en">
-      {/* The body applies global anti-aliasing styles. */}
-      <body className="antialiased">{children}</body>
-    </html>
-  );
+  // DO NOT nest <html> or <body> tags here.
+  // The root layout (app/layout.tsx) already provides them.
+  return <>{children}</>;
 }

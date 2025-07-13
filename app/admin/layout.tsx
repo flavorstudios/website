@@ -28,11 +28,11 @@ export const metadata = getMetadata({
   },
   twitter: {
     card: "summary_large_image", // Preferred Twitter card type.
-    site: SITE_BRAND_TWITTER, // Consistent use of the SITE_BRAND_TWITTER constant.
-    creator: SITE_BRAND_TWITTER, // Consistent use of the SITE_BRAND_TWITTER constant.
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
     title: `Admin Console – ${SITE_NAME}`,
     description: `Secure admin console for managing all ${SITE_NAME} content and studio tools.`,
-    images: [`${SITE_URL}/cover.jpg`], // Default Twitter card image for admin pages.
+    images: [`${SITE_URL}/cover.jpg`],
   },
   // JSON-LD (schema.org structured data) is intentionally omitted for admin pages,
   // as its purpose is for public search visibility, which is not desired here.

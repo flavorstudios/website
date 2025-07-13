@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useRef, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -93,7 +95,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           break
       }
     },
-    [activeMenu, focusedIndex, items.length]
+    [activeMenu, focusedIndex, items.length],
   )
 
   // Click outside handler
@@ -116,75 +118,107 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
     return false
   }
 
-  // --- [Scroll Update] Apply scrollable dropdown ONLY for Blog & Watch ---
+  // Enhanced dropdown with professional styling
   const renderDropdown = (item: MenuItem) => {
     if (!item.subItems || item.subItems.length === 0) return null
+
+    const isScrollableMenu = item.label === "Blog" || item.label === "Watch"
+
     return (
       <div
         className={cn(
-          // Apply scroll, max-height, and custom-scrollbar for Blog/Watch menus
-          (item.label === "Blog" || item.label === "Watch")
-            ? "absolute top-full left-0 mt-1 bg-white border border-gray-200 z-50 min-w-[280px] max-h-[60vh] overflow-y-auto rounded-2xl shadow-lg p-2 custom-scrollbar"
-            : "absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 min-w-[280px] py-2",
-          "transform transition-all duration-200 ease-out",
-          activeMenu === item.label ? "opacity-100 translate-y-0 visible" : "opacity-0 -translate-y-2 invisible"
+          "absolute top-full left-0 mt-2 bg-white border border-gray-100 z-50 min-w-[320px] rounded-xl shadow-2xl backdrop-blur-sm",
+          "transform transition-all duration-300 ease-out",
+          activeMenu === item.label
+            ? "opacity-100 translate-y-0 visible scale-100"
+            : "opacity-0 -translate-y-3 invisible scale-95",
+          isScrollableMenu && "max-h-[70vh]",
         )}
         role="menu"
         aria-label={`${item.label} submenu`}
         onMouseEnter={() => debouncedMouseEnter(item.label)}
         onMouseLeave={handleMouseLeave}
       >
-        {item.subItems.map((subItem, index) => (
-          <Link
-            key={index}
-            href={subItem.href}
-            role="menuitem"
-            tabIndex={focusedIndex === index ? 0 : -1}
-            className={cn(
-              "block px-4 py-3 text-sm transition-colors duration-150 border-b border-gray-100 last:border-b-0",
-              "hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 focus:bg-gradient-to-r focus:from-blue-50 focus:to-cyan-50 focus:outline-none",
-              isActive(subItem.href) && "bg-blue-50 text-blue-600",
-              focusedIndex === index && "bg-gradient-to-r from-blue-50 to-cyan-50"
-            )}
-            onClick={() => {
-              setActiveMenu(null)
-              setFocusedIndex(-1)
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault()
-                window.location.href = subItem.href
-              }
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <div className={cn("font-medium", isActive(subItem.href) ? "text-blue-600" : "text-gray-900")}>
-                  {subItem.label}
-                  {subItem.isNew && (
-                    <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                      New
-                    </span>
+        {/* Header for scrollable menus */}
+        {isScrollableMenu && (
+          <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-t-xl">
+            <h3 className="font-semibold text-gray-900 text-sm">{item.label} Categories</h3>
+            <p className="text-xs text-gray-600 mt-1">{item.subItems.length} categories available</p>
+          </div>
+        )}
+
+        {/* Scrollable content area */}
+        <div
+          className={cn(
+            isScrollableMenu ? "overflow-y-auto professional-scrollbar p-2" : "py-2",
+            isScrollableMenu && "max-h-[calc(70vh-80px)]",
+          )}
+        >
+          {item.subItems.map((subItem, index) => (
+            <Link
+              key={index}
+              href={subItem.href}
+              role="menuitem"
+              tabIndex={focusedIndex === index ? 0 : -1}
+              className={cn(
+                "group block px-4 py-3 text-sm transition-all duration-200 rounded-lg mx-1 my-0.5",
+                "hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 hover:shadow-sm",
+                "focus:bg-gradient-to-r focus:from-blue-50 focus:to-cyan-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20",
+                isActive(subItem.href) && "bg-blue-50 text-blue-600 shadow-sm",
+                focusedIndex === index && "bg-gradient-to-r from-blue-50 to-cyan-50",
+              )}
+              onClick={() => {
+                setActiveMenu(null)
+                setFocusedIndex(-1)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  window.location.href = subItem.href
+                }
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div
+                    className={cn(
+                      "font-medium transition-colors",
+                      isActive(subItem.href) ? "text-blue-600" : "text-gray-900 group-hover:text-gray-900",
+                    )}
+                  >
+                    {subItem.label}
+                    {subItem.isNew && (
+                      <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 rounded-full border border-blue-200">
+                        New
+                      </span>
+                    )}
+                  </div>
+                  {subItem.description && (
+                    <div className="text-xs text-gray-500 mt-1 group-hover:text-gray-600 transition-colors">
+                      {subItem.description}
+                    </div>
                   )}
                 </div>
-                {subItem.description && (
-                  <div className="text-xs text-gray-500 mt-1">{subItem.description}</div>
-                )}
+                <div className="ml-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
+
+        {/* Footer for scrollable menus */}
+        {isScrollableMenu && (
+          <div className="px-4 py-2 border-t border-gray-100 bg-gray-50 rounded-b-xl">
+            <p className="text-xs text-gray-500 text-center">Scroll to see all {item.label.toLowerCase()} categories</p>
+          </div>
+        )}
       </div>
     )
   }
-  // --- [End Scroll Update] ---
 
   return (
-    <nav
-      ref={menuRef}
-      className={cn("flex items-center space-x-6", className)}
-      role="menubar"
-    >
+    <nav ref={menuRef} className={cn("flex items-center space-x-6", className)} role="menubar">
       {items.map((item, index) => (
         <div
           key={item.label}
@@ -197,8 +231,8 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               href={item.href}
               role="menuitem"
               className={cn(
-                "text-sm font-medium transition-colors hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1",
-                isActive(item.href) && "text-blue-600"
+                "text-sm font-medium transition-all duration-200 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-3 py-2",
+                isActive(item.href) && "text-blue-600 bg-blue-50",
               )}
               aria-current={isActive(item.href) ? "page" : undefined}
             >
@@ -210,8 +244,8 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               aria-haspopup="true"
               aria-expanded={activeMenu === item.label}
               className={cn(
-                "flex items-center space-x-1 text-sm font-medium transition-colors hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1",
-                activeMenu === item.label && "text-blue-600"
+                "flex items-center space-x-1 text-sm font-medium transition-all duration-200 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-3 py-2",
+                activeMenu === item.label && "text-blue-600 bg-blue-50",
               )}
               onKeyDown={(e) => handleKeyDown(e, item, index)}
               tabIndex={0}
@@ -222,8 +256,8 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               {item.subItems && (
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 transition-transform duration-200",
-                    activeMenu === item.label && "rotate-180"
+                    "h-4 w-4 transition-all duration-300",
+                    activeMenu === item.label && "rotate-180 text-blue-600",
                   )}
                   aria-hidden="true"
                 />

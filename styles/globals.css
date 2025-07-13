@@ -48,6 +48,7 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -146,22 +147,158 @@ body {
   }
 }
 
-/* ========== Custom Scrollbar for Category Dropdowns ========== */
-.custom-scrollbar {
+/* ========== Professional Desktop Scrollbar ========== */
+.professional-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #e0e4f6 transparent;
+  scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
 }
-.custom-scrollbar::-webkit-scrollbar {
+
+.professional-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.professional-scrollbar::-webkit-scrollbar-track {
+  background: rgba(243, 244, 246, 0.5);
+  border-radius: 10px;
+  margin: 4px 0;
+}
+
+.professional-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.6));
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: all 0.2s ease;
+}
+
+.professional-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.6), rgba(37, 99, 235, 0.8));
+  transform: scaleX(1.2);
+}
+
+.professional-scrollbar::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.7), rgba(29, 78, 216, 0.9));
+}
+
+/* ========== Professional Mobile Scrollbar ========== */
+.professional-scrollbar-mobile {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.4) rgba(243, 244, 246, 0.3);
+}
+
+.professional-scrollbar-mobile::-webkit-scrollbar {
   width: 6px;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+
+.professional-scrollbar-mobile::-webkit-scrollbar-track {
+  background: rgba(243, 244, 246, 0.3);
+  border-radius: 8px;
+  margin: 2px 0;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(224, 228, 246, 0.7);
-  border-radius: 6px;
+
+.professional-scrollbar-mobile::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.5), rgba(37, 99, 235, 0.7));
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(180, 186, 220, 0.85);
+
+.professional-scrollbar-mobile::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.7), rgba(37, 99, 235, 0.9));
 }
-/* ========== End Custom Scrollbar ========== */
+
+/* ========== Enhanced Menu Animations ========== */
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes menuSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+}
+
+.menu-enter {
+  animation: menuSlideIn 0.2s ease-out forwards;
+}
+
+.menu-exit {
+  animation: menuSlideOut 0.15s ease-in forwards;
+}
+
+/* ========== Scroll Indicators ========== */
+.scroll-indicator {
+  position: relative;
+}
+
+.scroll-indicator::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.scroll-indicator::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.scroll-indicator.scrollable::before,
+.scroll-indicator.scrollable::after {
+  opacity: 1;
+}
+
+/* ========== Legacy Browser Support ========== */
+@supports not (backdrop-filter: blur(4px)) {
+  .backdrop-blur-sm {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+  }
+}
+
+/* ========== High Contrast Mode Support ========== */
+@media (prefers-contrast: high) {
+  .professional-scrollbar::-webkit-scrollbar-thumb {
+    background: #000 !important;
+  }
+
+  .professional-scrollbar-mobile::-webkit-scrollbar-thumb {
+    background: #000 !important;
+  }
+}
+
+/* ========== Reduced Motion Support ========== */
+@media (prefers-reduced-motion: reduce) {
+  .professional-scrollbar::-webkit-scrollbar-thumb,
+  .professional-scrollbar-mobile::-webkit-scrollbar-thumb {
+    transition: none !important;
+  }
+
+  .menu-enter,
+  .menu-exit {
+    animation: none !important;
+  }
+}

@@ -90,7 +90,8 @@ const orgSchema = getSchema({
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const { blogCategories, videoCategories } = await getDynamicCategories('video'); // Fetch only video categories
+  // 👇 FIX: Fetch BOTH blog and video categories for header/menu by calling with NO argument
+  const { blogCategories, videoCategories } = await getDynamicCategories();
 
   return (
     <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>

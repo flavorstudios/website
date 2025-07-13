@@ -74,12 +74,12 @@ type VideoType = {
 // --- DATA FETCHING ---
 async function getWatchData() {
   try {
-    // Fetch videos and categories in parallel
+    // Use codex-audited helper: always returns { blogCategories, videoCategories }
     const [videosRes, { videoCategories }] = await Promise.all([
       fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`, {
         next: { revalidate: 300 },
       }).catch(() => ({ ok: false, json: () => Promise.resolve({ videos: [] }) })),
-      getDynamicCategories('video'), // Fetch only video categories
+      getDynamicCategories('video'),
     ]);
 
     let videos: VideoType[] = [];

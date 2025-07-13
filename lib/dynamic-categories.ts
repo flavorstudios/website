@@ -7,7 +7,7 @@ export interface CategoryData {
   name: string
   slug: string
   count: number
-  tooltip?: string // Codex: support for tooltip
+  tooltip?: string // Support for tooltip
 }
 
 // --- Result Type for Dynamic Categories API ---
@@ -16,7 +16,7 @@ export interface DynamicCategoriesResult {
   videoCategories: CategoryData[]
 }
 
-// --- Server Helpers (each gets its own PrismaClient instance) ---
+// --- Server Helpers ---
 export async function getBlogCategories(): Promise<CategoryData[]> {
   const prisma = new PrismaClient()
   try {
@@ -83,41 +83,61 @@ export function formatCategoryName(slug: string): string {
 }
 
 /**
- * Canonical: Fetch all blog and video categories from API (unified source of truth)
- * - Fetches from /api/categories which returns { blogCategories, videoCategories }
- * - If type is provided, returns only that type as CategoryData[]
+ * Consistent, unified category fetcher
+ * Always returns { blogCategories, videoCategories } (never just an array)
+ * - If type is "blog", videoCategories = []
+ * - If type is "video", blogCategories = []
+ * - If no type, both populated
+ * Uses direct DB helpers on server, API fetch on client.
  */
 export async function getDynamicCategories(
   type?: "blog" | "video"
-): Promise<DynamicCategoriesResult | CategoryData[]> {
+): Promise<DynamicCategoriesResult> {
+  // Check if running on server or client (Next.js 13+ uses process.browser/env)
+  const isServer = typeof window === "undefined"
+
   try {
-    if (type === "blog") {
-      const res = await fetch("/api/categories?type=blog", { cache: "no-store" })
-      if (!res.ok) throw new Error("Failed to fetch blog categories")
-      const { categories } = await res.json()
-      return Array.isArray(categories) ? categories : []
-    }
-    if (type === "video") {
-      const res = await fetch("/api/categories?type=video", { cache: "no-store" })
-      if (!res.ok) throw new Error("Failed to fetch video categories")
-      const { categories } = await res.json()
-      return Array.isArray(categories) ? categories : []
-    }
-    // Fetch both
-    const res = await fetch("/api/categories", { cache: "no-store" })
-    if (!res.ok) throw new Error("Failed to fetch categories")
-    const { blogCategories, videoCategories } = await res.json()
-    return {
-      blogCategories: Array.isArray(blogCategories) ? blogCategories : [],
-      videoCategories: Array.isArray(videoCategories) ? videoCategories : [],
+    if (isServer) {
+      // Use direct Prisma calls for server components and API routes
+      if (type === "blog") {
+        const blogCategories = await getBlogCategories()
+        return { blogCategories, videoCategories: [] }
+      }
+      if (type === "video") {
+        const videoCategories = await getVideoCategories()
+        return { blogCategories: [], videoCategories }
+      }
+      const [blogCategories, videoCategories] = await Promise.all([
+        getBlogCategories(),
+        getVideoCategories(),
+      ])
+      return { blogCategories, videoCategories }
+    } else {
+      // On client: fetch from API routes
+      if (type === "blog") {
+        const res = await fetch("/api/categories?type=blog", { cache: "no-store" })
+        if (!res.ok) throw new Error("Failed to fetch blog categories")
+        const { categories } = await res.json()
+        return { blogCategories: Array.isArray(categories) ? categories : [], videoCategories: [] }
+      }
+      if (type === "video") {
+        const res = await fetch("/api/categories?type=video", { cache: "no-store" })
+        if (!res.ok) throw new Error("Failed to fetch video categories")
+        const { categories } = await res.json()
+        return { blogCategories: [], videoCategories: Array.isArray(categories) ? categories : [] }
+      }
+      // Fetch both
+      const res = await fetch("/api/categories", { cache: "no-store" })
+      if (!res.ok) throw new Error("Failed to fetch categories")
+      const { blogCategories, videoCategories } = await res.json()
+      return {
+        blogCategories: Array.isArray(blogCategories) ? blogCategories : [],
+        videoCategories: Array.isArray(videoCategories) ? videoCategories : [],
+      }
     }
   } catch (error) {
-    console.warn("Failed to fetch categories from API:", error)
-    if (type === "blog" || type === "video") return []
-    return {
-      blogCategories: [],
-      videoCategories: [],
-    }
+    console.warn("Failed to fetch categories:", error)
+    return { blogCategories: [], videoCategories: [] }
   }
 }
 

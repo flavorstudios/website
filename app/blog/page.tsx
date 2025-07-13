@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
 import { blogStore } from "@/lib/content-store";
-import { getDynamicCategories } from "@/lib/dynamic-categories"; // Ensure this is updated to fetch only blog categories
+import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { NewsletterSignup } from "@/components/newsletter-signup";
 import { getMetadata } from "@/lib/seo-utils";
@@ -69,10 +69,10 @@ const schema = getSchema({
 // --- DATA FETCHING ---
 async function getBlogData() {
   try {
-    // Fetch only blogCategories (no mixing with video categories)
+    // Use codex-audited helper: always returns { blogCategories, videoCategories }
     const [posts, { blogCategories }] = await Promise.all([
       blogStore.getPublished(),
-      getDynamicCategories('blog'), // Fetch only blog categories
+      getDynamicCategories("blog"),
     ]);
     return { posts, categories: blogCategories || [] };
   } catch (error) {

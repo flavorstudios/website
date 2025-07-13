@@ -17,35 +17,30 @@ interface Category {
   type?: string
 }
 
-// Helper to map categories to menu sub-items, including tooltips if present
-function ensureAllItem(
-  items: Category[],
-  label: string,
-  slug: string,
-  href: string,
-  description: string,
+// Helper: always include "All" menu entry, build description consistently
+function buildCategorySubItems(
+  categories: Category[],
+  allLabel: string,
+  allSlug: string,
+  basePath: string,
+  allDescription: string,
   typeLabel: string
 ) {
-  const exists = items.some(cat => cat.slug.toLowerCase() === slug.toLowerCase())
-  if (!exists) {
-    return [
-      {
-        label,
-        href,
-        description,
-      },
-      ...items.map(category => ({
-        label: category.name,
-        href: `${href}?category=${category.slug}`,
-        description: category.tooltip ?? `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
-      })),
-    ]
-  }
-  return items.map(category => ({
-    label: category.name,
-    href: `${href}?category=${category.slug}`,
-    description: category.tooltip ?? `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
-  }))
+  // Always add "All ..." link as first subItem
+  const subItems = [
+    {
+      label: allLabel,
+      href: basePath,
+      description: allDescription,
+    },
+    ...(categories || []).map(category => ({
+      label: category.name,
+      href: `${basePath}?category=${category.slug}`,
+      description: category.tooltip ??
+        `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
+    }))
+  ]
+  return subItems
 }
 
 export function Header({
@@ -57,20 +52,20 @@ export function Header({
 }) {
   const [isOpen, setIsOpen] = useState(false)
 
-  // Precompute menuItems once using props (no fetching)
-  const blogSubItems = ensureAllItem(
+  // Build menu with defensive fallbacks (always array, never undefined)
+  const blogSubItems = buildCategorySubItems(
     blogCategories,
     "All Posts",
-    "all-posts",
+    "all",
     "/blog",
     "Browse all our blog content",
     "posts"
   )
 
-  const videoSubItems = ensureAllItem(
+  const videoSubItems = buildCategorySubItems(
     videoCategories,
     "All Videos",
-    "all-videos",
+    "all",
     "/watch",
     "Browse our complete video library",
     "videos"

@@ -152,7 +152,7 @@ export default async function WatchPage({
               Watch Our Stories
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 italic font-light max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
-              Bringing anime to life—one frame at a time.
+              Step into our universe of original anime and animated stories.
             </p>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               <StatCard label="Videos" value={videos.length} color="blue" />

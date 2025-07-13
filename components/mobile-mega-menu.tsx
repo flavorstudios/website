@@ -94,7 +94,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                   )}
                 </button>
 
-                {/* Enhanced Submenu with Creative Design */}
+                {/* Fixed Submenu - Removed problematic scroll indicators */}
                 {item.subItems && (
                   <div
                     id={`mobile-submenu-${item.label}`}
@@ -105,36 +105,24 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                     role="region"
                     aria-label={`${item.label} submenu`}
                   >
-                    {/* Creative scrollable container */}
+                    {/* Clean scrollable container without interfering indicators */}
                     <div
                       className={cn(
-                        "space-y-2 relative",
+                        "space-y-2",
                         (item.label === "Blog" || item.label === "Watch") &&
                           "max-h-[60vh] overflow-y-auto mobile-elegant-scrollbar bg-gradient-to-b from-white/50 to-gray-50/80 rounded-2xl p-4 shadow-inner border border-gray-200/50 backdrop-blur-sm",
                       )}
                     >
-                      {/* Floating scroll indicator for long lists */}
-                      {(item.label === "Blog" || item.label === "Watch") && (
-                        <div className="sticky top-0 z-10 flex justify-center pb-2">
-                          <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full px-3 py-1 backdrop-blur-sm border border-white/30">
-                            <div className="flex items-center space-x-2">
-                              <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
-                              <span className="text-xs font-medium text-gray-600">Scroll to explore</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
                       {item.subItems.map((subItem, idx) => (
                         <Link
                           key={idx}
                           href={subItem.href}
                           className={cn(
-                            "group flex items-center justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden",
+                            "group flex items-center justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden border border-transparent",
                             "hover:shadow-md hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
                             isActive(subItem.href)
-                              ? "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border border-blue-200/50"
-                              : "text-gray-600 hover:text-gray-900 hover:bg-white/80 border border-transparent hover:border-gray-200/50",
+                              ? "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50"
+                              : "text-gray-600 hover:text-gray-900 hover:bg-white/80 hover:border-gray-200/50",
                           )}
                           onClick={onItemClick}
                           aria-current={isActive(subItem.href) ? "page" : undefined}
@@ -163,15 +151,6 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                           </div>
                         </Link>
                       ))}
-
-                      {/* Bottom fade indicator for scrollable sections */}
-                      {(item.label === "Blog" || item.label === "Watch") && (
-                        <div className="sticky bottom-0 flex justify-center pt-2">
-                          <div className="bg-gradient-to-r from-gray-500/20 to-gray-400/20 rounded-full px-3 py-1 backdrop-blur-sm border border-white/30">
-                            <span className="text-xs text-gray-500">End of {item.label.toLowerCase()} categories</span>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
                 )}

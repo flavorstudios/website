@@ -94,7 +94,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                   )}
                 </button>
 
-                {/* Enhanced Submenu with proper mobile scrolling */}
+                {/* Codex fix: submenu in a min-h panel for Blog, Watch, About */}
                 {item.subItems && (
                   <div
                     id={`mobile-submenu-${item.label}`}
@@ -108,57 +108,110 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                     role="region"
                     aria-label={`${item.label} submenu`}
                   >
-                    {/* Fixed scrollable container for Blog, Watch, About */}
-                    <div
-                      className={cn(
-                        "space-y-2",
-                        (item.label === "Blog" || item.label === "Watch" || item.label === "About") &&
-                          "max-h-[50vh] overflow-y-auto mobile-elegant-scrollbar bg-gradient-to-b from-white/50 to-gray-50/80 rounded-2xl p-4 shadow-inner border border-gray-200/50 backdrop-blur-sm"
-                      )}
-                      style={{
-                        WebkitOverflowScrolling: "touch",
-                        overscrollBehavior: "contain",
-                      }}
-                    >
-                      {item.subItems.map((subItem, idx) => (
-                        <Link
-                          key={idx}
-                          href={subItem.href}
+                    {(item.label === "Blog" || item.label === "Watch" || item.label === "About") ? (
+                      <div
+                        className={cn(
+                          "min-h-[50vh] rounded-2xl bg-gradient-to-b from-white/50 to-gray-50/80 p-4 shadow-inner border border-gray-200/50 backdrop-blur-sm"
+                        )}
+                      >
+                        <div
                           className={cn(
-                            "group flex items-start justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden border border-transparent",
-                            "hover:shadow-md hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
-                            isActive(subItem.href)
-                              ? "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50"
-                              : "text-gray-600 hover:text-gray-900 hover:bg-white/80 hover:border-gray-200/50",
+                            "space-y-2 max-h-[50vh] overflow-y-auto mobile-elegant-scrollbar"
                           )}
-                          onClick={onItemClick}
-                          aria-current={isActive(subItem.href) ? "page" : undefined}
+                          style={{
+                            WebkitOverflowScrolling: "touch",
+                            overscrollBehavior: "contain",
+                          }}
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <div className="flex-1 min-w-0 relative z-10 pr-3">
-                            <div className="flex items-start space-x-2 mb-1">
-                              <div className="font-medium text-sm leading-tight">{subItem.label}</div>
-                              {subItem.isNew && (
-                                <div className="flex items-center space-x-1 flex-shrink-0">
-                                  <Sparkles className="w-3 h-3 text-amber-500" />
-                                  <span className="px-2 py-0.5 text-xs font-medium bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 rounded-full border border-amber-200">
-                                    New
-                                  </span>
+                          {item.subItems.map((subItem, idx) => (
+                            <Link
+                              key={idx}
+                              href={subItem.href}
+                              className={cn(
+                                "group flex items-start justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden border border-transparent",
+                                "hover:shadow-md hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
+                                isActive(subItem.href)
+                                  ? "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50"
+                                  : "text-gray-600 hover:text-gray-900 hover:bg-white/80 hover:border-gray-200/50",
+                              )}
+                              onClick={onItemClick}
+                              aria-current={isActive(subItem.href) ? "page" : undefined}
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              <div className="flex-1 min-w-0 relative z-10 pr-3">
+                                <div className="flex items-start space-x-2 mb-1">
+                                  <div className="font-medium text-sm leading-tight">{subItem.label}</div>
+                                  {subItem.isNew && (
+                                    <div className="flex items-center space-x-1 flex-shrink-0">
+                                      <Sparkles className="w-3 h-3 text-amber-500" />
+                                      <span className="px-2 py-0.5 text-xs font-medium bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 rounded-full border border-amber-200">
+                                        New
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                {subItem.description && (
+                                  <div className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors leading-relaxed">
+                                    {subItem.description}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 relative z-10 flex-shrink-0">
+                                <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      // If not Blog/Watch/About, keep your original scroll style for future flexibility
+                      <div
+                        className="space-y-2"
+                        style={{
+                          WebkitOverflowScrolling: "touch",
+                          overscrollBehavior: "contain",
+                        }}
+                      >
+                        {item.subItems.map((subItem, idx) => (
+                          <Link
+                            key={idx}
+                            href={subItem.href}
+                            className={cn(
+                              "group flex items-start justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden border border-transparent",
+                              "hover:shadow-md hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
+                              isActive(subItem.href)
+                                ? "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50"
+                                : "text-gray-600 hover:text-gray-900 hover:bg-white/80 hover:border-gray-200/50",
+                            )}
+                            onClick={onItemClick}
+                            aria-current={isActive(subItem.href) ? "page" : undefined}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="flex-1 min-w-0 relative z-10 pr-3">
+                              <div className="flex items-start space-x-2 mb-1">
+                                <div className="font-medium text-sm leading-tight">{subItem.label}</div>
+                                {subItem.isNew && (
+                                  <div className="flex items-center space-x-1 flex-shrink-0">
+                                    <Sparkles className="w-3 h-3 text-amber-500" />
+                                    <span className="px-2 py-0.5 text-xs font-medium bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 rounded-full border border-amber-200">
+                                      New
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                              {subItem.description && (
+                                <div className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors leading-relaxed">
+                                  {subItem.description}
                                 </div>
                               )}
                             </div>
-                            {subItem.description && (
-                              <div className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors leading-relaxed">
-                                {subItem.description}
-                              </div>
-                            )}
-                          </div>
-                          <div className="ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 relative z-10 flex-shrink-0">
-                            <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
+                            <div className="ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 relative z-10 flex-shrink-0">
+                              <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </>

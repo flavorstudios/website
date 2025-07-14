@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Play, Eye, Calendar, Youtube, Clock, Video } from "lucide-react"
 import { useState, useEffect } from "react"
-import { formatHeading } from "@/lib/utils" // <-- Added import
+// REMOVED: import { formatHeading } from "@/lib/utils"
 
 interface VideoType {
   id: string
@@ -63,7 +63,6 @@ export function WatchPageClient({
 
       if (categoriesResponse.ok) {
         const categoriesData = await categoriesResponse.json()
-        // Use categories array from API (already filtered by type)
         setCategories(
           (categoriesData.categories || []).map((cat: any) => ({
             id: cat.id || cat.slug,
@@ -156,7 +155,7 @@ export function WatchPageClient({
             <h2 className="text-3xl font-bold text-gray-900">
               {selectedCategory === "all"
                 ? "Latest Videos"
-                : formatHeading(categoryName, "video")}
+                : categoryName}  {/* Changed: only categoryName, no suffix */}
             </h2>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-500">
@@ -206,6 +205,7 @@ export function WatchPageClient({
 }
 
 // --- rest of your code unchanged ---
+
 function FeaturedVideoCard({ video }: { video: VideoType }) {
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
 

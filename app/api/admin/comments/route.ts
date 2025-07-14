@@ -1,21 +1,39 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { commentStore } from "@/lib/content-store"
+import { NextRequest, NextResponse } from "next/server";
+import { adminDb } from "@/lib/firebase-admin";
 
-export async function GET() {
+// Fetch all flagged comments, grouped by postSlug
+export async function GET(request: NextRequest) {
   try {
-    const comments = await commentStore.getAll()
-    return NextResponse.json({ comments })
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 })
-  }
-}
+    const postsSnap = await adminDb.collection("comments").get();
+    let allComments: any[] = [];
 
-export async function POST(request: NextRequest) {
-  try {
-    const data = await request.json()
-    const comment = await commentStore.create(data)
-    return NextResponse.json({ comment })
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to create comment" }, { status: 500 })
+    for (const postDoc of postsSnap.docs) {
+      const slug = postDoc.id;
+      const entriesSnap = await adminDb
+        .collection("comments")
+        .doc(slug)
+        .collection("entries")
+        .orderBy("createdAt", "desc")
+        .get();
+      const comments = entriesSnap.docs.map((doc) => ({
+        id: doc.id,
+        postSlug: slug,
+        ...doc.data(),
+      }));
+      allComments = allComments.concat(comments);
+    }
+
+    // Sort: flagged first, then by date
+    allComments.sort((a, b) => {
+      if (a.flagged === b.flagged) {
+        return b.createdAt.localeCompare(a.createdAt);
+      }
+      return a.flagged ? -1 : 1;
+    });
+
+    return NextResponse.json({ comments: allComments });
+  } catch (err) {
+    console.error("[ADMIN_COMMENTS_GET]", err);
+    return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 });
   }
 }

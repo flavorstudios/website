@@ -1,21 +1,26 @@
 // lib/firebase.ts
-import { initializeApp, getApps, getApp } from "firebase/app";
 
-// Strict runtime check for required env vars
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+
+/**
+ * Safely retrieves environment variables.
+ * Logs errors in development if any required variable is missing.
+ */
 function getEnv(key: string): string {
   const value = process.env[key];
   if (!value) {
     if (process.env.NODE_ENV !== "production") {
-      // Log clear error for missing keys during local/dev
-      // (In prod, fail silently to avoid leaking keys in error logs)
       // eslint-disable-next-line no-console
       console.error(`Missing environment variable: ${key}`);
     }
-    return ""; // Still return empty to avoid crashing import
+    return ""; // Prevent crash by returning empty
   }
   return value;
 }
 
+// ✅ Firebase config for frontend (uses NEXT_PUBLIC_ variables only)
 const firebaseConfig = {
   apiKey: getEnv("NEXT_PUBLIC_FIREBASE_API_KEY"),
   authDomain: getEnv("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"),
@@ -25,6 +30,7 @@ const firebaseConfig = {
   appId: getEnv("NEXT_PUBLIC_FIREBASE_APP_ID"),
 };
 
+// ⚠️ Warn in dev if any key is missing
 if (
   !firebaseConfig.apiKey ||
   !firebaseConfig.authDomain ||
@@ -34,16 +40,20 @@ if (
   !firebaseConfig.appId
 ) {
   if (typeof window !== "undefined") {
-    // Display a user-friendly message in the browser console
     // eslint-disable-next-line no-console
     console.error(
       "[Firebase] One or more required Firebase environment variables are missing. " +
-      "Check your .env.local or hosting environment and ensure all NEXT_PUBLIC_FIREBASE_* vars are defined."
+      "Check your .env.local and ensure all NEXT_PUBLIC_FIREBASE_* variables are set."
     );
   }
 }
 
-// Only initialize app if not already initialized (prevents "app already exists" error in hot reload/dev)
+// ✅ Initialize Firebase only once (important for hot reload/dev)
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
+// ✅ Optional: export common services
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+// You can export `app` if needed elsewhere
 export default app;

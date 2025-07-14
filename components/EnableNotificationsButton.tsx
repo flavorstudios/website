@@ -17,12 +17,23 @@ export default function EnableNotificationsButton() {
         setResult("Notifications are not supported in this browser.")
         return
       }
+
+      // Validate VAPID key presence before requesting token
+      const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
+      if (!vapidKey) {
+        setResult(
+          "Push notifications cannot be enabled: The VAPID key is missing from the environment configuration. Please contact the site administrator."
+        )
+        return
+      }
+
       // Register the unified service worker (handles PWA & push)
       const swReg = await navigator.serviceWorker.register("/sw.js")
       const messaging = getMessaging(app)
+
       // Request permission and get FCM token
       const token = await getToken(messaging, {
-        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+        vapidKey,
         serviceWorkerRegistration: swReg,
       })
       if (token) {

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Play, Eye, Calendar, Youtube, Clock, Video } from "lucide-react"
 import { useState, useEffect } from "react"
+import { formatHeading } from "@/lib/utils" // <-- Added import
 
 interface VideoType {
   id: string
@@ -89,6 +90,10 @@ export function WatchPageClient({
   const featuredVideos = filteredVideos.filter((video) => video.featured)
   const regularVideos = filteredVideos.filter((video) => !video.featured)
 
+  // --- Get categoryName for proper heading ---
+  const categoryName =
+    categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Beautiful Header */}
@@ -151,7 +156,7 @@ export function WatchPageClient({
             <h2 className="text-3xl font-bold text-gray-900">
               {selectedCategory === "all"
                 ? "Latest Videos"
-                : `${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory} Videos`}
+                : formatHeading(categoryName, "video")}
             </h2>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-500">
@@ -200,6 +205,7 @@ export function WatchPageClient({
   )
 }
 
+// --- rest of your code unchanged ---
 function FeaturedVideoCard({ video }: { video: VideoType }) {
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
 

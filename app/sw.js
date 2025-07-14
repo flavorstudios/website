@@ -64,18 +64,22 @@ if (self.workbox) {
 importScripts('/vendor/firebase-app-compat.js');
 importScripts('/vendor/firebase-messaging-compat.js');
 
+// --- Injected by build script or Vercel/GitHub Action ---
+const FIREBASE_CONFIG = {
+  apiKey: "%%NEXT_PUBLIC_FIREBASE_API_KEY%%",
+  authDomain: "%%NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN%%",
+  projectId: "%%NEXT_PUBLIC_FIREBASE_PROJECT_ID%%",
+  messagingSenderId: "%%NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID%%",
+  appId: "%%NEXT_PUBLIC_FIREBASE_APP_ID%%"
+};
+// -------------------------------------------------------
+
 try {
   if (
     typeof firebase !== 'undefined' &&
     (!firebase.apps || firebase.apps.length === 0)
   ) {
-    firebase.initializeApp({
-      apiKey: "AIzaSyDqHI05mdV1vS-d9XJzcrUBNM1GCDNbBRo",
-      authDomain: "flavorstudios-a44b9.firebaseapp.com",
-      projectId: "flavorstudios-a44b9",
-      messagingSenderId: "1053560229683",
-      appId: "1:1053560229683:web:f204b20430690eb2e0f846"
-    });
+    firebase.initializeApp(FIREBASE_CONFIG);
   }
 
   if (typeof firebase !== 'undefined' && firebase.messaging) {

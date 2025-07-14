@@ -14,6 +14,7 @@ import { getCanonicalUrl } from "@/lib/seo/canonical";
 import { getSchema } from "@/lib/seo/schema";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
+import { formatHeading } from "@/lib/utils"; // <-- IMPORTANT: imported here
 
 // --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
@@ -123,6 +124,10 @@ export default async function BlogPage({
         )
       : 0;
 
+  // Find category name for heading
+  const categoryName =
+    categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* --- SEO JSON-LD Schema --- */}
@@ -192,7 +197,7 @@ export default async function BlogPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                 {selectedCategory === "all"
                   ? "Latest Posts"
-                  : `${categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory} Posts`}
+                  : formatHeading(categoryName, "post")}
               </h2>
               <p className="text-gray-600 text-sm sm:text-base">
                 {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""} found

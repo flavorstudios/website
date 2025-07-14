@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
-import { formatHeading } from "@/lib/utils"; // <--- ADDED THIS IMPORT
+// REMOVED: import { formatHeading } from "@/lib/utils";
 
 // === SEO METADATA (Centralized, Next.js 15+ compatible) ===
 export const metadata = getMetadata({
@@ -75,7 +75,6 @@ type VideoType = {
 // --- DATA FETCHING ---
 async function getWatchData() {
   try {
-    // Use codex-audited helper: always returns { blogCategories, videoCategories }
     const [videosRes, { videoCategories }] = await Promise.all([
       fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`, {
         next: { revalidate: 300 },
@@ -86,7 +85,6 @@ async function getWatchData() {
     let videos: VideoType[] = [];
     if (videosRes.ok) {
       const videosData = await videosRes.json();
-      // Only use videos marked as published
       videos = (videosData.videos || []).filter((video: VideoType) => video.status === "published");
     }
 
@@ -127,7 +125,6 @@ export default async function WatchPage({
   const featuredVideos = filteredVideos.filter((video: VideoType) => video.featured).slice(0, 3);
   const regularVideos = paginatedVideos.filter((video: VideoType) => !video.featured);
 
-  // Analytics
   const totalViews = videos.reduce((sum: number, video: VideoType) => sum + (video.views || 0), 0);
   const totalDuration = videos.reduce((sum: number, video: VideoType) => {
     const duration = video.duration || "0:00";
@@ -197,7 +194,7 @@ export default async function WatchPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                 {selectedCategory === "all"
                   ? "Latest Videos"
-                  : formatHeading(categoryName, "video")}
+                  : categoryName} {/* Changed: Only the category name, no suffix */}
               </h2>
               <p className="text-gray-600 text-sm sm:text-base">
                 {filteredVideos.length} video{filteredVideos.length !== 1 ? "s" : ""} found

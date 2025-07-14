@@ -14,7 +14,7 @@ import { getCanonicalUrl } from "@/lib/seo/canonical";
 import { getSchema } from "@/lib/seo/schema";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
-import { formatHeading } from "@/lib/utils"; // <-- IMPORTANT: imported here
+import { formatHeading } from "@/lib/utils"; // <-- ADD THIS LINE
 
 // --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
@@ -124,7 +124,7 @@ export default async function BlogPage({
         )
       : 0;
 
-  // Find category name for heading
+  // -- Add this for heading fix --
   const categoryName =
     categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory;
 

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
+import { formatHeading } from "@/lib/utils"; // <--- ADDED THIS IMPORT
 
 // === SEO METADATA (Centralized, Next.js 15+ compatible) ===
 export const metadata = getMetadata({
@@ -135,6 +136,10 @@ export default async function WatchPage({
   }, 0);
   const avgDuration = videos.length > 0 ? Math.round(totalDuration / videos.length) : 0;
 
+  // Find the active category name
+  const categoryName =
+    categories.find((c: any) => c.slug === selectedCategory)?.name || selectedCategory;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* SEO JSON-LD Schema */}
@@ -192,7 +197,7 @@ export default async function WatchPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                 {selectedCategory === "all"
                   ? "Latest Videos"
-                  : `${categories.find((c: any) => c.slug === selectedCategory)?.name || selectedCategory} Videos`}
+                  : formatHeading(categoryName, "video")}
               </h2>
               <p className="text-gray-600 text-sm sm:text-base">
                 {filteredVideos.length} video{filteredVideos.length !== 1 ? "s" : ""} found

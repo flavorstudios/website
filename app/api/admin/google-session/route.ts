@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { adminAuth } from "@/lib/firebase-admin"
+import { requireAdmin } from "@/lib/admin-auth"
 
 export async function POST(req: NextRequest) {
   try {
+    // Optional: prevent double login if already authenticated
+    if (await requireAdmin(req)) {
+      return NextResponse.json({ ok: true, message: "Already logged in." })
+    }
+
     const { idToken } = await req.json()
 
     if (!idToken) {

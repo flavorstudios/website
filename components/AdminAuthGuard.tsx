@@ -13,6 +13,7 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
   useEffect(() => {
     const auth = getAuth(app)
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      // If not logged in, redirect to login
       if (!firebaseUser) {
         router.replace("/admin/login")
       } else {
@@ -23,6 +24,12 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
     return () => unsubscribe()
   }, [router])
 
+  // --- Optionally restrict access by email, matching server policy ---
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+  const isAllowed =
+    user &&
+    (!adminEmail || user.email === adminEmail)
+
   if (!authChecked) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -32,7 +39,13 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
     )
   }
 
-  // Optionally: add further user.email or role checks here for extra security
+  // If user is not allowed (wrong email), force logout and redirect
+  if (authChecked && user && adminEmail && user.email !== adminEmail) {
+    // Optionally, sign out user here if desired
+    // getAuth(app).signOut()
+    router.replace("/admin/login")
+    return null
+  }
 
-  return <>{user && children}</>
+  return <>{user && isAllowed && children}</>
 }

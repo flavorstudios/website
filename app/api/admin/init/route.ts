@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { initializeRealData } from "@/lib/content-store"
 
 export async function POST(request: NextRequest) {
-  if (!requireAdmin(request)) {
+  if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {

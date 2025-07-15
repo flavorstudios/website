@@ -1,7 +1,11 @@
+import { requireAdmin } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import { commentStore } from "@/lib/content-store"
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const { status } = await request.json()
     const comment = await commentStore.updateStatus(params.id, status)
@@ -15,6 +19,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const success = await commentStore.delete(params.id)
     if (!success) {

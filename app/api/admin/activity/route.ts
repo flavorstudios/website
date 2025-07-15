@@ -1,6 +1,10 @@
-import { NextResponse } from "next/server"
+import { requireAdmin } from "@/lib/admin-auth"
+import { NextRequest, NextResponse } from "next/server"
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!requireAdmin(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     // In a real application, this would fetch from Firestore
     // For now, return empty array to show no dummy data

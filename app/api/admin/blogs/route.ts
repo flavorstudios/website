@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server"
+import { requireAdmin } from "@/lib/admin-auth"
+import { NextRequest, NextResponse } from "next/server"
 import { blogStore } from "@/lib/content-store"
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const blogs = await blogStore.getAll()
 
@@ -38,7 +42,10 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const blogData = await request.json()
 

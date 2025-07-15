@@ -6,7 +6,7 @@ import { adminDb } from "@/lib/firebase-admin";
 
 // DELETE /api/admin/comments/[slug]/[id]/delete
 export async function DELETE(req: NextRequest, { params }: { params: { slug: string, id: string } }) {
-  if (!requireAdmin(req)) {
+  if (!(await requireAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   const { slug, id } = params;

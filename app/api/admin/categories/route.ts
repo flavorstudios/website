@@ -1,9 +1,13 @@
+import { requireAdmin } from "@/lib/admin-auth"
 import { PrismaClient, CategoryType } from "@prisma/client"
 import { type NextRequest, NextResponse } from "next/server"
 
 const prisma = new PrismaClient()
 
 export async function GET(request: NextRequest) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const typeParam = request.nextUrl?.searchParams?.get("type")
     
@@ -39,6 +43,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const data = await request.json()
 

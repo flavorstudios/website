@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { blogStore } from "@/lib/content-store"
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  if (!requireAdmin(request)) {
+  if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
@@ -19,7 +19,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  if (!requireAdmin(request)) {
+  if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {

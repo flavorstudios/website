@@ -1,7 +1,11 @@
+import { requireAdmin } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import { categoryStore, initializeDefaultCategories } from "@/lib/category-store"
 
 export async function POST(request: NextRequest) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     // Initialize default categories if none exist
     await initializeDefaultCategories()

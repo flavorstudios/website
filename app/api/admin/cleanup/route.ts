@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server"
+import { requireAdmin } from "@/lib/admin-auth"
+import { NextRequest, NextResponse } from "next/server"
 import { blogStore, videoStore } from "@/lib/content-store"
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     // Get current counts before cleanup
     const allBlogs = await blogStore.getAll()

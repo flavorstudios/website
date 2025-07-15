@@ -1,8 +1,12 @@
+import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 
 // Fetch all flagged comments, grouped by postSlug
 export async function GET(request: NextRequest) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const postsSnap = await adminDb.collection("comments").get();
     let allComments: any[] = [];

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import "../globals.css"; // Ensure global styles are applied to the admin section
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { AdminAuthProvider } from "@/components/AdminAuthProvider"; // <-- Add this import
 
 // Centralized metadata for the entire admin layout segment.
 // This ensures all pages under /admin automatically inherit these SEO properties.
@@ -50,5 +51,5 @@ export default function AdminLayout({
 }) {
   // DO NOT nest <html> or <body> tags here.
   // The root layout (app/layout.tsx) already provides them.
-  return <>{children}</>;
+  return <AdminAuthProvider>{children}</AdminAuthProvider>;
 }

@@ -53,11 +53,12 @@ export default function AdminDashboardPageClient() {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // --- Updated Logout: Firebase signOut ---
+  // --- Improved Logout: Clears both Firebase and server session cookie ---
   const handleLogout = async () => {
     try {
       const auth = getAuth(app)
       await signOut(auth)
+      await fetch("/api/admin/logout", { method: "POST" }) // <-- Clear server cookie/session
       window.location.href = "/admin/login"
     } catch (error) {
       console.error("Logout failed:", error)

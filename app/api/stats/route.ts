@@ -1,29 +1,14 @@
 import { NextResponse } from "next/server";
-import { blogStore } from "@/lib/admin-store";
+import { systemStore } from "@/lib/admin-store";
 
 export async function GET() {
   try {
-    const blogs = await blogStore.getAll();
-    const published = blogs.filter((b: any) => b.status === "published");
-    const result = published.map((blog: any) => ({
-      id: blog.id,
-      title: blog.title,
-      slug: blog.slug,
-      excerpt: blog.excerpt,
-      featuredImage: blog.featuredImage,
-      category: blog.category,
-      tags: blog.tags,
-      publishedAt: blog.publishedAt,
-      readTime: blog.readTime,
-      views: blog.views,
-      seoTitle: blog.seoTitle,
-      seoDescription: blog.seoDescription,
-    }));
-    const res = NextResponse.json(result);
+    const stats = await systemStore.getStats();
+    const res = NextResponse.json(stats);
     res.headers.set("Cache-Control", "public, max-age=300");
     return res;
   } catch (error) {
-    console.error("Failed to fetch published blogs:", error);
-    return NextResponse.json([], { status: 500 });
+    console.error("Failed to fetch public stats:", error);
+    return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
   }
 }

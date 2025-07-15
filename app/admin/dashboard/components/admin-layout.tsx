@@ -34,9 +34,10 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
+  // --- Updated to use the new logout endpoint ---
   const handleLogout = async () => {
     try {
-      await fetch("/api/admin/auth", { method: "DELETE" })
+      await fetch("/api/admin/logout", { method: "POST" }) // <<--- UPDATED ENDPOINT
       window.location.href = "/admin/login"
     } catch (error) {
       console.error("Logout failed:", error)

@@ -35,10 +35,23 @@ export default function AdminLoginForm() {
     try {
       const auth = getAuth(app)
       const provider = new GoogleAuthProvider()
-      await signInWithPopup(auth, provider)
+      const result = await signInWithPopup(auth, provider)
+      const idToken = await result.user.getIdToken()
+      // POST the ID token to the backend to set the session cookie
+      const res = await fetch("/api/admin/google-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      })
+      if (!res.ok) {
+        setError("Authentication failed. You are not authorized to access this admin area.")
+        setLoading(false)
+        return
+      }
       router.push("/admin/dashboard")
     } catch (error: any) {
-      setError(error.message || "Google authentication failed.")
+      console.error("Google sign-in error:", error)
+      setError("Authentication failed. Please try again.")
     } finally {
       setLoading(false)
     }

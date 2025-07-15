@@ -1,6 +1,10 @@
-import { NextResponse } from "next/server"
+import { requireAdmin } from "@/lib/admin-auth"
+import { NextRequest, NextResponse } from "next/server"
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const { read } = await request.json()
 

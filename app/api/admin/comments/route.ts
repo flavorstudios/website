@@ -4,7 +4,7 @@ import { adminDb } from "@/lib/firebase-admin";
 
 // Fetch all flagged comments, grouped by postSlug
 export async function GET(request: NextRequest) {
-  if (!requireAdmin(request)) {
+  if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {

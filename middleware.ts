@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { requireAdmin } from "@/lib/admin-auth"
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // --- Normalize admin login path (allow trailing slash and query) ---
@@ -12,19 +13,17 @@ export function middleware(request: NextRequest) {
 
   // --- Only apply to /admin routes ---
   if (pathname.startsWith("/admin")) {
-    const token = request.cookies.get("admin-session")
-
     // Allow access to login page (all variants)
     if (isLoginPage) {
       // If already authenticated, redirect to dashboard
-      if (token?.value === "authenticated") {
+      if (await requireAdmin(request)) {
         return NextResponse.redirect(new URL("/admin/dashboard", request.url))
       }
       return NextResponse.next()
     }
 
-    // For all other admin routes, require authentication
-    if (!token || token.value !== "authenticated") {
+    // For all other admin routes, require authentication (async)
+    if (!(await requireAdmin(request))) {
       const loginUrl = new URL("/admin/login", request.url)
       return NextResponse.redirect(loginUrl)
     }

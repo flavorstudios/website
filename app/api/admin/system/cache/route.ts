@@ -1,6 +1,10 @@
-import { NextResponse } from "next/server"
+import { requireAdmin } from "@/lib/admin-auth"
+import { NextRequest, NextResponse } from "next/server"
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     // In a real application, you would clear various caches here
     // For now, we'll simulate cache clearing

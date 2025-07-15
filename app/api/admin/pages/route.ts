@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { pageStore } from "@/lib/content-store"
 
 export async function GET(request: NextRequest) {
-  if (!requireAdmin(request)) {
+  if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!requireAdmin(request)) {
+  if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {

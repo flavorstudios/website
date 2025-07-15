@@ -1,7 +1,11 @@
+import { requireAdmin } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import { categoryStore } from "@/lib/category-store"
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const data = await request.json()
     const category = await categoryStore.update(params.id, data)
@@ -15,6 +19,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  if (!requireAdmin(request)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
   try {
     const success = await categoryStore.delete(params.id)
     if (!success) {

@@ -154,7 +154,8 @@ export async function clearAllCaches() {
 }
 
 export async function logoutAdmin() {
-  const response = await fetch("/api/admin/auth", { method: "DELETE" })
+  // --- Updated per Codex recommendations ---
+  const response = await fetch("/api/admin/logout", { method: "POST" })
   if (response.ok) {
     redirect("/admin/login")
   }

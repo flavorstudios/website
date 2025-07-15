@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
         user: { email, name: "Admin" },
       });
 
-      // Set a secure session cookie
+      // Set a secure session cookie (legacy method—consider removing!)
       response.cookies.set("admin-session", "authenticated", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!requireAdmin(request)) {
+  if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const response = NextResponse.json({ success: true });
@@ -43,7 +43,7 @@ export async function DELETE(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  if (!requireAdmin(request)) {
+  if (!(await requireAdmin(request))) {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
   const session = request.cookies.get("admin-session");

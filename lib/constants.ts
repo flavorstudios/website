@@ -9,7 +9,7 @@ export const SITE_BRAND = SITE_NAME;
 
 // Email constants
 export const SUPPORT_EMAIL = "contact@flavorstudios.in";
-export const ADMIN_EMAIL = "contact@flavorstudios.in";
+// REMOVE ADMIN_EMAIL export! Use process.env.ADMIN_EMAIL everywhere in secure code
 
 // Default Open Graph/Twitter fallback image
 export const SITE_DEFAULT_IMAGE = `${SITE_URL}/cover.jpg`; // 1200x630 recommended
@@ -35,4 +35,3 @@ export const SOCIAL_LINKS = {
   linkedin: "https://www.linkedin.com/company/flavorstudios",
   // Add new links below as needed
 };
-

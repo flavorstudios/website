@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase-admin";
-import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth"; // <-- using new helper
+import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth"; // Helper with normalized email check
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,15 +23,18 @@ export async function POST(req: NextRequest) {
       if (err.code === "auth/id-token-revoked") {
         return NextResponse.json({ error: "Token revoked" }, { status: 401 });
       }
-      console.error("[google-session] Auth error:", err);
+      console.error("[google-session] Auth error (idToken):", err);
       return NextResponse.json({ error: "Authentication failed." }, { status: 401 });
     }
 
     // --- Securely check: Is this an allowed admin email? ---
     try {
-      // Throws if not allowed
-      await verifyAdminSession(await adminAuth.createSessionCookie(idToken, { expiresIn: 5 * 60 * 1000 })); // short session just to check
-    } catch {
+      // Use a short session just to check permissions
+      const testSessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn: 5 * 60 * 1000 });
+      await verifyAdminSession(testSessionCookie); // Throws if not allowed (uses email normalization)
+    } catch (err) {
+      // Never expose details to user
+      console.error("[google-session] Admin email unauthorized");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -50,7 +53,8 @@ export async function POST(req: NextRequest) {
     });
     return res;
   } catch (err) {
-    console.error("[google-session] Auth error:", err);
+    // Catch-all: log only on server
+    console.error("[google-session] Auth error (final catch):", err);
     return NextResponse.json({ error: "Authentication failed." }, { status: 401 });
   }
 }

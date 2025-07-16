@@ -50,7 +50,7 @@ function toIsoDuration(duration: string): string | undefined {
 async function getVideo(slug: string): Promise<Video | null> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || SITE_URL}/api/admin/videos`,
+      `${process.env.NEXT_PUBLIC_BASE_URL || SITE_URL}/api/videos`,
       { cache: "no-store" }
     );
     if (!response.ok) {

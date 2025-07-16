@@ -23,18 +23,6 @@ interface BlogPost {
   status?: string
 }
 
-interface LogPost {
-  id: string
-  slug: string
-  title: string
-  coverImage?: string
-  category?: string
-  publishedAt: string
-  excerpt?: string
-  readingTime?: string
-  status?: string
-}
-
 // --- SEO: Metadata for Home Page ---
 export const metadata = getMetadata({
   title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
@@ -87,20 +75,18 @@ async function getHomePageContent() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL
     const [statsResult, videosResult, blogsResult] = await Promise.allSettled([
-      fetch(`${baseUrl}/api/admin/stats`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
-      fetch(`${baseUrl}/api/admin/videos`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
-      fetch(`${baseUrl}/api/admin/blogs`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
+      fetch(`${baseUrl}/api/stats`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
+      fetch(`${baseUrl}/api/videos`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
+      fetch(`${baseUrl}/api/blogs`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
     ])
 
-    const stats = statsResult.status === "fulfilled" && statsResult.value ? statsResult.value.stats : null
-    const videos =
-      videosResult.status === "fulfilled" && videosResult.value
-        ? videosResult.value.videos?.filter((v: any) => v.status === "published") || []
-        : []
-    const blogs =
-      blogsResult.status === "fulfilled" && blogsResult.value
-        ? blogsResult.value.posts?.filter((p: BlogPost) => p.status === "published").slice(0, 6) || []
-        : []
+    const stats = statsResult.status === "fulfilled" ? statsResult.value : null
+    const videos = videosResult.status === "fulfilled" && Array.isArray(videosResult.value)
+      ? videosResult.value.slice(0, 6)
+      : []
+    const blogs = blogsResult.status === "fulfilled" && Array.isArray(blogsResult.value)
+      ? blogsResult.value.slice(0, 6)
+      : []
 
     return { stats, featuredVideos: videos, latestBlogs: blogs }
   } catch (error) {
@@ -120,6 +106,8 @@ const ErrorFallback = ({ section }: { section: string }) => (
     </div>
   </div>
 )
+
+// ... BlogsSkeleton, VideosSkeleton, StatsSkeleton components stay the same ...
 
 const BlogsSkeleton = () => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

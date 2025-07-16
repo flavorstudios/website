@@ -9,31 +9,42 @@ const THRESHOLD = 0.75; // Moderation strictness
 
 // --- Moderate comment using Perspective API ---
 async function moderateComment(text: string) {
-  const response = await fetch(
-    `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        comment: { text },
-        requestedAttributes: {
-          TOXICITY: {},
-          INSULT: {},
-          THREAT: {},
-        },
-        doNotStore: true,
-      }),
+  try {
+    const response = await fetch(
+      `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          comment: { text },
+          requestedAttributes: {
+            TOXICITY: {},
+            INSULT: {},
+            THREAT: {},
+          },
+          doNotStore: true,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      // Perspective API failed, return scores as null for fail-safe handling
+      return null;
     }
-  );
 
-  const data = await response.json();
-  const scores = {
-    toxicity: data.attributeScores?.TOXICITY?.summaryScore.value ?? 0,
-    insult: data.attributeScores?.INSULT?.summaryScore.value ?? 0,
-    threat: data.attributeScores?.THREAT?.summaryScore.value ?? 0,
-  };
+    const data = await response.json();
+    const scores = {
+      toxicity: data.attributeScores?.TOXICITY?.summaryScore.value ?? 0,
+      insult: data.attributeScores?.INSULT?.summaryScore.value ?? 0,
+      threat: data.attributeScores?.THREAT?.summaryScore.value ?? 0,
+    };
 
-  return scores;
+    return scores;
+  } catch (error) {
+    // On error, return null to signal moderation issue
+    console.error("[PERSPECTIVE_API_ERROR]", error);
+    return null;
+  }
 }
 
 // --- Handle POST (Comment Submission) ---
@@ -60,12 +71,20 @@ export async function POST(request: NextRequest) {
     const scores = await moderateComment(content);
 
     // Decide status
-    const isFlagged =
-      scores.toxicity > THRESHOLD ||
-      scores.insult > THRESHOLD ||
-      scores.threat > THRESHOLD;
+    let isFlagged: boolean;
+    let status: "approved" | "pending";
 
-    const status: "approved" | "pending" = isFlagged ? "pending" : "approved";
+    if (!scores) {
+      // If moderation fails, default to pending/manual review
+      isFlagged = true;
+      status = "pending";
+    } else {
+      isFlagged =
+        scores.toxicity > THRESHOLD ||
+        scores.insult > THRESHOLD ||
+        scores.threat > THRESHOLD;
+      status = isFlagged ? "pending" : "approved";
+    }
 
     // Firestore doc structure
     const newComment = {
@@ -80,7 +99,11 @@ export async function POST(request: NextRequest) {
       ip: ip || "",
       userAgent: userAgent || "",
       status,
-      scores,
+      scores: scores || {
+        toxicity: null,
+        insult: null,
+        threat: null,
+      },
     };
 
     // Store in Firestore
@@ -99,7 +122,9 @@ export async function POST(request: NextRequest) {
       success: true,
       status,
       flagged: isFlagged,
-      message: isFlagged
+      message: !scores
+        ? "Comment submitted but could not be automatically moderated. Pending manual review."
+        : isFlagged
         ? "Comment submitted but flagged for moderation."
         : "Comment submitted successfully.",
     });

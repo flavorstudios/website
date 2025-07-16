@@ -3,9 +3,12 @@
 import { blogStore, videoStore, commentStore, pageStore } from "@/lib/admin-store"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
+import { requireAdminAction } from "@/lib/admin-auth" // <-- Add this import
 
 // Blog actions
 export async function createBlogPost(formData: FormData) {
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+
   const title = formData.get("title") as string
   const slug = formData.get("slug") as string
   const content = formData.get("content") as string
@@ -40,6 +43,8 @@ export async function createBlogPost(formData: FormData) {
 }
 
 export async function updateBlogPost(id: string, formData: FormData) {
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+
   const updates = {
     title: formData.get("title") as string,
     slug: formData.get("slug") as string,
@@ -62,12 +67,15 @@ export async function updateBlogPost(id: string, formData: FormData) {
 }
 
 export async function deleteBlogPost(id: string) {
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
   await blogStore.delete(id)
   revalidatePath("/admin/dashboard")
 }
 
 // Video actions
 export async function createVideo(formData: FormData) {
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+
   const title = formData.get("title") as string
   const description = formData.get("description") as string
   const youtubeId = formData.get("youtubeId") as string
@@ -97,6 +105,8 @@ export async function createVideo(formData: FormData) {
 }
 
 export async function updateVideo(id: string, formData: FormData) {
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+
   const updates = {
     title: formData.get("title") as string,
     description: formData.get("description") as string,
@@ -117,23 +127,27 @@ export async function updateVideo(id: string, formData: FormData) {
 }
 
 export async function deleteVideo(id: string) {
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
   await videoStore.delete(id)
   revalidatePath("/admin/dashboard")
 }
 
 // Comment actions
 export async function updateCommentStatus(id: string, status: "pending" | "approved" | "spam" | "trash") {
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
   await commentStore.updateStatus(id, status)
   revalidatePath("/admin/dashboard")
 }
 
 export async function deleteComment(id: string) {
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
   await commentStore.delete(id)
   revalidatePath("/admin/dashboard")
 }
 
 // Page content actions
 export async function updatePageContent(page: string, section: string, content: Record<string, any>) {
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
   await pageStore.update(page, section, content, "Admin")
   revalidatePath("/admin/dashboard")
   revalidatePath("/")
@@ -141,10 +155,10 @@ export async function updatePageContent(page: string, section: string, content: 
 
 // System actions
 export async function clearAllCaches() {
-  // Simulate cache clearing with real delay
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+
   await new Promise((resolve) => setTimeout(resolve, 2000))
 
-  // Revalidate all paths
   revalidatePath("/")
   revalidatePath("/admin/dashboard")
   revalidatePath("/blog")
@@ -154,7 +168,8 @@ export async function clearAllCaches() {
 }
 
 export async function logoutAdmin() {
-  // --- Updated per Codex recommendations ---
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+
   const response = await fetch("/api/admin/logout", { method: "POST" })
   if (response.ok) {
     redirect("/admin/login")
@@ -162,27 +177,22 @@ export async function logoutAdmin() {
 }
 
 export async function revalidateBlogAndAdminDashboard() {
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+
   revalidatePath("/blog")
   revalidatePath("/admin/dashboard")
-  // Optionally revalidate specific blog post paths if needed
-  // const posts = await blogStore.getAll(); // Assuming blogStore has such a method
-  // posts.forEach(post => revalidatePath(`/blog/${post.slug}`));
   return { success: true, message: "Blog and Admin Dashboard revalidated." }
 }
 
 // Rename clearAllCaches to revalidateEntireWebsite
 export async function revalidateEntireWebsite() {
-  // Simulate delay if necessary, or remove if not needed for revalidation
-  // await new Promise((resolve) => setTimeout(resolve, 1000));
+  if (!(await requireAdminAction())) throw new Error("Unauthorized");
 
   revalidatePath("/")
   revalidatePath("/admin/dashboard")
   revalidatePath("/blog")
-  // Add other key paths if necessary
-  // e.g., videoStore.getAll().then(videos => videos.forEach(v => revalidatePath(`/watch/${v.slug}`)));
-  // pageStore.getAll().then(pages => pages.forEach(p => revalidatePath(`/${p.slug}`)));
   revalidatePath("/watch")
-  // Add more paths as needed
+  // Optionally add more dynamic paths if needed
 
   console.log("Revalidated entire website paths.")
   return { success: true, message: "Entire website revalidated successfully." }

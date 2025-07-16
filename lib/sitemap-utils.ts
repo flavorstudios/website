@@ -97,7 +97,8 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
     });
     if (blogsResponse.ok) {
       const blogsData = await blogsResponse.json();
-      const blogs = Array.isArray(blogsData.posts) ? blogsData.posts : [];
+      // --- Codex Update: Support both array and { posts: [] }
+      const blogs = Array.isArray(blogsData) ? blogsData : blogsData.posts || [];
       blogs.forEach((blog: any) => {
         if (blog.slug && blog.status === "published") {
           dynamicPages.push({
@@ -123,7 +124,8 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
     });
     if (videosResponse.ok) {
       const videosData = await videosResponse.json();
-      const videos = Array.isArray(videosData.videos) ? videosData.videos : [];
+      // --- Codex Update: Support both array and { videos: [] }
+      const videos = Array.isArray(videosData) ? videosData : videosData.videos || [];
       videos.forEach((video: any) => {
         if (video.slug && video.status === "published") {
           dynamicPages.push({

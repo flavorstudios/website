@@ -52,7 +52,8 @@ export default function CommentSection({ postId, postSlug }: CommentSectionProps
   const fetchComments = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/comments?postId=${postId}&postType=blog`)
+      // 🟢 Changed: Use public API endpoint!
+      const response = await fetch(`/api/comments?postId=${postId}&postType=blog`)
       if (response.ok) {
         const data = await response.json()
         setComments(data.comments || [])
@@ -78,7 +79,8 @@ export default function CommentSection({ postId, postSlug }: CommentSectionProps
         setSavedName(name)
       }
 
-      const response = await fetch("/api/admin/comments", {
+      // 🟢 Changed: Use public API endpoint!
+      const response = await fetch("/api/comments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

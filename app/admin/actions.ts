@@ -3,11 +3,11 @@
 import { blogStore, videoStore, commentStore, pageStore } from "@/lib/admin-store"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { requireAdminAction } from "@/lib/admin-auth" // <-- Add this import
+import { requireAdminAction } from "@/lib/admin-auth" // <-- Added
 
 // Blog actions
 export async function createBlogPost(formData: FormData) {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
 
   const title = formData.get("title") as string
   const slug = formData.get("slug") as string
@@ -43,7 +43,7 @@ export async function createBlogPost(formData: FormData) {
 }
 
 export async function updateBlogPost(id: string, formData: FormData) {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
 
   const updates = {
     title: formData.get("title") as string,
@@ -67,14 +67,14 @@ export async function updateBlogPost(id: string, formData: FormData) {
 }
 
 export async function deleteBlogPost(id: string) {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
   await blogStore.delete(id)
   revalidatePath("/admin/dashboard")
 }
 
 // Video actions
 export async function createVideo(formData: FormData) {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
 
   const title = formData.get("title") as string
   const description = formData.get("description") as string
@@ -105,7 +105,7 @@ export async function createVideo(formData: FormData) {
 }
 
 export async function updateVideo(id: string, formData: FormData) {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
 
   const updates = {
     title: formData.get("title") as string,
@@ -127,27 +127,27 @@ export async function updateVideo(id: string, formData: FormData) {
 }
 
 export async function deleteVideo(id: string) {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
   await videoStore.delete(id)
   revalidatePath("/admin/dashboard")
 }
 
 // Comment actions
 export async function updateCommentStatus(id: string, status: "pending" | "approved" | "spam" | "trash") {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
   await commentStore.updateStatus(id, status)
   revalidatePath("/admin/dashboard")
 }
 
 export async function deleteComment(id: string) {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
   await commentStore.delete(id)
   revalidatePath("/admin/dashboard")
 }
 
 // Page content actions
 export async function updatePageContent(page: string, section: string, content: Record<string, any>) {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
   await pageStore.update(page, section, content, "Admin")
   revalidatePath("/admin/dashboard")
   revalidatePath("/")
@@ -155,7 +155,7 @@ export async function updatePageContent(page: string, section: string, content: 
 
 // System actions
 export async function clearAllCaches() {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
 
   await new Promise((resolve) => setTimeout(resolve, 2000))
 
@@ -168,7 +168,7 @@ export async function clearAllCaches() {
 }
 
 export async function logoutAdmin() {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
 
   const response = await fetch("/api/admin/logout", { method: "POST" })
   if (response.ok) {
@@ -177,7 +177,7 @@ export async function logoutAdmin() {
 }
 
 export async function revalidateBlogAndAdminDashboard() {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
 
   revalidatePath("/blog")
   revalidatePath("/admin/dashboard")
@@ -186,7 +186,7 @@ export async function revalidateBlogAndAdminDashboard() {
 
 // Rename clearAllCaches to revalidateEntireWebsite
 export async function revalidateEntireWebsite() {
-  if (!(await requireAdminAction())) throw new Error("Unauthorized");
+  if (!(await requireAdminAction())) throw new Error("Unauthorized")
 
   revalidatePath("/")
   revalidatePath("/admin/dashboard")

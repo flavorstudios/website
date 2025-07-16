@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   // Retrieve session cookie
   const sessionCookie = cookies().get("admin-session")?.value;
   if (!sessionCookie) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ isAllowed: false }, { status: 401 });
   }
 
   // Decode session to get user email
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   try {
     decoded = await verifyAdminSession(sessionCookie);
   } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ isAllowed: false }, { status: 401 });
   }
 
   // Gather allowed emails and domain from env
@@ -33,10 +33,6 @@ export async function GET(req: NextRequest) {
     (adminDomain && userEmail.endsWith("@" + adminDomain)) ||
     false;
 
-  return NextResponse.json({
-    allowedEmails: adminEmails,
-    allowedDomain: adminDomain || null,
-    yourEmail: userEmail || null,
-    isAllowed,
-  });
+  // Only return the boolean
+  return NextResponse.json({ isAllowed });
 }

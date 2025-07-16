@@ -52,18 +52,18 @@ export async function POST(request: NextRequest) {
   try {
     const {
       author,
-      email,
+      email,      // Optional for public
       website,
       content,
       postId,
-      postType,    // "blog" or "video"
+      postType,   // "blog" or "video"
       parentId,
       ip,
       userAgent,
     } = await request.json();
 
     // Required fields check
-    if (!author || !email || !content || !postId || !postType) {
+    if (!author || !content || !postId || !postType) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -88,8 +88,8 @@ export async function POST(request: NextRequest) {
 
     // Firestore doc structure
     const newComment = {
-      author,
-      email,
+      author: author || "Anonymous",
+      email: email || "",
       website: website || "",
       content,
       postId,

@@ -82,6 +82,7 @@ const schema = getSchema({
   image: `${SITE_URL}/cover.jpg`,
 });
 
+// ======= ONLY CHANGE: DATA SHAPE HANDLING HERE =======
 async function getHomePageContent() {
   const fallbackContent = {
     latestBlogs: [],
@@ -96,12 +97,21 @@ async function getHomePageContent() {
       fetch(`${baseUrl}/api/videos`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
       fetch(`${baseUrl}/api/blogs`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
     ]);
-    const stats = statsResult.status === "fulfilled" && statsResult.value ? statsResult.value.stats : null;
+    // Stats: just assign the object
+    const stats = statsResult.status === "fulfilled" && statsResult.value ? statsResult.value : null;
+    // Videos: handle array or .videos (future-proof)
     const videos = videosResult.status === "fulfilled" && videosResult.value
-      ? videosResult.value.videos?.filter((v: Video) => v.status === "published") || []
+      ? (Array.isArray(videosResult.value)
+          ? videosResult.value
+          : videosResult.value.videos || []
+        ).filter((v: Video) => v.status === "published")
       : [];
+    // Blogs: handle array or .posts (future-proof)
     const blogs = blogsResult.status === "fulfilled" && blogsResult.value
-      ? blogsResult.value.posts?.filter((p: BlogPost) => p.status === "published").slice(0, 6) || []
+      ? (Array.isArray(blogsResult.value)
+          ? blogsResult.value
+          : blogsResult.value.posts || []
+        ).filter((p: BlogPost) => p.status === "published").slice(0, 6)
       : [];
     return { stats, featuredVideos: videos, latestBlogs: blogs };
   } catch (error) {
@@ -110,6 +120,7 @@ async function getHomePageContent() {
   }
 }
 
+// ======= EVERYTHING BELOW IS UNCHANGED =======
 const ErrorFallback = ({ section }: { section: string }) => (
   <div className="text-center py-12">
     <p className="text-gray-500">Unable to load {section} content. Please try again later.</p>
@@ -216,7 +227,6 @@ export default async function HomePage() {
 
       {/* --- Stats Section --- */}
       {content.stats && (
-        // Suspense not actually needed here since data is loaded server-side, but left for easy future transition
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">

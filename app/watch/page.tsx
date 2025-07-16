@@ -72,19 +72,21 @@ type VideoType = {
 };
 
 // --- DATA FETCHING ---
+// *** UPDATED DATA SHAPE LOGIC HERE ONLY ***
 async function getWatchData() {
   try {
     const [videosRes, { videoCategories }] = await Promise.all([
       fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/videos`, {
         next: { revalidate: 300 },
-      }).catch(() => ({ ok: false, json: () => Promise.resolve({ videos: [] }) })),
+      }),
       getDynamicCategories('video'),
     ]);
 
     let videos: VideoType[] = [];
     if (videosRes.ok) {
       const videosData = await videosRes.json();
-      videos = (videosData.videos || []).filter((video: VideoType) => video.status === "published");
+      const allVideos: VideoType[] = Array.isArray(videosData) ? videosData : videosData.videos || [];
+      videos = allVideos.filter((video: VideoType) => video.status === "published");
     }
 
     return { videos, categories: videoCategories || [] };

@@ -1,39 +1,41 @@
+// middleware.ts
+
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { requireAdmin } from "@/lib/admin-auth"
+
+// Edge middleware: Do NOT import firebase-admin or requireAdmin here!
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // --- Normalize admin login path (allow trailing slash and query) ---
+  // Allow login page (and variants) for everyone
   const isLoginPage =
     pathname === "/admin/login" ||
     pathname === "/admin/login/" ||
     pathname.startsWith("/admin/login?")
 
-  // --- Only apply to /admin routes ---
   if (pathname.startsWith("/admin")) {
-    // Allow access to login page (all variants)
+    const sessionCookie = request.cookies.get("admin-session")?.value
+
+    // If accessing the login page and already authenticated, redirect to dashboard
     if (isLoginPage) {
-      // If already authenticated, redirect to dashboard
-      if (await requireAdmin(request)) {
+      if (sessionCookie) {
         return NextResponse.redirect(new URL("/admin/dashboard", request.url))
       }
       return NextResponse.next()
     }
 
-    // For all other admin routes, require authentication (async)
-    if (!(await requireAdmin(request))) {
+    // For all other /admin routes, require the cookie
+    if (!sessionCookie) {
       const loginUrl = new URL("/admin/login", request.url)
       return NextResponse.redirect(loginUrl)
     }
   }
 
-  // Allow all other routes
+  // All other routes: allow through
   return NextResponse.next()
 }
 
-// Protect all /admin routes
 export const config = {
   matcher: "/admin/:path*",
 }

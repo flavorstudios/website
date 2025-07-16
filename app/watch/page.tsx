@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
-// REMOVED: import { formatHeading } from "@/lib/utils";
 
 // === SEO METADATA (Centralized, Next.js 15+ compatible) ===
 export const metadata = getMetadata({
@@ -76,7 +75,7 @@ type VideoType = {
 async function getWatchData() {
   try {
     const [videosRes, { videoCategories }] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/admin/videos`, {
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/videos`, {
         next: { revalidate: 300 },
       }).catch(() => ({ ok: false, json: () => Promise.resolve({ videos: [] }) })),
       getDynamicCategories('video'),
@@ -194,7 +193,7 @@ export default async function WatchPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
                 {selectedCategory === "all"
                   ? "Latest Videos"
-                  : categoryName} {/* Changed: Only the category name, no suffix */}
+                  : categoryName}
               </h2>
               <p className="text-gray-600 text-sm sm:text-base">
                 {filteredVideos.length} video{filteredVideos.length !== 1 ? "s" : ""} found

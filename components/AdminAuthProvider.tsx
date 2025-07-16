@@ -38,12 +38,15 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe()
   }, [])
 
+  // --- Codex Update: Also call /api/admin/logout after Firebase signOut
   const signOutAdmin = async () => {
     setLoading(true)
     setError(null)
     try {
       await signOut(getAuth(app))
       setUser(null)
+      // Call backend to clear the admin-session cookie server-side
+      await fetch("/api/admin/logout", { method: "POST" })
     } catch (err: any) {
       setError("Failed to sign out. Please try again.")
       console.error("[AdminAuthProvider] Sign out error:", err)

@@ -1,24 +1,31 @@
 // lib/admin-auth.ts
 
-import { NextRequest } from "next/server"
-import { adminAuth } from "@/lib/firebase-admin"
+import { NextRequest } from "next/server";
+import { adminAuth } from "@/lib/firebase-admin";
 
 /**
- * Checks if the request has a valid admin session (enterprise version).
- * Verifies the Firebase session cookie and admin email.
+ * Checks if the request has a valid admin session.
+ * Verifies the Firebase session cookie and admin email (from .env).
  * Use this at the top of any protected admin API route.
  */
 export async function requireAdmin(req: NextRequest): Promise<boolean> {
-  const sessionCookie = req.cookies.get("admin-session")?.value
-  if (!sessionCookie) return false
+  // Retrieve session cookie from request
+  const sessionCookie = req.cookies.get("admin-session")?.value;
+  if (!sessionCookie) return false;
 
   try {
-    // Verify Firebase session cookie
-    const decoded = await adminAuth.verifySessionCookie(sessionCookie, true)
-    // Ensure email matches admin (from env)
-    return decoded.email === process.env.ADMIN_EMAIL
+    // Verify session cookie (second arg: true checks revocation)
+    const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+
+    // Confirm email matches configured admin (fail safe: only if env is set)
+    const adminEmail = process.env.ADMIN_EMAIL || "";
+    if (!adminEmail) {
+      // If admin email is missing in env, deny access (hard fail)
+      return false;
+    }
+    return decoded.email === adminEmail;
   } catch (err) {
-    // Invalid, expired, or tampered session
-    return false
+    // Any verification error = unauthorized
+    return false;
   }
 }

@@ -70,7 +70,7 @@ export async function getDynamicCategories(): Promise<Category[]> {
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
-    const response = await fetch("/api/admin/blogs", { cache: "no-store" });
+    const response = await fetch("/api/blogs", { cache: "no-store" }); // <-- Codex update
     if (response.ok) {
       const posts = await response.json();
       return Array.isArray(posts) ? posts : [];
@@ -85,7 +85,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 
 export async function getVideos(): Promise<Video[]> {
   try {
-    const response = await fetch("/api/admin/videos", { cache: "no-store" });
+    const response = await fetch("/api/videos", { cache: "no-store" }); // <-- Codex update
     if (response.ok) {
       const videos = await response.json();
       return Array.isArray(videos) ? videos : [];

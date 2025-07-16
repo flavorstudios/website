@@ -104,3 +104,6 @@ export const commentStore = {
     return true;
   },
 };
+
+// === ADDITIONAL EXPORTS FOR ADMIN STORES (required for API/build compatibility) ===
+export { blogStore, videoStore, pageStore, initializeSampleData as initializeRealData } from "./admin-store";

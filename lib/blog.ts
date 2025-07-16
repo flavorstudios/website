@@ -15,7 +15,7 @@ export interface BlogPost {
 export const blogStore = {
   async getAllPosts(): Promise<BlogPost[]> {
     try {
-      const response = await fetch("/api/admin/blogs", {
+      const response = await fetch("/api/blogs", { // <-- updated endpoint as per Codex
         cache: "no-store",
       })
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import AdminAuthGuard from "@/components/AdminAuthGuard"
 import { AdminSidebar } from "./components/admin-sidebar"
 import { DashboardOverview } from "./components/dashboard-overview"
@@ -13,8 +13,6 @@ import { AdminHeader } from "./components/admin-header"
 import { CategoryManager } from "./components/category-manager"
 import { RoleProvider } from "./contexts/role-context"
 import { EmailInbox } from "./components/email-inbox"
-
-// --- Firebase logout ---
 import { getAuth, signOut } from "firebase/auth"
 import app from "@/lib/firebase"
 
@@ -23,20 +21,25 @@ export default function AdminDashboardPageClient() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
 
+  // --- Initialization on first load ---
   useEffect(() => {
     setMounted(true)
-    // Initialize real data on first load
-    fetch("/api/admin/init", { method: "POST" }).catch(console.error)
+    fetch("/api/admin/init", { method: "POST" }).catch((err) => {
+      if (process.env.NODE_ENV !== "production") console.error("Admin init failed:", err)
+    })
   }, [])
 
+  // --- Section navigation event ---
   useEffect(() => {
-    const handleNavigation = (event: CustomEvent) => {
-      setActiveSection(event.detail)
+    const handleNavigation = (event: Event) => {
+      const customEvent = event as CustomEvent<string>
+      setActiveSection(customEvent.detail)
     }
-    window.addEventListener("admin-navigate", handleNavigation as EventListener)
-    return () => window.removeEventListener("admin-navigate", handleNavigation as EventListener)
+    window.addEventListener("admin-navigate", handleNavigation)
+    return () => window.removeEventListener("admin-navigate", handleNavigation)
   }, [])
 
+  // --- Data refresh interval ---
   useEffect(() => {
     const interval = setInterval(() => {
       window.dispatchEvent(new CustomEvent("admin-refresh"))
@@ -44,26 +47,29 @@ export default function AdminDashboardPageClient() {
     return () => clearInterval(interval)
   }, [])
 
+  // --- Responsive sidebar (hide on small screens) ---
   useEffect(() => {
+    if (typeof window === "undefined") return
     const handleResize = () => {
       if (window.innerWidth < 1024) setSidebarOpen(false)
+      else setSidebarOpen(true)
     }
     window.addEventListener("resize", handleResize)
     handleResize()
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // --- Improved Logout: Clears both Firebase and server session cookie ---
-  const handleLogout = async () => {
+  // --- Logout: Clear Firebase + server session cookie ---
+  const handleLogout = useCallback(async () => {
     try {
       const auth = getAuth(app)
       await signOut(auth)
-      await fetch("/api/admin/logout", { method: "POST" }) // <-- Clear server cookie/session
+      await fetch("/api/admin/logout", { method: "POST" })
       window.location.href = "/admin/login"
     } catch (error) {
       console.error("Logout failed:", error)
     }
-  }
+  }, [])
 
   if (!mounted) {
     return (

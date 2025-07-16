@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { systemStore } from "@/lib/admin-store";
+import { systemStore } from "@/lib/admin-store"; // Or content-store if renamed
 
 export async function GET() {
   try {
@@ -9,6 +9,9 @@ export async function GET() {
     return res;
   } catch (error) {
     console.error("Failed to fetch public stats:", error);
-    return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch stats." },
+      { status: 500 }
+    );
   }
 }

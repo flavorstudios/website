@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -24,6 +23,8 @@ interface CommentSectionProps {
   postSlug: string
 }
 
+const AUTHOR_KEY = "flavor_comment_author"
+
 export default function CommentSection({ postId, postSlug }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,9 +34,19 @@ export default function CommentSection({ postId, postSlug }: CommentSectionProps
     content: "",
   })
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+  const [savedName, setSavedName] = useState<string | null>(null)
 
   useEffect(() => {
+    // Autofill name if present in localStorage
+    if (typeof window !== "undefined") {
+      const name = localStorage.getItem(AUTHOR_KEY)
+      if (name) {
+        setSavedName(name)
+        setFormData((prev) => ({ ...prev, name }))
+      }
+    }
     fetchComments()
+    // eslint-disable-next-line
   }, [postId])
 
   const fetchComments = async () => {
@@ -55,13 +66,18 @@ export default function CommentSection({ postId, postSlug }: CommentSectionProps
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
     if (!formData.content.trim()) return
-
     setSubmitting(true)
     setSubmitStatus("idle")
 
     try {
+      const name = formData.name.trim() || "Anonymous"
+      // Save author name to localStorage for pseudo-auth (used for pending comment visibility)
+      if (typeof window !== "undefined") {
+        localStorage.setItem(AUTHOR_KEY, name)
+        setSavedName(name)
+      }
+
       const response = await fetch("/api/admin/comments", {
         method: "POST",
         headers: {
@@ -70,15 +86,14 @@ export default function CommentSection({ postId, postSlug }: CommentSectionProps
         body: JSON.stringify({
           postId,
           postType: "blog",
-          author: formData.name.trim() || "Anonymous",
+          author: name,
           content: formData.content.trim(),
         }),
       })
 
       if (response.ok) {
         setSubmitStatus("success")
-        setFormData({ name: "", content: "" })
-        // Refresh comments to show the new one
+        setFormData({ name, content: "" })
         fetchComments()
       } else {
         setSubmitStatus("error")
@@ -92,7 +107,13 @@ export default function CommentSection({ postId, postSlug }: CommentSectionProps
   }
 
   const approvedComments = comments.filter((comment) => comment.status === "approved")
-  const pendingComments = comments.filter((comment) => comment.status === "pending")
+  // Only show *pending* comments authored by this browser's user (by name match)
+  const pendingComments = comments.filter(
+    (comment) =>
+      comment.status === "pending" &&
+      !!savedName &&
+      comment.author.trim().toLowerCase() === savedName.trim().toLowerCase()
+  )
 
   return (
     <div className="space-y-8">
@@ -132,6 +153,7 @@ export default function CommentSection({ postId, postSlug }: CommentSectionProps
                 value={formData.name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                 className="w-full"
+                autoComplete="name"
               />
             </div>
             <div>
@@ -199,7 +221,7 @@ export default function CommentSection({ postId, postSlug }: CommentSectionProps
               </Card>
             )}
 
-            {/* Pending Comments (only show to comment author) */}
+            {/* Pending Comments (shown only to this author) */}
             {pendingComments.length > 0 && (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">Your Pending Comments</h3>

@@ -51,13 +51,19 @@ export function WatchPageClient({
     try {
       setLoading(true)
       const [videosResponse, categoriesResponse] = await Promise.all([
-        fetch("/api/videos", { cache: "no-store" }), // <-- Codex Update: switched endpoint
+        fetch("/api/videos", { cache: "no-store" }),
         fetch("/api/categories?type=video", { cache: "no-store" }),
       ])
 
       if (videosResponse.ok) {
         const videosData = await videosResponse.json()
-        const publishedVideos = videosData.videos?.filter((video: VideoType) => video.status === "published") || []
+        // --- Codex fix: works with array or { videos: [...] }
+        const allVideos: VideoType[] = Array.isArray(videosData)
+          ? videosData
+          : videosData.videos || []
+        const publishedVideos = allVideos.filter(
+          (video: VideoType) => video.status === "published"
+        )
         setVideos(publishedVideos)
       }
 

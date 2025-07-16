@@ -47,6 +47,7 @@ function toIsoDuration(duration: string): string | undefined {
 }
 
 // --- Fetch video utility ---
+// *** ONLY THIS FUNCTION IS UPDATED! ***
 async function getVideo(slug: string): Promise<Video | null> {
   try {
     const response = await fetch(
@@ -58,7 +59,8 @@ async function getVideo(slug: string): Promise<Video | null> {
       return null;
     }
     const data = await response.json();
-    const videos: Video[] = data.videos || [];
+    // --- Codex fix: Accept array or { videos: [...] } shape
+    const videos: Video[] = Array.isArray(data) ? data : data.videos || [];
     return (
       videos.find(
         (video) =>

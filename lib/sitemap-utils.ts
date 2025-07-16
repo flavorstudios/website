@@ -8,9 +8,6 @@ export interface SitemapUrl {
 }
 
 // ---- UTILITY: Bulletproof URL joining (avoids double slashes/prefixes) ----
-// Robustly joins a base URL with a path.
-// Handles accidental leading slashes before absolute URLs (e.g. "/https://site.com/page")
-// so you NEVER get double-domain entries in generated sitemaps.
 function joinUrl(base: string, path: string): string {
   const trimmed = path.trim();
 
@@ -93,7 +90,8 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
 
   // --- Fetch Blogs ---
   try {
-    const blogsResponse = await fetch(joinUrl(baseUrl, "/api/admin/blogs"), {
+    // Endpoint updated as per Codex suggestion
+    const blogsResponse = await fetch(joinUrl(baseUrl, "/api/blogs"), {
       cache: "no-store",
       headers: { "Cache-Control": "no-cache" }
     });

@@ -2,34 +2,41 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyAdminSession } from "@/lib/admin-auth"; // You should have a helper to verify the cookie/session
+import { verifyAdminSession } from "@/lib/admin-auth"; // Helper should verify session and decode email
 
 export async function GET(req: NextRequest) {
-  // Check for a valid admin session
+  // Retrieve session cookie
   const sessionCookie = cookies().get("admin-session")?.value;
   if (!sessionCookie) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Optionally: Further verify session and email server-side
+  // Decode session to get user email
   let decoded: { email?: string } = {};
   try {
     decoded = await verifyAdminSession(sessionCookie);
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Load allowed emails/domains from env
-  const adminEmails = process.env.ADMIN_EMAILS?.split(",").map((e) => e.trim()) || [];
-  const adminDomain = process.env.ADMIN_DOMAIN?.trim() || "";
+  // Gather allowed emails and domain from env
+  const adminEmails = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+  const adminDomain = (process.env.ADMIN_DOMAIN || "").trim();
+
+  // Check if the user is allowed (email or domain match)
+  const userEmail = decoded.email || "";
+  const isAllowed =
+    (userEmail && adminEmails.includes(userEmail)) ||
+    (adminDomain && userEmail.endsWith("@" + adminDomain)) ||
+    false;
 
   return NextResponse.json({
     allowedEmails: adminEmails,
-    allowedDomain: adminDomain,
-    yourEmail: decoded.email || null,
-    isAllowed:
-      (decoded.email && adminEmails.includes(decoded.email)) ||
-      (adminDomain && decoded.email?.endsWith("@" + adminDomain)) ||
-      false,
+    allowedDomain: adminDomain || null,
+    yourEmail: userEmail || null,
+    isAllowed,
   });
 }

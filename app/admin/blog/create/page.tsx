@@ -1,9 +1,8 @@
 // app/admin/blog/create/page.tsx
 
-import dynamic from "next/dynamic";
 import { getMetadata } from "@/lib/seo-utils";
-import { BlogEditor } from "../../dashboard/components/blog-editor";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import BlogEditorPageClient from "./BlogEditorPageClient";
 
 // === SEO METADATA (ADMIN - NOINDEX) ===
 export const metadata = getMetadata({
@@ -34,18 +33,7 @@ export const metadata = getMetadata({
   },
 });
 
-// Dynamically import AdminAuthGuard with SSR disabled
-const AdminAuthGuard = dynamic(() => import("@/components/AdminAuthGuard"), { ssr: false });
-
+// This server component simply renders the client component
 export default function BlogEditorPage() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* BlogEditor is now wrapped in AdminAuthGuard for security */}
-        <AdminAuthGuard>
-          <BlogEditor />
-        </AdminAuthGuard>
-      </div>
-    </div>
-  );
+  return <BlogEditorPageClient />;
 }

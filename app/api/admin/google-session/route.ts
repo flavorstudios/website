@@ -15,8 +15,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing ID token." }, { status: 400 })
     }
 
-    // Verify the ID token with Firebase Admin SDK
-    const decoded = await adminAuth.verifyIdToken(idToken)
+    // --- VERIFY THE ID TOKEN WITH REVOCATION CHECK (recommended) ---
+    let decoded
+    try {
+      decoded = await adminAuth.verifyIdToken(idToken, true) // <--- true checks for revocation
+    } catch (err: any) {
+      if (err.code === "auth/id-token-revoked") {
+        return NextResponse.json({ error: "Token revoked" }, { status: 401 })
+      }
+      console.error("[google-session] Auth error:", err)
+      return NextResponse.json({ error: "Authentication failed." }, { status: 401 })
+    }
 
     // Restrict to the configured admin email (from .env)
     const adminEmail = process.env.ADMIN_EMAIL

@@ -87,8 +87,8 @@ export function SearchFeature() {
     setIsLoading(true)
     try {
       const [blogsResponse, videosResponse] = await Promise.allSettled([
-        fetch("/api/admin/blogs"),
-        fetch("/api/admin/videos"),
+        fetch("/api/blogs"),      // <-- Codex update
+        fetch("/api/videos"),     // <-- Codex update
       ])
 
       let blogs: BlogPost[] = []

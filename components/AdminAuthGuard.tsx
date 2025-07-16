@@ -23,11 +23,25 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
     return () => unsubscribe()
   }, [router])
 
-  // Optionally restrict by admin email from env (developer/deployment-side only)
   const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+
+  // --- Require admin email to be set in production (Codex recommendation) ---
+  if (typeof window !== "undefined" && process.env.NODE_ENV === "production" && !adminEmail) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <Loader2 className="animate-spin mb-4 h-8 w-8 text-purple-500" />
+        <p className="text-red-500 text-lg font-semibold">
+          Admin email not configured.<br />
+          Please set <code>NEXT_PUBLIC_ADMIN_EMAIL</code> in your environment variables.<br />
+          Access denied.
+        </p>
+      </div>
+    )
+  }
+
+  // Optionally restrict by admin email from env (developer/deployment-side only)
   const isAllowed =
-    user &&
-    (!adminEmail || user.email === adminEmail)
+    user && adminEmail && user.email === adminEmail
 
   if (!authChecked) {
     return (
@@ -40,12 +54,11 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
 
   // If the logged-in user is not allowed (wrong email), redirect and optionally sign out
   if (authChecked && user && adminEmail && user.email !== adminEmail) {
-    // Optional: log the user out client-side for immediate effect
-    // getAuth(app).signOut()
+    // getAuth(app).signOut() // Optionally log out
     router.replace("/admin/login")
     return null
   }
 
-  // Only render children if user is authenticated and allowed (or if adminEmail check is off)
+  // Only render children if user is authenticated and allowed
   return <>{user && isAllowed && children}</>
 }

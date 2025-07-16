@@ -51,7 +51,7 @@ export function WatchPageClient({
     try {
       setLoading(true)
       const [videosResponse, categoriesResponse] = await Promise.all([
-        fetch("/api/admin/videos", { cache: "no-store" }),
+        fetch("/api/videos", { cache: "no-store" }), // <-- Codex Update: switched endpoint
         fetch("/api/categories?type=video", { cache: "no-store" }),
       ])
 

@@ -1,9 +1,5 @@
-// middleware.ts
-
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-
-// Edge middleware: Do NOT import firebase-admin or requireAdmin here!
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -20,13 +16,32 @@ export async function middleware(request: NextRequest) {
     // If accessing the login page and already authenticated, redirect to dashboard
     if (isLoginPage) {
       if (sessionCookie) {
-        return NextResponse.redirect(new URL("/admin/dashboard", request.url))
+        // Validate cookie via API before redirecting
+        const apiResp = await fetch(`${request.nextUrl.origin}/api/admin/validate-session`, {
+          method: "GET",
+          headers: { cookie: `admin-session=${sessionCookie}` },
+        });
+        if (apiResp.ok) {
+          return NextResponse.redirect(new URL("/admin/dashboard", request.url))
+        }
       }
       return NextResponse.next()
     }
 
-    // For all other /admin routes, require the cookie
+    // For all other /admin routes, require and validate the cookie
     if (!sessionCookie) {
+      const loginUrl = new URL("/admin/login", request.url)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    // Validate the session cookie with backend API
+    const apiResp = await fetch(`${request.nextUrl.origin}/api/admin/validate-session`, {
+      method: "GET",
+      headers: { cookie: `admin-session=${sessionCookie}` },
+    });
+
+    if (!apiResp.ok) {
+      // Cookie is missing, expired, or invalid—redirect to login
       const loginUrl = new URL("/admin/login", request.url)
       return NextResponse.redirect(loginUrl)
     }

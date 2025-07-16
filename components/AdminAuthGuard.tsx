@@ -1,64 +1,73 @@
-"use client"
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { getAuth, onAuthStateChanged, User } from "firebase/auth"
-import app from "@/lib/firebase"
-import { Loader2 } from "lucide-react"
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import app from "@/lib/firebase";
+import { Loader2 } from "lucide-react";
 
 export default function AdminAuthGuard({ children }: { children: React.ReactNode }) {
-  const [authChecked, setAuthChecked] = useState(false)
-  const [user, setUser] = useState<User | null>(null)
-  const router = useRouter()
+  const [authChecked, setAuthChecked] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [allowedEmails, setAllowedEmails] = useState<string[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    const auth = getAuth(app)
+    // 1. Get user from Firebase Auth
+    const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (!firebaseUser) {
-        router.replace("/admin/login")
+        router.replace("/admin/login");
       } else {
-        setUser(firebaseUser)
+        setUser(firebaseUser);
       }
-      setAuthChecked(true)
-    })
-    return () => unsubscribe()
-  }, [router])
+      setAuthChecked(true);
+    });
+    return () => unsubscribe();
+  }, [router]);
 
-  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+  useEffect(() => {
+    // 2. Securely fetch allowed admin email(s) from API (not exposed in env/public)
+    async function fetchAllowedEmails() {
+      try {
+        const res = await fetch("/api/admin/allowed-email");
+        if (res.ok) {
+          const data = await res.json();
+          setAllowedEmails(data.emails || []);
+        } else {
+          setAllowedEmails([]);
+          setError("Unable to verify admin permissions. Please try again later.");
+        }
+      } catch (e) {
+        setAllowedEmails([]);
+        setError("Unable to verify admin permissions. Please try again later.");
+      }
+    }
+    fetchAllowedEmails();
+  }, []);
 
-  // --- Require admin email to be set in production (Codex recommendation) ---
-  if (typeof window !== "undefined" && process.env.NODE_ENV === "production" && !adminEmail) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <Loader2 className="animate-spin mb-4 h-8 w-8 text-purple-500" />
-        <p className="text-red-500 text-lg font-semibold">
-          Admin email not configured.<br />
-          Please set <code>NEXT_PUBLIC_ADMIN_EMAIL</code> in your environment variables.<br />
-          Access denied.
-        </p>
-      </div>
-    )
-  }
-
-  // Optionally restrict by admin email from env (developer/deployment-side only)
-  const isAllowed =
-    user && adminEmail && user.email === adminEmail
-
-  if (!authChecked) {
+  if (!authChecked || !allowedEmails) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <Loader2 className="animate-spin mb-4 h-8 w-8 text-purple-500" />
         <p className="text-gray-500 text-sm">Checking admin authentication…</p>
+        {error && <p className="text-red-500 mt-2">{error}</p>}
       </div>
-    )
+    );
   }
 
-  // If the logged-in user is not allowed (wrong email), redirect and optionally sign out
-  if (authChecked && user && adminEmail && user.email !== adminEmail) {
-    // getAuth(app).signOut() // Optionally log out
-    router.replace("/admin/login")
-    return null
+  // If the logged-in user's email is not allowed, redirect and optionally sign out
+  if (
+    authChecked &&
+    user &&
+    allowedEmails.length > 0 &&
+    !allowedEmails.includes(user.email || "")
+  ) {
+    // Optionally sign out: getAuth(app).signOut();
+    router.replace("/admin/login");
+    return null;
   }
 
   // Only render children if user is authenticated and allowed
-  return <>{user && isAllowed && children}</>
+  return <>{user && allowedEmails.includes(user.email || "") && children}</>;
 }

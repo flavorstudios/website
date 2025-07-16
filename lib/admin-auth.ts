@@ -6,27 +6,37 @@ import { cookies } from "next/headers";
 
 /**
  * Parse allowed admin emails from env (comma-separated) or admin domain.
+ * All emails are normalized to lowercase for safe comparison.
  */
 function getAllowedAdminEmails(): string[] {
   const emails = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || "";
-  return emails.split(",").map((email) => email.trim()).filter(Boolean);
+  return emails
+    .split(",")
+    .map((email) => email.trim().toLowerCase()) // Normalize
+    .filter(Boolean);
 }
 
 function getAllowedAdminDomain(): string | null {
-  return process.env.ADMIN_DOMAIN || null;
+  const domain = process.env.ADMIN_DOMAIN || "";
+  return domain ? domain.trim().toLowerCase() : null;
 }
 
 /**
- * Checks if an email is allowed as admin.
+ * Checks if an email is allowed as admin (case-insensitive).
  */
 function isEmailAllowed(email: string): boolean {
+  if (!email) return false;
   const allowedEmails = getAllowedAdminEmails();
   const allowedDomain = getAllowedAdminDomain();
+  const normalizedEmail = email.trim().toLowerCase();
 
-  if (allowedEmails.length && allowedEmails.includes(email)) {
+  if (allowedEmails.length && allowedEmails.includes(normalizedEmail)) {
     return true;
   }
-  if (allowedDomain && email.endsWith(`@${allowedDomain}`)) {
+  if (
+    allowedDomain &&
+    normalizedEmail.endsWith("@" + allowedDomain)
+  ) {
     return true;
   }
   return false;

@@ -13,9 +13,9 @@ function getEnv(key: string): string {
   if (!value) {
     if (process.env.NODE_ENV !== "production") {
       // eslint-disable-next-line no-console
-      console.error(`Missing environment variable: ${key}`);
+      console.error(`[Firebase] Missing environment variable: ${key}`);
     }
-    return ""; // Prevent crash by returning empty
+    return ""; // Prevent crash by returning empty in dev
   }
   return value;
 }
@@ -30,30 +30,36 @@ const firebaseConfig = {
   appId: getEnv("NEXT_PUBLIC_FIREBASE_APP_ID"),
 };
 
-// ⚠️ Warn in dev if any key is missing
-if (
-  !firebaseConfig.apiKey ||
-  !firebaseConfig.authDomain ||
-  !firebaseConfig.projectId ||
-  !firebaseConfig.storageBucket ||
-  !firebaseConfig.messagingSenderId ||
-  !firebaseConfig.appId
-) {
+// --- Enhanced: Throw an explicit error in production if any variable is missing
+const requiredKeys = [
+  "apiKey",
+  "authDomain",
+  "projectId",
+  "storageBucket",
+  "messagingSenderId",
+  "appId",
+];
+
+const missingKeys = requiredKeys.filter((key) => !firebaseConfig[key as keyof typeof firebaseConfig]);
+
+if (missingKeys.length > 0) {
+  const msg = `[Firebase] Missing Firebase environment variable(s): ${missingKeys.join(", ")}. Check your environment.`;
   if (typeof window !== "undefined") {
-    // eslint-disable-next-line no-console
-    console.error(
-      "[Firebase] One or more required Firebase environment variables are missing. " +
-      "Check your .env.local and ensure all NEXT_PUBLIC_FIREBASE_* variables are set."
-    );
+    if (process.env.NODE_ENV === "production") {
+      // In prod: throw hard to avoid silent failure!
+      throw new Error(msg);
+    } else {
+      // In dev: warn only
+      // eslint-disable-next-line no-console
+      console.warn(msg);
+    }
   }
 }
 
 // ✅ Initialize Firebase only once (important for hot reload/dev)
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// ✅ Optional: export common services
+// ✅ Export common services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-
-// You can export `app` if needed elsewhere
 export default app;

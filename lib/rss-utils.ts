@@ -82,6 +82,22 @@ export function truncateDescription(text: string, maxLength = 200): string {
   return text.substring(0, maxLength).trim() + "...";
 }
 
+// Codex: Securely load admin contact from env, fallback only if missing.
+function getRssAdminContact(): string {
+  return (
+    process.env.RSS_ADMIN_CONTACT ||
+    process.env.ADMIN_EMAILS?.split(",")[0]?.trim() ||
+    "contact@flavorstudios.in"
+  );
+}
+function getRssManagingEditor(): string {
+  return (
+    process.env.RSS_MANAGING_EDITOR ||
+    process.env.ADMIN_EMAILS?.split(",")[0]?.trim() ||
+    "editor@flavorstudios.in"
+  );
+}
+
 // RSS 2.0 XML builder (SEO-friendly, always canonical URLs)
 export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
   const xmlItems = items
@@ -217,8 +233,8 @@ export async function generateRssFeed(): Promise<string> {
         width: 144,
         height: 144,
       },
-      webMaster: "contact@flavorstudios.in (Support)",
-      managingEditor: "admin@flavorstudios.in (Admin)",
+      webMaster: `${getRssAdminContact()} (Support)`,
+      managingEditor: `${getRssManagingEditor()} (Admin)`,
       copyright: `Copyright ${new Date().getFullYear()} ${SITE_NAME}. All rights reserved.`,
     };
 

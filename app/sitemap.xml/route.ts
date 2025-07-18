@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { getStaticPages, generateSitemapXML, SitemapUrl } from "@/lib/sitemap-utils";
-import { blogStore, videoStore } from "@/lib/content-store";
+import { blogStore, videoStore } from "@/lib/comment-store";
 import { SITE_URL } from "@/lib/constants";
 
 // Prefer env variable, fallback to SITE_URL or the default

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { systemStore } from "@/lib/admin-store"; // Or content-store if renamed
+import { systemStore } from "@/lib/content-store"; // Or content-store if renamed
 
 export async function GET() {
   try {

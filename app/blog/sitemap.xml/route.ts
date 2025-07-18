@@ -1,7 +1,7 @@
 // app/blog/sitemap.xml/route.ts
 
 import { NextResponse } from "next/server";
-import { blogStore } from "@/lib/content-store";
+import { blogStore } from "@/lib/comment-store";
 import { generateSitemapXML, SitemapUrl } from "@/lib/sitemap-utils";
 import { SITE_URL } from "@/lib/constants";
 

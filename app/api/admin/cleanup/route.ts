@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
-import { blogStore, videoStore } from "@/lib/content-store"
+import { blogStore, videoStore } from "@/lib/comment-store"
 
 export async function POST(request: NextRequest) {
   if (!(await requireAdmin(request))) {

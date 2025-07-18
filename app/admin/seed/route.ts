@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { initializeSampleData } from "@/lib/admin-store"
+import { initializeSampleData } from "@/lib/content-store"
 import { requireAdmin } from "@/lib/admin-auth"
 
 export async function POST(request: Request) {

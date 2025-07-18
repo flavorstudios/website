@@ -1,7 +1,7 @@
 // app/watch/sitemap.xml/route.ts
 
 import { NextResponse } from "next/server";
-import { videoStore } from "@/lib/content-store";
+import { videoStore } from "@/lib/comment-store";
 import { generateSitemapXML, SitemapUrl } from "@/lib/sitemap-utils";
 import { SITE_URL } from "@/lib/constants";
 

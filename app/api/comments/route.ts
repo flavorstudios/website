@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { commentStore } from "@/lib/content-store"
+import { commentStore } from "@/lib/comment-store"
 
 export async function GET(request: NextRequest) {
   try {

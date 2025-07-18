@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
-import { blogStore } from "@/lib/content-store";
+import { blogStore } from "@/lib/comment-store";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { NewsletterSignup } from "@/components/newsletter-signup";

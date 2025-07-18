@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { videoStore } from "@/lib/admin-store"; // Or content-store if renamed
+import { videoStore } from "@/lib/content-store"; // Or content-store if renamed
 import { formatPublicVideo } from "@/lib/formatters"; // NEW: Formatting helper
 
 export async function GET() {

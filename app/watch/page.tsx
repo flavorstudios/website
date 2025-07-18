@@ -75,10 +75,9 @@ type VideoType = {
 // *** UPDATED DATA SHAPE LOGIC HERE ONLY ***
 async function getWatchData() {
   try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
     const [videosRes, { videoCategories }] = await Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/videos`, {
-        next: { revalidate: 300 },
-      }),
+      fetch(`${baseUrl}/api/videos`, { next: { revalidate: 300 } }),
       getDynamicCategories('video'),
     ]);
 

@@ -13,7 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Plus, Edit, Trash2 } from "lucide-react"
 
-// ------ Matches your Prisma model ------
 export type CategoryType = "BLOG" | "VIDEO"
 
 export interface Category {
@@ -28,10 +27,17 @@ export interface Category {
   isActive: boolean
   createdAt: string
   updatedAt: string
-  postCount?: number | null // Optional for legacy data, required for UI
+  postCount?: number | null
 }
 
-// ------ Main Category Manager ------
+// Safe client-side error logger (does nothing in prod, logs in dev)
+function safeLogError(...args: any[]) {
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.error(...args)
+  }
+}
+
 export function CategoryManager() {
   const [blogCategories, setBlogCategories] = useState<Category[]>([])
   const [videoCategories, setVideoCategories] = useState<Category[]>([])
@@ -42,6 +48,7 @@ export function CategoryManager() {
 
   useEffect(() => {
     loadCategories()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadCategories = async () => {
@@ -55,7 +62,7 @@ export function CategoryManager() {
     } catch (error) {
       setBlogCategories([])
       setVideoCategories([])
-      console.error("Failed to load categories:", error)
+      safeLogError("Failed to load categories:", error)
     } finally {
       setLoading(false)
     }
@@ -76,7 +83,7 @@ export function CategoryManager() {
         alert(error.error || "Failed to create category")
       }
     } catch (error) {
-      console.error("Failed to create category:", error)
+      safeLogError("Failed to create category:", error)
       alert("Failed to create category")
     }
   }
@@ -96,7 +103,7 @@ export function CategoryManager() {
         alert(error.error || "Failed to update category")
       }
     } catch (error) {
-      console.error("Failed to update category:", error)
+      safeLogError("Failed to update category:", error)
       alert("Failed to update category")
     }
   }
@@ -112,7 +119,7 @@ export function CategoryManager() {
         alert(error.error || "Failed to delete category")
       }
     } catch (error) {
-      console.error("Failed to delete category:", error)
+      safeLogError("Failed to delete category:", error)
       alert("Failed to delete category")
     }
   }

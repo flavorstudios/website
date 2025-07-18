@@ -1,6 +1,9 @@
+// app/api/admin/validate-session/route.ts
+
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { verifyAdminSession } from "@/lib/admin-auth"; // Secure session verifier
+import { logError } from "@/lib/log"; // Consistent server logging
 
 export async function GET() {
   try {
@@ -15,10 +18,8 @@ export async function GET() {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
+    logError("validate-session", err);
     // Never leak internal info in prod!
-    if (process.env.NODE_ENV !== "production") {
-      console.error("[validate-session] Admin session validation failed:", err);
-    }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 }

@@ -9,13 +9,18 @@ import { logError } from "@/lib/log";
  * Expects: { idToken: string } in body (fresh Firebase ID token from client)
  * If the current admin session is valid and the new ID token is valid, issues a new session cookie.
  * Returns 401 if not valid.
+ * 
+ * Codex audit: 
+ * - All errors clear the session cookie.
+ * - Only server-validated cookies are set.
+ * - No admin emails are ever leaked client-side.
  */
 export async function POST(req: NextRequest) {
   try {
-    // Check the current session cookie (for extra safety, but not strictly required)
+    // Grab any existing session cookie (extra safety, not strictly required)
     const sessionCookie = req.cookies.get("admin-session")?.value;
 
-    // Parse ID token from client (required for secure refresh)
+    // Parse ID token (required for secure refresh)
     let idToken: string | undefined;
     try {
       ({ idToken } = await req.json());
@@ -24,34 +29,32 @@ export async function POST(req: NextRequest) {
     }
 
     if (!idToken) {
-      // Clear session cookie if no ID token provided (client is out of sync or expired)
+      // Always clear the session cookie if request is not valid
       const res = NextResponse.json({ error: "Missing ID token for session refresh." }, { status: 401 });
       res.cookies.set("admin-session", "", { maxAge: 0, path: "/" });
       return res;
     }
 
-    // (Optional: If you want to require an existing valid session, uncomment below)
+    // If you want to require an existing session, uncomment the lines below.
     // if (!sessionCookie) {
     //   const res = NextResponse.json({ error: "No session." }, { status: 401 });
     //   res.cookies.set("admin-session", "", { maxAge: 0, path: "/" });
     //   return res;
     // }
 
-    // Always validate the new ID token and issue a new session cookie
+    // Validate the new ID token and issue a new session cookie
     let newSessionCookie: string;
     try {
-      // This will verify token, email, and generate cookie in one go
-      const expiresIn = 60 * 60 * 24 * 1 * 1000; // 1 day
+      const expiresIn = 60 * 60 * 24 * 1 * 1000; // 1 day in ms (Codex: review for your policy)
       newSessionCookie = await createSessionCookieFromIdToken(idToken, expiresIn);
     } catch (error) {
       logError("refresh-session: invalid idToken", error);
-      // Clear the cookie (session is stale or not admin)
       const res = NextResponse.json({ error: "Session refresh failed. Invalid token or unauthorized." }, { status: 401 });
       res.cookies.set("admin-session", "", { maxAge: 0, path: "/" });
       return res;
     }
 
-    // Set new cookie
+    // Set new cookie securely
     const res = NextResponse.json({ ok: true, refreshed: true });
     res.cookies.set("admin-session", newSessionCookie, {
       httpOnly: true,
@@ -63,7 +66,6 @@ export async function POST(req: NextRequest) {
     return res;
   } catch (error) {
     logError("refresh-session: final catch", error);
-    // Always clear session cookie on hard error
     const res = NextResponse.json({ error: "Session refresh failed." }, { status: 401 });
     res.cookies.set("admin-session", "", { maxAge: 0, path: "/" });
     return res;

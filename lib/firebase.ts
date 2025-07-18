@@ -30,7 +30,7 @@ const firebaseConfig = {
   appId: getEnv("NEXT_PUBLIC_FIREBASE_APP_ID"),
 };
 
-// --- Enhanced: Throw an explicit error in production if any variable is missing
+// --- Enhanced: Instead of throwing, export error for UI handling ---
 const requiredKeys = [
   "apiKey",
   "authDomain",
@@ -42,24 +42,20 @@ const requiredKeys = [
 
 const missingKeys = requiredKeys.filter((key) => !firebaseConfig[key as keyof typeof firebaseConfig]);
 
-if (missingKeys.length > 0) {
-  const msg = `[Firebase] Missing Firebase environment variable(s): ${missingKeys.join(", ")}. Check your environment.`;
-  if (typeof window !== "undefined") {
-    if (process.env.NODE_ENV === "production") {
-      // In prod: throw hard to avoid silent failure!
-      throw new Error(msg);
-    } else {
-      // In dev: warn only
-      // eslint-disable-next-line no-console
-      console.warn(msg);
-    }
+export let firebaseInitError: Error | null = null;
+let app: ReturnType<typeof initializeApp> | null = null;
+
+try {
+  if (missingKeys.length > 0) {
+    throw new Error(
+      `[Firebase] Missing Firebase environment variable(s): ${missingKeys.join(", ")}. Check your environment (Vercel/Env file).`
+    );
   }
+  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+} catch (err) {
+  firebaseInitError = err as Error;
 }
 
-// ✅ Initialize Firebase only once (important for hot reload/dev)
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-
-// ✅ Export common services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
 export default app;
+export const auth = app ? getAuth(app) : undefined;
+export const db = app ? getFirestore(app) : undefined;

@@ -37,11 +37,16 @@ export function EmailInbox() {
     fetch("/api/admin/from-addresses")
       .then((res) => res.json())
       .then((data) => {
-        setAdminEmails(data.addresses || [])
-        setFromEmail(data.addresses?.[0] || "")
+        // Secure: Only display addresses provided by the server (never hard-coded in production)
+        if (Array.isArray(data.addresses) && data.addresses.length) {
+          setAdminEmails(data.addresses)
+          setFromEmail(data.addresses[0])
+        } else {
+          throw new Error("No from-addresses provided")
+        }
       })
       .catch(() => {
-        // fallback if endpoint fails
+        // fallback for local/dev only (NEVER expose real admin emails in prod)
         setAdminEmails([
           "contact@flavorstudios.in",
           "hello@flavorstudios.in",
@@ -101,7 +106,7 @@ export function EmailInbox() {
       if (response.ok) {
         updateMessageStatus(selectedMessage.id, "replied")
         setReplyText("")
-        // Show success notification
+        // Optionally: Show success notification
       }
     } catch (error) {
       console.error("Failed to send reply:", error)

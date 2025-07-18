@@ -99,18 +99,21 @@ export async function requireAdminAction(): Promise<boolean> {
 }
 
 /**
- * Helper: creates a new session cookie for the given UID (used for session refresh).
+ * Helper: creates a new session cookie from an ID token (used for session refresh).
+ * You must provide a valid Firebase ID token (from the client) and the desired expiration in ms.
  */
-export async function createSessionCookie(uid: string, expiresIn: number): Promise<string> {
+export async function createSessionCookieFromIdToken(idToken: string, expiresIn: number): Promise<string> {
   try {
-    // You must issue an ID token on the client before calling this.
-    // For a refresh, you might first verify old session and re-authenticate.
-    // Here, you should replace this logic as per your Firebase strategy.
-    throw new Error("createSessionCookie is not yet implemented.");
-    // Example placeholder:
-    // return await adminAuth.createSessionCookie(idToken, { expiresIn });
+    // Validate and decode token (throws if invalid/revoked)
+    const decoded = await adminAuth.verifyIdToken(idToken, true);
+    if (!isEmailAllowed(decoded.email)) {
+      logError("admin-auth: createSessionCookieFromIdToken (unauthorized email)", decoded.email || "");
+      throw new Error("Unauthorized admin email");
+    }
+    // Now create the session cookie
+    return await adminAuth.createSessionCookie(idToken, { expiresIn });
   } catch (err) {
-    logError("admin-auth: createSessionCookie", err);
+    logError("admin-auth: createSessionCookieFromIdToken", err);
     throw err;
   }
 }

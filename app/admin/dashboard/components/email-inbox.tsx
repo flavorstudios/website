@@ -17,7 +17,7 @@ interface ContactMessage {
   email: string
   subject: string
   message: string
-  timestamp: Date
+  timestamp: string | Date
   status: "unread" | "read" | "replied" | "archived"
   priority: "low" | "medium" | "high"
 }
@@ -26,10 +26,31 @@ export function EmailInbox() {
   const [messages, setMessages] = useState<ContactMessage[]>([])
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null)
   const [replyText, setReplyText] = useState("")
-  const [fromEmail, setFromEmail] = useState("contact@flavorstudios.in")
+  const [fromEmail, setFromEmail] = useState("")
+  const [adminEmails, setAdminEmails] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
   const [loading, setLoading] = useState(true)
+
+  // Load admin email addresses from server
+  useEffect(() => {
+    fetch("/api/admin/from-addresses")
+      .then((res) => res.json())
+      .then((data) => {
+        setAdminEmails(data.addresses || [])
+        setFromEmail(data.addresses?.[0] || "")
+      })
+      .catch(() => {
+        // fallback if endpoint fails
+        setAdminEmails([
+          "contact@flavorstudios.in",
+          "hello@flavorstudios.in",
+          "support@flavorstudios.in",
+          "admin@flavorstudios.in",
+        ])
+        setFromEmail("contact@flavorstudios.in")
+      })
+  }, [])
 
   useEffect(() => {
     const loadMessages = async () => {
@@ -115,6 +136,14 @@ export function EmailInbox() {
     }
   }
 
+  // Helper to format date safely
+  const formatDate = (dt: string | Date, withTime = false) => {
+    const dateObj = typeof dt === "string" ? new Date(dt) : dt
+    return withTime
+      ? dateObj.toLocaleString()
+      : dateObj.toLocaleDateString()
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -198,7 +227,7 @@ export function EmailInbox() {
                         <p className="text-sm text-gray-600 truncate mt-1">{message.subject}</p>
                         <div className="flex items-center justify-between mt-2">
                           <Badge className={`text-xs ${getStatusColor(message.status)}`}>{message.status}</Badge>
-                          <p className="text-xs text-gray-400">{message.timestamp.toLocaleDateString()}</p>
+                          <p className="text-xs text-gray-400">{formatDate(message.timestamp)}</p>
                         </div>
                       </div>
                     </div>
@@ -220,7 +249,7 @@ export function EmailInbox() {
                     <p className="text-sm text-gray-600 mt-1">
                       From: {selectedMessage.name} &lt;{selectedMessage.email}&gt;
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">{selectedMessage.timestamp.toLocaleString()}</p>
+                    <p className="text-xs text-gray-400 mt-1">{formatDate(selectedMessage.timestamp, true)}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -256,10 +285,11 @@ export function EmailInbox() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="contact@flavorstudios.in">contact@flavorstudios.in</SelectItem>
-                          <SelectItem value="hello@flavorstudios.in">hello@flavorstudios.in</SelectItem>
-                          <SelectItem value="support@flavorstudios.in">support@flavorstudios.in</SelectItem>
-                          <SelectItem value="admin@flavorstudios.in">admin@flavorstudios.in</SelectItem>
+                          {adminEmails.map((email) => (
+                            <SelectItem key={email} value={email}>
+                              {email}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>

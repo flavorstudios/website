@@ -3,6 +3,7 @@
 import { NextRequest } from "next/server";
 import { adminAuth } from "@/lib/firebase-admin";
 import { cookies } from "next/headers";
+import { logError } from "@/lib/log"; // Consistent server logging
 
 /**
  * Parse allowed admin emails from env (comma-separated) or admin domain.
@@ -12,7 +13,7 @@ function getAllowedAdminEmails(): string[] {
   const emails = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || "";
   return emails
     .split(",")
-    .map((email) => email.trim().toLowerCase()) // Normalize
+    .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
 }
 
@@ -47,9 +48,21 @@ function isEmailAllowed(email: string): boolean {
  * Throws if invalid or unauthorized.
  */
 export async function verifyAdminSession(sessionCookie: string): Promise<any> {
-  if (!sessionCookie) throw new Error("No session cookie");
-  const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
-  if (!isEmailAllowed(decoded.email)) throw new Error("Unauthorized admin email");
+  if (!sessionCookie) {
+    logError("admin-auth: verifyAdminSession (no cookie)", "No session cookie");
+    throw new Error("No session cookie");
+  }
+  let decoded;
+  try {
+    decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+  } catch (err) {
+    logError("admin-auth: verifyAdminSession (verify fail)", err);
+    throw new Error("Session cookie invalid");
+  }
+  if (!isEmailAllowed(decoded.email)) {
+    logError("admin-auth: verifyAdminSession (unauthorized email)", decoded.email || "");
+    throw new Error("Unauthorized admin email");
+  }
   return decoded;
 }
 
@@ -63,7 +76,8 @@ export async function requireAdmin(req: NextRequest): Promise<boolean> {
   try {
     await verifyAdminSession(sessionCookie);
     return true;
-  } catch {
+  } catch (err) {
+    logError("admin-auth: requireAdmin", err);
     return false;
   }
 }
@@ -78,7 +92,25 @@ export async function requireAdminAction(): Promise<boolean> {
   try {
     await verifyAdminSession(sessionCookie);
     return true;
-  } catch {
+  } catch (err) {
+    logError("admin-auth: requireAdminAction", err);
     return false;
+  }
+}
+
+/**
+ * Helper: creates a new session cookie for the given UID (used for session refresh).
+ */
+export async function createSessionCookie(uid: string, expiresIn: number): Promise<string> {
+  try {
+    // You must issue an ID token on the client before calling this.
+    // For a refresh, you might first verify old session and re-authenticate.
+    // Here, you should replace this logic as per your Firebase strategy.
+    throw new Error("createSessionCookie is not yet implemented.");
+    // Example placeholder:
+    // return await adminAuth.createSessionCookie(idToken, { expiresIn });
+  } catch (err) {
+    logError("admin-auth: createSessionCookie", err);
+    throw err;
   }
 }

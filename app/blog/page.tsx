@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
-import { blogStore } from "@/lib/comment-store";
+// import { blogStore } from "@/lib/comment-store"; // <-- No longer needed!
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { NewsletterSignup } from "@/components/newsletter-signup";
@@ -66,14 +66,21 @@ const schema = getSchema({
   // logo ONLY here, schema.ts will attach under publisher/org not Thing root
 });
 
-// --- DATA FETCHING ---
+// --- DATA FETCHING (Updated: now uses /api/blogs) ---
 async function getBlogData() {
   try {
-    // Use codex-audited helper: always returns { blogCategories, videoCategories }
-    const [posts, { blogCategories }] = await Promise.all([
-      blogStore.getPublished(),
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+    const [postsRes, { blogCategories }] = await Promise.all([
+      fetch(`${baseUrl}/api/blogs`, { next: { revalidate: 300 } }),
       getDynamicCategories("blog"),
     ]);
+
+    let posts: any[] = [];
+    if (postsRes.ok) {
+      const data = await postsRes.json();
+      posts = Array.isArray(data) ? data : data.posts || [];
+    }
+
     return { posts, categories: blogCategories || [] };
   } catch (error) {
     console.error("Failed to fetch blog data:", error);

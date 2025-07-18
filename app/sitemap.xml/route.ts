@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { getStaticPages, generateSitemapXML, SitemapUrl } from "@/lib/sitemap-utils";
-import { blogStore, videoStore } from "@/lib/comment-store";
+// import { blogStore, videoStore } from "@/lib/comment-store"; // No longer needed!
 import { SITE_URL } from "@/lib/constants";
 
 // Prefer env variable, fallback to SITE_URL or the default
@@ -27,11 +27,14 @@ interface ContentPage {
 
 export async function GET() {
   try {
-    // Fetch published blogs and videos in parallel
-    const [blogs, videos] = await Promise.all([
-      blogStore.getPublished().catch(() => []),
-      videoStore.getPublished().catch(() => []),
+    // --- Fetch published blogs and videos via PUBLIC API ---
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+    const [blogsRes, videosRes] = await Promise.all([
+      fetch(`${baseUrl}/api/blogs`),
+      fetch(`${baseUrl}/api/videos`),
     ]);
+    const blogs: ContentPage[] = blogsRes.ok ? await blogsRes.json() : [];
+    const videos: ContentPage[] = videosRes.ok ? await videosRes.json() : [];
 
     // Blogs (relative URLs only!)
     const blogPages: SitemapUrl[] = (blogs as ContentPage[])

@@ -3,11 +3,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase-admin";
 import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
-import { logError } from "@/lib/log"; // Consistent logging helper
+import { logError } from "@/lib/log"; // Centralized logging
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    // Prevent double login if already authenticated
+    // If user is already authenticated as admin, skip re-login
     if (await requireAdmin(req)) {
       return NextResponse.json({ ok: true, message: "Already logged in." });
     }
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Missing ID token." }, { status: 400 });
     }
 
-    // --- VERIFY THE ID TOKEN WITH REVOCATION CHECK ---
+    // --- Verify Firebase ID token with revocation checks ---
     let decoded;
     try {
       decoded = await adminAuth.verifyIdToken(idToken, true);
@@ -30,22 +30,21 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Authentication failed." }, { status: 401 });
     }
 
-    // --- Securely check: Is this an allowed admin email? ---
+    // --- Check admin email authorization securely (server-side only) ---
     try {
-      // Use a short session just to check permissions
+      // Use a short-lived session just to verify admin email (never exposed to client)
       const testSessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn: 5 * 60 * 1000 });
-      await verifyAdminSession(testSessionCookie); // Throws if not allowed (uses email normalization)
+      await verifyAdminSession(testSessionCookie); // Throws if not allowed
     } catch (err) {
       logError("google-session: admin email unauthorized", err);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // --- CREATE A FIREBASE SESSION COOKIE ---
-    // Session duration: 1 day (Codex secure)
-    const expiresIn = 60 * 60 * 24 * 1 * 1000;
+    // --- Create a Firebase session cookie for admin, valid 1 day ---
+    const expiresIn = 60 * 60 * 24 * 1 * 1000; // 1 day in ms (audit: review for your policy)
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
-    // Set secure admin-session cookie
+    // Set secure cookie attributes for admin-session
     const res = NextResponse.json({ ok: true });
     res.cookies.set("admin-session", sessionCookie, {
       httpOnly: true,

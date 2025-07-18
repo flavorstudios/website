@@ -31,13 +31,13 @@ export function EmailInbox() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
   const [loading, setLoading] = useState(true)
+  const [emailError, setEmailError] = useState<string | null>(null)
 
   // Load admin email addresses from server
   useEffect(() => {
     fetch("/api/admin/from-addresses")
       .then((res) => res.json())
       .then((data) => {
-        // Secure: Only display addresses provided by the server (never hard-coded in production)
         if (Array.isArray(data.addresses) && data.addresses.length) {
           setAdminEmails(data.addresses)
           setFromEmail(data.addresses[0])
@@ -46,14 +46,10 @@ export function EmailInbox() {
         }
       })
       .catch(() => {
-        // fallback for local/dev only (NEVER expose real admin emails in prod)
-        setAdminEmails([
-          "contact@flavorstudios.in",
-          "hello@flavorstudios.in",
-          "support@flavorstudios.in",
-          "admin@flavorstudios.in",
-        ])
-        setFromEmail("contact@flavorstudios.in")
+        // No fallback in prod—show error instead (as per audit)
+        setEmailError("Unable to load email addresses for reply. Please contact your administrator.")
+        setAdminEmails([])
+        setFromEmail("")
       })
   }, [])
 
@@ -88,7 +84,7 @@ export function EmailInbox() {
   }
 
   const handleReply = async () => {
-    if (!selectedMessage || !replyText.trim()) return
+    if (!selectedMessage || !replyText.trim() || !fromEmail) return
 
     try {
       const response = await fetch("/api/admin/send-reply", {
@@ -159,6 +155,12 @@ export function EmailInbox() {
           {messages.filter((m) => m.status === "unread").length} unread
         </Badge>
       </div>
+
+      {emailError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded p-4 mb-2">
+          {emailError}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Message List */}
@@ -285,7 +287,7 @@ export function EmailInbox() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">From Email</label>
-                      <Select value={fromEmail} onValueChange={setFromEmail}>
+                      <Select value={fromEmail} onValueChange={setFromEmail} disabled={!!emailError}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -312,12 +314,15 @@ export function EmailInbox() {
                       onChange={(e) => setReplyText(e.target.value)}
                       rows={6}
                       className="resize-none"
+                      disabled={!!emailError}
                     />
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-500">This will trigger a manual API call for email sending</p>
-                    <Button onClick={handleReply} disabled={!replyText.trim()}>
+                    <p className="text-sm text-gray-500">
+                      {emailError ? "Reply is disabled until addresses are available." : "This will trigger a manual API call for email sending"}
+                    </p>
+                    <Button onClick={handleReply} disabled={!replyText.trim() || !!emailError}>
                       <Send className="h-4 w-4 mr-2" />
                       Send Reply
                     </Button>

@@ -142,7 +142,7 @@ ${xmlItems}
 // Main generator: always canonicalizes links, ready for SEO/schema injection if needed
 export async function generateRssFeed(): Promise<string> {
   try {
-    const { blogStore, videoStore } = await import("./content-store");
+    const { blogStore, videoStore } = await import("./content-store.ts");
 
     // Fetch concurrently for best performance
     const [blogPosts, videos] = await Promise.all([

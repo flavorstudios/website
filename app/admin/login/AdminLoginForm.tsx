@@ -8,8 +8,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Shield, Loader2, Sparkles } from "lucide-react"
 
 // --- Firebase Auth ---
+import app, { firebaseInitError } from "@/lib/firebase"
 import { GoogleAuthProvider, signInWithPopup, getAuth, onAuthStateChanged, User } from "firebase/auth"
-import app from "@/lib/firebase"
 
 // Safe client-side error logger (does nothing in prod, only logs in dev)
 function safeLogError(...args: any[]) {
@@ -24,6 +24,19 @@ export default function AdminLoginForm() {
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
+
+  // --- Show Firebase env error, if present ---
+  if (firebaseInitError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <Alert variant="destructive" className="max-w-md mx-auto">
+          <AlertDescription>
+            {firebaseInitError.message}
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
+  }
 
   // Check if already logged in
   useEffect(() => {
@@ -58,7 +71,6 @@ export default function AdminLoginForm() {
       }
       router.push("/admin/dashboard")
     } catch (error: any) {
-      // Codex: never log sensitive errors in production
       safeLogError("Google sign-in error:", error)
       setError("Authentication failed. Please try again.")
     } finally {

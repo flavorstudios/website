@@ -1,3 +1,5 @@
+// lib/firebase-admin.ts
+
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
@@ -46,7 +48,7 @@ if (!getApps().length) {
 export const getAllowedAdminEmails = (): string[] =>
   (adminEmailsEnv || "")
     .split(",")
-    .map((email) => email.trim())
+    .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
 
 // ✅ Export Firebase Admin Services

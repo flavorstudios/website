@@ -3,9 +3,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase-admin";
 import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
-import { logError } from "@/lib/log"; // NEW: Consistent logging helper
+import { logError } from "@/lib/log"; // Consistent logging helper
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     // Prevent double login if already authenticated
     if (await requireAdmin(req)) {
@@ -41,7 +41,8 @@ export async function POST(req: NextRequest) {
     }
 
     // --- CREATE A FIREBASE SESSION COOKIE ---
-    const expiresIn = 60 * 60 * 24 * 1 * 1000; // 1 day (was 7 days)
+    // Session duration: 1 day (Codex secure)
+    const expiresIn = 60 * 60 * 24 * 1 * 1000;
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
     // Set secure admin-session cookie

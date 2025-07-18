@@ -1,56 +1,56 @@
 // prisma/seed.ts
-
-import { PrismaClient } from '@prisma/client';
-import { readFile } from 'fs/promises';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-// --- This block replaces __dirname for ES modules!
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { PrismaClient, CategoryType } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  // 1. Path to your categories.json
-  const filePath = join(__dirname, '../content-data/categories.json');
-  const jsonData = await readFile(filePath, 'utf-8');
-  const categoriesObj = JSON.parse(jsonData).CATEGORIES;
-
-  // 2. Prepare array for Prisma
-  const allCategories = [
-    ...(categoriesObj.blog || []).map(({ title, ...rest }) => ({
-      ...rest,
-      type: 'BLOG',
-      name: title || '',
-    })),
-    ...(categoriesObj.watch || []).map(({ title, ...rest }) => ({
-      ...rest,
-      type: 'VIDEO',
-      name: title || '',
-    })),
-  ];
-
-  // 3. Remove all existing rows so only fresh JSON data exists
-  await prisma.category.deleteMany();
-
-  // 4. Seed categories from your JSON
-  let seeded = 0;
-  for (const category of allCategories) {
-    try {
-      await prisma.category.create({ data: category });
-      seeded++;
-    } catch (err) {
-      console.error(`❌ Failed to insert: ${category.slug} (${category.type})`, err);
-    }
+/**
+ * Seed a set of default categories when none exist.
+ * Categories are created for both BLOG and VIDEO types.
+ */
+async function seedCategories() {
+  const count = await prisma.category.count();
+  if (count > 0) {
+    console.log(`Categories already exist (${count}); skipping seeding.`);
+    return;
   }
 
-  console.log(`✅ Categories seeded successfully! (${seeded} added)`);
+  const defaults = ['Anime News', 'Reviews', 'Behind the Scenes', 'Tutorials'];
+
+  for (const [index, name] of defaults.entries()) {
+    const slug = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    const base = {
+      name,
+      slug,
+      description: `Content related to ${name.toLowerCase()}`,
+      color: `hsl(${(index * 90) % 360}, 70%, 50%)`,
+      order: index,
+      isActive: true,
+      postCount: 0,
+    };
+
+    await prisma.category.create({
+      data: { ...base, type: CategoryType.BLOG },
+    });
+
+    await prisma.category.create({
+      data: { ...base, type: CategoryType.VIDEO },
+    });
+  }
+
+  console.log('✅ Default categories seeded successfully.');
+}
+
+async function main() {
+  await seedCategories();
 }
 
 main()
-  .catch((e) => {
-    console.error("❌ Seed script error:", e);
+  .catch((err) => {
+    console.error('❌ Seed script error:', err);
     process.exit(1);
   })
   .finally(async () => {

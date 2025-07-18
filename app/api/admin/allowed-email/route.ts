@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/admin-auth"; // Helper should verify session and decode email
+import { logError } from "@/lib/log"; // Consistent server logging
 
 export async function GET(req: NextRequest) {
   // Retrieve session cookie
@@ -15,7 +16,8 @@ export async function GET(req: NextRequest) {
   let decoded: { email?: string } = {};
   try {
     decoded = await verifyAdminSession(sessionCookie);
-  } catch {
+  } catch (err) {
+    logError("allowed-email: verifyAdminSession failed", err);
     return NextResponse.json({ isAllowed: false }, { status: 401 });
   }
 

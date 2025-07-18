@@ -1,6 +1,9 @@
+// app/api/admin/google-session/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase-admin";
-import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth"; // Helper with normalized email check
+import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
+import { logError } from "@/lib/log"; // NEW: Consistent logging helper
 
 export async function POST(req: NextRequest) {
   try {
@@ -23,7 +26,7 @@ export async function POST(req: NextRequest) {
       if (err.code === "auth/id-token-revoked") {
         return NextResponse.json({ error: "Token revoked" }, { status: 401 });
       }
-      console.error("[google-session] Auth error (idToken):", err);
+      logError("google-session: verifyIdToken", err);
       return NextResponse.json({ error: "Authentication failed." }, { status: 401 });
     }
 
@@ -33,13 +36,12 @@ export async function POST(req: NextRequest) {
       const testSessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn: 5 * 60 * 1000 });
       await verifyAdminSession(testSessionCookie); // Throws if not allowed (uses email normalization)
     } catch (err) {
-      // Never expose details to user
-      console.error("[google-session] Admin email unauthorized");
+      logError("google-session: admin email unauthorized", err);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // --- CREATE A FIREBASE SESSION COOKIE ---
-    const expiresIn = 60 * 60 * 24 * 7 * 1000; // 7 days
+    const expiresIn = 60 * 60 * 24 * 1 * 1000; // 1 day (was 7 days)
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
     // Set secure admin-session cookie
@@ -53,8 +55,7 @@ export async function POST(req: NextRequest) {
     });
     return res;
   } catch (err) {
-    // Catch-all: log only on server
-    console.error("[google-session] Auth error (final catch):", err);
+    logError("google-session: final catch", err);
     return NextResponse.json({ error: "Authentication failed." }, { status: 401 });
   }
 }

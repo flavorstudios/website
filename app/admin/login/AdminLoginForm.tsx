@@ -11,6 +11,14 @@ import { Shield, Loader2, Sparkles } from "lucide-react"
 import { GoogleAuthProvider, signInWithPopup, getAuth, onAuthStateChanged, User } from "firebase/auth"
 import app from "@/lib/firebase"
 
+// Safe client-side error logger (does nothing in prod, only logs in dev)
+function safeLogError(...args: any[]) {
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.error(...args)
+  }
+}
+
 export default function AdminLoginForm() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
@@ -50,7 +58,8 @@ export default function AdminLoginForm() {
       }
       router.push("/admin/dashboard")
     } catch (error: any) {
-      console.error("Google sign-in error:", error)
+      // Codex: never log sensitive errors in production
+      safeLogError("Google sign-in error:", error)
       setError("Authentication failed. Please try again.")
     } finally {
       setLoading(false)

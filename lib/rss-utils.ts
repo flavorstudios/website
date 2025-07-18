@@ -142,13 +142,19 @@ ${xmlItems}
 // Main generator: always canonicalizes links, ready for SEO/schema injection if needed
 export async function generateRssFeed(): Promise<string> {
   try {
-    const { blogStore, videoStore } = await import("./content-store.ts");
+    // --- Fetch blogs and videos via PUBLIC API ---
+    const baseUrl =
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      process.env.BASE_URL ||
+      SITE_URL ||
+      "https://flavorstudios.in";
 
-    // Fetch concurrently for best performance
-    const [blogPosts, videos] = await Promise.all([
-      blogStore.getPublished().catch(() => []),
-      videoStore.getPublished().catch(() => []),
+    const [blogsRes, videosRes] = await Promise.all([
+      fetch(`${baseUrl}/api/blogs`),
+      fetch(`${baseUrl}/api/videos`),
     ]);
+    const blogPosts: any[] = blogsRes.ok ? await blogsRes.json() : [];
+    const videos: any[] = videosRes.ok ? await videosRes.json() : [];
 
     // Blogs (always canonical URLs)
     const blogItems: RSSItem[] = blogPosts.map((post: any) => ({

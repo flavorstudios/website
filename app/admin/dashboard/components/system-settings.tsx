@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -49,7 +49,7 @@ export function SystemSettings() {
   const [settings, setSettings] = useState({
     siteName: "Flavor Studios",
     siteDescription: "Professional video production and creative services",
-    adminEmail: "admin@flavorstudios.com",
+    adminEmail: "",
     timezone: "UTC-5",
     language: "en",
     maintenanceMode: false,
@@ -60,6 +60,22 @@ export function SystemSettings() {
     sslEnabled: true,
     cacheEnabled: true,
   })
+
+  // Fetch available admin emails (from-addresses) securely
+  const [fromAddresses, setFromAddresses] = useState<string[]>([])
+  useEffect(() => {
+    fetch("/api/admin/from-addresses")
+      .then((res) => res.json())
+      .then((data) => {
+        setFromAddresses(data.addresses || [])
+        // If settings.adminEmail is empty, default to first
+        if (!settings.adminEmail && data.addresses && data.addresses.length > 0) {
+          setSettings((prev) => ({ ...prev, adminEmail: data.addresses[0] }))
+        }
+      })
+      .catch(() => setFromAddresses([]))
+    // eslint-disable-next-line
+  }, [])
 
   const handleSave = () => {
     console.log("Settings saved:", settings)
@@ -139,16 +155,26 @@ export function SystemSettings() {
                 </div>
                 <div>
                   <Label htmlFor="adminEmail">Admin Email</Label>
-                  <Input
-                    id="adminEmail"
-                    type="email"
+                  <Select
                     value={settings.adminEmail}
-                    onChange={(e) => setSettings({ ...settings, adminEmail: e.target.value })}
-                  />
+                    onValueChange={(email) => setSettings((prev) => ({ ...prev, adminEmail: email }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an email..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fromAddresses.length === 0 ? (
+                        <SelectItem value="">No emails configured</SelectItem>
+                      ) : (
+                        fromAddresses.map((email) => (
+                          <SelectItem value={email} key={email}>{email}</SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -160,7 +186,10 @@ export function SystemSettings() {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="timezone">Timezone</Label>
-                  <Select value={settings.timezone}>
+                  <Select
+                    value={settings.timezone}
+                    onValueChange={(timezone) => setSettings((prev) => ({ ...prev, timezone }))}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -174,7 +203,10 @@ export function SystemSettings() {
                 </div>
                 <div>
                   <Label htmlFor="language">Language</Label>
-                  <Select value={settings.language}>
+                  <Select
+                    value={settings.language}
+                    onValueChange={(language) => setSettings((prev) => ({ ...prev, language }))}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

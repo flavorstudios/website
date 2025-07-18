@@ -45,6 +45,14 @@ const systemStats: SystemStats = {
   uptime: "15 days, 8 hours",
 }
 
+// Safe logger (dev only, invisible in prod)
+function safeLogError(...args: any[]) {
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.error(...args)
+  }
+}
+
 export function SystemSettings() {
   const [settings, setSettings] = useState({
     siteName: "Flavor Studios",
@@ -73,23 +81,24 @@ export function SystemSettings() {
           setSettings((prev) => ({ ...prev, adminEmail: data.addresses[0] }))
         }
       })
-      .catch(() => setFromAddresses([]))
+      .catch((err) => {
+        safeLogError("Failed to load admin from-addresses:", err)
+        setFromAddresses([])
+      })
     // eslint-disable-next-line
   }, [])
 
   const handleSave = () => {
-    console.log("Settings saved:", settings)
-    // Save logic would go here
+    // Save logic placeholder
+    safeLogError("Settings saved:", settings)
   }
 
   const handleBackup = () => {
-    console.log("Creating backup...")
-    // Backup logic would go here
+    safeLogError("Creating backup...")
   }
 
   const handleRestore = () => {
-    console.log("Restoring from backup...")
-    // Restore logic would go here
+    safeLogError("Restoring from backup...")
   }
 
   return (

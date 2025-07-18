@@ -1,7 +1,7 @@
 // app/watch/sitemap.xml/route.ts
 
 import { NextResponse } from "next/server";
-import { videoStore } from "@/lib/comment-store";
+// import { videoStore } from "@/lib/comment-store"; // No longer needed!
 import { generateSitemapXML, SitemapUrl } from "@/lib/sitemap-utils";
 import { SITE_URL } from "@/lib/constants";
 
@@ -31,7 +31,10 @@ interface ContentPage {
 
 export async function GET() {
   try {
-    const videos = await videoStore.getPublished().catch(() => []);
+    // --- Fetch videos via PUBLIC API ---
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+    const videosRes = await fetch(`${baseUrl}/api/videos`);
+    const videos: ContentPage[] = videosRes.ok ? await videosRes.json() : [];
 
     // Always include the root /watch page
     const videoPages: SitemapUrl[] = [

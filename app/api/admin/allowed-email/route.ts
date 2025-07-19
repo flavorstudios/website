@@ -24,10 +24,18 @@ export async function GET(req: NextRequest) {
   }
 
   // Gather allowed emails and domain from env
-  const adminEmails = (process.env.ADMIN_EMAILS || "")
+  // Accept both ADMIN_EMAIL and ADMIN_EMAILS for safety
+  const singleAdminEmail = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+  let adminEmails = (process.env.ADMIN_EMAILS || "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
+
+  // If single email env var is set, add it to the array (prevents empty checks)
+  if (singleAdminEmail && !adminEmails.includes(singleAdminEmail)) {
+    adminEmails.push(singleAdminEmail);
+  }
+
   const adminDomain = (process.env.ADMIN_DOMAIN || "").trim().toLowerCase();
 
   // Check if the user is allowed (email or domain match)
@@ -38,7 +46,7 @@ export async function GET(req: NextRequest) {
     false;
 
   if (!isAllowed) {
-    console.warn("[allowed-email] Admin email not allowed:", userEmail);
+    console.warn("[allowed-email] Admin email not allowed:", userEmail, "| Allowed:", adminEmails, "| Domain:", adminDomain);
   } else {
     console.log("[allowed-email] Admin email allowed:", userEmail);
   }

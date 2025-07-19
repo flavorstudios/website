@@ -2,16 +2,29 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged, User } from "firebase/auth";
-import app from "@/lib/firebase";
+import app, { firebaseInitError } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   const [authChecked, setAuthChecked] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isAllowed, setIsAllowed] = useState<boolean | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
+    // Guard: If Firebase config error, abort and show error + redirect
+    if (firebaseInitError || !app) {
+      setError(
+        firebaseInitError?.message ||
+        "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
+      );
+      router.replace("/admin/login");
+      setAuthChecked(true);
+      return;
+    }
+
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (!firebaseUser) {
@@ -25,12 +38,19 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
   }, [router]);
 
   useEffect(() => {
+    if (firebaseInitError || !app) {
+      setError(
+        firebaseInitError?.message ||
+        "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
+      );
+      router.replace("/admin/login");
+      return;
+    }
     // Check admin permission (email/domain) for this user only
     async function fetchIsAllowed() {
       try {
         const res = await fetch("/api/admin/allowed-email");
         if (!res.ok) {
-          // Force sign out and redirect if not allowed or error
           getAuth(app).signOut();
           router.replace("/admin/login");
           return;
@@ -49,6 +69,16 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
     }
     fetchIsAllowed();
   }, [router]);
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription className="text-red-700 text-sm">{error}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   if (!authChecked || isAllowed === null) {
     return (

@@ -32,14 +32,17 @@ function isEmailAllowed(email: string): boolean {
   const normalizedEmail = email.trim().toLowerCase();
 
   if (allowedEmails.length && allowedEmails.includes(normalizedEmail)) {
+    console.log("[admin-auth] Allowed admin email:", normalizedEmail);
     return true;
   }
   if (
     allowedDomain &&
     normalizedEmail.endsWith("@" + allowedDomain)
   ) {
+    console.log("[admin-auth] Allowed admin domain:", allowedDomain, "for email:", normalizedEmail);
     return true;
   }
+  console.warn("[admin-auth] Rejected admin email:", normalizedEmail, "(not in allowed list or domain)");
   return false;
 }
 
@@ -55,6 +58,7 @@ export async function verifyAdminSession(sessionCookie: string): Promise<any> {
   let decoded;
   try {
     decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+    console.log("[admin-auth] Session cookie verified for:", decoded.email);
   } catch (err) {
     logError("admin-auth: verifyAdminSession (verify fail)", err);
     throw new Error("Session cookie invalid");

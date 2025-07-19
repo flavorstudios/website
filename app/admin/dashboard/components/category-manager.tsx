@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Plus, Edit, Trash2 } from "lucide-react"
+import { toast } from "@/hooks/use-toast" // <-- ADDED
 
 export type CategoryType = "BLOG" | "VIDEO"
 
@@ -78,13 +79,14 @@ export function CategoryManager() {
       if (response.ok) {
         await loadCategories()
         setShowCreateForm(false)
+        toast({ title: "Category created!" }) // <-- ADDED
       } else {
         const error = await response.json()
-        alert(error.error || "Failed to create category")
+        toast(error.error || "Failed to create category") // <-- REPLACED alert
       }
     } catch (error) {
       safeLogError("Failed to create category:", error)
-      alert("Failed to create category")
+      toast("Failed to create category") // <-- REPLACED alert
     }
   }
 
@@ -98,13 +100,14 @@ export function CategoryManager() {
       if (response.ok) {
         await loadCategories()
         setEditingCategory(null)
+        toast({ title: "Category updated!" }) // <-- ADDED
       } else {
         const error = await response.json()
-        alert(error.error || "Failed to update category")
+        toast(error.error || "Failed to update category") // <-- REPLACED alert
       }
     } catch (error) {
       safeLogError("Failed to update category:", error)
-      alert("Failed to update category")
+      toast("Failed to update category") // <-- REPLACED alert
     }
   }
 
@@ -114,13 +117,14 @@ export function CategoryManager() {
       const response = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" })
       if (response.ok) {
         await loadCategories()
+        toast({ title: "Category deleted!" }) // <-- ADDED
       } else {
         const error = await response.json()
-        alert(error.error || "Failed to delete category")
+        toast(error.error || "Failed to delete category") // <-- REPLACED alert
       }
     } catch (error) {
       safeLogError("Failed to delete category:", error)
-      alert("Failed to delete category")
+      toast("Failed to delete category") // <-- REPLACED alert
     }
   }
 

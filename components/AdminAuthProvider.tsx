@@ -2,6 +2,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react"
 import { getAuth, onAuthStateChanged, signOut, User } from "firebase/auth"
 import app from "@/lib/firebase"
+import app, { firebaseInitError } from "@/lib/firebase"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 // ---- Define Context Shape ----
 interface AdminAuthContextType {
@@ -21,6 +23,15 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (firebaseInitError || !app) {
+      setError(
+        firebaseInitError?.message ||
+          "Firebase app failed to initialize due to misconfiguration."
+      )
+      setLoading(false)
+      return
+    }
+
     const auth = getAuth(app)
     const unsubscribe = onAuthStateChanged(
       auth,
@@ -43,6 +54,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setError(null)
     try {
+      if (!app) {
+        setError(
+          "Firebase app failed to initialize due to misconfiguration."
+        )
+        setLoading(false)
+        return
+      }
       await signOut(getAuth(app))
       setUser(null)
       // Call backend to clear the admin-session cookie server-side
@@ -57,6 +75,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AdminAuthContext.Provider value={{ user, loading, error, signOutAdmin }}>
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription className="text-red-700 text-sm">
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
       {children}
     </AdminAuthContext.Provider>
   )

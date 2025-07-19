@@ -14,12 +14,14 @@ import { CategoryManager } from "./components/category-manager"
 import { RoleProvider } from "./contexts/role-context"
 import { EmailInbox } from "./components/email-inbox"
 import { getAuth, signOut } from "firebase/auth"
-import app from "@/lib/firebase"
+import app, { firebaseInitError } from "@/lib/firebase"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function AdminDashboardPageClient() {
   const [activeSection, setActiveSection] = useState("overview")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [error, setError] = useState("")
 
   // --- Initialization on first load ---
   useEffect(() => {
@@ -62,12 +64,22 @@ export default function AdminDashboardPageClient() {
   // --- Logout: Clear Firebase + server session cookie ---
   const handleLogout = useCallback(async () => {
     try {
+      if (firebaseInitError || !app) {
+        setError(
+          firebaseInitError?.message ||
+            "Firebase not initialized. Cannot log out safely."
+        )
+        return
+      }
       const auth = getAuth(app)
       await signOut(auth)
       await fetch("/api/admin/logout", { method: "POST" })
       window.location.href = "/admin/login"
     } catch (error) {
-      console.error("Logout failed:", error)
+      setError("Logout failed. Please try again.")
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Logout failed:", error)
+      }
     }
   }, [])
 
@@ -120,7 +132,16 @@ export default function AdminDashboardPageClient() {
             <AdminHeader onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
             <main className="flex-1 p-6 overflow-auto">
-              <div className="max-w-7xl mx-auto">{renderContent()}</div>
+              <div className="max-w-7xl mx-auto">
+                {error && (
+                  <Alert variant="destructive" className="mb-4 border-red-200 bg-red-50">
+                    <AlertDescription className="text-red-700 text-sm">
+                      {error}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {renderContent()}
+              </div>
             </main>
           </div>
         </div>

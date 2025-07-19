@@ -3,21 +3,22 @@
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
 import { useState } from "react"
-import { useRouter } from "next/navigation"         // <-- Added import
+import { useRouter } from "next/navigation"
+import { toast } from "@/components/ui/toast"      // <-- Added import
 import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions"
 
 export const BlogManager = () => {
   const [isRevalidating, setIsRevalidating] = useState(false)
-  const router = useRouter()                        // <-- Added hook
+  const router = useRouter()
 
   const handleRevalidateBlog = async () => {
     setIsRevalidating(true)
     try {
       const result = await revalidateBlogAndAdminDashboard()
-      alert(result.message) // Simple alert for now
+      toast(result.message)                         // <-- Use toast instead of alert
     } catch (error) {
       console.error("Failed to revalidate blog:", error)
-      alert("Failed to revalidate blog section.")
+      toast("Failed to revalidate blog section.")   // <-- Use toast instead of alert
     } finally {
       setIsRevalidating(false)
     }
@@ -25,7 +26,7 @@ export const BlogManager = () => {
 
   const handleCreatePost = () => {
     router.push("/admin/blog/create")
-  }                                                // <-- Added handler
+  }
 
   return (
     <div>
@@ -36,7 +37,7 @@ export const BlogManager = () => {
             <RefreshCw className={`mr-2 h-4 w-4 ${isRevalidating ? "animate-spin" : ""}`} />
             {isRevalidating ? "Revalidating..." : "Revalidate Blog Section"}
           </Button>
-          <Button onClick={handleCreatePost}>Create New Post</Button>  {/* <-- Updated button */}
+          <Button onClick={handleCreatePost}>Create New Post</Button>
         </div>
       </div>
       {/* Rest of the blog manager component */}

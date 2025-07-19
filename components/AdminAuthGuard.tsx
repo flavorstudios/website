@@ -49,20 +49,15 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
     // Check admin permission (email/domain) for this user only
     async function fetchIsAllowed() {
       try {
-        const res = await fetch("/api/admin/allowed-email");
-        if (!res.ok) {
-          getAuth(app).signOut();
-          router.replace("/admin/login");
-          return;
-        }
+        const res = await fetch("/api/admin/allowed-email", {
+          credentials: "include" // <-- ensures cookies are sent!
+        });
+        if (!res.ok) throw new Error("not allowed");
         const data = await res.json();
-        if (!data.isAllowed) {
-          getAuth(app).signOut();
-          router.replace("/admin/login");
-          return;
-        }
+        if (!data.isAllowed) throw new Error("not allowed");
         setIsAllowed(true);
-      } catch {
+      } catch (err) {
+        setError("Authentication failed. Please log in again.");
         getAuth(app).signOut();
         router.replace("/admin/login");
       }

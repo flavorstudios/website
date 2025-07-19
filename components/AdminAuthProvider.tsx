@@ -1,7 +1,6 @@
 "use client"
 import React, { createContext, useContext, useEffect, useState } from "react"
 import { getAuth, onAuthStateChanged, signOut, User } from "firebase/auth"
-import app from "@/lib/firebase"
 import app, { firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
@@ -23,10 +22,11 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Guard: If Firebase config error, do not register listener
     if (firebaseInitError || !app) {
       setError(
         firebaseInitError?.message ||
-          "Firebase app failed to initialize due to misconfiguration."
+        "Firebase app failed to initialize due to misconfiguration."
       )
       setLoading(false)
       return
@@ -43,7 +43,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         setError("Authentication error.")
         setLoading(false)
         // Optionally log the error for devs
-        console.error("[AdminAuthProvider] Auth listener error:", err)
+        if (process.env.NODE_ENV !== "production") {
+          console.error("[AdminAuthProvider] Auth listener error:", err)
+        }
       }
     )
     return () => unsubscribe()
@@ -54,8 +56,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      if (!app) {
+      if (firebaseInitError || !app) {
         setError(
+          firebaseInitError?.message ||
           "Firebase app failed to initialize due to misconfiguration."
         )
         setLoading(false)
@@ -67,7 +70,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       await fetch("/api/admin/logout", { method: "POST" })
     } catch (err: any) {
       setError("Failed to sign out. Please try again.")
-      console.error("[AdminAuthProvider] Sign out error:", err)
+      if (process.env.NODE_ENV !== "production") {
+        console.error("[AdminAuthProvider] Sign out error:", err)
+      }
     } finally {
       setLoading(false)
     }

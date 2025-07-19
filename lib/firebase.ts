@@ -4,30 +4,14 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-/**
- * Safely retrieves environment variables.
- * Logs errors in development if any required variable is missing.
- */
-function getEnv(key: string): string {
-  const value = process.env[key];
-  if (!value) {
-    if (process.env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
-      console.error(`[Firebase] Missing environment variable: ${key}`);
-    }
-    return ""; // Prevent crash by returning empty in dev
-  }
-  return value;
-}
-
 // ✅ Firebase config for frontend (uses NEXT_PUBLIC_ variables only)
 const firebaseConfig = {
-  apiKey: getEnv("NEXT_PUBLIC_FIREBASE_API_KEY"),
-  authDomain: getEnv("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN"),
-  projectId: getEnv("NEXT_PUBLIC_FIREBASE_PROJECT_ID"),
-  storageBucket: getEnv("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"),
-  messagingSenderId: getEnv("NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"),
-  appId: getEnv("NEXT_PUBLIC_FIREBASE_APP_ID"),
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
 };
 
 // --- Enhanced: Instead of throwing, export error for UI handling ---
@@ -40,7 +24,9 @@ const requiredKeys = [
   "appId",
 ];
 
-const missingKeys = requiredKeys.filter((key) => !firebaseConfig[key as keyof typeof firebaseConfig]);
+const missingKeys = requiredKeys.filter(
+  (key) => !firebaseConfig[key as keyof typeof firebaseConfig]
+);
 
 export let firebaseInitError: Error | null = null;
 let app: ReturnType<typeof initializeApp> | null = null;
@@ -54,6 +40,7 @@ try {
   app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 } catch (err) {
   firebaseInitError = err as Error;
+  app = null;
 }
 
 export default app;

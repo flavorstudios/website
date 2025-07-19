@@ -4,7 +4,10 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// ✅ Firebase config for frontend (uses NEXT_PUBLIC_ variables only)
+/**
+ * Firebase config for frontend (uses NEXT_PUBLIC_ variables only).
+ * Reads directly from process.env, with fallback to empty string.
+ */
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
@@ -14,7 +17,7 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
 };
 
-// --- Enhanced: Instead of throwing, export error for UI handling ---
+// List of required config keys for sanity check
 const requiredKeys = [
   "apiKey",
   "authDomain",
@@ -33,9 +36,15 @@ let app: ReturnType<typeof initializeApp> | null = null;
 
 try {
   if (missingKeys.length > 0) {
-    throw new Error(
+    const err = new Error(
       `[Firebase] Missing Firebase environment variable(s): ${missingKeys.join(", ")}. Check your environment (Vercel/Env file).`
     );
+    if (process.env.NODE_ENV !== "production") {
+      // Show in dev only—never leak in prod
+      // eslint-disable-next-line no-console
+      console.error(err.message);
+    }
+    throw err;
   }
   app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 } catch (err) {

@@ -38,9 +38,13 @@ export default function AdminLoginForm() {
     )
   }
 
-  // Check if already logged in
+  // Only set up auth listener if app is ready
   useEffect(() => {
     setMounted(true)
+    if (!app) {
+      setError("Firebase app failed to initialize due to misconfiguration. Please contact the site administrator.")
+      return
+    }
     const auth = getAuth(app)
     const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
@@ -54,6 +58,11 @@ export default function AdminLoginForm() {
     setError("")
     setLoading(true)
     try {
+      if (!app) {
+        setError("Firebase app failed to initialize due to misconfiguration. Please contact the site administrator.")
+        setLoading(false)
+        return
+      }
       const auth = getAuth(app)
       const provider = new GoogleAuthProvider()
       const result = await signInWithPopup(auth, provider)

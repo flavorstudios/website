@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { getMessaging, getToken, isSupported } from "firebase/messaging"
-import app from "@/lib/firebase"
+import app, { firebaseInitError } from "@/lib/firebase"
 
 export default function EnableNotificationsButton() {
   const [loading, setLoading] = useState(false)
@@ -11,6 +11,15 @@ export default function EnableNotificationsButton() {
     setLoading(true)
     setResult("")
     try {
+      // Check for Firebase config error
+      if (firebaseInitError || !app) {
+        setResult(
+          firebaseInitError?.message ||
+            "Notifications unavailable: Firebase configuration error. Please contact the site administrator."
+        )
+        return
+      }
+
       // Check browser support for notifications and service worker
       const supported = await isSupported()
       if (!supported || !("serviceWorker" in navigator)) {

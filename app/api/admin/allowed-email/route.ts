@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
   // Retrieve session cookie
   const sessionCookie = cookies().get("admin-session")?.value;
   if (!sessionCookie) {
+    console.warn("[allowed-email] No admin-session cookie found");
     return NextResponse.json({ isAllowed: false }, { status: 401 });
   }
 
@@ -16,6 +17,7 @@ export async function GET(req: NextRequest) {
   let decoded: { email?: string } = {};
   try {
     decoded = await verifyAdminSession(sessionCookie);
+    console.log("[allowed-email] Decoded admin session for:", decoded.email);
   } catch (err) {
     logError("allowed-email: verifyAdminSession failed", err);
     return NextResponse.json({ isAllowed: false }, { status: 401 });
@@ -24,16 +26,22 @@ export async function GET(req: NextRequest) {
   // Gather allowed emails and domain from env
   const adminEmails = (process.env.ADMIN_EMAILS || "")
     .split(",")
-    .map((e) => e.trim())
+    .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
-  const adminDomain = (process.env.ADMIN_DOMAIN || "").trim();
+  const adminDomain = (process.env.ADMIN_DOMAIN || "").trim().toLowerCase();
 
   // Check if the user is allowed (email or domain match)
-  const userEmail = decoded.email || "";
+  const userEmail = (decoded.email || "").toLowerCase();
   const isAllowed =
     (userEmail && adminEmails.includes(userEmail)) ||
     (adminDomain && userEmail.endsWith("@" + adminDomain)) ||
     false;
+
+  if (!isAllowed) {
+    console.warn("[allowed-email] Admin email not allowed:", userEmail);
+  } else {
+    console.log("[allowed-email] Admin email allowed:", userEmail);
+  }
 
   // Only return the boolean
   return NextResponse.json({ isAllowed });

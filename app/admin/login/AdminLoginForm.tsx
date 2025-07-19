@@ -72,6 +72,7 @@ export default function AdminLoginForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
+        credentials: "include", // ===> This is the only new line!
       })
       if (!res.ok) {
         setError("Authentication failed. You are not authorized to access this admin area.")

@@ -12,6 +12,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 import PwaServiceWorker from "@/components/PwaServiceWorker";
+import Toaster from "@/components/ui/toaster"; // <-- ADD THIS LINE
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -144,6 +145,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
         </noscript>
         {/* END GTM (NOSCRIPT) */}
+
+        <Toaster /> {/* <-- Add this for toast support everywhere */}
 
         {/* Pass categories as props to Header, only if not /admin */}
         {!isAdmin && (

@@ -11,7 +11,7 @@ import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE, SITE_LOGO_
 import { StructuredData } from "@/components/StructuredData";
 import Link from "next/link";
 
-// BlogPost type interface for type safety
+// BlogPost type interface for type safety (multi-category aware)
 interface BlogPost {
   id: string;
   slug: string;
@@ -19,6 +19,7 @@ interface BlogPost {
   excerpt: string;
   content: string;
   category: string;
+  categories?: string[];
   publishedAt: string; // ISO 8601 string
   updatedAt?: string; // ISO 8601 string, optional
   author?: string;
@@ -27,6 +28,9 @@ interface BlogPost {
   coverImage?: string;
   seoTitle?: string;
   seoDescription?: string;
+  seoKeywords?: string;
+  openGraphImage?: string;
+  schemaType?: string;
   status: "published" | "draft";
   tags?: string[];
 }
@@ -89,9 +93,19 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     });
   }
 
-  const ogImage = post.coverImage || SITE_DEFAULT_IMAGE;
+  // Multi-category support: prefer categories[0] as primary
+  const primaryCategory = (post.categories && post.categories.length > 0)
+    ? post.categories[0]
+    : post.category;
+
+  const ogImage =
+    post.openGraphImage ||
+    post.coverImage ||
+    SITE_DEFAULT_IMAGE;
+
   const seoTitle = post.seoTitle || post.title;
   const seoDescription = post.seoDescription || post.excerpt;
+  const schemaType = post.schemaType || "Article";
 
   return getMetadata({
     title: `${seoTitle} – ${SITE_NAME}`,
@@ -100,7 +114,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     robots: "index,follow",
     openGraph: {
       images: [{ url: ogImage, width: 1200, height: 630 }],
-      type: "article",
+      type: schemaType,
       title: seoTitle,
       description: seoDescription,
     },
@@ -122,6 +136,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // If post is not found or not published, trigger Next.js not-found page.
   if (!post) notFound();
 
+  // Multi-category support: prefer categories[0] as primary
+  const primaryCategory = (post.categories && post.categories.length > 0)
+    ? post.categories[0]
+    : post.category;
+
   // Determine author schema based on post.author (Person or Organization).
   const articleAuthorSchema =
     post.author === SITE_NAME
@@ -130,11 +149,11 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   // --- Article Schema JSON-LD (modular, rendered only for valid posts) ---
   const articleSchema = getSchema({
-    type: "Article",
+    type: post.schemaType || "Article",
     path: `/blog/${post.slug}`,
     title: post.seoTitle || post.title,
     description: post.seoDescription || post.excerpt,
-    image: post.coverImage || SITE_DEFAULT_IMAGE,
+    image: post.openGraphImage || post.coverImage || SITE_DEFAULT_IMAGE,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
     author: articleAuthorSchema,
@@ -150,7 +169,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         {/* Header Section */}
         <header className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            {post.category && <Badge variant="outline">{post.category}</Badge>}
+            {primaryCategory && <Badge variant="outline">{primaryCategory}</Badge>}
             {post.publishedAt && (
               <span className="text-sm text-gray-500 flex items-center gap-1">
                 <Calendar className="h-3 w-3" aria-hidden="true" />
@@ -185,10 +204,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </header>
 
         {/* Featured Image Section */}
-        {post.coverImage && (
+        {(post.openGraphImage || post.coverImage) && (
           <div className="mb-8">
             <img
-              src={post.coverImage}
+              src={post.openGraphImage || post.coverImage!}
               alt={post.title || "Blog post cover image"}
               className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
             />
@@ -210,7 +229,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           title={post.title}
           excerpt={post.excerpt}
           url={`${SITE_URL}/blog/${post.slug}`}
-          image={post.coverImage}
+          image={post.openGraphImage || post.coverImage}
         />
 
         {/* Tags Section */}

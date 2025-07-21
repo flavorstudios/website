@@ -5,6 +5,8 @@ import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { cookies } from "next/headers";
 import { logError } from "@/lib/log"; // Consistent server logging
 import jwt from "jsonwebtoken";
+import type { UserRole } from "@/lib/role-permissions";
+import { getUserRole } from "@/lib/user-roles";
 
 /**
  * Parse allowed admin emails from env (comma-separated) or admin domain.
@@ -51,9 +53,17 @@ function isEmailAllowed(email: string): boolean {
  * Verifies the session cookie:
  * - Tries Firebase session first (Google login)
  * - If fails, tries JWT session (email/password login)
+ * Returns decoded session PLUS the user's role.
  * Throws if invalid or unauthorized.
  */
-export async function verifyAdminSession(sessionCookie: string): Promise<any> {
+export interface VerifiedAdmin {
+  role: UserRole
+  email?: string
+  uid: string
+  [key: string]: any
+}
+
+export async function verifyAdminSession(sessionCookie: string): Promise<VerifiedAdmin> {
   if (!sessionCookie) {
     logError("admin-auth: verifyAdminSession (no cookie)", "No session cookie");
     throw new Error("No session cookie");
@@ -77,18 +87,28 @@ export async function verifyAdminSession(sessionCookie: string): Promise<any> {
     logError("admin-auth: verifyAdminSession (unauthorized email)", decoded.email || "");
     throw new Error("Unauthorized admin email");
   }
-  return decoded;
+  const role = await getUserRole(decoded.uid);
+  return { ...(decoded as any), role } as VerifiedAdmin;
 }
 
 /**
  * Checks if the request has a valid admin session.
- * Use this at the top of any protected admin API route.
+ * If a permission is passed, checks that the user's role includes that permission.
  */
-export async function requireAdmin(req: NextRequest): Promise<boolean> {
+export async function requireAdmin(
+  req: NextRequest,
+  permission?: keyof import("./role-permissions").RolePermissions,
+): Promise<boolean> {
   const sessionCookie = req.cookies.get("admin-session")?.value;
   if (!sessionCookie) return false;
   try {
-    await verifyAdminSession(sessionCookie);
+    const decoded = await verifyAdminSession(sessionCookie);
+    if (permission) {
+      const { hasPermission } = await import("@/lib/role-permissions");
+      if (!hasPermission(decoded.role, permission)) {
+        return false;
+      }
+    }
     return true;
   } catch (err) {
     logError("admin-auth: requireAdmin", err);
@@ -99,12 +119,21 @@ export async function requireAdmin(req: NextRequest): Promise<boolean> {
 /**
  * Checks if the current server action context has a valid admin session.
  * Reads the session cookie using next/headers and validates as above.
+ * Supports permission check.
  */
-export async function requireAdminAction(): Promise<boolean> {
+export async function requireAdminAction(
+  permission?: keyof import("./role-permissions").RolePermissions,
+): Promise<boolean> {
   const sessionCookie = cookies().get("admin-session")?.value;
   if (!sessionCookie) return false;
   try {
-    await verifyAdminSession(sessionCookie);
+    const decoded = await verifyAdminSession(sessionCookie);
+    if (permission) {
+      const { hasPermission } = await import("@/lib/role-permissions");
+      if (!hasPermission(decoded.role, permission)) {
+        return false;
+      }
+    }
     return true;
   } catch (err) {
     logError("admin-auth: requireAdminAction", err);

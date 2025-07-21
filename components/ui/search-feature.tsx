@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import Link from "next/link"
+import { Badge } from "@/components/ui/badge" // Added for multi-category support
 
 interface BlogPost {
   id: string
   title: string
   slug: string
   category: string
+  categories?: string[]
   excerpt: string
   publishedAt: string
 }
@@ -87,8 +89,8 @@ export function SearchFeature() {
     setIsLoading(true)
     try {
       const [blogsResponse, videosResponse] = await Promise.allSettled([
-        fetch("/api/blogs"),      // <-- Codex update
-        fetch("/api/videos"),     // <-- Codex update
+        fetch("/api/blogs"),
+        fetch("/api/videos"),
       ])
 
       let blogs: BlogPost[] = []
@@ -98,14 +100,25 @@ export function SearchFeature() {
       if (blogsResponse.status === "fulfilled" && blogsResponse.value.ok) {
         const blogsData = await blogsResponse.value.json()
         blogs = blogsData
-          .filter(
-            (blog: BlogPost) =>
-              blog.title.toLowerCase().includes(query.toLowerCase()) ||
-              blog.slug.toLowerCase().includes(query.toLowerCase()) ||
-              blog.category.toLowerCase().includes(query.toLowerCase()) ||
-              blog.excerpt.toLowerCase().includes(query.toLowerCase()),
-          )
-          .slice(0, 5) // Limit to 5 results
+          .filter((blog: BlogPost) => {
+            // Multi-category match logic
+            const search = query.toLowerCase()
+            const title = blog.title.toLowerCase()
+            const slug = blog.slug.toLowerCase()
+            const excerpt = blog.excerpt.toLowerCase()
+            // Multi or single category match
+            const categories = Array.isArray(blog.categories) && blog.categories.length
+              ? blog.categories.map((c) => c.toLowerCase())
+              : [blog.category?.toLowerCase()]
+
+            return (
+              title.includes(search) ||
+              slug.includes(search) ||
+              excerpt.includes(search) ||
+              categories.some((cat) => cat.includes(search))
+            )
+          })
+          .slice(0, 5)
       }
 
       // Process videos
@@ -117,7 +130,7 @@ export function SearchFeature() {
               video.title.toLowerCase().includes(query.toLowerCase()) ||
               video.slug.toLowerCase().includes(query.toLowerCase()),
           )
-          .slice(0, 5) // Limit to 5 results
+          .slice(0, 5)
       }
 
       setResults({ blogs, videos })
@@ -137,12 +150,10 @@ export function SearchFeature() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Open search with Ctrl+K or /
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault()
         setIsOpen(true)
       } else if (e.key === "/" && !isOpen) {
-        // Only trigger if not already typing in an input
         const activeElement = document.activeElement
         if (activeElement?.tagName !== "INPUT" && activeElement?.tagName !== "TEXTAREA") {
           e.preventDefault()
@@ -157,7 +168,6 @@ export function SearchFeature() {
 
   // Handle modal keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Skip keyboard navigation on mobile devices
     if ("ontouchstart" in window) return
 
     const totalResults = results.blogs.length + results.videos.length
@@ -170,7 +180,6 @@ export function SearchFeature() {
       setSelectedIndex((prev) => (prev <= 0 ? totalResults - 1 : prev - 1))
     } else if (e.key === "Enter" && selectedIndex >= 0) {
       e.preventDefault()
-      // Navigate to selected result
       const allResults = [...results.blogs, ...results.videos]
       const selectedResult = allResults[selectedIndex]
       if (selectedResult) {
@@ -181,7 +190,6 @@ export function SearchFeature() {
     }
   }
 
-  // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
       setSearchQuery("")
@@ -270,8 +278,21 @@ export function SearchFeature() {
                           <div className="font-medium text-sm mb-1">
                             {highlightText(blog.title, debouncedSearchQuery)}
                           </div>
-                          <div className="text-xs text-muted-foreground mb-1">
-                            📝 {blog.category} • {new Date(blog.publishedAt).toLocaleDateString()}
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            {Array.isArray(blog.categories) && blog.categories.length > 0 ? (
+                              blog.categories.map((cat) => (
+                                <Badge key={cat} variant="secondary" className="text-xxs">
+                                  {cat}
+                                </Badge>
+                              ))
+                            ) : (
+                              <Badge variant="secondary" className="text-xxs">
+                                {blog.category}
+                              </Badge>
+                            )}
+                            <span className="text-xs text-muted-foreground ml-2">
+                              {new Date(blog.publishedAt).toLocaleDateString()}
+                            </span>
                           </div>
                           <div className="text-xs text-muted-foreground line-clamp-2">
                             {highlightText(blog.excerpt, debouncedSearchQuery)}

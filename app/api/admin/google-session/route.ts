@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase-admin";
-import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
+import { requireAdmin, verifyAdminSession, createRefreshSession } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Centralized logging
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -45,17 +45,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // --- Create a Firebase session cookie for admin, valid 1 day ---
-    const expiresIn = 60 * 60 * 24 * 1 * 1000; // 1 day in ms (audit: review for your policy)
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+    // --- Create a session cookie & refresh token (short-lived, per Codex) ---
+    const { sessionCookie, refreshToken } = await createRefreshSession(idToken);
 
     // Set secure cookie attributes for admin-session
-    const res = NextResponse.json({ ok: true });
+    const res = NextResponse.json({ ok: true, refreshToken });
     res.cookies.set("admin-session", sessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: expiresIn / 1000, // in seconds
+      maxAge: 60 * 60 * 2, // 2 hours in seconds
       path: "/",
     });
 

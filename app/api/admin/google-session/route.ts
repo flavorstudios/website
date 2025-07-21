@@ -1,8 +1,8 @@
 // app/api/admin/google-session/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase-admin";
-import { requireAdmin, verifyAdminSession, createRefreshSession } from "@/lib/admin-auth";
+import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Centralized logging
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -45,21 +45,36 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // --- Create a session cookie & refresh token (short-lived, per Codex) ---
-    const { sessionCookie, refreshToken } = await createRefreshSession(idToken);
+    // --- Determine session expiry (in days) from env ---
+    const expiryDaysEnv = parseInt(process.env.ADMIN_SESSION_EXPIRY_DAYS || "1", 10);
+    const expiryDays = Number.isNaN(expiryDaysEnv) || expiryDaysEnv <= 0 ? 1 : expiryDaysEnv;
+    const expiresIn = 60 * 60 * 24 * expiryDays * 1000; // ms
+    const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+    const expiryDate = new Date(Date.now() + expiresIn);
 
     // Set secure cookie attributes for admin-session
-    const res = NextResponse.json({ ok: true, refreshToken });
+    const res = NextResponse.json({ ok: true, expiresAt: expiryDate.toISOString(), expiryDays });
     res.cookies.set("admin-session", sessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 60 * 60 * 2, // 2 hours in seconds
+      maxAge: expiresIn / 1000, // in seconds
       path: "/",
     });
 
     // --- LOGGING: Cookie issued for admin ---
     console.log("google-session: Admin session cookie set for", decoded.email);
+
+    // Record login event in Firestore
+    try {
+      await adminDb.collection("login_events").add({
+        email: decoded.email || "",
+        timestamp: new Date().toISOString(),
+        ip: req.headers.get("x-forwarded-for") || "",
+      });
+    } catch (logErr) {
+      logError("google-session: failed to record login event", logErr);
+    }
 
     return res;
   } catch (err) {

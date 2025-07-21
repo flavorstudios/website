@@ -18,16 +18,16 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate fetching user role from Firestore
-    // In real implementation, this would fetch from /roles/{userId}
+    // Fetch user role from API endpoint
     const fetchUserRole = async () => {
       try {
-        // Mock API call - replace with actual Firestore query
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // For demo, you can change this to test different roles
-        const mockRole: UserRole = "admin" // Change to 'editor' or 'support' to test
-        setUserRole(mockRole)
+        const res = await fetch("/api/admin/user-role")
+        const data = await res.json()
+        if (res.ok && data.role) {
+          setUserRole(data.role as UserRole)
+        } else {
+          setUserRole("support")
+        }
       } catch (error) {
         console.error("Failed to fetch user role:", error)
         setUserRole("support") // Fallback to most restrictive role

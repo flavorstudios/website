@@ -1,9 +1,10 @@
 // app/blog/category/[slug]/page.tsx
 
-import { PrismaClient } from "@prisma/client"
-import BlogPage from "../../page"
+import siteData from "@/content-data/categories.json";
+import BlogPage from "../../page";
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export default async function BlogCategoryPage({
   params,
@@ -12,41 +13,32 @@ export default async function BlogCategoryPage({
   params: { slug: string }
   searchParams: { page?: string }
 }) {
-  // Fetching the category based on the slug
-  const categorySlug = params.slug
+  const categorySlug = params.slug;
 
-  // Fetch blog posts filtered by category slug
-  const category = await prisma.category.findUnique({
-    where: { slug: categorySlug },
-    select: {
-      name: true,
-      slug: true,
-      postCount: true,
-      tooltip: true,
-    },
-  })
+  // Find the category from JSON instead of DB
+  const category = (siteData.CATEGORIES.blog || []).find(
+    (cat) => cat.slug === categorySlug
+  );
 
   if (!category) {
-    // If category not found, return a 404 page or similar handling
-    return <div>Category not found</div>
+    return <div>Category not found</div>;
   }
 
-  // Fetching blog posts for this category
+  // Fetch blog posts for this category (still using Prisma)
   const blogPosts = await prisma.post.findMany({
     where: {
       category: { slug: categorySlug },
     },
-    orderBy: { createdAt: "desc" }, // Sort by the most recent posts
+    orderBy: { createdAt: "desc" },
     skip: searchParams.page ? (parseInt(searchParams.page) - 1) * 10 : 0,
-    take: 10, // Limit to 10 posts per page
-  })
+    take: 10,
+  });
 
-  // Pass the category data and blog posts to the BlogPage component
   return (
     <BlogPage
       searchParams={{ ...searchParams, category: categorySlug }}
       category={category}
       blogPosts={blogPosts}
     />
-  )
+  );
 }

@@ -1,9 +1,10 @@
 // app/watch/category/[slug]/page.tsx
 
-import { PrismaClient } from "@prisma/client"
-import WatchPage from "../../page"
+import siteData from "@/content-data/categories.json";
+import WatchPage from "../../page";
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export default async function WatchCategoryPage({
   params,
@@ -12,41 +13,32 @@ export default async function WatchCategoryPage({
   params: { slug: string }
   searchParams: { page?: string }
 }) {
-  // Fetching the category based on the slug
-  const categorySlug = params.slug
+  const categorySlug = params.slug;
 
-  // Fetch category details based on the slug
-  const category = await prisma.category.findUnique({
-    where: { slug: categorySlug },
-    select: {
-      name: true,
-      slug: true,
-      postCount: true,
-      tooltip: true,
-    },
-  })
+  // Look up the video category in JSON, not the DB!
+  const category = (siteData.CATEGORIES.watch || []).find(
+    (cat) => cat.slug === categorySlug
+  );
 
   if (!category) {
-    // If category not found, return a 404 or similar handling
-    return <div>Category not found</div>
+    return <div>Category not found</div>;
   }
 
-  // Fetching videos for this category
+  // Still fetch videos from Prisma as before
   const videos = await prisma.video.findMany({
     where: {
       category: { slug: categorySlug },
     },
-    orderBy: { createdAt: "desc" }, // Sort by the most recent videos
+    orderBy: { createdAt: "desc" },
     skip: searchParams.page ? (parseInt(searchParams.page) - 1) * 10 : 0,
-    take: 10, // Limit to 10 videos per page
-  })
+    take: 10,
+  });
 
-  // Pass the category data and videos to the WatchPage component
   return (
     <WatchPage
       searchParams={{ ...searchParams, category: categorySlug }}
       category={category}
       videos={videos}
     />
-  )
+  );
 }

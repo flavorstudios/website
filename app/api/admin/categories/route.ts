@@ -18,7 +18,7 @@ async function writeJSON(newData: any) {
 }
 
 export async function GET(request: NextRequest) {
-  if (!(await requireAdmin(request))) {
+  if (!(await requireAdmin(request, "canManageCategories"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await requireAdmin(request))) {
+  if (!(await requireAdmin(request, "canManageCategories"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {

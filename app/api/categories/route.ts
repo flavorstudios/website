@@ -1,7 +1,6 @@
 // app/api/categories/route.ts
 
 import { NextResponse, type NextRequest } from "next/server";
-import siteData from "@/content-data/categories.json";
 
 // Helper to format categories (works for both blog & watch arrays)
 function format(arr: any[]) {
@@ -18,6 +17,9 @@ function format(arr: any[]) {
 
 export async function GET(request: NextRequest) {
   try {
+    // 👇 Dynamic import is required in Next.js API routes!
+    const siteData = await import('@/content-data/categories.json').then(m => m.default);
+
     const type = request.nextUrl.searchParams.get("type");
     const { blog = [], watch = [] } = siteData.CATEGORIES;
 

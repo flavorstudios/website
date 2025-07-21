@@ -48,7 +48,7 @@ Thumbs.db
 .vscode
 .idea
 
-# --- Prisma SQLite database files ---
+# --- SQLite database files ---
 *.db
 *.sqlite
 *.sqlite3

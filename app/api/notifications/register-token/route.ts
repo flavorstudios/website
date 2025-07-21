@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 
-// Replace this with actual DB save logic (Firestore, Prisma, etc.)
+// Replace this with your actual database save logic as needed.
 async function saveTokenToDatabase(token: string) {
-  // Example: Write token to a file (for demo), replace with real DB!
+  // Example: Write token to a file for demo, replace with your actual storage!
   // await fs.promises.appendFile("fcm_tokens.txt", token + "\n")
-  // For Firestore, import and save: await firestore.collection('fcm_tokens').add({ token })
-  // For Prisma, create: await prisma.pushToken.create({ data: { token } })
+  // For Firestore: await firestore.collection('fcm_tokens').add({ token })
   return true
 }
 
@@ -14,7 +13,7 @@ export async function POST(req: NextRequest) {
     const { token } = await req.json()
     if (!token) return NextResponse.json({ error: "No token provided" }, { status: 400 })
 
-    // Save to DB
+    // Save to your storage
     await saveTokenToDatabase(token)
 
     return NextResponse.json({ success: true })

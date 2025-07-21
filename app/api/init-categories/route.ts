@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server"
 
-// Optionally, import and call your Prisma-based seeder here if needed
+// Optionally, import and call your seeder here if needed
 // import { initializeDefaultCategories } from "@/lib/category-store"
 
 export async function GET() {
   try {
-    // If you need to initialize categories at runtime (rare with Prisma migrations/seeds), call your seeder here.
+    // If you need to initialize categories at runtime, call your seeder here.
     // await initializeDefaultCategories();
 
     return NextResponse.json({
       success: true,
       message: "Categories initialized successfully"
-      // No static or fallback category arrays; rely on database/prisma.
+      // No static or fallback category arrays; rely on your chosen data store.
     })
   } catch (error) {
     console.error("Failed to initialize categories:", error)

@@ -2,9 +2,6 @@
 
 import siteData from "@/content-data/categories.json";
 import BlogPage from "../../page";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
 
 export default async function BlogCategoryPage({
   params,
@@ -24,15 +21,14 @@ export default async function BlogCategoryPage({
     return <div>Category not found</div>;
   }
 
-  // Fetch blog posts for this category (still using Prisma)
-  const blogPosts = await prisma.post.findMany({
-    where: {
-      category: { slug: categorySlug },
-    },
-    orderBy: { createdAt: "desc" },
-    skip: searchParams.page ? (parseInt(searchParams.page) - 1) * 10 : 0,
-    take: 10,
-  });
+  // TODO: Fetch blog posts for this category from your preferred data source (e.g., Firebase or static JSON)
+  // Example placeholder: Replace with actual fetch as needed
+  // const blogPosts = (siteData.BLOG_POSTS || []).filter(
+  //   (post) => post.categorySlug === categorySlug
+  // );
+
+  // Pass empty array or implement your new fetching logic here
+  const blogPosts: any[] = [];
 
   return (
     <BlogPage

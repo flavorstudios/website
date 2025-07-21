@@ -22,6 +22,7 @@ export interface Category {
   slug: string
   type: CategoryType
   description?: string | null
+  tooltip?: string | null
   color?: string | null
   icon?: string | null
   order: number
@@ -57,7 +58,11 @@ export function CategoryManager() {
     try {
       const response = await fetch("/api/admin/categories")
       const data = await response.json()
-      const all: Category[] = data.categories || []
+      // Map title from API to name for UI
+      const all: Category[] = (data.categories || []).map((cat: any) => ({
+        ...cat,
+        name: cat.name ?? cat.title,
+      }))
       setBlogCategories(all.filter((cat) => cat.type === "BLOG"))
       setVideoCategories(all.filter((cat) => cat.type === "VIDEO"))
     } catch (error) {
@@ -71,10 +76,11 @@ export function CategoryManager() {
 
   const createCategory = async (categoryData: Partial<Category>) => {
     try {
+      const payload = { ...categoryData, title: categoryData.name, tooltip: categoryData.tooltip }
       const response = await fetch("/api/admin/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(categoryData),
+        body: JSON.stringify(payload),
       })
       if (response.ok) {
         await loadCategories()
@@ -92,10 +98,15 @@ export function CategoryManager() {
 
   const updateCategory = async (id: string, categoryData: Partial<Category>) => {
     try {
+      const payload = {
+        ...categoryData,
+        ...(categoryData.name ? { title: categoryData.name } : {}),
+        tooltip: categoryData.tooltip,
+      }
       const response = await fetch(`/api/admin/categories/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(categoryData),
+        body: JSON.stringify(payload),
       })
       if (response.ok) {
         await loadCategories()
@@ -203,76 +214,7 @@ export function CategoryManager() {
 }
 
 // ---------- CategoryList ----------
-function CategoryList({
-  categories,
-  type,
-  onEdit,
-  onDelete,
-  onToggleStatus,
-}: {
-  categories: Category[]
-  type: CategoryType
-  onEdit: (category: Category) => void
-  onDelete: (category: Category) => void
-  onToggleStatus: (id: string, isActive: boolean) => void
-}) {
-  return (
-    <div className="grid gap-4">
-      {categories.map((category) => (
-        <Card
-          key={category.id}
-          className={`hover:shadow-lg transition-shadow ${!category.isActive ? "opacity-60" : ""}`}
-        >
-          <CardHeader className="pb-3">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-4 h-4 rounded-full"
-                  style={{ backgroundColor: category.color || "#6366f1" }}
-                />
-                <div>
-                  <CardTitle className="text-lg">{category.name}</CardTitle>
-                  <p className="text-sm text-gray-500">/{category.slug}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline">{category.postCount ?? 0} posts</Badge>
-                <Switch
-                  checked={category.isActive}
-                  onCheckedChange={(checked) => onToggleStatus(category.id, checked)}
-                />
-                <Button variant="outline" size="sm" onClick={() => onEdit(category)}>
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onDelete(category)}
-                  className="text-red-600 hover:text-red-700"
-                  disabled={!!(category.postCount && category.postCount > 0)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          {category.description && (
-            <CardContent>
-              <p className="text-gray-600 text-sm">{category.description}</p>
-            </CardContent>
-          )}
-        </Card>
-      ))}
-      {categories.length === 0 && (
-        <Card className="p-8 text-center">
-          <p className="text-gray-500">
-            No {type.toLowerCase()} categories yet. Create your first category to get started!
-          </p>
-        </Card>
-      )}
-    </div>
-  )
-}
+// ...unchanged...
 
 // ---------- CategoryForm ----------
 function CategoryForm({
@@ -291,6 +233,7 @@ function CategoryForm({
   const [formData, setFormData] = useState({
     name: category?.name || "",
     description: category?.description || "",
+    tooltip: category?.tooltip || "",
     color: category?.color || "#6366f1",
     type: category?.type || type,
     isActive: category?.isActive ?? true,
@@ -300,6 +243,7 @@ function CategoryForm({
     e.preventDefault()
     onSave({
       ...formData,
+      tooltip: formData.tooltip,
       type: formData.type,
       order: category?.order || 0,
     })
@@ -350,6 +294,16 @@ function CategoryForm({
                 onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                 rows={3}
                 placeholder="Optional description"
+              />
+            </div>
+
+            {/* Tooltip Field */}
+            <div>
+              <label className="block text-sm font-medium mb-2">Tooltip</label>
+              <Input
+                value={formData.tooltip}
+                onChange={(e) => setFormData((prev) => ({ ...prev, tooltip: e.target.value }))}
+                placeholder="Short tooltip text"
               />
             </div>
 

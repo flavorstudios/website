@@ -2,9 +2,7 @@
 
 import siteData from "@/content-data/categories.json";
 import WatchPage from "../../page";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { SITE_URL } from "@/lib/constants";
 
 export default async function WatchCategoryPage({
   params,
@@ -24,15 +22,32 @@ export default async function WatchCategoryPage({
     return <div>Category not found</div>;
   }
 
-  // Still fetch videos from Prisma as before
-  const videos = await prisma.video.findMany({
-    where: {
-      category: { slug: categorySlug },
-    },
-    orderBy: { createdAt: "desc" },
-    skip: searchParams.page ? (parseInt(searchParams.page) - 1) * 10 : 0,
-    take: 10,
-  });
+  // Fetch videos from the public API and filter by category slug
+  const videos = await (async () => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+      const res = await fetch(`${baseUrl}/api/videos`, {
+        next: { revalidate: 300 },
+      });
+      if (!res.ok) return [];
+      const data = await res.json();
+      const allVideos = Array.isArray(data) ? data : data.videos || [];
+
+      const normalizeSlug = (name: string) =>
+        name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+      return allVideos.filter((video: any) => {
+        const cats =
+          Array.isArray(video.categories) && video.categories.length > 0
+            ? video.categories
+            : [video.category];
+        return cats.some((cat: string) => normalizeSlug(cat) === categorySlug);
+      });
+    } catch (error) {
+      console.error("Failed to fetch videos for category:", error);
+      return [];
+    }
+  })();
 
   return (
     <WatchPage

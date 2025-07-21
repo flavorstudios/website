@@ -86,8 +86,8 @@ export async function POST(request: NextRequest) {
       deletedVideoCategories = await videoStore.cleanupInvalidCategories()
     }
 
-    // If you want to display the latest categories, fetch dynamically from your Prisma-powered API or content-store
-    // For demo, just leave empty arrays (or fetch via Prisma here)
+    // Fetch latest categories dynamically from your content store or API as needed
+    // For demo, just leave empty arrays or fetch dynamically here
     const currentBlogCategories: string[] = []
     const currentWatchCategories: string[] = []
 

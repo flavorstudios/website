@@ -21,15 +21,26 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
   try {
     const data = await request.json();
+    // Accept dashboard `name`, map to `title`
+    if (data.name && !data.title) {
+      data.title = data.name;
+    }
     const json = await readJSON();
 
-    // Find and update category by ID (in both blog & watch arrays)
+    // Find and update category by ID (both blog & watch arrays)
     let found = false;
     ["blog", "watch"].forEach((type) => {
       json.CATEGORIES[type] = json.CATEGORIES[type].map((cat: any) => {
         if (cat.id === params.id) {
           found = true;
-          return { ...cat, ...data, id: cat.id }; // Keep id unchanged
+          const { name, ...rest } = data;
+          return {
+            ...cat,
+            ...rest,
+            tooltip: rest.tooltip ?? cat.tooltip,
+            id: cat.id,
+            title: rest.title ?? cat.title,
+          };
         }
         return cat;
       });
@@ -41,9 +52,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     await writeJSON(json);
 
-    // Return the updated category
-    const updated = [...json.CATEGORIES.blog, ...json.CATEGORIES.watch].find((cat: any) => cat.id === params.id);
-    return NextResponse.json({ category: updated });
+    // Return updated category with `name` for dashboard
+    const updated = [...json.CATEGORIES.blog, ...json.CATEGORIES.watch].find(
+      (cat: any) => cat.id === params.id
+    );
+    return NextResponse.json({ category: { ...updated, name: updated.title } });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || "Failed to update category" },
@@ -59,7 +72,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
   try {
     const json = await readJSON();
 
-    // Remove category by ID (in both blog & watch arrays)
+    // Remove category by ID (both blog & watch arrays)
     let removed = false;
     ["blog", "watch"].forEach((type) => {
       const origLength = json.CATEGORIES[type].length;

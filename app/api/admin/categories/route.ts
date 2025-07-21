@@ -30,6 +30,8 @@ export async function GET(request: NextRequest) {
     if (typeParam === "blog") categories = blog;
     else if (typeParam === "video") categories = watch;
     else categories = [...blog, ...watch];
+    // Always map title -> name for dashboard compatibility
+    categories = categories.map((c: any) => ({ ...c, name: c.title }));
     return NextResponse.json({ categories });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
@@ -42,6 +44,10 @@ export async function POST(request: NextRequest) {
   }
   try {
     const data = await request.json();
+    // Accept dashboard sending `name` and map to title
+    if (data.name && !data.title) {
+      data.title = data.name;
+    }
     const json = await readJSON();
 
     let arr;
@@ -80,7 +86,8 @@ export async function POST(request: NextRequest) {
     arr.push(category);
     await writeJSON(json);
 
-    return NextResponse.json({ category });
+    // Always include name for dashboard compatibility
+    return NextResponse.json({ category: { ...category, name: category.title } });
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || "Failed to create category" },

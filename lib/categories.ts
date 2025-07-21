@@ -37,7 +37,7 @@ export async function getDynamicCategories(): Promise<Category[]> {
       return [];
     }
   } catch (error) {
-    console.warn("Failed to fetch dynamic categories from Prisma:", error);
+    console.warn("Failed to fetch dynamic categories:", error);
   }
   // No fallback: return empty array if fetch fails
   return [];

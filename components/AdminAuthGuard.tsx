@@ -1,89 +1,23 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
-import app, { firebaseInitError } from "@/lib/firebase";
 import { Loader2 } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+
+// Optionally: you can add a loading state if your page needs it.
+// For most cases, you can just render children immediately, since authentication is handled by middleware.
 
 export default function AdminAuthGuard({ children }: { children: React.ReactNode }) {
-  const [authChecked, setAuthChecked] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [isAllowed, setIsAllowed] = useState<boolean | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    // Guard: If Firebase config error, abort and show error + redirect
-    if (firebaseInitError || !app) {
-      setError(
-        firebaseInitError?.message ||
-        "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
-      );
-      router.replace("/admin/login");
-      setAuthChecked(true);
-      return;
-    }
-
-    const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (!firebaseUser) {
-        router.replace("/admin/login");
-      } else {
-        setUser(firebaseUser);
-      }
-      setAuthChecked(true);
-    });
-    return () => unsubscribe();
-  }, [router]);
-
-  useEffect(() => {
-    if (firebaseInitError || !app) {
-      setError(
-        firebaseInitError?.message ||
-        "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
-      );
-      router.replace("/admin/login");
-      return;
-    }
-    // Check admin permission (email/domain) for this user only
-    async function fetchIsAllowed() {
-      try {
-        const res = await fetch("/api/admin/allowed-email", {
-          credentials: "include" // <-- ensures cookies are sent!
-        });
-        if (!res.ok) throw new Error("not allowed");
-        const data = await res.json();
-        if (!data.isAllowed) throw new Error("not allowed");
-        setIsAllowed(true);
-      } catch (err) {
-        setError("Authentication failed. Please log in again.");
-        getAuth(app).signOut();
-        router.replace("/admin/login");
-      }
-    }
-    fetchIsAllowed();
-  }, [router]);
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription className="text-red-700 text-sm">{error}</AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  if (!authChecked || isAllowed === null) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="animate-spin mb-4 h-8 w-8 text-purple-500" />
-        <p className="text-gray-500 text-sm">Checking admin authentication…</p>
-      </div>
-    );
-  }
-
-  // Render children only if authenticated and explicitly allowed
-  return <>{user && isAllowed && children}</>;
+  // If you want to show a brief loading spinner (e.g., for suspense fallback), you can uncomment/use useState/useEffect:
+  // const [loading, setLoading] = useState(true);
+  // useEffect(() => {
+  //   setTimeout(() => setLoading(false), 300); // Simulate loading
+  // }, []);
+  // if (loading) {
+  //   return (
+  //     <div className="flex flex-col items-center justify-center min-h-[60vh]">
+  //       <Loader2 className="animate-spin mb-4 h-8 w-8 text-purple-500" />
+  //       <p className="text-gray-500 text-sm">Loading…</p>
+  //     </div>
+  //   );
+  // }
+  // For now, simply render children:
+  return <>{children}</>;
 }

@@ -7,13 +7,21 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { RichTextEditor } from "./rich-text-editor"
-import { Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info } from "lucide-react"
+import {
+  Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info, ChevronDown,
+} from "lucide-react"
+import { toast } from "@/components/ui/toast" // <--- Add Sonner/your toast system
 
 interface BlogCategory {
   name: string
@@ -27,11 +35,15 @@ interface BlogPost {
   slug: string
   content: string
   excerpt: string
-  category: string // Always slug!
+  category: string // legacy single (always first of categories)
+  categories: string[]
   tags: string[]
   featuredImage: string
   seoTitle: string
   seoDescription: string
+  seoKeywords: string
+  openGraphImage: string
+  schemaType: string
   status: "draft" | "published" | "scheduled"
   featured: boolean
   publishedAt?: Date
@@ -49,10 +61,14 @@ export function BlogEditor() {
     content: "",
     excerpt: "",
     category: "",
+    categories: [],
     tags: [],
     featuredImage: "",
     seoTitle: "",
     seoDescription: "",
+    seoKeywords: "",
+    openGraphImage: "",
+    schemaType: "Article",
     status: "draft",
     featured: false,
     author: "Admin",
@@ -81,14 +97,17 @@ export function BlogEditor() {
         })) || []
         setCategories(blogCategories)
 
-        // Set default category if unset
-        if (!post.category && blogCategories.length > 0) {
-          setPost((prev) => ({ ...prev, category: blogCategories[0].slug }))
+        // Set default if unset
+        if (post.categories.length === 0 && blogCategories.length > 0) {
+          setPost((prev) => ({
+            ...prev,
+            category: blogCategories[0].slug,
+            categories: [blogCategories[0].slug],
+          }))
         }
       } catch (error) {
         console.error("Failed to load categories:", error)
       }
-      // We do not set post here, only in the next effect!
     }
     loadCategories()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -144,6 +163,8 @@ export function BlogEditor() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...post,
+          // Always send both for backward compatibility
+          category: post.categories[0] || post.category || "",
           publishedAt: post.status === "published" ? new Date() : undefined,
           scheduledFor: post.status === "scheduled" ? scheduledDate : undefined,
         }),
@@ -152,13 +173,13 @@ export function BlogEditor() {
         const savedPost = await response.json()
         setPost((prev) => ({ ...prev, id: savedPost.id }))
         setLastSaved(new Date())
-        if (!isAutoSave) {
-          // Show success message
-          console.log("Post saved successfully!")
-        }
+        toast(isAutoSave ? "Auto-saved" : "Post saved successfully!") // Show toast
+      } else {
+        throw new Error("Save failed")
       }
     } catch (error) {
       console.error("Failed to save post:", error)
+      toast(isAutoSave ? "Auto-save failed" : "Failed to save post")
     } finally {
       if (!isAutoSave) setSaving(false)
     }
@@ -215,7 +236,10 @@ export function BlogEditor() {
     }))
   }
 
-  const selectedCategoryObj = categories.find((cat) => cat.slug === post.category)
+  // Multi-category selection helper
+  const selectedCategories = categories.filter((cat) =>
+    post.categories.includes(cat.slug)
+  )
 
   return (
     <motion.div
@@ -236,7 +260,6 @@ export function BlogEditor() {
             <p className="text-gray-600">Write and publish your blog content</p>
           </div>
         </div>
-
         <div className="flex items-center gap-3">
           {lastSaved && <span className="text-sm text-gray-500">Last saved: {lastSaved.toLocaleTimeString()}</span>}
           <Button variant="outline" onClick={() => savePost()} disabled={saving} className="flex items-center gap-2">
@@ -328,9 +351,53 @@ export function BlogEditor() {
                 </label>
                 <Textarea
                   value={post.seoDescription}
-                  onChange={(e) => setPost((prev) => ({ ...prev, seoDescription: e.target.value.slice(0, 160) }))}
+                  onChange={(e) =>
+                    setPost((prev) => ({
+                      ...prev,
+                      seoDescription: e.target.value.slice(0, 160),
+                    }))
+                  }
                   placeholder="Brief description for search engines..."
                   rows={3}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Keywords</label>
+                <Input
+                  value={post.seoKeywords}
+                  onChange={(e) =>
+                    setPost((prev) => ({
+                      ...prev,
+                      seoKeywords: e.target.value,
+                    }))
+                  }
+                  placeholder="keyword1, keyword2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">OpenGraph Image URL</label>
+                <Input
+                  value={post.openGraphImage}
+                  onChange={(e) =>
+                    setPost((prev) => ({
+                      ...prev,
+                      openGraphImage: e.target.value,
+                    }))
+                  }
+                  placeholder="https://example.com/og-image.jpg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Schema Type</label>
+                <Input
+                  value={post.schemaType}
+                  onChange={(e) =>
+                    setPost((prev) => ({
+                      ...prev,
+                      schemaType: e.target.value,
+                    }))
+                  }
+                  placeholder="Article"
                 />
               </div>
             </CardContent>
@@ -347,13 +414,17 @@ export function BlogEditor() {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Status</span>
-                <Badge variant={post.status === "published" ? "default" : "secondary"}>{post.status}</Badge>
+                <Badge variant={post.status === "published" ? "default" : "secondary"}>
+                  {post.status}
+                </Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Featured Post</span>
                 <Switch
                   checked={post.featured}
-                  onCheckedChange={(featured) => setPost((prev) => ({ ...prev, featured }))}
+                  onCheckedChange={(featured) =>
+                    setPost((prev) => ({ ...prev, featured }))
+                  }
                 />
               </div>
               <Popover open={showScheduler} onOpenChange={setShowScheduler}>
@@ -385,40 +456,59 @@ export function BlogEditor() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Tag className="h-5 w-5" />
-                Category & Tags
+                Categories & Tags
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Multi-select categories */}
               <div>
-                <label className="block text-sm font-medium mb-2">Category</label>
-                <Select
-                  value={post.category}
-                  onValueChange={(categorySlug) =>
-                    setPost((prev) => ({ ...prev, category: categorySlug }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
+                <label className="block text-sm font-medium mb-2">Categories</label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between">
+                      <span className="truncate">
+                        {post.categories.length > 0
+                          ? post.categories
+                              .map(
+                                (slug) =>
+                                  categories.find((cat) => cat.slug === slug)?.name || slug
+                              )
+                              .join(", ")
+                          : "Select categories"}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="max-h-64 overflow-y-auto">
                     {categories.map((category) => (
-                      <SelectItem
+                      <DropdownMenuCheckboxItem
                         key={category.slug}
-                        value={category.slug}
-                        title={category.tooltip}
-                        className="flex items-center gap-2"
+                        checked={post.categories.includes(category.slug)}
+                        onCheckedChange={(checked) => {
+                          setPost((prev) => {
+                            const categories = checked
+                              ? [...prev.categories, category.slug]
+                              : prev.categories.filter((c) => c !== category.slug)
+                            return {
+                              ...prev,
+                              categories,
+                              category: categories[0] || "",
+                            }
+                          })
+                        }}
+                        className="capitalize"
                       >
                         {category.name}
                         {category.tooltip && (
                           <Info className="ml-2 h-4 w-4 text-blue-400" title={category.tooltip} />
                         )}
-                      </SelectItem>
+                      </DropdownMenuCheckboxItem>
                     ))}
-                  </SelectContent>
-                </Select>
-                {selectedCategoryObj?.tooltip && (
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                {selectedCategories[0]?.tooltip && (
                   <div className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                    <Info className="h-3 w-3" /> {selectedCategoryObj.tooltip}
+                    <Info className="h-3 w-3" /> {selectedCategories[0]?.tooltip}
                   </div>
                 )}
               </div>

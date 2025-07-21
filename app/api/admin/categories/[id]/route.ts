@@ -1,34 +1,85 @@
-import { requireAdmin } from "@/lib/admin-auth"
-import { type NextRequest, NextResponse } from "next/server"
-import { categoryStore } from "@/lib/category-store"
+// app/api/admin/categories/[id]/route.ts
+
+import { requireAdmin } from "@/lib/admin-auth";
+import { type NextRequest, NextResponse } from "next/server";
+import fs from "fs/promises";
+import path from "path";
+
+const CATEGORIES_PATH = path.join(process.cwd(), "content-data", "categories.json");
+
+async function readJSON() {
+  const data = await fs.readFile(CATEGORIES_PATH, "utf-8");
+  return JSON.parse(data);
+}
+async function writeJSON(newData: any) {
+  await fs.writeFile(CATEGORIES_PATH, JSON.stringify(newData, null, 2), "utf-8");
+}
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   if (!(await requireAdmin(request))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const data = await request.json()
-    const category = await categoryStore.update(params.id, data)
-    if (!category) {
-      return NextResponse.json({ error: "Category not found" }, { status: 404 })
+    const data = await request.json();
+    const json = await readJSON();
+
+    // Find and update category by ID (in both blog & watch arrays)
+    let found = false;
+    ["blog", "watch"].forEach((type) => {
+      json.CATEGORIES[type] = json.CATEGORIES[type].map((cat: any) => {
+        if (cat.id === params.id) {
+          found = true;
+          return { ...cat, ...data, id: cat.id }; // Keep id unchanged
+        }
+        return cat;
+      });
+    });
+
+    if (!found) {
+      return NextResponse.json({ error: "Category not found" }, { status: 404 });
     }
-    return NextResponse.json({ category })
+
+    await writeJSON(json);
+
+    // Return the updated category
+    const updated = [...json.CATEGORIES.blog, ...json.CATEGORIES.watch].find((cat: any) => cat.id === params.id);
+    return NextResponse.json({ category: updated });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to update category" }, { status: 400 })
+    return NextResponse.json(
+      { error: error.message || "Failed to update category" },
+      { status: 400 }
+    );
   }
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   if (!(await requireAdmin(request))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const success = await categoryStore.delete(params.id)
-    if (!success) {
-      return NextResponse.json({ error: "Category not found" }, { status: 404 })
+    const json = await readJSON();
+
+    // Remove category by ID (in both blog & watch arrays)
+    let removed = false;
+    ["blog", "watch"].forEach((type) => {
+      const origLength = json.CATEGORIES[type].length;
+      json.CATEGORIES[type] = json.CATEGORIES[type].filter((cat: any) => cat.id !== params.id);
+      if (json.CATEGORIES[type].length !== origLength) {
+        removed = true;
+      }
+    });
+
+    if (!removed) {
+      return NextResponse.json({ error: "Category not found" }, { status: 404 });
     }
-    return NextResponse.json({ success: true })
+
+    await writeJSON(json);
+
+    return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to delete category" }, { status: 400 })
+    return NextResponse.json(
+      { error: error.message || "Failed to delete category" },
+      { status: 400 }
+    );
   }
 }

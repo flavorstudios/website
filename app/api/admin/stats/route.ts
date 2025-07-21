@@ -2,7 +2,7 @@ import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
-  if (!(await requireAdmin(request))) {
+  if (!(await requireAdmin(request, "canViewAnalytics"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {

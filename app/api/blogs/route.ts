@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { blogStore } from "@/lib/content-store"; // Firestore-backed store
 import { formatPublicBlog } from "@/lib/formatters"; // Your existing formatter
+import { logError } from "@/lib/log"; // Add error logging
 
 export async function GET() {
   try {
@@ -20,8 +21,8 @@ export async function GET() {
     res.headers.set("Cache-Control", "public, max-age=300");
     return res;
   } catch (error) {
-    // Log error for diagnostics
-    console.error("Failed to fetch published blogs:", error);
+    // Log error using the helper for diagnostics
+    logError("blogs:GET", error);
 
     // Return a safe error response
     return NextResponse.json(

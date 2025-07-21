@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Shield, Loader2, Sparkles } from "lucide-react"
+import EmailLoginForm from "./EmailLoginForm"
+import useAuthError from "@/hooks/useAuthError"
 
 // --- Firebase Auth ---
 import app, { firebaseInitError } from "@/lib/firebase"
@@ -20,9 +22,10 @@ function safeLogError(...args: any[]) {
 }
 
 export default function AdminLoginForm() {
-  const [error, setError] = useState("")
+  const { error, setError, clearError } = useAuthError()
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [method, setMethod] = useState<"google" | "email">("google")
   const router = useRouter()
 
   // --- Show Firebase env error, if present ---
@@ -52,7 +55,7 @@ export default function AdminLoginForm() {
       }
     })
     return () => unsubscribe()
-  }, [router])
+  }, [router, setError])
 
   const handleGoogleLogin = async () => {
     setError("")
@@ -72,7 +75,7 @@ export default function AdminLoginForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
-        credentials: "include", // ===> This is the only new line!
+        credentials: "include",
       })
       if (!res.ok) {
         setError("Authentication failed. You are not authorized to access this admin area.")
@@ -92,14 +95,6 @@ export default function AdminLoginForm() {
 
   return (
     <div className="min-h-screen bg-[#f5f8fd] flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      {/* Google-style: Plain light background, no animation */}
-      {/* 
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-20 -right-20 sm:-top-40 sm:-right-40 w-40 h-40 sm:w-80 sm:h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-20 -left-20 sm:-bottom-40 sm:-left-40 w-40 h-40 sm:w-80 sm:h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 sm:w-80 sm:h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-500"></div>
-      </div>
-      */}
       <Card className="w-full max-w-sm sm:max-w-md bg-white border border-blue-100 shadow-lg rounded-2xl mx-4 relative z-10">
         <CardHeader className="space-y-3 sm:space-y-4 text-center px-4 sm:px-6 pt-6 sm:pt-8">
           <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-2xl flex items-center justify-center">
@@ -121,26 +116,35 @@ export default function AdminLoginForm() {
                 <AlertDescription className="text-red-700 text-sm">{error}</AlertDescription>
               </Alert>
             )}
-            <Button
-              onClick={handleGoogleLogin}
-              disabled={loading}
-              className="w-full min-h-[48px] h-12 sm:h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow transition-all duration-200 text-base sm:text-sm"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  <span className="text-sm sm:text-base">Authenticating...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  <span className="text-sm sm:text-base">Sign in with Google</span>
-                </>
-              )}
-            </Button>
-            <div className="mt-4 sm:mt-6 text-center">
-              <p className="text-xs text-gray-500 px-2">Secured with enterprise-grade encryption</p>
-            </div>
+            {method === "google" ? (
+              <>
+                <Button
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                  className="w-full min-h-[48px] h-12 sm:h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow transition-all duration-200 text-base sm:text-sm"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span className="text-sm sm:text-base">Authenticating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      <span className="text-sm sm:text-base">Sign in with Google</span>
+                    </>
+                  )}
+                </Button>
+                <Button variant="ghost" onClick={() => { clearError(); setMethod("email") }} className="w-full">
+                  Use Email & Password
+                </Button>
+                <div className="mt-4 sm:mt-6 text-center">
+                  <p className="text-xs text-gray-500 px-2">Secured with enterprise-grade encryption</p>
+                </div>
+              </>
+            ) : (
+              <EmailLoginForm onCancel={() => { clearError(); setMethod("google") }} />
+            )}
           </div>
         </CardContent>
       </Card>

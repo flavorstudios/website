@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { videoStore } from "@/lib/comment-store"
 
 export async function GET(request: NextRequest) {
-  if (!(await requireAdmin(request))) {
+  if (!(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await requireAdmin(request))) {
+  if (!(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {

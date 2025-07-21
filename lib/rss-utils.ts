@@ -172,18 +172,21 @@ export async function generateRssFeed(): Promise<string> {
     const blogPosts: any[] = blogsRes.ok ? await blogsRes.json() : [];
     const videos: any[] = videosRes.ok ? await videosRes.json() : [];
 
-    // Blogs (always canonical URLs)
+    // Blogs (always canonical URLs, support categories[])
     const blogItems: RSSItem[] = blogPosts.map((post: any) => ({
       title: post.title,
       description: truncateDescription(stripHtml(post.excerpt || post.content)),
       link: getCanonicalUrl(`/blog/${post.slug}`),
       pubDate: formatRSSDate(post.publishedAt),
-      category: post.category || "General",
+      // Multi-category support: prefer first .categories[] or fallback to .category
+      category: Array.isArray(post.categories) && post.categories.length > 0
+        ? post.categories[0]
+        : post.category || "General",
       author: post.author || SITE_NAME,
       guid: getCanonicalUrl(`/blog/${post.slug}`),
     }));
 
-    // Videos (with thumbnail enclosure, canonical URLs)
+    // Videos (with thumbnail enclosure, canonical URLs, support categories[])
     const videoItems: RSSItem[] = await Promise.all(
       videos.map(async (video: any) => {
         let enclosure;
@@ -203,7 +206,10 @@ export async function generateRssFeed(): Promise<string> {
           description: truncateDescription(stripHtml(video.description)),
           link: getCanonicalUrl(`/watch/${video.slug || video.id}`),
           pubDate: formatRSSDate(video.publishedAt),
-          category: video.category || "General",
+          // Multi-category support: prefer first .categories[] or fallback to .category
+          category: Array.isArray(video.categories) && video.categories.length > 0
+            ? video.categories[0]
+            : video.category || "General",
           author: SITE_NAME,
           guid: getCanonicalUrl(`/watch/${video.slug || video.id}`),
           enclosure,

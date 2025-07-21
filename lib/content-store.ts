@@ -1,7 +1,6 @@
-// lib/content-store.ts
 import { adminDb } from "@/lib/firebase-admin";
 
-/* Interfaces – unchanged */
+/* Interfaces – updated for multi-category support */
 export interface BlogPost {
   id: string;
   title: string;
@@ -9,7 +8,8 @@ export interface BlogPost {
   content: string;
   excerpt: string;
   status: "draft" | "published" | "scheduled";
-  category: string;
+  category: string;           // legacy: main category
+  categories?: string[];      // NEW: multiple categories (optional)
   tags: string[];
   featuredImage: string;
   seoTitle: string;
@@ -60,14 +60,32 @@ export interface SystemStats {
 
 /* ----- Blog Store ----- */
 export const blogStore = {
+  // Always ensure categories[] is present for all posts (migrate at read time)
   async getAll(): Promise<BlogPost[]> {
     const snap = await adminDb.collection("blogs").orderBy("createdAt", "desc").get();
-    return snap.docs.map((d) => d.data() as BlogPost);
+    return snap.docs.map((d) => {
+      const post = d.data() as BlogPost;
+      return {
+        ...post,
+        categories:
+          Array.isArray(post.categories) && post.categories.length > 0
+            ? post.categories
+            : [post.category],
+      };
+    });
   },
 
   async getById(id: string): Promise<BlogPost | null> {
     const doc = await adminDb.collection("blogs").doc(id).get();
-    return doc.exists ? (doc.data() as BlogPost) : null;
+    if (!doc.exists) return null;
+    const post = doc.data() as BlogPost;
+    return {
+      ...post,
+      categories:
+        Array.isArray(post.categories) && post.categories.length > 0
+          ? post.categories
+          : [post.category],
+    };
   },
 
   async create(
@@ -80,16 +98,29 @@ export const blogStore = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       views: 0,
+      categories: post.categories && post.categories.length > 0 ? post.categories : [post.category],
     };
     await adminDb.collection("blogs").doc(id).set(newPost);
     return newPost;
   },
 
   async update(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
+    // If category is updated but categories[] not provided, sync both
+    if (updates.category && !updates.categories) {
+      updates.categories = [updates.category];
+    }
     const ref = adminDb.collection("blogs").doc(id);
     await ref.set({ ...updates, updatedAt: new Date().toISOString() }, { merge: true });
     const doc = await ref.get();
-    return doc.exists ? (doc.data() as BlogPost) : null;
+    if (!doc.exists) return null;
+    const post = doc.data() as BlogPost;
+    return {
+      ...post,
+      categories:
+        Array.isArray(post.categories) && post.categories.length > 0
+          ? post.categories
+          : [post.category],
+    };
   },
 
   async delete(id: string): Promise<boolean> {
@@ -98,6 +129,17 @@ export const blogStore = {
     if (!doc.exists) return false;
     await ref.delete();
     return true;
+  },
+
+  // Fetch by a single category (matches both `category` and `categories[]`)
+  async getByCategory(category: string): Promise<BlogPost[]> {
+    const allPosts = await this.getAll();
+    if (category === "all") return allPosts;
+    return allPosts.filter(
+      (post) =>
+        post.category === category ||
+        (Array.isArray(post.categories) && post.categories.includes(category))
+    );
   },
 };
 

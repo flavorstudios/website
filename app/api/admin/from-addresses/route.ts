@@ -4,8 +4,8 @@ import { requireAdminAction } from "@/lib/admin-auth";
 
 // Only allow authenticated admins to access
 export async function GET() {
-  // Protect this endpoint so only logged-in admins get the list
-  if (!(await requireAdminAction())) {
+  // Protect this endpoint so only logged-in admins with system permission get the list
+  if (!(await requireAdminAction("canManageSystem"))) {
     return NextResponse.json({ addresses: [] }, { status: 401 });
   }
   // Return the allowed admin email addresses from environment config

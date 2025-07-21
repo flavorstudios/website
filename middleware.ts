@@ -5,10 +5,46 @@ import type { NextRequest } from "next/server";
 import { verifyAdminSession, logAdminAuditFailure } from "@/lib/admin-auth";
 import { adminAuth } from "@/lib/firebase-admin";
 
+// --- In-memory rate limiter (per Codex) ---
+type RateInfo = { count: number; lastAttempt: number };
+const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
+const MAX_FAILURES = 5;
+const rateMap: Map<string, RateInfo> =
+  // @ts-ignore
+  (globalThis as any).__adminRateMap ||
+  // @ts-ignore
+  ((globalThis as any).__adminRateMap = new Map<string, RateInfo>());
+
+function recordFailure(ip: string) {
+  const now = Date.now();
+  const info = rateMap.get(ip);
+  if (!info || now - info.lastAttempt > RATE_LIMIT_WINDOW) {
+    rateMap.set(ip, { count: 1, lastAttempt: now });
+    return 1;
+  }
+  info.count += 1;
+  info.lastAttempt = now;
+  rateMap.set(ip, info);
+  return info.count;
+}
+
+function isRateLimited(ip: string): boolean {
+  const info = rateMap.get(ip);
+  if (!info) return false;
+  if (Date.now() - info.lastAttempt > RATE_LIMIT_WINDOW) {
+    rateMap.delete(ip);
+    return false;
+  }
+  return info.count > MAX_FAILURES;
+}
+
+function resetRate(ip: string) {
+  rateMap.delete(ip);
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // Allow login page (and variants) for everyone
+  const ip = request.ip ?? request.headers.get("x-forwarded-for") ?? "unknown";
   const isLoginPage =
     pathname === "/admin/login" ||
     pathname === "/admin/login/" ||
@@ -17,11 +53,18 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/admin")) {
     const sessionCookie = request.cookies.get("admin-session")?.value || "";
 
-    // If accessing the login page and already authenticated, redirect to dashboard
+    // --- Rate limiter: block if too many invalid attempts ---
+    if (isRateLimited(ip)) {
+      await logAdminAuditFailure(null, ip, "rate_limited");
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
+
+    // --- Login page, redirect if already authenticated ---
     if (isLoginPage) {
       if (sessionCookie) {
         try {
           await verifyAdminSession(sessionCookie);
+          resetRate(ip);
           return NextResponse.redirect(new URL("/admin/dashboard", request.url));
         } catch (err) {
           // Audit log on failed session attempt at login
@@ -30,36 +73,36 @@ export async function middleware(request: NextRequest) {
             const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
             email = decoded.email || null;
           } catch {}
-          await logAdminAuditFailure(email, request.headers.get("x-forwarded-for") ?? "");
+          recordFailure(ip);
+          await logAdminAuditFailure(email, ip, "invalid_session_login");
         }
       }
       return NextResponse.next();
     }
 
-    // For all other /admin routes, require and validate the cookie
+    // --- All other /admin routes: require & validate cookie ---
     if (!sessionCookie) {
-      await logAdminAuditFailure(null, request.headers.get("x-forwarded-for") ?? "");
-      const loginUrl = new URL("/admin/login", request.url);
-      return NextResponse.redirect(loginUrl);
+      recordFailure(ip);
+      await logAdminAuditFailure(null, ip, "missing_session");
+      return NextResponse.redirect(new URL("/admin/login", request.url));
     }
 
-    // Validate the session cookie directly (no HTTP fetch)
     try {
       await verifyAdminSession(sessionCookie);
+      resetRate(ip);
     } catch (err) {
-      // Audit log on failed validation
       let email: string | null = null;
       try {
         const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
         email = decoded.email || null;
       } catch {}
-      await logAdminAuditFailure(email, request.headers.get("x-forwarded-for") ?? "");
-      const loginUrl = new URL("/admin/login", request.url);
-      return NextResponse.redirect(loginUrl);
+      recordFailure(ip);
+      await logAdminAuditFailure(email, ip, "invalid_session_route");
+      return NextResponse.redirect(new URL("/admin/login", request.url));
     }
   }
 
-  // All other routes: allow through
+  // --- All other routes: allow through ---
   return NextResponse.next();
 }
 

@@ -1,6 +1,8 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
-import { blogStore, videoStore } from "@/lib/comment-store"
+import { blogStore } from "@/lib/content-store"
+import { videoStore } from "@/lib/comment-store"
+import { logError } from "@/lib/log"
 
 export async function POST(request: NextRequest) {
   if (!(await requireAdmin(request, "canManageSystem"))) {
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Clean up invalid categories (optional: update to only use Prisma categories if those helpers exist)
+    // Clean up invalid categories (optional)
     let deletedBlogCategories = 0
     let deletedVideoCategories = 0
     if (typeof blogStore.cleanupInvalidCategories === "function") {
@@ -105,7 +107,7 @@ export async function POST(request: NextRequest) {
       report,
     })
   } catch (error) {
-    console.error("Cleanup failed:", error)
+    logError("admin/cleanup", error)
     return NextResponse.json(
       {
         success: false,

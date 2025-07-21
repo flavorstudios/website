@@ -4,7 +4,8 @@ export interface BlogPost {
   slug: string
   excerpt: string
   content: string
-  category: string
+  category: string           // Main/legacy category
+  categories?: string[]      // New: multiple categories, optional
   tags: string[]
   publishedAt: string
   author: string
@@ -15,13 +16,19 @@ export interface BlogPost {
 export const blogStore = {
   async getAllPosts(): Promise<BlogPost[]> {
     try {
-      const response = await fetch("/api/blogs", { // <-- updated endpoint as per Codex
+      const response = await fetch("/api/blogs", {
         cache: "no-store",
       })
 
       if (response.ok) {
         const posts = await response.json()
-        return posts || []
+        // Always ensure categories[] exists (for old posts)
+        return (posts || []).map((post: BlogPost) => ({
+          ...post,
+          categories: Array.isArray(post.categories) && post.categories.length > 0
+            ? post.categories
+            : [post.category],
+        }))
       }
     } catch (error) {
       console.warn("Failed to fetch blog posts:", error)
@@ -44,7 +51,12 @@ export const blogStore = {
     try {
       const posts = await this.getAllPosts()
       if (category === "all") return posts
-      return posts.filter((post) => post.category === category)
+
+      // Check both main category and all categories (array)
+      return posts.filter((post) =>
+        post.category === category ||
+        (Array.isArray(post.categories) && post.categories.includes(category))
+      )
     } catch (error) {
       console.warn("Failed to fetch blog posts by category:", error)
       return []

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { blogStore, videoStore } from "@/lib/comment-store"
 
 export async function POST(request: NextRequest) {
-  if (!(await requireAdmin(request))) {
+  if (!(await requireAdmin(request, "canManageSystem"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {

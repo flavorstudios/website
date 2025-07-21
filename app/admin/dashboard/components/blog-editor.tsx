@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,7 @@ import { RichTextEditor } from "./rich-text-editor"
 import {
   Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info, ChevronDown,
 } from "lucide-react"
-import { toast } from "@/components/ui/toast" // <--- Add Sonner/your toast system
+import { toast } from "sonner" // ✅ Use Sonner for toast notifications
 
 interface BlogCategory {
   name: string
@@ -35,7 +35,7 @@ interface BlogPost {
   slug: string
   content: string
   excerpt: string
-  category: string // legacy single (always first of categories)
+  category: string
   categories: string[]
   tags: string[]
   featuredImage: string
@@ -55,6 +55,7 @@ interface BlogPost {
 
 export function BlogEditor() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [post, setPost] = useState<BlogPost>({
     title: "",
     slug: "",
@@ -83,8 +84,9 @@ export function BlogEditor() {
   const [scheduledDate, setScheduledDate] = useState<Date>()
   const [imageUploading, setImageUploading] = useState(false)
   const [tagInput, setTagInput] = useState("")
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
-  // Load blog categories (always use .categories from API)
+  // Load blog categories
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -96,8 +98,6 @@ export function BlogEditor() {
           tooltip: cat.tooltip ?? "",
         })) || []
         setCategories(blogCategories)
-
-        // Set default if unset
         if (post.categories.length === 0 && blogCategories.length > 0) {
           setPost((prev) => ({
             ...prev,
@@ -113,7 +113,7 @@ export function BlogEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Auto-generate slug from title (unless user already edited slug)
+  // Auto-generate slug from title
   useEffect(() => {
     if (post.title && (!post.slug || post.slug === "")) {
       const slug = post.title
@@ -143,7 +143,7 @@ export function BlogEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post.content])
 
-  // Auto-save functionality
+  // Auto-save
   useEffect(() => {
     const autoSave = async () => {
       if (post.title || post.content) {
@@ -163,7 +163,6 @@ export function BlogEditor() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...post,
-          // Always send both for backward compatibility
           category: post.categories[0] || post.category || "",
           publishedAt: post.status === "published" ? new Date() : undefined,
           scheduledFor: post.status === "scheduled" ? scheduledDate : undefined,
@@ -173,13 +172,13 @@ export function BlogEditor() {
         const savedPost = await response.json()
         setPost((prev) => ({ ...prev, id: savedPost.id }))
         setLastSaved(new Date())
-        toast(isAutoSave ? "Auto-saved" : "Post saved successfully!") // Show toast
+        toast.success(isAutoSave ? "Auto-saved" : "Post saved successfully!")
       } else {
         throw new Error("Save failed")
       }
     } catch (error) {
       console.error("Failed to save post:", error)
-      toast(isAutoSave ? "Auto-save failed" : "Failed to save post")
+      toast.error(isAutoSave ? "Auto-save failed" : "Failed to save post")
     } finally {
       if (!isAutoSave) setSaving(false)
     }
@@ -199,6 +198,11 @@ export function BlogEditor() {
     }
   }
 
+  // --- 🟢 IMAGE UPLOAD WITH FILE NAME + CHANGE BUTTON ---
+  const handleImageSelect = (file: File) => {
+    setSelectedFile(file)
+  }
+
   const handleImageUpload = async (file: File) => {
     setImageUploading(true)
     try {
@@ -211,22 +215,30 @@ export function BlogEditor() {
       if (response.ok) {
         const { url } = await response.json()
         setPost((prev) => ({ ...prev, featuredImage: url }))
+        setSelectedFile(null)
+        toast.success("Image uploaded successfully!")
       }
     } catch (error) {
       console.error("Failed to upload image:", error)
+      toast.error("Failed to upload image")
     } finally {
       setImageUploading(false)
     }
   }
 
+  // --- 🟢 ADD TAG: Prevent duplicates ---
   const addTag = () => {
-    if (tagInput.trim() && !post.tags.includes(tagInput.trim())) {
-      setPost((prev) => ({
-        ...prev,
-        tags: [...prev.tags, tagInput.trim()],
-      }))
-      setTagInput("")
+    const newTag = tagInput.trim()
+    if (!newTag) return
+    if (post.tags.includes(newTag)) {
+      toast.warning("Tag already added!")
+      return
     }
+    setPost((prev) => ({
+      ...prev,
+      tags: [...prev.tags, newTag],
+    }))
+    setTagInput("")
   }
 
   const removeTag = (tagToRemove: string) => {
@@ -236,10 +248,21 @@ export function BlogEditor() {
     }))
   }
 
-  // Multi-category selection helper
   const selectedCategories = categories.filter((cat) =>
     post.categories.includes(cat.slug)
   )
+
+  // --- 🟢 Formatted Date for Last Saved ---
+  function formatDateTime(dt: Date) {
+    return dt.toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    })
+  }
 
   return (
     <motion.div
@@ -261,7 +284,11 @@ export function BlogEditor() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {lastSaved && <span className="text-sm text-gray-500">Last saved: {lastSaved.toLocaleTimeString()}</span>}
+          {lastSaved && (
+            <span className="text-sm text-gray-500">
+              Last saved: {formatDateTime(lastSaved)}
+            </span>
+          )}
           <Button variant="outline" onClick={() => savePost()} disabled={saving} className="flex items-center gap-2">
             <Save className="h-4 w-4" />
             {saving ? "Saving..." : "Save Draft"}
@@ -537,7 +564,7 @@ export function BlogEditor() {
             </CardContent>
           </Card>
 
-          {/* Featured Image */}
+          {/* --- 🟢 FEATURED IMAGE SECTION UPDATED --- */}
           <Card>
             <CardHeader>
               <CardTitle>Featured Image</CardTitle>
@@ -550,13 +577,23 @@ export function BlogEditor() {
                     alt="Featured"
                     className="w-full h-32 object-cover rounded-lg"
                   />
-                  <Button
-                    variant="outline"
-                    onClick={() => setPost((prev) => ({ ...prev, featuredImage: "" }))}
-                    className="w-full"
-                  >
-                    Remove Image
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setPost((prev) => ({ ...prev, featuredImage: "" }))}
+                      className="w-full"
+                    >
+                      Remove Image
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      disabled={imageUploading}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      {imageUploading ? "Uploading..." : "Change Image"}
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
@@ -565,15 +602,30 @@ export function BlogEditor() {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0])}
+                    ref={fileInputRef}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        handleImageSelect(file)
+                        handleImageUpload(file)
+                      }
+                    }}
                     className="hidden"
                     id="image-upload"
                   />
                   <label htmlFor="image-upload">
-                    <Button variant="outline" disabled={imageUploading} asChild>
+                    <Button
+                      variant="outline"
+                      disabled={imageUploading}
+                      asChild
+                      onClick={() => fileInputRef.current?.click()}
+                    >
                       <span>{imageUploading ? "Uploading..." : "Choose Image"}</span>
                     </Button>
                   </label>
+                  {selectedFile && (
+                    <div className="text-xs text-gray-500 mt-2">{selectedFile.name}</div>
+                  )}
                 </div>
               )}
             </CardContent>

@@ -3,13 +3,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import siteData from "@/content-data/categories.json";
 
+// Helper to format categories (works for both blog & watch arrays)
 function format(arr: any[]) {
   return (arr || [])
     .filter((c) => c.isActive)
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     .map((c) => ({
       ...c,
-      name: c.title, // Provide "name" for compatibility, but all original fields included
+      name: c.title,                  // Alias for compatibility
       count: c.postCount ?? 0,
       tooltip: c.tooltip ?? undefined,
     }));
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
       return response;
     }
 
-    // If no type, return both blog and video categories
+    // No type: return both blog and video categories
     const response = NextResponse.json({
       blogCategories: format(blog),
       videoCategories: format(watch),

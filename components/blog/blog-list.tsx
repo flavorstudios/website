@@ -14,6 +14,7 @@ interface BlogPost {
   excerpt: string
   content: string
   category: string
+  categories?: string[]
   tags: string[]
   publishedAt: string
   author: string
@@ -33,9 +34,13 @@ export function BlogList({ posts = [], category = "all", searchQuery = "" }: Blo
   useEffect(() => {
     let filtered = posts
 
-    // Filter by category
+    // Filter by category (now supports multi-category)
     if (category !== "all") {
-      filtered = filtered.filter((post) => post.category.toLowerCase() === category.toLowerCase())
+      filtered = filtered.filter((post) =>
+        Array.isArray(post.categories) && post.categories.length > 0
+          ? post.categories.map((c) => c.toLowerCase()).includes(category.toLowerCase())
+          : post.category.toLowerCase() === category.toLowerCase()
+      )
     }
 
     // Filter by search query
@@ -94,8 +99,21 @@ export function BlogList({ posts = [], category = "all", searchQuery = "" }: Blo
           <CardContent>
             <p className="text-gray-600 line-clamp-3 mb-4">{post.excerpt}</p>
 
-            <div className="flex items-center justify-between">
-              <Badge variant="secondary">{post.category}</Badge>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              {/* MULTI-CATEGORY BADGES */}
+              <div className="flex flex-wrap gap-1">
+                {Array.isArray(post.categories) && post.categories.length > 0
+                  ? post.categories.map((cat) => (
+                      <Badge key={cat} variant="secondary" className="text-xs">
+                        {cat}
+                      </Badge>
+                    ))
+                  : (
+                      <Badge variant="secondary" className="text-xs">
+                        {post.category}
+                      </Badge>
+                    )}
+              </div>
               <div className="flex items-center text-sm text-gray-500">
                 <Clock className="w-4 h-4 mr-1" />
                 <span>5 min read</span>

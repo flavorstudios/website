@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
-// import { blogStore } from "@/lib/comment-store"; // <-- No longer needed!
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { NewsletterSignup } from "@/components/newsletter-signup";
@@ -63,7 +62,6 @@ const schema = getSchema({
   },
   organizationName: SITE_NAME,
   organizationUrl: SITE_URL,
-  // logo ONLY here, schema.ts will attach under publisher/org not Thing root
 });
 
 // --- DATA FETCHING (Updated: now uses /api/blogs) ---
@@ -102,12 +100,18 @@ export default async function BlogPage({
   const normalizeSlug = (name: string) =>
     name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+  // --- TRUE MULTI-CATEGORY FILTER ---
   const filteredPosts =
     selectedCategory === "all"
       ? posts
       : posts.filter((post: any) => {
-          const categorySlug = normalizeSlug(post.category);
-          return categorySlug === selectedCategory;
+          const postCategories =
+            post.categories && post.categories.length > 0
+              ? post.categories
+              : [post.category];
+          return postCategories.some(
+            (cat: string) => normalizeSlug(cat) === selectedCategory
+          );
         });
 
   // Pagination
@@ -118,13 +122,14 @@ export default async function BlogPage({
   const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3);
   const regularPosts = paginatedPosts.filter((post: any) => !post.featured);
 
-  // Analytics data
+  // Analytics data (multi-category safe)
   const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0);
   const avgReadTime =
     posts.length > 0
       ? Math.round(
           posts.reduce(
-            (sum: number, post: any) => sum + Number.parseInt(post.readTime?.replace(" min read", "") || "5"),
+            (sum: number, post: any) =>
+              sum + Number.parseInt(post.readTime?.replace(" min read", "") || "5"),
             0,
           ) / posts.length,
         )
@@ -274,6 +279,11 @@ export default async function BlogPage({
 // --- COMPONENTS (as before) ---
 
 function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
+  // Prefer categories[0] for display; fallback to category
+  const mainCategory =
+    post.categories && post.categories.length > 0
+      ? post.categories[0]
+      : post.category;
   return (
     <Link href={`/blog/${post.slug}`} className="group">
       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full bg-gradient-to-br from-white to-gray-50">
@@ -304,6 +314,11 @@ function FeaturedPostCard({ post, priority = false }: { post: any; priority?: bo
                 <span className="truncate">{post.author}</span>
               </span>
               <span className="flex items-center gap-1">
+                <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 text-xs">
+                  {mainCategory}
+                </Badge>
+              </span>
+              <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">{new Date(post.publishedAt).toLocaleDateString()}</span>
                 <span className="sm:hidden">
@@ -329,6 +344,11 @@ function FeaturedPostCard({ post, priority = false }: { post: any; priority?: bo
 }
 
 function BlogPostCard({ post }: { post: any }) {
+  // Prefer categories[0] for display; fallback to category
+  const mainCategory =
+    post.categories && post.categories.length > 0
+      ? post.categories[0]
+      : post.category;
   return (
     <Link href={`/blog/${post.slug}`} className="group">
       <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 bg-white">
@@ -351,7 +371,7 @@ function BlogPostCard({ post }: { post: any }) {
         <CardHeader className="pb-3 p-4 sm:p-6">
           <div className="flex items-center gap-2 mb-3">
             <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 text-xs">
-              {post.category}
+              {mainCategory}
             </Badge>
             <span className="text-xs text-gray-500 flex items-center gap-1">
               <Calendar className="h-3 w-3" />

@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Plus, Edit, Trash2 } from "lucide-react"
-import { toast } from "@/hooks/use-toast" // <-- ADDED
+import { toast } from "@/hooks/use-toast"
 
 export type CategoryType = "BLOG" | "VIDEO"
 
@@ -79,14 +79,14 @@ export function CategoryManager() {
       if (response.ok) {
         await loadCategories()
         setShowCreateForm(false)
-        toast({ title: "Category created!" }) // <-- ADDED
+        toast({ title: "Category created!" })
       } else {
         const error = await response.json()
-        toast(error.error || "Failed to create category") // <-- REPLACED alert
+        toast(error.error || "Failed to create category")
       }
     } catch (error) {
       safeLogError("Failed to create category:", error)
-      toast("Failed to create category") // <-- REPLACED alert
+      toast("Failed to create category")
     }
   }
 
@@ -100,31 +100,32 @@ export function CategoryManager() {
       if (response.ok) {
         await loadCategories()
         setEditingCategory(null)
-        toast({ title: "Category updated!" }) // <-- ADDED
+        toast({ title: "Category updated!" })
       } else {
         const error = await response.json()
-        toast(error.error || "Failed to update category") // <-- REPLACED alert
+        toast(error.error || "Failed to update category")
       }
     } catch (error) {
       safeLogError("Failed to update category:", error)
-      toast("Failed to update category") // <-- REPLACED alert
+      toast("Failed to update category")
     }
   }
 
-  const deleteCategory = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete the category "${name}"?`)) return
+  // NEW: Accepts category object
+  const deleteCategory = async (category: Category) => {
+    if (!confirm(`Are you sure you want to delete the category "${category.name}"?`)) return
     try {
-      const response = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" })
+      const response = await fetch(`/api/admin/categories/${category.id}`, { method: "DELETE" })
       if (response.ok) {
         await loadCategories()
-        toast({ title: "Category deleted!" }) // <-- ADDED
+        toast({ title: "Category deleted!" })
       } else {
         const error = await response.json()
-        toast(error.error || "Failed to delete category") // <-- REPLACED alert
+        toast(error.error || "Failed to delete category")
       }
     } catch (error) {
       safeLogError("Failed to delete category:", error)
-      toast("Failed to delete category") // <-- REPLACED alert
+      toast("Failed to delete category")
     }
   }
 
@@ -212,7 +213,7 @@ function CategoryList({
   categories: Category[]
   type: CategoryType
   onEdit: (category: Category) => void
-  onDelete: (id: string, name: string) => void
+  onDelete: (category: Category) => void
   onToggleStatus: (id: string, isActive: boolean) => void
 }) {
   return (
@@ -246,7 +247,7 @@ function CategoryList({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onDelete(category.id, category.name)}
+                  onClick={() => onDelete(category)}
                   className="text-red-600 hover:text-red-700"
                   disabled={!!(category.postCount && category.postCount > 0)}
                 >

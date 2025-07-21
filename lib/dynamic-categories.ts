@@ -1,16 +1,14 @@
-// /lib/dynamic-categories.ts
-
 import siteData from "@/content-data/categories.json";
 
-// --- Category Data Interface ---
+// --- Category Data Interface (normalized) ---
 export interface CategoryData {
-  title: string;
+  name: string;               // Normalized from title
   slug: string;
   order: number;
   isActive: boolean;
-  postCount: number;
+  count: number;              // Normalized from postCount
   tooltip?: string;
-  [key: string]: any; // Support for all extra fields (SEO/meta, etc.)
+  [key: string]: any;         // Retain extra SEO/meta fields
 }
 
 // --- Result Type for Dynamic Categories API ---
@@ -19,11 +17,16 @@ export interface DynamicCategoriesResult {
   videoCategories: CategoryData[];
 }
 
-// --- Utility: Format category list (sort, filter) ---
+// --- Utility: Normalize and format category list ---
 function format(list: any[]): CategoryData[] {
   return (list || [])
     .filter((c) => c.isActive)
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .map(({ title, postCount, ...rest }) => ({
+      ...rest,
+      name: title,
+      count: postCount ?? 0,
+    }));
 }
 
 // --- Server Helpers ---
@@ -35,7 +38,7 @@ export async function getVideoCategories(): Promise<CategoryData[]> {
   return format(siteData.CATEGORIES.watch);
 }
 
-// --- Utility: Create slug from category name (keep for use elsewhere) ---
+// --- Utility: Create slug from category name ---
 export function createCategorySlug(name: string): string {
   return name
     .toLowerCase()
@@ -95,10 +98,10 @@ export function mapToMenuItems(
   typeLabel: string
 ) {
   return categories.map((category) => ({
-    label: category.title, // Use title instead of name
+    label: category.name, // Always use normalized name
     href: `${baseHref}?category=${category.slug}`,
     description: category.tooltip ||
-      `${category.title} ${typeLabel}${category.postCount > 0 ? ` (${category.postCount})` : ""}`,
+      `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
   }));
 }
 

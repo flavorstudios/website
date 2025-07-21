@@ -26,6 +26,7 @@ interface BlogPost {
   title: string;
   coverImage?: string;
   category?: string;
+  categories?: string[];
   publishedAt: string;
   excerpt?: string;
   readingTime?: string;
@@ -120,7 +121,7 @@ async function getHomePageContent() {
   }
 }
 
-// ======= EVERYTHING BELOW IS UNCHANGED =======
+// ======= EVERYTHING BELOW IS UNCHANGED EXCEPT BLOG CARD CATEGORY BADGES =======
 const ErrorFallback = ({ section }: { section: string }) => (
   <div className="text-center py-12">
     <p className="text-gray-500">Unable to load {section} content. Please try again later.</p>
@@ -284,10 +285,18 @@ export default async function HomePage() {
                       />
                     </div>
                     <CardHeader className="pb-3">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Badge variant="outline" className="text-xs">
-                          {post.category}
-                        </Badge>
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        {Array.isArray(post.categories) && post.categories.length > 0
+                          ? post.categories.map((cat) => (
+                              <Badge variant="outline" className="text-xs" key={cat}>
+                                {cat}
+                              </Badge>
+                            ))
+                          : post.category && (
+                              <Badge variant="outline" className="text-xs">
+                                {post.category}
+                              </Badge>
+                            )}
                         <span className="text-sm text-gray-500 flex items-center gap-1">
                           <Calendar className="h-3 w-3" aria-hidden="true" />
                           {new Date(post.publishedAt).toLocaleDateString()}

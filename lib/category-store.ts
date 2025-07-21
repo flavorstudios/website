@@ -1,144 +1,125 @@
 // lib/category-store.ts
 
-import { PrismaClient, CategoryType, Category as PrismaCategory } from "@prisma/client"
+import fs from "fs/promises";
+import path from "path";
 
-const prisma = new PrismaClient()
+const CATEGORIES_PATH = path.join(process.cwd(), "content-data", "categories.json");
 
-export type Category = PrismaCategory
+export interface Category {
+  id: string;
+  title: string;
+  slug: string;
+  order: number;
+  isActive: boolean;
+  postCount: number;
+  type: "blog" | "video";
+  tooltip?: string;
+  [key: string]: any;
+}
 
 export const categoryStore = {
+  async readJSON() {
+    const data = await fs.readFile(CATEGORIES_PATH, "utf-8");
+    return JSON.parse(data);
+  },
+  async writeJSON(newData: any) {
+    await fs.writeFile(CATEGORIES_PATH, JSON.stringify(newData, null, 2), "utf-8");
+  },
+
   async getAll(): Promise<Category[]> {
-    return prisma.category.findMany({ orderBy: { order: "asc" } })
+    const data = await this.readJSON();
+    return [...(data.CATEGORIES.blog || []), ...(data.CATEGORIES.watch || [])];
   },
 
   async getByType(type: "blog" | "video"): Promise<Category[]> {
-    const enumType = type === "blog" ? CategoryType.BLOG : CategoryType.VIDEO
-    return prisma.category.findMany({
-      where: { type: enumType, isActive: true },
-      orderBy: { order: "asc" },
-    })
+    const data = await this.readJSON();
+    return type === "blog" ? (data.CATEGORIES.blog || []) : (data.CATEGORIES.watch || []);
   },
 
   async getById(id: string): Promise<Category | null> {
-    return prisma.category.findUnique({ where: { id } })
+    const data = await this.readJSON();
+    const all = [...(data.CATEGORIES.blog || []), ...(data.CATEGORIES.watch || [])];
+    return all.find((c) => c.id === id) || null;
   },
 
   async getBySlug(slug: string, type: "blog" | "video"): Promise<Category | null> {
-    const enumType = type === "blog" ? CategoryType.BLOG : CategoryType.VIDEO
-    return prisma.category.findUnique({
-      where: { slug_type: { slug, type: enumType } },
-    })
+    const data = await this.readJSON();
+    const arr = type === "blog" ? (data.CATEGORIES.blog || []) : (data.CATEGORIES.watch || []);
+    return arr.find((c) => c.slug === slug) || null;
   },
 
-  async create(category: Omit<Category, "id" | "createdAt" | "updatedAt" | "postCount">): Promise<Category> {
-    // Prevent duplicate (slug, type)
-    const slug = category.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-    const enumType = category.type === "blog" ? CategoryType.BLOG : CategoryType.VIDEO
+  async create(category: Omit<Category, "id" | "postCount">): Promise<Category> {
+    const data = await this.readJSON();
+    const arr = category.type === "blog" ? data.CATEGORIES.blog : data.CATEGORIES.watch;
 
-    const exists = await prisma.category.findUnique({
-      where: { slug_type: { slug, type: enumType } },
-    })
-    if (exists) {
-      throw new Error(`Category "${category.name}" already exists for ${category.type}`)
+    // Prevent duplicate slug/type
+    if (arr.some((c: Category) => c.slug === category.slug)) {
+      throw new Error(`Category "${category.title}" already exists for ${category.type}`);
     }
 
-    return prisma.category.create({
-      data: {
-        ...category,
-        slug,
-        type: enumType,
-        postCount: 0,
-      },
-    })
+    const newCategory: Category = {
+      ...category,
+      id: crypto.randomUUID(),
+      postCount: 0,
+    };
+
+    arr.push(newCategory);
+    await this.writeJSON(data);
+
+    return newCategory;
   },
 
   async update(id: string, updates: Partial<Omit<Category, "id">>): Promise<Category | null> {
-    // If updating name, also update slug
-    let data: any = { ...updates }
-    if (updates.name) {
-      data.slug = updates.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")
+    const data = await this.readJSON();
+    let updated: Category | null = null;
+    for (const type of ["blog", "watch"] as const) {
+      const arr = data.CATEGORIES[type];
+      const idx = arr.findIndex((c: Category) => c.id === id);
+      if (idx !== -1) {
+        arr[idx] = { ...arr[idx], ...updates };
+        updated = arr[idx];
+        break;
+      }
     }
-    try {
-      return await prisma.category.update({
-        where: { id },
-        data,
-      })
-    } catch {
-      return null
-    }
+    if (updated) await this.writeJSON(data);
+    return updated;
   },
 
   async delete(id: string): Promise<boolean> {
-    try {
-      await prisma.category.delete({ where: { id } })
-      return true
-    } catch {
-      return false
-    }
-  },
-
-  // Update post counts for dashboard/statistics
-  async updatePostCounts(): Promise<void> {
-    // NOTE: You must implement blogStore/videoStore with Prisma for best results!
-    // Example (pseudo):
-    // const blogs = await prisma.blog.findMany()
-    // const videos = await prisma.video.findMany()
-    // ...then count posts per category, and update prisma.category accordingly
-    // For now, this is a placeholder (safe to leave empty if not used yet)
-    return
-  },
-
-  async reorder(categoryIds: string[]): Promise<void> {
-    // Update order based on the provided array position
-    await Promise.all(
-      categoryIds.map((id, index) =>
-        prisma.category.update({
-          where: { id },
-          data: { order: index },
-        }),
-      ),
-    )
-  },
-}
-
-// Initialize default categories if none exist (Prisma-only, no file logic)
-export async function initializeDefaultCategories() {
-  const count = await prisma.category.count()
-  if (count === 0) {
-    const defaultNames = ["Anime News", "Reviews", "Behind the Scenes", "Tutorials"]
-    for (let i = 0; i < defaultNames.length; i++) {
-      const base = {
-        name: defaultNames[i],
-        description: `Content related to ${defaultNames[i].toLowerCase()}`,
-        color: `hsl(${(i * 90) % 360}, 70%, 50%)`,
-        order: i,
-        isActive: true,
+    const data = await this.readJSON();
+    let changed = false;
+    for (const type of ["blog", "watch"] as const) {
+      const arr = data.CATEGORIES[type];
+      const idx = arr.findIndex((c: Category) => c.id === id);
+      if (idx !== -1) {
+        arr.splice(idx, 1);
+        changed = true;
       }
-      // BLOG
-      await prisma.category.create({
-        data: {
-          ...base,
-          slug: base.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
-          type: CategoryType.BLOG,
-          postCount: 0,
-        },
-      })
-      // VIDEO
-      await prisma.category.create({
-        data: {
-          ...base,
-          slug: base.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
-          type: CategoryType.VIDEO,
-          postCount: 0,
-        },
-      })
     }
-    console.log("Default categories initialized in database.")
-  }
+    if (changed) await this.writeJSON(data);
+    return changed;
+  },
+
+  // Optional: Update postCount for dashboard/statistics — implement if you want
+  async updatePostCounts(): Promise<void> {
+    // You could calculate counts based on your blog/video sources, if desired
+    return;
+  },
+
+  async reorder(categoryIds: string[], type: "blog" | "video"): Promise<void> {
+    const data = await this.readJSON();
+    const arr = data.CATEGORIES[type];
+    // Sort by order of ids in categoryIds
+    data.CATEGORIES[type] = categoryIds
+      .map((id) => arr.find((c: Category) => c.id === id))
+      .filter(Boolean)
+      .map((c, idx) => ({ ...c, order: idx })) as Category[];
+    await this.writeJSON(data);
+  },
+};
+
+// (Optional) Initialize defaults — for dev/testing only. Not needed for live JSON-only setup.
+export async function initializeDefaultCategories() {
+  // NO-OP for JSON only; kept for API compatibility
+  return;
 }

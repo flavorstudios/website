@@ -1,93 +1,90 @@
-import { requireAdmin } from "@/lib/admin-auth"
-import { PrismaClient, CategoryType } from "@prisma/client"
-import { type NextRequest, NextResponse } from "next/server"
+// app/api/admin/categories/route.ts
 
-const prisma = new PrismaClient()
+import { requireAdmin } from "@/lib/admin-auth";
+import { type NextRequest, NextResponse } from "next/server";
+import fs from "fs/promises";
+import path from "path";
+import crypto from "crypto"; // For generating unique IDs
+
+const CATEGORIES_PATH = path.join(process.cwd(), "content-data", "categories.json");
+
+async function readJSON() {
+  const data = await fs.readFile(CATEGORIES_PATH, "utf-8");
+  return JSON.parse(data);
+}
+
+async function writeJSON(newData: any) {
+  await fs.writeFile(CATEGORIES_PATH, JSON.stringify(newData, null, 2), "utf-8");
+}
 
 export async function GET(request: NextRequest) {
   if (!(await requireAdmin(request))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const typeParam = request.nextUrl?.searchParams?.get("type")
-    
-    // Initialize where filter
-    const where = typeParam ? { type: typeParam === "blog" ? CategoryType.BLOG : CategoryType.VIDEO } : {}
-
-    // Fetch categories based on type (blog/video)
-    const categories = await prisma.category.findMany({
-      where,
-      orderBy: { order: "asc" },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        type: true,
-        description: true,
-        color: true,
-        icon: true,
-        order: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-        postCount: true,
-        tooltip: true, // Ensure tooltip field is included in Prisma schema
-      },
-    })
-    return NextResponse.json({ categories })
+    const typeParam = request.nextUrl?.searchParams?.get("type");
+    const data = await readJSON();
+    const blog = data.CATEGORIES.blog || [];
+    const watch = data.CATEGORIES.watch || [];
+    let categories;
+    if (typeParam === "blog") categories = blog;
+    else if (typeParam === "video") categories = watch;
+    else categories = [...blog, ...watch];
+    return NextResponse.json({ categories });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 })
-  } finally {
-    await prisma.$disconnect()
+    return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   if (!(await requireAdmin(request))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const data = await request.json()
+    const data = await request.json();
+    const json = await readJSON();
 
-    // Transform string "blog"/"video" to enum value
-    let type: CategoryType
-    if (data.type === "blog") type = CategoryType.BLOG
-    else if (data.type === "video") type = CategoryType.VIDEO
-    else throw new Error("Invalid category type")
+    let arr;
+    if (data.type === "blog") arr = json.CATEGORIES.blog;
+    else if (data.type === "video") arr = json.CATEGORIES.watch;
+    else throw new Error("Invalid category type");
 
     // Slugify name if not provided
     const slug =
       data.slug ||
-      data.name
+      data.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")
+        .replace(/(^-|-$)/g, "");
 
     // Check for duplicate (slug, type)
-    const exists = await prisma.category.findUnique({
-      where: { slug_type: { slug, type } },
-    })
-    if (exists) throw new Error("Category with this name/type already exists.")
+    if (arr.some((cat: any) => cat.slug === slug)) {
+      throw new Error("Category with this name/type already exists.");
+    }
 
-    const category = await prisma.category.create({
-      data: {
-        name: data.name,
-        slug,
-        type,
-        description: data.description || "",
-        tooltip: data.tooltip || "", // Add this field if present
-        color: data.color || null,
-        icon: data.icon || null,
-        order: typeof data.order === "number" ? data.order : 0,
-        isActive: data.isActive !== false,
-        postCount: 0,
-      },
-    })
+    const category = {
+      id: crypto.randomUUID(),
+      title: data.title,
+      slug,
+      type: data.type,
+      description: data.description || "",
+      tooltip: data.tooltip || "",
+      color: data.color || null,
+      icon: data.icon || null,
+      order: typeof data.order === "number" ? data.order : 0,
+      isActive: data.isActive !== false,
+      postCount: 0,
+      // You can add additional fields here if your UI needs them
+    };
 
-    return NextResponse.json({ category })
+    arr.push(category);
+    await writeJSON(json);
+
+    return NextResponse.json({ category });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || "Failed to create category" }, { status: 400 })
-  } finally {
-    await prisma.$disconnect()
+    return NextResponse.json(
+      { error: error.message || "Failed to create category" },
+      { status: 400 }
+    );
   }
 }

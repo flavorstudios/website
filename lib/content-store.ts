@@ -1,6 +1,10 @@
-import { adminDb } from "@/lib/firebase-admin";
+// lib/content-store.ts
 
-/* Interfaces – updated for multi-category support */
+import { adminDb } from "@/lib/firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
+import { z } from "zod";
+
+/* Interfaces – unchanged */
 export interface BlogPost {
   id: string;
   title: string;
@@ -8,8 +12,7 @@ export interface BlogPost {
   content: string;
   excerpt: string;
   status: "draft" | "published" | "scheduled";
-  category: string;           // legacy: main category
-  categories?: string[];      // NEW: multiple categories (optional)
+  category: string;
   tags: string[];
   featuredImage: string;
   seoTitle: string;
@@ -58,69 +61,104 @@ export interface SystemStats {
   storageUsed: string;
 }
 
+// Zod schemas for validating BlogPost and Video objects
+export const BlogPostSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  slug: z.string(),
+  content: z.string(),
+  excerpt: z.string(),
+  status: z.enum(["draft", "published", "scheduled"]),
+  category: z.string(),
+  tags: z.array(z.string()),
+  featuredImage: z.string(),
+  seoTitle: z.string(),
+  seoDescription: z.string(),
+  author: z.string(),
+  publishedAt: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  views: z.number(),
+  readTime: z.string().optional(),
+});
+
+export const VideoSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  youtubeId: z.string(),
+  thumbnail: z.string(),
+  duration: z.string(),
+  category: z.string(),
+  tags: z.array(z.string()),
+  status: z.enum(["draft", "published"]),
+  publishedAt: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  views: z.number(),
+  featured: z.boolean().optional(),
+});
+
 /* ----- Blog Store ----- */
 export const blogStore = {
-  // Always ensure categories[] is present for all posts (migrate at read time)
   async getAll(): Promise<BlogPost[]> {
     const snap = await adminDb.collection("blogs").orderBy("createdAt", "desc").get();
-    return snap.docs.map((d) => {
-      const post = d.data() as BlogPost;
-      return {
-        ...post,
-        categories:
-          Array.isArray(post.categories) && post.categories.length > 0
-            ? post.categories
-            : [post.category],
-      };
-    });
+    return snap.docs.map((d) => d.data() as BlogPost);
   },
 
   async getById(id: string): Promise<BlogPost | null> {
     const doc = await adminDb.collection("blogs").doc(id).get();
-    if (!doc.exists) return null;
-    const post = doc.data() as BlogPost;
-    return {
-      ...post,
-      categories:
-        Array.isArray(post.categories) && post.categories.length > 0
-          ? post.categories
-          : [post.category],
-    };
+    return doc.exists ? (doc.data() as BlogPost) : null;
   },
 
+  /**
+   * Create a new blog post after validating input with BlogPostSchema.
+   * Rejects invalid data.
+   */
   async create(
     post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "views">
   ): Promise<BlogPost> {
+    // Validate input (omitting auto fields)
+    const data = BlogPostSchema.omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true,
+      views: true,
+    }).parse(post);
+
     const id = `post_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
     const newPost: BlogPost = {
       ...post,
+      ...data,
       id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       views: 0,
-      categories: post.categories && post.categories.length > 0 ? post.categories : [post.category],
     };
     await adminDb.collection("blogs").doc(id).set(newPost);
     return newPost;
   },
 
+  /**
+   * Update a blog post after validating updates with BlogPostSchema.
+   * Rejects invalid data.
+   */
   async update(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
-    // If category is updated but categories[] not provided, sync both
-    if (updates.category && !updates.categories) {
-      updates.categories = [updates.category];
-    }
+    // Validate input (partial allows patching)
+    const data = BlogPostSchema.partial().parse(updates);
     const ref = adminDb.collection("blogs").doc(id);
     await ref.set({ ...updates, updatedAt: new Date().toISOString() }, { merge: true });
+    await ref.set({ ...data, updatedAt: new Date().toISOString() }, { merge: true });
     const doc = await ref.get();
-    if (!doc.exists) return null;
-    const post = doc.data() as BlogPost;
-    return {
-      ...post,
-      categories:
-        Array.isArray(post.categories) && post.categories.length > 0
-          ? post.categories
-          : [post.category],
-    };
+    return doc.exists ? (doc.data() as BlogPost) : null;
+  },
+
+  /** Increment the view counter for a blog post using Firestore's atomic increment. */
+  async incrementViews(id: string): Promise<void> {
+    await adminDb
+      .collection("blogs")
+      .doc(id)
+      .update({ views: FieldValue.increment(1) });
   },
 
   async delete(id: string): Promise<boolean> {
@@ -129,17 +167,6 @@ export const blogStore = {
     if (!doc.exists) return false;
     await ref.delete();
     return true;
-  },
-
-  // Fetch by a single category (matches both `category` and `categories[]`)
-  async getByCategory(category: string): Promise<BlogPost[]> {
-    const allPosts = await this.getAll();
-    if (category === "all") return allPosts;
-    return allPosts.filter(
-      (post) =>
-        post.category === category ||
-        (Array.isArray(post.categories) && post.categories.includes(category))
-    );
   },
 };
 
@@ -155,12 +182,25 @@ export const videoStore = {
     return doc.exists ? (doc.data() as Video) : null;
   },
 
+  /**
+   * Create a new video after validating input with VideoSchema.
+   * Rejects invalid data.
+   */
   async create(
     video: Omit<Video, "id" | "createdAt" | "updatedAt" | "views">
   ): Promise<Video> {
+    // Validate input (omitting auto fields)
+    const data = VideoSchema.omit({
+      id: true,
+      createdAt: true,
+      updatedAt: true,
+      views: true,
+    }).parse(video);
+
     const id = `video_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
     const newVideo: Video = {
       ...video,
+      ...data,
       id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -170,11 +210,26 @@ export const videoStore = {
     return newVideo;
   },
 
+  /**
+   * Update a video after validating updates with VideoSchema.
+   * Rejects invalid data.
+   */
   async update(id: string, updates: Partial<Video>): Promise<Video | null> {
+    // Validate input (partial allows patching)
+    const data = VideoSchema.partial().parse(updates);
     const ref = adminDb.collection("videos").doc(id);
     await ref.set({ ...updates, updatedAt: new Date().toISOString() }, { merge: true });
+    await ref.set({ ...data, updatedAt: new Date().toISOString() }, { merge: true });
     const doc = await ref.get();
     return doc.exists ? (doc.data() as Video) : null;
+  },
+
+  /** Increment the view counter for a video using Firestore's atomic increment. */
+  async incrementViews(id: string): Promise<void> {
+    await adminDb
+      .collection("videos")
+      .doc(id)
+      .update({ views: FieldValue.increment(1) });
   },
 
   async delete(id: string): Promise<boolean> {
@@ -210,28 +265,5 @@ export const pageStore = {
     };
     await adminDb.collection("pages").doc(id).set(entry);
     return entry;
-  },
-};
-
-/* ----- System Stats ----- */
-export const systemStore = {
-  async getStats(): Promise<SystemStats> {
-    const [blogs, videos, comments] = await Promise.all([
-      adminDb.collection("blogs").get(),
-      adminDb.collection("videos").get(),
-      adminDb.collectionGroup("entries").get(),
-    ]);
-
-    return {
-      totalPosts: blogs.size,
-      totalVideos: videos.size,
-      totalComments: comments.size,
-      pendingComments: comments.docs.filter((d) => d.data().status === "pending").length,
-      totalViews:
-        blogs.docs.reduce((sum, d) => sum + (d.data().views || 0), 0) +
-        videos.docs.reduce((sum, d) => sum + (d.data().views || 0), 0),
-      lastBackup: "Never",
-      storageUsed: "Firestore",
-    };
   },
 };

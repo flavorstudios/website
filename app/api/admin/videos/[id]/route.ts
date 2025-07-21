@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { videoStore } from "@/lib/comment-store"
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  if (!(await requireAdmin(request))) {
+  if (!(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
@@ -19,7 +19,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  if (!(await requireAdmin(request))) {
+  if (!(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {

@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { cookies } from "next/headers";
 import { logError } from "@/lib/log"; // Consistent server logging
+import jwt from "jsonwebtoken";
 
 /**
  * Parse allowed admin emails from env (comma-separated) or admin domain.
@@ -47,7 +48,9 @@ function isEmailAllowed(email: string): boolean {
 }
 
 /**
- * Verifies the Firebase session cookie and checks admin email(s)/domain.
+ * Verifies the session cookie:
+ * - Tries Firebase session first (Google login)
+ * - If fails, tries JWT session (email/password login)
  * Throws if invalid or unauthorized.
  */
 export async function verifyAdminSession(sessionCookie: string): Promise<any> {
@@ -55,13 +58,20 @@ export async function verifyAdminSession(sessionCookie: string): Promise<any> {
     logError("admin-auth: verifyAdminSession (no cookie)", "No session cookie");
     throw new Error("No session cookie");
   }
-  let decoded;
+  let decoded: any;
   try {
     decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
     console.log("[admin-auth] Session cookie verified for:", decoded.email);
   } catch (err) {
-    logError("admin-auth: verifyAdminSession (verify fail)", err);
-    throw new Error("Session cookie invalid");
+    // Fallback: try JWT (for email/password logins)
+    try {
+      const secret = process.env.ADMIN_JWT_SECRET || "";
+      decoded = jwt.verify(sessionCookie, secret);
+      console.log("[admin-auth] JWT session verified for:", decoded.email);
+    } catch (jwtErr) {
+      logError("admin-auth: verifyAdminSession (verify fail)", jwtErr);
+      throw new Error("Session cookie invalid");
+    }
   }
   if (!isEmailAllowed(decoded.email)) {
     logError("admin-auth: verifyAdminSession (unauthorized email)", decoded.email || "");

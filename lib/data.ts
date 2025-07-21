@@ -1,5 +1,3 @@
-// lib/data.ts
-
 // --------- DATA TYPES ---------
 
 export interface BlogPost {
@@ -9,6 +7,7 @@ export interface BlogPost {
   excerpt: string
   content: string
   category: string
+  categories?: string[]  // <-- NEW: multi-category support
   tags: string[]
   publishedAt: string
   author: string
@@ -22,6 +21,7 @@ export interface Video {
   slug: string
   description: string
   category: string
+  categories?: string[]  // <-- NEW: multi-category support
   tags: string[]
   publishedAt: string
   thumbnailUrl: string
@@ -66,14 +66,20 @@ export async function getDynamicCategories(): Promise<Category[]> {
   return [];
 }
 
-// --------- BLOG POSTS FETCH ---------
+// --------- BLOG POSTS FETCH (returns posts with .categories[]) ---------
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     const response = await fetch("/api/blogs", { cache: "no-store" }); // <-- Codex update
     if (response.ok) {
       const posts = await response.json();
-      return Array.isArray(posts) ? posts : [];
+      // Always expose .categories[] for every post
+      return (Array.isArray(posts) ? posts : []).map((post: BlogPost) => ({
+        ...post,
+        categories: Array.isArray(post.categories) && post.categories.length > 0
+          ? post.categories
+          : [post.category],
+      }));
     }
   } catch (error) {
     console.warn("Failed to fetch blog posts:", error);
@@ -81,14 +87,20 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
   return [];
 }
 
-// --------- VIDEOS FETCH ---------
+// --------- VIDEOS FETCH (returns videos with .categories[]) ---------
 
 export async function getVideos(): Promise<Video[]> {
   try {
     const response = await fetch("/api/videos", { cache: "no-store" }); // <-- Codex update
     if (response.ok) {
       const videos = await response.json();
-      return Array.isArray(videos) ? videos : [];
+      // Always expose .categories[] for every video
+      return (Array.isArray(videos) ? videos : []).map((video: Video) => ({
+        ...video,
+        categories: Array.isArray(video.categories) && video.categories.length > 0
+          ? video.categories
+          : [video.category],
+      }));
     }
   } catch (error) {
     console.warn("Failed to fetch videos:", error);

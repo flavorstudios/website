@@ -2,6 +2,8 @@
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { verifyAdminSession, logAdminAuditFailure } from "@/lib/admin-auth";
+import { adminAuth } from "@/lib/firebase-admin";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -13,24 +15,22 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/admin/login?");
 
   if (pathname.startsWith("/admin")) {
-    const sessionCookie = request.cookies.get("admin-session")?.value;
+    const sessionCookie = request.cookies.get("admin-session")?.value || "";
 
     // If accessing the login page and already authenticated, redirect to dashboard
     if (isLoginPage) {
       if (sessionCookie) {
         try {
-          const apiResp = await fetch(`${request.nextUrl.origin}/api/admin/validate-session`, {
-            method: "GET",
-            headers: { cookie: `admin-session=${sessionCookie}` },
-          });
-          if (apiResp.ok) {
-            return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-          }
+          await verifyAdminSession(sessionCookie);
+          return NextResponse.redirect(new URL("/admin/dashboard", request.url));
         } catch (err) {
-          // Hardened: If the API is down or throws, don't block the login page—just allow access to login
-          if (process.env.NODE_ENV !== "production") {
-            console.error("Admin session validation (login) failed:", err);
-          }
+          // Audit log on failed session attempt at login
+          let email: string | null = null;
+          try {
+            const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+            email = decoded.email || null;
+          } catch {}
+          await logAdminAuditFailure(email, request.headers.get("x-forwarded-for") ?? "");
         }
       }
       return NextResponse.next();
@@ -38,27 +38,22 @@ export async function middleware(request: NextRequest) {
 
     // For all other /admin routes, require and validate the cookie
     if (!sessionCookie) {
+      await logAdminAuditFailure(null, request.headers.get("x-forwarded-for") ?? "");
       const loginUrl = new URL("/admin/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
 
-    // Validate the session cookie with backend API
+    // Validate the session cookie directly (no HTTP fetch)
     try {
-      const apiResp = await fetch(`${request.nextUrl.origin}/api/admin/validate-session`, {
-        method: "GET",
-        headers: { cookie: `admin-session=${sessionCookie}` },
-      });
-
-      if (!apiResp.ok) {
-        // Cookie is missing, expired, or invalid—redirect to login
-        const loginUrl = new URL("/admin/login", request.url);
-        return NextResponse.redirect(loginUrl);
-      }
+      await verifyAdminSession(sessionCookie);
     } catch (err) {
-      // Hardened: If the API is down or throws, redirect to login instead of erroring out
-      if (process.env.NODE_ENV !== "production") {
-        console.error("Admin session validation (route) failed:", err);
-      }
+      // Audit log on failed validation
+      let email: string | null = null;
+      try {
+        const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+        email = decoded.email || null;
+      } catch {}
+      await logAdminAuditFailure(email, request.headers.get("x-forwarded-for") ?? "");
       const loginUrl = new URL("/admin/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
@@ -70,4 +65,5 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: "/admin/:path*",
+  runtime: "nodejs",
 };

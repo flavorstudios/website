@@ -5,7 +5,7 @@ import { adminDb } from "@/lib/firebase-admin";
 // --- Fetch all flagged (and all) comments, grouped by postSlug (admin only) ---
 export async function GET(request: NextRequest) {
   // Enforce admin access at the top
-  if (!(await requireAdmin(request))) {
+  if (!(await requireAdmin(request, "canManageComments"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

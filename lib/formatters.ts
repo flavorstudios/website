@@ -3,6 +3,7 @@
 /**
  * Formats a blog object for safe public API responses.
  * Only exposes non-admin fields.
+ * Adds .categories[] for multi-category support (fallbacks to [category]).
  */
 export function formatPublicBlog(blog: any) {
   return {
@@ -12,6 +13,9 @@ export function formatPublicBlog(blog: any) {
     excerpt: blog.excerpt,
     featuredImage: blog.featuredImage,
     category: blog.category,
+    categories: Array.isArray(blog.categories) && blog.categories.length > 0
+      ? blog.categories
+      : [blog.category],
     tags: blog.tags,
     publishedAt: blog.publishedAt,
     readTime: blog.readTime,
@@ -24,6 +28,7 @@ export function formatPublicBlog(blog: any) {
 /**
  * Formats a video object for safe public API responses.
  * Only exposes non-admin fields.
+ * Adds .categories[] for multi-category support (fallbacks to [category]).
  */
 export function formatPublicVideo(video: any) {
   return {
@@ -34,6 +39,9 @@ export function formatPublicVideo(video: any) {
     thumbnail: video.thumbnail,
     description: video.description,
     category: video.category,
+    categories: Array.isArray(video.categories) && video.categories.length > 0
+      ? video.categories
+      : [video.category],
     tags: video.tags,
     duration: video.duration,
     publishedAt: video.publishedAt,

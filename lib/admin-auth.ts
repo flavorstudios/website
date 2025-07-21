@@ -1,7 +1,7 @@
 // lib/admin-auth.ts
 
 import { NextRequest } from "next/server";
-import { adminAuth } from "@/lib/firebase-admin";
+import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { cookies } from "next/headers";
 import { logError } from "@/lib/log"; // Consistent server logging
 
@@ -119,5 +119,24 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
   } catch (err) {
     logError("admin-auth: createSessionCookieFromIdToken", err);
     throw err;
+  }
+}
+
+/**
+ * Logs failed admin validations to Firestore for auditing.
+ * Call this from middleware or API routes on validation failure.
+ */
+export async function logAdminAuditFailure(
+  email: string | null,
+  ip: string
+): Promise<void> {
+  try {
+    await adminDb.collection("admin_audit_logs").add({
+      email,
+      ip,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    logError("admin-auth: logAdminAuditFailure", err);
   }
 }

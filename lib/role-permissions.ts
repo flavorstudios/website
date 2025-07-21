@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "editor" | "support"
+export type UserRole = string
 
 export interface RolePermissions {
   canManageBlogs: boolean
@@ -11,7 +11,7 @@ export interface RolePermissions {
   canManageCategories: boolean
 }
 
-export const rolePermissions: Record<UserRole, RolePermissions> = {
+export const defaultRolePermissions: Record<string, RolePermissions> = {
   admin: {
     canManageBlogs: true,
     canManageVideos: true,
@@ -44,18 +44,37 @@ export const rolePermissions: Record<UserRole, RolePermissions> = {
   },
 }
 
+let customRolePermissions: Record<string, RolePermissions> = {}
+try {
+  const raw = process.env.CUSTOM_ROLE_PERMISSIONS || process.env.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS
+  if (raw) {
+    customRolePermissions = JSON.parse(raw)
+  }
+} catch (err) {
+  console.error("Failed to parse CUSTOM_ROLE_PERMISSIONS", err)
+}
+
+function getPermissions(role: UserRole): RolePermissions {
+  return (
+    customRolePermissions[role] ||
+    defaultRolePermissions[role] ||
+    defaultRolePermissions["support"]
+  )
+}
+
 export function hasPermission(userRole: UserRole, permission: keyof RolePermissions): boolean {
-  return rolePermissions[userRole][permission]
+  return getPermissions(userRole)[permission]
 }
 
 export function getAccessibleSections(userRole: UserRole): string[] {
-  const permissions = rolePermissions[userRole]
+  const permissions = getPermissions(userRole)
   const sections: string[] = ["overview"] // Everyone can see overview
 
   if (permissions.canManageBlogs) sections.push("blogs")
   if (permissions.canManageVideos) sections.push("videos")
   if (permissions.canManageCategories) sections.push("categories")
   if (permissions.canManageComments) sections.push("comments")
+  if (permissions.canManageUsers) sections.push("users")
   if (permissions.canHandleContacts) sections.push("inbox")
   if (permissions.canManageSystem) sections.push("pages", "system")
 

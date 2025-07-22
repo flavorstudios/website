@@ -26,26 +26,53 @@ function getAllowedAdminDomain(): string | null {
 }
 
 /**
- * Checks if an email is allowed as admin (case-insensitive).
+ * Fetch admin emails from Firestore's admin_users collection (lowercased, trimmed).
  */
-function isEmailAllowed(email: string): boolean {
+async function getFirestoreAdminEmails(): Promise<string[]> {
+  try {
+    const snap = await adminDb.collection("admin_users").get();
+    return snap.docs
+      .map((d) => (d.data().email || "").toLowerCase().trim())
+      .filter(Boolean);
+  } catch (err) {
+    logError("admin-auth: fetch admin_users", err);
+    return [];
+  }
+}
+
+/**
+ * Checks if an email is allowed as admin (case-insensitive).
+ * Combines env and Firestore emails.
+ */
+function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
   if (!email) return false;
   const allowedEmails = getAllowedAdminEmails();
   const allowedDomain = getAllowedAdminDomain();
   const normalizedEmail = email.trim().toLowerCase();
 
-  if (allowedEmails.length && allowedEmails.includes(normalizedEmail)) {
-    console.log("[admin-auth] Allowed admin email:", normalizedEmail);
+  const combinedEmails = [...new Set([...allowedEmails, ...extraEmails])];
+
+  if (combinedEmails.length && combinedEmails.includes(normalizedEmail)) {
+    if (process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
+      console.log("[admin-auth] Allowed admin email:", normalizedEmail);
+    }
     return true;
   }
   if (
     allowedDomain &&
     normalizedEmail.endsWith("@" + allowedDomain)
   ) {
-    console.log("[admin-auth] Allowed admin domain:", allowedDomain, "for email:", normalizedEmail);
+    if (process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
+      console.log("[admin-auth] Allowed admin domain:", allowedDomain, "for email:", normalizedEmail);
+    }
     return true;
   }
-  console.warn("[admin-auth] Rejected admin email:", normalizedEmail, "(not in allowed list or domain)");
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.warn("[admin-auth] Rejected admin email:", normalizedEmail, "(not in allowed list or domain)");
+  }
   return false;
 }
 
@@ -69,21 +96,33 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
     throw new Error("No session cookie");
   }
   let decoded: any;
+  let firestoreEmails: string[] = [];
   try {
     decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
-    console.log("[admin-auth] Session cookie verified for:", decoded.email);
+    if (process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
+      console.log("[admin-auth] Session cookie verified for:", decoded.email);
+    }
   } catch (err) {
     // Fallback: try JWT (for email/password logins)
     try {
       const secret = process.env.ADMIN_JWT_SECRET || "";
       decoded = jwt.verify(sessionCookie, secret);
-      console.log("[admin-auth] JWT session verified for:", decoded.email);
+      if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.log("[admin-auth] JWT session verified for:", decoded.email);
+      }
     } catch (jwtErr) {
       logError("admin-auth: verifyAdminSession (verify fail)", jwtErr);
       throw new Error("Session cookie invalid");
     }
   }
-  if (!isEmailAllowed(decoded.email)) {
+
+  // --- Firestore-based admin users ---
+  firestoreEmails = await getFirestoreAdminEmails();
+
+  // --- Check env + Firestore merged ---
+  if (!isEmailAllowed(decoded.email, firestoreEmails)) {
     logError("admin-auth: verifyAdminSession (unauthorized email)", decoded.email || "");
     throw new Error("Unauthorized admin email");
   }
@@ -149,7 +188,11 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
   try {
     // Validate and decode token (throws if invalid/revoked)
     const decoded = await adminAuth.verifyIdToken(idToken, true);
-    if (!isEmailAllowed(decoded.email)) {
+
+    // --- Firestore-based admin users ---
+    const firestoreEmails = await getFirestoreAdminEmails();
+
+    if (!isEmailAllowed(decoded.email, firestoreEmails)) {
       logError("admin-auth: createSessionCookieFromIdToken (unauthorized email)", decoded.email || "");
       throw new Error("Unauthorized admin email");
     }

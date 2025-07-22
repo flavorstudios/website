@@ -9,32 +9,39 @@ interface RoleContextType {
   hasPermission: (permission: string) => boolean
   accessibleSections: string[]
   isLoading: boolean
+  error: string | null
 }
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined)
 
 export function RoleProvider({ children }: { children: ReactNode }) {
-  const [userRole, setUserRole] = useState<UserRole>("admin") // Default to admin
+  const [userRole, setUserRole] = useState<UserRole>("admin")
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Fetch user role from API endpoint, include credentials as per audit
     const fetchUserRole = async () => {
       try {
         const res = await fetch("/api/admin/user-role", { credentials: "include" })
         if (res.status === 401) {
+          // Not logged in; redirect to login
           window.location.href = "/admin/login"
           return
         }
         const data = await res.json()
-        if (res.ok && data.role) {
+        if (res.ok && (data.role === "admin" || data.role === "editor" || data.role === "support")) {
           setUserRole(data.role as UserRole)
-        } else {
+        } else if (res.ok && data.role === "support") {
           setUserRole("support")
+        } else if (data.error) {
+          // The API gave an explicit error (e.g., role fetch failed)
+          setError(data.error)
+        } else {
+          setError("Unknown role fetch error")
         }
       } catch (error) {
         console.error("Failed to fetch user role:", error)
-        setUserRole("support") // Fallback to most restrictive role
+        setError("Network error")
       } finally {
         setIsLoading(false)
       }
@@ -49,6 +56,17 @@ export function RoleProvider({ children }: { children: ReactNode }) {
 
   const accessibleSections = getAccessibleSections(userRole)
 
+  // Optionally, display an error overlay (or just block rendering children)
+  if (error && !isLoading) {
+    return (
+      <div style={{ padding: "2rem", textAlign: "center", color: "red" }}>
+        <h2>Unable to load dashboard</h2>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+      </div>
+    )
+  }
+
   return (
     <RoleContext.Provider
       value={{
@@ -57,6 +75,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         hasPermission: checkPermission,
         accessibleSections,
         isLoading,
+        error,
       }}
     >
       {children}

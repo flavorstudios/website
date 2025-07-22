@@ -6,6 +6,8 @@ import { getFirestore } from "firebase-admin/firestore";
 
 // 🔐 Retrieve the service account JSON from env
 const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+
+// Supports both multi-admin (ADMIN_EMAILS) and single-admin (ADMIN_EMAIL)
 const adminEmailsEnv = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL; // Accepts comma-separated or single
 
 // ======= ENVIRONMENT VARIABLE VALIDATION =======
@@ -27,7 +29,7 @@ if (!adminEmailsEnv) {
   // Not throwing here, just warn (in dev)
 }
 
-// ✅ Parse safely
+// ✅ Parse service account credentials safely
 let parsedCredentials;
 try {
   parsedCredentials = JSON.parse(serviceAccountKey);
@@ -44,7 +46,12 @@ if (!getApps().length) {
   });
 }
 
-// Helper: Get allowed admin emails as an array (for future multi-admin support)
+/**
+ * Helper: Get allowed admin emails as a lowercase array
+ * - Supports: 
+ *    - ADMIN_EMAILS (comma-separated)
+ *    - ADMIN_EMAIL (single email)
+ */
 export const getAllowedAdminEmails = (): string[] =>
   (adminEmailsEnv || "")
     .split(",")

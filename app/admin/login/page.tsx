@@ -37,5 +37,6 @@ export const metadata = getMetadata({
 });
 
 export default function AdminLoginPage() {
+  // No client-side redirect or session check; handled by middleware!
   return <AdminLoginForm />;
 }

@@ -9,7 +9,7 @@ import { VideoManager } from "./components/video-manager"
 import { CommentManager } from "./components/comment-manager"
 import { PageCustomizer } from "./components/page-customizer"
 import { SystemTools } from "./components/system-tools"
-import { UserRoleManager } from "./components/user-role-manager" // <-- Added import
+import { UserRoleManager } from "./components/user-role-manager"
 import { AdminHeader } from "./components/admin-header"
 import { CategoryManager } from "./components/category-manager"
 import { RoleProvider } from "./contexts/role-context"
@@ -114,7 +114,7 @@ export default function AdminDashboardPageClient() {
       case "system":
         return <SystemTools />
       case "users":
-        return <UserRoleManager /> // <-- Added user role manager UI
+        return <UserRoleManager />
       default:
         return <DashboardOverview />
     }

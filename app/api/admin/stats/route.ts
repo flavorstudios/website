@@ -1,25 +1,26 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 
+// This API returns dashboard analytics stats for authorized admins only.
 export async function GET(request: NextRequest) {
+  // Enforce role/permission check
   if (!(await requireAdmin(request, "canViewAnalytics"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
-    // In a real application, this would fetch actual stats from Firestore
-    // Return actual counts or zeros if no data exists
+    // TODO: Replace placeholder zeros with actual Firestore queries
     const stats = {
-      totalPosts: 0, // Real count from Firestore blogs collection
-      totalVideos: 0, // Real count from Firestore videos collection
-      totalComments: 0, // Real count from Firestore comments collection
-      totalViews: 0, // Real count from analytics or Firestore
-      pendingComments: 0, // Real count of unmoderated comments
-      publishedPosts: 0, // Real count of published posts
-      featuredVideos: 0, // Real count of featured videos
-      monthlyGrowth: 0, // Real calculated growth percentage
+      totalPosts: 0,         // Real: await adminDb.collection("blogs").count()
+      totalVideos: 0,        // Real: await adminDb.collection("videos").count()
+      totalComments: 0,      // Real: await adminDb.collection("comments").count()
+      totalViews: 0,         // Real: await analyticsDb.collection("views").sum("count")
+      pendingComments: 0,    // Real: await adminDb.collection("comments").where("approved", "==", false).count()
+      publishedPosts: 0,     // Real: await adminDb.collection("blogs").where("status", "==", "published").count()
+      featuredVideos: 0,     // Real: await adminDb.collection("videos").where("featured", "==", true).count()
+      monthlyGrowth: 0,      // Real: calculate based on current/prior month
     }
 
-    return NextResponse.json(stats)
+    return NextResponse.json(stats, { status: 200 })
   } catch (error) {
     console.error("Failed to fetch stats:", error)
     return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 })

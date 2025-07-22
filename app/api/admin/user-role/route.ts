@@ -5,6 +5,8 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { logError } from "@/lib/log";
 import type { UserRole } from "@/lib/role-permissions";
 
+// GET: returns { role } for the authenticated user (admin/editor/support)
+// Returns 401 for unauthorized, 500 for errors, and "support" only if user has no role record.
 export async function GET(req: NextRequest) {
   try {
     if (!(await requireAdmin(req))) {
@@ -15,14 +17,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
-    const role = (await userRoleStore.get(decoded.uid)) || ("admin" as UserRole);
-    return NextResponse.json({ role });
+
+    const role = await userRoleStore.get(decoded.uid);
+    if (role === "admin" || role === "editor" || role === "support") {
+      return NextResponse.json({ role });
+    } else {
+      // No explicit role found; backward compatibility: treat as 'support'
+      return NextResponse.json({ role: "support" });
+    }
   } catch (err) {
     logError("user-role:get", err);
-    return NextResponse.json({ role: "support" }, { status: 200 });
+    // No more silent fallback: return error so frontend can handle
+    return NextResponse.json({ error: "Failed to fetch user role" }, { status: 500 });
   }
 }
 
+// POST: sets { uid, role } for a user; requires admin
 export async function POST(req: NextRequest) {
   try {
     if (!(await requireAdmin(req))) {
@@ -31,6 +41,9 @@ export async function POST(req: NextRequest) {
     const { uid, role } = await req.json();
     if (!uid || !role) {
       return NextResponse.json({ error: "Missing uid or role" }, { status: 400 });
+    }
+    if (!["admin", "editor", "support"].includes(role)) {
+      return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
     await userRoleStore.set(uid, role as UserRole);
     return NextResponse.json({ ok: true });

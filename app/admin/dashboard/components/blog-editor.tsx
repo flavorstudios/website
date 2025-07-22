@@ -90,7 +90,9 @@ export function BlogEditor() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const response = await fetch("/api/admin/categories?type=blog")
+        const response = await fetch("/api/admin/categories?type=blog", {
+          credentials: "include", // ADDED: credentials
+        })
         const data = await response.json()
         const blogCategories: BlogCategory[] = data.categories?.map((cat: any) => ({
           name: cat.name,
@@ -167,6 +169,7 @@ export function BlogEditor() {
           publishedAt: post.status === "published" ? new Date() : undefined,
           scheduledFor: post.status === "scheduled" ? scheduledDate : undefined,
         }),
+        credentials: "include", // ADDED: credentials
       })
       if (response.ok) {
         const savedPost = await response.json()
@@ -211,6 +214,7 @@ export function BlogEditor() {
       const response = await fetch("/api/admin/blog/upload-image", {
         method: "POST",
         body: formData,
+        credentials: "include", // ADDED: credentials
       })
       if (response.ok) {
         const { url } = await response.json()

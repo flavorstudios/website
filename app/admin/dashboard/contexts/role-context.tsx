@@ -29,12 +29,13 @@ export function RoleProvider({ children }: { children: ReactNode }) {
           return
         }
         const data = await res.json()
-        if (res.ok && (data.role === "admin" || data.role === "editor" || data.role === "support")) {
+        if (!res.ok || !data.role) {
+          window.location.href = "/admin/login"
+          return
+        }
+        if (data.role === "admin" || data.role === "editor" || data.role === "support") {
           setUserRole(data.role as UserRole)
-        } else if (res.ok && data.role === "support") {
-          setUserRole("support")
         } else if (data.error) {
-          // The API gave an explicit error (e.g., role fetch failed)
           setError(data.error)
         } else {
           setError("Unknown role fetch error")

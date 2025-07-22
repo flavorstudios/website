@@ -1,17 +1,18 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 
+// GET /api/admin/activity - Only for authorized admins
 export async function GET(req: NextRequest) {
+  // Check admin role and "canViewAnalytics" permission
   if (!(await requireAdmin(req, "canViewAnalytics"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
-    // In a real application, this would fetch from Firestore
-    // For now, return empty array to show no dummy data
+    // TODO: Replace with real Firestore query for activity log
     return NextResponse.json({
-      activities: [], // Real activities will come from Firestore
+      activities: [], // Placeholder, replace with fetched activities
       success: true,
-    })
+    }, { status: 200 })
   } catch (error) {
     console.error("Failed to fetch activity:", error)
     return NextResponse.json({ error: "Failed to fetch activity" }, { status: 500 })

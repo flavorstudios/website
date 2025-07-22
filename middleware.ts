@@ -59,15 +59,16 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
 
-    // --- Login page, redirect if already authenticated ---
+    // --- Login page: redirect if and only if valid session exists ---
     if (isLoginPage) {
       if (sessionCookie) {
         try {
+          // If the session is valid, skip login and go to dashboard
           await verifyAdminSession(sessionCookie);
           resetRate(ip);
           return NextResponse.redirect(new URL("/admin/dashboard", request.url));
         } catch (err) {
-          // Audit log on failed session attempt at login
+          // Session cookie invalid or expired, let user log in again
           let email: string | null = null;
           try {
             const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
@@ -77,10 +78,11 @@ export async function middleware(request: NextRequest) {
           await logAdminAuditFailure(email, ip, "invalid_session_login");
         }
       }
+      // No session or invalid: stay on login
       return NextResponse.next();
     }
 
-    // --- All other /admin routes: require & validate cookie ---
+    // --- Protected /admin routes: require a valid session cookie ---
     if (!sessionCookie) {
       recordFailure(ip);
       await logAdminAuditFailure(null, ip, "missing_session");
@@ -88,9 +90,11 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
+      // If the session is valid, proceed to admin route
       await verifyAdminSession(sessionCookie);
       resetRate(ip);
     } catch (err) {
+      // Session invalid or expired, redirect to login
       let email: string | null = null;
       try {
         const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);

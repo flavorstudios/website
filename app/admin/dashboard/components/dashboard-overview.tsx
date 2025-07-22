@@ -38,14 +38,22 @@ export function DashboardOverview() {
         setLoading(true)
 
         // Load real stats from Firestore
-        const statsResponse = await fetch("/api/admin/stats")
+        const statsResponse = await fetch("/api/admin/stats", { credentials: "include" })
+        if (statsResponse.status === 401) {
+          window.location.href = "/admin/login"
+          return
+        }
         if (statsResponse.ok) {
           const statsData = await statsResponse.json()
           setStats(statsData)
         }
 
         // Load real activity from Firestore
-        const activityResponse = await fetch("/api/admin/activity")
+        const activityResponse = await fetch("/api/admin/activity", { credentials: "include" })
+        if (activityResponse.status === 401) {
+          window.location.href = "/admin/login"
+          return
+        }
         if (activityResponse.ok) {
           const activityData = await activityResponse.json()
           setRecentActivity(activityData.activities || [])

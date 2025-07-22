@@ -35,7 +35,9 @@ export function CommentManager() {
 
   const loadComments = async () => {
     try {
-      const response = await fetch("/api/admin/comments")
+      const response = await fetch("/api/admin/comments", {
+        credentials: "include",
+      })
       const data = await response.json()
       setComments(data.comments || [])
     } catch (error) {
@@ -51,6 +53,7 @@ export function CommentManager() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
+        credentials: "include",
       })
 
       if (response.ok) {
@@ -67,6 +70,7 @@ export function CommentManager() {
     try {
       const response = await fetch(`/api/admin/comments/${id}`, {
         method: "DELETE",
+        credentials: "include",
       })
 
       if (response.ok) {

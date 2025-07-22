@@ -63,8 +63,8 @@ export function VideoManager() {
     try {
       // Fetch videos and VIDEO categories
       const [videosRes, categoriesRes] = await Promise.all([
-        fetch("/api/admin/videos"),
-        fetch("/api/admin/categories?type=video"),
+        fetch("/api/admin/videos", { credentials: "include" }),
+        fetch("/api/admin/categories?type=video", { credentials: "include" }),
       ])
       const videosData = (await videosRes.json()).videos || []
       const videoCategories = (await categoriesRes.json()).categories || []
@@ -83,6 +83,7 @@ export function VideoManager() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(videoData),
+        credentials: "include",
       })
       if (response.ok) {
         await loadData()
@@ -99,6 +100,7 @@ export function VideoManager() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(videoData),
+        credentials: "include",
       })
       if (response.ok) {
         await loadData()
@@ -115,6 +117,7 @@ export function VideoManager() {
     try {
       const response = await fetch(`/api/admin/videos/${id}`, {
         method: "DELETE",
+        credentials: "include",
       })
       if (response.ok) {
         await loadData()

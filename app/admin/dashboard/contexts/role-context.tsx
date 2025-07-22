@@ -18,10 +18,14 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Fetch user role from API endpoint
+    // Fetch user role from API endpoint, include credentials as per audit
     const fetchUserRole = async () => {
       try {
-        const res = await fetch("/api/admin/user-role")
+        const res = await fetch("/api/admin/user-role", { credentials: "include" })
+        if (res.status === 401) {
+          window.location.href = "/admin/login"
+          return
+        }
         const data = await res.json()
         if (res.ok && data.role) {
           setUserRole(data.role as UserRole)

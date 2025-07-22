@@ -27,8 +27,8 @@ export async function GET(req: NextRequest) {
     }
   } catch (err) {
     logError("user-role:get", err);
-    // No more silent fallback: return error so frontend can handle
-    return NextResponse.json({ error: "Failed to fetch user role" }, { status: 500 });
+    // Per audit: return error so frontend can handle it
+    return NextResponse.json({ error: "Failed to fetch role" }, { status: 500 });
   }
 }
 

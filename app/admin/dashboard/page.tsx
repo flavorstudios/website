@@ -35,5 +35,6 @@ export const metadata = getMetadata({
 });
 
 export default function AdminDashboardPage() {
+  // All logic/role validation/UI is handled by AdminDashboardPageClient and RoleProvider context
   return <AdminDashboardPageClient />;
 }

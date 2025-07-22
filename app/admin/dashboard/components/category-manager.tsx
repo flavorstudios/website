@@ -56,7 +56,9 @@ export function CategoryManager() {
   const loadCategories = async () => {
     setLoading(true)
     try {
-      const response = await fetch("/api/admin/categories")
+      const response = await fetch("/api/admin/categories", {
+        credentials: "include",
+      })
       const data = await response.json()
       // Map title from API to name for UI
       const all: Category[] = (data.categories || []).map((cat: any) => ({
@@ -81,6 +83,7 @@ export function CategoryManager() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        credentials: "include",
       })
       if (response.ok) {
         await loadCategories()
@@ -107,6 +110,7 @@ export function CategoryManager() {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        credentials: "include",
       })
       if (response.ok) {
         await loadCategories()
@@ -126,7 +130,10 @@ export function CategoryManager() {
   const deleteCategory = async (category: Category) => {
     if (!confirm(`Are you sure you want to delete the category "${category.name}"?`)) return
     try {
-      const response = await fetch(`/api/admin/categories/${category.id}`, { method: "DELETE" })
+      const response = await fetch(`/api/admin/categories/${category.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      })
       if (response.ok) {
         await loadCategories()
         toast({ title: "Category deleted!" })

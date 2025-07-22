@@ -76,6 +76,12 @@ export async function middleware(request: NextRequest) {
           } catch {}
           recordFailure(ip);
           await logAdminAuditFailure(email, ip, "invalid_session_login");
+
+          // --- DEV ONLY: Extra debug for allowlist failures
+          if (process.env.NODE_ENV !== "production") {
+            // eslint-disable-next-line no-console
+            console.log(`[Admin Middleware] Invalid session for email: ${email}. Possible allowlist mismatch. Check ADMIN_EMAILS/ADMIN_EMAIL env.`);
+          }
         }
       }
       // No session or invalid: stay on login
@@ -102,6 +108,13 @@ export async function middleware(request: NextRequest) {
       } catch {}
       recordFailure(ip);
       await logAdminAuditFailure(email, ip, "invalid_session_route");
+
+      // --- DEV ONLY: Extra debug for allowlist failures
+      if (process.env.NODE_ENV !== "production") {
+        // eslint-disable-next-line no-console
+        console.log(`[Admin Middleware] Unauthorized session for email: ${email}. Check allowlist in ADMIN_EMAILS/ADMIN_EMAIL.`);
+      }
+
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
   }
@@ -110,6 +123,7 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+// Multi-admin compatible! Supports ADMIN_EMAILS (comma-separated) and ADMIN_EMAIL (single email).
 export const config = {
   matcher: "/admin/:path*",
   runtime: "nodejs",

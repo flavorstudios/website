@@ -11,7 +11,14 @@ import useAuthError from "@/hooks/useAuthError"
 
 // --- Firebase Auth ---
 import app, { firebaseInitError } from "@/lib/firebase"
-import { GoogleAuthProvider, signInWithPopup, getAuth, onAuthStateChanged, User } from "firebase/auth"
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  getAuth,
+  onAuthStateChanged,
+  User,
+  signOut,
+} from "firebase/auth"
 
 // Safe client-side error logger (does nothing in prod, only logs in dev)
 function safeLogError(...args: any[]) {
@@ -20,6 +27,14 @@ function safeLogError(...args: any[]) {
     console.error(...args)
   }
 }
+
+// Helper to validate the admin session on the server
+const checkServerSession = async () =>
+  (
+    await fetch("/api/admin/validate-session", {
+      credentials: "include",
+    })
+  ).ok
 
 export default function AdminLoginForm() {
   const { error, setError, clearError } = useAuthError()
@@ -49,9 +64,13 @@ export default function AdminLoginForm() {
       return
     }
     const auth = getAuth(app)
-    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
-        router.push("/admin/dashboard")
+        if (await checkServerSession()) {
+          router.push("/admin/dashboard")
+        } else {
+          await signOut(auth)
+        }
       }
     })
     return () => unsubscribe()
@@ -82,7 +101,13 @@ export default function AdminLoginForm() {
         setLoading(false)
         return
       }
-      router.push("/admin/dashboard")
+      // Optionally check the server session after setting cookie
+      if (await checkServerSession()) {
+        router.push("/admin/dashboard")
+      } else {
+        await signOut(auth)
+        setError("Server session invalid. Please try logging in again.")
+      }
     } catch (error: any) {
       safeLogError("Google sign-in error:", error)
       setError("Authentication failed. Please try again.")

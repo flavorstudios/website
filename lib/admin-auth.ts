@@ -1,7 +1,7 @@
 // lib/admin-auth.ts
 
 import { NextRequest } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { adminAuth, adminDb, getAllowedAdminEmails } from "@/lib/firebase-admin"; // <- Use the canonical function!
 import { cookies } from "next/headers";
 import { logError } from "@/lib/log"; // Consistent server logging
 import jwt from "jsonwebtoken";
@@ -12,24 +12,8 @@ import { getUserRole } from "@/lib/user-roles";
 const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
 
 /**
- * Parse allowed admin emails from env (comma-separated) or admin domain.
- * All emails are normalized to lowercase for safe comparison.
+ * Parse allowed admin domain (from env)
  */
-function getAllowedAdminEmails(): string[] {
-  // --- LOG FOR DEBUGGING ---
-  if (debug) {
-    // eslint-disable-next-line no-console
-    console.log("[admin-auth] Loaded ADMIN_EMAILS:", process.env.ADMIN_EMAILS);
-    // eslint-disable-next-line no-console
-    console.log("[admin-auth] Loaded ADMIN_EMAIL:", process.env.ADMIN_EMAIL);
-  }
-  const emails = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || "";
-  return emails
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
-}
-
 function getAllowedAdminDomain(): string | null {
   const domain = process.env.ADMIN_DOMAIN || "";
   return domain ? domain.trim().toLowerCase() : null;

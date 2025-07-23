@@ -1,6 +1,8 @@
+// app/api/admin/user-role/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase-admin";
-import { userRoleStore } from "@/lib/user-role-store";
+import { userRoleStore } from "@/lib/user-role-store"; // Ensure this uses "roles" collection!
 import { requireAdmin } from "@/lib/admin-auth";
 import { logError } from "@/lib/log";
 import type { UserRole } from "@/lib/role-permissions";
@@ -18,6 +20,7 @@ export async function GET(req: NextRequest) {
     }
     const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
 
+    // Unified role collection: always use "roles"
     const role = await userRoleStore.get(decoded.uid);
     if (role === "admin" || role === "editor" || role === "support") {
       return NextResponse.json({ role });
@@ -27,7 +30,7 @@ export async function GET(req: NextRequest) {
     }
   } catch (err) {
     logError("user-role:get", err);
-    // Per audit: return error so frontend can handle it
+    // Surface error for frontend, as Codex recommends
     return NextResponse.json({ error: "Failed to fetch role" }, { status: 500 });
   }
 }
@@ -45,6 +48,7 @@ export async function POST(req: NextRequest) {
     if (!["admin", "editor", "support"].includes(role)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
+    // Unified role collection: always use "roles"
     await userRoleStore.set(uid, role as UserRole);
     return NextResponse.json({ ok: true });
   } catch (err) {

@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
-import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
+import { requireAdmin, verifyAdminSession, getAllowedAdminEmails } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Centralized logging
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
@@ -32,6 +32,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
       logError("google-session: verifyIdToken failed", err);
       return NextResponse.json({ error: "Authentication failed." }, { status: 401 });
+    }
+
+    // --- Log normalized email and allowed admin emails for debug ---
+    if (process.env.NODE_ENV !== "production") {
+      const normalizedLoginEmail = decoded.email?.trim().toLowerCase();
+      const allowedAdminEmails = getAllowedAdminEmails();
+      // eslint-disable-next-line no-console
+      console.log("[google-session] Normalized login email:", `"${normalizedLoginEmail}"`);
+      // eslint-disable-next-line no-console
+      console.log("[google-session] Allowed admin emails:", allowedAdminEmails.map(e => `"${e}"`));
     }
 
     // --- Check admin email authorization securely (server-side only) ---

@@ -7,6 +7,14 @@ import { getFirestore } from "firebase-admin/firestore";
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
 const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
 
+// === EARLY LOGS FOR ENV DEBUGGING ===
+if (debug) {
+  // eslint-disable-next-line no-console
+  console.log("[ENV] ADMIN_EMAIL:", process.env.ADMIN_EMAIL);
+  // eslint-disable-next-line no-console
+  console.log("[ENV] ADMIN_EMAILS:", process.env.ADMIN_EMAILS);
+}
+
 // 🔐 Retrieve the service account JSON from env
 const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 

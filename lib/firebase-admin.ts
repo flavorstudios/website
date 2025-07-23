@@ -10,8 +10,9 @@ const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "pr
 // 🔐 Retrieve the service account JSON from env
 const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 
-// Supports both multi-admin (ADMIN_EMAILS) and single-admin (ADMIN_EMAIL)
-export const adminEmailsEnv = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL; // Accepts comma-separated or single
+// Accept ADMIN_EMAILS if it contains a real value; otherwise fall back to ADMIN_EMAIL
+const rawEmails = (process.env.ADMIN_EMAILS ?? "").trim();
+export const adminEmailsEnv = rawEmails !== "" ? rawEmails : process.env.ADMIN_EMAIL;
 
 // ======= ENVIRONMENT VARIABLE VALIDATION =======
 if (!serviceAccountKey) {

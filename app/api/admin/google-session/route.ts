@@ -1,8 +1,8 @@
 // app/api/admin/google-session/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
-import { requireAdmin, verifyAdminSession, getAllowedAdminEmails } from "@/lib/admin-auth";
+import { adminAuth, adminDb, getAllowedAdminEmails } from "@/lib/firebase-admin";
+import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Centralized logging
 
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)

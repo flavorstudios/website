@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyAdminSession, logAdminAuditFailure } from "@/lib/admin-auth";
 import { adminAuth } from "@/lib/firebase-admin";
+import { getUserRole } from "@/lib/user-roles"; // <- Add for role lookup if needed
 
 // --- In-memory rate limiter (per Codex) ---
 type RateInfo = { count: number; lastAttempt: number };
@@ -64,8 +65,24 @@ export async function middleware(request: NextRequest) {
       if (sessionCookie) {
         try {
           // If the session is valid, skip login and go to dashboard
-          await verifyAdminSession(sessionCookie);
+          const session = await verifyAdminSession(sessionCookie);
           resetRate(ip);
+
+          // --- Log user role & permissions for debugging (Codex recommendation) ---
+          if (process.env.NODE_ENV !== "production") {
+            try {
+              const role = await getUserRole(session.uid);
+              // You can enhance this log to include permission checks if you want
+              // Example: canViewAnalytics, canEdit, etc.
+              // For now, just log the role
+              // eslint-disable-next-line no-console
+              console.log(`[Admin Middleware] Verified session for email: ${session.email} (uid: ${session.uid}), role: ${role}`);
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.log("[Admin Middleware] Could not fetch user role for debug log:", e);
+            }
+          }
+
           return NextResponse.redirect(new URL("/admin/dashboard", request.url));
         } catch (err) {
           // Session cookie invalid or expired, let user log in again
@@ -97,8 +114,20 @@ export async function middleware(request: NextRequest) {
 
     try {
       // If the session is valid, proceed to admin route
-      await verifyAdminSession(sessionCookie);
+      const session = await verifyAdminSession(sessionCookie);
       resetRate(ip);
+
+      // --- Log user role & permissions for debugging (Codex recommendation) ---
+      if (process.env.NODE_ENV !== "production") {
+        try {
+          const role = await getUserRole(session.uid);
+          // eslint-disable-next-line no-console
+          console.log(`[Admin Middleware] Verified session for email: ${session.email} (uid: ${session.uid}), role: ${role}`);
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.log("[Admin Middleware] Could not fetch user role for debug log:", e);
+        }
+      }
     } catch (err) {
       // Session invalid or expired, redirect to login
       let email: string | null = null;

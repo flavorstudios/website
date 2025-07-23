@@ -5,11 +5,17 @@ import { adminAuth, adminDb } from "@/lib/firebase-admin";
 import { requireAdmin, verifyAdminSession, getAllowedAdminEmails } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Centralized logging
 
+// Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
+const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
+
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     // If user is already authenticated as admin, skip re-login
     if (await requireAdmin(req)) {
-      console.log("google-session: User already logged in as admin.");
+      if (debug) {
+        // eslint-disable-next-line no-console
+        console.log("google-session: User already logged in as admin.");
+      }
       return NextResponse.json({ ok: true, message: "Already logged in." });
     }
 
@@ -24,7 +30,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     let decoded;
     try {
       decoded = await adminAuth.verifyIdToken(idToken, true);
-      console.log("google-session: ID token verified for email:", decoded.email);
+      if (debug) {
+        // eslint-disable-next-line no-console
+        console.log("google-session: ID token verified for email:", decoded.email);
+      }
     } catch (err: any) {
       if (err.code === "auth/id-token-revoked") {
         logError("google-session: Token revoked for email", err?.email);
@@ -35,7 +44,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // --- Log normalized email and allowed admin emails for debug ---
-    if (process.env.NODE_ENV !== "production") {
+    if (debug) {
       const normalizedLoginEmail = decoded.email?.trim().toLowerCase();
       const allowedAdminEmails = getAllowedAdminEmails();
       // eslint-disable-next-line no-console
@@ -49,7 +58,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       // Use a short-lived session just to verify admin email (never exposed to client)
       const testSessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn: 5 * 60 * 1000 });
       await verifyAdminSession(testSessionCookie); // Throws if not allowed
-      console.log("google-session: Admin email authorized:", decoded.email);
+      if (debug) {
+        // eslint-disable-next-line no-console
+        console.log("google-session: Admin email authorized:", decoded.email);
+      }
     } catch (err) {
       logError("google-session: admin email unauthorized", err);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -73,7 +85,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     });
 
     // --- LOGGING: Cookie issued for admin ---
-    console.log("google-session: Admin session cookie set for", decoded.email);
+    if (debug) {
+      // eslint-disable-next-line no-console
+      console.log("google-session: Admin session cookie set for", decoded.email);
+    }
 
     // Record login event in Firestore
     try {

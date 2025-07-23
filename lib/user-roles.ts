@@ -2,14 +2,14 @@ import { adminDb } from "@/lib/firebase-admin"
 import type { UserRole } from "@/lib/role-permissions"
 
 /**
- * Fetches the user's role from the Firestore 'user_roles' collection.
+ * Fetches the user's role from the Firestore 'roles' collection.
  * - Returns the exact role if present and valid.
  * - Returns "support" only if the document is missing or the role is unrecognized.
  * - Logs and rethrows actual network/database errors (does NOT silently downgrade role).
  */
 export async function getUserRole(uid: string): Promise<UserRole> {
   try {
-    const doc = await adminDb.collection("user_roles").doc(uid).get()
+    const doc = await adminDb.collection("roles").doc(uid).get()
 
     if (!doc.exists) {
       // No role document found, default to 'support'
@@ -33,12 +33,12 @@ export async function getUserRole(uid: string): Promise<UserRole> {
 }
 
 /**
- * Sets the user's role in the Firestore 'user_roles' collection.
+ * Sets the user's role in the Firestore 'roles' collection.
  * - Overwrites only the 'role' field (merge: true).
  */
 export async function setUserRole(uid: string, role: UserRole): Promise<void> {
   try {
-    await adminDb.collection("user_roles").doc(uid).set({ role }, { merge: true })
+    await adminDb.collection("roles").doc(uid).set({ role }, { merge: true })
   } catch (err) {
     console.error("Failed to set user role:", err)
     throw err

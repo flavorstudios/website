@@ -4,6 +4,9 @@ import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 
+// Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
+const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
+
 // 🔐 Retrieve the service account JSON from env
 const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 
@@ -12,7 +15,7 @@ const adminEmailsEnv = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL; // A
 
 // ======= ENVIRONMENT VARIABLE VALIDATION =======
 if (!serviceAccountKey) {
-  if (process.env.NODE_ENV !== "production") {
+  if (debug) {
     // eslint-disable-next-line no-console
     console.error("[Firebase Admin] Missing FIREBASE_SERVICE_ACCOUNT_KEY environment variable.");
   }
@@ -20,7 +23,7 @@ if (!serviceAccountKey) {
 }
 
 if (!adminEmailsEnv) {
-  if (process.env.NODE_ENV !== "production") {
+  if (debug) {
     // eslint-disable-next-line no-console
     console.warn(
       "[Firebase Admin] Warning: ADMIN_EMAIL or ADMIN_EMAILS environment variable is missing. Admin routes will deny all access!"
@@ -52,11 +55,31 @@ if (!getApps().length) {
  *    - ADMIN_EMAILS (comma-separated)
  *    - ADMIN_EMAIL (single email)
  */
-export const getAllowedAdminEmails = (): string[] =>
-  (adminEmailsEnv || "")
+export const getAllowedAdminEmails = (): string[] => {
+  const allowedEmails = (adminEmailsEnv || "")
     .split(",")
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
+
+  if (debug) {
+    // eslint-disable-next-line no-console
+    console.log("[Firebase Admin] DEBUG_ADMIN enabled");
+    // eslint-disable-next-line no-console
+    console.log("[Firebase Admin] Loaded ADMIN_EMAILS:", process.env.ADMIN_EMAILS);
+    // eslint-disable-next-line no-console
+    console.log("[Firebase Admin] Loaded ADMIN_EMAIL:", process.env.ADMIN_EMAIL);
+    // eslint-disable-next-line no-console
+    console.log("[Firebase Admin] Final allowed admin emails:", allowedEmails);
+    // One-time dump of critical envs (for troubleshooting)
+    // eslint-disable-next-line no-console
+    console.log("[ENV DUMP]", JSON.stringify({
+      ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+      ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+      NODE_ENV: process.env.NODE_ENV
+    }, null, 2));
+  }
+  return allowedEmails;
+};
 
 // ✅ Export Firebase Admin Services
 export const adminAuth = getAuth();

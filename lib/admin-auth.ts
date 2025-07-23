@@ -13,6 +13,12 @@ import { getUserRole } from "@/lib/user-roles";
  * All emails are normalized to lowercase for safe comparison.
  */
 function getAllowedAdminEmails(): string[] {
+  // --- ADDED LOG FOR DEBUGGING ---
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.log("[admin-auth] Loaded ADMIN_EMAILS:", process.env.ADMIN_EMAILS);
+    console.log("[admin-auth] Loaded ADMIN_EMAIL:", process.env.ADMIN_EMAIL);
+  }
   const emails = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || "";
   return emails
     .split(",")
@@ -48,9 +54,17 @@ function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
   if (!email) return false;
   const allowedEmails = getAllowedAdminEmails();
   const allowedDomain = getAllowedAdminDomain();
+  // --- NORMALIZE EMAIL, LOG FOR DEBUG ---
   const normalizedEmail = email.trim().toLowerCase();
 
   const combinedEmails = [...new Set([...allowedEmails, ...extraEmails])];
+
+  // --- ADDED LOGS TO DEBUG EMAIL COMPARISON ---
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.log("[admin-auth] Normalized login email:", `"${normalizedEmail}"`);
+    console.log("[admin-auth] Combined allowed emails:", combinedEmails.map(e => `"${e}"`));
+  }
 
   if (combinedEmails.length && combinedEmails.includes(normalizedEmail)) {
     if (process.env.NODE_ENV !== "production") {
@@ -71,7 +85,7 @@ function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
   }
   if (process.env.NODE_ENV !== "production") {
     // eslint-disable-next-line no-console
-    console.warn("[admin-auth] Rejected admin email:", normalizedEmail, "(not in allowed list or domain)");
+    console.warn("[admin-auth] Rejected admin email:", `"${normalizedEmail}"`, "(not in allowed list or domain)");
   }
   return false;
 }
@@ -120,6 +134,13 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
 
   // --- Firestore-based admin users ---
   firestoreEmails = await getFirestoreAdminEmails();
+
+  // --- LOG BOTH EMAILS FOR DEBUG ---
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line no-console
+    console.log("[admin-auth] Email from session:", `"${decoded.email?.trim().toLowerCase()}"`);
+    console.log("[admin-auth] Allowed emails after merging:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
+  }
 
   // --- Check env + Firestore merged ---
   if (!isEmailAllowed(decoded.email, firestoreEmails)) {
@@ -191,6 +212,13 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
 
     // --- Firestore-based admin users ---
     const firestoreEmails = await getFirestoreAdminEmails();
+
+    // --- LOG FOR DEBUGGING EMAIL MATCH ---
+    if (process.env.NODE_ENV !== "production") {
+      // eslint-disable-next-line no-console
+      console.log("[admin-auth] Creating session cookie for email:", `"${decoded.email?.trim().toLowerCase()}"`);
+      console.log("[admin-auth] Allowed emails:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
+    }
 
     if (!isEmailAllowed(decoded.email, firestoreEmails)) {
       logError("admin-auth: createSessionCookieFromIdToken (unauthorized email)", decoded.email || "");

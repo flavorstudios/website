@@ -1,7 +1,7 @@
 // lib/admin-auth.ts
 
 import { NextRequest } from "next/server";
-import { adminAuth, adminDb, getAllowedAdminEmails } from "@/lib/firebase-admin"; // <- Use the canonical function!
+import { adminAuth, adminDb, getAllowedAdminEmails } from "@/lib/firebase-admin"; // Canonical source!
 import { cookies } from "next/headers";
 import { logError } from "@/lib/log"; // Consistent server logging
 import jwt from "jsonwebtoken";
@@ -42,12 +42,10 @@ function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
   if (!email) return false;
   const allowedEmails = getAllowedAdminEmails();
   const allowedDomain = getAllowedAdminDomain();
-  // --- NORMALIZE EMAIL, LOG FOR DEBUG ---
   const normalizedEmail = email.trim().toLowerCase();
-
   const combinedEmails = [...new Set([...allowedEmails, ...extraEmails])];
 
-  // --- LOGS TO DEBUG EMAIL COMPARISON ---
+  // Debug logging
   if (debug) {
     // eslint-disable-next-line no-console
     console.log("[admin-auth] Normalized login email:", `"${normalizedEmail}"`);
@@ -55,17 +53,14 @@ function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
     console.log("[admin-auth] Combined allowed emails:", combinedEmails.map(e => `"${e}"`));
   }
 
-  if (combinedEmails.length && combinedEmails.includes(normalizedEmail)) {
+  if (combinedEmails.includes(normalizedEmail)) {
     if (debug) {
       // eslint-disable-next-line no-console
       console.log("[admin-auth] Allowed admin email:", normalizedEmail);
     }
     return true;
   }
-  if (
-    allowedDomain &&
-    normalizedEmail.endsWith("@" + allowedDomain)
-  ) {
+  if (allowedDomain && normalizedEmail.endsWith("@" + allowedDomain)) {
     if (debug) {
       // eslint-disable-next-line no-console
       console.log("[admin-auth] Allowed admin domain:", allowedDomain, "for email:", normalizedEmail);

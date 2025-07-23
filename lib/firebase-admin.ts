@@ -11,7 +11,7 @@ const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "pr
 const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 
 // Supports both multi-admin (ADMIN_EMAILS) and single-admin (ADMIN_EMAIL)
-const adminEmailsEnv = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL; // Accepts comma-separated or single
+export const adminEmailsEnv = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL; // Accepts comma-separated or single
 
 // ======= ENVIRONMENT VARIABLE VALIDATION =======
 if (!serviceAccountKey) {
@@ -47,6 +47,12 @@ if (!getApps().length) {
   initializeApp({
     credential: cert(parsedCredentials),
   });
+}
+
+// ---- LOG ON STARTUP: current adminEmailsEnv (for diagnosis) ----
+if (debug) {
+  // eslint-disable-next-line no-console
+  console.log("[Firebase Admin] STARTUP Loaded ADMIN_EMAILS/ADMIN_EMAIL:", adminEmailsEnv);
 }
 
 /**

@@ -1,19 +1,25 @@
-import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
+import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 
 // This API returns dashboard analytics stats for authorized admins only.
 export async function GET(request: NextRequest) {
-  // Get session and role info for debugging
-  const sessionInfo = await getSessionAndRole(request)
+  // Use the new helper for session info (audit-ready)
+  const sessionInfo = await getSessionInfo(request)
+
+  if (process.env.DEBUG_ADMIN === "true") {
+    console.log("[admin-stats] sessionInfo:", sessionInfo)
+  }
+
   const hasAccess = await requireAdmin(request, "canViewAnalytics")
 
   if (!hasAccess) {
-    // 401 includes computed role and email for diagnostics
+    // 401 includes computed role, email, and uid for diagnostics
     return NextResponse.json(
       {
         error: "Unauthorized",
         role: sessionInfo?.role || "unknown",
         email: sessionInfo?.email || "unknown",
+        uid: sessionInfo?.uid || "unknown",
       },
       { status: 401 }
     )

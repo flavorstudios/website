@@ -1,7 +1,8 @@
-// app/layout.tsx
-
+// ✅ Codex Suggestion Implemented: Viewport meta added
 export const viewport = {
-  themeColor: "#000000",
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#000000", // you can change this to match your brand
 };
 
 import type { ReactNode } from "react";
@@ -12,7 +13,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 import PwaServiceWorker from "@/components/PwaServiceWorker";
-import Toaster from "@/components/ui/toaster"; // <-- ADD THIS LINE
+import Toaster from "@/components/ui/toaster";
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -32,9 +33,7 @@ const baseMetadata = getMetadata({
     title: SITE_NAME,
     description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
     type: "website",
-    images: [
-      { url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 },
-    ],
+    images: [{ url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }],
     appId: "1404440770881914",
   },
   twitter: {
@@ -45,7 +44,6 @@ const baseMetadata = getMetadata({
     description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  // Don't add PWA fields here!
 });
 
 export const metadata = {
@@ -88,17 +86,15 @@ import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { headers } from "next/headers";
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  // --- Robust detection of /admin route across all hosts/middleware ---
   const h = headers();
   const pathname =
     h.get("next-url") ||
     h.get("x-invoke-path") ||
     h.get("x-matched-path") ||
-    ""; // fallback
+    "";
 
   const isAdmin = pathname.startsWith("/admin");
 
-  // Only fetch categories for non-admin routes
   const { blogCategories, videoCategories } = isAdmin
     ? { blogCategories: [], videoCategories: [] }
     : await getDynamicCategories();
@@ -106,9 +102,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>
       <head>
-        {/* -- Most metadata is handled by `export const metadata` -- */}
-
-        {/* Mastodon Verification (manual) */}
+        {/* Mastodon Verification */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
 
         {/* Global Organization JSON-LD Schema */}
@@ -146,16 +140,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </noscript>
         {/* END GTM (NOSCRIPT) */}
 
-        <Toaster /> {/* <-- Add this for toast support everywhere */}
+        <Toaster />
 
-        {/* Pass categories as props to Header, only if not /admin */}
         {!isAdmin && (
           <Header blogCategories={blogCategories} videoCategories={videoCategories} />
         )}
 
         <main>{children}</main>
-        
-        {/* Only show Footer, BackToTop, and PWA if not /admin */}
+
         {!isAdmin && (
           <>
             <Footer />
@@ -163,7 +155,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <PwaServiceWorker />
           </>
         )}
-        {/* <PwaInstallPrompt />  (REMOVED) */}
       </body>
     </html>
   );

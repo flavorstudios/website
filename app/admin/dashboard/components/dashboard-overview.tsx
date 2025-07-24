@@ -32,15 +32,27 @@ export function DashboardOverview() {
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [authInfo, setAuthInfo] = useState<{ role?: string; email?: string } | null>(null)
 
   const loadDashboardData = async () => {
     try {
       setLoading(true)
       setError(null)
+      setAuthInfo(null)
 
       // Stats
       const statsResponse = await fetch("/api/admin/stats", { credentials: "include" })
       if (statsResponse.status === 401) {
+        const data = await statsResponse.json().catch(() => ({}))
+        // Log unauthorized info for debugging
+        console.error(
+          "Unauthorized stats access:",
+          data.role || "unknown",
+          data.email || "unknown"
+        )
+        if (process.env.NODE_ENV !== "production") {
+          setAuthInfo({ role: data.role, email: data.email })
+        }
         setError("You do not have permission to view dashboard analytics. Contact your admin.")
         setStats(null)
         setRecentActivity([])
@@ -59,6 +71,16 @@ export function DashboardOverview() {
       // Activity
       const activityResponse = await fetch("/api/admin/activity", { credentials: "include" })
       if (activityResponse.status === 401) {
+        const data = await activityResponse.json().catch(() => ({}))
+        // Log unauthorized info for debugging
+        console.error(
+          "Unauthorized activity access:",
+          data.role || "unknown",
+          data.email || "unknown"
+        )
+        if (process.env.NODE_ENV !== "production") {
+          setAuthInfo({ role: data.role, email: data.email })
+        }
         setError("You do not have permission to view recent activity. Contact your admin.")
         setRecentActivity([])
         return
@@ -132,6 +154,11 @@ export function DashboardOverview() {
         <div className="text-center">
           <p className="text-red-600 mb-2">Unable to load dashboard data</p>
           <p className="text-gray-600 mb-4">{error}</p>
+          {process.env.NODE_ENV !== "production" && authInfo?.role && (
+            <p className="text-xs text-gray-500 mb-4">
+              Role: {authInfo.role}, Email: {authInfo.email}
+            </p>
+          )}
           <Button onClick={loadDashboardData} variant="outline">
             Retry Dashboard
           </Button>

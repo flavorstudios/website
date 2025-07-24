@@ -1,7 +1,7 @@
 "use client";
 
 import AdminAuthGuard from "@/components/AdminAuthGuard";
-import { BlogEditor } from "../../dashboard/components/blog-editor";
+import { BlogEditor } from "@/app/admin/dashboard/components/blog-editor";
 
 export default function BlogEditorPageClient() {
   return (

@@ -32,7 +32,14 @@ export function DashboardOverview() {
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [authInfo, setAuthInfo] = useState<{ role?: string; email?: string } | null>(null)
+  const [authInfo, setAuthInfo] = useState<{ role?: string; email?: string; uid?: string } | null>(null)
+
+  // Utility to extract debug info from API error response
+  const extractDebugInfo = (data: any) => ({
+    role: data.role || "unknown",
+    email: data.email || "unknown",
+    uid: data.uid || "unknown",
+  })
 
   const loadDashboardData = async () => {
     try {
@@ -47,11 +54,10 @@ export function DashboardOverview() {
         // Log unauthorized info for debugging
         console.error(
           "Unauthorized stats access:",
-          data.role || "unknown",
-          data.email || "unknown"
+          extractDebugInfo(data)
         )
         if (process.env.NODE_ENV !== "production") {
-          setAuthInfo({ role: data.role, email: data.email })
+          setAuthInfo(extractDebugInfo(data))
         }
         setError("You do not have permission to view dashboard analytics. Contact your admin.")
         setStats(null)
@@ -63,6 +69,9 @@ export function DashboardOverview() {
         setError(data.error || "Failed to load stats")
         setStats(null)
         setRecentActivity([])
+        if (process.env.NODE_ENV !== "production") {
+          setAuthInfo(extractDebugInfo(data))
+        }
         return
       }
       const statsData = await statsResponse.json()
@@ -75,11 +84,10 @@ export function DashboardOverview() {
         // Log unauthorized info for debugging
         console.error(
           "Unauthorized activity access:",
-          data.role || "unknown",
-          data.email || "unknown"
+          extractDebugInfo(data)
         )
         if (process.env.NODE_ENV !== "production") {
-          setAuthInfo({ role: data.role, email: data.email })
+          setAuthInfo(extractDebugInfo(data))
         }
         setError("You do not have permission to view recent activity. Contact your admin.")
         setRecentActivity([])
@@ -89,6 +97,9 @@ export function DashboardOverview() {
         const data = await activityResponse.json().catch(() => ({}))
         setError(data.error || "Failed to load activity")
         setRecentActivity([])
+        if (process.env.NODE_ENV !== "production") {
+          setAuthInfo(extractDebugInfo(data))
+        }
         return
       }
       const activityData = await activityResponse.json()
@@ -154,10 +165,12 @@ export function DashboardOverview() {
         <div className="text-center">
           <p className="text-red-600 mb-2">Unable to load dashboard data</p>
           <p className="text-gray-600 mb-4">{error}</p>
-          {process.env.NODE_ENV !== "production" && authInfo?.role && (
-            <p className="text-xs text-gray-500 mb-4">
-              Role: {authInfo.role}, Email: {authInfo.email}
-            </p>
+          {process.env.NODE_ENV !== "production" && authInfo && (
+            <div className="text-xs text-gray-500 mb-4">
+              <div>Role: {authInfo.role}</div>
+              <div>Email: {authInfo.email}</div>
+              <div>UID: {authInfo.uid}</div>
+            </div>
           )}
           <Button onClick={loadDashboardData} variant="outline">
             Retry Dashboard

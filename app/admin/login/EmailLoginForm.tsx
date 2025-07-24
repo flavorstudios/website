@@ -1,4 +1,5 @@
 "use client"
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
@@ -46,26 +47,42 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
           {error}
         </p>
       )}
+
+      <label htmlFor="login-email" className="sr-only">
+        Email
+      </label>
       <Input
+        id="login-email"
         type="email"
         placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
       />
+
+      <label htmlFor="login-password" className="sr-only">
+        Password
+      </label>
       <Input
+        id="login-password"
         type="password"
         placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
       />
+
+      <label htmlFor="login-otp" className="sr-only">
+        2FA code (if enabled)
+      </label>
       <Input
+        id="login-otp"
         type="text"
         placeholder="2FA code (if enabled)"
         value={otp}
         onChange={(e) => setOtp(e.target.value)}
       />
+
       <Button type="submit" disabled={loading} className="w-full">
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Login
       </Button>

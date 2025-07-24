@@ -50,7 +50,7 @@ export function VideoManager() {
   const [editingVideo, setEditingVideo] = useState<Video | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [filterCategory, setFilterCategory] = useState("all")
+  const [filterCategory, setFilterCategory] = useState("")
   const [categories, setCategories] = useState<Category[]>([])
 
   useEffect(() => {
@@ -58,10 +58,17 @@ export function VideoManager() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Set the first category as default filter after categories load
+  useEffect(() => {
+    if (categories.length > 0 && !filterCategory) {
+      setFilterCategory(categories[0].slug)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories])
+
   const loadData = async () => {
     setLoading(true)
     try {
-      // Fetch videos and VIDEO categories
       const [videosRes, categoriesRes] = await Promise.all([
         fetch("/api/admin/videos", { credentials: "include" }),
         fetch("/api/admin/categories?type=video", { credentials: "include" }),
@@ -127,9 +134,10 @@ export function VideoManager() {
     }
   }
 
+  // Only show videos from the selected category
   const filteredVideos = videos.filter((video) => {
     const matchesSearch = video.title.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = filterCategory === "all" || video.category === filterCategory
+    const matchesCategory = !filterCategory || video.category === filterCategory
     return matchesSearch && matchesCategory
   })
 
@@ -158,15 +166,12 @@ export function VideoManager() {
           className="max-w-sm"
         />
         <CategoryDropdown
-          categories={[
-            { name: "All", slug: "all", count: videos.length },
-            ...categories.map((cat) => ({
-              name: cat.name,
-              slug: cat.slug,
-              count: cat.postCount,
-              tooltip: cat.tooltip,
-            })),
-          ]}
+          categories={categories.map((cat) => ({
+            name: cat.name,
+            slug: cat.slug,
+            count: cat.postCount,
+            tooltip: cat.tooltip,
+          }))}
           selectedCategory={filterCategory}
           onCategoryChange={setFilterCategory}
           type="video"
@@ -281,7 +286,7 @@ function VideoForm({
   }, [categories])
 
   const extractYouTubeId = (url: string) => {
-    const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/ // keep for full coverage
+    const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/
     const match = url.match(regex)
     return match ? match[1] : url
   }

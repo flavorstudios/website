@@ -14,7 +14,10 @@ export const userRoleStore = {
     try {
       const doc = await adminDb.collection(COLLECTION).doc(uid).get();
       if (!doc.exists) {
-        console.warn(`[userRoleStore] No role document found for UID: ${uid}`);
+        // Log for debugging but do not break
+        if (process.env.NODE_ENV !== "production") {
+          console.warn(`[userRoleStore] No role document found for UID: ${uid}`);
+        }
         return null;
       }
 
@@ -24,7 +27,9 @@ export const userRoleStore = {
         return role;
       }
       // Unrecognized role in DB
-      console.warn(`[userRoleStore] Unrecognized role "${role}" for UID: ${uid}`);
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(`[userRoleStore] Unrecognized role "${role}" for UID: ${uid}`);
+      }
       return null;
     } catch (err) {
       console.error("[userRoleStore.get] Error fetching user role:", err);
@@ -39,7 +44,9 @@ export const userRoleStore = {
   async set(uid: string, role: UserRole): Promise<void> {
     try {
       await adminDb.collection(COLLECTION).doc(uid).set({ role }, { merge: true });
-      console.log(`[userRoleStore] Set role "${role}" for UID: ${uid}`);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`[userRoleStore] Set role "${role}" for UID: ${uid}`);
+      }
     } catch (err) {
       console.error("[userRoleStore.set] Error setting user role:", err);
       throw err;

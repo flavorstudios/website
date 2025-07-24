@@ -1,12 +1,24 @@
-import { requireAdmin } from "@/lib/admin-auth"
+import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 
 // This API returns dashboard analytics stats for authorized admins only.
 export async function GET(request: NextRequest) {
-  // Enforce role/permission check
-  if (!(await requireAdmin(request, "canViewAnalytics"))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  // Get session and role info for debugging
+  const sessionInfo = await getSessionAndRole(request)
+  const hasAccess = await requireAdmin(request, "canViewAnalytics")
+
+  if (!hasAccess) {
+    // 401 includes computed role and email for diagnostics
+    return NextResponse.json(
+      {
+        error: "Unauthorized",
+        role: sessionInfo?.role || "unknown",
+        email: sessionInfo?.email || "unknown",
+      },
+      { status: 401 }
+    )
   }
+
   try {
     // TODO: Replace placeholder zeros with actual Firestore queries
     const stats = {

@@ -31,45 +31,58 @@ export function DashboardOverview() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Stats
+      const statsResponse = await fetch("/api/admin/stats", { credentials: "include" })
+      if (statsResponse.status === 401) {
+        window.location.href = "/admin/login"
+        return
+      }
+      if (!statsResponse.ok) {
+        const data = await statsResponse.json().catch(() => ({}))
+        setError(data.error || "Failed to load stats")
+        setStats(null)
+        setRecentActivity([])
+        return
+      }
+      const statsData = await statsResponse.json()
+      setStats(statsData)
+
+      // Activity
+      const activityResponse = await fetch("/api/admin/activity", { credentials: "include" })
+      if (activityResponse.status === 401) {
+        window.location.href = "/admin/login"
+        return
+      }
+      if (!activityResponse.ok) {
+        const data = await activityResponse.json().catch(() => ({}))
+        setError(data.error || "Failed to load activity")
+        setRecentActivity([])
+        return
+      }
+      const activityData = await activityResponse.json()
+      setRecentActivity(activityData.activities || [])
+    } catch (error) {
+      console.error("Failed to load dashboard data:", error)
+      setError("Network error while loading dashboard data")
+      setStats(null)
+      setRecentActivity([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        setLoading(true)
-
-        // Load real stats from Firestore
-        const statsResponse = await fetch("/api/admin/stats", { credentials: "include" })
-        if (statsResponse.status === 401) {
-          window.location.href = "/admin/login"
-          return
-        }
-        if (statsResponse.ok) {
-          const statsData = await statsResponse.json()
-          setStats(statsData)
-        }
-
-        // Load real activity from Firestore
-        const activityResponse = await fetch("/api/admin/activity", { credentials: "include" })
-        if (activityResponse.status === 401) {
-          window.location.href = "/admin/login"
-          return
-        }
-        if (activityResponse.ok) {
-          const activityData = await activityResponse.json()
-          setRecentActivity(activityData.activities || [])
-        }
-      } catch (error) {
-        console.error("Failed to load dashboard data:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     loadDashboardData()
-
-    // Set up real-time updates
     const interval = setInterval(loadDashboardData, 30000) // Refresh every 30 seconds
     return () => clearInterval(interval)
+    // eslint-disable-next-line
   }, [])
 
   const quickActions = [
@@ -107,6 +120,21 @@ export function DashboardOverview() {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("admin-navigate", { detail: action }))
     }
+  }
+
+  // Error overlay (UI block, retry supported)
+  if (error && !loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-600 mb-2">Unable to load dashboard data</p>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Retry Dashboard
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   if (loading) {

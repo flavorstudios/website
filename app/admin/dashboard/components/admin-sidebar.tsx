@@ -29,65 +29,22 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
   const [isMobile, setIsMobile] = useState(false)
 
   const menuItems = [
-    {
-      id: "overview",
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      count: null,
-    },
-    {
-      id: "blogs",
-      label: "Blog Posts",
-      icon: FileText,
-      count: null,
-    },
-    {
-      id: "videos",
-      label: "Videos",
-      icon: Video,
-      count: null,
-    },
-    {
-      id: "categories",
-      label: "Categories",
-      icon: Edit,
-      count: null,
-    },
-    {
-      id: "comments",
-      label: "Comments",
-      icon: MessageSquare,
-      count: null,
-    },
-    {
-      id: "inbox",
-      label: "Email Inbox",
-      icon: Mail,
-      count: null,
-    },
-    {
-      id: "users",
-      label: "Users",
-      icon: Users,
-      count: null,
-    },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: Settings,
-      count: null,
-    },
+    { id: "overview", label: "Dashboard", icon: LayoutDashboard, count: null },
+    { id: "blogs", label: "Blog Posts", icon: FileText, count: null },
+    { id: "videos", label: "Videos", icon: Video, count: null },
+    { id: "categories", label: "Categories", icon: Edit, count: null },
+    { id: "comments", label: "Comments", icon: MessageSquare, count: null },
+    { id: "inbox", label: "Email Inbox", icon: Mail, count: null },
+    { id: "users", label: "Users", icon: Users, count: null },
+    { id: "settings", label: "Settings", icon: Settings, count: null },
   ]
 
-  // Filter navigation items based on user role
-  const filteredNavItems = menuItems.filter((item) => accessibleSections.includes(item.id) || item.id === "overview")
+  const filteredNavItems = menuItems.filter(
+    (item) => accessibleSections.includes(item.id) || item.id === "overview"
+  )
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-      // No sidebarOpen auto-close here; handled by overlay/menu click now
-    }
-
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
     checkMobile()
     window.addEventListener("resize", checkMobile)
     return () => window.removeEventListener("resize", checkMobile)
@@ -102,15 +59,16 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
       <aside
-        className={`bg-white border-r border-gray-200 transition-all duration-300 ease-in-out ${
-          sidebarOpen ? "w-64" : "w-0 md:w-16"
-        } flex flex-col h-full overflow-hidden fixed left-0 top-0 z-40 md:relative md:z-auto`}
+        className={`bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? "translate-x-0 w-64" : "-translate-x-full md:translate-x-0 md:w-16"
+        } flex flex-col h-screen overflow-y-auto fixed left-0 top-0 z-50 md:relative md:z-auto`}
       >
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200 min-h-[80px] flex items-center">
           <div className="flex items-center justify-between w-full">
-            {sidebarOpen && (
+            {sidebarOpen ? (
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
                   <span className="text-white font-bold text-sm">FS</span>
@@ -120,12 +78,12 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
                   <span className="text-xs text-gray-500 block truncate">Flavor Studios</span>
                 </div>
               </div>
-            )}
-            {!sidebarOpen && (
+            ) : (
               <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mx-auto">
                 <span className="text-white font-bold text-xs">FS</span>
               </div>
             )}
+
             <Button
               variant="ghost"
               size="sm"
@@ -163,7 +121,9 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
                 <Button
                   key={item.id}
                   variant={isActive ? "default" : "ghost"}
-                  className={`w-full ${sidebarOpen ? "justify-start px-3" : "justify-center px-0"} h-10 ${
+                  className={`w-full ${
+                    sidebarOpen ? "justify-start px-3" : "justify-center px-0"
+                  } h-10 ${
                     isActive
                       ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
                       : "text-gray-700 hover:bg-gray-100"
@@ -181,7 +141,9 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
                       {item.count && (
                         <Badge
                           variant="secondary"
-                          className={`ml-2 text-xs ${isActive ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"}`}
+                          className={`ml-2 text-xs ${
+                            isActive ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
+                          }`}
                         >
                           {item.count}
                         </Badge>

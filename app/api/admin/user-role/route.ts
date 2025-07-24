@@ -1,9 +1,8 @@
 // app/api/admin/user-role/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { verifyAdminSession } from "@/lib/admin-auth"; // Use this for universal session support!
-import { userRoleStore } from "@/lib/user-role-store"; // Ensure this uses "roles" collection!
-import { requireAdmin } from "@/lib/admin-auth";
+import { verifyAdminSession, requireAdmin } from "@/lib/admin-auth"; // Use this for universal session support!
+import { getUserRole, setUserRole } from "@/lib/user-roles"; // canonical role utils
 import { logError } from "@/lib/log";
 import type { UserRole } from "@/lib/role-permissions";
 
@@ -20,7 +19,7 @@ export async function GET(req: NextRequest) {
     }
     // ---- Updated: Use verifyAdminSession instead of verifySessionCookie ----
     const verified = await verifyAdminSession(sessionCookie); // Handles Firebase + JWT
-    const role = await userRoleStore.get(verified.uid);
+    const role = await getUserRole(verified.uid);
 
     if (role === "admin" || role === "editor" || role === "support") {
       return NextResponse.json({ role });
@@ -49,7 +48,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
     // Unified role collection: always use "roles"
-    await userRoleStore.set(uid, role as UserRole);
+    await setUserRole(uid, role as UserRole);
     return NextResponse.json({ ok: true });
   } catch (err) {
     logError("user-role:post", err);

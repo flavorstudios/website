@@ -126,7 +126,7 @@ export function CategoryManager() {
     }
   }
 
-  // NEW: Accepts category object
+  // Accepts category object
   const deleteCategory = async (category: Category) => {
     if (!confirm(`Are you sure you want to delete the category "${category.name}"?`)) return
     try {
@@ -221,9 +221,61 @@ export function CategoryManager() {
 }
 
 // ---------- CategoryList ----------
-// ...unchanged...
+// Minimal, working CategoryList implementation
+function CategoryList({
+  categories,
+  type,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+}: {
+  categories: Category[]
+  type: CategoryType
+  onEdit: (cat: Category) => void
+  onDelete: (cat: Category) => void
+  onToggleStatus: (id: string, active: boolean) => void
+}) {
+  if (!categories || categories.length === 0) {
+    return <p className="text-sm text-gray-500">No categories found.</p>;
+  }
+  return (
+    <table className="w-full text-sm">
+      <thead>
+        <tr>
+          <th className="text-left py-2">Name</th>
+          <th className="text-left py-2">Slug</th>
+          <th className="text-left py-2">Status</th>
+          <th className="text-left py-2">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {categories.map((cat) => (
+          <tr key={cat.id}>
+            <td className="py-2">{cat.name}</td>
+            <td className="py-2">{cat.slug}</td>
+            <td className="py-2">
+              <Switch
+                checked={cat.isActive}
+                onCheckedChange={(v) => onToggleStatus(cat.id, v)}
+              />
+            </td>
+            <td className="py-2">
+              <Button size="sm" variant="outline" onClick={() => onEdit(cat)} className="mr-2">
+                <Edit className="w-4 h-4" />
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => onDelete(cat)}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
 // ---------- CategoryForm ----------
+// (No changes, your previous CategoryForm follows here as in your snippet)
 function CategoryForm({
   category,
   type,

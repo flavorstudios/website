@@ -111,6 +111,16 @@ export const blogStore = {
     return doc.exists ? (doc.data() as BlogPost) : null;
   },
 
+  // Codex addition: fetch a post by slug for edit/preview workflows
+  async getBySlug(slug: string): Promise<BlogPost | null> {
+    const snap = await adminDb
+      .collection("blogs")
+      .where("slug", "==", slug)
+      .limit(1)
+      .get();
+    return snap.empty ? null : (snap.docs[0].data() as BlogPost);
+  },
+
   /**
    * Create a new blog post after validating input with BlogPostSchema.
    * Rejects invalid data.
@@ -180,6 +190,16 @@ export const videoStore = {
   async getById(id: string): Promise<Video | null> {
     const doc = await adminDb.collection("videos").doc(id).get();
     return doc.exists ? (doc.data() as Video) : null;
+  },
+
+  // (Optional but consistent): fetch video by slug
+  async getBySlug(slug: string): Promise<Video | null> {
+    const snap = await adminDb
+      .collection("videos")
+      .where("slug", "==", slug)
+      .limit(1)
+      .get();
+    return snap.empty ? null : (snap.docs[0].data() as Video);
   },
 
   /**

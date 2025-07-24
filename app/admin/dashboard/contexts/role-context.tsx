@@ -28,17 +28,16 @@ export function RoleProvider({ children }: { children: ReactNode }) {
           window.location.href = "/admin/login"
           return
         }
-        const data = await res.json()
-        if (!res.ok || !data.role) {
-          window.location.href = "/admin/login"
+        // --- NEW: Always parse, even on error
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          setError(data.error || "Failed to fetch role")
           return
         }
         if (data.role === "admin" || data.role === "editor" || data.role === "support") {
           setUserRole(data.role as UserRole)
-        } else if (data.error) {
-          setError(data.error)
         } else {
-          setError("Unknown role fetch error")
+          setError("Unknown role")
         }
       } catch (error) {
         console.error("Failed to fetch user role:", error)
@@ -57,7 +56,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
 
   const accessibleSections = getAccessibleSections(userRole)
 
-  // Optionally, display an error overlay (or just block rendering children)
+  // Show error overlay if any error (except during loading)
   if (error && !isLoading) {
     return (
       <div style={{ padding: "2rem", textAlign: "center", color: "red" }}>

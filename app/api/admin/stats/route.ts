@@ -7,12 +7,25 @@ export async function GET(request: NextRequest) {
   const sessionInfo = await getSessionInfo(request)
 
   if (process.env.DEBUG_ADMIN === "true") {
+    console.log("[admin-stats] Incoming request at", new Date().toISOString())
     console.log("[admin-stats] sessionInfo:", sessionInfo)
   }
 
   const hasAccess = await requireAdmin(request, "canViewAnalytics")
 
+  if (process.env.DEBUG_ADMIN === "true") {
+    console.log("[admin-stats] hasAccess:", hasAccess, "| role:", sessionInfo?.role, "| email:", sessionInfo?.email)
+  }
+
   if (!hasAccess) {
+    if (process.env.DEBUG_ADMIN === "true") {
+      console.warn("[admin-stats] ACCESS DENIED. Details:", {
+        ip: request.headers.get("x-forwarded-for"),
+        role: sessionInfo?.role,
+        email: sessionInfo?.email,
+        uid: sessionInfo?.uid,
+      })
+    }
     // 401 includes computed role, email, and uid for diagnostics
     return NextResponse.json(
       {
@@ -36,6 +49,10 @@ export async function GET(request: NextRequest) {
       publishedPosts: 0,     // Real: await adminDb.collection("blogs").where("status", "==", "published").count()
       featuredVideos: 0,     // Real: await adminDb.collection("videos").where("featured", "==", true).count()
       monthlyGrowth: 0,      // Real: calculate based on current/prior month
+    }
+
+    if (process.env.DEBUG_ADMIN === "true") {
+      console.log("[admin-stats] Returning stats:", stats)
     }
 
     return NextResponse.json(stats, { status: 200 })

@@ -70,18 +70,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                   <div className="flex items-center space-x-3 relative z-10">
                     <Grid3X3 className="w-5 h-5 opacity-70" />
                     <span>{item.label}</span>
-                    {item.subItems && (
-                      <span
-                        className={cn(
-                          "px-2.5 py-1 text-xs font-medium rounded-full transition-colors",
-                          expanded === item.label
-                            ? "bg-white/20 text-white"
-                            : "bg-gray-100 text-gray-600 group-hover:bg-white/80",
-                        )}
-                      >
-                        {item.subItems.length}
-                      </span>
-                    )}
+                    {/* Count bubble removed here, nothing else touched */}
                   </div>
                   {item.subItems && (
                     <ChevronDown

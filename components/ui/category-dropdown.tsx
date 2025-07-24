@@ -11,7 +11,6 @@ interface CategoryDropdownProps {
   selectedCategory: string
   onCategoryChange: (category: string) => void
   placeholder?: string
-  showAll?: boolean
   className?: string
 }
 
@@ -20,17 +19,11 @@ export function CategoryDropdown({
   selectedCategory,
   onCategoryChange,
   placeholder = "Select category",
-  showAll = true,
   className,
 }: CategoryDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
 
-  const allCategories = showAll
-    ? [{ name: "All Categories", slug: "all", count: 0 }]
-        .concat(categories)
-    : categories
-
-  const selectedCategoryData = allCategories.find((cat) => cat.slug === selectedCategory)
+  const selectedCategoryData = categories.find((cat) => cat.slug === selectedCategory)
   const displayText = selectedCategoryData?.name || placeholder
 
   return (
@@ -48,8 +41,11 @@ export function CategoryDropdown({
           <ChevronDown className="h-4 w-4 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[180px]">
-        {allCategories.map((category) => (
+      <DropdownMenuContent
+        align="start"
+        className="min-w-[180px] max-h-64 overflow-y-auto"
+      >
+        {categories.map((category) => (
           <DropdownMenuItem
             key={category.slug}
             onClick={() => {

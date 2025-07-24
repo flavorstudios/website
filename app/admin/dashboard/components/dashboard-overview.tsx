@@ -41,7 +41,9 @@ export function DashboardOverview() {
       // Stats
       const statsResponse = await fetch("/api/admin/stats", { credentials: "include" })
       if (statsResponse.status === 401) {
-        window.location.href = "/admin/login"
+        setError("You do not have permission to view dashboard analytics. Contact your admin.")
+        setStats(null)
+        setRecentActivity([])
         return
       }
       if (!statsResponse.ok) {
@@ -57,7 +59,8 @@ export function DashboardOverview() {
       // Activity
       const activityResponse = await fetch("/api/admin/activity", { credentials: "include" })
       if (activityResponse.status === 401) {
-        window.location.href = "/admin/login"
+        setError("You do not have permission to view recent activity. Contact your admin.")
+        setRecentActivity([])
         return
       }
       if (!activityResponse.ok) {
@@ -129,7 +132,7 @@ export function DashboardOverview() {
         <div className="text-center">
           <p className="text-red-600 mb-2">Unable to load dashboard data</p>
           <p className="text-gray-600 mb-4">{error}</p>
-          <Button onClick={() => window.location.reload()} variant="outline">
+          <Button onClick={loadDashboardData} variant="outline">
             Retry Dashboard
           </Button>
         </div>
@@ -151,7 +154,7 @@ export function DashboardOverview() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
-          <Button onClick={() => window.location.reload()} variant="outline">
+          <Button onClick={loadDashboardData} variant="outline">
             Refresh Dashboard
           </Button>
         </div>

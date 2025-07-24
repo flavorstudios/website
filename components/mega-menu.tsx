@@ -245,22 +245,12 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               type="button"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              {/* ---- This block is now WITHOUT the count bubble ---- */}
               <div className="flex items-center space-x-2 relative z-10">
                 <Grid3X3 className="w-4 h-4 opacity-70" />
                 <span>{item.label}</span>
-                {item.subItems && (
-                  <span
-                    className={cn(
-                      "px-2 py-0.5 text-xs font-medium rounded-full transition-colors",
-                      activeMenu === item.label
-                        ? "bg-white/20 text-white"
-                        : "bg-gray-100 text-gray-600 group-hover:bg-white/80",
-                    )}
-                  >
-                    {item.subItems.length}
-                  </span>
-                )}
               </div>
+              {/* ---- END UPDATED block ---- */}
               {item.subItems && (
                 <ChevronDown
                   className={cn(

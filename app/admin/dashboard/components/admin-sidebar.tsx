@@ -85,15 +85,13 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false)
-      }
+      // No sidebarOpen auto-close here; handled by overlay/menu click now
     }
 
     checkMobile()
     window.addEventListener("resize", checkMobile)
     return () => window.removeEventListener("resize", checkMobile)
-  }, [setSidebarOpen])
+  }, [])
 
   return (
     <>
@@ -170,7 +168,10 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
                       ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
-                  onClick={() => setActiveSection(item.id)}
+                  onClick={() => {
+                    setActiveSection(item.id)
+                    if (isMobile) setSidebarOpen(false)
+                  }}
                   title={!sidebarOpen ? item.label : undefined}
                 >
                   <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />

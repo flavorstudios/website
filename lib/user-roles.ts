@@ -6,33 +6,33 @@ import type { UserRole } from "@/lib/role-permissions"
  * - Returns the exact role if present and valid ("admin", "editor", or "support").
  * - Returns "support" if the document is missing or the role is unrecognized.
  * - Logs and rethrows actual network/database errors (does NOT default on error).
+ * - Normalizes role to lowercase and trims whitespace for safety.
  */
 export async function getUserRole(uid: string): Promise<UserRole> {
   try {
     const doc = await adminDb.collection("roles").doc(uid).get();
 
     if (!doc.exists) {
-      // No role document found, default to 'support'
       if (process.env.NODE_ENV !== "production") {
         console.warn(`[getUserRole] No role document found for UID: ${uid}`);
       }
       return "support";
     }
 
-    const data = doc.data() as { role?: UserRole };
+    const data = doc.data() as { role?: string };
 
-    // Check for valid roles only
-    if (data && ["admin", "editor", "support"].includes(data.role || "")) {
-      return data.role as UserRole;
+    // Normalize role value: lowercase, trimmed
+    const normalizedRole = data?.role?.toString().trim().toLowerCase();
+
+    if (normalizedRole === "admin" || normalizedRole === "editor" || normalizedRole === "support") {
+      return normalizedRole as UserRole;
     }
 
-    // Unrecognized role value; treat as 'support' for safety
     if (process.env.NODE_ENV !== "production") {
-      console.warn(`[getUserRole] Unrecognized role value "${data.role}" for UID: ${uid}`);
+      console.warn(`[getUserRole] Unrecognized role value "${data?.role}" (normalized: "${normalizedRole}") for UID: ${uid}`);
     }
     return "support";
   } catch (err) {
-    // Only log the error; do NOT default to 'support' on internal/server error
     console.error("[getUserRole] Failed to fetch user role:", err);
     throw err;
   }
@@ -44,7 +44,7 @@ export async function getUserRole(uid: string): Promise<UserRole> {
  */
 export async function setUserRole(uid: string, role: UserRole): Promise<void> {
   try {
-    await adminDb.collection("roles").doc(uid).set({ role }, { merge: true });
+    await adminDb.collection("roles").doc(uid).set({ role: role.toLowerCase() }, { merge: true });
     if (process.env.NODE_ENV !== "production") {
       console.log(`[setUserRole] Set role "${role}" for UID: ${uid}`);
     }

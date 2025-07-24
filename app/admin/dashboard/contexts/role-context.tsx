@@ -18,36 +18,54 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>("admin")
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [debugInfo, setDebugInfo] = useState<{ role?: string; email?: string; uid?: string } | null>(null)
+
+  // Utility to extract debug info from API error response
+  const extractDebugInfo = (data: any) => ({
+    role: data.role || "unknown",
+    email: data.email || "unknown",
+    uid: data.uid || "unknown",
+  })
+
+  const fetchUserRole = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      setDebugInfo(null)
+      const res = await fetch("/api/admin/user-role", { credentials: "include" })
+      // Always parse, even on error
+      const data = await res.json().catch(() => ({}))
+      if (res.status === 401) {
+        // Not logged in; redirect to login
+        window.location.href = "/admin/login"
+        return
+      }
+      if (!res.ok) {
+        setError(data.error || "Failed to fetch role")
+        if (process.env.NODE_ENV !== "production") {
+          setDebugInfo(extractDebugInfo(data))
+        }
+        return
+      }
+      if (data.role === "admin" || data.role === "editor" || data.role === "support") {
+        setUserRole(data.role as UserRole)
+      } else {
+        setError("Unknown role")
+        if (process.env.NODE_ENV !== "production") {
+          setDebugInfo(extractDebugInfo(data))
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch user role:", error)
+      setError("Network error")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      try {
-        const res = await fetch("/api/admin/user-role", { credentials: "include" })
-        if (res.status === 401) {
-          // Not logged in; redirect to login
-          window.location.href = "/admin/login"
-          return
-        }
-        // --- NEW: Always parse, even on error
-        const data = await res.json().catch(() => ({}))
-        if (!res.ok) {
-          setError(data.error || "Failed to fetch role")
-          return
-        }
-        if (data.role === "admin" || data.role === "editor" || data.role === "support") {
-          setUserRole(data.role as UserRole)
-        } else {
-          setError("Unknown role")
-        }
-      } catch (error) {
-        console.error("Failed to fetch user role:", error)
-        setError("Network error")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     fetchUserRole()
+    // eslint-disable-next-line
   }, [])
 
   const checkPermission = (permission: string) => {
@@ -62,7 +80,14 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       <div style={{ padding: "2rem", textAlign: "center", color: "red" }}>
         <h2>Unable to load dashboard</h2>
         <p>{error}</p>
-        <button onClick={() => window.location.reload()}>Retry</button>
+        {process.env.NODE_ENV !== "production" && debugInfo && (
+          <div style={{ color: "#666", fontSize: "12px", margin: "12px 0" }}>
+            <div>Role: {debugInfo.role}</div>
+            <div>Email: {debugInfo.email}</div>
+            <div>UID: {debugInfo.uid}</div>
+          </div>
+        )}
+        <button onClick={fetchUserRole}>Retry</button>
       </div>
     )
   }

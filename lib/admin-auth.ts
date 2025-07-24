@@ -137,6 +137,26 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
 }
 
 /**
+ * Returns the decoded admin session and role (or null if verification fails).
+ * For API debugging and permission reporting.
+ */
+export async function getSessionAndRole(req: NextRequest): Promise<VerifiedAdmin | null> {
+  const sessionCookie = req.cookies.get("admin-session")?.value;
+  if (!sessionCookie) return null;
+  try {
+    const verified = await verifyAdminSession(sessionCookie);
+    if (debug) {
+      // eslint-disable-next-line no-console
+      console.log("[admin-auth] session uid:", verified.uid, "role:", verified.role);
+    }
+    return verified;
+  } catch (err) {
+    logError("admin-auth:getSessionAndRole", err);
+    return null;
+  }
+}
+
+/**
  * Checks if the request has a valid admin session.
  * If a permission is passed, checks that the user's role includes that permission.
  */

@@ -1,19 +1,25 @@
-import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
+import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 
 // GET /api/admin/activity - Only for authorized admins
 export async function GET(req: NextRequest) {
-  // Check admin role and "canViewAnalytics" permission
-  const sessionInfo = await getSessionAndRole(req)
+  // Use the improved getSessionInfo helper
+  const sessionInfo = await getSessionInfo(req)
+
+  if (process.env.DEBUG_ADMIN === "true") {
+    console.log("[admin-activity] sessionInfo:", sessionInfo)
+  }
+
   const hasAccess = await requireAdmin(req, "canViewAnalytics")
 
   if (!hasAccess) {
-    // Include the computed role and email in the error response for debugging
+    // Include the computed role, email, and uid in the error response for debugging
     return NextResponse.json(
       {
         error: "Unauthorized",
         role: sessionInfo?.role || "unknown",
         email: sessionInfo?.email || "unknown",
+        uid: sessionInfo?.uid || "unknown",
       },
       { status: 401 }
     )

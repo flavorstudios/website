@@ -1,15 +1,10 @@
 // app/blog/[slug]/page.tsx
 
 import { notFound } from "next/navigation";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Eye, User, Clock } from "lucide-react";
-import CommentSection from "./components/comment-section";
-import SocialShare from "./components/social-share";
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE, SITE_LOGO_URL } from "@/lib/constants";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
-import Link from "next/link";
+import BlogPostRenderer from "@/components/BlogPostRenderer";
 
 // BlogPost type interface for type safety (multi-category aware)
 interface BlogPost {
@@ -93,11 +88,6 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     });
   }
 
-  // Multi-category support: prefer categories[0] as primary
-  const primaryCategory = (post.categories && post.categories.length > 0)
-    ? post.categories[0]
-    : post.category;
-
   const ogImage =
     post.openGraphImage ||
     post.coverImage ||
@@ -106,6 +96,12 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
   const seoTitle = post.seoTitle || post.title;
   const seoDescription = post.seoDescription || post.excerpt;
   const schemaType = post.schemaType || "Article";
+
+  // Determine author schema based on post.author (Person or Organization).
+  const articleAuthorSchema =
+    post.author === SITE_NAME
+      ? { "@type": "Organization", name: SITE_NAME }
+      : { "@type": "Person", name: post.author || SITE_NAME };
 
   return getMetadata({
     title: `${seoTitle} – ${SITE_NAME}`,
@@ -136,18 +132,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // If post is not found or not published, trigger Next.js not-found page.
   if (!post) notFound();
 
-  // Multi-category support: prefer categories[0] as primary
-  const primaryCategory = (post.categories && post.categories.length > 0)
-    ? post.categories[0]
-    : post.category;
-
-  // Determine author schema based on post.author (Person or Organization).
-  const articleAuthorSchema =
-    post.author === SITE_NAME
-      ? { "@type": "Organization", name: SITE_NAME }
-      : { "@type": "Person", name: post.author || SITE_NAME };
-
-  // --- Article Schema JSON-LD (modular, rendered only for valid posts) ---
+  // Article Schema JSON-LD (SEO)
   const articleSchema = getSchema({
     type: post.schemaType || "Article",
     path: `/blog/${post.slug}`,
@@ -156,7 +141,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     image: post.openGraphImage || post.coverImage || SITE_DEFAULT_IMAGE,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
-    author: articleAuthorSchema,
+    author:
+      post.author === SITE_NAME
+        ? { "@type": "Organization", name: SITE_NAME }
+        : { "@type": "Person", name: post.author || SITE_NAME },
     headline: post.title,
   });
 
@@ -164,93 +152,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     <div className="min-h-screen bg-gray-50">
       {/* --- Inject Article schema (for Google/SEO) --- */}
       <StructuredData schema={articleSchema} />
-
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header Section */}
-        <header className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            {primaryCategory && <Badge variant="outline">{primaryCategory}</Badge>}
-            {post.publishedAt && (
-              <span className="text-sm text-gray-500 flex items-center gap-1">
-                <Calendar className="h-3 w-3" aria-hidden="true" />
-                {new Date(post.publishedAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
-            )}
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">{post.title}</h1>
-          <p className="text-xl text-gray-600 mb-6">{post.excerpt}</p>
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            {post.author && (
-              <span className="flex items-center gap-1">
-                <User className="h-4 w-4" aria-hidden="true" />
-                {post.author}
-              </span>
-            )}
-            <span className="flex items-center gap-1">
-              <Eye className="h-4 w-4" aria-hidden="true" />
-              {(post.views || 0).toLocaleString()} views
-            </span>
-            {post.readTime && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-4 w-4" aria-hidden="true" />
-                {post.readTime}
-              </span>
-            )}
-          </div>
-        </header>
-
-        {/* Featured Image Section */}
-        {(post.openGraphImage || post.coverImage) && (
-          <div className="mb-8">
-            <img
-              src={post.openGraphImage || post.coverImage!}
-              alt={post.title || "Blog post cover image"}
-              className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
-            />
-          </div>
-        )}
-
-        {/* Blog Post Content */}
-        <Card className="mb-12">
-          <CardContent className="p-8">
-            <div
-              className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Social Share Component */}
-        <SocialShare
-          title={post.title}
-          excerpt={post.excerpt}
-          url={`${SITE_URL}/blog/${post.slug}`}
-          image={post.openGraphImage || post.coverImage}
-        />
-
-        {/* Tags Section */}
-        {post.tags && Array.isArray(post.tags) && post.tags.length > 0 && (
-          <div className="mb-12">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">Tags</h3>
-            <div className="flex flex-wrap gap-2">
-              {post.tags.map((tag: string) => (
-                <Badge key={tag} variant="secondary">
-                  <Link href={`/blog/tag/${encodeURIComponent(tag)}`} className="hover:underline">
-                    {tag}
-                  </Link>
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Comment Section Component */}
-        <CommentSection postId={post.id} postSlug={post.slug} />
-      </article>
+      {/* --- Blog Post Renderer (unified) --- */}
+      <BlogPostRenderer post={post} />
     </div>
   );
 }

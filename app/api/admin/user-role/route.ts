@@ -1,8 +1,8 @@
 // app/api/admin/user-role/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { verifyAdminSession, requireAdmin } from "@/lib/admin-auth"; // Use this for universal session support!
-import { getUserRole, setUserRole } from "@/lib/user-roles"; // canonical role utils
+import { verifyAdminSession, requireAdmin } from "@/lib/admin-auth"; // Universal session support
+import { getUserRole, setUserRole } from "@/lib/user-roles"; // Canonical role utils
 import { logError } from "@/lib/log";
 import type { UserRole } from "@/lib/role-permissions";
 
@@ -11,26 +11,60 @@ import type { UserRole } from "@/lib/role-permissions";
 export async function GET(req: NextRequest) {
   try {
     if (!(await requireAdmin(req))) {
+      if (process.env.DEBUG_ADMIN === "true") {
+        console.warn("[user-role] Unauthorized access attempt.");
+      }
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const sessionCookie = req.cookies.get("admin-session")?.value;
     if (!sessionCookie) {
+      if (process.env.DEBUG_ADMIN === "true") {
+        console.warn("[user-role] Missing session cookie.");
+      }
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    // ---- Updated: Use verifyAdminSession instead of verifySessionCookie ----
+    // ---- Use verifyAdminSession for universal session support ----
     const verified = await verifyAdminSession(sessionCookie); // Handles Firebase + JWT
-    const role = await getUserRole(verified.uid);
+    if (process.env.DEBUG_ADMIN === "true") {
+      console.log("[user-role] Verified admin:", {
+        uid: verified?.uid,
+        email: verified?.email,
+      });
+    }
+    // Always pass both UID and email!
+    const role = await getUserRole(verified.uid, verified.email);
 
     if (role === "admin" || role === "editor" || role === "support") {
+      if (process.env.DEBUG_ADMIN === "true") {
+        console.log("[user-role] Returning role:", role, "for", verified.email);
+      }
       return NextResponse.json({ role });
     } else {
       // No explicit role found; treat as 'support'
+      if (process.env.DEBUG_ADMIN === "true") {
+        console.warn("[user-role] No explicit role, defaulting to support for", verified.email);
+      }
       return NextResponse.json({ role: "support" });
     }
-  } catch (err) {
+  } catch (err: any) {
     logError("user-role:get", err);
-    // Surface error for frontend, as Codex recommends
-    return NextResponse.json({ error: "Failed to fetch role" }, { status: 500 });
+    if (process.env.DEBUG_ADMIN === "true") {
+      console.error("[user-role] Error fetching role:", err);
+    }
+    // If available, surface debug info
+    return NextResponse.json(
+      {
+        error: "Failed to fetch role",
+        ...(typeof err === "object" && err !== null
+          ? {
+              message: err.message,
+              stack: err.stack,
+              code: err.code,
+            }
+          : {}),
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -38,6 +72,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     if (!(await requireAdmin(req))) {
+      if (process.env.DEBUG_ADMIN === "true") {
+        console.warn("[user-role:post] Unauthorized access attempt.");
+      }
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const { uid, role } = await req.json();
@@ -49,9 +86,15 @@ export async function POST(req: NextRequest) {
     }
     // Unified role collection: always use "roles"
     await setUserRole(uid, role as UserRole);
+    if (process.env.DEBUG_ADMIN === "true") {
+      console.log(`[user-role:post] Set role for ${uid}: ${role}`);
+    }
     return NextResponse.json({ ok: true });
   } catch (err) {
     logError("user-role:post", err);
+    if (process.env.DEBUG_ADMIN === "true") {
+      console.error("[user-role:post] Error:", err);
+    }
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }

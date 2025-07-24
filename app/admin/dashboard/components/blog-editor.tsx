@@ -25,13 +25,13 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-interface BlogCategory {
+export interface BlogCategory {
   name: string
   slug: string
   tooltip?: string
 }
 
-interface BlogPost {
+export interface BlogPost {
   id?: string
   title: string
   slug: string
@@ -55,29 +55,34 @@ interface BlogPost {
   readTime: string
 }
 
-export function BlogEditor() {
+export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> }) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [post, setPost] = useState<BlogPost>({
-    title: "",
-    slug: "",
-    content: "",
-    excerpt: "",
-    category: "",
-    categories: [],
-    tags: [],
-    featuredImage: "",
-    seoTitle: "",
-    seoDescription: "",
-    seoKeywords: "",
-    openGraphImage: "",
-    schemaType: "Article",
-    status: "draft",
-    featured: false,
-    author: "Admin",
-    wordCount: 0,
-    readTime: "1 min read",
-  })
+
+  // Init from initialPost if present
+  const [post, setPost] = useState<BlogPost>(() => ({
+    title: initialPost?.title ?? "",
+    slug: initialPost?.slug ?? "",
+    content: initialPost?.content ?? "",
+    excerpt: initialPost?.excerpt ?? "",
+    category: initialPost?.category ?? "",
+    categories: initialPost?.categories ?? (initialPost?.category ? [initialPost.category] : []),
+    tags: initialPost?.tags ?? [],
+    featuredImage: initialPost?.featuredImage ?? "",
+    seoTitle: initialPost?.seoTitle ?? "",
+    seoDescription: initialPost?.seoDescription ?? "",
+    seoKeywords: initialPost?.seoKeywords ?? "",
+    openGraphImage: initialPost?.openGraphImage ?? "",
+    schemaType: initialPost?.schemaType ?? "Article",
+    status: (initialPost?.status as BlogPost["status"]) ?? "draft",
+    featured: initialPost?.featured ?? false,
+    author: initialPost?.author ?? "Admin",
+    wordCount: initialPost?.wordCount ?? 0,
+    readTime: initialPost?.readTime ?? "1 min read",
+    id: initialPost?.id,
+    publishedAt: initialPost?.publishedAt ? new Date(initialPost.publishedAt) : undefined,
+    scheduledFor: initialPost?.scheduledFor ? new Date(initialPost.scheduledFor) : undefined,
+  }))
 
   const [categories, setCategories] = useState<BlogCategory[]>([])
   const [saving, setSaving] = useState(false)
@@ -87,7 +92,7 @@ export function BlogEditor() {
   const [imageUploading, setImageUploading] = useState(false)
   const [tagInput, setTagInput] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [showPreview, setShowPreview] = useState(false) // <-- Preview Modal
+  const [showPreview, setShowPreview] = useState(false)
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -279,7 +284,7 @@ export function BlogEditor() {
               Back
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Create New Post</h1>
+              <h1 className="text-3xl font-bold text-gray-900">{post.id ? "Edit Post" : "Create New Post"}</h1>
               <p className="text-gray-600">Write and publish your blog content</p>
             </div>
           </div>

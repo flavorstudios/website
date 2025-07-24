@@ -122,7 +122,9 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
   const renderDropdown = (item: MenuItem) => {
     if (!item.subItems || item.subItems.length === 0) return null
 
-    const isScrollableMenu = item.label === "Blog" || item.label === "Watch"
+    // UPDATED LINE: Now includes "About" in scrollable menu logic
+    const isScrollableMenu =
+      item.label === "Blog" || item.label === "Watch" || item.label === "About"
 
     return (
       <div

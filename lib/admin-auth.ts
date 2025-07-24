@@ -157,6 +157,23 @@ export async function getSessionAndRole(req: NextRequest): Promise<VerifiedAdmin
 }
 
 /**
+ * NEW AUDIT-READY HELPER: Reads the admin-session cookie from a Next.js request and returns
+ * the verified session info including role and uid. Returns null if no valid session is present.
+ */
+export async function getSessionInfo(
+  req: NextRequest,
+): Promise<VerifiedAdmin | null> {
+  const sessionCookie = req.cookies.get("admin-session")?.value;
+  if (!sessionCookie) return null;
+  try {
+    return await verifyAdminSession(sessionCookie);
+  } catch (err) {
+    logError("admin-auth: getSessionInfo", err);
+    return null;
+  }
+}
+
+/**
  * Checks if the request has a valid admin session.
  * If a permission is passed, checks that the user's role includes that permission.
  */

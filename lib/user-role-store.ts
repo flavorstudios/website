@@ -9,12 +9,12 @@ export const userRoleStore = {
    * Gets the user's role from Firestore "roles" collection.
    * Returns UserRole ("admin" | "editor" | "support") if valid, otherwise null.
    * Only returns null if doc missing, invalid, or on error.
+   * Now: Normalizes value to lowercase/trimmed for robust checks!
    */
   async get(uid: string): Promise<UserRole | null> {
     try {
       const doc = await adminDb.collection(COLLECTION).doc(uid).get();
       if (!doc.exists) {
-        // Log for debugging but do not break
         if (process.env.NODE_ENV !== "production") {
           console.warn(`[userRoleStore] No role document found for UID: ${uid}`);
         }
@@ -22,13 +22,13 @@ export const userRoleStore = {
       }
 
       const data = doc.data();
-      const role = data?.role;
+      // Normalize role for comparison
+      const role = data?.role?.toString().trim().toLowerCase();
       if (role === "admin" || role === "editor" || role === "support") {
-        return role;
+        return role as UserRole;
       }
-      // Unrecognized role in DB
       if (process.env.NODE_ENV !== "production") {
-        console.warn(`[userRoleStore] Unrecognized role "${role}" for UID: ${uid}`);
+        console.warn(`[userRoleStore] Unrecognized role "${data?.role}" (normalized: "${role}") for UID: ${uid}`);
       }
       return null;
     } catch (err) {
@@ -40,12 +40,13 @@ export const userRoleStore = {
   /**
    * Sets the user's role in Firestore "roles" collection.
    * Only writes the 'role' field.
+   * Now: Always stores lowercase role for consistency.
    */
   async set(uid: string, role: UserRole): Promise<void> {
     try {
-      await adminDb.collection(COLLECTION).doc(uid).set({ role }, { merge: true });
+      await adminDb.collection(COLLECTION).doc(uid).set({ role: role.toLowerCase() }, { merge: true });
       if (process.env.NODE_ENV !== "production") {
-        console.log(`[userRoleStore] Set role "${role}" for UID: ${uid}`);
+        console.log(`[userRoleStore] Set role "${role.toLowerCase()}" for UID: ${uid}`);
       }
     } catch (err) {
       console.error("[userRoleStore.set] Error setting user role:", err);

@@ -47,28 +47,23 @@ function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
 
   // Debug logging
   if (debug) {
-    // eslint-disable-next-line no-console
     console.log("[admin-auth] Normalized login email:", `"${normalizedEmail}"`);
-    // eslint-disable-next-line no-console
     console.log("[admin-auth] Combined allowed emails:", combinedEmails.map(e => `"${e}"`));
   }
 
   if (combinedEmails.includes(normalizedEmail)) {
     if (debug) {
-      // eslint-disable-next-line no-console
       console.log("[admin-auth] Allowed admin email:", normalizedEmail);
     }
     return true;
   }
   if (allowedDomain && normalizedEmail.endsWith("@" + allowedDomain)) {
     if (debug) {
-      // eslint-disable-next-line no-console
       console.log("[admin-auth] Allowed admin domain:", allowedDomain, "for email:", normalizedEmail);
     }
     return true;
   }
   if (debug) {
-    // eslint-disable-next-line no-console
     console.warn("[admin-auth] Rejected admin email:", `"${normalizedEmail}"`, "(not in allowed list or domain)");
   }
   return false;
@@ -98,7 +93,6 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
   try {
     decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
     if (debug) {
-      // eslint-disable-next-line no-console
       console.log("[admin-auth] Session cookie verified for:", decoded.email);
     }
   } catch (err) {
@@ -107,7 +101,6 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
       const secret = process.env.ADMIN_JWT_SECRET || "";
       decoded = jwt.verify(sessionCookie, secret);
       if (debug) {
-        // eslint-disable-next-line no-console
         console.log("[admin-auth] JWT session verified for:", decoded.email);
       }
     } catch (jwtErr) {
@@ -121,9 +114,7 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
 
   // --- LOG BOTH EMAILS FOR DEBUG ---
   if (debug) {
-    // eslint-disable-next-line no-console
     console.log("[admin-auth] Email from session:", `"${decoded.email?.trim().toLowerCase()}"`);
-    // eslint-disable-next-line no-console
     console.log("[admin-auth] Allowed emails after merging:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
   }
 
@@ -132,7 +123,9 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
     logError("admin-auth: verifyAdminSession (unauthorized email)", decoded.email || "");
     throw new Error("Unauthorized admin email");
   }
-  const role = await getUserRole(decoded.uid);
+
+  // IMPORTANT: Always pass BOTH uid and email for fallback admin role logic!
+  const role = await getUserRole(decoded.uid, decoded.email);
   return { ...(decoded as any), role } as VerifiedAdmin;
 }
 
@@ -146,7 +139,6 @@ export async function getSessionAndRole(req: NextRequest): Promise<VerifiedAdmin
   try {
     const verified = await verifyAdminSession(sessionCookie);
     if (debug) {
-      // eslint-disable-next-line no-console
       console.log("[admin-auth] session uid:", verified.uid, "role:", verified.role);
     }
     return verified;
@@ -188,6 +180,9 @@ export async function requireAdmin(
     if (permission) {
       const { hasPermission } = await import("@/lib/role-permissions");
       if (!hasPermission(decoded.role, permission)) {
+        if (debug) {
+          console.warn("[admin-auth] Permission denied:", permission, "for role:", decoded.role);
+        }
         return false;
       }
     }
@@ -213,6 +208,9 @@ export async function requireAdminAction(
     if (permission) {
       const { hasPermission } = await import("@/lib/role-permissions");
       if (!hasPermission(decoded.role, permission)) {
+        if (debug) {
+          console.warn("[admin-auth] Action permission denied:", permission, "for role:", decoded.role);
+        }
         return false;
       }
     }
@@ -237,9 +235,7 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
 
     // --- LOG FOR DEBUGGING EMAIL MATCH ---
     if (debug) {
-      // eslint-disable-next-line no-console
       console.log("[admin-auth] Creating session cookie for email:", `"${decoded.email?.trim().toLowerCase()}"`);
-      // eslint-disable-next-line no-console
       console.log("[admin-auth] Allowed emails:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
     }
 

@@ -2,6 +2,8 @@
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
   FileText,
@@ -32,10 +34,12 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const { accessibleSections, userRole } = useRole()
   const [isMobile, setIsMobile] = useState(false)
+  const pathname = usePathname()
 
+  // Only one menu item per section, with `href` for route navigation
   const menuItems = [
-    { id: "overview", label: "Dashboard", icon: LayoutDashboard, count: null },
-    { id: "blogs", label: "Blog Posts", icon: FileText, count: null },
+    { id: "overview", label: "Dashboard", icon: LayoutDashboard, count: null, href: "/admin/dashboard" },
+    { id: "blogs", label: "Blog Posts", icon: FileText, count: null, href: "/admin/dashboard/blog-posts" },
     { id: "videos", label: "Videos", icon: Video, count: null },
     { id: "categories", label: "Categories", icon: Edit, count: null },
     { id: "comments", label: "Comments", icon: MessageSquare, count: null },
@@ -44,6 +48,7 @@ export function AdminSidebar({
     { id: "settings", label: "Settings", icon: Settings, count: null },
   ]
 
+  // Show only accessible sections and always the dashboard
   const filteredNavItems = menuItems.filter(
     (item) => accessibleSections.includes(item.id) || item.id === "overview"
   )
@@ -121,10 +126,48 @@ export function AdminSidebar({
         <nav className="flex-1 p-2 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map((item) => {
-              const isActive = activeSection === item.id
+              // For menu items with href, determine active state by path
+              const isActive = item.href
+                ? pathname.startsWith(item.href)
+                : activeSection === item.id
               const Icon = item.icon
 
-              return (
+              // If href is present, use Link (route navigation). Else, fallback to section state.
+              return item.href ? (
+                <Button
+                  key={item.id}
+                  asChild
+                  variant={isActive ? "default" : "ghost"}
+                  className={`w-full ${
+                    sidebarOpen ? "justify-start px-3" : "justify-center px-0"
+                  } h-10 ${
+                    isActive
+                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  title={!sidebarOpen ? item.label : undefined}
+                  onClick={isMobile ? () => setSidebarOpen(false) : undefined}
+                >
+                  <Link href={item.href} className="flex items-center w-full">
+                    <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />
+                    {sidebarOpen && (
+                      <>
+                        <span className="flex-1 text-left text-sm truncate">{item.label}</span>
+                        {item.count && (
+                          <Badge
+                            variant="secondary"
+                            className={`ml-2 text-xs ${
+                              isActive ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
+                            }`}
+                          >
+                            {item.count}
+                          </Badge>
+                        )}
+                      </>
+                    )}
+                  </Link>
+                </Button>
+              ) : (
                 <Button
                   key={item.id}
                   variant={isActive ? "default" : "ghost"}

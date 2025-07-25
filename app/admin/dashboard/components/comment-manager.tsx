@@ -131,7 +131,7 @@ export function CommentManager() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-gray-900">{statusCounts.all}</div>
@@ -166,7 +166,7 @@ export function CommentManager() {
 
       {/* Comments Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full">
           <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
           <TabsTrigger value="pending">Pending ({statusCounts.pending})</TabsTrigger>
           <TabsTrigger value="approved">Approved ({statusCounts.approved})</TabsTrigger>

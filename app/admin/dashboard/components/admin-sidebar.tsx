@@ -130,7 +130,7 @@ export function AdminSidebar({
         <nav className="flex-1 p-2 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map((item) => {
-              // === NEW LOGIC: Only one can be active at a time! ===
+              // Exclusive highlight logic: Only one item is active at a time
               const isActive = item.href
                 ? pathname === item.href
                 : !activeHrefItem && activeSection === item.id

@@ -36,19 +36,17 @@ export function AdminSidebar({
   const [isMobile, setIsMobile] = useState(false)
   const pathname = usePathname()
 
-  // Only one menu item per section, with `href` for route navigation
   const menuItems = [
     { id: "overview", label: "Dashboard", icon: LayoutDashboard, count: null, href: "/admin/dashboard" },
     { id: "blogs", label: "Blog Posts", icon: FileText, count: null, href: "/admin/dashboard/blog-posts" },
-    { id: "videos", label: "Videos", icon: Video, count: null },
-    { id: "categories", label: "Categories", icon: Edit, count: null },
-    { id: "comments", label: "Comments", icon: MessageSquare, count: null },
-    { id: "inbox", label: "Email Inbox", icon: Mail, count: null },
-    { id: "users", label: "Users", icon: Users, count: null },
-    { id: "settings", label: "Settings", icon: Settings, count: null },
+    { id: "videos", label: "Videos", icon: Video, count: null, href: "/admin/dashboard/videos" },
+    { id: "categories", label: "Categories", icon: Edit, count: null, href: "/admin/dashboard/categories" },
+    { id: "comments", label: "Comments", icon: MessageSquare, count: null, href: "/admin/dashboard/comments" },
+    { id: "inbox", label: "Email Inbox", icon: Mail, count: null, href: "/admin/dashboard/inbox" },
+    { id: "users", label: "Users", icon: Users, count: null, href: "/admin/dashboard/users" },
+    { id: "settings", label: "Settings", icon: Settings, count: null, href: "/admin/dashboard/settings" },
   ]
 
-  // Show only accessible sections and always the dashboard
   const filteredNavItems = menuItems.filter(
     (item) => accessibleSections.includes(item.id) || item.id === "overview"
   )
@@ -62,7 +60,6 @@ export function AdminSidebar({
 
   return (
     <>
-      {/* Mobile Overlay */}
       {isMobile && sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden"
@@ -105,11 +102,7 @@ export function AdminSidebar({
               className="hidden md:flex p-1 h-8 w-8"
               aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
             >
-              {sidebarOpen ? (
-                <ChevronLeft className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
+              {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             </Button>
           </div>
         </div>
@@ -126,14 +119,12 @@ export function AdminSidebar({
         <nav className="flex-1 p-2 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map((item) => {
-              // For menu items with href, determine active state by path
-              const isActive = item.href
-                ? pathname.startsWith(item.href)
-                : activeSection === item.id
+              const isActive =
+                pathname === item.href || pathname.startsWith(`${item.href}/`)
+
               const Icon = item.icon
 
-              // If href is present, use Link (route navigation). Else, fallback to section state.
-              return item.href ? (
+              return (
                 <Button
                   key={item.id}
                   asChild
@@ -167,46 +158,11 @@ export function AdminSidebar({
                     )}
                   </Link>
                 </Button>
-              ) : (
-                <Button
-                  key={item.id}
-                  variant={isActive ? "default" : "ghost"}
-                  className={`w-full ${
-                    sidebarOpen ? "justify-start px-3" : "justify-center px-0"
-                  } h-10 ${
-                    isActive
-                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                  onClick={() => {
-                    setActiveSection(item.id)
-                    if (isMobile) setSidebarOpen(false)
-                  }}
-                  title={!sidebarOpen ? item.label : undefined}
-                >
-                  <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />
-                  {sidebarOpen && (
-                    <>
-                      <span className="flex-1 text-left text-sm truncate">{item.label}</span>
-                      {item.count && (
-                        <Badge
-                          variant="secondary"
-                          className={`ml-2 text-xs ${
-                            isActive ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
-                          }`}
-                        >
-                          {item.count}
-                        </Badge>
-                      )}
-                    </>
-                  )}
-                </Button>
               )
             })}
           </div>
         </nav>
 
-        {/* Sidebar Footer */}
         {sidebarOpen && (
           <div className="p-4 border-t border-gray-200 mt-auto">
             <div className="text-xs text-gray-500 text-center">

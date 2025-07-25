@@ -68,7 +68,8 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
           <h3 className="text-lg font-semibold text-gray-900">Share this post</h3>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        {/* Responsive grid for share buttons: 1 col on mobile, more on larger screens */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
           {/* Facebook */}
           <Button
             variant="outline"

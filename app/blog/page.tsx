@@ -158,8 +158,7 @@ export default async function BlogPage({
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 italic font-light max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
               Every post brings you closer to the anime universe.
             </p>
-            {/* ---- ONLY THIS LINE CHANGED ---- */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto px-4">
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-3 sm:p-4 border border-blue-100">
                 <div className="text-xl sm:text-2xl font-bold text-blue-600">{posts.length}</div>
                 <div className="text-xs sm:text-sm text-gray-600">Articles</div>

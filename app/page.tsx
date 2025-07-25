@@ -45,17 +45,17 @@ interface Video {
 
 // --- SEO: Metadata for Home Page ---
 export const metadata = getMetadata({
-  title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
-  description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+  title: ${SITE_NAME} | Anime News & Original Stories That Inspire,
+  description: ${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.,
   path: "/",
   robots: "index,follow",
   openGraph: {
-    title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
-    description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+    title: ${SITE_NAME} | Anime News & Original Stories That Inspire,
+    description: ${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.,
     type: "website",
     images: [
       {
-        url: `${SITE_URL}/cover.jpg`,
+        url: ${SITE_URL}/cover.jpg,
         width: 1200,
         height: 630,
       },
@@ -65,9 +65,9 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: SITE_BRAND_TWITTER,
     creator: SITE_BRAND_TWITTER,
-    title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
-    description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
-    images: [`${SITE_URL}/cover.jpg`],
+    title: ${SITE_NAME} | Anime News & Original Stories That Inspire,
+    description: ${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.,
+    images: [${SITE_URL}/cover.jpg],
   },
   alternates: {
     canonical: getCanonicalUrl("/"),
@@ -78,9 +78,9 @@ export const metadata = getMetadata({
 const schema = getSchema({
   type: "WebPage",
   path: "/",
-  title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
-  description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
-  image: `${SITE_URL}/cover.jpg`,
+  title: ${SITE_NAME} | Anime News & Original Stories That Inspire,
+  description: ${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.,
+  image: ${SITE_URL}/cover.jpg,
 });
 
 // ======= ONLY CHANGE: DATA SHAPE HANDLING HERE =======
@@ -94,9 +94,9 @@ async function getHomePageContent() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
     const [statsResult, videosResult, blogsResult] = await Promise.allSettled([
-      fetch(`${baseUrl}/api/stats`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
-      fetch(`${baseUrl}/api/videos`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
-      fetch(`${baseUrl}/api/blogs`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
+      fetch(${baseUrl}/api/stats, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
+      fetch(${baseUrl}/api/videos, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
+      fetch(${baseUrl}/api/blogs, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
     ]);
     // Stats: just assign the object
     const stats = statsResult.status === "fulfilled" && statsResult.value ? statsResult.value : null;
@@ -272,7 +272,7 @@ export default async function HomePage() {
           {content.latestBlogs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {content.latestBlogs.map((post: BlogPost) => (
-                <Link key={post.id} href={`/blog/${post.slug}`}>
+                <Link key={post.id} href={/blog/${post.slug}}>
                   <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                     <div className="relative h-48 overflow-hidden">
                       <img
@@ -376,7 +376,7 @@ export default async function HomePage() {
           {content.featuredVideos.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {content.featuredVideos.slice(0, 6).map((video: Video) => (
-                <Link key={video.id} href={`/watch/${video.id}`}>
+                <Link key={video.id} href={/watch/${video.id}}>
                   <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                     <div className="relative">
                       <img

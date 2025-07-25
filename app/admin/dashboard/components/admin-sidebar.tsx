@@ -32,7 +32,8 @@ export function AdminSidebar({
   sidebarOpen,
   setSidebarOpen,
 }: AdminSidebarProps) {
-  const { accessibleSections, userRole } = useRole()
+  // --- FIX: remove userRole destructure as per Codex audit ---
+  const { accessibleSections } = useRole()
   const [isMobile, setIsMobile] = useState(false)
   const pathname = usePathname()
 

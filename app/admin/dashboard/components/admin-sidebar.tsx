@@ -36,6 +36,7 @@ export function AdminSidebar({
   const [isMobile, setIsMobile] = useState(false)
   const pathname = usePathname()
 
+  // All menu items now have href for navigation and correct highlighting
   const menuItems = [
     { id: "overview", label: "Dashboard", icon: LayoutDashboard, count: null, href: "/admin/dashboard" },
     { id: "blogs", label: "Blog Posts", icon: FileText, count: null, href: "/admin/dashboard/blog-posts" },
@@ -47,6 +48,7 @@ export function AdminSidebar({
     { id: "settings", label: "Settings", icon: Settings, count: null, href: "/admin/dashboard/settings" },
   ]
 
+  // Show only accessible sections and always the dashboard
   const filteredNavItems = menuItems.filter(
     (item) => accessibleSections.includes(item.id) || item.id === "overview"
   )
@@ -60,6 +62,7 @@ export function AdminSidebar({
 
   return (
     <>
+      {/* Mobile Overlay */}
       {isMobile && sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden"
@@ -102,7 +105,11 @@ export function AdminSidebar({
               className="hidden md:flex p-1 h-8 w-8"
               aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
             >
-              {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {sidebarOpen ? (
+                <ChevronLeft className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>
@@ -119,9 +126,8 @@ export function AdminSidebar({
         <nav className="flex-1 p-2 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map((item) => {
-              const isActive =
-                pathname === item.href || pathname.startsWith(`${item.href}/`)
-
+              // Only highlight if the pathname matches the menu href or is a subroute
+              const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
               const Icon = item.icon
 
               return (
@@ -139,7 +145,7 @@ export function AdminSidebar({
                   title={!sidebarOpen ? item.label : undefined}
                   onClick={isMobile ? () => setSidebarOpen(false) : undefined}
                 >
-                  <Link href={item.href} className="flex items-center w-full">
+                  <Link href={item.href!} className="flex items-center w-full">
                     <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />
                     {sidebarOpen && (
                       <>
@@ -163,6 +169,7 @@ export function AdminSidebar({
           </div>
         </nav>
 
+        {/* Sidebar Footer */}
         {sidebarOpen && (
           <div className="p-4 border-t border-gray-200 mt-auto">
             <div className="text-xs text-gray-500 text-center">

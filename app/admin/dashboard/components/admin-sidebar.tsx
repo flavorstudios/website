@@ -126,9 +126,9 @@ export function AdminSidebar({
         <nav className="flex-1 p-2 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map((item) => {
-              // For menu items with href, determine active state by path
+              // Updated logic: Only highlight the menu item if the current route matches exactly.
               const isActive = item.href
-                ? pathname.startsWith(item.href)
+                ? pathname === item.href
                 : activeSection === item.id
               const Icon = item.icon
 

@@ -1,10 +1,10 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { RefreshCw } from "lucide-react"
+import { RefreshCw, PlusCircle } from "lucide-react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { toast } from "@/components/ui/toast"      // <-- Added import
+import { toast } from "@/components/ui/toast"
 import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions"
 
 export const BlogManager = () => {
@@ -15,10 +15,10 @@ export const BlogManager = () => {
     setIsRevalidating(true)
     try {
       const result = await revalidateBlogAndAdminDashboard()
-      toast(result.message)                         // <-- Use toast instead of alert
+      toast(result.message)
     } catch (error) {
       console.error("Failed to revalidate blog:", error)
-      toast("Failed to revalidate blog section.")   // <-- Use toast instead of alert
+      toast("Failed to revalidate blog section.")
     } finally {
       setIsRevalidating(false)
     }
@@ -30,14 +30,27 @@ export const BlogManager = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
         <h2 className="text-2xl font-semibold">Blog Management</h2>
-        <div className="space-x-2">
-          <Button onClick={handleRevalidateBlog} disabled={isRevalidating} variant="outline" size="sm">
-            <RefreshCw className={`mr-2 h-4 w-4 ${isRevalidating ? "animate-spin" : ""}`} />
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={handleRevalidateBlog}
+            disabled={isRevalidating}
+            variant="outline"
+            size="sm"
+            className="rounded-xl px-4 flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRevalidating ? "animate-spin" : ""}`} />
             {isRevalidating ? "Revalidating..." : "Revalidate Blog Section"}
           </Button>
-          <Button onClick={handleCreatePost}>Create New Post</Button>
+          <Button
+            onClick={handleCreatePost}
+            size="sm"
+            className="rounded-xl px-4 flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow"
+          >
+            <PlusCircle className="h-4 w-4" />
+            Create New Post
+          </Button>
         </div>
       </div>
       {/* Rest of the blog manager component */}

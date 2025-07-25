@@ -36,16 +36,16 @@ export function AdminSidebar({
   const [isMobile, setIsMobile] = useState(false)
   const pathname = usePathname()
 
-  // All menu items now have href for navigation and correct highlighting
+  // Only one menu item per section, with `href` for route navigation
   const menuItems = [
     { id: "overview", label: "Dashboard", icon: LayoutDashboard, count: null, href: "/admin/dashboard" },
     { id: "blogs", label: "Blog Posts", icon: FileText, count: null, href: "/admin/dashboard/blog-posts" },
-    { id: "videos", label: "Videos", icon: Video, count: null, href: "/admin/dashboard/videos" },
-    { id: "categories", label: "Categories", icon: Edit, count: null, href: "/admin/dashboard/categories" },
-    { id: "comments", label: "Comments", icon: MessageSquare, count: null, href: "/admin/dashboard/comments" },
-    { id: "inbox", label: "Email Inbox", icon: Mail, count: null, href: "/admin/dashboard/inbox" },
-    { id: "users", label: "Users", icon: Users, count: null, href: "/admin/dashboard/users" },
-    { id: "settings", label: "Settings", icon: Settings, count: null, href: "/admin/dashboard/settings" },
+    { id: "videos", label: "Videos", icon: Video, count: null },
+    { id: "categories", label: "Categories", icon: Edit, count: null },
+    { id: "comments", label: "Comments", icon: MessageSquare, count: null },
+    { id: "inbox", label: "Email Inbox", icon: Mail, count: null },
+    { id: "users", label: "Users", icon: Users, count: null },
+    { id: "settings", label: "Settings", icon: Settings, count: null },
   ]
 
   // Show only accessible sections and always the dashboard
@@ -126,11 +126,14 @@ export function AdminSidebar({
         <nav className="flex-1 p-2 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map((item) => {
-              // Only highlight if the pathname matches the menu href or is a subroute
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+              // For menu items with href, determine active state by path
+              const isActive = item.href
+                ? pathname.startsWith(item.href)
+                : activeSection === item.id
               const Icon = item.icon
 
-              return (
+              // If href is present, use Link (route navigation). Else, fallback to section state.
+              return item.href ? (
                 <Button
                   key={item.id}
                   asChild
@@ -145,7 +148,7 @@ export function AdminSidebar({
                   title={!sidebarOpen ? item.label : undefined}
                   onClick={isMobile ? () => setSidebarOpen(false) : undefined}
                 >
-                  <Link href={item.href!} className="flex items-center w-full">
+                  <Link href={item.href} className="flex items-center w-full">
                     <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />
                     {sidebarOpen && (
                       <>
@@ -163,6 +166,40 @@ export function AdminSidebar({
                       </>
                     )}
                   </Link>
+                </Button>
+              ) : (
+                <Button
+                  key={item.id}
+                  variant={isActive ? "default" : "ghost"}
+                  className={`w-full ${
+                    sidebarOpen ? "justify-start px-3" : "justify-center px-0"
+                  } h-10 ${
+                    isActive
+                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => {
+                    setActiveSection(item.id)
+                    if (isMobile) setSidebarOpen(false)
+                  }}
+                  title={!sidebarOpen ? item.label : undefined}
+                >
+                  <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />
+                  {sidebarOpen && (
+                    <>
+                      <span className="flex-1 text-left text-sm truncate">{item.label}</span>
+                      {item.count && (
+                        <Badge
+                          variant="secondary"
+                          className={`ml-2 text-xs ${
+                            isActive ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
+                          }`}
+                        >
+                          {item.count}
+                        </Badge>
+                      )}
+                    </>
+                  )}
                 </Button>
               )
             })}

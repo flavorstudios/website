@@ -15,9 +15,16 @@ interface AdminHeaderProps {
 export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
+      {/* flex-wrap and responsive gap for mobile-friendliness */}
+      <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="lg:hidden"
+            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+          >
             <Menu className="h-5 w-5" />
           </Button>
 
@@ -32,7 +39,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
           <Button
             variant="outline"
             size="sm"
@@ -58,7 +65,13 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
             </div>
           </div>
 
-          <Button variant="ghost" size="sm" onClick={onLogout} className="text-red-600 hover:text-red-700">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onLogout}
+            className="text-red-600 hover:text-red-700"
+            aria-label="Logout"
+          >
             <LogOut className="h-4 w-4" />
           </Button>
         </div>

@@ -7,7 +7,7 @@ import { DashboardOverview } from "./components/dashboard-overview"
 import { BlogManager } from "./components/blog-manager"
 import { VideoManager } from "./components/video-manager"
 import { CommentManager } from "./components/comment-manager"
-import { PageCustomizer } from "./components/page-customizer"
+// REMOVED: import { PageCustomizer } from "./components/page-customizer"
 import { SystemTools } from "./components/system-tools"
 import { UserRoleManager } from "./components/user-role-manager"
 import { AdminHeader } from "./components/admin-header"
@@ -115,8 +115,8 @@ export default function AdminDashboardPageClient({
         return <CommentManager />
       case "inbox":
         return <EmailInbox />
-      case "pages":
-        return <PageCustomizer />
+      // REMOVED: case "pages":
+      //   return <PageCustomizer />
       case "system":
         return <SystemTools />
       case "users":

@@ -60,6 +60,10 @@ export function AdminSidebar({
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
+  // === Exclusive Highlight Logic ===
+  // Find if any href item matches the current pathname
+  const activeHrefItem = filteredNavItems.find(item => item.href && pathname === item.href)
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -126,10 +130,10 @@ export function AdminSidebar({
         <nav className="flex-1 p-2 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map((item) => {
-              // Updated logic: Only highlight the menu item if the current route matches exactly.
+              // === NEW LOGIC: Only one can be active at a time! ===
               const isActive = item.href
                 ? pathname === item.href
-                : activeSection === item.id
+                : !activeHrefItem && activeSection === item.id
               const Icon = item.icon
 
               // If href is present, use Link (route navigation). Else, fallback to section state.

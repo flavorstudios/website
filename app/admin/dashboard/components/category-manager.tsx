@@ -53,20 +53,28 @@ export function CategoryManager() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // --- UPDATED: Fetch blog & video categories separately via ?type=blog / ?type=video ---
   const loadCategories = async () => {
     setLoading(true)
     try {
-      const response = await fetch("/api/admin/categories", {
-        credentials: "include",
-      })
-      const data = await response.json()
+      // Fetch both types in parallel
+      const [blogRes, videoRes] = await Promise.all([
+        fetch("/api/admin/categories?type=blog", { credentials: "include" }),
+        fetch("/api/admin/categories?type=video", { credentials: "include" }),
+      ])
+      const blogData = await blogRes.json()
+      const videoData = await videoRes.json()
       // Map title from API to name for UI
-      const all: Category[] = (data.categories || []).map((cat: any) => ({
+      const blogCats: Category[] = (blogData.categories || []).map((cat: any) => ({
         ...cat,
         name: cat.name ?? cat.title,
       }))
-      setBlogCategories(all.filter((cat) => cat.type === "BLOG"))
-      setVideoCategories(all.filter((cat) => cat.type === "VIDEO"))
+      const videoCats: Category[] = (videoData.categories || []).map((cat: any) => ({
+        ...cat,
+        name: cat.name ?? cat.title,
+      }))
+      setBlogCategories(blogCats)
+      setVideoCategories(videoCats)
     } catch (error) {
       setBlogCategories([])
       setVideoCategories([])
@@ -76,9 +84,16 @@ export function CategoryManager() {
     }
   }
 
+  // --- No changes below here unless required by API changes ---
   const createCategory = async (categoryData: Partial<Category>) => {
     try {
-      const payload = { ...categoryData, title: categoryData.name, tooltip: categoryData.tooltip }
+      // Make sure type is always lowercase in the payload for backend filtering
+      const payload = {
+        ...categoryData,
+        title: categoryData.name,
+        tooltip: categoryData.tooltip,
+        ...(categoryData.type ? { type: categoryData.type.toLowerCase() as any } : {}),
+      }
       const response = await fetch("/api/admin/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -126,7 +141,6 @@ export function CategoryManager() {
     }
   }
 
-  // Accepts category object
   const deleteCategory = async (category: Category) => {
     if (!confirm(`Are you sure you want to delete the category "${category.name}"?`)) return
     try {
@@ -221,7 +235,6 @@ export function CategoryManager() {
 }
 
 // ---------- CategoryList ----------
-// Wrapped table in overflow-x-auto for mobile
 function CategoryList({
   categories,
   type,
@@ -277,7 +290,7 @@ function CategoryList({
 }
 
 // ---------- CategoryForm ----------
-// (No changes, your previous CategoryForm follows here as in your snippet)
+// ... (No changes, your previous CategoryForm follows as in your snippet)
 function CategoryForm({
   category,
   type,

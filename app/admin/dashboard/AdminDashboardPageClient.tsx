@@ -18,8 +18,14 @@ import { getAuth, signOut } from "firebase/auth"
 import app, { firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-export default function AdminDashboardPageClient() {
-  const [activeSection, setActiveSection] = useState("overview")
+interface AdminDashboardPageClientProps {
+  initialSection?: string
+}
+
+export default function AdminDashboardPageClient({
+  initialSection = "overview",
+}: AdminDashboardPageClientProps) {
+  const [activeSection, setActiveSection] = useState(initialSection)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [error, setError] = useState("")

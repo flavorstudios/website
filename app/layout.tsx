@@ -48,6 +48,7 @@ const baseMetadata = getMetadata({
 
 export const metadata = {
   ...baseMetadata,
+  viewport, // <-- ensures all pages include meta viewport
   metadataBase: new URL(SITE_URL),
   manifest: "/manifest.webmanifest",
   icons: {

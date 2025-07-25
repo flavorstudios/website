@@ -24,7 +24,12 @@ interface AdminSidebarProps {
   setSidebarOpen: (open: boolean) => void
 }
 
-export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, setSidebarOpen }: AdminSidebarProps) {
+export function AdminSidebar({
+  activeSection,
+  setActiveSection,
+  sidebarOpen,
+  setSidebarOpen,
+}: AdminSidebarProps) {
   const { accessibleSections, userRole } = useRole()
   const [isMobile, setIsMobile] = useState(false)
 
@@ -55,15 +60,19 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
       {/* Mobile Overlay */}
       {isMobile && sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside
-        className={`bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
-          sidebarOpen ? "translate-x-0 w-64" : "-translate-x-full md:translate-x-0 md:w-16"
-        } flex flex-col h-screen overflow-y-auto fixed left-0 top-0 z-50 md:relative md:z-auto`}
+        className={`
+          bg-white border-r border-gray-200 fixed left-0 top-0 h-screen overflow-y-auto z-50
+          transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          w-64 md:translate-x-0 ${sidebarOpen ? "md:w-64" : "md:w-16"}
+          flex flex-col md:relative md:z-auto
+        `}
       >
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200 min-h-[80px] flex items-center">
@@ -89,8 +98,13 @@ export function AdminSidebar({ activeSection, setActiveSection, sidebarOpen, set
               size="sm"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="hidden md:flex p-1 h-8 w-8"
+              aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
             >
-              {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+              {sidebarOpen ? (
+                <ChevronLeft className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>

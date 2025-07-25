@@ -276,9 +276,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        {/* Header - UPDATED FOR MOBILE SUPPORT */}
+        <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <Button variant="ghost" onClick={() => router.back()} className="flex items-center gap-2">
               <ArrowLeft className="h-4 w-4" />
               Back
@@ -288,7 +288,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               <p className="text-gray-600">Write and publish your blog content</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {lastSaved && (
               <span className="text-sm text-gray-500">
                 Last saved: {formatDateTime(lastSaved)}

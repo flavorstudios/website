@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { TrendingUp, FileText, Video, MessageSquare, Eye, Calendar, Activity, Plus, ExternalLink } from "lucide-react"
+import { TrendingUp, FileText, Video, MessageSquare, Eye, Calendar, Activity, Plus, ExternalLink, Users } from "lucide-react"
 
 interface DashboardStats {
   totalPosts: number
@@ -144,11 +144,11 @@ export function DashboardOverview() {
       color: "bg-green-500",
     },
     {
-      title: "Edit Pages",
-      description: "Update website content",
-      icon: FileText,
-      action: "pages",
-      color: "bg-orange-500",
+      title: "Manage Users",
+      description: "Edit user roles and permissions",
+      icon: Users,
+      action: "users",
+      color: "bg-teal-500",
     },
   ]
 

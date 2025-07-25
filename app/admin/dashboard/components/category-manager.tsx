@@ -221,7 +221,7 @@ export function CategoryManager() {
 }
 
 // ---------- CategoryList ----------
-// Minimal, working CategoryList implementation
+// Wrapped table in overflow-x-auto for mobile
 function CategoryList({
   categories,
   type,
@@ -239,38 +239,40 @@ function CategoryList({
     return <p className="text-sm text-gray-500">No categories found.</p>;
   }
   return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr>
-          <th className="text-left py-2">Name</th>
-          <th className="text-left py-2">Slug</th>
-          <th className="text-left py-2">Status</th>
-          <th className="text-left py-2">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {categories.map((cat) => (
-          <tr key={cat.id}>
-            <td className="py-2">{cat.name}</td>
-            <td className="py-2">{cat.slug}</td>
-            <td className="py-2">
-              <Switch
-                checked={cat.isActive}
-                onCheckedChange={(v) => onToggleStatus(cat.id, v)}
-              />
-            </td>
-            <td className="py-2">
-              <Button size="sm" variant="outline" onClick={() => onEdit(cat)} className="mr-2">
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button size="sm" variant="destructive" onClick={() => onDelete(cat)}>
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </td>
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr>
+            <th className="text-left py-2">Name</th>
+            <th className="text-left py-2">Slug</th>
+            <th className="text-left py-2">Status</th>
+            <th className="text-left py-2">Actions</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {categories.map((cat) => (
+            <tr key={cat.id}>
+              <td className="py-2">{cat.name}</td>
+              <td className="py-2">{cat.slug}</td>
+              <td className="py-2">
+                <Switch
+                  checked={cat.isActive}
+                  onCheckedChange={(v) => onToggleStatus(cat.id, v)}
+                />
+              </td>
+              <td className="py-2">
+                <Button size="sm" variant="outline" onClick={() => onEdit(cat)} className="mr-2">
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => onDelete(cat)}>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

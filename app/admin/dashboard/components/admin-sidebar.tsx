@@ -70,12 +70,12 @@ export function AdminSidebar({
           bg-white border-r border-gray-200 fixed left-0 top-0 h-screen overflow-y-auto z-50
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          w-64 md:translate-x-0 ${sidebarOpen ? "md:w-64" : "md:w-16"}
+          w-64 md:translate-x-0 ${sidebarOpen ? "md:w-64" : "md:w-20"}
           flex flex-col md:relative md:z-auto
         `}
       >
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-gray-200 min-h-[80px] flex items-center">
+        <div className={`${sidebarOpen ? "p-4" : "p-2"} border-b border-gray-200 min-h-[80px] flex items-center`}>
           <div className="flex items-center justify-between w-full">
             {sidebarOpen ? (
               <div className="flex items-center gap-3">
@@ -113,12 +113,10 @@ export function AdminSidebar({
         {sidebarOpen && (
           <div className="px-4 py-3 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-gray-600 font-medium text-sm">OM</span>
-              </div>
+              {/* Avatar REMOVED as requested */}
               <div className="min-w-0">
                 <p className="font-medium text-gray-900 text-sm truncate">Administrator</p>
-                <p className="text-xs text-gray-500 truncate">Manage your store</p>
+                <p className="text-xs text-gray-500 truncate">Manage your studio</p>
               </div>
             </div>
           </div>

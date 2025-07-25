@@ -147,7 +147,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <Header blogCategories={blogCategories} videoCategories={videoCategories} />
         )}
 
-        <main>{children}</main>
+        {/* --- Codex: Add Tailwind container for all (non-admin) pages --- */}
+        <main className={!isAdmin ? "container mx-auto px-4" : undefined}>
+          {children}
+        </main>
 
         {!isAdmin && (
           <>

@@ -36,12 +36,11 @@ export const BlogManager = () => {
           <Button
             onClick={handleRevalidateBlog}
             disabled={isRevalidating}
-            variant="outline"
             size="sm"
-            className="rounded-xl px-4 flex items-center gap-2"
+            className="rounded-xl px-4 flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white"
           >
             <RefreshCw className={`h-4 w-4 ${isRevalidating ? "animate-spin" : ""}`} />
-            {isRevalidating ? "Revalidating..." : "Revalidate Blog Section"}
+            {isRevalidating ? "Refreshing..." : "Refresh"}
           </Button>
           <Button
             onClick={handleCreatePost}

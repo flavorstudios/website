@@ -70,7 +70,8 @@ export function WatchPageClient({
       if (categoriesResponse.ok) {
         const categoriesData = await categoriesResponse.json()
         setCategories(
-          (categoriesData.categories || []).map((cat: any) => ({
+          // CODEx FIX: Change (cat: any) => ... to (cat: Category) => ...
+          (categoriesData.categories || []).map((cat: Category) => ({
             id: cat.id || cat.slug,
             name: cat.name,
             slug: cat.slug,

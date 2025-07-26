@@ -35,8 +35,8 @@ export function getMetadata({
   ogImage?: string | { url: string; width?: number; height?: number; alt?: string };
   schema?: WithContext<Thing>;
   robots?: string;
-  openGraph?: Record<string, any>;
-  twitter?: Record<string, any>;
+  openGraph?: Record<string, unknown>;
+  twitter?: Record<string, unknown>;
 }): Metadata {
   const fullTitle =
     title.trim().toLowerCase().includes(SITE_NAME.toLowerCase())
@@ -86,13 +86,15 @@ export function getMetadata({
     siteName: SITE_NAME,
     url: canonical,
     images:
-      Array.isArray(openGraph.images) && openGraph.images.length > 0
-        ? openGraph.images.map((img: any) => ({
-            url: img.url,
-            width: img.width || OG_IMAGE_DEFAULT_WIDTH,
-            height: img.height || OG_IMAGE_DEFAULT_HEIGHT,
-            alt: img.alt || description,
-          }))
+      Array.isArray((openGraph as Record<string, unknown>).images) && (openGraph as Record<string, unknown>).images.length > 0
+        ? (openGraph as Record<string, { url: string; width?: number; height?: number; alt?: string }[]>).images.map(
+            (img: { url: string; width?: number; height?: number; alt?: string }) => ({
+              url: img.url,
+              width: img.width || OG_IMAGE_DEFAULT_WIDTH,
+              height: img.height || OG_IMAGE_DEFAULT_HEIGHT,
+              alt: img.alt || description,
+            })
+          )
         : defaultOpenGraph.images,
   };
 
@@ -102,8 +104,10 @@ export function getMetadata({
     site: SITE_BRAND_TWITTER,
     creator: SITE_BRAND_TWITTER,
     images:
-      Array.isArray(twitter.images) && twitter.images.length > 0
-        ? twitter.images.map((img: any) => (typeof img === "string" ? img : img.url))
+      Array.isArray((twitter as Record<string, unknown>).images) && (twitter as Record<string, unknown>).images.length > 0
+        ? (twitter as Record<string, (string | { url: string })[]>).images.map(
+            (img: string | { url: string }) => (typeof img === "string" ? img : img.url)
+          )
         : defaultTwitter.images,
   };
 

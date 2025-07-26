@@ -8,7 +8,7 @@ export interface CategoryData {
   isActive: boolean;
   count: number;              // Normalized from postCount
   tooltip?: string;
-  [key: string]: any;         // Retain extra SEO/meta fields
+  [key: string]: unknown;     // Retain extra SEO/meta fields
 }
 
 // --- Result Type for Dynamic Categories API ---
@@ -18,11 +18,11 @@ export interface DynamicCategoriesResult {
 }
 
 // --- Utility: Normalize and format category list ---
-function format(list: any[]): CategoryData[] {
+function format(list: Record<string, unknown>[]): CategoryData[] {
   return (list || [])
-    .filter((c) => c.isActive)
-    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-    .map(({ title, postCount, ...rest }) => ({
+    .filter((c) => (c as CategoryData).isActive)
+    .sort((a, b) => ((a as CategoryData).order ?? 0) - ((b as CategoryData).order ?? 0))
+    .map(({ title, postCount, ...rest }: any) => ({
       ...rest,
       name: title,
       count: postCount ?? 0,

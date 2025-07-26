@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import { type UserRole, hasPermission, getAccessibleSections } from "@/lib/role-permissions"
+import { type UserRole, hasPermission, getAccessibleSections, type RolePermissions } from "@/lib/role-permissions"
 
 interface RoleContextType {
   userRole: UserRole
@@ -21,10 +21,10 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const [debugInfo, setDebugInfo] = useState<{ role?: string; email?: string; uid?: string } | null>(null)
 
   // Utility to extract debug info from API error response
-  const extractDebugInfo = (data: any) => ({
-    role: data.role || "unknown",
-    email: data.email || "unknown",
-    uid: data.uid || "unknown",
+  const extractDebugInfo = (data: Record<string, unknown>) => ({
+    role: typeof data.role === "string" ? data.role : "unknown",
+    email: typeof data.email === "string" ? data.email : "unknown",
+    uid: typeof data.uid === "string" ? data.uid : "unknown",
   })
 
   const fetchUserRole = async () => {
@@ -41,9 +41,9 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         return
       }
       if (!res.ok) {
-        setError(data.error || "Failed to fetch role")
+        setError((data as Record<string, unknown>).error as string || "Failed to fetch role")
         if (process.env.NODE_ENV !== "production") {
-          setDebugInfo(extractDebugInfo(data))
+          setDebugInfo(extractDebugInfo(data as Record<string, unknown>))
         }
         return
       }
@@ -52,7 +52,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       } else {
         setError("Unknown role")
         if (process.env.NODE_ENV !== "production") {
-          setDebugInfo(extractDebugInfo(data))
+          setDebugInfo(extractDebugInfo(data as Record<string, unknown>))
         }
       }
     } catch (error) {
@@ -69,7 +69,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const checkPermission = (permission: string) => {
-    return hasPermission(userRole, permission as any)
+    return hasPermission(userRole, permission as keyof RolePermissions)
   }
 
   const accessibleSections = getAccessibleSections(userRole)

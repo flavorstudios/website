@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { commentStore } from "@/lib/comment-store"
+import type { Comment } from "@/lib/comment-store" // Import the Comment type
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,8 +13,8 @@ export async function GET(request: NextRequest) {
     }
 
     const comments = await commentStore.getByPost(postId, postType)
-    const approved = comments.filter((c: any) => c.status === "approved")
-    const result = approved.map((c: any) => ({
+    const approved = comments.filter((c: Comment) => c.status === "approved")
+    const result = approved.map((c: Comment) => ({
       id: c.id,
       author: c.author,
       content: c.content,

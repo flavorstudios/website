@@ -14,7 +14,7 @@ export interface Category {
   postCount: number;
   type: "blog" | "video";
   tooltip?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const categoryStore = {
@@ -22,7 +22,7 @@ export const categoryStore = {
     const data = await fs.readFile(CATEGORIES_PATH, "utf-8");
     return JSON.parse(data);
   },
-  async writeJSON(newData: any) {
+  async writeJSON(newData: unknown) {
     await fs.writeFile(CATEGORIES_PATH, JSON.stringify(newData, null, 2), "utf-8");
   },
 

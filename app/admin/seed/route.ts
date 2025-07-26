@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server"
+import { NextResponse, NextRequest } from "next/server"
 import { initializeSampleData } from "@/lib/content-store"
 import { requireAdmin } from "@/lib/admin-auth"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   // Protect this route: only allow if admin session is valid
-  if (!(await requireAdmin(request as any))) {
+  if (!(await requireAdmin(request as NextRequest))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

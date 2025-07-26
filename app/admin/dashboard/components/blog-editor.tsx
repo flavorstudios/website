@@ -17,13 +17,26 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Dialog, DialogContent } from "@/components/ui/dialog" // Preview Modal
-import BlogPostRenderer from "@/components/BlogPostRenderer"    // Preview Renderer
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import BlogPostRenderer from "@/components/BlogPostRenderer"
 import { RichTextEditor } from "./rich-text-editor"
 import {
   Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info, ChevronDown,
 } from "lucide-react"
 import { toast } from "sonner"
+
+// --- SEO Best Practice constants & helper ---
+const titleMin = 50
+const titleMax = 60
+const descMin = 120
+const descMax = 160
+
+function getLengthClass(length: number, min: number, max: number) {
+  if (length === 0) return "text-gray-500"
+  if (length < min) return "text-yellow-600"
+  if (length > max) return "text-red-600"
+  return "text-green-600"
+}
 
 export interface BlogCategory {
   name: string
@@ -269,6 +282,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     })
   }
 
+  // Get host for SEO preview (fallback SSR safe)
+  const host = typeof window !== "undefined" ? window.location.host : "example.com"
+
   return (
     <>
       <motion.div
@@ -384,22 +400,26 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                     onChange={(e) => setPost((prev) => ({ ...prev, seoTitle: e.target.value }))}
                     placeholder="SEO optimized title..."
                   />
+                  <p className={`text-xs mt-1 ${getLengthClass(post.seoTitle.length, titleMin, titleMax)}`}>
+                    {post.seoTitle.length}/{titleMax} characters
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Meta Description ({post.seoDescription.length}/160)
-                  </label>
+                  <label className="block text-sm font-medium mb-2">Meta Description</label>
                   <Textarea
                     value={post.seoDescription}
                     onChange={(e) =>
                       setPost((prev) => ({
                         ...prev,
-                        seoDescription: e.target.value.slice(0, 160),
+                        seoDescription: e.target.value.slice(0, descMax),
                       }))
                     }
                     placeholder="Brief description for search engines..."
                     rows={3}
                   />
+                  <p className={`text-xs mt-1 ${getLengthClass(post.seoDescription.length, descMin, descMax)}`}>
+                    {post.seoDescription.length}/{descMax} characters
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Keywords</label>
@@ -440,10 +460,26 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                     placeholder="Article"
                   />
                 </div>
+                {/* --- Google-style Search Preview --- */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Search Preview</label>
+                  <div className="border rounded-lg p-4 bg-white space-y-1">
+                    {(post.openGraphImage || post.featuredImage) && (
+                      <img
+                        src={post.openGraphImage || post.featuredImage}
+                        alt="Preview"
+                        className="w-full h-32 object-cover rounded mb-2"
+                      />
+                    )}
+                    <p className="text-xs text-green-700 truncate">{`${host}/${post.slug}`}</p>
+                    <p className="text-blue-800 text-lg leading-snug">{post.seoTitle || post.title || "Untitled"}</p>
+                    <p className="text-gray-700 text-sm line-clamp-2">{post.seoDescription || post.excerpt}</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
-          {/* Sidebar */}
+          {/* Sidebar (unchanged) */}
           <div className="space-y-6">
             {/* Publishing Controls */}
             <Card>
@@ -667,7 +703,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         </div>
       </motion.div>
 
-      {/* 🟢 Preview Modal */}
+      {/* Preview Modal */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="max-w-5xl overflow-y-auto max-h-screen">
           <BlogPostRenderer post={post} />

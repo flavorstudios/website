@@ -13,6 +13,7 @@ export interface BlogPost {
   author: string
   featured: boolean
   imageUrl?: string
+  commentCount?: number    // <-- Codex: enable comment badge support!
 }
 
 export interface Video {
@@ -66,19 +67,20 @@ export async function getDynamicCategories(): Promise<Category[]> {
   return [];
 }
 
-// --------- BLOG POSTS FETCH (returns posts with .categories[]) ---------
+// --------- BLOG POSTS FETCH (returns posts with .categories[] and .commentCount) ---------
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     const response = await fetch("/api/blogs", { cache: "no-store" }); // <-- Codex update
     if (response.ok) {
       const posts = await response.json();
-      // Always expose .categories[] for every post
+      // Always expose .categories[] and .commentCount for every post
       return (Array.isArray(posts) ? posts : []).map((post: BlogPost) => ({
         ...post,
         categories: Array.isArray(post.categories) && post.categories.length > 0
           ? post.categories
           : [post.category],
+        commentCount: typeof post.commentCount === "number" ? post.commentCount : 0, // <--- Codex!
       }));
     }
   } catch (error) {

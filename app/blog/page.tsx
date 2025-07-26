@@ -5,7 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
+import {
+  Calendar,
+  User,
+  Eye,
+  BookOpen,
+  Clock,
+  Star,
+  MessageCircle // <-- Added for comment badge
+} from "lucide-react";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { NewsletterSignup } from "@/components/newsletter-signup";
@@ -14,7 +22,7 @@ import { getCanonicalUrl } from "@/lib/seo/canonical";
 import { getSchema } from "@/lib/seo/schema";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
-import type { BlogPost } from "@/lib/types"; // <-- Adjust if needed
+import type { BlogPost } from "@/lib/types";
 
 // --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
@@ -74,13 +82,11 @@ async function getBlogData() {
       fetch(`${baseUrl}/api/blogs`, { next: { revalidate: 300 } }),
       getDynamicCategories("blog"),
     ]);
-
     let posts: BlogPost[] = [];
     if (postsRes.ok) {
       const data = await postsRes.json();
       posts = Array.isArray(data) ? data : data.posts || [];
     }
-
     return { posts, categories: blogCategories || [] };
   } catch (error) {
     console.error("Failed to fetch blog data:", error);
@@ -89,7 +95,6 @@ async function getBlogData() {
 }
 
 // --- PAGE COMPONENT ---
-// Now accepts searchParams: { category?: string; page?: string; search?: string; sort?: string }
 export default async function BlogPage({
   searchParams,
 }: {
@@ -335,10 +340,9 @@ export default async function BlogPage({
   );
 }
 
-// --- COMPONENTS (as before, with Pagination updated for params) ---
+// --- COMPONENTS (with comment badge) ---
 
 function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority?: boolean }) {
-  // Prefer categories[0] for display; fallback to category
   const mainCategory =
     post.categories && post.categories.length > 0
       ? post.categories[0]
@@ -390,6 +394,11 @@ function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority
                 <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                 {post.views?.toLocaleString() || 0}
               </span>
+              {/* --- COMMENT COUNT BADGE --- */}
+              <span className="flex items-center gap-1">
+                <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                {post.commentCount ?? 0}
+              </span>
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                 {post.readTime || "5 min"}
@@ -403,7 +412,6 @@ function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority
 }
 
 function BlogPostCard({ post }: { post: BlogPost }) {
-  // Prefer categories[0] for display; fallback to category
   const mainCategory =
     post.categories && post.categories.length > 0
       ? post.categories[0]
@@ -456,6 +464,11 @@ function BlogPostCard({ post }: { post: BlogPost }) {
                 <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                 {post.views?.toLocaleString() || 0}
               </span>
+              {/* --- COMMENT COUNT BADGE --- */}
+              <span className="flex items-center gap-1">
+                <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                {post.commentCount ?? 0}
+              </span>
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                 {post.readTime || "5 min"}
@@ -468,7 +481,8 @@ function BlogPostCard({ post }: { post: BlogPost }) {
   );
 }
 
-// --- Updated Pagination component to include search/sort ---
+// --- Pagination & EmptyState remain unchanged, as before ---
+
 function Pagination({
   currentPage,
   totalPages,

@@ -6,13 +6,14 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Plus, Edit, Trash2, GripVertical } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+import CategoryBulkActions from "@/components/admin/category/CategoryBulkActions"
 
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import {
@@ -58,6 +59,8 @@ export function CategoryManager() {
   const [createType, setCreateType] = useState<CategoryType>("BLOG")
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [activeTab, setActiveTab] = useState<"BLOG" | "VIDEO">("BLOG")
 
   useEffect(() => {
     loadCategories()
@@ -189,6 +192,74 @@ export function CategoryManager() {
   const filteredBlogCategories = filterCategories(blogCategories)
   const filteredVideoCategories = filterCategories(videoCategories)
 
+  // ----------- BULK ACTIONS -----------
+  const toggleSelect = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = (checked: boolean, cats: Category[]) => {
+    if (checked) {
+      setSelected(prev => new Set([...prev, ...cats.map(c => c.id)]))
+    } else {
+      setSelected(prev => {
+        const next = new Set(prev)
+        cats.forEach(c => next.delete(c.id))
+        return next
+      })
+    }
+  }
+
+  const handleBulk = async (
+    action: "publish" | "unpublish" | "delete",
+    ids: string[],
+  ) => {
+    if (ids.length === 0) return
+    if (action === "delete" && !confirm(`Delete ${ids.length} category(ies)? This cannot be undone.`))
+      return
+    try {
+      if (action === "delete") {
+        for (const id of ids) {
+          const res = await fetch(`/api/admin/categories/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+          })
+          if (!res.ok) {
+            const err = await res.json()
+            toast(err.error || "Failed to delete category")
+          }
+        }
+      } else {
+        const isActive = action === "publish"
+        for (const id of ids) {
+          const res = await fetch(`/api/admin/categories/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isActive }),
+            credentials: "include",
+          })
+          if (!res.ok) {
+            const err = await res.json()
+            toast(err.error || "Failed to update category")
+          }
+        }
+      }
+      await loadCategories()
+      setSelected(prev => {
+        const next = new Set(prev)
+        ids.forEach(id => next.delete(id))
+        return next
+      })
+    } catch (error) {
+      safeLogError("Bulk action failed:", error)
+      toast("Bulk action failed")
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -196,6 +267,10 @@ export function CategoryManager() {
       </div>
     )
   }
+
+  // Determine which tab is active to filter selection
+  const categoriesForTab =
+    activeTab === "BLOG" ? filteredBlogCategories : filteredVideoCategories
 
   return (
     <div className="space-y-6">
@@ -236,28 +311,80 @@ export function CategoryManager() {
       </div>
 
       {/* Category Tabs */}
-      <Tabs defaultValue="BLOG" className="space-y-6">
+      <Tabs
+        defaultValue="BLOG"
+        className="space-y-6"
+        onValueChange={v => setActiveTab(v as "BLOG" | "VIDEO")}
+      >
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="BLOG">Blog Categories ({filteredBlogCategories.length})</TabsTrigger>
           <TabsTrigger value="VIDEO">Video Categories ({filteredVideoCategories.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="BLOG">
+          <CategoryBulkActions
+            count={filteredBlogCategories.filter(c => selected.has(c.id)).length}
+            onPublish={() =>
+              handleBulk(
+                "publish",
+                filteredBlogCategories.filter(c => selected.has(c.id)).map(c => c.id),
+              )
+            }
+            onUnpublish={() =>
+              handleBulk(
+                "unpublish",
+                filteredBlogCategories.filter(c => selected.has(c.id)).map(c => c.id),
+              )
+            }
+            onDelete={() =>
+              handleBulk(
+                "delete",
+                filteredBlogCategories.filter(c => selected.has(c.id)).map(c => c.id),
+              )
+            }
+          />
           <CategoryList
             categories={filteredBlogCategories}
             type="BLOG"
             onEdit={setEditingCategory}
             onDelete={deleteCategory}
             onToggleStatus={toggleCategoryStatus}
+            selected={selected}
+            toggleSelect={toggleSelect}
+            toggleSelectAll={checked => toggleSelectAll(checked, filteredBlogCategories)}
           />
         </TabsContent>
         <TabsContent value="VIDEO">
+          <CategoryBulkActions
+            count={filteredVideoCategories.filter(c => selected.has(c.id)).length}
+            onPublish={() =>
+              handleBulk(
+                "publish",
+                filteredVideoCategories.filter(c => selected.has(c.id)).map(c => c.id),
+              )
+            }
+            onUnpublish={() =>
+              handleBulk(
+                "unpublish",
+                filteredVideoCategories.filter(c => selected.has(c.id)).map(c => c.id),
+              )
+            }
+            onDelete={() =>
+              handleBulk(
+                "delete",
+                filteredVideoCategories.filter(c => selected.has(c.id)).map(c => c.id),
+              )
+            }
+          />
           <CategoryList
             categories={filteredVideoCategories}
             type="VIDEO"
             onEdit={setEditingCategory}
             onDelete={deleteCategory}
             onToggleStatus={toggleCategoryStatus}
+            selected={selected}
+            toggleSelect={toggleSelect}
+            toggleSelectAll={checked => toggleSelectAll(checked, filteredVideoCategories)}
           />
         </TabsContent>
       </Tabs>
@@ -279,19 +406,25 @@ export function CategoryManager() {
   )
 }
 
-// ---------- CategoryList with drag-and-drop ----------
+// ---------- CategoryList (with bulk select, drag, actions) ----------
 function CategoryList({
   categories,
   type,
   onEdit,
   onDelete,
   onToggleStatus,
+  selected,
+  toggleSelect,
+  toggleSelectAll,
 }: {
   categories: Category[]
   type: CategoryType
   onEdit: (cat: Category) => void
   onDelete: (cat: Category) => void
   onToggleStatus: (id: string, active: boolean) => void
+  selected: Set<string>
+  toggleSelect: (id: string) => void
+  toggleSelectAll: (checked: boolean) => void
 }) {
   const [items, setItems] = useState<Category[]>(categories)
   useEffect(() => {
@@ -328,6 +461,8 @@ function CategoryList({
     return <p className="text-sm text-gray-500">No categories found.</p>
   }
 
+  const allSelected = items.length > 0 && items.every(c => selected.has(c.id))
+
   return (
     <div className="overflow-x-auto">
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -335,6 +470,13 @@ function CategoryList({
           <table className="w-full text-sm">
             <thead>
               <tr>
+                <th className="w-4">
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={v => toggleSelectAll(!!v)}
+                    aria-label="Select all"
+                  />
+                </th>
                 <th className="w-4" />
                 <th className="text-left py-2">Name</th>
                 <th className="text-left py-2">Slug</th>
@@ -350,6 +492,8 @@ function CategoryList({
                   onEdit={onEdit}
                   onDelete={onDelete}
                   onToggleStatus={onToggleStatus}
+                  checked={selected.has(cat.id)}
+                  onCheck={() => toggleSelect(cat.id)}
                 />
               ))}
             </tbody>
@@ -365,11 +509,15 @@ function SortableRow({
   onEdit,
   onDelete,
   onToggleStatus,
+  checked,
+  onCheck,
 }: {
   cat: Category
   onEdit: (cat: Category) => void
   onDelete: (cat: Category) => void
   onToggleStatus: (id: string, active: boolean) => void
+  checked: boolean
+  onCheck: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: cat.id })
 
@@ -380,6 +528,13 @@ function SortableRow({
 
   return (
     <tr ref={setNodeRef} style={style} className="cursor-grab">
+      <td className="px-1">
+        <Checkbox
+          checked={checked}
+          onCheckedChange={onCheck}
+          aria-label={`Select ${cat.name}`}
+        />
+      </td>
       <td className="px-1">
         <span {...attributes} {...listeners} className="cursor-grab">
           <GripVertical className="w-4 h-4" />

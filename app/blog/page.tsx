@@ -13,6 +13,7 @@ import { getCanonicalUrl } from "@/lib/seo/canonical";
 import { getSchema } from "@/lib/seo/schema";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
+import type { BlogPost } from "@/lib/types"; // <-- Adjust if needed
 
 // --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
@@ -73,7 +74,7 @@ async function getBlogData() {
       getDynamicCategories("blog"),
     ]);
 
-    let posts: any[] = [];
+    let posts: BlogPost[] = [];
     if (postsRes.ok) {
       const data = await postsRes.json();
       posts = Array.isArray(data) ? data : data.posts || [];
@@ -104,7 +105,7 @@ export default async function BlogPage({
   const filteredPosts =
     selectedCategory === "all"
       ? posts
-      : posts.filter((post: any) => {
+      : posts.filter((post: BlogPost) => {
           const postCategories =
             post.categories && post.categories.length > 0
               ? post.categories
@@ -119,16 +120,16 @@ export default async function BlogPage({
   const startIndex = (currentPage - 1) * postsPerPage;
   const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
 
-  const featuredPosts = filteredPosts.filter((post: any) => post.featured).slice(0, 3);
-  const regularPosts = paginatedPosts.filter((post: any) => !post.featured);
+  const featuredPosts = filteredPosts.filter((post: BlogPost) => post.featured).slice(0, 3);
+  const regularPosts = paginatedPosts.filter((post: BlogPost) => !post.featured);
 
   // Analytics data (multi-category safe)
-  const totalViews = posts.reduce((sum: number, post: any) => sum + (post.views || 0), 0);
+  const totalViews = posts.reduce((sum: number, post: BlogPost) => sum + (post.views || 0), 0);
   const avgReadTime =
     posts.length > 0
       ? Math.round(
           posts.reduce(
-            (sum: number, post: any) =>
+            (sum: number, post: BlogPost) =>
               sum + Number.parseInt(post.readTime?.replace(" min read", "") || "5"),
             0,
           ) / posts.length,
@@ -192,7 +193,7 @@ export default async function BlogPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Featured Posts</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {featuredPosts.map((post: any, index: number) => (
+              {featuredPosts.map((post: BlogPost, index: number) => (
                 <FeaturedPostCard key={post.id} post={post} priority={index === 0} />
               ))}
             </div>
@@ -226,7 +227,7 @@ export default async function BlogPage({
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-                {regularPosts.map((post: any) => (
+                {regularPosts.map((post: BlogPost) => (
                   <BlogPostCard key={post.id} post={post} />
                 ))}
               </div>
@@ -278,7 +279,7 @@ export default async function BlogPage({
 
 // --- COMPONENTS (as before) ---
 
-function FeaturedPostCard({ post, priority = false }: { post: any; priority?: boolean }) {
+function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority?: boolean }) {
   // Prefer categories[0] for display; fallback to category
   const mainCategory =
     post.categories && post.categories.length > 0
@@ -343,7 +344,7 @@ function FeaturedPostCard({ post, priority = false }: { post: any; priority?: bo
   );
 }
 
-function BlogPostCard({ post }: { post: any }) {
+function BlogPostCard({ post }: { post: BlogPost }) {
   // Prefer categories[0] for display; fallback to category
   const mainCategory =
     post.categories && post.categories.length > 0

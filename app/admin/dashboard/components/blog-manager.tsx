@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { RefreshCw, PlusCircle } from "lucide-react"
+import { RefreshCw, PlusCircle, AlertCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,8 +23,8 @@ import type { BlogPost } from "@/lib/content-store"
 import type { CategoryData } from "@/lib/dynamic-categories"
 import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions"
 
-// Pagination component
-function Pagination({
+// Pagination component (now exported for reuse)
+export function Pagination({
   currentPage,
   totalPages,
   onPageChange,
@@ -49,6 +49,8 @@ function Pagination({
         size="sm"
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
+        aria-label="Go to previous page"
+        title="Previous"
       >
         Previous
       </Button>
@@ -58,6 +60,7 @@ function Pagination({
           variant={p === currentPage ? "default" : "outline"}
           size="sm"
           onClick={() => onPageChange(p)}
+          aria-label={`Go to page ${p}`}
         >
           {p}
         </Button>
@@ -67,6 +70,8 @@ function Pagination({
         size="sm"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
+        aria-label="Go to next page"
+        title="Next"
       >
         Next
       </Button>
@@ -90,6 +95,7 @@ export const BlogManager = () => {
   const POSTS_PER_PAGE = 10
 
   const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadData()
@@ -97,11 +103,15 @@ export const BlogManager = () => {
 
   const loadData = async () => {
     setLoading(true)
+    setError(null)
     try {
       const [postRes, catRes] = await Promise.all([
         fetch("/api/admin/blogs", { credentials: "include" }),
         fetch("/api/admin/categories?type=blog", { credentials: "include" }),
       ])
+      if (!postRes.ok || !catRes.ok) {
+        throw new Error("Failed to load data.")
+      }
       const postData = await postRes.json()
       const catData = await catRes.json()
 
@@ -117,6 +127,7 @@ export const BlogManager = () => {
     } catch (err) {
       console.error("Failed to load posts:", err)
       toast("Failed to load posts")
+      setError("Could not load blog posts. Please refresh or try again later.")
     } finally {
       setLoading(false)
     }
@@ -140,7 +151,7 @@ export const BlogManager = () => {
   }
 
   const deletePost = async (id: string) => {
-    if (!confirm("Delete this post?")) return
+    if (!confirm("Delete this post? This cannot be undone.")) return
     try {
       const res = await fetch(`/api/admin/blogs/${id}`, {
         method: "DELETE",
@@ -205,6 +216,7 @@ export const BlogManager = () => {
   const handleBulk = async (action: "publish" | "unpublish" | "delete") => {
     const ids = Array.from(selected)
     if (ids.length === 0) return
+    if (action === "delete" && !confirm(`Delete ${ids.length} post(s)? This cannot be undone.`)) return
     for (const id of ids) {
       if (action === "delete") await deletePost(id)
       else await togglePublish(id, action === "publish")
@@ -213,17 +225,14 @@ export const BlogManager = () => {
     await loadData()
   }
 
+  // Filters, sorting, pagination
   const filteredPosts = posts.filter((post) => {
     const inCategory =
       category === "all" ||
       post.category === category ||
       (Array.isArray(post.categories) && post.categories.includes(category))
-
     const inStatus = status === "all" || post.status === status
-    const matchesSearch = post.title
-      .toLowerCase()
-      .includes(search.toLowerCase())
-
+    const matchesSearch = post.title.toLowerCase().includes(search.toLowerCase())
     return inCategory && inStatus && matchesSearch
   })
 
@@ -254,6 +263,20 @@ export const BlogManager = () => {
     )
   }
 
+  // --- Error state ---
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+        <p className="text-lg text-gray-800">{error}</p>
+        <Button onClick={loadData} className="mt-6" aria-label="Retry loading">
+          Retry
+        </Button>
+      </div>
+    )
+  }
+
+  // --- Main UI ---
   return (
     <div>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
@@ -264,6 +287,8 @@ export const BlogManager = () => {
             disabled={isRevalidating}
             size="sm"
             className="rounded-xl px-4 flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white"
+            aria-label="Refresh blog posts"
+            title="Refresh blog posts"
           >
             <RefreshCw className={`h-4 w-4 ${isRevalidating ? "animate-spin" : ""}`} />
             {isRevalidating ? "Refreshing..." : "Refresh"}
@@ -272,6 +297,8 @@ export const BlogManager = () => {
             onClick={handleCreatePost}
             size="sm"
             className="rounded-xl px-4 flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow"
+            aria-label="Create new post"
+            title="Create new post"
           >
             <PlusCircle className="h-4 w-4" />
             Create New Post
@@ -288,6 +315,7 @@ export const BlogManager = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full sm:w-60"
+            aria-label="Search by title"
           />
           <CategoryDropdown
             categories={categories}
@@ -295,9 +323,10 @@ export const BlogManager = () => {
             onCategoryChange={setCategory}
             placeholder="All categories"
             className="w-full sm:w-48"
+            aria-label="Category"
           />
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40" aria-label="Status">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -308,7 +337,7 @@ export const BlogManager = () => {
             </SelectContent>
           </Select>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40" aria-label="Sort By">
               <SelectValue placeholder="Sort By" />
             </SelectTrigger>
             <SelectContent>
@@ -327,15 +356,36 @@ export const BlogManager = () => {
           onDelete={() => handleBulk("delete")}
         />
 
-        {/* Table */}
-        <BlogTable
-          posts={paginatedPosts}
-          selected={selected}
-          toggleSelect={toggleSelect}
-          toggleSelectAll={toggleSelectAll}
-          onDelete={deletePost}
-          onTogglePublish={togglePublish}
-        />
+        {/* Table or Empty State */}
+        {paginatedPosts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <svg
+              width="56"
+              height="56"
+              viewBox="0 0 56 56"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="mb-2"
+              aria-hidden
+            >
+              <rect width="56" height="56" rx="12" fill="#F3F4F6" />
+              <path d="M19 29V35C19 35.5523 19.4477 36 20 36H36C36.5523 36 37 35.5523 37 35V29" stroke="#A1A1AA" strokeWidth="2" strokeLinecap="round" />
+              <rect x="15" y="19" width="26" height="10" rx="2" stroke="#A1A1AA" strokeWidth="2" />
+              <circle cx="28" cy="24" r="1.5" fill="#A1A1AA" />
+            </svg>
+            <span className="text-lg font-medium">No blog posts found</span>
+            <span className="text-sm mt-2">Try changing your filters or create a new post.</span>
+          </div>
+        ) : (
+          <BlogTable
+            posts={paginatedPosts}
+            selected={selected}
+            toggleSelect={toggleSelect}
+            toggleSelectAll={toggleSelectAll}
+            onDelete={deletePost}
+            onTogglePublish={togglePublish}
+          />
+        )}
 
         {/* Pagination */}
         <Pagination

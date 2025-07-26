@@ -6,6 +6,9 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto"; // For generating unique IDs
 
+// Import the Category type if available
+import type { Category } from "@/types/category";
+
 const CATEGORIES_PATH = path.join(process.cwd(), "content-data", "categories.json");
 
 async function readJSON() {
@@ -13,7 +16,7 @@ async function readJSON() {
   return JSON.parse(data);
 }
 
-async function writeJSON(newData: any) {
+async function writeJSON(newData: unknown) {
   await fs.writeFile(CATEGORIES_PATH, JSON.stringify(newData, null, 2), "utf-8");
 }
 
@@ -24,16 +27,16 @@ export async function GET(request: NextRequest) {
   try {
     const typeParam = request.nextUrl?.searchParams?.get("type");
     const data = await readJSON();
-    const blog = data.CATEGORIES.blog || [];
-    const watch = data.CATEGORIES.watch || [];
-    let categories;
+    const blog: Category[] = data.CATEGORIES.blog || [];
+    const watch: Category[] = data.CATEGORIES.watch || [];
+    let categories: Category[];
     if (typeParam === "blog") categories = blog;
     else if (typeParam === "video") categories = watch;
     else categories = [...blog, ...watch];
     // Always map title -> name for dashboard compatibility
-    categories = categories.map((c: any) => ({ ...c, name: c.title }));
+    categories = categories.map((c: Category) => ({ ...c, name: c.title }));
     return NextResponse.json({ categories });
-  } catch (error) {
+  } catch (error: unknown) {
     return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
   }
 }
@@ -50,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
     const json = await readJSON();
 
-    let arr;
+    let arr: Category[];
     if (data.type === "blog") arr = json.CATEGORIES.blog;
     else if (data.type === "video") arr = json.CATEGORIES.watch;
     else throw new Error("Invalid category type");
@@ -64,11 +67,11 @@ export async function POST(request: NextRequest) {
         .replace(/(^-|-$)/g, "");
 
     // Check for duplicate (slug, type)
-    if (arr.some((cat: any) => cat.slug === slug)) {
+    if (arr.some((cat: Category) => cat.slug === slug)) {
       throw new Error("Category with this name/type already exists.");
     }
 
-    const category = {
+    const category: Category = {
       id: crypto.randomUUID(),
       title: data.title,
       slug,
@@ -80,7 +83,7 @@ export async function POST(request: NextRequest) {
       order: typeof data.order === "number" ? data.order : 0,
       isActive: data.isActive !== false,
       postCount: 0,
-      // You can add additional fields here if your UI needs them
+      // Add other fields if required
     };
 
     arr.push(category);
@@ -88,9 +91,10 @@ export async function POST(request: NextRequest) {
 
     // Always include name for dashboard compatibility
     return NextResponse.json({ category: { ...category, name: category.title } });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to create category";
     return NextResponse.json(
-      { error: error.message || "Failed to create category" },
+      { error: message },
       { status: 400 }
     );
   }

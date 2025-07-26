@@ -57,9 +57,9 @@ export async function GET(req: NextRequest) {
         error: "Failed to fetch role",
         ...(typeof err === "object" && err !== null
           ? {
-              message: (err as any).message,
-              stack: (err as any).stack,
-              code: (err as any).code,
+              message: (err as { message?: string }).message,
+              stack: (err as { stack?: string }).stack,
+              code: (err as { code?: string }).code,
             }
           : {}),
       },

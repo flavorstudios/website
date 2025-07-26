@@ -47,6 +47,9 @@ export function CategoryManager() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [createType, setCreateType] = useState<CategoryType>("BLOG")
+  // NEW: Filter/Search state
+  const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all") // all | active | inactive
 
   useEffect(() => {
     loadCategories()
@@ -167,6 +170,22 @@ export function CategoryManager() {
     await updateCategory(id, { isActive })
   }
 
+  // ----------- FILTERING (NEW) -----------
+  const filterCategories = (cats: Category[]) =>
+    cats.filter((cat) => {
+      const search = searchTerm.toLowerCase()
+      const matchesSearch =
+        cat.name.toLowerCase().includes(search) ||
+        cat.slug.toLowerCase().includes(search)
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" ? cat.isActive : !cat.isActive)
+      return matchesSearch && matchesStatus
+    })
+
+  const filteredBlogCategories = filterCategories(blogCategories)
+  const filteredVideoCategories = filterCategories(videoCategories)
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -178,7 +197,7 @@ export function CategoryManager() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Category Manager</h2>
           <p className="text-gray-600">Manage blog and video categories</p>
@@ -192,16 +211,37 @@ export function CategoryManager() {
         </Button>
       </div>
 
+      {/* Filters (NEW) */}
+      <div className="flex flex-wrap items-center gap-4 mb-2">
+        <Input
+          placeholder="Search categories…"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full sm:w-60"
+          aria-label="Search categories"
+        />
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-full sm:w-40">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Category Tabs */}
       <Tabs defaultValue="BLOG" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="BLOG">Blog Categories ({blogCategories.length})</TabsTrigger>
-          <TabsTrigger value="VIDEO">Video Categories ({videoCategories.length})</TabsTrigger>
+          <TabsTrigger value="BLOG">Blog Categories ({filteredBlogCategories.length})</TabsTrigger>
+          <TabsTrigger value="VIDEO">Video Categories ({filteredVideoCategories.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="BLOG">
           <CategoryList
-            categories={blogCategories}
+            categories={filteredBlogCategories}
             type="BLOG"
             onEdit={setEditingCategory}
             onDelete={deleteCategory}
@@ -210,7 +250,7 @@ export function CategoryManager() {
         </TabsContent>
         <TabsContent value="VIDEO">
           <CategoryList
-            categories={videoCategories}
+            categories={filteredVideoCategories}
             type="VIDEO"
             onEdit={setEditingCategory}
             onDelete={deleteCategory}
@@ -292,7 +332,6 @@ function CategoryList({
 }
 
 // ---------- CategoryForm ----------
-// ... (No changes, your previous CategoryForm follows as in your snippet)
 function CategoryForm({
   category,
   type,

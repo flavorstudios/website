@@ -28,6 +28,7 @@ import {
   Upload,
   Trash2,
 } from "lucide-react"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 interface SystemStats {
   cpuUsage: number
@@ -112,14 +113,24 @@ export function SystemSettings() {
           <p className="text-muted-foreground">Configure your website and system preferences</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleBackup}>
-            <Download className="h-4 w-4 mr-2" />
-            Backup
-          </Button>
-          <Button onClick={handleSave}>
-            <Save className="h-4 w-4 mr-2" />
-            Save Settings
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" aria-label="Download backup" onClick={handleBackup}>
+                <Download className="h-4 w-4 mr-2" aria-hidden="true" />
+                Backup
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Download site backup</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button aria-label="Save settings" onClick={handleSave}>
+                <Save className="h-4 w-4 mr-2" aria-hidden="true" />
+                Save Settings
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Save all settings</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
@@ -139,7 +150,7 @@ export function SystemSettings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
+                  <Globe className="h-5 w-5" aria-hidden="true" />
                   Site Information
                 </CardTitle>
                 <CardDescription>Basic information about your website</CardDescription>
@@ -187,7 +198,7 @@ export function SystemSettings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
+                  <Settings className="h-5 w-5" aria-hidden="true" />
                   Regional Settings
                 </CardTitle>
                 <CardDescription>Timezone and language preferences</CardDescription>
@@ -237,7 +248,7 @@ export function SystemSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
+                <Shield className="h-5 w-5" aria-hidden="true" />
                 Security & Access
               </CardTitle>
               <CardDescription>Configure security settings and user access</CardDescription>
@@ -272,7 +283,7 @@ export function SystemSettings() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-green-100 text-green-800">
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                    <CheckCircle className="h-3 w-3 mr-1" aria-hidden="true" />
                     Active
                   </Badge>
                   <Switch
@@ -291,7 +302,7 @@ export function SystemSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Mail className="h-5 w-5" />
+                <Mail className="h-5 w-5" aria-hidden="true" />
                 Email Configuration
               </CardTitle>
               <CardDescription>Configure email delivery settings</CardDescription>
@@ -328,9 +339,14 @@ export function SystemSettings() {
                 <Label htmlFor="smtpPassword">Password</Label>
                 <Input id="smtpPassword" type="password" placeholder="••••••••" />
               </div>
-              <Button variant="outline" className="w-full">
-                Test Email Configuration
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" className="w-full" aria-label="Test email configuration">
+                    Test Email Configuration
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Send test email with current configuration</TooltipContent>
+              </Tooltip>
             </CardContent>
           </Card>
         </TabsContent>
@@ -340,7 +356,7 @@ export function SystemSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5" />
+                <Palette className="h-5 w-5" aria-hidden="true" />
                 Theme & Appearance
               </CardTitle>
               <CardDescription>Customize the look and feel of your site</CardDescription>
@@ -363,17 +379,22 @@ export function SystemSettings() {
               <div>
                 <Label htmlFor="primaryColor">Primary Color</Label>
                 <div className="flex items-center gap-2">
-                  <Input id="primaryColor" value="#8B5CF6" />
-                  <div className="w-10 h-10 rounded border bg-purple-500"></div>
+                  <Input id="primaryColor" value="#8B5CF6" aria-label="Primary Color" />
+                  <div className="w-10 h-10 rounded border bg-purple-500" aria-label="Current primary color"></div>
                 </div>
               </div>
               <div>
                 <Label htmlFor="logo">Site Logo</Label>
                 <div className="flex items-center gap-2">
                   <Input id="logo" placeholder="Upload logo..." />
-                  <Button variant="outline">
-                    <Upload className="h-4 w-4" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="outline" aria-label="Upload logo">
+                        <Upload className="h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Upload your site logo</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </CardContent>
@@ -386,7 +407,7 @@ export function SystemSettings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5" />
+                  <Activity className="h-5 w-5" aria-hidden="true" />
                   System Performance
                 </CardTitle>
                 <CardDescription>Current system resource usage</CardDescription>
@@ -395,32 +416,32 @@ export function SystemSettings() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label className="flex items-center gap-2">
-                      <Cpu className="h-4 w-4" />
+                      <Cpu className="h-4 w-4" aria-hidden="true" />
                       CPU Usage
                     </Label>
                     <span className="text-sm font-medium">{systemStats.cpuUsage}%</span>
                   </div>
-                  <Progress value={systemStats.cpuUsage} className="h-2" />
+                  <Progress value={systemStats.cpuUsage} className="h-2" aria-label="CPU Usage Progress" />
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label className="flex items-center gap-2">
-                      <Database className="h-4 w-4" />
+                      <Database className="h-4 w-4" aria-hidden="true" />
                       Memory Usage
                     </Label>
                     <span className="text-sm font-medium">{systemStats.memoryUsage}%</span>
                   </div>
-                  <Progress value={systemStats.memoryUsage} className="h-2" />
+                  <Progress value={systemStats.memoryUsage} className="h-2" aria-label="Memory Usage Progress" />
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label className="flex items-center gap-2">
-                      <HardDrive className="h-4 w-4" />
+                      <HardDrive className="h-4 w-4" aria-hidden="true" />
                       Disk Usage
                     </Label>
                     <span className="text-sm font-medium">{systemStats.diskUsage}%</span>
                   </div>
-                  <Progress value={systemStats.diskUsage} className="h-2" />
+                  <Progress value={systemStats.diskUsage} className="h-2" aria-label="Disk Usage Progress" />
                 </div>
               </CardContent>
             </Card>
@@ -428,7 +449,7 @@ export function SystemSettings() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
+                  <Users className="h-5 w-5" aria-hidden="true" />
                   System Status
                 </CardTitle>
                 <CardDescription>Current system information</CardDescription>
@@ -445,14 +466,14 @@ export function SystemSettings() {
                 <div className="flex items-center justify-between">
                   <Label>Cache Status</Label>
                   <Badge className="bg-green-100 text-green-800">
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                    <CheckCircle className="h-3 w-3 mr-1" aria-hidden="true" />
                     Active
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <Label>Database Status</Label>
                   <Badge className="bg-green-100 text-green-800">
-                    <CheckCircle className="h-3 w-3 mr-1" />
+                    <CheckCircle className="h-3 w-3 mr-1" aria-hidden="true" />
                     Connected
                   </Badge>
                 </div>
@@ -466,7 +487,7 @@ export function SystemSettings() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
+                <Database className="h-5 w-5" aria-hidden="true" />
                 Backup & Restore
               </CardTitle>
               <CardDescription>Manage your website backups and data</CardDescription>
@@ -485,18 +506,33 @@ export function SystemSettings() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button onClick={handleBackup} className="w-full">
-                  <Download className="h-4 w-4 mr-2" />
-                  Create Backup
-                </Button>
-                <Button variant="outline" onClick={handleRestore} className="w-full">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Restore Backup
-                </Button>
-                <Button variant="destructive" className="w-full">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Clear Cache
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button onClick={handleBackup} className="w-full" aria-label="Create backup">
+                      <Download className="h-4 w-4 mr-2" aria-hidden="true" />
+                      Create Backup
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Create a new site backup</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" onClick={handleRestore} className="w-full" aria-label="Restore backup">
+                      <Upload className="h-4 w-4 mr-2" aria-hidden="true" />
+                      Restore Backup
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Restore from a previous backup</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="destructive" className="w-full" aria-label="Clear cache">
+                      <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
+                      Clear Cache
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Clear all system cache</TooltipContent>
+                </Tooltip>
               </div>
 
               <div className="border rounded-lg p-4">
@@ -515,12 +551,22 @@ export function SystemSettings() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                          <Download className="h-3 w-3" />
-                        </Button>
-                        <Button variant="destructive" size="sm">
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="sm" aria-label={`Download ${backup.name}`}>
+                              <Download className="h-3 w-3" aria-hidden="true" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Download backup</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="destructive" size="sm" aria-label={`Delete ${backup.name}`}>
+                              <Trash2 className="h-3 w-3" aria-hidden="true" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Delete backup</TooltipContent>
+                        </Tooltip>
                       </div>
                     </div>
                   ))}

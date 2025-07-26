@@ -146,7 +146,7 @@ export async function deleteComment(id: string) {
 }
 
 // Page content actions
-export async function updatePageContent(page: string, section: string, content: Record<string, any>) {
+export async function updatePageContent(page: string, section: string, content: Record<string, unknown>) {
   if (!(await requireAdminAction())) throw new Error("Unauthorized")
   await pageStore.update(page, section, content, "Admin")
   revalidatePath("/admin/dashboard")

@@ -29,7 +29,7 @@ function getAbsoluteCanonicalUrlForSchema(inputUrl: string): string {
  * Usage:
  *   getSchema({ type: "Blog", ...props })
  */
-export function getSchema<T extends Record<string, any>>({
+export function getSchema<T extends Record<string, unknown>>({
   type = "WebPage",
   path = "/",
   title,

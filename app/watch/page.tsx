@@ -1,5 +1,3 @@
-// app/watch/page.tsx
-
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
@@ -10,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
+// If not already imported, import Category interface:
+// import { Category } from "@/lib/types"; 
 
-// === SEO METADATA (Centralized, Next.js 15+ compatible) ===
 export const metadata = getMetadata({
   title: `${SITE_NAME} Videos | Original Anime, Studio Films & More`,
   description: `Watch original anime, studio films, and exclusive video content from ${SITE_NAME}. Discover our creative world—stream the latest now.`,
@@ -45,7 +44,6 @@ export const metadata = getMetadata({
   },
 });
 
-// === JSON-LD Schema (WebPage for a video gallery page) ===
 const schema = getSchema({
   type: "WebPage",
   path: "/watch",
@@ -54,7 +52,6 @@ const schema = getSchema({
   url: getCanonicalUrl("/watch"),
 });
 
-// --- TYPES ---
 type VideoType = {
   id: string;
   title: string;
@@ -71,8 +68,6 @@ type VideoType = {
   status: string;
 };
 
-// --- DATA FETCHING ---
-// *** UPDATED DATA SHAPE LOGIC HERE ONLY ***
 async function getWatchData() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
@@ -95,7 +90,6 @@ async function getWatchData() {
   }
 }
 
-// --- MAIN PAGE COMPONENT ---
 export default async function WatchPage({
   searchParams,
 }: {
@@ -106,7 +100,6 @@ export default async function WatchPage({
   const currentPage = Number.parseInt(searchParams.page || "1");
   const videosPerPage = 12;
 
-  // Slug normalization helper
   const normalizeSlug = (name: string) =>
     name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
@@ -133,9 +126,9 @@ export default async function WatchPage({
   }, 0);
   const avgDuration = videos.length > 0 ? Math.round(totalDuration / videos.length) : 0;
 
-  // Find the active category name
+  // --- Only this line changed as per Codex audit ---
   const categoryName =
-    categories.find((c: any) => c.slug === selectedCategory)?.name || selectedCategory;
+    categories.find((c: Category) => c.slug === selectedCategory)?.name || selectedCategory;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -243,7 +236,6 @@ export default async function WatchPage({
   );
 }
 
-// --- StatCard (for header stats) ---
 function StatCard({ label, value, color }: { label: string; value: string | number; color: string }) {
   const colorMap: Record<string, string> = {
     blue: "text-blue-600 border-blue-100 bg-gradient-to-br from-blue-50 to-purple-50",
@@ -259,7 +251,6 @@ function StatCard({ label, value, color }: { label: string; value: string | numb
   );
 }
 
-// --- FeaturedVideoCard ---
 function FeaturedVideoCard({ video, priority = false }: { video: VideoType; priority?: boolean }) {
   const thumbnailUrl =
     video.thumbnail ||
@@ -330,7 +321,6 @@ function FeaturedVideoCard({ video, priority = false }: { video: VideoType; prio
   );
 }
 
-// --- VideoCard ---
 function VideoCard({ video }: { video: VideoType }) {
   const thumbnailUrl =
     video.thumbnail ||
@@ -399,7 +389,6 @@ function VideoCard({ video }: { video: VideoType }) {
   );
 }
 
-// --- Pagination ---
 function Pagination({
   currentPage,
   totalPages,
@@ -445,7 +434,6 @@ function Pagination({
   );
 }
 
-// --- EmptyState ---
 function EmptyState({ selectedCategory }: { selectedCategory: string }) {
   return (
     <div className="text-center py-12 sm:py-16 lg:py-20">

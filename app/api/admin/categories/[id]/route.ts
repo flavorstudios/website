@@ -5,13 +5,16 @@ import { type NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 
+// Import the Category type (adjust the import if the path is different)
+import type { Category } from "@/types/category";
+
 const CATEGORIES_PATH = path.join(process.cwd(), "content-data", "categories.json");
 
 async function readJSON() {
   const data = await fs.readFile(CATEGORIES_PATH, "utf-8");
   return JSON.parse(data);
 }
-async function writeJSON(newData: any) {
+async function writeJSON(newData: unknown) {
   await fs.writeFile(CATEGORIES_PATH, JSON.stringify(newData, null, 2), "utf-8");
 }
 
@@ -30,7 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     // Find and update category by ID (both blog & watch arrays)
     let found = false;
     ["blog", "watch"].forEach((type) => {
-      json.CATEGORIES[type] = json.CATEGORIES[type].map((cat: any) => {
+      json.CATEGORIES[type] = json.CATEGORIES[type].map((cat: Category) => {
         if (cat.id === params.id) {
           found = true;
           const { name, ...rest } = data;
@@ -54,12 +57,14 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     // Return updated category with `name` for dashboard
     const updated = [...json.CATEGORIES.blog, ...json.CATEGORIES.watch].find(
-      (cat: any) => cat.id === params.id
+      (cat: Category) => cat.id === params.id
     );
     return NextResponse.json({ category: { ...updated, name: updated.title } });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    // Use type guard for error
+    const message = error instanceof Error ? error.message : "Failed to update category";
     return NextResponse.json(
-      { error: error.message || "Failed to update category" },
+      { error: message },
       { status: 400 }
     );
   }
@@ -76,7 +81,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     let removed = false;
     ["blog", "watch"].forEach((type) => {
       const origLength = json.CATEGORIES[type].length;
-      json.CATEGORIES[type] = json.CATEGORIES[type].filter((cat: any) => cat.id !== params.id);
+      json.CATEGORIES[type] = json.CATEGORIES[type].filter((cat: Category) => cat.id !== params.id);
       if (json.CATEGORIES[type].length !== origLength) {
         removed = true;
       }
@@ -89,9 +94,10 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     await writeJSON(json);
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to delete category";
     return NextResponse.json(
-      { error: error.message || "Failed to delete category" },
+      { error: message },
       { status: 400 }
     );
   }

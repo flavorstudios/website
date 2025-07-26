@@ -386,7 +386,7 @@ function VideoForm({
                 <label className="block text-sm font-medium mb-2">Status</label>
                 <Select
                   value={formData.status}
-                  onValueChange={(value: any) => setFormData((prev) => ({ ...prev, status: value }))}
+                  onValueChange={(value: Video["status"]) => setFormData((prev) => ({ ...prev, status: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue />

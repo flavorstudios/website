@@ -2,6 +2,7 @@
 
 import siteData from "@/content-data/categories.json";
 import BlogPage from "../../page";
+import type { BlogPost } from "@/components/admin/blog/BlogEditor"; // Make sure this import points to your BlogPost interface
 
 /**
  * Blog Category Route
@@ -40,7 +41,7 @@ export default async function BlogCategoryPage({
   //     post.category === categorySlug ||
   //     (Array.isArray(post.categories) && post.categories.includes(categorySlug))
   // );
-  const blogPosts: any[] = [];
+  const blogPosts: BlogPost[] = [];
 
   return (
     <BlogPage

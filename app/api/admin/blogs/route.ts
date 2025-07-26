@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 import { blogStore } from "@/lib/comment-store"
 
+// GET: Fetch all blogs for admin dashboard
 export async function GET(request: NextRequest) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -10,6 +11,7 @@ export async function GET(request: NextRequest) {
   try {
     const blogs = await blogStore.getAll()
 
+    // Return all relevant fields for admin UI
     const formattedBlogs = blogs.map((blog) => ({
       id: blog.id,
       title: blog.title,
@@ -28,7 +30,7 @@ export async function GET(request: NextRequest) {
       updatedAt: blog.updatedAt,
       views: blog.views,
       readTime: blog.readTime,
-      commentCount: blog.commentCount ?? 0, // ✅ Added safely
+      commentCount: blog.commentCount ?? 0, // Always return a number
     }))
 
     return NextResponse.json({ posts: formattedBlogs }, { status: 200 })
@@ -44,6 +46,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// POST: Create a new blog post
 export async function POST(request: NextRequest) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -52,6 +55,7 @@ export async function POST(request: NextRequest) {
   try {
     const blogData = await request.json()
 
+    // Validate required fields
     if (!blogData.title || !blogData.content) {
       return NextResponse.json(
         {
@@ -61,6 +65,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Generate a safe slug
     const slug =
       blogData.slug ||
       blogData.title
@@ -68,17 +73,24 @@ export async function POST(request: NextRequest) {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "")
 
+    const excerpt =
+      blogData.excerpt ||
+      (blogData.content.length > 160
+        ? blogData.content.substring(0, 160) + "..."
+        : blogData.content)
+
+    // Create the blog post
     const blog = await blogStore.create({
       title: blogData.title,
       slug,
       content: blogData.content,
-      excerpt: blogData.excerpt || blogData.content.substring(0, 160) + "...",
+      excerpt,
       status: blogData.status || "draft",
       category: blogData.category || "Episodes",
       tags: blogData.tags || [],
       featuredImage: blogData.featuredImage || "",
       seoTitle: blogData.seoTitle || blogData.title,
-      seoDescription: blogData.seoDescription || blogData.excerpt,
+      seoDescription: blogData.seoDescription || excerpt,
       author: blogData.author || "Flavor Studios",
       publishedAt: blogData.publishedAt || new Date().toISOString(),
       readTime: blogData.readTime || "5 min read",

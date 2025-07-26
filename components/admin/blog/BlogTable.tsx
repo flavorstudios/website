@@ -1,4 +1,4 @@
-'use client'
+"use client"
 import { motion } from 'framer-motion'
 import { Checkbox } from '@/components/ui/checkbox'
 import BlogStatusBadge from './BlogStatusBadge'
@@ -14,7 +14,14 @@ export interface BlogTableProps {
   onTogglePublish: (id: string, publish: boolean) => void
 }
 
-export default function BlogTable({ posts, selected, toggleSelect, toggleSelectAll, onDelete, onTogglePublish }: BlogTableProps) {
+export default function BlogTable({
+  posts,
+  selected,
+  toggleSelect,
+  toggleSelectAll,
+  onDelete,
+  onTogglePublish
+}: BlogTableProps) {
   const allSelected = posts.length > 0 && posts.every((p) => selected.has(p.id))
   return (
     <div className="overflow-x-auto border rounded-lg">
@@ -49,7 +56,7 @@ export default function BlogTable({ posts, selected, toggleSelect, toggleSelectA
               </td>
               <td className="p-3">{post.author}</td>
               <td className="p-3">
-                <BlogStatusBadge status={post.status as any} />
+                <BlogStatusBadge status={post.status as BlogPost["status"]} />
               </td>
               <td className="p-3">{new Date(post.publishedAt || post.createdAt).toLocaleDateString()}</td>
               <td className="p-3 text-right">

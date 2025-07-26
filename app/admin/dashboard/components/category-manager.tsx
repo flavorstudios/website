@@ -1,23 +1,19 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Edit, Trash2, GripVertical } from "lucide-react"
-import { toast } from "@/hooks/use-toast"
-import CategoryBulkActions from "@/components/admin/category/CategoryBulkActions"
+import { Switch } from "@/components/ui/switch"
+import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { createCategorySlug } from "@/lib/dynamic-categories"
-
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
+import { GripVertical, Edit, Trash2 } from "lucide-react"
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core"
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -25,6 +21,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { toast } from "@/hooks/use-toast"
 
 export type CategoryType = "BLOG" | "VIDEO"
 
@@ -39,546 +36,317 @@ export interface Category {
   icon?: string | null
   order: number
   isActive: boolean
-  createdAt: string
-  updatedAt: string
+  createdAt?: string
+  updatedAt?: string
   postCount?: number | null
 }
 
-// Safe client-side error logger (does nothing in prod, logs in dev)
-function safeLogError(...args: unknown[]) {
-  if (process.env.NODE_ENV !== "production") {
-    // eslint-disable-next-line no-console
-    console.error(...args)
-  }
+export interface CategoryListProps {
+  categories: Category[]
+  type: CategoryType
+  onEdit: (category: Category) => void
+  onDelete: (category: Category) => void
+  onToggleStatus: (id: string, isActive: boolean) => void
+  selected: Set<string>
+  toggleSelect: (id: string) => void
+  toggleSelectAll: (checked: boolean) => void
 }
 
-export function CategoryManager() {
-  const [blogCategories, setBlogCategories] = useState<Category[]>([])
-  const [videoCategories, setVideoCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [createType, setCreateType] = useState<CategoryType>("BLOG")
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [activeTab, setActiveTab] = useState<"BLOG" | "VIDEO">("BLOG")
-
-  useEffect(() => {
-    loadCategories()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const loadCategories = async () => {
-    setLoading(true)
-    try {
-      const [blogRes, videoRes] = await Promise.all([
-        fetch("/api/admin/categories?type=blog", { credentials: "include" }),
-        fetch("/api/admin/categories?type=video", { credentials: "include" }),
-      ])
-      const blogData = await blogRes.json()
-      const videoData = await videoRes.json()
-      const blogCats: Category[] = (blogData.categories || []).map((cat: Category) => ({
-        ...cat,
-        name: cat.name ?? cat.title,
-      }))
-      const videoCats: Category[] = (videoData.categories || []).map((cat: Category) => ({
-        ...cat,
-        name: cat.name ?? cat.title,
-      }))
-      setBlogCategories(blogCats)
-      setVideoCategories(videoCats)
-    } catch (error) {
-      setBlogCategories([])
-      setVideoCategories([])
-      safeLogError("Failed to load categories:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const createCategory = async (categoryData: Partial<Category>) => {
-    try {
-      const payload = {
-        ...categoryData,
-        title: categoryData.name,
-        slug: categoryData.slug,
-        tooltip: categoryData.tooltip,
-        ...(categoryData.type
-          ? { type: categoryData.type.toLowerCase() as Lowercase<CategoryType> }
-          : {}),
-      }
-      const response = await fetch("/api/admin/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        credentials: "include",
-      })
-      if (response.ok) {
-        await loadCategories()
-        setShowCreateForm(false)
-        toast({ title: "Category created!" })
-      } else {
-        const error = await response.json()
-        toast(error.error || "Failed to create category")
-      }
-    } catch (error) {
-      safeLogError("Failed to create category:", error)
-      toast("Failed to create category")
-    }
-  }
-
-  const updateCategory = async (id: string, categoryData: Partial<Category>) => {
-    try {
-      const payload = {
-        ...categoryData,
-        ...(categoryData.name ? { title: categoryData.name } : {}),
-        ...(categoryData.slug ? { slug: categoryData.slug } : {}),
-        tooltip: categoryData.tooltip,
-      }
-      const response = await fetch(`/api/admin/categories/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        credentials: "include",
-      })
-      if (response.ok) {
-        await loadCategories()
-        setEditingCategory(null)
-        toast({ title: "Category updated!" })
-      } else {
-        const error = await response.json()
-        toast(error.error || "Failed to update category")
-      }
-    } catch (error) {
-      safeLogError("Failed to update category:", error)
-      toast("Failed to update category")
-    }
-  }
-
-  const deleteCategory = async (category: Category) => {
-    if (!confirm(`Are you sure you want to delete the category "${category.name}"?`)) return
-    try {
-      const response = await fetch(`/api/admin/categories/${category.id}`, {
-        method: "DELETE",
-        credentials: "include",
-      })
-      if (response.ok) {
-        await loadCategories()
-        toast({ title: "Category deleted!" })
-      } else {
-        const error = await response.json()
-        toast(error.error || "Failed to delete category")
-      }
-    } catch (error) {
-      safeLogError("Failed to delete category:", error)
-      toast("Failed to delete category")
-    }
-  }
-
-  const toggleCategoryStatus = async (id: string, isActive: boolean) => {
-    await updateCategory(id, { isActive })
-  }
-
-  // ----------- FILTERING -----------
-  const filterCategories = (cats: Category[]) =>
-    cats.filter((cat) => {
-      const search = searchTerm.toLowerCase()
-      const matchesSearch =
-        cat.name.toLowerCase().includes(search) ||
-        cat.slug.toLowerCase().includes(search)
-      const matchesStatus =
-        statusFilter === "all" ||
-        (statusFilter === "active" ? cat.isActive : !cat.isActive)
-      return matchesSearch && matchesStatus
-    })
-
-  const filteredBlogCategories = filterCategories(blogCategories)
-  const filteredVideoCategories = filterCategories(videoCategories)
-
-  // ----------- BULK ACTIONS -----------
-  const toggleSelect = (id: string) => {
-    setSelected(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
-
-  const toggleSelectAll = (checked: boolean, cats: Category[]) => {
-    if (checked) {
-      setSelected(prev => new Set([...prev, ...cats.map(c => c.id)]))
-    } else {
-      setSelected(prev => {
-        const next = new Set(prev)
-        cats.forEach(c => next.delete(c.id))
-        return next
-      })
-    }
-  }
-
-  const handleBulk = async (
-    action: "publish" | "unpublish" | "delete",
-    ids: string[],
-  ) => {
-    if (ids.length === 0) return
-    if (action === "delete" && !confirm(`Delete ${ids.length} category(ies)? This cannot be undone.`))
-      return
-    try {
-      if (action === "delete") {
-        for (const id of ids) {
-          const res = await fetch(`/api/admin/categories/${id}`, {
-            method: "DELETE",
-            credentials: "include",
-          })
-          if (!res.ok) {
-            const err = await res.json()
-            toast(err.error || "Failed to delete category")
-          }
-        }
-      } else {
-        const isActive = action === "publish"
-        for (const id of ids) {
-          const res = await fetch(`/api/admin/categories/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ isActive }),
-            credentials: "include",
-          })
-          if (!res.ok) {
-            const err = await res.json()
-            toast(err.error || "Failed to update category")
-          }
-        }
-      }
-      await loadCategories()
-      setSelected(prev => {
-        const next = new Set(prev)
-        ids.forEach(id => next.delete(id))
-        return next
-      })
-    } catch (error) {
-      safeLogError("Bulk action failed:", error)
-      toast("Bulk action failed")
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-      </div>
-    )
-  }
-
+// --- Responsive Card for Mobile ---
+function CategoryCard({
+  category,
+  selected,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  toggleSelect,
+}: Omit<SortableRowProps, "attributes" | "listeners" | "setNodeRef" | "transform" | "transition">) {
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Category Manager</h2>
-          <p className="text-gray-600">Manage blog and video categories</p>
+    <div className="sm:hidden bg-white border-b last:border-b-0 p-3 flex flex-col gap-2 rounded-lg shadow-sm mt-2">
+      <div className="flex items-center gap-2 justify-between">
+        <div className="flex items-center gap-2">
+          <Checkbox
+            checked={selected}
+            onCheckedChange={() => toggleSelect(category.id)}
+            aria-label={`Select ${category.name}`}
+          />
+          <span
+            className="inline-block w-4 h-4 rounded-full border"
+            style={{ backgroundColor: category.color || "#6366f1" }}
+            title={category.color || "#6366f1"}
+          />
+          <span className="font-bold">{category.name}</span>
+          <span className="text-xs px-2 py-1 bg-gray-100 rounded ml-2">{category.slug}</span>
+          <span className="text-xs px-2 py-1 bg-gray-200 rounded ml-2">{category.type}</span>
         </div>
-        <Button
-          onClick={() => setShowCreateForm(true)}
-          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Category
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="icon" aria-label="Edit" onClick={() => onEdit(category)}>
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-red-600"
+            aria-label="Delete"
+            onClick={() => onDelete(category)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap items-center gap-4 mb-2">
-        <Input
-          placeholder="Search categories…"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:w-60"
-          aria-label="Search categories"
-        />
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-40">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <div>
+          {category.description && (
+            <span className="text-gray-700">{category.description}</span>
+          )}
+          {category.tooltip && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="ml-1 underline cursor-help text-blue-500">?</span>
+              </TooltipTrigger>
+              <TooltipContent>{category.tooltip}</TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          <span>Status:{" "}
+            <Switch
+              checked={category.isActive}
+              onCheckedChange={(v) => onToggleStatus(category.id, !!v)}
+              aria-label={`Toggle ${category.name} status`}
+            />
+          </span>
+          <span>Posts: {category.postCount ?? 0}</span>
+        </div>
       </div>
-
-      {/* Category Tabs */}
-      <Tabs
-        defaultValue="BLOG"
-        className="space-y-6"
-        onValueChange={v => setActiveTab(v as "BLOG" | "VIDEO")}
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="BLOG">Blog Categories ({filteredBlogCategories.length})</TabsTrigger>
-          <TabsTrigger value="VIDEO">Video Categories ({filteredVideoCategories.length})</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="BLOG">
-          <CategoryBulkActions
-            count={filteredBlogCategories.filter(c => selected.has(c.id)).length}
-            onPublish={() =>
-              handleBulk(
-                "publish",
-                filteredBlogCategories.filter(c => selected.has(c.id)).map(c => c.id),
-              )
-            }
-            onUnpublish={() =>
-              handleBulk(
-                "unpublish",
-                filteredBlogCategories.filter(c => selected.has(c.id)).map(c => c.id),
-              )
-            }
-            onDelete={() =>
-              handleBulk(
-                "delete",
-                filteredBlogCategories.filter(c => selected.has(c.id)).map(c => c.id),
-              )
-            }
-          />
-          <CategoryList
-            categories={filteredBlogCategories}
-            type="BLOG"
-            onEdit={setEditingCategory}
-            onDelete={deleteCategory}
-            onToggleStatus={toggleCategoryStatus}
-            selected={selected}
-            toggleSelect={toggleSelect}
-            toggleSelectAll={checked => toggleSelectAll(checked, filteredBlogCategories)}
-          />
-        </TabsContent>
-        <TabsContent value="VIDEO">
-          <CategoryBulkActions
-            count={filteredVideoCategories.filter(c => selected.has(c.id)).length}
-            onPublish={() =>
-              handleBulk(
-                "publish",
-                filteredVideoCategories.filter(c => selected.has(c.id)).map(c => c.id),
-              )
-            }
-            onUnpublish={() =>
-              handleBulk(
-                "unpublish",
-                filteredVideoCategories.filter(c => selected.has(c.id)).map(c => c.id),
-              )
-            }
-            onDelete={() =>
-              handleBulk(
-                "delete",
-                filteredVideoCategories.filter(c => selected.has(c.id)).map(c => c.id),
-              )
-            }
-          />
-          <CategoryList
-            categories={filteredVideoCategories}
-            type="VIDEO"
-            onEdit={setEditingCategory}
-            onDelete={deleteCategory}
-            onToggleStatus={toggleCategoryStatus}
-            selected={selected}
-            toggleSelect={toggleSelect}
-            toggleSelectAll={checked => toggleSelectAll(checked, filteredVideoCategories)}
-          />
-        </TabsContent>
-      </Tabs>
-
-      {/* Create/Edit Form Modal */}
-      {(showCreateForm || editingCategory) && (
-        <CategoryForm
-          category={editingCategory}
-          type={editingCategory?.type || createType}
-          onSave={editingCategory ? (data) => updateCategory(editingCategory.id, data) : createCategory}
-          onCancel={() => {
-            setShowCreateForm(false)
-            setEditingCategory(null)
-          }}
-          onTypeChange={setCreateType}
-        />
-      )}
     </div>
   )
 }
 
-// ---------- CategoryList (with tooltips/aria-labels) ----------
-// ...unchanged...
-
-// ---------- CategoryForm ----------
-function CategoryForm({
-  category,
+// --- Main Table/List ---
+export default function CategoryList({
+  categories,
   type,
-  onSave,
-  onCancel,
-  onTypeChange,
-}: {
-  category: Category | null
-  type: CategoryType
-  onSave: (data: Partial<Category>) => void
-  onCancel: () => void
-  onTypeChange: (type: CategoryType) => void
-}) {
-  const [formData, setFormData] = useState({
-    name: category?.name || "",
-    slug: category?.slug || createCategorySlug(category?.name || ""),
-    description: category?.description || "",
-    tooltip: category?.tooltip || "",
-    color: category?.color || "#6366f1",
-    type: category?.type || type,
-    isActive: category?.isActive ?? true,
-  })
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  selected,
+  toggleSelect,
+  toggleSelectAll,
+}: CategoryListProps) {
+  const [items, setItems] = useState<Category[]>([])
+  const [width, setWidth] = useState<number>(1024) // screen size for mobile/table
 
-  // Auto-update slug on name change (only on create, not edit)
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newName = e.target.value
-    setFormData((prev) => ({
-      ...prev,
-      name: newName,
-      ...(category ? {} : { slug: createCategorySlug(newName) }),
-    }))
+  useEffect(() => {
+    setItems([...categories].sort((a, b) => a.order - b.order))
+  }, [categories])
+
+  useEffect(() => {
+    // Simple resize handler to toggle mobile/table
+    const handleResize = () => setWidth(window.innerWidth)
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
+  const sensors = useSensors(useSensor(PointerSensor))
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = items.findIndex((i) => i.id === active.id)
+    const newIndex = items.findIndex((i) => i.id === over.id)
+    const newItems = arrayMove(items, oldIndex, newIndex)
+    setItems(newItems)
+    try {
+      await fetch("/api/admin/categories/reorder", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ ids: newItems.map((c) => c.id), type: type.toLowerCase() }),
+      })
+    } catch (err) {
+      toast("Failed to reorder categories")
+      // console.error("Failed to reorder categories", err)
+    }
   }
 
-  // Ensure slug is unique before saving
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      const res = await fetch(
-        `/api/admin/categories?type=${formData.type.toLowerCase()}`,
-        { credentials: "include" }
-      )
-      const data = await res.json()
-      const categories: Category[] = (data.categories || []).map((c: Category) => ({
-        ...c,
-        name: c.name ?? c.title,
-      }))
-      if (
-        categories.some(
-          (cat) => cat.slug === formData.slug && cat.id !== category?.id
-        )
-      ) {
-        toast("Slug already exists for this category type")
-        return
-      }
-    } catch (error) {
-      toast("Failed to validate slug")
-      return
-    }
-    onSave({
-      ...formData,
-      tooltip: formData.tooltip,
-      type: formData.type,
-      order: category?.order || 0,
-    })
+  const allSelected = items.length > 0 && items.every((c) => selected.has(c.id))
+
+  // --- Responsive: Card view for mobile (sm breakpoint < 640px)
+  if (width < 640) {
+    return (
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <Checkbox
+            checked={allSelected}
+            onCheckedChange={(v) => toggleSelectAll(!!v)}
+            aria-label="Select all categories"
+          />
+          <span className="text-xs">Select all</span>
+        </div>
+        {items.map((cat) => (
+          <CategoryCard
+            key={cat.id}
+            category={cat}
+            selected={selected.has(cat.id)}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onToggleStatus={onToggleStatus}
+            toggleSelect={toggleSelect}
+          />
+        ))}
+      </div>
+    )
+  }
+
+  // --- Table view for desktop/tablet
+  return (
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={items.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+        <div className="overflow-x-auto border rounded-lg">
+          <table className="min-w-full bg-white text-sm">
+            <thead className="bg-gray-50 text-xs uppercase text-gray-500 sticky top-0 z-10">
+              <tr>
+                <th className="p-3 w-8">
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={(v) => toggleSelectAll(!!v)}
+                    aria-label="Select all categories"
+                  />
+                </th>
+                <th className="p-3 w-8" />
+                <th className="p-3 text-left">Name</th>
+                <th className="p-3 text-left">Slug</th>
+                <th className="p-3 text-left">Description</th>
+                <th className="p-3 text-center">Status</th>
+                <th className="p-3 text-right">Posts</th>
+                <th className="p-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((cat) => (
+                <SortableRow
+                  key={cat.id}
+                  category={cat}
+                  selected={selected.has(cat.id)}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onToggleStatus={onToggleStatus}
+                  toggleSelect={toggleSelect}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SortableContext>
+    </DndContext>
+  )
+}
+
+interface SortableRowProps {
+  category: Category
+  selected: boolean
+  onEdit: (category: Category) => void
+  onDelete: (category: Category) => void
+  onToggleStatus: (id: string, isActive: boolean) => void
+  toggleSelect: (id: string) => void
+  // (DnD-kit hooks, used below)
+  attributes?: any
+  listeners?: any
+  setNodeRef?: any
+  transform?: any
+  transition?: any
+}
+
+function SortableRow({
+  category,
+  selected,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+  toggleSelect,
+  ...dndProps
+}: SortableRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: category.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>{category ? "Edit Category" : "Create New Category"}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Name</label>
-              <Input
-                value={formData.name}
-                onChange={handleNameChange}
-                required
-                placeholder="Category name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Slug</label>
-              <Input
-                value={formData.slug}
-                onChange={e => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                required
-                placeholder="category-slug"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Type</label>
-              <Select
-                value={formData.type}
-                onValueChange={(value: CategoryType) => {
-                  setFormData((prev) => ({ ...prev, type: value }))
-                  onTypeChange(value)
-                }}
-                disabled={!!category}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="BLOG">Blog Category</SelectItem>
-                  <SelectItem value="VIDEO">Video Category</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Description</label>
-              <Textarea
-                value={formData.description ?? ""}
-                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-                rows={3}
-                placeholder="Optional description"
-              />
-            </div>
-            {/* Tooltip Field */}
-            <div>
-              <label className="block text-sm font-medium mb-2">Tooltip</label>
-              <Input
-                value={formData.tooltip}
-                onChange={(e) => setFormData((prev) => ({ ...prev, tooltip: e.target.value }))}
-                placeholder="Short tooltip text"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Color</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={formData.color ?? "#6366f1"}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, color: e.target.value }))}
-                  className="w-12 h-10 rounded border"
-                />
-                <Input
-                  value={formData.color ?? "#6366f1"}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, color: e.target.value }))}
-                  placeholder="#6366f1"
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Active</label>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Switch
-                    aria-label="Active"
-                    checked={formData.isActive}
-                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, isActive: checked }))}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>Toggle active status</TooltipContent>
-              </Tooltip>
-            </div>
-            <div className="flex justify-end gap-4 pt-4">
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button type="submit" className="bg-gradient-to-r from-purple-600 to-blue-600">
-                {category ? "Update Category" : "Create Category"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+    <tr ref={setNodeRef} style={style} className="border-b last:border-b-0 hover:bg-gray-50">
+      <td className="p-3">
+        <Checkbox
+          checked={selected}
+          onCheckedChange={() => toggleSelect(category.id)}
+          aria-label={`Select ${category.name}`}
+        />
+      </td>
+      <td className="p-3 cursor-grab" {...attributes} {...listeners} aria-label="Drag handle">
+        <GripVertical className="h-4 w-4 text-gray-400" />
+      </td>
+      {/* --- Name + Color badge + Tooltip on hover --- */}
+      <td className="p-3 flex items-center gap-2">
+        <span
+          className="inline-block w-3 h-3 rounded-full border"
+          style={{ backgroundColor: category.color || "#6366f1" }}
+          title={category.color || "#6366f1"}
+        />
+        <span className="font-medium">{category.name}</span>
+        {category.tooltip && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="ml-1 underline cursor-help text-blue-500">?</span>
+            </TooltipTrigger>
+            <TooltipContent>{category.tooltip}</TooltipContent>
+          </Tooltip>
+        )}
+      </td>
+      <td className="p-3 text-gray-500">{category.slug}</td>
+      <td className="p-3 text-gray-700">
+        {category.description || <span className="text-gray-300">—</span>}
+      </td>
+      <td className="p-3 text-center">
+        <Switch
+          checked={category.isActive}
+          onCheckedChange={(v) => onToggleStatus(category.id, !!v)}
+          aria-label={`Toggle ${category.name} status`}
+        />
+      </td>
+      <td className="p-3 text-right">{category.postCount ?? 0}</td>
+      <td className="p-3 text-right flex gap-2 justify-end">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" aria-label="Edit category" title="Edit" onClick={() => onEdit(category)}>
+              <Edit className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Edit</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-red-600"
+              aria-label="Delete category"
+              title="Delete"
+              onClick={() => onDelete(category)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Delete</TooltipContent>
+        </Tooltip>
+      </td>
+    </tr>
   )
 }

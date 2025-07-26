@@ -26,8 +26,10 @@ interface AdminSidebarProps {
   setSidebarOpen: (open: boolean) => void
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function AdminSidebar({
   activeSection,
+  activeSection: _activeSection,
   setActiveSection,
   sidebarOpen,
   setSidebarOpen,
@@ -36,13 +38,6 @@ export function AdminSidebar({
   const { accessibleSections } = useRole()
   const [isMobile, setIsMobile] = useState(false)
   const pathname = usePathname()
-
-  // Universal isActive helper (Codex audit)
-  const isActive = (href?: string) => {
-    if (!href) return false
-    if (href === "/" && pathname === "/") return true
-    return pathname === href || pathname.startsWith(`${href}/`)
-  }
 
   // Only one menu item per section, with `href` for route navigation
   const menuItems = [
@@ -60,6 +55,20 @@ export function AdminSidebar({
   const filteredNavItems = menuItems.filter(
     (item) => accessibleSections.includes(item.id) || item.id === "overview"
   )
+
+  // Codex audit: Longest prefix active item logic
+  const activeHrefItem = filteredNavItems
+    .filter(
+      (item) =>
+        item.href &&
+        (pathname === item.href || pathname.startsWith(`${item.href}/`)),
+    )
+    .sort((a, b) => (b.href!.length - a.href!.length))[0]
+
+  const isActive = (href?: string) => {
+    if (!href) return false
+    return href === activeHrefItem?.href
+  }
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)

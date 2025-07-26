@@ -104,12 +104,13 @@ export const BlogManager = () => {
       ])
       const postData = await postRes.json()
       const catData = await catRes.json()
+
       setPosts(postData.posts || [])
       setCategories(
-        (catData.categories || []).map((c: any) => ({
-          name: c.name || c.title,
-          slug: c.slug,
-          count: c.postCount || 0,
+        (catData.categories || []).map((c: Partial<CategoryData>) => ({
+          name: c.name ?? (c as { title?: string }).title ?? "",
+          slug: c.slug ?? "",
+          count: c.count ?? (c as { postCount?: number }).postCount ?? 0,
           tooltip: c.tooltip,
         }))
       )
@@ -216,8 +217,7 @@ export const BlogManager = () => {
     const inCategory =
       category === "all" ||
       post.category === category ||
-      (Array.isArray((post as any).categories) &&
-        (post as any).categories.includes(category))
+      (Array.isArray(post.categories) && post.categories.includes(category))
 
     const inStatus = status === "all" || post.status === status
     const matchesSearch = post.title

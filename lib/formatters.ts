@@ -1,11 +1,14 @@
 // lib/formatters.ts
 
+import type { BlogPost } from "./content-store"; // Adjust path if needed
+import type { Video } from "./content-store";    // Adjust path if needed
+
 /**
  * Formats a blog object for safe public API responses.
  * Only exposes non-admin fields.
  * Adds .categories[] for multi-category support (fallbacks to [category]).
  */
-export function formatPublicBlog(blog: any) {
+export function formatPublicBlog(blog: BlogPost) {
   return {
     id: blog.id,
     title: blog.title,
@@ -30,7 +33,7 @@ export function formatPublicBlog(blog: any) {
  * Only exposes non-admin fields.
  * Adds .categories[] for multi-category support (fallbacks to [category]).
  */
-export function formatPublicVideo(video: any) {
+export function formatPublicVideo(video: Video) {
   return {
     id: video.id,
     title: video.title,
@@ -53,7 +56,7 @@ export function formatPublicVideo(video: any) {
  * Optionally, you can add formatters for other types—like stats, podcasts, etc.
  * Here’s a generic stats passthrough (customize if you want to strip fields).
  */
-export function formatPublicStats(stats: any) {
+export function formatPublicStats(stats: Record<string, unknown>) {
   // Adjust this function if you ever need to hide fields in stats
   return stats;
 }

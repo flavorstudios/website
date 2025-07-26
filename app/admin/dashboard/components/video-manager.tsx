@@ -9,6 +9,11 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CategoryDropdown } from "@/components/ui/category-dropdown"
 import { toast } from "@/components/ui/toast"
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip"
 import { Info, RefreshCw, Eye, Pencil, Trash2, Upload, Archive } from "lucide-react"
 
 // Types
@@ -138,7 +143,7 @@ function VideoBulkActions({
   )
 }
 
-// Table View
+// Table View (with accessible Tooltips & aria-labels)
 function VideoTable({
   videos,
   selected,
@@ -225,33 +230,68 @@ function VideoTable({
                 <td className="p-3 text-right hidden sm:table-cell">{video.views?.toLocaleString() ?? 0}</td>
                 <td className="p-3 hidden md:table-cell">{video.duration}</td>
                 <td className="p-3 text-right flex flex-wrap gap-2 justify-end">
-                  <Button asChild variant="ghost" size="icon" title="Edit">
-                    <a href={`/admin/video/edit?id=${video.id}`}>
-                      <Pencil className="h-4 w-4" />
-                    </a>
-                  </Button>
-                  <Button asChild variant="ghost" size="icon" title="View on site">
-                    <a href={`/watch/${video.slug}`} target="_blank" rel="noopener noreferrer">
-                      <Eye className="h-4 w-4" />
-                    </a>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    title={isPublished ? "Unpublish" : "Publish"}
-                    onClick={() => onTogglePublish(video.id, !isPublished)}
-                  >
-                    {isPublished ? <Archive className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-600"
-                    title="Delete"
-                    onClick={() => onDelete(video.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {/* --- Tooltips & Aria Labels for all actions --- */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Edit video"
+                        title="Edit"
+                      >
+                        <a href={`/admin/video/edit?id=${video.id}`}>
+                          <Pencil className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Edit</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="icon"
+                        aria-label="View on site"
+                        title="View"
+                      >
+                        <a href={`/watch/${video.slug}`} target="_blank" rel="noopener noreferrer">
+                          <Eye className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>View</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={isPublished ? "Unpublish video" : "Publish video"}
+                        title={isPublished ? "Unpublish" : "Publish"}
+                        onClick={() => onTogglePublish(video.id, !isPublished)}
+                      >
+                        {isPublished ? <Archive className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{isPublished ? "Unpublish" : "Publish"}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-600"
+                        aria-label="Delete video"
+                        title="Delete"
+                        onClick={() => onDelete(video.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete</TooltipContent>
+                  </Tooltip>
                 </td>
               </tr>
             )

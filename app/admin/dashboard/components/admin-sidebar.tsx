@@ -37,6 +37,13 @@ export function AdminSidebar({
   const [isMobile, setIsMobile] = useState(false)
   const pathname = usePathname()
 
+  // Universal isActive helper (Codex audit)
+  const isActive = (href?: string) => {
+    if (!href) return false
+    if (href === "/" && pathname === "/") return true
+    return pathname === href || pathname.startsWith(`${href}/`)
+  }
+
   // Only one menu item per section, with `href` for route navigation
   const menuItems = [
     { id: "overview", label: "Dashboard", icon: LayoutDashboard, count: null, href: "/admin/dashboard" },
@@ -60,10 +67,6 @@ export function AdminSidebar({
     window.addEventListener("resize", checkMobile)
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
-
-  // === Exclusive Highlight Logic ===
-  // Find if any href item matches the current pathname
-  const activeHrefItem = filteredNavItems.find(item => item.href && pathname === item.href)
 
   return (
     <>
@@ -131,58 +134,56 @@ export function AdminSidebar({
         <nav className="flex-1 p-2 overflow-y-auto">
           <div className="space-y-1">
             {filteredNavItems.map((item) => {
-              // Exclusive highlight logic: Only one item is active at a time
-              const isActive = item.href
-                ? pathname === item.href
-                : !activeHrefItem && activeSection === item.id
+              const active = isActive(item.href)
               const Icon = item.icon
 
-              // If href is present, use Link (route navigation). Else, fallback to section state.
-              return item.href ? (
+              // If href is present, use Link (route navigation).
+              if (item.href) {
+                return (
+                  <Button
+                    key={item.id}
+                    asChild
+                    variant={active ? "default" : "ghost"}
+                    className={`w-full ${
+                      sidebarOpen ? "justify-start px-3" : "justify-center px-0"
+                    } h-10 ${
+                      active
+                        ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                    title={!sidebarOpen ? item.label : undefined}
+                    onClick={isMobile ? () => setSidebarOpen(false) : undefined}
+                  >
+                    <Link href={item.href} className="flex items-center w-full">
+                      <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />
+                      {sidebarOpen && (
+                        <>
+                          <span className="flex-1 text-left text-sm truncate">{item.label}</span>
+                          {item.count && (
+                            <Badge
+                              variant="secondary"
+                              className={`ml-2 text-xs ${
+                                active ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
+                              }`}
+                            >
+                              {item.count}
+                            </Badge>
+                          )}
+                        </>
+                      )}
+                    </Link>
+                  </Button>
+                )
+              }
+
+              // Section only (no href), never highlighted
+              return (
                 <Button
                   key={item.id}
-                  asChild
-                  variant={isActive ? "default" : "ghost"}
+                  variant="ghost"
                   className={`w-full ${
                     sidebarOpen ? "justify-start px-3" : "justify-center px-0"
-                  } h-10 ${
-                    isActive
-                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                  title={!sidebarOpen ? item.label : undefined}
-                  onClick={isMobile ? () => setSidebarOpen(false) : undefined}
-                >
-                  <Link href={item.href} className="flex items-center w-full">
-                    <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />
-                    {sidebarOpen && (
-                      <>
-                        <span className="flex-1 text-left text-sm truncate">{item.label}</span>
-                        {item.count && (
-                          <Badge
-                            variant="secondary"
-                            className={`ml-2 text-xs ${
-                              isActive ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
-                            }`}
-                          >
-                            {item.count}
-                          </Badge>
-                        )}
-                      </>
-                    )}
-                  </Link>
-                </Button>
-              ) : (
-                <Button
-                  key={item.id}
-                  variant={isActive ? "default" : "ghost"}
-                  className={`w-full ${
-                    sidebarOpen ? "justify-start px-3" : "justify-center px-0"
-                  } h-10 ${
-                    isActive
-                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                  } h-10 text-gray-700 hover:bg-gray-100`}
                   onClick={() => {
                     setActiveSection(item.id)
                     if (isMobile) setSidebarOpen(false)
@@ -196,9 +197,7 @@ export function AdminSidebar({
                       {item.count && (
                         <Badge
                           variant="secondary"
-                          className={`ml-2 text-xs ${
-                            isActive ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
-                          }`}
+                          className="ml-2 text-xs bg-gray-200 text-gray-700"
                         >
                           {item.count}
                         </Badge>

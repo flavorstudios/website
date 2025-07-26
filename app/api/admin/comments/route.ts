@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
+import type { Comment } from "@/lib/comment-store"; // Add this import if Comment type exists
 
 // --- Fetch all flagged (and all) comments, grouped by postSlug (admin only) ---
 export async function GET(request: NextRequest) {
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get all comment parent docs (each post's comments)
     const postsSnap = await adminDb.collection("comments").get();
-    let allComments: any[] = [];
+    let allComments: Comment[] = []; // ← Codex fix
 
     // Iterate through each post (slug = post ID)
     for (const postDoc of postsSnap.docs) {

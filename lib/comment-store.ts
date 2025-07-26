@@ -62,7 +62,10 @@ export const commentStore = {
     }
 
     // Type guard for expected moderation structure
-    const attr = (moderation as any)?.attributeScores;
+    const attr = (moderation as {
+      attributeScores?: Record<string, { summaryScore: { value: number } }>;
+    })?.attributeScores;
+
     const scores = {
       toxicity: attr?.TOXICITY?.summaryScore.value ?? 0,
       insult: attr?.INSULT?.summaryScore.value ?? 0,

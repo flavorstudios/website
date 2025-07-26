@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { MessageCircle, Send, User, Clock, AlertCircle, CheckCircle } from "lucide-react"
 
@@ -150,7 +151,11 @@ export default function CommentSection({ postId, postSlug }: CommentSectionProps
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
+              <Label htmlFor="comment-name" className="block text-sm font-medium mb-1">
+                Name (optional)
+              </Label>
               <Input
+                id="comment-name"
                 placeholder="Your name (optional)"
                 value={formData.name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
@@ -159,7 +164,11 @@ export default function CommentSection({ postId, postSlug }: CommentSectionProps
               />
             </div>
             <div>
+              <Label htmlFor="comment-content" className="block text-sm font-medium mb-1">
+                Comment
+              </Label>
               <Textarea
+                id="comment-content"
                 placeholder="Write your comment here..."
                 value={formData.content}
                 onChange={(e) => setFormData((prev) => ({ ...prev, content: e.target.value }))}
@@ -168,20 +177,23 @@ export default function CommentSection({ postId, postSlug }: CommentSectionProps
               />
             </div>
 
-            {/* Submit Status */}
-            {submitStatus === "success" && (
-              <div className="flex items-center gap-2 text-green-600 text-sm">
-                <CheckCircle className="h-4 w-4" />
-                Comment submitted successfully! It will appear after moderation.
-              </div>
-            )}
-
-            {submitStatus === "error" && (
-              <div className="flex items-center gap-2 text-red-600 text-sm">
-                <AlertCircle className="h-4 w-4" />
-                Failed to submit comment. Please try again.
-              </div>
-            )}
+            {/* Accessible submit status */}
+            <p aria-live="polite" className="flex items-center gap-2 text-sm min-h-[24px]">
+              {submitStatus === "success" && (
+                <>
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-green-600">
+                    Comment submitted successfully! It will appear after moderation.
+                  </span>
+                </>
+              )}
+              {submitStatus === "error" && (
+                <>
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <span className="text-red-600">Failed to submit comment. Please try again.</span>
+                </>
+              )}
+            </p>
 
             <Button type="submit" disabled={submitting || !formData.content.trim()} className="w-full sm:w-auto">
               {submitting ? (

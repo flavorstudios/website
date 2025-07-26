@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Plus, Edit, Trash2, GripVertical } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import CategoryBulkActions from "@/components/admin/category/CategoryBulkActions"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import {
@@ -268,10 +269,6 @@ export function CategoryManager() {
     )
   }
 
-  // Determine which tab is active to filter selection
-  const categoriesForTab =
-    activeTab === "BLOG" ? filteredBlogCategories : filteredVideoCategories
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -406,7 +403,7 @@ export function CategoryManager() {
   )
 }
 
-// ---------- CategoryList (with bulk select, drag, actions) ----------
+// ---------- CategoryList (with tooltips/aria-labels) ----------
 function CategoryList({
   categories,
   type,
@@ -536,22 +533,54 @@ function SortableRow({
         />
       </td>
       <td className="px-1">
-        <span {...attributes} {...listeners} className="cursor-grab">
+        <span {...attributes} {...listeners} className="cursor-grab" aria-label={`Drag ${cat.name}`}>
           <GripVertical className="w-4 h-4" />
         </span>
       </td>
       <td className="py-2">{cat.name}</td>
       <td className="py-2">{cat.slug}</td>
       <td className="py-2">
-        <Switch checked={cat.isActive} onCheckedChange={(v) => onToggleStatus(cat.id, v)} />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Switch
+              aria-label="Active"
+              checked={cat.isActive}
+              onCheckedChange={(v) => onToggleStatus(cat.id, v)}
+            />
+          </TooltipTrigger>
+          <TooltipContent>
+            {cat.isActive ? "Set inactive" : "Set active"}
+          </TooltipContent>
+        </Tooltip>
       </td>
-      <td className="py-2">
-        <Button size="sm" variant="outline" onClick={() => onEdit(cat)} className="mr-2">
-          <Edit className="w-4 h-4" />
-        </Button>
-        <Button size="sm" variant="destructive" onClick={() => onDelete(cat)}>
-          <Trash2 className="w-4 h-4" />
-        </Button>
+      <td className="py-2 flex gap-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onEdit(cat)}
+              aria-label="Edit category"
+              className="mr-2"
+            >
+              <Edit className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Edit</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => onDelete(cat)}
+              aria-label="Delete category"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Delete</TooltipContent>
+        </Tooltip>
       </td>
     </tr>
   )
@@ -667,10 +696,16 @@ function CategoryForm({
 
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Active</label>
-              <Switch
-                checked={formData.isActive}
-                onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, isActive: checked }))}
-              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Switch
+                    aria-label="Active"
+                    checked={formData.isActive}
+                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, isActive: checked }))}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>Toggle active status</TooltipContent>
+              </Tooltip>
             </div>
 
             <div className="flex justify-end gap-4 pt-4">

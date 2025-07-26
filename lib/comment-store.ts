@@ -38,7 +38,7 @@ export const commentStore = {
     const THRESHOLD = 0.75; // Adjust as needed
 
     // --- Perspective Moderation ---
-    let moderation: any = {};
+    let moderation: unknown = {};
     try {
       moderation = await fetch(
         `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_API_KEY}`,
@@ -61,10 +61,12 @@ export const commentStore = {
       throw new Error("Comment moderation failed");
     }
 
+    // Type guard for expected moderation structure
+    const attr = (moderation as any)?.attributeScores;
     const scores = {
-      toxicity: moderation.attributeScores?.TOXICITY?.summaryScore.value ?? 0,
-      insult: moderation.attributeScores?.INSULT?.summaryScore.value ?? 0,
-      threat: moderation.attributeScores?.THREAT?.summaryScore.value ?? 0,
+      toxicity: attr?.TOXICITY?.summaryScore.value ?? 0,
+      insult: attr?.INSULT?.summaryScore.value ?? 0,
+      threat: attr?.THREAT?.summaryScore.value ?? 0,
     };
 
     const isFlagged =

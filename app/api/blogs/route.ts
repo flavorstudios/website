@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { blogStore } from "@/lib/content-store"; // Firestore-backed store
 import { formatPublicBlog } from "@/lib/formatters"; // Your existing formatter
+import { commentStore } from "@/lib/comment-store"; // <-- add this import
 import { logError } from "@/lib/log"; // Add error logging
 
 export async function GET() {
@@ -13,8 +14,16 @@ export async function GET() {
     // Only published blogs (same as before)
     const published = blogs.filter((b) => b.status === "published");
 
+    // Attach comment counts for each post (async)
+    const withCounts = await Promise.all(
+      published.map(async (post) => {
+        const comments = await commentStore.getByPost(post.id, "blog");
+        return { ...post, commentCount: comments.length };
+      })
+    );
+
     // Format for the public API response
-    const result = published.map(formatPublicBlog);
+    const result = withCounts.map(formatPublicBlog);
 
     // Send response with cache headers
     const res = NextResponse.json(result);

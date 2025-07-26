@@ -4,6 +4,8 @@ import { SITE_URL, SITE_NAME } from "@/lib/constants";
 import { getCanonicalUrl } from "@/lib/seo-utils";
 import fs from "fs";
 import path from "path";
+import type { BlogPost } from "@/lib/content-store";
+import type { Video } from "@/lib/video-store";
 
 // Detects MIME type from file extension
 function getMimeType(url: string): string {
@@ -169,11 +171,11 @@ export async function generateRssFeed(): Promise<string> {
       fetch(`${baseUrl}/api/blogs`),
       fetch(`${baseUrl}/api/videos`),
     ]);
-    const blogPosts: any[] = blogsRes.ok ? await blogsRes.json() : [];
-    const videos: any[] = videosRes.ok ? await videosRes.json() : [];
+    const blogPosts: BlogPost[] = blogsRes.ok ? await blogsRes.json() : [];
+    const videos: Video[] = videosRes.ok ? await videosRes.json() : [];
 
     // Blogs (always canonical URLs, support categories[])
-    const blogItems: RSSItem[] = blogPosts.map((post: any) => ({
+    const blogItems: RSSItem[] = blogPosts.map((post: BlogPost) => ({
       title: post.title,
       description: truncateDescription(stripHtml(post.excerpt || post.content)),
       link: getCanonicalUrl(`/blog/${post.slug}`),
@@ -188,7 +190,7 @@ export async function generateRssFeed(): Promise<string> {
 
     // Videos (with thumbnail enclosure, canonical URLs, support categories[])
     const videoItems: RSSItem[] = await Promise.all(
-      videos.map(async (video: any) => {
+      videos.map(async (video: Video) => {
         let enclosure;
         if (video.thumbnail) {
           const type = getMimeType(video.thumbnail);

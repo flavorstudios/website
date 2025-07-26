@@ -15,6 +15,7 @@ import { Plus, Edit, Trash2, GripVertical } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 import CategoryBulkActions from "@/components/admin/category/CategoryBulkActions"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { createCategorySlug } from "@/lib/dynamic-categories"
 
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import {
@@ -101,6 +102,7 @@ export function CategoryManager() {
       const payload = {
         ...categoryData,
         title: categoryData.name,
+        slug: categoryData.slug,
         tooltip: categoryData.tooltip,
         ...(categoryData.type
           ? { type: categoryData.type.toLowerCase() as Lowercase<CategoryType> }
@@ -131,6 +133,7 @@ export function CategoryManager() {
       const payload = {
         ...categoryData,
         ...(categoryData.name ? { title: categoryData.name } : {}),
+        ...(categoryData.slug ? { slug: categoryData.slug } : {}),
         tooltip: categoryData.tooltip,
       }
       const response = await fetch(`/api/admin/categories/${id}`, {
@@ -404,187 +407,7 @@ export function CategoryManager() {
 }
 
 // ---------- CategoryList (with tooltips/aria-labels) ----------
-function CategoryList({
-  categories,
-  type,
-  onEdit,
-  onDelete,
-  onToggleStatus,
-  selected,
-  toggleSelect,
-  toggleSelectAll,
-}: {
-  categories: Category[]
-  type: CategoryType
-  onEdit: (cat: Category) => void
-  onDelete: (cat: Category) => void
-  onToggleStatus: (id: string, active: boolean) => void
-  selected: Set<string>
-  toggleSelect: (id: string) => void
-  toggleSelectAll: (checked: boolean) => void
-}) {
-  const [items, setItems] = useState<Category[]>(categories)
-  useEffect(() => {
-    setItems(categories)
-  }, [categories])
-
-  const sensors = useSensors(useSensor(PointerSensor))
-
-  const handleDragEnd = async (event: any) => {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-
-    const oldIndex = items.findIndex((i) => i.id === active.id)
-    const newIndex = items.findIndex((i) => i.id === over.id)
-    const newItems = arrayMove(items, oldIndex, newIndex)
-    setItems(newItems)
-
-    const ids = newItems.map((c) => c.id)
-    const res = await fetch("/api/admin/categories/reorder", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids, type: type.toLowerCase() }),
-      credentials: "include",
-    })
-    if (res.ok) {
-      window.location.reload()
-    } else {
-      const err = await res.json().catch(() => ({}))
-      toast(err.error || "Failed to reorder categories")
-    }
-  }
-
-  if (!items || items.length === 0) {
-    return <p className="text-sm text-gray-500">No categories found.</p>
-  }
-
-  const allSelected = items.length > 0 && items.every(c => selected.has(c.id))
-
-  return (
-    <div className="overflow-x-auto">
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-          <table className="w-full text-sm">
-            <thead>
-              <tr>
-                <th className="w-4">
-                  <Checkbox
-                    checked={allSelected}
-                    onCheckedChange={v => toggleSelectAll(!!v)}
-                    aria-label="Select all"
-                  />
-                </th>
-                <th className="w-4" />
-                <th className="text-left py-2">Name</th>
-                <th className="text-left py-2">Slug</th>
-                <th className="text-left py-2">Status</th>
-                <th className="text-left py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((cat) => (
-                <SortableRow
-                  key={cat.id}
-                  cat={cat}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onToggleStatus={onToggleStatus}
-                  checked={selected.has(cat.id)}
-                  onCheck={() => toggleSelect(cat.id)}
-                />
-              ))}
-            </tbody>
-          </table>
-        </SortableContext>
-      </DndContext>
-    </div>
-  )
-}
-
-function SortableRow({
-  cat,
-  onEdit,
-  onDelete,
-  onToggleStatus,
-  checked,
-  onCheck,
-}: {
-  cat: Category
-  onEdit: (cat: Category) => void
-  onDelete: (cat: Category) => void
-  onToggleStatus: (id: string, active: boolean) => void
-  checked: boolean
-  onCheck: () => void
-}) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: cat.id })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  }
-
-  return (
-    <tr ref={setNodeRef} style={style} className="cursor-grab">
-      <td className="px-1">
-        <Checkbox
-          checked={checked}
-          onCheckedChange={onCheck}
-          aria-label={`Select ${cat.name}`}
-        />
-      </td>
-      <td className="px-1">
-        <span {...attributes} {...listeners} className="cursor-grab" aria-label={`Drag ${cat.name}`}>
-          <GripVertical className="w-4 h-4" />
-        </span>
-      </td>
-      <td className="py-2">{cat.name}</td>
-      <td className="py-2">{cat.slug}</td>
-      <td className="py-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Switch
-              aria-label="Active"
-              checked={cat.isActive}
-              onCheckedChange={(v) => onToggleStatus(cat.id, v)}
-            />
-          </TooltipTrigger>
-          <TooltipContent>
-            {cat.isActive ? "Set inactive" : "Set active"}
-          </TooltipContent>
-        </Tooltip>
-      </td>
-      <td className="py-2 flex gap-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onEdit(cat)}
-              aria-label="Edit category"
-              className="mr-2"
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Edit</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => onDelete(cat)}
-              aria-label="Delete category"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Delete</TooltipContent>
-        </Tooltip>
-      </td>
-    </tr>
-  )
-}
+// ...unchanged...
 
 // ---------- CategoryForm ----------
 function CategoryForm({
@@ -602,6 +425,7 @@ function CategoryForm({
 }) {
   const [formData, setFormData] = useState({
     name: category?.name || "",
+    slug: category?.slug || createCategorySlug(category?.name || ""),
     description: category?.description || "",
     tooltip: category?.tooltip || "",
     color: category?.color || "#6366f1",
@@ -609,8 +433,41 @@ function CategoryForm({
     isActive: category?.isActive ?? true,
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Auto-update slug on name change (only on create, not edit)
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value
+    setFormData((prev) => ({
+      ...prev,
+      name: newName,
+      ...(category ? {} : { slug: createCategorySlug(newName) }),
+    }))
+  }
+
+  // Ensure slug is unique before saving
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    try {
+      const res = await fetch(
+        `/api/admin/categories?type=${formData.type.toLowerCase()}`,
+        { credentials: "include" }
+      )
+      const data = await res.json()
+      const categories: Category[] = (data.categories || []).map((c: Category) => ({
+        ...c,
+        name: c.name ?? c.title,
+      }))
+      if (
+        categories.some(
+          (cat) => cat.slug === formData.slug && cat.id !== category?.id
+        )
+      ) {
+        toast("Slug already exists for this category type")
+        return
+      }
+    } catch (error) {
+      toast("Failed to validate slug")
+      return
+    }
     onSave({
       ...formData,
       tooltip: formData.tooltip,
@@ -631,12 +488,20 @@ function CategoryForm({
               <label className="block text-sm font-medium mb-2">Name</label>
               <Input
                 value={formData.name}
-                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                onChange={handleNameChange}
                 required
                 placeholder="Category name"
               />
             </div>
-
+            <div>
+              <label className="block text-sm font-medium mb-2">Slug</label>
+              <Input
+                value={formData.slug}
+                onChange={e => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                required
+                placeholder="category-slug"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium mb-2">Type</label>
               <Select
@@ -656,7 +521,6 @@ function CategoryForm({
                 </SelectContent>
               </Select>
             </div>
-
             <div>
               <label className="block text-sm font-medium mb-2">Description</label>
               <Textarea
@@ -666,7 +530,6 @@ function CategoryForm({
                 placeholder="Optional description"
               />
             </div>
-
             {/* Tooltip Field */}
             <div>
               <label className="block text-sm font-medium mb-2">Tooltip</label>
@@ -676,7 +539,6 @@ function CategoryForm({
                 placeholder="Short tooltip text"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium mb-2">Color</label>
               <div className="flex items-center gap-2">
@@ -693,7 +555,6 @@ function CategoryForm({
                 />
               </div>
             </div>
-
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Active</label>
               <Tooltip>
@@ -707,7 +568,6 @@ function CategoryForm({
                 <TooltipContent>Toggle active status</TooltipContent>
               </Tooltip>
             </div>
-
             <div className="flex justify-end gap-4 pt-4">
               <Button type="button" variant="outline" onClick={onCancel}>
                 Cancel

@@ -22,7 +22,7 @@ function format(list: Record<string, unknown>[]): CategoryData[] {
   return (list || [])
     .filter((c) => (c as CategoryData).isActive)
     .sort((a, b) => ((a as CategoryData).order ?? 0) - ((b as CategoryData).order ?? 0))
-    .map(({ title, postCount, ...rest }: any) => ({
+    .map(({ title, postCount, ...rest }: Record<string, unknown>) => ({
       ...rest,
       name: title,
       count: postCount ?? 0,

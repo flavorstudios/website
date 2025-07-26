@@ -46,7 +46,7 @@ const systemStats: SystemStats = {
 }
 
 // Safe logger (dev only, invisible in prod)
-function safeLogError(...args: any[]) {
+function safeLogError(...args: unknown[]) {
   if (process.env.NODE_ENV !== "production") {
     // eslint-disable-next-line no-console
     console.error(...args)

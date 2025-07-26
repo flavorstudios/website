@@ -40,7 +40,7 @@ export interface PageContent {
   id: string
   page: string
   section: string
-  content: Record<string, any>
+  content: Record<string, unknown>
   updatedAt: string
 }
 
@@ -212,7 +212,7 @@ export const pageContentData = {
     return readJsonFile<PageContent>("page-content.json")
   },
 
-  async update(page: string, section: string, content: Record<string, any>): Promise<PageContent> {
+  async update(page: string, section: string, content: Record<string, unknown>): Promise<PageContent> {
     const contents = await this.getAll()
     const index = contents.findIndex((c) => c.page === page && c.section === section)
     const updatedContent: PageContent = {

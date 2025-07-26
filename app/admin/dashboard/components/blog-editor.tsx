@@ -24,6 +24,8 @@ import {
   Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info, ChevronDown,
 } from "lucide-react"
 import { toast } from "sonner"
+// 🟢 Accessibility: Tooltip import
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 // --- SEO Best Practice constants & helper ---
 const titleMin = 50
@@ -316,21 +318,33 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               {saving ? "Saving..." : "Save Draft"}
             </Button>
             {/* 🟢 Preview Button */}
-            <Button
-              variant="outline"
-              onClick={() => setShowPreview(true)}
-              className="flex items-center gap-2"
-            >
-              <Eye className="h-4 w-4" />
-              Preview
-            </Button>
-            <Button
-              onClick={publishPost}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 flex items-center gap-2"
-            >
-              <Eye className="h-4 w-4" />
-              Publish
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowPreview(true)}
+                  className="flex items-center gap-2"
+                  aria-label="Preview post"
+                >
+                  <Eye className="h-4 w-4" />
+                  Preview
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Preview</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={publishPost}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 flex items-center gap-2"
+                  aria-label="Publish post"
+                >
+                  <Eye className="h-4 w-4" />
+                  Publish
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Publish</TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
@@ -479,7 +493,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               </CardContent>
             </Card>
           </div>
-          {/* Sidebar (unchanged) */}
+          {/* Sidebar (unchanged except accessibility) */}
           <div className="space-y-6">
             {/* Publishing Controls */}
             <Card>
@@ -495,16 +509,23 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Featured Post</span>
-                  <Switch
-                    checked={post.featured}
-                    onCheckedChange={(featured) =>
-                      setPost((prev) => ({ ...prev, featured }))
-                    }
-                  />
+                  {/* Accessibility: Switch with aria-label and Tooltip */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Switch
+                        aria-label="Featured post"
+                        checked={post.featured}
+                        onCheckedChange={(featured) =>
+                          setPost((prev) => ({ ...prev, featured }))
+                        }
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>Toggle featured post</TooltipContent>
+                  </Tooltip>
                 </div>
                 <Popover open={showScheduler} onOpenChange={setShowScheduler}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full flex items-center gap-2">
+                    <Button variant="outline" className="w-full flex items-center gap-2" aria-label="Schedule Post">
                       <CalendarIcon className="h-4 w-4" />
                       Schedule Post
                     </Button>

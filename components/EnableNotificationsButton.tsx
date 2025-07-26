@@ -56,8 +56,12 @@ export default function EnableNotificationsButton() {
       } else {
         setResult("Permission granted, but no token returned.")
       }
-    } catch (err: any) {
-      setResult("Failed: " + (err?.message || "Unknown error"))
+    } catch (err: unknown) {
+      let msg = "Unknown error"
+      if (err && typeof err === "object" && "message" in err && typeof (err as any).message === "string") {
+        msg = (err as any).message
+      }
+      setResult("Failed: " + msg)
     } finally {
       setLoading(false)
     }

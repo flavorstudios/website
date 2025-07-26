@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { Check, X, Trash2, MessageSquare, Search, AlertTriangle, Shield } from "lucide-react"
 
 interface Comment {
@@ -126,6 +127,7 @@ export function CommentManager() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 w-64"
+            aria-label="Search comments"
           />
         </div>
       </div>
@@ -260,7 +262,9 @@ function CommentCard({
                   <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
-              <Badge className={getStatusBadge(comment.status)}>{comment.status}</Badge>
+              <Badge className={getStatusBadge(comment.status)} aria-label={`Status: ${comment.status}`}>
+                {comment.status}
+              </Badge>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4">
@@ -274,35 +278,53 @@ function CommentCard({
 
               <div className="flex items-center gap-2">
                 {comment.status !== "approved" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onUpdateStatus(comment.id, "approved")}
-                    className="text-green-600 border-green-200 hover:bg-green-50"
-                  >
-                    <Check className="h-4 w-4 mr-1" />
-                    Approve
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onUpdateStatus(comment.id, "approved")}
+                        aria-label="Approve comment"
+                        className="text-green-600 border-green-200 hover:bg-green-50"
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Approve this comment</TooltipContent>
+                  </Tooltip>
                 )}
                 {comment.status !== "spam" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onUpdateStatus(comment.id, "spam")}
-                    className="text-red-600 border-red-200 hover:bg-red-50"
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Spam
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onUpdateStatus(comment.id, "spam")}
+                        aria-label="Mark as spam"
+                        className="text-red-600 border-red-200 hover:bg-red-50"
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Spam
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Mark as spam</TooltipContent>
+                  </Tooltip>
                 )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onDelete(comment.id)}
-                  className="text-gray-600 border-gray-200 hover:bg-gray-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDelete(comment.id)}
+                      aria-label="Delete comment"
+                      className="text-gray-600 border-gray-200 hover:bg-gray-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Delete permanently</TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </div>

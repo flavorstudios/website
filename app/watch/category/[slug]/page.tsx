@@ -1,8 +1,25 @@
-// app/watch/category/[slug]/page.tsx
-
 import siteData from "@/content-data/categories.json";
 import WatchPage from "../../page";
 import { SITE_URL } from "@/lib/constants";
+
+// --- Add this if VideoType isn't already imported ---
+// You can instead: import { VideoType } from "@/lib/types" if you have it there
+type VideoType = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  youtubeId?: string;
+  thumbnail?: string;
+  duration: string;
+  category: string;
+  categories?: string[];
+  tags?: string[];
+  publishedAt: string;
+  views: number;
+  featured: boolean;
+  status: string;
+};
 
 export default async function WatchCategoryPage({
   params,
@@ -31,12 +48,12 @@ export default async function WatchCategoryPage({
       });
       if (!res.ok) return [];
       const data = await res.json();
-      const allVideos = Array.isArray(data) ? data : data.videos || [];
+      const allVideos: VideoType[] = Array.isArray(data) ? data : data.videos || [];
 
       const normalizeSlug = (name: string) =>
         name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-      return allVideos.filter((video: any) => {
+      return allVideos.filter((video: VideoType) => {
         const cats =
           Array.isArray(video.categories) && video.categories.length > 0
             ? video.categories

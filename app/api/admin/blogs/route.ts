@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+
   try {
     const blogs = await blogStore.getAll()
 
@@ -27,6 +28,7 @@ export async function GET(request: NextRequest) {
       updatedAt: blog.updatedAt,
       views: blog.views,
       readTime: blog.readTime,
+      commentCount: blog.commentCount ?? 0, // ✅ Added safely
     }))
 
     return NextResponse.json({ posts: formattedBlogs }, { status: 200 })
@@ -35,9 +37,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Failed to fetch blogs",
-        posts: [], // Return empty array as fallback
+        posts: [],
       },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }
@@ -46,20 +48,19 @@ export async function POST(request: NextRequest) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+
   try {
     const blogData = await request.json()
 
-    // Validate required fields
     if (!blogData.title || !blogData.content) {
       return NextResponse.json(
         {
           error: "Title and content are required",
         },
-        { status: 400 },
+        { status: 400 }
       )
     }
 
-    // Generate slug if not provided
     const slug =
       blogData.slug ||
       blogData.title
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
       {
         error: "Failed to create blog",
       },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

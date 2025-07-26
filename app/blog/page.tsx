@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Calendar, User, Eye, BookOpen, Clock, Star } from "lucide-react";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
@@ -87,14 +88,18 @@ async function getBlogData() {
   }
 }
 
+// --- PAGE COMPONENT ---
+// Now accepts searchParams: { category?: string; page?: string; search?: string; sort?: string }
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: { category?: string; page?: string };
+  searchParams: { category?: string; page?: string; search?: string; sort?: string };
 }) {
   const { posts, categories } = await getBlogData();
   const selectedCategory = searchParams.category || "all";
   const currentPage = Number.parseInt(searchParams.page || "1");
+  const searchQuery = (searchParams.search || "").toLowerCase();
+  const sortOption = searchParams.sort || "date";
   const postsPerPage = 9;
 
   // Clean/normalize the slug for filtering
@@ -115,12 +120,33 @@ export default async function BlogPage({
           );
         });
 
-  // Pagination
-  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
-  const startIndex = (currentPage - 1) * postsPerPage;
-  const paginatedPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
+  // --- SEARCH FILTER ---
+  const searchedPosts = searchQuery
+    ? filteredPosts.filter((post: BlogPost) =>
+        post.title.toLowerCase().includes(searchQuery)
+      )
+    : filteredPosts;
 
-  const featuredPosts = filteredPosts.filter((post: BlogPost) => post.featured).slice(0, 3);
+  // --- SORTING ---
+  const sortedPosts = [...searchedPosts].sort((a: BlogPost, b: BlogPost) => {
+    if (sortOption === "views") {
+      return (b.views || 0) - (a.views || 0);
+    }
+    if (sortOption === "title") {
+      return a.title.localeCompare(b.title);
+    }
+    // Default to date (newest first)
+    return (
+      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    );
+  });
+
+  // --- PAGINATION ---
+  const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const paginatedPosts = sortedPosts.slice(startIndex, startIndex + postsPerPage);
+
+  const featuredPosts = sortedPosts.filter((post: BlogPost) => post.featured).slice(0, 3);
   const regularPosts = paginatedPosts.filter((post: BlogPost) => !post.featured);
 
   // Analytics data (multi-category safe)
@@ -212,7 +238,7 @@ export default async function BlogPage({
                   : categoryName}
               </h2>
               <p className="text-gray-600 text-sm sm:text-base">
-                {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""} found
+                {sortedPosts.length} post{sortedPosts.length !== 1 ? "s" : ""} found
               </p>
             </div>
             {totalPages > 1 && (
@@ -222,7 +248,33 @@ export default async function BlogPage({
             )}
           </div>
 
-          {filteredPosts.length === 0 ? (
+          {/* --- Search and Sort UI --- */}
+          <form
+            className="mb-6 flex flex-col sm:flex-row items-center gap-4"
+            method="get"
+            action="/blog"
+          >
+            {selectedCategory !== "all" && (
+              <input type="hidden" name="category" value={selectedCategory} />
+            )}
+            <Input
+              name="search"
+              placeholder="Search posts..."
+              defaultValue={searchParams.search || ""}
+              className="w-full sm:w-64"
+            />
+            <select
+              name="sort"
+              defaultValue={sortOption}
+              className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="date">Newest</option>
+              <option value="views">Most Viewed</option>
+              <option value="title">Title</option>
+            </select>
+          </form>
+
+          {sortedPosts.length === 0 ? (
             <EmptyState selectedCategory={selectedCategory} />
           ) : (
             <>
@@ -232,7 +284,13 @@ export default async function BlogPage({
                 ))}
               </div>
               {totalPages > 1 && (
-                <Pagination currentPage={currentPage} totalPages={totalPages} selectedCategory={selectedCategory} />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  selectedCategory={selectedCategory}
+                  search={searchParams.search}
+                  sort={sortOption}
+                />
               )}
             </>
           )}
@@ -277,7 +335,7 @@ export default async function BlogPage({
   );
 }
 
-// --- COMPONENTS (as before) ---
+// --- COMPONENTS (as before, with Pagination updated for params) ---
 
 function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority?: boolean }) {
   // Prefer categories[0] for display; fallback to category
@@ -410,15 +468,26 @@ function BlogPostCard({ post }: { post: BlogPost }) {
   );
 }
 
+// --- Updated Pagination component to include search/sort ---
 function Pagination({
   currentPage,
   totalPages,
   selectedCategory,
-}: { currentPage: number; totalPages: number; selectedCategory: string }) {
+  search,
+  sort,
+}: {
+  currentPage: number;
+  totalPages: number;
+  selectedCategory: string;
+  search?: string;
+  sort?: string;
+}) {
   const getPageUrl = (page: number) => {
     const params = new URLSearchParams();
     if (selectedCategory !== "all") params.set("category", selectedCategory);
     if (page > 1) params.set("page", page.toString());
+    if (search) params.set("search", search);
+    if (sort) params.set("sort", sort);
     return `/blog${params.toString() ? `?${params.toString()}` : ""}`;
   };
 

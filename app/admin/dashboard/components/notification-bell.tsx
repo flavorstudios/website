@@ -13,7 +13,7 @@ interface Notification {
   message: string
   timestamp: Date
   read: boolean
-  data?: any
+  data?: Record<string, unknown>
 }
 
 export function NotificationBell() {

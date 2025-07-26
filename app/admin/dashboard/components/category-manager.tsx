@@ -11,8 +11,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
-import { Plus, Edit, Trash2 } from "lucide-react"
+import { Plus, Edit, Trash2, GripVertical } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 
 export type CategoryType = "BLOG" | "VIDEO"
 
@@ -47,27 +56,23 @@ export function CategoryManager() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [createType, setCreateType] = useState<CategoryType>("BLOG")
-  // NEW: Filter/Search state
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all") // all | active | inactive
+  const [statusFilter, setStatusFilter] = useState("all")
 
   useEffect(() => {
     loadCategories()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // --- UPDATED: Fetch blog & video categories separately via ?type=blog / ?type=video ---
   const loadCategories = async () => {
     setLoading(true)
     try {
-      // Fetch both types in parallel
       const [blogRes, videoRes] = await Promise.all([
         fetch("/api/admin/categories?type=blog", { credentials: "include" }),
         fetch("/api/admin/categories?type=video", { credentials: "include" }),
       ])
       const blogData = await blogRes.json()
       const videoData = await videoRes.json()
-      // Map title from API to name for UI
       const blogCats: Category[] = (blogData.categories || []).map((cat: Category) => ({
         ...cat,
         name: cat.name ?? cat.title,
@@ -87,10 +92,8 @@ export function CategoryManager() {
     }
   }
 
-  // --- No changes below here unless required by API changes ---
   const createCategory = async (categoryData: Partial<Category>) => {
     try {
-      // Make sure type is always lowercase in the payload for backend filtering
       const payload = {
         ...categoryData,
         title: categoryData.name,
@@ -170,7 +173,7 @@ export function CategoryManager() {
     await updateCategory(id, { isActive })
   }
 
-  // ----------- FILTERING (NEW) -----------
+  // ----------- FILTERING -----------
   const filterCategories = (cats: Category[]) =>
     cats.filter((cat) => {
       const search = searchTerm.toLowerCase()
@@ -211,7 +214,7 @@ export function CategoryManager() {
         </Button>
       </div>
 
-      {/* Filters (NEW) */}
+      {/* Filters */}
       <div className="flex flex-wrap items-center gap-4 mb-2">
         <Input
           placeholder="Search categories…"
@@ -276,7 +279,7 @@ export function CategoryManager() {
   )
 }
 
-// ---------- CategoryList ----------
+// ---------- CategoryList with drag-and-drop ----------
 function CategoryList({
   categories,
   type,
@@ -290,45 +293,113 @@ function CategoryList({
   onDelete: (cat: Category) => void
   onToggleStatus: (id: string, active: boolean) => void
 }) {
-  if (!categories || categories.length === 0) {
-    return <p className="text-sm text-gray-500">No categories found.</p>;
+  const [items, setItems] = useState<Category[]>(categories)
+  useEffect(() => {
+    setItems(categories)
+  }, [categories])
+
+  const sensors = useSensors(useSensor(PointerSensor))
+
+  const handleDragEnd = async (event: any) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = items.findIndex((i) => i.id === active.id)
+    const newIndex = items.findIndex((i) => i.id === over.id)
+    const newItems = arrayMove(items, oldIndex, newIndex)
+    setItems(newItems)
+
+    const ids = newItems.map((c) => c.id)
+    const res = await fetch("/api/admin/categories/reorder", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids, type: type.toLowerCase() }),
+      credentials: "include",
+    })
+    if (res.ok) {
+      window.location.reload()
+    } else {
+      const err = await res.json().catch(() => ({}))
+      toast(err.error || "Failed to reorder categories")
+    }
   }
+
+  if (!items || items.length === 0) {
+    return <p className="text-sm text-gray-500">No categories found.</p>
+  }
+
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
-        <thead>
-          <tr>
-            <th className="text-left py-2">Name</th>
-            <th className="text-left py-2">Slug</th>
-            <th className="text-left py-2">Status</th>
-            <th className="text-left py-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories.map((cat) => (
-            <tr key={cat.id}>
-              <td className="py-2">{cat.name}</td>
-              <td className="py-2">{cat.slug}</td>
-              <td className="py-2">
-                <Switch
-                  checked={cat.isActive}
-                  onCheckedChange={(v) => onToggleStatus(cat.id, v)}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+          <table className="w-full text-sm">
+            <thead>
+              <tr>
+                <th className="w-4" />
+                <th className="text-left py-2">Name</th>
+                <th className="text-left py-2">Slug</th>
+                <th className="text-left py-2">Status</th>
+                <th className="text-left py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((cat) => (
+                <SortableRow
+                  key={cat.id}
+                  cat={cat}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onToggleStatus={onToggleStatus}
                 />
-              </td>
-              <td className="py-2">
-                <Button size="sm" variant="outline" onClick={() => onEdit(cat)} className="mr-2">
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button size="sm" variant="destructive" onClick={() => onDelete(cat)}>
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              ))}
+            </tbody>
+          </table>
+        </SortableContext>
+      </DndContext>
     </div>
-  );
+  )
+}
+
+function SortableRow({
+  cat,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+}: {
+  cat: Category
+  onEdit: (cat: Category) => void
+  onDelete: (cat: Category) => void
+  onToggleStatus: (id: string, active: boolean) => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: cat.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <tr ref={setNodeRef} style={style} className="cursor-grab">
+      <td className="px-1">
+        <span {...attributes} {...listeners} className="cursor-grab">
+          <GripVertical className="w-4 h-4" />
+        </span>
+      </td>
+      <td className="py-2">{cat.name}</td>
+      <td className="py-2">{cat.slug}</td>
+      <td className="py-2">
+        <Switch checked={cat.isActive} onCheckedChange={(v) => onToggleStatus(cat.id, v)} />
+      </td>
+      <td className="py-2">
+        <Button size="sm" variant="outline" onClick={() => onEdit(cat)} className="mr-2">
+          <Edit className="w-4 h-4" />
+        </Button>
+        <Button size="sm" variant="destructive" onClick={() => onDelete(cat)}>
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </td>
+    </tr>
+  )
 }
 
 // ---------- CategoryForm ----------

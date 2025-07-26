@@ -35,7 +35,7 @@ export function DashboardOverview() {
   const [authInfo, setAuthInfo] = useState<{ role?: string; email?: string; uid?: string } | null>(null)
 
   // Utility to extract debug info from API error response
-  const extractDebugInfo = (data: any) => ({
+  const extractDebugInfo = (data: Record<string, unknown>) => ({
     role: data.role || "unknown",
     email: data.email || "unknown",
     uid: data.uid || "unknown",

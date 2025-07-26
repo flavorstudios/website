@@ -68,7 +68,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null)
       // Call backend to clear the admin-session cookie server-side
       await fetch("/api/admin/logout", { method: "POST" })
-    } catch (err: any) {
+    } catch (err: unknown) { // <--- Only this line changed
       setError("Failed to sign out. Please try again.")
       if (process.env.NODE_ENV !== "production") {
         console.error("[AdminAuthProvider] Sign out error:", err)

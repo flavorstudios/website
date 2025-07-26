@@ -101,7 +101,8 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
           credentials: "include",
         })
         const data = await response.json()
-        const blogCategories: BlogCategory[] = data.categories?.map((cat: any) => ({
+        // ONLY CHANGE: enforce BlogCategory type
+        const blogCategories: BlogCategory[] = data.categories?.map((cat: BlogCategory) => ({
           name: cat.name,
           slug: cat.slug,
           tooltip: cat.tooltip ?? "",

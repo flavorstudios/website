@@ -11,10 +11,8 @@ type RateInfo = { count: number; lastAttempt: number };
 const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
 const MAX_FAILURES = 5;
 const rateMap: Map<string, RateInfo> =
-  // @ts-ignore
-  (globalThis as any).__adminRateMap ||
-  // @ts-ignore
-  ((globalThis as any).__adminRateMap = new Map<string, RateInfo>());
+  (globalThis as { __adminRateMap?: Map<string, RateInfo> }).__adminRateMap ||
+  ((globalThis as { __adminRateMap?: Map<string, RateInfo> }).__adminRateMap = new Map<string, RateInfo>());
 
 function recordFailure(ip: string) {
   const now = Date.now();

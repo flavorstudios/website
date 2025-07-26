@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { videoStore } from "@/lib/content-store"; // Firestore store
 import { formatPublicVideo } from "@/lib/formatters"; // Helper for safe public output
+import type { Video } from "@/lib/content-store"; // Import Video type
 
 export async function GET() {
   try {
@@ -10,7 +11,7 @@ export async function GET() {
     const videos = await videoStore.getAll();
 
     // Only published videos for the public API
-    const published = videos.filter((v: any) => v.status === "published");
+    const published = videos.filter((v: Video) => v.status === "published");
     const result = published.map(formatPublicVideo);
 
     // JSON response, cache for 5 minutes

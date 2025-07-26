@@ -14,6 +14,7 @@ export interface BlogPost {
   content: string
   createdAt: string
   updatedAt: string
+  commentCount?: number        // <-- ADDED
 }
 
 export interface Video {
@@ -70,19 +71,32 @@ async function writeJsonFile<T>(filename: string, data: T[]): Promise<void> {
   await fs.writeFile(filePath, JSON.stringify(data, null, 2))
 }
 
+// --- Helper to fetch comment count for each post ---
+async function getCommentCountByPost(): Promise<Record<string, number>> {
+  const comments = await readJsonFile<Comment>("comments.json")
+  const counts: Record<string, number> = {}
+  for (const c of comments) {
+    if (!counts[c.postId]) counts[c.postId] = 0
+    counts[c.postId] += 1
+  }
+  return counts
+}
+
 export const blogData = {
   async getAll(): Promise<BlogPost[]> {
     const posts = await readJsonFile<BlogPost>("blogs.json")
+    const commentCounts = await getCommentCountByPost()
     // Always return array, and ensure categories[] present (for backward compatibility)
     return posts.map((post) => ({
       ...post,
       // If categories missing, fallback to [category]
       categories: post.categories && post.categories.length > 0 ? post.categories : [post.category],
+      commentCount: commentCounts[post.id] ?? 0, // <-- Always attach commentCount
     }))
   },
 
   // Accepts either `category` (string) or `categories` (string[])
-  async create(post: Omit<BlogPost, "id" | "createdAt" | "updatedAt">): Promise<BlogPost> {
+  async create(post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "commentCount">): Promise<BlogPost> {
     const posts = await this.getAll()
     const mainCategory =
       Array.isArray(post.categories) && post.categories.length > 0
@@ -102,6 +116,7 @@ export const blogData = {
       categories,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      commentCount: 0,
     }
     posts.push(newPost)
     await writeJsonFile("blogs.json", posts)

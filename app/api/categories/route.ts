@@ -2,8 +2,19 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 
+// Define Category interface if not already imported elsewhere.
+// If you have a shared type, import it instead.
+interface Category {
+  isActive: boolean
+  order?: number
+  title: string
+  postCount?: number
+  tooltip?: string
+  [key: string]: unknown  // For forward compatibility
+}
+
 // Helper to format categories (works for both blog & watch arrays)
-function format(arr: any[]) {
+function format(arr: Category[]) {
   return (arr || [])
     .filter((c) => c.isActive)
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))

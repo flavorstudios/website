@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
       }
       return NextResponse.json({ role: "support" });
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     logError("user-role:get", err);
     if (process.env.DEBUG_ADMIN === "true") {
       console.error("[user-role] Error fetching role:", err);
@@ -57,9 +57,9 @@ export async function GET(req: NextRequest) {
         error: "Failed to fetch role",
         ...(typeof err === "object" && err !== null
           ? {
-              message: err.message,
-              stack: err.stack,
-              code: err.code,
+              message: (err as any).message,
+              stack: (err as any).stack,
+              code: (err as any).code,
             }
           : {}),
       },

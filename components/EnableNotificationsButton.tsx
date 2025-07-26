@@ -58,8 +58,13 @@ export default function EnableNotificationsButton() {
       }
     } catch (err: unknown) {
       let msg = "Unknown error"
-      if (err && typeof err === "object" && "message" in err && typeof (err as any).message === "string") {
-        msg = (err as any).message
+      if (
+        err &&
+        typeof err === "object" &&
+        "message" in err &&
+        typeof (err as { message?: string }).message === "string"
+      ) {
+        msg = (err as { message: string }).message
       }
       setResult("Failed: " + msg)
     } finally {

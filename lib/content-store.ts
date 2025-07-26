@@ -1,10 +1,8 @@
-// lib/content-store.ts
-
 import { adminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
 
-/* Interfaces – unchanged */
+// --- Interfaces (with commentCount, multi-category, etc.) ---
 export interface BlogPost {
   id: string;
   title: string;
@@ -13,6 +11,7 @@ export interface BlogPost {
   excerpt: string;
   status: "draft" | "published" | "scheduled";
   category: string;
+  categories?: string[];      // <--- Codex: allow multiple categories
   tags: string[];
   featuredImage: string;
   seoTitle: string;
@@ -23,6 +22,7 @@ export interface BlogPost {
   updatedAt: string;
   views: number;
   readTime?: string;
+  commentCount?: number;      // <--- Codex: comment count for API/UI
 }
 
 export interface Video {
@@ -61,7 +61,7 @@ export interface SystemStats {
   storageUsed: string;
 }
 
-// Zod schemas for validating BlogPost and Video objects
+// --- Zod Schemas for validation (unchanged, but can add commentCount if you wish) ---
 export const BlogPostSchema = z.object({
   id: z.string(),
   title: z.string(),
@@ -70,6 +70,7 @@ export const BlogPostSchema = z.object({
   excerpt: z.string(),
   status: z.enum(["draft", "published", "scheduled"]),
   category: z.string(),
+  categories: z.array(z.string()).optional(),    // <--- Codex: optional
   tags: z.array(z.string()),
   featuredImage: z.string(),
   seoTitle: z.string(),
@@ -80,6 +81,7 @@ export const BlogPostSchema = z.object({
   updatedAt: z.string(),
   views: z.number(),
   readTime: z.string().optional(),
+  commentCount: z.number().optional(),           // <--- Codex: optional
 });
 
 export const VideoSchema = z.object({
@@ -99,34 +101,49 @@ export const VideoSchema = z.object({
   featured: z.boolean().optional(),
 });
 
-/* ----- Blog Store ----- */
+// --- Blog Store ---
 export const blogStore = {
   async getAll(): Promise<BlogPost[]> {
     const snap = await adminDb.collection("blogs").orderBy("createdAt", "desc").get();
-    return snap.docs.map((d) => d.data() as BlogPost);
+    return snap.docs.map((d) => {
+      const doc = d.data() as BlogPost;
+      return {
+        ...doc,
+        categories: Array.isArray(doc.categories) && doc.categories.length > 0 ? doc.categories : [doc.category],
+        commentCount: typeof doc.commentCount === "number" ? doc.commentCount : 0, // always present
+      };
+    });
   },
 
   async getById(id: string): Promise<BlogPost | null> {
     const doc = await adminDb.collection("blogs").doc(id).get();
-    return doc.exists ? (doc.data() as BlogPost) : null;
+    if (!doc.exists) return null;
+    const data = doc.data() as BlogPost;
+    return {
+      ...data,
+      categories: Array.isArray(data.categories) && data.categories.length > 0 ? data.categories : [data.category],
+      commentCount: typeof data.commentCount === "number" ? data.commentCount : 0,
+    };
   },
 
-  // Codex addition: fetch a post by slug for edit/preview workflows
+  // Fetch a post by slug for edit/preview workflows
   async getBySlug(slug: string): Promise<BlogPost | null> {
     const snap = await adminDb
       .collection("blogs")
       .where("slug", "==", slug)
       .limit(1)
       .get();
-    return snap.empty ? null : (snap.docs[0].data() as BlogPost);
+    if (snap.empty) return null;
+    const data = snap.docs[0].data() as BlogPost;
+    return {
+      ...data,
+      categories: Array.isArray(data.categories) && data.categories.length > 0 ? data.categories : [data.category],
+      commentCount: typeof data.commentCount === "number" ? data.commentCount : 0,
+    };
   },
 
-  /**
-   * Create a new blog post after validating input with BlogPostSchema.
-   * Rejects invalid data.
-   */
   async create(
-    post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "views">
+    post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "views" | "commentCount">
   ): Promise<BlogPost> {
     // Validate input (omitting auto fields)
     const data = BlogPostSchema.omit({
@@ -134,6 +151,7 @@ export const blogStore = {
       createdAt: true,
       updatedAt: true,
       views: true,
+      commentCount: true,
     }).parse(post);
 
     const id = `post_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
@@ -144,31 +162,39 @@ export const blogStore = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       views: 0,
+      commentCount: 0,
     };
     await adminDb.collection("blogs").doc(id).set(newPost);
     return newPost;
   },
 
-  /**
-   * Update a blog post after validating updates with BlogPostSchema.
-   * Rejects invalid data.
-   */
   async update(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
     // Validate input (partial allows patching)
     const data = BlogPostSchema.partial().parse(updates);
     const ref = adminDb.collection("blogs").doc(id);
-    await ref.set({ ...updates, updatedAt: new Date().toISOString() }, { merge: true });
     await ref.set({ ...data, updatedAt: new Date().toISOString() }, { merge: true });
     const doc = await ref.get();
-    return doc.exists ? (doc.data() as BlogPost) : null;
+    if (!doc.exists) return null;
+    const updated = doc.data() as BlogPost;
+    return {
+      ...updated,
+      categories: Array.isArray(updated.categories) && updated.categories.length > 0 ? updated.categories : [updated.category],
+      commentCount: typeof updated.commentCount === "number" ? updated.commentCount : 0,
+    };
   },
 
-  /** Increment the view counter for a blog post using Firestore's atomic increment. */
   async incrementViews(id: string): Promise<void> {
     await adminDb
       .collection("blogs")
       .doc(id)
       .update({ views: FieldValue.increment(1) });
+  },
+
+  async setCommentCount(id: string, count: number): Promise<void> {
+    await adminDb
+      .collection("blogs")
+      .doc(id)
+      .update({ commentCount: count });
   },
 
   async delete(id: string): Promise<boolean> {
@@ -180,7 +206,7 @@ export const blogStore = {
   },
 };
 
-/* ----- Video Store ----- */
+// --- Video Store (unchanged) ---
 export const videoStore = {
   async getAll(): Promise<Video[]> {
     const snap = await adminDb.collection("videos").orderBy("createdAt", "desc").get();
@@ -192,7 +218,6 @@ export const videoStore = {
     return doc.exists ? (doc.data() as Video) : null;
   },
 
-  // (Optional but consistent): fetch video by slug
   async getBySlug(slug: string): Promise<Video | null> {
     const snap = await adminDb
       .collection("videos")
@@ -202,14 +227,9 @@ export const videoStore = {
     return snap.empty ? null : (snap.docs[0].data() as Video);
   },
 
-  /**
-   * Create a new video after validating input with VideoSchema.
-   * Rejects invalid data.
-   */
   async create(
     video: Omit<Video, "id" | "createdAt" | "updatedAt" | "views">
   ): Promise<Video> {
-    // Validate input (omitting auto fields)
     const data = VideoSchema.omit({
       id: true,
       createdAt: true,
@@ -230,21 +250,14 @@ export const videoStore = {
     return newVideo;
   },
 
-  /**
-   * Update a video after validating updates with VideoSchema.
-   * Rejects invalid data.
-   */
   async update(id: string, updates: Partial<Video>): Promise<Video | null> {
-    // Validate input (partial allows patching)
     const data = VideoSchema.partial().parse(updates);
     const ref = adminDb.collection("videos").doc(id);
-    await ref.set({ ...updates, updatedAt: new Date().toISOString() }, { merge: true });
     await ref.set({ ...data, updatedAt: new Date().toISOString() }, { merge: true });
     const doc = await ref.get();
     return doc.exists ? (doc.data() as Video) : null;
   },
 
-  /** Increment the view counter for a video using Firestore's atomic increment. */
   async incrementViews(id: string): Promise<void> {
     await adminDb
       .collection("videos")
@@ -261,7 +274,7 @@ export const videoStore = {
   },
 };
 
-/* ----- Page Store ----- */
+// --- Page Store (unchanged) ---
 export const pageStore = {
   async getAll(): Promise<PageContent[]> {
     const snap = await adminDb.collection("pages").get();

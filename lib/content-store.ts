@@ -46,7 +46,7 @@ export interface PageContent {
   id: string;
   page: string;
   section: string;
-  content: Record<string, any>;
+  content: Record<string, unknown>;
   updatedAt: string;
   updatedBy: string;
 }
@@ -271,7 +271,7 @@ export const pageStore = {
   async update(
     page: string,
     section: string,
-    content: Record<string, any>,
+    content: Record<string, unknown>,
     updatedBy: string
   ): Promise<PageContent> {
     const id = `${page}_${section}`;

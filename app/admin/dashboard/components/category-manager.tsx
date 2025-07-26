@@ -33,7 +33,7 @@ export interface Category {
 }
 
 // Safe client-side error logger (does nothing in prod, logs in dev)
-function safeLogError(...args: any[]) {
+function safeLogError(...args: unknown[]) {
   if (process.env.NODE_ENV !== "production") {
     // eslint-disable-next-line no-console
     console.error(...args)
@@ -65,11 +65,11 @@ export function CategoryManager() {
       const blogData = await blogRes.json()
       const videoData = await videoRes.json()
       // Map title from API to name for UI
-      const blogCats: Category[] = (blogData.categories || []).map((cat: any) => ({
+      const blogCats: Category[] = (blogData.categories || []).map((cat: Category) => ({
         ...cat,
         name: cat.name ?? cat.title,
       }))
-      const videoCats: Category[] = (videoData.categories || []).map((cat: any) => ({
+      const videoCats: Category[] = (videoData.categories || []).map((cat: Category) => ({
         ...cat,
         name: cat.name ?? cat.title,
       }))
@@ -92,7 +92,9 @@ export function CategoryManager() {
         ...categoryData,
         title: categoryData.name,
         tooltip: categoryData.tooltip,
-        ...(categoryData.type ? { type: categoryData.type.toLowerCase() as any } : {}),
+        ...(categoryData.type
+          ? { type: categoryData.type.toLowerCase() as Lowercase<CategoryType> }
+          : {}),
       }
       const response = await fetch("/api/admin/categories", {
         method: "POST",

@@ -3,31 +3,43 @@
 import siteData from "@/content-data/categories.json";
 import BlogPage from "../../page";
 
+/**
+ * Blog Category Route
+ * Finds the blog category from JSON (static) by slug.
+ * You can replace blogPosts logic with a live data fetch when ready.
+ */
 export default async function BlogCategoryPage({
   params,
   searchParams,
 }: {
-  params: { slug: string }
-  searchParams: { page?: string }
+  params: { slug: string };
+  searchParams: { page?: string };
 }) {
   const categorySlug = params.slug;
 
-  // Find the category from JSON instead of DB
-  const category = (siteData.CATEGORIES.blog || []).find(
-    (cat) => cat.slug === categorySlug
-  );
+  // --- Robustly find the category (case-insensitive, defensive fallback) ---
+  const category =
+    (siteData.CATEGORIES?.blog || []).find(
+      (cat) => cat.slug?.toLowerCase() === categorySlug?.toLowerCase()
+    ) || null;
 
   if (!category) {
-    return <div>Category not found</div>;
+    return (
+      <div className="max-w-2xl mx-auto py-24 text-center text-lg font-semibold text-gray-600">
+        Category not found
+      </div>
+    );
   }
 
-  // TODO: Fetch blog posts for this category from your preferred data source (e.g., Firebase or static JSON)
-  // Example placeholder: Replace with actual fetch as needed
+  // --- TODO: Fetch blog posts for this category (replace this placeholder) ---
+  // Codex: If you have a static blog source, filter by category/categories array
+  // If you move to dynamic DB fetch, replace this logic accordingly
+  // Example (static): 
   // const blogPosts = (siteData.BLOG_POSTS || []).filter(
-  //   (post) => post.categorySlug === categorySlug
+  //   (post) =>
+  //     post.category === categorySlug ||
+  //     (Array.isArray(post.categories) && post.categories.includes(categorySlug))
   // );
-
-  // Pass empty array or implement your new fetching logic here
   const blogPosts: any[] = [];
 
   return (

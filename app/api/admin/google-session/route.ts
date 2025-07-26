@@ -41,7 +41,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         "code" in err &&
         (err as { code?: string }).code === "auth/id-token-revoked"
       ) {
-        logError("google-session: Token revoked for email", (err as any)?.email);
+        logError("google-session: Token revoked for email", (err as { email?: string })?.email);
         return NextResponse.json({ error: "Token revoked" }, { status: 401 });
       }
       logError("google-session: verifyIdToken failed", err);

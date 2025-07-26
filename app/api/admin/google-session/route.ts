@@ -34,9 +34,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         // eslint-disable-next-line no-console
         console.log("google-session: ID token verified for email:", decoded.email);
       }
-    } catch (err: any) {
-      if (err.code === "auth/id-token-revoked") {
-        logError("google-session: Token revoked for email", err?.email);
+    } catch (err: unknown) {
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        (err as { code?: string }).code === "auth/id-token-revoked"
+      ) {
+        logError("google-session: Token revoked for email", (err as any)?.email);
         return NextResponse.json({ error: "Token revoked" }, { status: 401 });
       }
       logError("google-session: verifyIdToken failed", err);
@@ -62,7 +67,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         // eslint-disable-next-line no-console
         console.log("google-session: Admin email authorized:", decoded.email);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       logError("google-session: admin email unauthorized", err);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -97,12 +102,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         timestamp: new Date().toISOString(),
         ip: req.headers.get("x-forwarded-for") || "",
       });
-    } catch (logErr) {
+    } catch (logErr: unknown) {
       logError("google-session: failed to record login event", logErr);
     }
 
     return res;
-  } catch (err) {
+  } catch (err: unknown) {
     logError("google-session: final catch", err);
     return NextResponse.json({ error: "Authentication failed." }, { status: 401 });
   }

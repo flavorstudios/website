@@ -30,7 +30,7 @@ function joinUrl(base: string, path: string): string {
 }
 
 // ---- UTILITY: Convert to ISO8601 date string, or empty ----
-function toISO8601(input: any): string {
+function toISO8601(input: string | Date | null | undefined): string {
   if (!input) return "";
   if (typeof input === "string" && !isNaN(Date.parse(input))) return new Date(input).toISOString();
   if (input instanceof Date && !isNaN(input.getTime())) return input.toISOString();
@@ -99,7 +99,7 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
       const blogsData = await blogsResponse.json();
       // --- Codex Update: Support both array and { posts: [] }
       const blogs = Array.isArray(blogsData) ? blogsData : blogsData.posts || [];
-      blogs.forEach((blog: any) => {
+      blogs.forEach((blog: BlogPost) => {
         if (blog.slug && blog.status === "published") {
           dynamicPages.push({
             url: `/blog/${blog.slug}`,
@@ -126,7 +126,7 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
       const videosData = await videosResponse.json();
       // --- Codex Update: Support both array and { videos: [] }
       const videos = Array.isArray(videosData) ? videosData : videosData.videos || [];
-      videos.forEach((video: any) => {
+      videos.forEach((video: Video) => {
         if (video.slug && video.status === "published") {
           dynamicPages.push({
             url: `/watch/${video.slug}`,
@@ -147,3 +147,7 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
 
   return dynamicPages;
 }
+
+// --- Add these imports at the top if not already present: ---
+import type { BlogPost } from "./content-store";
+import type { Video } from "./content-store";

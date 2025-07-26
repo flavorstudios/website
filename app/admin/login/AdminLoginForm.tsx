@@ -21,7 +21,7 @@ import {
 } from "firebase/auth"
 
 // Safe client-side error logger (does nothing in prod, only logs in dev)
-function safeLogError(...args: any[]) {
+function safeLogError(...args: unknown[]) {
   if (process.env.NODE_ENV !== "production") {
     // eslint-disable-next-line no-console
     console.error(...args)
@@ -108,7 +108,7 @@ export default function AdminLoginForm() {
         await signOut(auth)
         setError("Server session invalid. Please try logging in again.")
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       safeLogError("Google sign-in error:", error)
       setError("Authentication failed. Please try again.")
     } finally {

@@ -18,22 +18,10 @@ import { Info, Eye, Pencil, Trash2, Upload, Archive } from "lucide-react";
 import { VideoForm } from "@/components/ui/video-form";
 import { cn } from "@/lib/utils";
 
-// Types
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  type: "BLOG" | "VIDEO";
-  tooltip?: string;
-  color?: string;
-  icon?: string;
-  order: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  postCount: number;
-}
+// TYPES — Import your unified Category interface!
+import type { Category } from "@/types/category";
 
+// Video type is still local (or you can unify elsewhere)
 interface Video {
   id: string;
   title: string;
@@ -225,7 +213,7 @@ function VideoTable({
                 <td className="p-3 hidden md:table-cell">
                   {catObj?.name || video.category}
                   {catObj?.tooltip && (
-                    <span className="ml-1 text-xs text-gray-400" title={catObj.tooltip}>
+                    <span className="ml-1 text-xs text-gray-400" title={catObj.tooltip?.toString()}>
                       <Info className="inline h-3 w-3" />
                     </span>
                   )}

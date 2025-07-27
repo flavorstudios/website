@@ -2,7 +2,7 @@
 
 import siteData from "@/content-data/categories.json";
 import BlogPage from "../../page";
-import type { BlogPost } from "@/components/admin/blog/BlogEditor"; // Make sure this import points to your BlogPost interface
+import type { BlogPost } from "@/lib/types"; // Correct canonical type import
 
 /**
  * Blog Category Route

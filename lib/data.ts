@@ -1,5 +1,7 @@
 // --------- DATA TYPES ---------
 
+import type { Category } from "@/types/category" // <-- Unified type!
+
 export interface BlogPost {
   id: string
   title: string
@@ -29,15 +31,6 @@ export interface Video {
   videoUrl: string
   duration: string
   featured: boolean
-}
-
-export interface Category {
-  id: string
-  name: string
-  slug: string
-  description?: string
-  count?: number
-  type?: string // ("BLOG" | "VIDEO"), if provided by your API
 }
 
 // --------- CATEGORY FETCH (DEPRECATED: USE /lib/dynamic-categories.ts) ---------

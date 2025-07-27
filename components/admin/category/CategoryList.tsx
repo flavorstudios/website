@@ -6,6 +6,8 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { GripVertical, Edit, Trash2 } from "lucide-react"
+import * as Icons from "lucide-react"
+import type { LucideProps } from "lucide-react"
 import {
   DndContext,
   closestCenter,
@@ -49,6 +51,17 @@ export interface CategoryListProps {
   selected: Set<string>
   toggleSelect: (id: string) => void
   toggleSelectAll: (checked: boolean) => void
+}
+
+// --- Helper: Safe icon renderer ---
+const renderIcon = (name?: string | null) => {
+  if (!name) return null
+  if (name.startsWith("http") || name.startsWith("/")) {
+    return <img src={name} alt="" className="w-4 h-4" />
+  }
+  const Icon = (Icons as Record<string, React.ComponentType<LucideProps>>)[name]
+  if (!Icon) return null
+  return <Icon className="w-4 h-4" />
 }
 
 export default function CategoryList({
@@ -213,6 +226,7 @@ function CategoryCard({
             style={{ backgroundColor: category.color || "#6366f1" }}
             title={category.color || "#6366f1"}
           />
+          {renderIcon(category.icon)}
           <span className="font-bold">{category.name}</span>
           <span className="text-xs px-2 py-1 bg-gray-100 rounded ml-2">{category.slug}</span>
           <span className="text-xs px-2 py-1 bg-gray-200 rounded ml-2">{category.type}</span>
@@ -306,6 +320,7 @@ function SortableRow({
           style={{ backgroundColor: category.color || "#6366f1" }}
           title={category.color || "#6366f1"}
         />
+        {renderIcon(category.icon)}
         <span className="font-medium">{category.name}</span>
         {category.tooltip && (
           <Tooltip>

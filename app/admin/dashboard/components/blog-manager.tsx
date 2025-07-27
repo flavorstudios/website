@@ -22,6 +22,7 @@ import BlogBulkActions from "@/components/admin/blog/BlogBulkActions"
 import type { BlogPost } from "@/lib/content-store"
 import type { CategoryData } from "@/lib/dynamic-categories"
 import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions"
+import { cn } from "@/lib/utils"
 
 // Pagination component (now exported for reuse)
 export function Pagination({
@@ -307,7 +308,7 @@ export const BlogManager = () => {
       </div>
 
       {/* Blog management UI section */}
-      <div className="space-y-6">
+      <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}>
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-4">
           <Input
@@ -326,7 +327,7 @@ export const BlogManager = () => {
             aria-label="Category"
           />
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-40" aria-label="Status">
+            <SelectTrigger className="w-full sm:w-40" aria-label="Status">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -337,7 +338,7 @@ export const BlogManager = () => {
             </SelectContent>
           </Select>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-40" aria-label="Sort By">
+            <SelectTrigger className="w-full sm:w-40" aria-label="Sort By">
               <SelectValue placeholder="Sort By" />
             </SelectTrigger>
             <SelectContent>
@@ -348,7 +349,7 @@ export const BlogManager = () => {
           </Select>
         </div>
 
-        {/* Bulk Actions */}
+        {/* Bulk Actions (sticky bar on mobile) */}
         <BlogBulkActions
           count={selected.size}
           onPublish={() => handleBulk("publish")}

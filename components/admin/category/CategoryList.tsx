@@ -64,7 +64,13 @@ export default function CategoryList({
   const [items, setItems] = useState<Category[]>([])
 
   useEffect(() => {
-    setItems([...categories].sort((a, b) => a.order - b.order))
+    if (Array.isArray(categories)) {
+      setItems([
+        ...categories,
+      ].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)))
+    } else {
+      setItems([])
+    }
   }, [categories])
 
   const sensors = useSensors(useSensor(PointerSensor))
@@ -77,13 +83,17 @@ export default function CategoryList({
     const newItems = arrayMove(items, oldIndex, newIndex)
     setItems(newItems)
     try {
-      await fetch("/api/admin/categories/reorder", {
+      const res = await fetch("/api/admin/categories/reorder", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ ids: newItems.map((c) => c.id), type: type.toLowerCase() }),
       })
+      if (!res.ok) {
+        throw new Error(`Server responded with ${res.status}`)
+      }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Failed to reorder categories", err)
     }
   }

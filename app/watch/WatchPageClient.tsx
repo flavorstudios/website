@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Play, Eye, Calendar, Youtube, Clock, Video } from "lucide-react"
 import { useState, useEffect } from "react"
+import type { Category } from "@/types/category" // <-- Unified import
 
 interface VideoType {
   id: string
@@ -22,14 +23,6 @@ interface VideoType {
   publishedAt: string
   views: number
   featured: boolean
-}
-
-interface Category {
-  id?: string
-  name: string
-  slug: string
-  color?: string
-  tooltip?: string
 }
 
 export function WatchPageClient({

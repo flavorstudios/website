@@ -1,11 +1,11 @@
 // app/api/admin/allowed-email/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/admin-auth"; // Helper should verify session and decode email
 import { logError } from "@/lib/log"; // Consistent server logging
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   // Retrieve session cookie
   const sessionCookie = cookies().get("admin-session")?.value;
   if (!sessionCookie) {
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   // Gather allowed emails and domain from env
   // Accept both ADMIN_EMAIL and ADMIN_EMAILS for safety
   const singleAdminEmail = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
-  let adminEmails = (process.env.ADMIN_EMAILS || "")
+  const adminEmails = (process.env.ADMIN_EMAILS || "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
@@ -46,7 +46,14 @@ export async function GET(req: NextRequest) {
     false;
 
   if (!isAllowed) {
-    console.warn("[allowed-email] Admin email not allowed:", userEmail, "| Allowed:", adminEmails, "| Domain:", adminDomain);
+    console.warn(
+      "[allowed-email] Admin email not allowed:",
+      userEmail,
+      "| Allowed:",
+      adminEmails,
+      "| Domain:",
+      adminDomain
+    );
   } else {
     console.log("[allowed-email] Admin email allowed:", userEmail);
   }

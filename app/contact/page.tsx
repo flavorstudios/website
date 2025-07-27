@@ -1,7 +1,7 @@
 // app/contact/page.tsx
 
-import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_LOGO_URL } from "@/lib/constants";
+import { getMetadata, getSchema } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData"; // Assumes you have this for JSON-LD
 import ContactPageClient from "./ContactPageClient";
 
@@ -42,7 +42,7 @@ export default function ContactPage() {
   // Generate WebPage schema for enhanced SEO (JSON-LD)
   const schema = getSchema({
     type: "WebPage",
-    path: "/contact", // getSchema will use this path to construct the URL
+    path: "/contact",
     title: `Contact ${SITE_NAME} – Collaborate or Inquire`,
     description:
       `Have a question or proposal? Contact ${SITE_NAME} for support, collaborations, or general inquiries. We respond within 24–48 hours.`,

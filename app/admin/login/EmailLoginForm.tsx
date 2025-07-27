@@ -9,13 +9,13 @@ import useAuthError from "@/hooks/useAuthError"
 
 export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
   const router = useRouter()
-  const { error, setError, clearError } = useAuthError()
+  const { error, setError } = useAuthError()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError("")
@@ -33,7 +33,7 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
         return
       }
       router.push("/admin/dashboard")
-    } catch (err) {
+    } catch {
       setError("Authentication failed. Please try again.")
     } finally {
       setLoading(false)
@@ -84,7 +84,8 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
       />
 
       <Button type="submit" disabled={loading} className="w-full">
-        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Login
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        Login
       </Button>
       <Button type="button" variant="ghost" onClick={onCancel} className="w-full">
         Back

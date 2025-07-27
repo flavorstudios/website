@@ -1,7 +1,7 @@
 // app/privacy-policy/page.tsx
 
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL, SITE_LOGO_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,7 @@ export const metadata = getMetadata({
   description:
     `Read how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL}. Your privacy matters to us.`,
   path: "/privacy-policy",
-  robots: "index,follow", // CORRECTED: Public legal/privacy page should be indexed.
+  robots: "index,follow",
   openGraph: {
     title: `Privacy Policy – ${SITE_NAME}`,
     description:
@@ -35,7 +35,7 @@ export const metadata = getMetadata({
   twitter: {
     card: "summary_large_image",
     site: SITE_BRAND_TWITTER,
-    creator: SITE_BRAND_TWITTER, // ADDED: For consistency and completeness.
+    creator: SITE_BRAND_TWITTER,
     title: `Privacy Policy – ${SITE_NAME}`,
     description:
       `Read how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL}. Your privacy matters to us.`,
@@ -52,8 +52,7 @@ const schema = getSchema({
   path: "/privacy-policy",
   title: `Privacy Policy – ${SITE_NAME}`,
   description: `Read how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL}. Your privacy matters to us.`,
-  image: `${SITE_URL}/cover.jpg`, // You could consider SITE_LOGO_URL here for consistency with publisher, but cover is fine.
-  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
+  image: `${SITE_URL}/cover.jpg`,
 });
 
 export default function PrivacyPolicyPage() {
@@ -102,12 +101,12 @@ export default function PrivacyPolicyPage() {
       icon: AlertCircle,
       content: [
         {
-          text: "To maintain a safe and respectful community, we use Google's Perspective API — an AI-powered content moderation tool developed by Jigsaw, a subsidiary of Google. This service helps detect toxic, spammy, or harmful content in comments submitted to our website.",
+          text: "To maintain a safe and respectful community, we use Google&apos;s Perspective API — an AI-powered content moderation tool developed by Jigsaw, a subsidiary of Google. This service helps detect toxic, spammy, or harmful content in comments submitted to our website.",
         },
         {
           text: "Please note:",
           list: [
-            "Only the content of your comment is sent to Google's servers for moderation.",
+            "Only the content of your comment is sent to Google&apos;s servers for moderation.",
             "No personally identifiable information (like your name or email) is included in that data.",
             "This helps us reduce spam and ensure safer interactions on our platform.",
           ],
@@ -139,7 +138,7 @@ export default function PrivacyPolicyPage() {
           text: "Our Site may contain links to third-party websites. We are not responsible for the privacy practices or content of these websites. Please review the privacy policies of third-party sites before providing any personal information.",
         },
         {
-          text: "We also use trusted third-party services, such as Google's Perspective API, to moderate user-generated content. These services may process limited data according to their own privacy policies. For more information, please review Google's Privacy Policy.",
+          text: "We also use trusted third-party services, such as Google&apos;s Perspective API, to moderate user-generated content. These services may process limited data according to their own privacy policies. For more information, please review Google&apos;s Privacy Policy.",
         },
       ],
     },
@@ -171,12 +170,12 @@ export default function PrivacyPolicyPage() {
       note: "To exercise these rights, please contact us using the details provided below.",
     },
     {
-      title: "Children's Privacy",
+      title: "Children&apos;s Privacy",
       text: "Our Site is not directed toward children under 13 years old, and we do not knowingly collect information from individuals under the age of 13.",
     },
     {
       title: "Changes to This Privacy Policy",
-      text: 'We may update this Privacy Policy periodically. Any changes will be posted on this page with an updated "Effective Date." We encourage you to review this Privacy Policy regularly.',
+      text: "We may update this Privacy Policy periodically. Any changes will be posted on this page with an updated &quot;Effective Date.&quot; We encourage you to review this Privacy Policy regularly.",
     },
   ];
 
@@ -192,13 +191,13 @@ export default function PrivacyPolicyPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Privacy Policy</h1>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex items-start gap-3">
-              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm sm:text-base md:text-lg text-blue-800 font-medium mb-2">
                   Effective Date: May 9, 2025
                 </p>
                 <p className="text-sm sm:text-base md:text-lg text-blue-700 leading-relaxed sm:leading-loose">
-                  Flavor Studios ("we," "us," or "our") respects your privacy and is committed to protecting your
+                  Flavor Studios (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) respects your privacy and is committed to protecting your
                   personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your
                   information when you visit our website.
                 </p>
@@ -207,7 +206,7 @@ export default function PrivacyPolicyPage() {
           </div>
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+              <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm sm:text-base md:text-lg text-amber-800 font-medium mb-2">Important Notice</p>
                 <p className="text-sm sm:text-base md:text-lg text-amber-700 leading-relaxed sm:leading-loose">
@@ -219,14 +218,14 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
 
-        {/* Main Sections (Information We Collect, How We Use, Disclosure, etc.) */}
+        {/* Main Sections */}
         <div className="space-y-4 sm:space-y-6 md:space-y-8 mb-6 sm:mb-8 md:mb-12">
           {sections.map((section, index) => (
             <Card key={index} id={section.id} className="scroll-mt-20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
                   <div className="p-2 bg-blue-100 rounded-lg">
-                    <section.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <section.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
                   </div>
                   {section.title}
                 </CardTitle>
@@ -242,11 +241,11 @@ export default function PrivacyPolicyPage() {
                     <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose mb-3">
                       {item.text}
                     </p>
-                    {item.list && ( // Check if list exists before rendering ul
+                    {item.list && (
                       <ul className="space-y-2 ml-4">
                         {item.list.map((listItem, listIndex) => (
                           <li key={listIndex} className="flex items-start gap-2">
-                            <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div> {/* Added aria-hidden */}
+                            <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                             <span className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose">
                               {listItem}
                             </span>
@@ -261,7 +260,7 @@ export default function PrivacyPolicyPage() {
           ))}
         </div>
 
-        {/* Additional Sections (Retention, Your Rights, Children's Privacy, Changes) */}
+        {/* Additional Sections */}
         <div className="space-y-6 sm:space-y-8 mb-12 sm:mb-16">
           {additionalSections.map((section, index) => (
             <Card key={index}>
@@ -272,11 +271,11 @@ export default function PrivacyPolicyPage() {
                 <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose mb-3">
                   {section.text}
                 </p>
-                {section.list && ( // Check if list exists before rendering ul
+                {section.list && (
                   <ul className="space-y-2 ml-4 mb-4">
                     {section.list.map((listItem, listIndex) => (
                       <li key={listIndex} className="flex items-start gap-2">
-                        <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div> {/* Added aria-hidden */}
+                        <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                         <span className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose">
                           {listItem}
                         </span>
@@ -299,7 +298,7 @@ export default function PrivacyPolicyPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-blue-900">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
               </div>
               Contact Us
             </CardTitle>
@@ -312,7 +311,7 @@ export default function PrivacyPolicyPage() {
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
-                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="font-semibold text-blue-900 text-sm sm:text-base md:text-lg">Flavor Studios</p>
@@ -322,7 +321,7 @@ export default function PrivacyPolicyPage() {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                   <Link href="/contact">
-                    <Phone className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
                     Contact Us
                   </Link>
                 </Button>
@@ -332,7 +331,7 @@ export default function PrivacyPolicyPage() {
                   className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm"
                 >
                   <Link href={`mailto:contact@flavorstudios.in`}>
-                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
                     Email Us
                   </Link>
                 </Button>
@@ -345,7 +344,7 @@ export default function PrivacyPolicyPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-blue-900">
-              <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+              <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
               Related Legal Documents
             </CardTitle>
           </CardHeader>
@@ -356,31 +355,31 @@ export default function PrivacyPolicyPage() {
             <div className="flex flex-wrap gap-2">
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/terms-of-service">
-                  <FileText className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
                   Terms of Service
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/cookie-policy">
-                  <Cookie className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <Cookie className="mr-2 h-4 w-4" aria-hidden="true" />
                   Cookie Policy
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/dmca">
-                  <Copyright className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <Copyright className="mr-2 h-4 w-4" aria-hidden="true" />
                   DMCA Policy
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/disclaimer">
-                  <AlertCircle className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <AlertCircle className="mr-2 h-4 w-4" aria-hidden="true" />
                   Disclaimer
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/media-usage-policy">
-                  <Eye className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
                   Media Usage Policy
                 </Link>
               </Button>

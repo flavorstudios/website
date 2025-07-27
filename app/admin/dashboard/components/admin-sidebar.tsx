@@ -26,20 +26,18 @@ interface AdminSidebarProps {
   setSidebarOpen: (open: boolean) => void
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// FIX: Remove unused _activeSection param
 export function AdminSidebar({
-  activeSection,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   activeSection: _activeSection,
   setActiveSection,
   sidebarOpen,
   setSidebarOpen,
 }: AdminSidebarProps) {
-  // --- FIX: remove userRole destructure as per Codex audit ---
   const { accessibleSections } = useRole()
   const [isMobile, setIsMobile] = useState(false)
   const pathname = usePathname()
 
-  // Only one menu item per section, with `href` for route navigation
   const menuItems = [
     { id: "overview", label: "Dashboard", icon: LayoutDashboard, count: null, href: "/admin/dashboard" },
     { id: "blogs", label: "Blog Posts", icon: FileText, count: null, href: "/admin/dashboard/blog-posts" },
@@ -51,12 +49,10 @@ export function AdminSidebar({
     { id: "settings", label: "Settings", icon: Settings, count: null },
   ]
 
-  // Show only accessible sections and always the dashboard
   const filteredNavItems = menuItems.filter(
     (item) => accessibleSections.includes(item.id) || item.id === "overview"
   )
 
-  // Codex audit: Longest prefix active item logic
   const activeHrefItem = filteredNavItems
     .filter(
       (item) =>
@@ -146,7 +142,6 @@ export function AdminSidebar({
               const active = isActive(item.href)
               const Icon = item.icon
 
-              // If href is present, use Link (route navigation).
               if (item.href) {
                 return (
                   <Button
@@ -185,7 +180,6 @@ export function AdminSidebar({
                 )
               }
 
-              // Section only (no href), never highlighted
               return (
                 <Button
                   key={item.id}

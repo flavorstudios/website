@@ -1,14 +1,35 @@
 "use client"
 
-import { Shield, FileText, Copyright, Cookie, AlertCircle, Eye, Scale, AlertTriangle, Gavel } from "lucide-react"
+import {
+  Shield,
+  FileText,
+  Copyright,
+  Cookie,
+  AlertCircle,
+  Eye,
+  Scale,
+  AlertTriangle,
+  Gavel,
+} from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useState } from "react"
 
+type LegalCategory = "Privacy" | "Legal" | "Copyright"
+type LegalDoc = {
+  title: string
+  href: string
+  icon: React.ElementType
+  description: string
+  lastUpdated: string
+  category: LegalCategory
+  color: string
+}
+
 export default function LegalPageClient() {
-  const legalDocuments = [
+  const legalDocuments: LegalDoc[] = [
     {
       title: "Privacy Policy",
       href: "/privacy-policy",
@@ -65,8 +86,9 @@ export default function LegalPageClient() {
     },
   ]
 
-  const categories = ["All", "Privacy", "Legal", "Copyright"]
-  const [activeCategory, setActiveCategory] = useState("All")
+  const categories = ["All", "Privacy", "Legal", "Copyright"] as const
+  const [activeCategory, setActiveCategory] = useState<(typeof categories)[number]>("All")
+
   const filteredDocuments =
     activeCategory === "All" ? legalDocuments : legalDocuments.filter((doc) => doc.category === activeCategory)
 
@@ -80,7 +102,7 @@ export default function LegalPageClient() {
             Legal Information
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-            Important legal documents and policies that govern your use of Flavor Studios' website and services.
+            Important legal documents and policies that govern your use of Flavor Studios&apos; website and services.
           </p>
         </div>
 
@@ -113,37 +135,44 @@ export default function LegalPageClient() {
         {/* Category Filter */}
         <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8 sm:mb-12">
           {categories.map((category) => (
-            <Badge
+            <button
               key={category}
-              variant={activeCategory === category ? "default" : "secondary"}
-              className={`cursor-pointer ${activeCategory === category ? "bg-blue-600 text-white" : "hover:bg-blue-500 hover:text-white"} text-xs sm:text-sm`}
+              type="button"
+              aria-pressed={activeCategory === category}
+              className={`focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                activeCategory === category
+                  ? "bg-blue-600 text-white"
+                  : "hover:bg-blue-500 hover:text-white"
+              } text-xs sm:text-sm rounded-md px-3 sm:px-4 py-1.5 sm:py-2 font-medium transition-colors`}
               onClick={() => setActiveCategory(category)}
             >
               {category}
-            </Badge>
+            </button>
           ))}
         </div>
 
         {/* Legal Documents Grid */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 mb-12 sm:mb-16">
           {filteredDocuments.map((doc, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow h-full">
+            <Card key={index} className="hover:shadow-lg transition-shadow h-full" aria-label={doc.title}>
               <CardHeader>
-                <div className={`p-2 rounded-lg ${doc.color} flex items-center justify-between mb-3`}>
-                  <doc.icon className="h-5 w-5 sm:h-6 sm:w-6" />
-                  <Badge variant="secondary" className="text-xs">
-                    {doc.category}
-                  </Badge>
+                <div
+                  className={`p-2 rounded-lg flex items-center justify-between mb-3 ${doc.color} ring-1 ring-inset ring-blue-100`}
+                >
+                  <doc.icon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+                  <Badge variant="secondary" className="text-xs">{doc.category}</Badge>
                 </div>
                 <CardTitle className="text-lg sm:text-xl">{doc.title}</CardTitle>
-                <CardDescription className="text-sm sm:text-base leading-relaxed">{doc.description}</CardDescription>
+                <CardDescription className="text-sm sm:text-base leading-relaxed">
+                  {doc.description}
+                </CardDescription>
               </CardHeader>
               <CardContent className="pt-0 flex flex-col justify-between flex-1">
                 <div className="mb-4">
                   <p className="text-xs sm:text-sm text-gray-500">Last updated: {doc.lastUpdated}</p>
                 </div>
-                <Button asChild className="w-full h-9 sm:h-10 text-xs sm:text-sm">
-                  <Link href={doc.href}>Read Document</Link>
+                <Button asChild className="w-full h-9 sm:h-10 text-xs sm:text-sm" aria-label={`Read ${doc.title}`}>
+                  <Link href={doc.href}>Read {doc.title}</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -200,10 +229,10 @@ export default function LegalPageClient() {
           <CardContent>
             <p className="text-sm sm:text-base text-blue-800 leading-relaxed mb-4 sm:mb-6">
               If you have questions about any of these legal documents or need clarification on our policies, please
-              don't hesitate to contact us.
+              don&apos;t hesitate to contact us.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Button asChild className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-xs sm:text-sm">
+              <Button asChild className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-xs sm:text-sm" aria-label="Contact Us for Legal Matters">
                 <Link href="/contact">Contact Us</Link>
               </Button>
             </div>

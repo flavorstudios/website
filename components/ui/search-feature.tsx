@@ -250,7 +250,9 @@ export function SearchFeature() {
               {/* No Results */}
               {showNoResults && (
                 <div className="text-center py-8 px-4">
-                  <div className="text-muted-foreground mb-2">No results found for "{debouncedSearchQuery}"</div>
+                  <div className="text-muted-foreground mb-2">
+                    {`No results found for "${debouncedSearchQuery}"`}
+                  </div>
                   <div className="text-sm text-muted-foreground">
                     Try searching for blog posts, videos, or support content
                   </div>

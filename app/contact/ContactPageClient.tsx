@@ -1,16 +1,15 @@
-"use client"
+"use client";
 
-import type React from "react"
-
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
+import type React from "react";
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import {
   Mail,
   Clock,
@@ -27,8 +26,8 @@ import {
   Check,
   Loader2,
   AlertCircle,
-} from "lucide-react"
-import Link from "next/link"
+} from "lucide-react";
+import Link from "next/link";
 
 export default function ContactPageClient() {
   const [formData, setFormData] = useState({
@@ -38,10 +37,10 @@ export default function ContactPageClient() {
     subject: "",
     message: "",
     privacyAccepted: false,
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const contactInfo = [
     {
@@ -62,23 +61,18 @@ export default function ContactPageClient() {
       details: "Within 24-48 hours during business days (Monday-Friday)",
       description: "We try to respond as quickly as possible",
     },
-  ]
+  ];
 
   const socialLinks = [
     { name: "YouTube", href: "https://www.youtube.com/@flavorstudios", icon: Youtube, color: "text-red-600" },
     { name: "Facebook", href: "https://www.facebook.com/flavourstudios", icon: Facebook, color: "text-blue-700" },
     { name: "Instagram", href: "https://www.instagram.com/flavorstudios", icon: Instagram, color: "text-pink-600" },
     { name: "Twitter", href: "https://twitter.com/flavor_studios", icon: Twitter, color: "text-blue-600" },
-    {
-      name: "Discord",
-      href: "https://discord.com/channels/@flavorstudios",
-      icon: MessageCircle,
-      color: "text-indigo-600",
-    },
+    { name: "Discord", href: "https://discord.com/channels/@flavorstudios", icon: MessageCircle, color: "text-indigo-600" },
     { name: "Telegram", href: "https://t.me/flavorstudios", icon: Send, color: "text-blue-500" },
     { name: "Threads", href: "https://www.threads.net/@flavorstudios", icon: MessageCircle, color: "text-gray-600" },
     { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/", icon: Users, color: "text-orange-600" },
-  ]
+  ];
 
   const contactProcess = [
     {
@@ -92,13 +86,13 @@ export default function ContactPageClient() {
       step: "2",
       title: "Initial Assessment",
       description:
-        "You'll receive an immediate confirmation. Our team reviews all inquiries within 24 hours during business days.",
+        "You&apos;ll receive an immediate confirmation. Our team reviews all inquiries within 24 hours during business days.",
       icon: CheckCircle,
     },
     {
       step: "3",
       title: "Personalized Response",
-      description: "We'll respond with tailored information addressing your specific questions or concerns.",
+      description: "We&apos;ll respond with tailored information addressing your specific questions or concerns.",
       icon: MessageSquare,
     },
     {
@@ -108,66 +102,66 @@ export default function ContactPageClient() {
         "For complex matters, we may schedule additional communication to ensure your inquiry is fully resolved.",
       icon: Users,
     },
-  ]
+  ];
 
   const expectations = [
-    "You'll receive an email confirmation immediately.",
+    "You&apos;ll receive an email confirmation immediately.",
     "Our team will review your message within 24 hours.",
-    "We'll respond with helpful information or next steps.",
+    "We&apos;ll respond with helpful information or next steps.",
     "For complex inquiries, we may schedule a follow-up call.",
-  ]
+  ];
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = "First name is required"
+      newErrors.firstName = "First name is required";
     }
 
     if (!formData.lastName.trim()) {
-      newErrors.lastName = "Last name is required"
+      newErrors.lastName = "Last name is required";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required"
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address"
+      newErrors.email = "Please enter a valid email address";
     }
 
     if (!formData.subject) {
-      newErrors.subject = "Please select a subject"
+      newErrors.subject = "Please select a subject";
     }
 
     if (!formData.message.trim()) {
-      newErrors.message = "Message is required"
+      newErrors.message = "Message is required";
     } else if (formData.message.trim().length < 10) {
-      newErrors.message = "Message must be at least 10 characters long"
+      newErrors.message = "Message must be at least 10 characters long";
     }
 
     if (!formData.privacyAccepted) {
-      newErrors.privacyAccepted = "You must accept the privacy policy"
+      newErrors.privacyAccepted = "You must accept the privacy policy";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsSubmitting(true)
-    setSubmitStatus("idle")
+    setIsSubmitting(true);
+    setSubmitStatus("idle");
 
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Mock success
-      setSubmitStatus("success")
+      setSubmitStatus("success");
       setFormData({
         firstName: "",
         lastName: "",
@@ -175,21 +169,21 @@ export default function ContactPageClient() {
         subject: "",
         message: "",
         privacyAccepted: false,
-      })
-      setErrors({})
-    } catch (error) {
-      setSubmitStatus("error")
+      });
+      setErrors({});
+    } catch {
+      setSubmitStatus("error");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }))
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
-  }
+  };
 
   return (
     <div className="min-h-screen py-6 sm:py-8 lg:py-12">
@@ -201,8 +195,8 @@ export default function ContactPageClient() {
             Get In Touch
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-            Whether you have a question about our content, want to collaborate, or just want to say hello, we're here to
-            help. Fill out the form and we'll get back to you as soon as possible.
+            Whether you have a question about our content, want to collaborate, or just want to say hello, we&apos;re here to
+            help. Fill out the form and we&apos;ll get back to you as soon as possible.
           </p>
         </div>
 
@@ -284,7 +278,7 @@ export default function ContactPageClient() {
               <CardHeader>
                 <CardTitle className="text-xl sm:text-2xl">Send us a Message</CardTitle>
                 <CardDescription className="text-sm sm:text-base">
-                  Fill out the form below and we'll get back to you as soon as possible.
+                  Fill out the form below and we&apos;ll get back to you as soon as possible.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6">
@@ -293,7 +287,7 @@ export default function ContactPageClient() {
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <div>
                       <h4 className="font-semibold text-green-800">Message sent successfully!</h4>
-                      <p className="text-sm text-green-700">We'll get back to you within 24-48 hours.</p>
+                      <p className="text-sm text-green-700">We&apos;ll get back to you within 24-48 hours.</p>
                     </div>
                   </div>
                 )}
@@ -472,7 +466,7 @@ export default function ContactPageClient() {
                             <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white font-bold" />
                           </div>
                         </div>
-                        <span className="text-xs sm:text-sm text-blue-800 leading-relaxed">{expectation}</span>
+                        <span className="text-xs sm:text-sm text-blue-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: expectation }} />
                       </div>
                     ))}
                   </div>
@@ -512,9 +506,7 @@ export default function ContactPageClient() {
                           </div>
                         </CardHeader>
                         <CardContent className="pt-0">
-                          <CardDescription className="text-sm sm:text-base leading-relaxed">
-                            {process.description}
-                          </CardDescription>
+                          <CardDescription className="text-sm sm:text-base leading-relaxed" dangerouslySetInnerHTML={{ __html: process.description }} />
                         </CardContent>
                       </Card>
                     </div>
@@ -530,7 +522,7 @@ export default function ContactPageClient() {
           <HelpCircle className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-blue-600" />
           <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-blue-900">Need Quick Answers?</h2>
           <p className="text-base sm:text-lg text-blue-700 mb-4 sm:mb-6 max-w-2xl mx-auto px-4">
-            Before reaching out, check our comprehensive FAQ page where we've answered the most common questions about
+            Before reaching out, check our comprehensive FAQ page where we&apos;ve answered the most common questions about
             our content, collaborations, and services.
           </p>
           <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 h-10 sm:h-12 px-6 sm:px-8">
@@ -542,5 +534,5 @@ export default function ContactPageClient() {
         </section>
       </div>
     </div>
-  )
+  );
 }

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   Mail, Shield, AlertTriangle, ExternalLink, Copyright, Users, Bot,
   Briefcase, FileText, Phone, Globe, AlertCircle, Eye, Scale, RefreshCw, Cookie,
-} from "lucide-react"; // All necessary Lucide icons are correctly imported.
+} from "lucide-react";
 import Link from "next/link";
 
 // --- SEO Metadata: all handlers, all meta, dynamic canonical ---
@@ -17,12 +17,12 @@ export const metadata = getMetadata({
   title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
   description: `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
   path: "/disclaimer",
-  robots: "index,follow", // CORRECT: Public legal documents should be indexed and followed.
+  robots: "index,follow",
   openGraph: {
     title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
     description: `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
-    type: "website", // Appropriate type for a general policy page.
-    images: [{ url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }], // Main OG image.
+    type: "website",
+    images: [{ url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
@@ -30,18 +30,17 @@ export const metadata = getMetadata({
     creator: SITE_BRAND_TWITTER,
     title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
     description: `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
-    images: [`${SITE_URL}/cover.jpg`], // Main Twitter card image.
+    images: [`${SITE_URL}/cover.jpg`],
   },
 });
 
 // --- WebPage Schema: attaches JSON-LD with canonical, logo, etc ---
 const schema = getSchema({
-  type: "WebPage", // Suitable schema type for a legal policy page.
+  type: "WebPage",
   path: "/disclaimer",
   title: `Disclaimer – Legal Notice | ${SITE_NAME}`,
   description: `Read ${SITE_NAME}'s official disclaimer outlining legal limitations, liability, third-party links, and content usage policies. Stay informed about your responsibilities.`,
-  image: SITE_LOGO_URL, // Using the site's logo for the page's image in schema is a good practice for legal documents.
-  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
+  image: SITE_LOGO_URL,
 });
 
 export default function DisclaimerPage() {
@@ -138,11 +137,11 @@ export default function DisclaimerPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Disclaimer</h1>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex items-start gap-3">
-              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm sm:text-base text-blue-800 font-medium mb-2">Effective Date: May 9, 2025</p>
                 <p className="text-sm sm:text-base text-blue-700 leading-relaxed">
-                  The information provided by Flavor Studios ("we," "us," or "our") on our website and associated media
+                  The information provided by Flavor Studios (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) on our website and associated media
                   platforms is intended for general informational and entertainment purposes only. All content is
                   presented in good faith; however, we make no warranty or guarantee regarding the accuracy, adequacy,
                   reliability, completeness, or timeliness of the information.
@@ -152,7 +151,7 @@ export default function DisclaimerPage() {
           </div>
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+              <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm sm:text-base text-amber-800 font-medium mb-2">Important Notice</p>
                 <p className="text-sm sm:text-base text-amber-700 leading-relaxed">
@@ -171,7 +170,7 @@ export default function DisclaimerPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-base sm:text-xl">
                   <div className={`p-2 rounded-lg ${section.color}`}>
-                    <section.icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <section.icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                   </div>
                   {section.title}
                 </CardTitle>
@@ -192,7 +191,7 @@ export default function DisclaimerPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
                     <div className="p-2 bg-gray-100 rounded-lg">
-                      <section.icon className="h-5 w-5 text-gray-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                      <section.icon className="h-5 w-5 text-gray-600" aria-hidden="true" />
                     </div>
                     {section.title}
                   </CardTitle>
@@ -210,7 +209,7 @@ export default function DisclaimerPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-red-900">
               <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" aria-hidden="true" />
               </div>
               Use at Your Own Risk
             </CardTitle>
@@ -222,7 +221,7 @@ export default function DisclaimerPage() {
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
               {riskFactors.map((risk, index) => (
                 <div key={index} className="flex items-start gap-2">
-                  <div className="h-1.5 w-1.5 bg-red-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div> {/* Added aria-hidden */}
+                  <div className="h-1.5 w-1.5 bg-red-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                   <span className="text-xs sm:text-sm text-red-800 leading-relaxed">{risk}</span>
                 </div>
               ))}
@@ -272,7 +271,7 @@ export default function DisclaimerPage() {
           <CardContent>
             <div className="space-y-2 sm:space-y-3">
               <p className="text-xs sm:text-base text-cyan-800 leading-relaxed">
-                <strong>Technology Used:</strong> We employ Google's Perspective API and other automated tools to help
+                <strong>Technology Used:</strong> We employ Google&apos;s Perspective API and other automated tools to help
                 maintain a safe and respectful community environment.
               </p>
               <p className="text-xs sm:text-base text-cyan-800 leading-relaxed">
@@ -338,7 +337,6 @@ export default function DisclaimerPage() {
         <div className="text-center mb-8 sm:mb-12">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Quick Navigation</h3>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-            {/* Assuming these sections have corresponding IDs in your content */}
             {[
               { id: "limitation-liability", title: "Limitation of Liability" },
               { id: "external-links", title: "External Links" },
@@ -346,13 +344,13 @@ export default function DisclaimerPage() {
               { id: "third-party-content", title: "Third-Party Content" },
               { id: "user-content", title: "User Content" },
               { id: "automated-moderation", title: "Automated Moderation" },
-              { id: "no-professional-advice", title: "No Professional Advice" }, // Assuming an ID for this section
-              { id: "accuracy-information", title: "Accuracy of Info" }, // Assuming an ID for this section
-              { id: "changes-to-disclaimer", title: "Policy Changes" }, // Assuming an ID for this section
-              { id: "risk-acknowledgment", title: "Use at Own Risk" }, // Assuming an ID for this section
-              { id: "fair-use-copyright", title: "Fair Use" }, // Assuming an ID for this section
-              { id: "moderation-technology", title: "Moderation Tech" }, // Assuming an ID for this section
-              { id: "contact-disclaimer", title: "Contact" }, // Assuming an ID for this section
+              { id: "no-professional-advice", title: "No Professional Advice" },
+              { id: "accuracy-information", title: "Accuracy of Info" },
+              { id: "changes-to-disclaimer", title: "Policy Changes" },
+              { id: "risk-acknowledgment", title: "Use at Own Risk" },
+              { id: "fair-use-copyright", title: "Fair Use" },
+              { id: "moderation-technology", title: "Moderation Tech" },
+              { id: "contact-disclaimer", title: "Contact" },
             ].map((section, index) => (
               <Button key={index} variant="outline" size="sm" asChild className="text-xs sm:text-sm px-3 py-2">
                 <Link href={`#${section.id}`}>{section.title}</Link>

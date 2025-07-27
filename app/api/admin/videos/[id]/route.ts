@@ -13,7 +13,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: "Video not found" }, { status: 404 })
     }
     return NextResponse.json(video)
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to update video" }, { status: 500 })
   }
 }
@@ -28,7 +28,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: "Video not found" }, { status: 404 })
     }
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to delete video" }, { status: 500 })
   }
 }

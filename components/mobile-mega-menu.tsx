@@ -32,7 +32,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
   return (
     <div className="bg-gradient-to-b from-gray-50/80 to-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
       <nav className={cn("p-4", className)} aria-label="Mobile menu">
-        {items.map((item, itemIndex) => (
+        {items.map((item) => (
           <div key={item.label} className="mb-2 last:mb-0">
             {/* Single link, no subItems */}
             {item.href && !item.subItems ? (
@@ -70,7 +70,6 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                   <div className="flex items-center space-x-3 relative z-10">
                     <Grid3X3 className="w-5 h-5 opacity-70" />
                     <span>{item.label}</span>
-                    {/* Count bubble removed here, nothing else touched */}
                   </div>
                   {item.subItems && (
                     <ChevronDown

@@ -1,10 +1,10 @@
 // app/robots.txt/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getCanonicalUrl } from "@/lib/seo-utils";
 
 // This route dynamically generates robots.txt for your site.
-export async function GET(_request: NextRequest): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   // Get canonical sitemap index URL
   const sitemapIndexUrl = getCanonicalUrl("/sitemap.xml");
 

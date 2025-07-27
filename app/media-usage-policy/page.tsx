@@ -93,7 +93,7 @@ export default function MediaUsagePolicyPage() {
               <div>
                 <p className="text-sm sm:text-base text-blue-800 font-medium mb-2">Effective Date: May 9, 2025</p>
                 <p className="text-sm sm:text-base text-blue-700 leading-relaxed">
-                  Flavor Studios ("we," "us," or "our") creates original animation content and media assets protected by copyright and intellectual property laws. This Media Usage Policy outlines acceptable use of our media assets, including videos, images, graphics, animations, and other related content available through our website and related platforms.
+                  Flavor Studios (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) creates original animation content and media assets protected by copyright and intellectual property laws. This Media Usage Policy outlines acceptable use of our media assets, including videos, images, graphics, animations, and other related content available through our website and related platforms.
                 </p>
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function MediaUsagePolicyPage() {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6">
               <h4 className="font-semibold text-blue-900 mb-2 text-sm sm:text-base">Attribution Requirement</h4>
               <p className="text-xs sm:text-sm text-blue-800 leading-relaxed">
-                Proper attribution should clearly indicate "Courtesy of Flavor Studios" and include a direct link to our official website when applicable.
+                Proper attribution should clearly indicate &quot;Courtesy of Flavor Studios&quot; and include a direct link to our official website when applicable.
               </p>
             </div>
           </CardContent>

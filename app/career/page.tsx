@@ -1,12 +1,12 @@
 // app/career/page.tsx
 
-import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
+import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
   SITE_NAME,
   SITE_URL,
   SITE_BRAND_TWITTER,
   SITE_DEFAULT_IMAGE,
-  SITE_LOGO_URL, // Make sure this is defined in your constants.ts as discussed!
+  // SITE_LOGO_URL, // Unused, removed for ESLint
 } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import {
@@ -32,7 +32,7 @@ import {
   Star,
   MessageCircle,
   UserPlus,
-} from "lucide-react"; // All necessary Lucide icons are correctly imported.
+} from "lucide-react";
 import Link from "next/link";
 
 // --- SEO METADATA & SCHEMA (WebPage) ---
@@ -70,7 +70,7 @@ const schema = getSchema({
   title: `Join Our Team – Careers at ${SITE_NAME}`,
   description: `Careers, job opportunities, and creative roles at ${SITE_NAME}. Join our talent pool and follow us for future openings.`,
   image: SITE_DEFAULT_IMAGE,
-  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
+  // 'publisher' handled automatically.
 });
 
 // --- DATA: Closed Positions and Social Links ---
@@ -148,7 +148,7 @@ const stayConnectedOptions = [
     description: "Watch our content and see our creative process in action",
     icon: Youtube,
     action: "Subscribe",
-    href: "https://img.youtube.com/vi/", // CORRECTED: Using the canonical YouTube channel URL
+    href: "https://www.youtube.com/@flavorstudios", // Fixed to canonical YouTube channel URL
     external: true,
     color: "bg-red-600 hover:bg-red-700",
   },
@@ -179,10 +179,10 @@ export default function CareerPage() {
         <div className="mb-8 sm:mb-12 text-center">
           <div className="bg-yellow-400 border border-yellow-500 rounded-lg p-4 sm:p-6 max-w-4xl mx-auto">
             <h2 className="text-base sm:text-lg lg:text-xl font-bold text-black mb-2 sm:mb-3 leading-tight">
-              We're Grateful for Your Interest – All Roles Are Currently Filled
+              We&apos;re Grateful for Your Interest – All Roles Are Currently Filled
             </h2>
             <p className="text-sm sm:text-base text-black leading-relaxed">
-              Thank you for your interest in joining Flavor Studios. At this time, all positions are filled. We'll
+              Thank you for your interest in joining Flavor Studios. At this time, all positions are filled. We&apos;ll
               notify you when new opportunities become available.
             </p>
           </div>
@@ -194,7 +194,7 @@ export default function CareerPage() {
             <CardHeader>
               <div className="flex justify-center mb-4">
                 <div className="p-3 bg-blue-100 rounded-lg">
-                  <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" aria-hidden="true" />
                 </div>
               </div>
               <CardTitle className="text-xl sm:text-2xl lg:text-3xl text-blue-900 text-center">
@@ -204,7 +204,7 @@ export default function CareerPage() {
             <CardContent>
               <p className="text-sm sm:text-base lg:text-lg text-blue-800 leading-relaxed max-w-3xl mx-auto">
                 At Flavor Studios, we bring stories to life through heart-driven animation, meaningful storytelling, and
-                creative passion. Even when we're not actively hiring, we welcome visionary minds and creators to stay
+                creative passion. Even when we&apos;re not actively hiring, we welcome visionary minds and creators to stay
                 in touch for future possibilities.
               </p>
             </CardContent>
@@ -232,7 +232,7 @@ export default function CareerPage() {
                 {/* Position Filled Banner */}
                 <div className="absolute top-2 right-2 z-10">
                   <div className="bg-yellow-400 border border-yellow-500 rounded-full px-2 py-0.5 sm:px-3 sm:py-1 flex items-center gap-1 sm:gap-1.5">
-                    <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-black" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-black" aria-hidden="true" />
                     <span className="text-[10px] sm:text-xs font-medium text-black">Position Filled</span>
                   </div>
                 </div>
@@ -245,7 +245,7 @@ export default function CareerPage() {
                       {position.type}
                     </Badge>
                     <Badge variant="outline" className="text-xs border-purple-200 text-purple-700 bg-purple-50">
-                      <MapPin className="h-3 w-3 mr-1" aria-hidden="true" /> {/* Added aria-hidden */}
+                      <MapPin className="h-3 w-3 mr-1" aria-hidden="true" />
                       {position.location}
                     </Badge>
                   </div>
@@ -272,12 +272,12 @@ export default function CareerPage() {
                 Interested in Similar Roles?
               </h3>
               <p className="text-sm sm:text-base text-gray-700 mb-4 leading-relaxed max-w-2xl mx-auto">
-                While these specific positions are filled, we're always looking for talented individuals. Join our
+                While these specific positions are filled, we&apos;re always looking for talented individuals. Join our
                 talent list to be the first to know about new opportunities.
               </p>
               <Button asChild className="bg-blue-600 hover:bg-blue-700 h-10 sm:h-11 px-6 sm:px-8 text-sm sm:text-base">
                 <Link href="#talent-form">
-                  <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
                   Join Our Talent List
                 </Link>
               </Button>
@@ -299,7 +299,7 @@ export default function CareerPage() {
               <Card key={index} className="text-center hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3 sm:pb-4">
                   <div className="mx-auto mb-3 sm:mb-4 p-3 bg-gray-100 rounded-xl w-fit">
-                    <option.icon className="h-6 w-6 sm:h-8 sm:w-8 text-gray-700" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <option.icon className="h-6 w-6 sm:h-8 sm:w-8 text-gray-700" aria-hidden="true" />
                   </div>
                   <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">{option.title}</CardTitle>
                   <CardDescription className="text-sm sm:text-base leading-relaxed text-gray-600">
@@ -314,7 +314,7 @@ export default function CareerPage() {
                       rel={option.external ? "noopener noreferrer" : undefined}
                     >
                       {option.action}
-                      {option.external && <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />} {/* Added aria-hidden */}
+                      {option.external && <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />}
                     </Link>
                   </Button>
                 </CardContent>
@@ -328,7 +328,7 @@ export default function CareerPage() {
           <div className="text-center mb-6 sm:mb-8">
             <div className="flex justify-center mb-4">
               <div className="p-3 bg-blue-100 rounded-lg">
-                <Star className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Star className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" aria-hidden="true" />
               </div>
             </div>
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 text-gray-900">
@@ -365,7 +365,7 @@ export default function CareerPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="skills" className="text-sm sm:text-base text-gray-700">
-                  Skills & Interests
+                  Skills &amp; Interests
                 </Label>
                 <Input id="skills" placeholder="e.g., Animation, Voice Acting, Writing..." className="h-10 sm:h-11" />
               </div>
@@ -389,12 +389,12 @@ export default function CareerPage() {
               </div>
 
               <Button className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-11 text-sm sm:text-base">
-                <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
                 Join Talent List
               </Button>
 
               <p className="text-xs sm:text-sm text-gray-500 text-center leading-relaxed">
-                We'll only contact you about relevant opportunities and updates.
+                We&apos;ll only contact you about relevant opportunities and updates.
               </p>
             </CardContent>
           </Card>
@@ -405,7 +405,7 @@ export default function CareerPage() {
           <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 sm:p-8 lg:p-12 max-w-4xl mx-auto">
             <div className="flex justify-center mb-4 sm:mb-6">
               <div className="p-3 bg-blue-100 rounded-lg">
-                <MessageCircle className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <MessageCircle className="h-8 w-8 sm:h-10 sm:w-10 text-blue-600" aria-hidden="true" />
               </div>
             </div>
             <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-3 sm:mb-4 text-blue-900">
@@ -413,12 +413,12 @@ export default function CareerPage() {
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-blue-800 leading-relaxed mb-6 sm:mb-8 max-w-2xl mx-auto">
               Whether you have questions about our work, want to discuss potential collaborations, or simply want to
-              introduce yourself and your skills, we'd love to hear from you. Reach out and let's start a conversation.
+              introduce yourself and your skills, we&apos;d love to hear from you. Reach out and let&apos;s start a conversation.
             </p>
             <div className="flex justify-center">
               <Button asChild className="bg-blue-600 hover:bg-blue-700 h-10 sm:h-11 px-6 sm:px-8 text-sm sm:text-base">
                 <Link href="/contact">
-                  <Mail className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
                   Contact Us
                 </Link>
               </Button>

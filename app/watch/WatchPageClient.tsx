@@ -1,12 +1,12 @@
 "use client"
 import Link from "next/link"
+import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Play, Eye, Calendar, Youtube, Clock, Video } from "lucide-react"
 import { useState, useEffect } from "react"
-// REMOVED: import { formatHeading } from "@/lib/utils"
 
 interface VideoType {
   id: string
@@ -57,7 +57,7 @@ export function WatchPageClient({
 
       if (videosResponse.ok) {
         const videosData = await videosResponse.json()
-        // --- Codex fix: works with array or { videos: [...] }
+        // Handles both array and { videos: [...] }
         const allVideos: VideoType[] = Array.isArray(videosData)
           ? videosData
           : videosData.videos || []
@@ -70,7 +70,6 @@ export function WatchPageClient({
       if (categoriesResponse.ok) {
         const categoriesData = await categoriesResponse.json()
         setCategories(
-          // CODEx FIX: Change (cat: any) => ... to (cat: Category) => ...
           (categoriesData.categories || []).map((cat: Category) => ({
             id: cat.id || cat.slug,
             name: cat.name,
@@ -87,7 +86,7 @@ export function WatchPageClient({
     }
   }
 
-  // Filter only by category SLUG (never name)
+  // Filter by category SLUG
   const filteredVideos =
     selectedCategory === "all"
       ? videos
@@ -96,7 +95,7 @@ export function WatchPageClient({
   const featuredVideos = filteredVideos.filter((video) => video.featured)
   const regularVideos = filteredVideos.filter((video) => !video.featured)
 
-  // --- Get categoryName for proper heading ---
+  // Get category name for proper heading
   const categoryName =
     categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory
 
@@ -162,14 +161,14 @@ export function WatchPageClient({
             <h2 className="text-3xl font-bold text-gray-900">
               {selectedCategory === "all"
                 ? "Latest Videos"
-                : categoryName}  {/* Changed: only categoryName, no suffix */}
+                : categoryName}
             </h2>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-500">
                 {filteredVideos.length} video{filteredVideos.length !== 1 ? "s" : ""}
               </span>
               <Button asChild variant="outline">
-                <Link href="https://www.youtube.com/@flavorstudios" target="_blank">
+                <Link href="https://www.youtube.com/@flavorstudios" target="_blank" rel="noopener noreferrer">
                   <Youtube className="mr-2 h-4 w-4" />
                   View All on YouTube
                 </Link>
@@ -196,11 +195,10 @@ export function WatchPageClient({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">Subscribe to Our YouTube Channel</h2>
           <p className="text-xl mb-8 opacity-90">
-            Don't miss any of our latest content! Subscribe for weekly episodes, behind-the-scenes content, and anime
-            news.
+            Don&apos;t miss any of our latest content! Subscribe for weekly episodes, behind-the-scenes content, and anime news.
           </p>
           <Button asChild size="lg" variant="secondary">
-            <Link href="https://www.youtube.com/@flavorstudios" target="_blank">
+            <Link href="https://www.youtube.com/@flavorstudios" target="_blank" rel="noopener noreferrer">
               <Youtube className="mr-2 h-5 w-5" />
               Subscribe on YouTube
             </Link>
@@ -211,7 +209,7 @@ export function WatchPageClient({
   )
 }
 
-// --- rest of your code unchanged ---
+// --- Components ---
 
 function FeaturedVideoCard({ video }: { video: VideoType }) {
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`
@@ -219,8 +217,15 @@ function FeaturedVideoCard({ video }: { video: VideoType }) {
   return (
     <Link href={`/watch/${video.slug || video.id}`}>
       <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-        <div className="relative">
-          <img src={thumbnailUrl || "/placeholder.svg"} alt={video.title} className="w-full h-64 object-cover" />
+        <div className="relative h-64 w-full">
+          <Image
+            src={thumbnailUrl || "/placeholder.svg"}
+            alt={video.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 512px"
+            priority
+          />
           <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
             <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
               <Play className="mr-2 h-5 w-5" />
@@ -265,11 +270,14 @@ function VideoCard({ video }: { video: VideoType }) {
   return (
     <Link href={`/watch/${video.slug || video.id}`} className="group">
       <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
-        <div className="relative">
-          <img
+        <div className="relative h-48 w-full">
+          <Image
             src={thumbnailUrl || "/placeholder.svg"}
             alt={video.title}
-            className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-110"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 384px"
+            loading="lazy"
           />
           <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded-md text-sm flex items-center gap-1 backdrop-blur-sm">
             <Clock className="h-3 w-3" />
@@ -334,7 +342,7 @@ function EmptyState({ selectedCategory }: { selectedCategory: string }) {
         </h3>
         <p className="text-gray-600 mb-6">
           {selectedCategory === "all"
-            ? "Come back soon for new updates! We're creating amazing original anime content, tutorials, and behind-the-scenes videos."
+            ? "Come back soon for new updates! We&apos;re creating amazing original anime content, tutorials, and behind-the-scenes videos."
             : `No videos have been published in the ${selectedCategory} category yet. Try selecting a different category or check back later.`}
         </p>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -343,7 +351,7 @@ function EmptyState({ selectedCategory }: { selectedCategory: string }) {
           </p>
         </div>
         <Button asChild>
-          <Link href="https://www.youtube.com/@flavorstudios" target="_blank">
+          <Link href="https://www.youtube.com/@flavorstudios" target="_blank" rel="noopener noreferrer">
             <Youtube className="mr-2 h-4 w-4" />
             Subscribe on YouTube
           </Link>

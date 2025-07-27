@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import BlogStatusBadge from "./BlogStatusBadge"
 import BlogRowActions from "./BlogRowActions"
 import type { BlogPost } from "@/lib/content-store"
+import Image from "next/image" // ✅ Import Image
 
 export interface BlogTableProps {
   posts: BlogPost[]
@@ -36,7 +37,7 @@ export default function BlogTable({
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           className="mb-2"
-          aria-hidden
+          aria-hidden="true"
         >
           <rect width="56" height="56" rx="12" fill="#F3F4F6" />
           <path d="M19 29V35C19 35.5523 19.4477 36 20 36H36C36.5523 36 37 35.5523 37 35V29" stroke="#A1A1AA" strokeWidth="2" strokeLinecap="round" />
@@ -130,13 +131,17 @@ export default function BlogTable({
               {/* Author */}
               <td className="p-3">{post.author}</td>
 
-              {/* Image Preview */}
+              {/* Image Preview - Replaced <img> with <Image> */}
               <td className="p-3 hidden md:table-cell">
                 {post.featuredImage && (
-                  <img
+                  <Image
                     src={post.featuredImage}
                     alt={`Featured image for ${post.title}`}
+                    width={64}
+                    height={40}
                     className="h-10 w-16 object-cover rounded"
+                    style={{ objectFit: "cover" }}
+                    unoptimized
                   />
                 )}
               </td>

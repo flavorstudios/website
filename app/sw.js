@@ -93,7 +93,7 @@ try {
       self.registration.showNotification(notificationTitle, notificationOptions);
     });
   }
-} catch (e) {
+} catch {
   // Optionally log errors for debugging
   // console.error('Firebase SW init error', e);
 }

@@ -2,6 +2,7 @@ import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,8 @@ import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lu
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 // If not already imported, import Category interface:
-// import { Category } from "@/lib/types"; 
+// import type { Category } from "@/lib/types";
+type Category = { name: string; slug: string }; // Add or adjust as needed
 
 export const metadata = getMetadata({
   title: `${SITE_NAME} Videos | Original Anime, Studio Films & More`,
@@ -221,7 +223,7 @@ export default async function WatchPage({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4">Subscribe to Our YouTube Channel</h2>
           <p className="text-base sm:text-lg lg:text-xl mb-6 sm:mb-8 opacity-90">
-            Don't miss any of our latest content! Subscribe for weekly episodes, behind-the-scenes content, and anime news.
+            Don&apos;t miss any of our latest content! Subscribe for weekly episodes, behind-the-scenes content, and anime news.
           </p>
           <Button asChild size="lg" variant="secondary" className="shadow-lg">
             <Link href="https://www.youtube.com/@flavorstudios" target="_blank" rel="noopener noreferrer">
@@ -235,6 +237,8 @@ export default async function WatchPage({
     </div>
   );
 }
+
+// --- Helper Components ---
 
 function StatCard({ label, value, color }: { label: string; value: string | number; color: string }) {
   const colorMap: Record<string, string> = {
@@ -259,11 +263,14 @@ function FeaturedVideoCard({ video, priority = false }: { video: VideoType; prio
     <Link href={`/watch/${video.slug || video.id}`} className="group">
       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full bg-gradient-to-br from-white to-gray-50">
         <div className="relative h-40 sm:h-48 lg:h-56 overflow-hidden">
-          <img
+          <Image
             src={thumbnailUrl}
             alt={video.title || "Featured video thumbnail"}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
             loading={priority ? "eager" : "lazy"}
+            priority={priority}
           />
           <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
             <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-900 shadow-lg text-xs">
@@ -329,10 +336,12 @@ function VideoCard({ video }: { video: VideoType }) {
     <Link href={`/watch/${video.slug || video.id}`} className="group">
       <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 bg-white">
         <div className="relative h-40 sm:h-48 overflow-hidden">
-          <img
+          <Image
             src={thumbnailUrl}
             alt={video.title || "Video thumbnail"}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-110"
             loading="lazy"
           />
           <div className="absolute bottom-2 right-2 bg-black/80 text-white px-2 py-1 rounded-md text-sm flex items-center gap-1 backdrop-blur-sm">
@@ -446,7 +455,7 @@ function EmptyState({ selectedCategory }: { selectedCategory: string }) {
         </h3>
         <p className="text-gray-600 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">
           {selectedCategory === "all"
-            ? "We're working on exciting video content about anime creation, tutorials, and behind-the-scenes footage. Check back soon!"
+            ? "We&apos;re working on exciting video content about anime creation, tutorials, and behind-the-scenes footage. Check back soon!"
             : `No videos have been published in this category yet. Try selecting a different category or check back later.`}
         </p>
         <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 sm:p-6">

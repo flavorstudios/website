@@ -1,18 +1,15 @@
 // app/cookie-policy/page.tsx
 
-import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
+import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
   SITE_NAME,
   SITE_URL,
   SITE_BRAND_TWITTER,
-  SITE_DEFAULT_IMAGE,
-  SITE_LOGO_URL, // Make sure this is defined in your constants.ts!
 } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -21,9 +18,8 @@ import { Button } from "@/components/ui/button";
 import {
   Mail, Shield, Settings, BarChart3, User, Zap, Globe,
   Phone, FileText, AlertCircle, ExternalLink, Cookie, Eye,
-  Wrench, TrendingUp, Users,
-  Copyright // ADDED: Import Copyright icon here
-} from "lucide-react"; // All necessary Lucide icons are correctly imported.
+  Wrench, TrendingUp, Copyright
+} from "lucide-react";
 import Link from "next/link";
 
 // === SEO Metadata: Use handler for all canonical, OG, Twitter, robots, etc. ---
@@ -31,7 +27,7 @@ export const metadata = getMetadata({
   title: `Cookie Policy – ${SITE_NAME}`,
   description: `Understand how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL.replace(/^https?:\/\//, '')}. Your privacy matters to us.`,
   path: "/cookie-policy",
-  robots: "index,follow", // CORRECTED: Public legal pages should be indexed and followed.
+  robots: "index,follow",
   openGraph: {
     title: `Cookie Policy – ${SITE_NAME}`,
     description: `Understand how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL.replace(/^https?:\/\//, '')}. Your privacy matters to us.`,
@@ -56,11 +52,9 @@ const schema = getSchema({
   path: "/cookie-policy",
   title: `Cookie Policy – ${SITE_NAME}`,
   description: `Understand how ${SITE_NAME} uses cookies to enhance your experience. Read our cookie policy to control your privacy settings on ${SITE_URL.replace(/^https?:\/\//, '')}.`,
-  image: `${SITE_URL}/cover.jpg`, // You could consider SITE_LOGO_URL here for consistency with publisher, but cover is fine.
-  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
+  image: `${SITE_URL}/cover.jpg`,
 });
 
-// --- Main Page Component ---
 export default function CookiePolicyPage() {
   const cookieTypes = [
     { title: "Essential Cookies", icon: Zap, color: "bg-red-100 text-red-600", description: "Necessary for the website to function properly.", examples: ["Session management", "Security features", "Basic site functionality"], canDisable: false },
@@ -84,7 +78,6 @@ export default function CookiePolicyPage() {
 
   return (
     <div className="min-h-screen py-8 sm:py-12">
-      {/* --- JSON-LD SCHEMA for Google/Bing/etc --- */}
       <StructuredData schema={schema} />
       <div className="container mx-auto max-w-4xl px-4 sm:px-6">
 
@@ -94,11 +87,11 @@ export default function CookiePolicyPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Cookie Policy</h1>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex items-start gap-3">
-              <Cookie className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+              <Cookie className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm sm:text-base text-blue-800 font-medium mb-2">Effective Date: May 9, 2025</p>
                 <p className="text-sm sm:text-base text-blue-700 leading-relaxed">
-                  Flavor Studios ("we," "us," or "our") uses cookies and similar technologies to enhance your Browse
+                  Flavor Studios (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) uses cookies and similar technologies to enhance your Browse
                   experience on our website. This Cookie Policy explains what cookies are, how we use them, and your
                   choices regarding their use.
                 </p>
@@ -112,7 +105,7 @@ export default function CookiePolicyPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Cookie className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Cookie className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
               </div>
               What Are Cookies?
             </CardTitle>
@@ -134,7 +127,7 @@ export default function CookiePolicyPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
                     <div className={`p-2 rounded-lg ${cookie.color}`}>
-                      <cookie.icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> {/* Added aria-hidden */}
+                      <cookie.icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                     </div>
                     {cookie.title}
                     {!cookie.canDisable && (
@@ -151,7 +144,7 @@ export default function CookiePolicyPage() {
                     <ul className="space-y-1">
                       {cookie.examples.map((example, exampleIndex) => (
                         <li key={exampleIndex} className="flex items-start gap-2">
-                          <div className="h-1.5 w-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div> {/* Added aria-hidden */}
+                          <div className="h-1.5 w-1.5 bg-gray-400 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                           <span className="text-xs sm:text-sm text-gray-600">{example}</span>
                         </li>
                       ))}
@@ -174,7 +167,7 @@ export default function CookiePolicyPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
               <div className="p-2 bg-green-100 rounded-lg">
-                <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" aria-hidden="true" />
               </div>
               How We Use Cookies
             </CardTitle>
@@ -184,7 +177,7 @@ export default function CookiePolicyPage() {
               {usagePurposes.map((purpose, index) => (
                 <div key={index} className="flex items-start gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
                   <div className="p-2 bg-white rounded-lg shadow-sm">
-                    <purpose.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <purpose.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-sm sm:text-base text-gray-900 mb-1">{purpose.title}</h4>
@@ -201,7 +194,7 @@ export default function CookiePolicyPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Settings className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" aria-hidden="true" />
               </div>
               Managing Your Cookies
             </CardTitle>
@@ -214,10 +207,10 @@ export default function CookiePolicyPage() {
                 href="https://www.aboutcookies.org"
                 target="_blank"
                 className="text-blue-600 hover:underline inline-flex items-center gap-1"
-                rel="noopener noreferrer" // Added rel for security
+                rel="noopener noreferrer"
               >
                 www.aboutcookies.org
-                <ExternalLink className="h-3 w-3" aria-hidden="true" /> {/* Added aria-hidden */}
+                <ExternalLink className="h-3 w-3" aria-hidden="true" />
               </Link>{" "}
               for more details.
             </p>
@@ -240,7 +233,7 @@ export default function CookiePolicyPage() {
 
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <div>
                   <h4 className="font-semibold text-amber-900 mb-2 text-sm sm:text-base">Important Note</h4>
                   <p className="text-xs sm:text-sm text-amber-800 leading-relaxed">
@@ -258,7 +251,7 @@ export default function CookiePolicyPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
               <div className="p-2 bg-orange-100 rounded-lg">
-                <Globe className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Globe className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" aria-hidden="true" />
               </div>
               Third-Party Cookies and Content Usage
             </CardTitle>
@@ -286,7 +279,7 @@ export default function CookiePolicyPage() {
                   "Content Delivery Networks - Faster content delivery",
                 ].map((service, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div> {/* Added aria-hidden */}
+                    <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                     <span className="text-xs sm:text-sm text-blue-800 leading-relaxed">{service}</span>
                   </li>
                 ))}
@@ -300,7 +293,7 @@ export default function CookiePolicyPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
               <div className="p-2 bg-gray-100 rounded-lg">
-                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600" aria-hidden="true" />
               </div>
               Changes to this Cookie Policy
             </CardTitle>
@@ -318,7 +311,7 @@ export default function CookiePolicyPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-blue-900">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
               </div>
               Contact Us
             </CardTitle>
@@ -330,7 +323,7 @@ export default function CookiePolicyPage() {
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
-                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <Mail className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="font-semibold text-blue-900 text-sm sm:text-base">Flavor Studios</p>
@@ -340,7 +333,7 @@ export default function CookiePolicyPage() {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-xs sm:text-sm">
                   <Link href="/contact">
-                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
                     Contact Us
                   </Link>
                 </Button>
@@ -350,7 +343,7 @@ export default function CookiePolicyPage() {
                   className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white h-9 sm:h-10 text-xs sm:text-sm"
                 >
                   <Link href="mailto:contact@flavorstudios.in">
-                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
                     Email Us
                   </Link>
                 </Button>
@@ -365,31 +358,31 @@ export default function CookiePolicyPage() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/privacy-policy">
-                <Shield className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Shield className="mr-2 h-4 w-4" aria-hidden="true" />
                 Privacy Policy
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/terms-of-service">
-                <FileText className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
                 Terms of Service
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/dmca">
-                <Copyright className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Copyright className="mr-2 h-4 w-4" aria-hidden="true" />
                 DMCA Policy
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/disclaimer">
-                <AlertCircle className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                <AlertCircle className="mr-2 h-4 w-4" aria-hidden="true" />
                 Disclaimer
               </Link>
             </Button>
             <Button asChild variant="outline" className="h-9 sm:h-10 text-xs sm:text-sm">
               <Link href="/media-usage-policy">
-                <Eye className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
                 Media Usage Policy
               </Link>
             </Button>

@@ -84,6 +84,7 @@ const orgSchema = getSchema({
 
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { headers } from "next/headers";
+import Script from "next/script"; // ADDED for GTM
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const h = headers();
@@ -102,6 +103,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>
       <head>
+        {/* Meta viewport fallback for bots/legacy */}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
         {/* Mastodon Verification */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
 
@@ -112,18 +116,19 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           suppressHydrationWarning
         />
 
-        {/* Google Tag Manager (HEAD) */}
-        <script
+        {/* Google Tag Manager (HEAD) using next/script */}
+        <Script
+          id="gtm-head"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-WMTGR7NM');
+              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+              })(window,document,'script','dataLayer','GTM-WMTGR7NM');
             `,
           }}
-          suppressHydrationWarning
         />
         {/* END GTM (HEAD) */}
       </head>

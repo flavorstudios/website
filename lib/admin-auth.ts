@@ -1,9 +1,7 @@
-// lib/admin-auth.ts
-
 import { NextRequest } from "next/server";
-import { adminAuth, adminDb, getAllowedAdminEmails } from "@/lib/firebase-admin"; // Canonical source!
+import { adminAuth, adminDb, getAllowedAdminEmails } from "@/lib/firebase-admin";
 import { cookies } from "next/headers";
-import { logError } from "@/lib/log"; // Consistent server logging
+import { logError } from "@/lib/log";
 import jwt from "jsonwebtoken";
 import type { UserRole } from "@/lib/role-permissions";
 import { getUserRole } from "@/lib/user-roles";
@@ -11,17 +9,13 @@ import { getUserRole } from "@/lib/user-roles";
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
 const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
 
-/**
- * Parse allowed admin domain (from env)
- */
+// Parse allowed admin domain from env
 function getAllowedAdminDomain(): string | null {
   const domain = process.env.ADMIN_DOMAIN || "";
   return domain ? domain.trim().toLowerCase() : null;
 }
 
-/**
- * Fetch admin emails from Firestore's admin_users collection (lowercased, trimmed).
- */
+// Fetch admin emails from Firestore's admin_users collection (lowercased, trimmed).
 async function getFirestoreAdminEmails(): Promise<string[]> {
   try {
     const snap = await adminDb.collection("admin_users").get();
@@ -29,15 +23,12 @@ async function getFirestoreAdminEmails(): Promise<string[]> {
       .map((d) => (d.data().email || "").toLowerCase().trim())
       .filter(Boolean);
   } catch (err) {
-    logError("admin-auth: fetch admin_users", err);
+    logError("admin-auth: fetch admin_users", err); // error variable IS used here.
     return [];
   }
 }
 
-/**
- * Checks if an email is allowed as admin (case-insensitive).
- * Combines env and Firestore emails.
- */
+// Checks if an email is allowed as admin (case-insensitive). Combines env and Firestore emails.
 function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
   if (!email) return false;
   const allowedEmails = getAllowedAdminEmails();
@@ -45,22 +36,17 @@ function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
   const normalizedEmail = email.trim().toLowerCase();
   const combinedEmails = [...new Set([...allowedEmails, ...extraEmails])];
 
-  // Debug logging
   if (debug) {
     console.log("[admin-auth] Normalized login email:", `"${normalizedEmail}"`);
     console.log("[admin-auth] Combined allowed emails:", combinedEmails.map(e => `"${e}"`));
   }
 
   if (combinedEmails.includes(normalizedEmail)) {
-    if (debug) {
-      console.log("[admin-auth] Allowed admin email:", normalizedEmail);
-    }
+    if (debug) console.log("[admin-auth] Allowed admin email:", normalizedEmail);
     return true;
   }
   if (allowedDomain && normalizedEmail.endsWith("@" + allowedDomain)) {
-    if (debug) {
-      console.log("[admin-auth] Allowed admin domain:", allowedDomain, "for email:", normalizedEmail);
-    }
+    if (debug) console.log("[admin-auth] Allowed admin domain:", allowedDomain, "for email:", normalizedEmail);
     return true;
   }
   if (debug) {
@@ -69,13 +55,6 @@ function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
   return false;
 }
 
-/**
- * Verifies the session cookie:
- * - Tries Firebase session first (Google login)
- * - If fails, tries JWT session (email/password login)
- * Returns decoded session PLUS the user's role.
- * Throws if invalid or unauthorized.
- */
 export interface VerifiedAdmin {
   role: UserRole
   email?: string
@@ -83,6 +62,7 @@ export interface VerifiedAdmin {
   [key: string]: unknown
 }
 
+// Verifies the session cookie (Firebase or JWT) and checks admin status.
 export async function verifyAdminSession(sessionCookie: string): Promise<VerifiedAdmin> {
   if (!sessionCookie) {
     logError("admin-auth: verifyAdminSession (no cookie)", "No session cookie");
@@ -93,10 +73,10 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
   try {
     decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
     if (debug) {
-      // @ts-ignore
+      // @ts-expect-error Firebase DecodedIdToken may not type email
       console.log("[admin-auth] Session cookie verified for:", decoded.email);
     }
-  } catch (err) {
+  } catch {
     // Fallback: try JWT (for email/password logins)
     try {
       const secret = process.env.ADMIN_JWT_SECRET || "";
@@ -115,29 +95,26 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
 
   // --- LOG BOTH EMAILS FOR DEBUG ---
   if (debug) {
-    // @ts-ignore
+    // @ts-expect-error Firebase DecodedIdToken may not type email
     console.log("[admin-auth] Email from session:", `"${decoded.email?.trim().toLowerCase()}"`);
     console.log("[admin-auth] Allowed emails after merging:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
   }
 
   // --- Check env + Firestore merged ---
-  // @ts-ignore
+  // @ts-expect-error Email is not guaranteed typed by firebase/jwt
   if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
-    // @ts-ignore
+    // @ts-expect-error email may be undefined
     logError("admin-auth: verifyAdminSession (unauthorized email)", decoded.email || "");
     throw new Error("Unauthorized admin email");
   }
 
   // IMPORTANT: Always pass BOTH uid and email for fallback admin role logic!
-  // @ts-ignore
+  // @ts-expect-error uid and email may be missing types on jwt or firebase
   const role = await getUserRole(decoded.uid as string, decoded.email as string);
   return { ...(decoded as jwt.JwtPayload), role } as VerifiedAdmin;
 }
 
-/**
- * Returns the decoded admin session and role (or null if verification fails).
- * For API debugging and permission reporting.
- */
+// Returns the decoded admin session and role (or null if verification fails).
 export async function getSessionAndRole(req: NextRequest): Promise<VerifiedAdmin | null> {
   const sessionCookie = req.cookies.get("admin-session")?.value;
   if (!sessionCookie) return null;
@@ -153,10 +130,7 @@ export async function getSessionAndRole(req: NextRequest): Promise<VerifiedAdmin
   }
 }
 
-/**
- * NEW AUDIT-READY HELPER: Reads the admin-session cookie from a Next.js request and returns
- * the verified session info including role and uid. Returns null if no valid session is present.
- */
+// NEW AUDIT-READY HELPER: Reads the admin-session cookie and returns verified session info or null.
 export async function getSessionInfo(
   req: NextRequest,
 ): Promise<VerifiedAdmin | null> {
@@ -170,10 +144,7 @@ export async function getSessionInfo(
   }
 }
 
-/**
- * Checks if the request has a valid admin session.
- * If a permission is passed, checks that the user's role includes that permission.
- */
+// Checks if the request has a valid admin session (and optional permission).
 export async function requireAdmin(
   req: NextRequest,
   permission?: keyof import("./role-permissions").RolePermissions,
@@ -198,11 +169,7 @@ export async function requireAdmin(
   }
 }
 
-/**
- * Checks if the current server action context has a valid admin session.
- * Reads the session cookie using next/headers and validates as above.
- * Supports permission check.
- */
+// Checks if the current server action context has a valid admin session (with optional permission).
 export async function requireAdminAction(
   permission?: keyof import("./role-permissions").RolePermissions,
 ): Promise<boolean> {
@@ -226,10 +193,7 @@ export async function requireAdminAction(
   }
 }
 
-/**
- * Helper: creates a new session cookie from an ID token (used for session refresh).
- * You must provide a valid Firebase ID token (from the client) and the desired expiration in ms.
- */
+// Helper: creates a new session cookie from an ID token (used for session refresh).
 export async function createSessionCookieFromIdToken(idToken: string, expiresIn: number): Promise<string> {
   try {
     // Validate and decode token (throws if invalid/revoked)
@@ -238,16 +202,15 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
     // --- Firestore-based admin users ---
     const firestoreEmails = await getFirestoreAdminEmails();
 
-    // --- LOG FOR DEBUGGING EMAIL MATCH ---
     if (debug) {
-      // @ts-ignore
+      // @ts-expect-error Firebase DecodedIdToken may not type email
       console.log("[admin-auth] Creating session cookie for email:", `"${decoded.email?.trim().toLowerCase()}"`);
       console.log("[admin-auth] Allowed emails:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
     }
 
-    // @ts-ignore
+    // @ts-expect-error Email may be missing
     if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
-      // @ts-ignore
+      // @ts-expect-error email may be undefined
       logError("admin-auth: createSessionCookieFromIdToken (unauthorized email)", decoded.email || "");
       throw new Error("Unauthorized admin email");
     }
@@ -259,10 +222,7 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
   }
 }
 
-/**
- * Logs failed admin validations to Firestore for auditing.
- * Call this from middleware or API routes on validation failure.
- */
+// Logs failed admin validations to Firestore for auditing.
 export async function logAdminAuditFailure(
   email: string | null,
   ip: string

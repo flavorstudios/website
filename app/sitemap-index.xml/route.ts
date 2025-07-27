@@ -1,15 +1,9 @@
 // app/sitemap.xml/route.ts (Sitemap Index Route)
 
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getCanonicalUrl } from "@/lib/seo-utils";
-import { SITE_URL } from "@/lib/constants";
+// import { SITE_URL } from "@/lib/constants";
 // import { categoryStore } from "@/lib/category-store"; // Uncomment if/when category sitemaps go live
-
-const BASE_URL =
-  process.env.NEXT_PUBLIC_BASE_URL ||
-  process.env.BASE_URL ||
-  SITE_URL ||
-  "https://flavorstudios.in";
 
 // Optional: Type for categories, in case you expand to dynamic category sitemaps
 // interface Category {
@@ -20,7 +14,7 @@ const BASE_URL =
 //   published?: boolean;
 // }
 
-export async function GET(_request: NextRequest): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   try {
     // --- Optionally fetch category sitemaps ---
     // const categories = await categoryStore.getAll().catch(() => []);
@@ -89,6 +83,7 @@ ${dedupedSitemaps
       },
     });
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("Error generating sitemap index:", error);
 
     // Fallback: at least return main sitemap

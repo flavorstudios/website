@@ -54,11 +54,12 @@ const samplePages: PageData[] = [
 export function PageEditor() {
   const [selectedPage, setSelectedPage] = useState<PageData | null>(samplePages[0])
   const [previewMode, setPreviewMode] = useState<"desktop" | "tablet" | "mobile">("desktop")
-  const [isEditing, setIsEditing] = useState(false)
+  // Removed: const [isEditing, setIsEditing] = useState(false) // Unused as per lint
+  // Removed: const getPreviewIcon = ... // Unused as per lint
 
   const handleSave = () => {
     // Save logic would go here
-    setIsEditing(false)
+    // setIsEditing(false) // Removed as per lint
     console.log("Page saved:", selectedPage)
   }
 
@@ -72,17 +73,6 @@ export function PageEditor() {
         return "bg-blue-100 text-blue-800"
       default:
         return "bg-gray-100 text-gray-800"
-    }
-  }
-
-  const getPreviewIcon = () => {
-    switch (previewMode) {
-      case "desktop":
-        return <Monitor className="h-4 w-4" />
-      case "tablet":
-        return <FileText className="h-4 w-4" />
-      case "mobile":
-        return <Smartphone className="h-4 w-4" />
     }
   }
 

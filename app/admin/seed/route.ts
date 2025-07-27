@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     await initializeSampleData()
     return NextResponse.json({ success: true, message: "Sample data initialized successfully" })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: "Failed to initialize sample data" }, { status: 500 })
   }
 }

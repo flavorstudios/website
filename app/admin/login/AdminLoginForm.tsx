@@ -20,7 +20,7 @@ import {
   signOut,
 } from "firebase/auth"
 
-// Safe client-side error logger (does nothing in prod, only logs in dev)
+// Safe client-side error logger (dev only)
 function safeLogError(...args: unknown[]) {
   if (process.env.NODE_ENV !== "production") {
     // eslint-disable-next-line no-console
@@ -43,20 +43,8 @@ export default function AdminLoginForm() {
   const [method, setMethod] = useState<"google" | "email">("google")
   const router = useRouter()
 
-  // --- Show Firebase env error, if present ---
-  if (firebaseInitError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f8fd]">
-        <Alert variant="destructive" className="max-w-md mx-auto">
-          <AlertDescription>
-            {firebaseInitError.message}
-          </AlertDescription>
-        </Alert>
-      </div>
-    )
-  }
+  // --- FIX: Always call hooks first, never after a conditional return ---
 
-  // Only set up auth listener if app is ready
   useEffect(() => {
     setMounted(true)
     if (!app) {
@@ -75,6 +63,19 @@ export default function AdminLoginForm() {
     })
     return () => unsubscribe()
   }, [router, setError])
+
+  // --- Show Firebase env error, if present ---
+  if (firebaseInitError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f5f8fd]">
+        <Alert variant="destructive" className="max-w-md mx-auto">
+          <AlertDescription>
+            {firebaseInitError.message}
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
+  }
 
   const handleGoogleLogin = async () => {
     setError("")
@@ -161,7 +162,7 @@ export default function AdminLoginForm() {
                   )}
                 </Button>
                 <Button variant="ghost" onClick={() => { clearError(); setMethod("email") }} className="w-full">
-                  Use Email & Password
+                  Use Email &amp; Password
                 </Button>
                 <div className="mt-4 sm:mt-6 text-center">
                   <p className="text-xs text-gray-500 px-2">Secured with enterprise-grade encryption</p>

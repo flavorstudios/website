@@ -20,14 +20,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import BlogPostRenderer from "@/components/BlogPostRenderer"
 import { RichTextEditor } from "./rich-text-editor"
+import Image from "next/image"
 import {
   Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info, ChevronDown,
 } from "lucide-react"
 import { toast } from "sonner"
-// 🟢 Accessibility: Tooltip import
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
-// --- SEO Best Practice constants & helper ---
 const titleMin = 50
 const titleMax = 60
 const descMin = 120
@@ -74,7 +73,6 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Init from initialPost if present
   const [post, setPost] = useState<BlogPost>(() => ({
     title: initialPost?.title ?? "",
     slug: initialPost?.slug ?? "",
@@ -116,7 +114,6 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
           credentials: "include",
         })
         const data = await response.json()
-        // ONLY CHANGE: enforce BlogCategory type
         const blogCategories: BlogCategory[] = data.categories?.map((cat: BlogCategory) => ({
           name: cat.name,
           slug: cat.slug,
@@ -284,7 +281,6 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     })
   }
 
-  // Get host for SEO preview (fallback SSR safe)
   const host = typeof window !== "undefined" ? window.location.host : "example.com"
 
   return (
@@ -479,10 +475,13 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   <label className="block text-sm font-medium mb-2">Search Preview</label>
                   <div className="border rounded-lg p-4 bg-white space-y-1">
                     {(post.openGraphImage || post.featuredImage) && (
-                      <img
+                      <Image
                         src={post.openGraphImage || post.featuredImage}
                         alt="Preview"
+                        width={600}
+                        height={128}
                         className="w-full h-32 object-cover rounded mb-2"
+                        unoptimized // You can remove this if your images are always absolute URLs
                       />
                     )}
                     <p className="text-xs text-green-700 truncate">{`${host}/${post.slug}`}</p>
@@ -493,7 +492,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               </CardContent>
             </Card>
           </div>
-          {/* Sidebar (unchanged except accessibility) */}
+          {/* Sidebar */}
           <div className="space-y-6">
             {/* Publishing Controls */}
             <Card>
@@ -509,7 +508,6 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Featured Post</span>
-                  {/* Accessibility: Switch with aria-label and Tooltip */}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Switch
@@ -639,10 +637,13 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               <CardContent>
                 {post.featuredImage ? (
                   <div className="space-y-3">
-                    <img
+                    <Image
                       src={post.featuredImage || "/placeholder.svg"}
                       alt="Featured"
+                      width={600}
+                      height={128}
                       className="w-full h-32 object-cover rounded-lg"
+                      unoptimized
                     />
                     <div className="flex gap-2">
                       <Button

@@ -1,6 +1,6 @@
-import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils"; // Added getSchema and getCanonicalUrl
-import { SITE_NAME, SITE_URL, SITE_LOGO_URL, SITE_BRAND_TWITTER } from "@/lib/constants"; // Added SITE_LOGO_URL, SITE_BRAND_TWITTER
-import { StructuredData } from "@/components/StructuredData"; // Import StructuredData component
+import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"; // Removed unused SITE_LOGO_URL
+import { StructuredData } from "@/components/StructuredData";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,14 +23,13 @@ import {
   Eye,
 } from "lucide-react";
 import Link from "next/link";
-// Removed: import Script from "next/script"; // No longer needed for JSON-LD direct embedding
 
 // === SEO METADATA (using centralized handler) ===
 export const metadata = getMetadata({
   title: `Terms of Service – ${SITE_NAME}`,
   description: `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
   path: "/terms-of-service",
-  robots: "index,follow", // UPDATED: Changed from noindex,nofollow to index,follow
+  robots: "index,follow",
   openGraph: {
     title: `Terms of Service – ${SITE_NAME}`,
     description: `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
@@ -45,14 +44,14 @@ export const metadata = getMetadata({
   },
   twitter: {
     card: "summary_large_image",
-    site: SITE_BRAND_TWITTER, // Consistent with Privacy Policy
-    creator: SITE_BRAND_TWITTER, // Consistent with Privacy Policy
+    site: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER,
     title: `Terms of Service – ${SITE_NAME}`,
     description: `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
   alternates: {
-    canonical: getCanonicalUrl("/terms-of-service"), // ADDED: Canonical URL
+    canonical: getCanonicalUrl("/terms-of-service"),
   },
 });
 
@@ -62,10 +61,8 @@ const schema = getSchema({
   path: "/terms-of-service",
   title: `Terms of Service – ${SITE_NAME}`,
   description: `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
-  image: `${SITE_URL}/cover.jpg`, // Consistent with Privacy Policy
-  // The 'publisher' object should be added automatically by your getSchema utility as it is for Privacy Policy.
+  image: `${SITE_URL}/cover.jpg`,
 });
-
 
 export default function TermsOfServicePage() {
   const sections = [
@@ -118,7 +115,7 @@ export default function TermsOfServicePage() {
       icon: Shield,
       content: [
         {
-          text: "We use automated tools to maintain a safe environment, including Google's Perspective API, developed by Jigsaw (a unit of Google), to analyze and score user-generated comments for toxicity, spam, or abuse.",
+          text: "We use automated tools to maintain a safe environment, including Google&apos;s Perspective API, developed by Jigsaw (a unit of Google), to analyze and score user-generated comments for toxicity, spam, or abuse.",
         },
         {
           text: "Important details about our moderation system:",
@@ -146,7 +143,7 @@ export default function TermsOfServicePage() {
       icon: AlertCircle,
       content: [
         {
-          text: 'The Site is provided "as is" and "as available." We do not make warranties or representations about the accuracy, completeness, reliability, or availability of the content or services provided on the Site. Your use of the Site is at your own risk.',
+          text: 'The Site is provided &quot;as is&quot; and &quot;as available.&quot; We do not make warranties or representations about the accuracy, completeness, reliability, or availability of the content or services provided on the Site. Your use of the Site is at your own risk.',
         },
       ],
     },
@@ -183,7 +180,7 @@ export default function TermsOfServicePage() {
   return (
     <>
       {/* === SEO: Inject JSON-LD Schema === */}
-      <StructuredData schema={schema} /> {/* UPDATED: Using StructuredData component */}
+      <StructuredData schema={schema} />
 
       <div className="py-6 sm:py-8 md:py-12 min-h-screen">
         <div className="container mx-auto max-w-4xl px-3 sm:px-4 md:px-6">
@@ -193,20 +190,20 @@ export default function TermsOfServicePage() {
             <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Terms of Service</h1>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
               <div className="flex items-start gap-3">
-                <Gavel className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" />
+                <Gavel className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <div>
                   <p className="text-sm sm:text-base text-blue-800 font-medium mb-2">Effective Date: May 9, 2025</p>
                   <p className="text-sm sm:text-base text-blue-700 leading-relaxed sm:leading-loose">
-                    Welcome to Flavor Studios ("we," "us," or "our"). These Terms of Service ("Terms") govern your access
+                    Welcome to Flavor Studios (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;). These Terms of Service (&quot;Terms&quot;) govern your access
                     to and use of our website, including any related media, mobile applications, and services
-                    (collectively, the "Site").
+                    (collectively, the &quot;Site&quot;).
                   </p>
                 </div>
               </div>
             </div>
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <div>
                   <p className="text-sm sm:text-base text-amber-800 font-medium mb-2">Agreement to Terms</p>
                   <p className="text-sm sm:text-base text-amber-700 leading-relaxed sm:leading-loose">
@@ -225,7 +222,7 @@ export default function TermsOfServicePage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
                     <div className="p-2 bg-blue-100 rounded-lg">
-                      <section.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                      <section.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
                     </div>
                     {section.title}
                   </CardTitle>
@@ -240,7 +237,7 @@ export default function TermsOfServicePage() {
                         <ul className="space-y-2 ml-4">
                           {item.list.map((listItem, listIndex) => (
                             <li key={listIndex} className="flex items-start gap-2">
-                              <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                              <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                               <span className="text-sm sm:text-base text-gray-700 leading-relaxed sm:leading-loose">
                                 {listItem}
                               </span>
@@ -264,7 +261,7 @@ export default function TermsOfServicePage() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
                       <div className="p-2 bg-blue-100 rounded-lg">
-                        <section.icon className="h-5 w-5 text-blue-600" />
+                        <section.icon className="h-5 w-5 text-blue-600" aria-hidden="true" />
                       </div>
                       {section.title}
                     </CardTitle>
@@ -282,7 +279,7 @@ export default function TermsOfServicePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-red-900">
                 <div className="p-2 bg-red-100 rounded-lg">
-                  <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+                  <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" aria-hidden="true" />
                 </div>
                 Important Legal Notice
               </CardTitle>
@@ -310,7 +307,7 @@ export default function TermsOfServicePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-blue-900">
                 <div className="p-2 bg-blue-100 rounded-lg">
-                  <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                  <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
                 </div>
                 Contact Us
               </CardTitle>
@@ -323,7 +320,7 @@ export default function TermsOfServicePage() {
               <div className="space-y-3 sm:space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-100 rounded-lg">
-                    <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                    <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="font-semibold text-blue-900 text-sm sm:text-base">Flavor Studios</p>
@@ -333,7 +330,7 @@ export default function TermsOfServicePage() {
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                   <Button asChild className="bg-blue-600 hover:bg-blue-700 h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                     <Link href="/contact">
-                      <Phone className="mr-2 h-4 w-4" />
+                      <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
                       Contact Us
                     </Link>
                   </Button>
@@ -343,7 +340,7 @@ export default function TermsOfServicePage() {
                     className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm"
                   >
                     <Link href={`mailto:contact@flavorstudios.in`}>
-                      <Mail className="mr-2 h-4 w-4" />
+                      <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
                       Email Us
                     </Link>
                   </Button>
@@ -376,31 +373,31 @@ export default function TermsOfServicePage() {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/privacy-policy">
-                  <Lock className="mr-2 h-4 w-4" />
+                  <Lock className="mr-2 h-4 w-4" aria-hidden="true" />
                   Privacy Policy
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/dmca">
-                  <FileText className="mr-2 h-4 w-4" />
+                  <FileText className="mr-2 h-4 w-4" aria-hidden="true" />
                   DMCA Policy
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/cookie-policy">
-                  <Shield className="mr-2 h-4 w-4" />
+                  <Shield className="mr-2 h-4 w-4" aria-hidden="true" />
                   Cookie Policy
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/disclaimer">
-                  <AlertCircle className="mr-2 h-4 w-4" />
+                  <AlertCircle className="mr-2 h-4 w-4" aria-hidden="true" />
                   Disclaimer
                 </Link>
               </Button>
               <Button asChild variant="outline" className="h-11 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm">
                 <Link href="/media-usage-policy">
-                  <Eye className="mr-2 h-4 w-4" />
+                  <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
                   Media Usage Policy
                 </Link>
               </Button>
@@ -410,7 +407,7 @@ export default function TermsOfServicePage() {
           {/* Footer Note */}
           <div className="mt-8 sm:mt-12 md:mt-16 text-center">
             <p className="text-xs sm:text-sm text-gray-500">
-              Last updated: May 9, 2025 • These Terms of Service are effective immediately upon posting.
+              Last updated: May 9, 2025 &bull; These Terms of Service are effective immediately upon posting.
             </p>
           </div>
         </div>

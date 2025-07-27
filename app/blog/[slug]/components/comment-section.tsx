@@ -21,12 +21,11 @@ interface Comment {
 
 interface CommentSectionProps {
   postId: string
-  postSlug: string
 }
 
 const AUTHOR_KEY = "flavor_comment_author"
 
-export default function CommentSection({ postId, postSlug }: CommentSectionProps) {
+export default function CommentSection({ postId }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)

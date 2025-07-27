@@ -1,7 +1,7 @@
 // app/page.tsx
 
-import { Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -128,61 +128,6 @@ const ErrorFallback = ({ section }: { section: string }) => (
   </div>
 );
 
-const BlogsSkeleton = () => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-    {[...Array(6)].map((_, i) => (
-      <Card key={i} className="overflow-hidden">
-        <div className="h-48 bg-gray-200 animate-pulse"></div>
-        <CardHeader>
-          <div className="h-4 bg-gray-200 animate-pulse rounded mb-2"></div>
-          <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-            <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-2/3"></div>
-          </div>
-        </CardContent>
-      </Card>
-    ))}
-  </div>
-);
-
-const VideosSkeleton = () => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-    {[...Array(6)].map((_, i) => (
-      <Card key={i} className="overflow-hidden">
-        <div className="h-48 bg-gray-200 animate-pulse"></div>
-        <CardHeader>
-          <div className="h-6 bg-gray-200 animate-pulse rounded"></div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-            <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2"></div>
-          </div>
-        </CardContent>
-      </Card>
-    ))}
-  </div>
-);
-
-const StatsSkeleton = () => (
-  <section className="py-16 bg-white">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="text-center">
-            <div className="h-12 bg-gray-200 animate-pulse rounded mb-2"></div>
-            <div className="h-4 bg-gray-200 animate-pulse rounded"></div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
 export default async function HomePage() {
   const content = await getHomePageContent();
   return (
@@ -275,13 +220,16 @@ export default async function HomePage() {
                 <Link key={post.id} href={`/blog/${post.slug}`}>
                   <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                     <div className="relative h-48 overflow-hidden">
-                      <img
+                      <Image
                         src={post.coverImage || "/placeholder.svg"}
                         alt={post.title || "Anime blog cover"}
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-300 hover:scale-105"
                         loading="lazy"
                         decoding="async"
                         sizes="(max-width: 768px) 100vw, 33vw"
+                        priority={false}
+                        style={{ objectFit: "cover" }}
                       />
                     </div>
                     <CardHeader className="pb-3">
@@ -343,7 +291,9 @@ export default async function HomePage() {
               </div>
               <div className="max-w-md mx-auto relative">
                 <NewsletterSignup />
-                <p className="text-sm text-blue-200 mt-3">Join 10,000+ anime enthusiasts. Unsubscribe anytime.</p>
+                <p className="text-sm text-blue-200 mt-3">
+                  Join 10,000+ anime enthusiasts. Unsubscribe anytime.
+                </p>
               </div>
               <div className="flex flex-wrap justify-center gap-6 text-sm text-blue-200">
                 <span className="flex items-center gap-2">
@@ -378,14 +328,17 @@ export default async function HomePage() {
               {content.featuredVideos.slice(0, 6).map((video: Video) => (
                 <Link key={video.id} href={`/watch/${video.id}`}>
                   <Card className="hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
-                    <div className="relative">
-                      <img
+                    <div className="relative h-48">
+                      <Image
                         src={video.thumbnail || "/placeholder.svg"}
                         alt={video.title || "Anime video thumbnail"}
-                        className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-300 hover:scale-105"
                         loading="lazy"
                         decoding="async"
                         sizes="(max-width: 768px) 100vw, 33vw"
+                        priority={false}
+                        style={{ objectFit: "cover" }}
                       />
                       <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <Play className="h-12 w-12 text-white" aria-hidden="true" />
@@ -442,7 +395,7 @@ export default async function HomePage() {
               </h2>
               <p className="text-xl md:text-2xl text-gray-300 leading-relaxed mx-auto">
                 Ready to start your creative journey? Whether you want to collaborate, learn more about our process, or
-                support our mission, we're here to help bring stories to life.
+                support our mission, we&apos;re here to help bring stories to life.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                 <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">

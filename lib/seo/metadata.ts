@@ -2,7 +2,7 @@
 
 import {
   SITE_NAME,
-  SITE_URL,
+  // SITE_URL, // Removed: unused import
   SITE_BRAND_TWITTER,
   SITE_DEFAULT_IMAGE,
 } from "@/lib/constants";

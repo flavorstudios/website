@@ -280,7 +280,7 @@ export default function AboutPage() {
               <CardContent>
                 <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base leading-relaxed">
                   We are a global community of dreamers, artists, and storytellers. Our independence allows us to stay
-                  true to our values while pushing the boundaries of what's possible in animation.
+                  true to our values while pushing the boundaries of what&apos;s possible in animation.
                 </p>
                 <ul className="space-y-1 sm:space-y-1.5 lg:space-y-2 text-xs sm:text-sm text-gray-600">
                   <li>• Independent studio free from corporate compromise</li>
@@ -390,7 +390,7 @@ export default function AboutPage() {
                 </div>
                 <CardTitle className="text-sm sm:text-base lg:text-lg">Get in Touch</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                  Have a business inquiry or collaboration opportunity? We'd love to hear from you.
+                  Have a business inquiry or collaboration opportunity? We&apos;d love to hear from you.
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0">

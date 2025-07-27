@@ -97,12 +97,6 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
   const seoDescription = post.seoDescription || post.excerpt;
   const schemaType = post.schemaType || "Article";
 
-  // Determine author schema based on post.author (Person or Organization).
-  const articleAuthorSchema =
-    post.author === SITE_NAME
-      ? { "@type": "Organization", name: SITE_NAME }
-      : { "@type": "Person", name: post.author || SITE_NAME };
-
   return getMetadata({
     title: `${seoTitle} – ${SITE_NAME}`,
     description: seoDescription,

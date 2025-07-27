@@ -1,53 +1,54 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CategoryDropdown } from "@/components/ui/category-dropdown"
-import { toast } from "@/components/ui/toast"
+import type React from "react";
+import { useState, useEffect } from "react";
+import Image from "next/image"; // Lint: For optimized image rendering in Next.js
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CategoryDropdown } from "@/components/ui/category-dropdown";
+import { toast } from "@/components/ui/toast";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@/components/ui/tooltip"
-import { Info, RefreshCw, Eye, Pencil, Trash2, Upload, Archive } from "lucide-react"
+} from "@/components/ui/tooltip";
+import { Info, Eye, Pencil, Trash2, Upload, Archive } from "lucide-react";
+import { VideoForm } from "@/components/ui/video-form";
 
 // Types
 interface Category {
-  id: string
-  name: string
-  slug: string
-  type: "BLOG" | "VIDEO"
-  tooltip?: string
-  color?: string
-  icon?: string
-  order: number
-  isActive: boolean
-  createdAt: string
-  updatedAt: string
-  postCount: number
+  id: string;
+  name: string;
+  slug: string;
+  type: "BLOG" | "VIDEO";
+  tooltip?: string;
+  color?: string;
+  icon?: string;
+  order: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  postCount: number;
 }
 
 interface Video {
-  id: string
-  title: string
-  slug: string
-  description: string
-  youtubeId: string
-  thumbnail: string
-  duration: string
-  category: string
-  tags: string[]
-  status: "published" | "draft" | "unlisted"
-  publishedAt: string
-  views: number
-  featured: boolean
-  episodeNumber?: number
-  season?: string
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  youtubeId: string;
+  thumbnail: string;
+  duration: string;
+  category: string;
+  tags: string[];
+  status: "published" | "draft" | "unlisted";
+  publishedAt: string;
+  views: number;
+  featured: boolean;
+  episodeNumber?: number;
+  season?: string;
 }
 
 // Pagination Helper
@@ -56,17 +57,17 @@ function Pagination({
   totalPages,
   onPageChange,
 }: {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }) {
-  if (totalPages <= 1) return null
+  if (totalPages <= 1) return null;
   const pages = Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-    if (totalPages <= 5) return i + 1
-    if (currentPage <= 3) return i + 1
-    if (currentPage >= totalPages - 2) return totalPages - 4 + i
-    return currentPage - 2 + i
-  })
+    if (totalPages <= 5) return i + 1;
+    if (currentPage <= 3) return i + 1;
+    if (currentPage >= totalPages - 2) return totalPages - 4 + i;
+    return currentPage - 2 + i;
+  });
   return (
     <div className="flex items-center justify-center gap-2 my-4 flex-wrap">
       <Button
@@ -101,7 +102,7 @@ function Pagination({
         Next
       </Button>
     </div>
-  )
+  );
 }
 
 // Status Badge
@@ -110,8 +111,8 @@ function VideoStatusBadge({ status }: { status: Video["status"] }) {
     draft: "bg-gray-100 text-gray-800",
     published: "bg-green-100 text-green-800",
     unlisted: "bg-yellow-100 text-yellow-800",
-  }
-  return <Badge className={styles[status]}>{status}</Badge>
+  };
+  return <Badge className={styles[status]}>{status}</Badge>;
 }
 
 // Bulk Actions
@@ -121,12 +122,12 @@ function VideoBulkActions({
   onUnpublish,
   onDelete,
 }: {
-  count: number
-  onPublish: () => void
-  onUnpublish: () => void
-  onDelete: () => void
+  count: number;
+  onPublish: () => void;
+  onUnpublish: () => void;
+  onDelete: () => void;
 }) {
-  if (count === 0) return null
+  if (count === 0) return null;
   return (
     <div className="flex items-center gap-2 my-2">
       <span className="text-sm text-muted-foreground mr-2">{count} selected</span>
@@ -140,7 +141,7 @@ function VideoBulkActions({
         <Trash2 className="h-4 w-4 mr-1" /> Delete
       </Button>
     </div>
-  )
+  );
 }
 
 // Table View (with accessible Tooltips & aria-labels)
@@ -153,15 +154,15 @@ function VideoTable({
   onTogglePublish,
   categories,
 }: {
-  videos: Video[]
-  selected: Set<string>
-  toggleSelect: (id: string) => void
-  toggleSelectAll: (checked: boolean) => void
-  onDelete: (id: string) => void
-  onTogglePublish: (id: string, publish: boolean) => void
-  categories: Category[]
+  videos: Video[];
+  selected: Set<string>;
+  toggleSelect: (id: string) => void;
+  toggleSelectAll: (checked: boolean) => void;
+  onDelete: (id: string) => void;
+  onTogglePublish: (id: string, publish: boolean) => void;
+  categories: Category[];
 }) {
-  const allSelected = videos.length > 0 && videos.every((v) => selected.has(v.id))
+  const allSelected = videos.length > 0 && videos.every((v) => selected.has(v.id));
   return (
     <div className="overflow-x-auto border rounded-lg">
       <table className="min-w-full bg-white text-sm">
@@ -187,8 +188,8 @@ function VideoTable({
         </thead>
         <tbody>
           {videos.map((video) => {
-            const catObj = categories.find((cat) => cat.slug === video.category)
-            const isPublished = video.status === "published"
+            const catObj = categories.find((cat) => cat.slug === video.category);
+            const isPublished = video.status === "published";
             return (
               <tr key={video.id} className="border-b last:border-b-0 hover:bg-gray-50">
                 <td className="p-3">
@@ -201,9 +202,11 @@ function VideoTable({
                 </td>
                 <td className="p-3">
                   {video.thumbnail && (
-                    <img
+                    <Image
                       src={video.thumbnail}
                       alt="Thumbnail"
+                      width={64}
+                      height={40}
                       className="h-10 w-16 object-cover rounded"
                     />
                   )}
@@ -230,7 +233,6 @@ function VideoTable({
                 <td className="p-3 text-right hidden sm:table-cell">{video.views?.toLocaleString() ?? 0}</td>
                 <td className="p-3 hidden md:table-cell">{video.duration}</td>
                 <td className="p-3 text-right flex flex-wrap gap-2 justify-end">
-                  {/* --- Tooltips & Aria Labels for all actions --- */}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -294,60 +296,62 @@ function VideoTable({
                   </Tooltip>
                 </td>
               </tr>
-            )
+            );
           })}
         </tbody>
       </table>
     </div>
-  )
+  );
 }
 
 // Main Component
 export function VideoManager() {
-  const [videos, setVideos] = useState<Video[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [editingVideo, setEditingVideo] = useState<Video | null>(null)
-  const [showCreateForm, setShowCreateForm] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filterCategory, setFilterCategory] = useState("")
-  const [categories, setCategories] = useState<Category[]>([])
-  const [filterStatus, setFilterStatus] = useState<"all" | Video["status"]>("all")
-  const [sortBy, setSortBy] = useState("date")
-  const [currentPage, setCurrentPage] = useState(1)
-  const VIDEOS_PER_PAGE = 10
-  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editingVideo, setEditingVideo] = useState<Video | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [filterStatus, setFilterStatus] = useState<"all" | Video["status"]>("all");
+  const [sortBy, setSortBy] = useState("date");
+  const [currentPage, setCurrentPage] = useState(1);
+  const VIDEOS_PER_PAGE = 10;
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    loadData()
-  }, [])
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (categories.length > 0 && !filterCategory) {
-      setFilterCategory(categories[0].slug)
+      setFilterCategory(categories[0].slug);
     }
-  }, [categories])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories]);
 
   const loadData = async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
       const [videosRes, categoriesRes] = await Promise.all([
         fetch("/api/admin/videos", { credentials: "include" }),
         fetch("/api/admin/categories?type=video", { credentials: "include" }),
-      ])
-      if (!videosRes.ok || !categoriesRes.ok) throw new Error("Failed to load data")
-      const videosData = (await videosRes.json()).videos || []
-      const videoCategories = (await categoriesRes.json()).categories || []
-      setVideos(videosData)
-      setCategories(videoCategories)
-    } catch (error) {
-      setError("Failed to load videos or categories.")
-      toast("Failed to load videos or categories")
+      ]);
+      if (!videosRes.ok || !categoriesRes.ok) throw new Error("Failed to load data");
+      const videosData = (await videosRes.json()).videos || [];
+      const videoCategories = (await categoriesRes.json()).categories || [];
+      setVideos(videosData);
+      setCategories(videoCategories);
+    } catch {
+      setError("Failed to load videos or categories.");
+      toast("Failed to load videos or categories");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const createVideo = async (videoData: Partial<Video>) => {
     try {
@@ -356,16 +360,16 @@ export function VideoManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(videoData),
         credentials: "include",
-      })
+      });
       if (response.ok) {
-        toast("Video created!")
-        await loadData()
-        setShowCreateForm(false)
+        toast("Video created!");
+        await loadData();
+        setShowCreateForm(false);
       }
-    } catch (error) {
-      toast("Failed to create video.")
+    } catch {
+      toast("Failed to create video.");
     }
-  }
+  };
 
   const updateVideo = async (id: string, videoData: Partial<Video>) => {
     try {
@@ -374,37 +378,37 @@ export function VideoManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(videoData),
         credentials: "include",
-      })
+      });
       if (response.ok) {
-        toast("Video updated.")
-        await loadData()
-        setEditingVideo(null)
+        toast("Video updated.");
+        await loadData();
+        setEditingVideo(null);
       }
-    } catch (error) {
-      toast("Failed to update video.")
+    } catch {
+      toast("Failed to update video.");
     }
-  }
+  };
 
   const deleteVideo = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this video? This cannot be undone.")) return
+    if (!confirm("Are you sure you want to delete this video? This cannot be undone.")) return;
     try {
       const response = await fetch(`/api/admin/videos/${id}`, {
         method: "DELETE",
         credentials: "include",
-      })
+      });
       if (response.ok) {
-        toast("Video deleted.")
-        await loadData()
+        toast("Video deleted.");
+        await loadData();
         setSelected((prev) => {
-          const s = new Set(prev)
-          s.delete(id)
-          return s
-        })
+          const s = new Set(prev);
+          s.delete(id);
+          return s;
+        });
       }
-    } catch (error) {
-      toast("Failed to delete video.")
+    } catch {
+      toast("Failed to delete video.");
     }
-  }
+  };
 
   const togglePublish = async (id: string, publish: boolean) => {
     try {
@@ -413,75 +417,75 @@ export function VideoManager() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ status: publish ? "published" : "draft" }),
-      })
+      });
       if (res.ok) {
-        toast(publish ? "Video published." : "Video unpublished.")
-        await loadData()
+        toast(publish ? "Video published." : "Video unpublished.");
+        await loadData();
       }
-    } catch (err) {
-      toast("Failed to update video status.")
+    } catch {
+      toast("Failed to update video status.");
     }
-  }
+  };
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const filteredVideos = videos.filter((video) => {
+    const matchesSearch = video.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = !filterCategory || video.category === filterCategory;
+    const matchesStatus = filterStatus === "all" || video.status === filterStatus;
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
   const toggleSelectAll = (checked: boolean) => {
-    if (checked) setSelected(new Set(filteredVideos.map((v) => v.id)))
-    else setSelected(new Set())
-  }
+    if (checked) setSelected(new Set(filteredVideos.map((v) => v.id)));
+    else setSelected(new Set());
+  };
 
   const handleBulk = async (action: "publish" | "unpublish" | "delete") => {
-    const ids = Array.from(selected)
-    if (ids.length === 0) return
-    if (action === "delete" && !confirm(`Delete ${ids.length} video(s)? This cannot be undone.`)) return
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
+    if (action === "delete" && !confirm(`Delete ${ids.length} video(s)? This cannot be undone.`)) return;
     for (const id of ids) {
-      if (action === "delete") await deleteVideo(id)
-      else await togglePublish(id, action === "publish")
+      if (action === "delete") await deleteVideo(id);
+      else await togglePublish(id, action === "publish");
     }
-    setSelected(new Set())
-    await loadData()
-  }
+    setSelected(new Set());
+    await loadData();
+  };
 
   // Filtering, Sorting, Pagination
-  const filteredVideos = videos.filter((video) => {
-    const matchesSearch = video.title.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = !filterCategory || video.category === filterCategory
-    const matchesStatus = filterStatus === "all" || video.status === filterStatus
-    return matchesSearch && matchesCategory && matchesStatus
-  })
-
   const sortedVideos = [...filteredVideos].sort((a, b) => {
-    if (sortBy === "title") return a.title.localeCompare(b.title)
-    if (sortBy === "status") return a.status.localeCompare(b.status)
+    if (sortBy === "title") return a.title.localeCompare(b.title);
+    if (sortBy === "status") return a.status.localeCompare(b.status);
     return (
       new Date(b.publishedAt || b.createdAt).getTime() -
       new Date(a.publishedAt || a.createdAt).getTime()
-    )
-  })
+    );
+  });
 
-  const totalPages = Math.ceil(sortedVideos.length / VIDEOS_PER_PAGE) || 1
+  const totalPages = Math.ceil(sortedVideos.length / VIDEOS_PER_PAGE) || 1;
   const paginatedVideos = sortedVideos.slice(
     (currentPage - 1) * VIDEOS_PER_PAGE,
     currentPage * VIDEOS_PER_PAGE
-  )
+  );
 
   useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, filterCategory, filterStatus, sortBy])
+    setCurrentPage(1);
+  }, [searchTerm, filterCategory, filterStatus, sortBy]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
       </div>
-    )
+    );
   }
 
   if (error) {
@@ -493,7 +497,7 @@ export function VideoManager() {
           Retry
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -535,7 +539,7 @@ export function VideoManager() {
           type="video"
           className="w-full sm:w-48"
         />
-        <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val as any)}>
+        <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val as "all" | "draft" | "published" | "unlisted")}>
           <SelectTrigger className="w-40" aria-label="Status">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -607,14 +611,12 @@ export function VideoManager() {
           video={editingVideo}
           onSave={editingVideo ? (data) => updateVideo(editingVideo.id, data) : createVideo}
           onCancel={() => {
-            setShowCreateForm(false)
-            setEditingVideo(null)
+            setShowCreateForm(false);
+            setEditingVideo(null);
           }}
           categories={categories}
         />
       )}
     </div>
-  )
+  );
 }
-
-// ...Your VideoForm stays exactly as before, unless you want upgrades!

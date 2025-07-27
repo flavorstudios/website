@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     // Always map title -> name for dashboard compatibility
     categories = categories.map((c: Category) => ({ ...c, name: c.title }));
     return NextResponse.json({ categories });
-  } catch (error: unknown) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
   }
 }

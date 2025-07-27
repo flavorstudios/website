@@ -1,7 +1,7 @@
 // app/watch/[slug]/page.tsx
 
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL, SITE_DEFAULT_IMAGE } from "@/lib/constants";
+import { SITE_NAME, SITE_URL } from "@/lib/constants"; // <- removed SITE_DEFAULT_IMAGE here
 import { StructuredData } from "@/components/StructuredData";
 
 import { Card, CardContent } from "@/components/ui/card";

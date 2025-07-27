@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   Mail, Shield, FileText, AlertTriangle, Phone, Globe, Copyright,
   UserX, Scale, AlertCircle, CheckCircle, Clock, Gavel, Eye, Cookie
-} from "lucide-react"; // All necessary Lucide icons are correctly imported.
+} from "lucide-react";
 import Link from "next/link";
 
 // --- SEO Metadata: dynamic, centralized ---
@@ -17,7 +17,7 @@ export const metadata = getMetadata({
   title: `DMCA Takedown Policy – ${SITE_NAME}`,
   description: `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
   path: "/dmca",
-  robots: "index,follow", // This policy page should be publicly indexable.
+  robots: "index,follow",
   openGraph: {
     title: `DMCA Takedown Policy – ${SITE_NAME}`,
     description: `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
@@ -40,7 +40,7 @@ const schema = getSchema({
   path: "/dmca",
   title: `DMCA Takedown Policy – ${SITE_NAME}`,
   description: `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
-  image: SITE_LOGO_URL, // Using the site's logo for consistency in legal documents.
+  image: SITE_LOGO_URL,
   // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
 });
 
@@ -89,35 +89,7 @@ export default function DMCAPage() {
     "Consent to jurisdiction of courts in India and acceptance of service of process",
   ];
 
-  // Note: The original version of this file did not have 'additionalSections' and 'riskFactors' defined,
-  // but they are included here as they were part of the audit's context. Ensure they are defined correctly.
-  const additionalSections = [
-    {
-      title: "No Professional Advice",
-      icon: Mail, // Placeholder icon
-      content: "The content on our Site is not a substitute for professional advice...",
-    },
-    {
-      title: "Accuracy of Information",
-      icon: AlertCircle, // Placeholder icon
-      content: "Although we strive to maintain updated and accurate information...",
-    },
-    {
-      title: "Changes to this Disclaimer",
-      icon: FileText, // Placeholder icon
-      content: "We may update this Disclaimer from time to time...",
-    },
-  ];
-
-  const riskFactors = [
-    "Content accuracy and completeness",
-    "Third-party website reliability",
-    "User-generated content quality",
-    "Automated moderation limitations",
-    "External service availability",
-    "Information currency and updates",
-  ];
-
+  // Removed: additionalSections and riskFactors (unused)
 
   return (
     <div className="min-h-screen py-8 sm:py-12">
@@ -131,18 +103,18 @@ export default function DMCAPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">DMCA Policy</h1>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex items-start gap-3">
-              <Copyright className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+              <Copyright className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm sm:text-base text-blue-800 font-medium mb-2">Effective Date: May 9, 2025</p>
                 <p className="text-sm sm:text-base text-blue-700 leading-relaxed">
-                  Flavor Studios ("we," "us," or "our") respects the intellectual property rights of others and expects its users to do the same. It is our policy to respond to clear notices of alleged copyright infringement in accordance with the Digital Millennium Copyright Act ("DMCA") and other applicable intellectual property laws.
+                  Flavor Studios (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) respects the intellectual property rights of others and expects its users to do the same. It is our policy to respond to clear notices of alleged copyright infringement in accordance with the Digital Millennium Copyright Act (&quot;DMCA&quot;) and other applicable intellectual property laws.
                 </p>
               </div>
             </div>
           </div>
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 sm:p-6">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+              <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm sm:text-base text-amber-800 font-medium mb-2">Policy Overview</p>
                 <p className="text-sm sm:text-base text-amber-700 leading-relaxed">
@@ -172,7 +144,7 @@ export default function DMCAPage() {
                         <CardHeader className="pb-3 sm:pb-4">
                           <div className="flex items-center gap-2 sm:gap-3 mb-2">
                             <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
-                              <step.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                              <step.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" />
                             </div>
                             <CardTitle className="text-lg sm:text-xl">{step.title}</CardTitle>
                           </div>
@@ -194,7 +166,7 @@ export default function DMCAPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
               </div>
               1. Filing a DMCA Notice (Copyright Infringement Notification)
             </CardTitle>
@@ -208,7 +180,7 @@ export default function DMCAPage() {
               <ul className="space-y-2 sm:space-y-3">
                 {requiredElements.map((element, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div> {/* Added aria-hidden */}
+                    <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                     <span className="text-sm sm:text-base text-gray-700 leading-relaxed">{element}</span>
                   </li>
                 ))}
@@ -220,7 +192,7 @@ export default function DMCAPage() {
                 <p className="text-sm sm:text-base text-blue-800 font-medium">Designated DMCA Agent</p>
                 <p className="text-sm sm:text-base text-blue-800">Flavor Studios</p>
                 <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <Mail className="h-4 w-4 text-blue-600" aria-hidden="true" />
                   <span className="text-sm sm:text-base text-blue-700 font-medium">contact@flavorstudios.in</span>
                 </div>
               </div>
@@ -233,7 +205,7 @@ export default function DMCAPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
               <div className="p-2 bg-green-100 rounded-lg">
-                <Scale className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Scale className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" aria-hidden="true" />
               </div>
               2. Counter Notification (Restoring Removed Content)
             </CardTitle>
@@ -247,7 +219,7 @@ export default function DMCAPage() {
               <ul className="space-y-2 sm:space-y-3">
                 {counterNoticeElements.map((element, index) => (
                   <li key={index} className="flex items-start gap-2">
-                    <div className="h-1.5 w-1.5 bg-green-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div> {/* Added aria-hidden */}
+                    <div className="h-1.5 w-1.5 bg-green-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                     <span className="text-sm sm:text-base text-gray-700 leading-relaxed">{element}</span>
                   </li>
                 ))}
@@ -255,7 +227,7 @@ export default function DMCAPage() {
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-6">
               <div className="flex items-start gap-3">
-                <Clock className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Clock className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <div>
                   <h4 className="font-semibold text-green-900 mb-2 text-base sm:text-lg">Restoration Timeline</h4>
                   <p className="text-sm sm:text-base text-green-800 leading-relaxed">
@@ -273,7 +245,7 @@ export default function DMCAPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
                 <div className="p-2 bg-red-100 rounded-lg">
-                  <UserX className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <UserX className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" aria-hidden="true" />
                 </div>
                 3. Repeat Infringer Policy
               </CardTitle>
@@ -288,7 +260,7 @@ export default function DMCAPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-amber-900">
                 <div className="p-2 bg-amber-100 rounded-lg">
-                  <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600" aria-hidden="true" />
                 </div>
                 4. Misuse of DMCA Notices
               </CardTitle>
@@ -302,11 +274,11 @@ export default function DMCAPage() {
         </div>
 
         {/* Contact Section */}
-        <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 mb-12 sm:mb-16">
+        <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 mb-12 sm:mb-16" id="contact-info">
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-blue-900">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
               </div>
               5. Contact Information
             </CardTitle>
@@ -318,7 +290,7 @@ export default function DMCAPage() {
             <div className="space-y-3 sm:space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-100 rounded-lg">
-                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="font-semibold text-blue-900 text-sm sm:text-base">Flavor Studios</p>
@@ -328,7 +300,7 @@ export default function DMCAPage() {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Button asChild className="bg-blue-600 hover:bg-blue-700 h-9 sm:h-10 text-xs sm:text-sm">
                   <Link href="/contact" aria-label="Contact Flavor Studios">
-                    <Phone className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <Phone className="mr-2 h-4 w-4" aria-hidden="true" />
                     Contact Us
                   </Link>
                 </Button>
@@ -338,7 +310,7 @@ export default function DMCAPage() {
                   className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white h-9 sm:h-10 text-xs sm:text-sm"
                 >
                   <Link href="mailto:contact@flavorstudios.in" aria-label="Email DMCA Agent">
-                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
+                    <Mail className="mr-2 h-4 w-4" aria-hidden="true" />
                     Send DMCA Notice
                   </Link>
                 </Button>
@@ -352,7 +324,7 @@ export default function DMCAPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-red-900">
               <div className="p-2 bg-red-100 rounded-lg">
-                <Gavel className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <Gavel className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" aria-hidden="true" />
               </div>
               Important Legal Notice
             </CardTitle>
@@ -376,13 +348,12 @@ export default function DMCAPage() {
         <div className="text-center mb-8 sm:mb-12">
           <h3 className="text-lg sm:text-xl font-semibold mb-4 sm:mb-6">Quick Navigation</h3>
           <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-            {/* Using a custom array for navigation for clarity, assuming these are the relevant sections */}
             {[
               { id: "filing-notice", title: "Filing Notice" },
               { id: "counter-notification", title: "Counter Notice" },
-              { id: "repeat-infringer", title: "Repeat Infringer Policy" }, // Assuming this section has an ID
-              { id: "misuse-dmca", title: "Misuse of DMCA Notices" }, // Assuming this section has an ID
-              { id: "contact-info", title: "Contact Information" }, // Assuming this section has an ID
+              { id: "repeat-infringer", title: "Repeat Infringer Policy" },
+              { id: "misuse-dmca", title: "Misuse of DMCA Notices" },
+              { id: "contact-info", title: "Contact Information" },
             ].map((section, index) => (
               <Button key={index} variant="outline" size="sm" asChild className="text-xs sm:text-sm" aria-label={`Jump to ${section.title}`}>
                 <Link href={`#${section.id}`}>{section.title}</Link>

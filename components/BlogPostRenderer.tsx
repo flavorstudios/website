@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Eye, User, Clock } from "lucide-react";
@@ -38,7 +39,9 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <header className="mb-8">
         <div className="flex items-center gap-2 mb-4">
-          {primaryCategory && <Badge variant="outline">{primaryCategory}</Badge>}
+          {primaryCategory && (
+            <Badge variant="outline">{primaryCategory}</Badge>
+          )}
           {post.publishedAt && (
             <span className="text-sm text-gray-500 flex items-center gap-1">
               <Calendar className="h-3 w-3" aria-hidden="true" />
@@ -63,7 +66,7 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
           )}
           <span className="flex items-center gap-1">
             <Eye className="h-4 w-4" aria-hidden="true" />
-            {(post.views || 0).toLocaleString()} views
+            {(post.views ?? 0).toLocaleString()} views
           </span>
           {post.readTime && (
             <span className="flex items-center gap-1">
@@ -74,11 +77,14 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
         </div>
       </header>
       {image && (
-        <div className="mb-8">
-          <img
+        <div className="mb-8 w-full h-64 md:h-96 relative rounded-lg shadow-lg overflow-hidden">
+          <Image
             src={image}
             alt={post.title || "Blog post cover image"}
-            className="w-full h-64 md:h-96 object-cover rounded-lg shadow-lg"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 1024px"
+            priority
           />
         </div>
       )}
@@ -86,6 +92,7 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
         <CardContent className="p-8">
           <div
             className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
+            // NOTE: content is assumed sanitized, or use a sanitizer if coming from untrusted sources
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
         </CardContent>
@@ -102,7 +109,10 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
           <div className="flex flex-wrap gap-2">
             {post.tags.map((tag: string) => (
               <Badge key={tag} variant="secondary">
-                <Link href={`/blog/tag/${encodeURIComponent(tag)}`} className="hover:underline">
+                <Link
+                  href={`/blog/tag/${encodeURIComponent(tag)}`}
+                  className="hover:underline"
+                >
                   {tag}
                 </Link>
               </Badge>

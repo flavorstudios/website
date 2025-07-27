@@ -36,7 +36,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       json.CATEGORIES[type] = json.CATEGORIES[type].map((cat: Category) => {
         if (cat.id === params.id) {
           found = true;
-          const { name, ...rest } = data;
+          // Only destructure ...rest, avoid unused `name`
+          const { /* name, */ ...rest } = data;
           return {
             ...cat,
             ...rest,

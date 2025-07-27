@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
+  type DragEndEvent,
 } from "@dnd-kit/core"
 import {
   SortableContext,
@@ -135,17 +135,15 @@ export default function CategoryList({
   toggleSelect,
   toggleSelectAll,
 }: CategoryListProps) {
-  // Defensive: always an array, never breaks if categories is missing/null/undefined
-  const categoryArray = Array.isArray(categories) ? categories : []
+  const categoryArray = useMemo(() => Array.isArray(categories) ? categories : [], [categories])
   const [items, setItems] = useState<Category[]>([])
-  const [width, setWidth] = useState<number>(1024) // screen size for mobile/table
+  const [width, setWidth] = useState<number>(1024)
 
   useEffect(() => {
     setItems([...categoryArray].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)))
   }, [categoryArray])
 
   useEffect(() => {
-    // Simple resize handler to toggle mobile/table
     const handleResize = () => setWidth(window.innerWidth)
     handleResize()
     window.addEventListener("resize", handleResize)
@@ -168,7 +166,7 @@ export default function CategoryList({
         credentials: "include",
         body: JSON.stringify({ ids: newItems.map((c) => c.id), type: type.toLowerCase() }),
       })
-    } catch (err) {
+    } catch {
       toast("Failed to reorder categories")
     }
   }
@@ -264,12 +262,7 @@ interface SortableRowProps {
   onDelete: (category: Category) => void
   onToggleStatus: (id: string, isActive: boolean) => void
   toggleSelect: (id: string) => void
-  // (DnD-kit hooks, used below)
-  attributes?: any
-  listeners?: any
-  setNodeRef?: any
-  transform?: any
-  transition?: any
+  // dndProps REMOVED (was unused)
 }
 
 function SortableRow({
@@ -279,7 +272,6 @@ function SortableRow({
   onDelete,
   onToggleStatus,
   toggleSelect,
-  ...dndProps
 }: SortableRowProps) {
   const {
     attributes,
@@ -290,7 +282,7 @@ function SortableRow({
   } = useSortable({ id: category.id })
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: transform ? CSS.Transform.toString(transform) : undefined,
     transition,
   }
 

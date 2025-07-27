@@ -694,7 +694,7 @@ export default function FAQPage() {
               <HelpCircle className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-4 text-blue-600" />
               <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-blue-900">Still have questions?</h2>
               <p className="text-sm sm:text-base text-blue-800 mb-4 sm:mb-6 max-w-2xl mx-auto">
-                If you couldn't find the answer you were looking for, feel free to reach out to us directly.
+                If you couldn&apos;t find the answer you were looking for, feel free to reach out to us directly.
               </p>
               <Button asChild className="bg-blue-600 hover:bg-blue-700 h-10 sm:h-11 px-6 sm:px-8">
                 <Link href="/contact">

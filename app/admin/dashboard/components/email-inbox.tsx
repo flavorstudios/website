@@ -30,8 +30,8 @@ export function EmailInbox() {
   const [adminEmails, setAdminEmails] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
-  const [loading, setLoading] = useState(true)
   const [emailError, setEmailError] = useState<string | null>(null)
+  const [loadingState, setLoadingState] = useState(true) // Now actively used
 
   // Load admin email addresses from server
   useEffect(() => {
@@ -46,7 +46,6 @@ export function EmailInbox() {
         }
       })
       .catch(() => {
-        // No fallback in prod—show error instead (as per audit)
         setEmailError("Unable to load email addresses for reply. Please contact your administrator.")
         setAdminEmails([])
         setFromEmail("")
@@ -62,7 +61,7 @@ export function EmailInbox() {
       } catch (error) {
         console.error("Failed to load messages:", error)
       } finally {
-        setLoading(false)
+        setLoadingState(false)
       }
     }
     loadMessages()
@@ -102,7 +101,6 @@ export function EmailInbox() {
       if (response.ok) {
         updateMessageStatus(selectedMessage.id, "replied")
         setReplyText("")
-        // Optionally: Show success notification
       }
     } catch (error) {
       console.error("Failed to send reply:", error)
@@ -137,7 +135,6 @@ export function EmailInbox() {
     }
   }
 
-  // Helper to format date safely
   const formatDate = (dt: string | Date, withTime = false) => {
     const dateObj = typeof dt === "string" ? new Date(dt) : dt
     return withTime
@@ -194,52 +191,62 @@ export function EmailInbox() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="max-h-96 overflow-y-auto">
-                {filteredMessages.map((message) => (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`p-4 border-b last:border-b-0 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      selectedMessage?.id === message.id ? "bg-blue-50 border-l-4 border-l-blue-500" : ""
-                    } ${message.status === "unread" ? "bg-blue-50/30" : ""}`}
-                    onClick={() => {
-                      setSelectedMessage(message)
-                      if (message.status === "unread") {
-                        updateMessageStatus(message.id, "read")
-                      }
-                    }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-gradient-to-br from-purple-400 to-blue-400 text-white text-xs">
-                          {message.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p
-                            className={`font-medium text-sm ${message.status === "unread" ? "text-gray-900" : "text-gray-700"}`}
-                          >
-                            {message.name}
-                          </p>
-                          <div className="flex items-center gap-1">
-                            <Badge className={`text-xs ${getPriorityColor(message.priority)}`}>
-                              {message.priority}
-                            </Badge>
+                {loadingState ? (
+                  <div className="flex justify-center items-center py-10 text-gray-400">
+                    Loading messages...
+                  </div>
+                ) : filteredMessages.length === 0 ? (
+                  <div className="flex justify-center items-center py-10 text-gray-400">
+                    No messages found.
+                  </div>
+                ) : (
+                  filteredMessages.map((message) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`p-4 border-b last:border-b-0 cursor-pointer hover:bg-gray-50 transition-colors ${
+                        selectedMessage?.id === message.id ? "bg-blue-50 border-l-4 border-l-blue-500" : ""
+                      } ${message.status === "unread" ? "bg-blue-50/30" : ""}`}
+                      onClick={() => {
+                        setSelectedMessage(message)
+                        if (message.status === "unread") {
+                          updateMessageStatus(message.id, "read")
+                        }
+                      }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-gradient-to-br from-purple-400 to-blue-400 text-white text-xs">
+                            {message.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <p
+                              className={`font-medium text-sm ${message.status === "unread" ? "text-gray-900" : "text-gray-700"}`}
+                            >
+                              {message.name}
+                            </p>
+                            <div className="flex items-center gap-1">
+                              <Badge className={`text-xs ${getPriorityColor(message.priority)}`}>
+                                {message.priority}
+                              </Badge>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 truncate mt-1">{message.subject}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <Badge className={`text-xs ${getStatusColor(message.status)}`}>{message.status}</Badge>
+                            <p className="text-xs text-gray-400">{formatDate(message.timestamp)}</p>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-600 truncate mt-1">{message.subject}</p>
-                        <div className="flex items-center justify-between mt-2">
-                          <Badge className={`text-xs ${getStatusColor(message.status)}`}>{message.status}</Badge>
-                          <p className="text-xs text-gray-400">{formatDate(message.timestamp)}</p>
-                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>

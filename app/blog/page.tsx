@@ -1,6 +1,7 @@
 // app/blog/page.tsx
 
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import {
   BookOpen,
   Clock,
   Star,
-  MessageCircle // <-- Added for comment badge
+  MessageCircle
 } from "lucide-react";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
@@ -351,11 +352,14 @@ function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority
     <Link href={`/blog/${post.slug}`} className="group">
       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full bg-gradient-to-br from-white to-gray-50">
         <div className="relative h-40 sm:h-48 lg:h-56 overflow-hidden">
-          <img
+          <Image
             src={post.featuredImage || post.coverImage || "/placeholder.svg?height=256&width=512&text=Featured+Post"}
             alt={post.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading={priority ? "eager" : "lazy"}
+            fill
+            sizes="(max-width: 1024px) 100vw, 33vw"
+            priority={priority}
           />
           <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
             <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-900 shadow-lg text-xs">
@@ -420,11 +424,14 @@ function BlogPostCard({ post }: { post: BlogPost }) {
     <Link href={`/blog/${post.slug}`} className="group">
       <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 bg-white">
         <div className="relative h-40 sm:h-48 overflow-hidden">
-          <img
+          <Image
             src={post.featuredImage || post.coverImage || "/placeholder.svg?height=192&width=384&text=Blog+Post"}
             alt={post.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
             loading="lazy"
+            fill
+            sizes="(max-width: 1024px) 100vw, 33vw"
+            priority={false}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           {post.featured && (

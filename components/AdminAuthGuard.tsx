@@ -1,5 +1,4 @@
 "use client";
-import { Loader2 } from "lucide-react";
 
 // This component is intentionally minimal, since authentication is enforced by middleware/server.
 // If you wish to use suspense/lazy loading, simply add a loading spinner as fallback in your layout or page.
@@ -7,6 +6,7 @@ import { Loader2 } from "lucide-react";
 export default function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   // Uncomment and use the code below if you need a UI loading spinner for lazy/suspense transitions.
   /*
+  import { Loader2 } from "lucide-react";
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 300); // Simulate brief loading

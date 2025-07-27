@@ -67,7 +67,13 @@ export default function PlayPageClient() {
 
       return () => clearInterval(timer)
     }
-  }, [gameState.currentPlayer, gameState.isGameActive, gameState.winner, gameState.gameMode, gameState.turnTimeLimit])
+  }, [
+    gameState.currentPlayer,
+    gameState.isGameActive,
+    gameState.winner,
+    gameState.gameMode,
+    gameState.turnTimeLimit
+  ])
 
   const checkWinner = useCallback((board: Player[]): Player | "tie" | null => {
     const lines = [
@@ -80,26 +86,21 @@ export default function PlayPageClient() {
       [0, 4, 8],
       [2, 4, 6],
     ]
-
     for (const [a, b, c] of lines) {
       if (board[a] && board[a] === board[b] && board[a] === board[c]) {
         return board[a]
       }
     }
-
     return board.every((cell) => cell !== null) ? "tie" : null
   }, [])
 
   const getComputerMove = useCallback(
     (board: Player[], difficulty: Difficulty): number => {
-      const availableMoves = board.map((cell, index) => (cell === null ? index : null)).filter((val) => val !== null)
-
+      const availableMoves = board.map((cell, index) => (cell === null ? index : null)).filter((val) => val !== null) as number[]
       if (availableMoves.length === 0) return -1
-
       if (difficulty === "easy") {
         return availableMoves[Math.floor(Math.random() * availableMoves.length)]!
       }
-
       // Medium and Hard: Try to win first, then block, then random
       const checkMove = (player: Player) => {
         for (const move of availableMoves) {
@@ -111,22 +112,17 @@ export default function PlayPageClient() {
         }
         return null
       }
-
       const winMove = checkMove("O")
       if (winMove !== null) return winMove
-
       const blockMove = checkMove("X")
       if (blockMove !== null && (difficulty === "medium" || difficulty === "hard")) return blockMove
-
       if (difficulty === "hard" && board[4] === null) return 4
-
       if (difficulty === "hard") {
         const corners = [0, 2, 6, 8].filter((i) => board[i] === null)
         if (corners.length > 0) {
           return corners[Math.floor(Math.random() * corners.length)]
         }
       }
-
       return availableMoves[Math.floor(Math.random() * availableMoves.length)]!
     },
     [checkWinner],
@@ -135,17 +131,14 @@ export default function PlayPageClient() {
   const makeMove = useCallback(
     (index: number) => {
       if (gameState.board[index] || gameState.winner || !gameState.isGameActive) return
-
       if (typeof window !== "undefined" && "vibrate" in navigator) {
         navigator.vibrate(20)
       }
-
       setGameState((prev) => {
         const newBoard = [...prev.board]
         newBoard[index] = prev.currentPlayer
         const winner = checkWinner(newBoard)
         const nextPlayer = prev.currentPlayer === "X" ? "O" : "X"
-
         return {
           ...prev,
           board: newBoard,
@@ -163,7 +156,13 @@ export default function PlayPageClient() {
         }
       })
     },
-    [gameState.board, gameState.winner, gameState.isGameActive, gameState.currentPlayer, checkWinner],
+    [
+      gameState.board,
+      gameState.winner,
+      gameState.isGameActive,
+      // gameState.currentPlayer, // <-- FIX: removed from dependencies
+      checkWinner
+    ],
   )
 
   // Computer move effect
@@ -185,9 +184,40 @@ export default function PlayPageClient() {
       )
       return () => clearTimeout(timer)
     }
-  }, [gameState.currentPlayer, gameState.gameMode, gameState.board, gameState.difficulty, makeMove, getComputerMove])
+  }, [
+    gameState.currentPlayer,
+    gameState.gameMode,
+    gameState.board,
+    gameState.difficulty,
+    makeMove,
+    getComputerMove,
+    gameState.winner,
+    gameState.isGameActive
+  ])
 
   // Auto-reset timer after game ends
+  const resetGame = useCallback(() => {
+    if (autoResetTimer) {
+      clearTimeout(autoResetTimer)
+      setAutoResetTimer(null)
+    }
+    setCountdown(0)
+    setResetFeedback(true)
+    setTimeout(() => setResetFeedback(false), 200)
+    if (typeof window !== "undefined" && "vibrate" in navigator) {
+      navigator.vibrate(50)
+    }
+    setGameState((prev) => ({
+      ...prev,
+      board: Array(9).fill(null),
+      currentPlayer: "X",
+      winner: null,
+      isGameActive: true,
+      moveHistory: [],
+      timeLeft: prev.turnTimeLimit,
+    }))
+  }, [autoResetTimer])
+
   useEffect(() => {
     if (gameState.winner && !autoResetTimer) {
       setCountdown(2)
@@ -214,32 +244,7 @@ export default function PlayPageClient() {
         clearInterval(countdownInterval)
       }
     }
-  }, [gameState.winner])
-
-  const resetGame = useCallback(() => {
-    if (autoResetTimer) {
-      clearTimeout(autoResetTimer)
-      setAutoResetTimer(null)
-    }
-    setCountdown(0)
-
-    setResetFeedback(true)
-    setTimeout(() => setResetFeedback(false), 200)
-
-    if (typeof window !== "undefined" && "vibrate" in navigator) {
-      navigator.vibrate(50)
-    }
-
-    setGameState((prev) => ({
-      ...prev,
-      board: Array(9).fill(null),
-      currentPlayer: "X",
-      winner: null,
-      isGameActive: true,
-      moveHistory: [],
-      timeLeft: prev.turnTimeLimit,
-    }))
-  }, [autoResetTimer])
+  }, [gameState.winner, autoResetTimer, resetGame])
 
   const changeGameMode = useCallback((mode: GameMode) => {
     setGameState((prev) => ({
@@ -270,9 +275,7 @@ export default function PlayPageClient() {
             return 0
         }
       }
-
       const newTimeLimit = getTimeLimit(gameState.gameMode, difficulty)
-
       setGameState((prev) => ({
         ...prev,
         difficulty,
@@ -289,7 +292,7 @@ export default function PlayPageClient() {
   )
 
   const getStatusMessage = () => {
-    if (gameState.winner === "tie") return "It's a tie! 🤝"
+    if (gameState.winner === "tie") return "It&apos;s a tie! 🤝"
     if (gameState.winner) {
       if (gameState.gameMode === "p2c") {
         return gameState.winner === "X" ? "You win! 🎉" : "Computer wins! 🤖"
@@ -299,7 +302,7 @@ export default function PlayPageClient() {
     if (gameState.gameMode === "p2c") {
       return gameState.currentPlayer === "X" ? "Your turn" : "Computer thinking..."
     }
-    return `Player ${gameState.currentPlayer}'s turn`
+    return `Player ${gameState.currentPlayer}&apos;s turn`
   }
 
   const getDifficultyDescription = (mode: GameMode, difficulty: Difficulty) => {
@@ -614,7 +617,7 @@ export default function PlayPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-3 text-sm sm:text-base leading-relaxed">
-                We're working on adding more exciting games with various difficulty levels and multiplayer options.
+                We&apos;re working on adding more exciting games with various difficulty levels and multiplayer options.
               </p>
               <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs sm:text-sm">
                 Stay Tuned for Updates

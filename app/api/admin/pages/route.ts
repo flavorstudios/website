@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   try {
     const pages = await pageStore.getAll()
     return NextResponse.json(pages)
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to fetch pages" }, { status: 500 })
   }
 }
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const { page, section, content } = await request.json()
     const updatedPage = await pageStore.update(page, section, content, "Admin")
     return NextResponse.json(updatedPage)
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Failed to update page" }, { status: 500 })
   }
 }

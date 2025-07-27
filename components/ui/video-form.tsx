@@ -7,11 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Video } from "@/lib/types"
-
-interface Category {
-  slug: string
-  name: string
-}
+import type { Category } from "@/types/category" // <- Use the shared category type
 
 export interface VideoFormProps {
   video?: Partial<Video>

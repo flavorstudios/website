@@ -8,14 +8,7 @@ import { Menu, Coffee } from "lucide-react"
 import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
-
-interface Category {
-  name: string
-  slug: string
-  count: number
-  tooltip?: string
-  type?: string
-}
+import type { Category } from "@/types/category" // <--- Unified type
 
 // Helper: only include "All" if it's not present in the categories
 function buildCategorySubItems(
@@ -31,7 +24,7 @@ function buildCategorySubItems(
     href: `${basePath}?category=${category.slug}`,
     description:
       category.tooltip ??
-      `${category.name} ${typeLabel}${category.count > 0 ? ` (${category.count})` : ""}`,
+      `${category.name} ${typeLabel}${category.postCount && category.postCount > 0 ? ` (${category.postCount})` : ""}`,
   }))
 
   const hasAll = categories.some(cat =>

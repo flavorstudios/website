@@ -23,7 +23,7 @@ async function getFirestoreAdminEmails(): Promise<string[]> {
       .map((d) => (d.data().email || "").toLowerCase().trim())
       .filter(Boolean);
   } catch (err) {
-    logError("admin-auth: fetch admin_users", err); // error variable IS used here.
+    logError("admin-auth: fetch admin_users", err);
     return [];
   }
 }
@@ -223,14 +223,17 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
 }
 
 // Logs failed admin validations to Firestore for auditing.
+// Now supports an optional 'reason' string for better diagnostics.
 export async function logAdminAuditFailure(
   email: string | null,
-  ip: string
+  ip: string,
+  reason?: string
 ): Promise<void> {
   try {
     await adminDb.collection("admin_audit_logs").add({
       email,
       ip,
+      reason,
       timestamp: new Date().toISOString(),
     });
   } catch (err) {

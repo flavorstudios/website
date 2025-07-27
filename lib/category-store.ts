@@ -2,20 +2,10 @@
 
 import fs from "fs/promises";
 import path from "path";
+import crypto from "crypto";
+import type { Category } from "@/types/category"; // Use shared type
 
 const CATEGORIES_PATH = path.join(process.cwd(), "content-data", "categories.json");
-
-export interface Category {
-  id: string;
-  title: string;
-  slug: string;
-  order: number;
-  isActive: boolean;
-  postCount: number;
-  type: "blog" | "video";
-  tooltip?: string;
-  [key: string]: unknown;
-}
 
 export const categoryStore = {
   async readJSON() {
@@ -39,13 +29,13 @@ export const categoryStore = {
   async getById(id: string): Promise<Category | null> {
     const data = await this.readJSON();
     const all = [...(data.CATEGORIES.blog || []), ...(data.CATEGORIES.watch || [])];
-    return all.find((c) => c.id === id) || null;
+    return all.find((c: Category) => c.id === id) || null;
   },
 
   async getBySlug(slug: string, type: "blog" | "video"): Promise<Category | null> {
     const data = await this.readJSON();
     const arr = type === "blog" ? (data.CATEGORIES.blog || []) : (data.CATEGORIES.watch || []);
-    return arr.find((c) => c.slug === slug) || null;
+    return arr.find((c: Category) => c.slug === slug) || null;
   },
 
   async create(category: Omit<Category, "id" | "postCount">): Promise<Category> {

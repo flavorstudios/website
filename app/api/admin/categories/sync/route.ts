@@ -25,8 +25,19 @@ async function categoriesExist() {
 }
 
 async function restoreDefaultCategories() {
-  const defaultFile = await fs.readFile(DEFAULT_CATEGORIES_PATH, "utf-8");
-  await fs.writeFile(CATEGORIES_PATH, defaultFile, "utf-8");
+  try {
+    const defaultFile = await fs.readFile(DEFAULT_CATEGORIES_PATH, "utf-8");
+    await fs.writeFile(CATEGORIES_PATH, defaultFile, "utf-8");
+  } catch (error: unknown) {
+    const code = (error as NodeJS.ErrnoException)?.code;
+    if (code === "ENOENT") {
+      // Default file missing - create minimal placeholder instead
+      const empty = JSON.stringify({ CATEGORIES: { blog: [], watch: [] } }, null, 2);
+      await fs.writeFile(CATEGORIES_PATH, empty, "utf-8");
+    } else {
+      throw error;
+    }
+  }
 }
 
 export async function POST(request: NextRequest) {

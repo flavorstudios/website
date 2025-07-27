@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import CategoryList, { Category, CategoryType } from "./CategoryList"
+import CategoryList, { CategoryType } from "./CategoryList"
+import type { Category } from "@/types/category"         // <--- Unified type import
 import CategoryBulkActions from "./CategoryBulkActions"
 import IconSelector from "./IconSelector"
 import { Input } from "@/components/ui/input"

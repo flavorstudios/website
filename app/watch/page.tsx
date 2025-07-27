@@ -1,3 +1,5 @@
+// app/watch/page.tsx
+
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
@@ -9,9 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
-// If not already imported, import Category interface:
-// import type { Category } from "@/lib/types";
-type Category = { name: string; slug: string }; // Add or adjust as needed
+type Category = { name: string; slug: string }; // Adjust as needed
 
 export const metadata = getMetadata({
   title: `${SITE_NAME} Videos | Original Anime, Studio Films & More`,
@@ -128,7 +128,6 @@ export default async function WatchPage({
   }, 0);
   const avgDuration = videos.length > 0 ? Math.round(totalDuration / videos.length) : 0;
 
-  // --- Only this line changed as per Codex audit ---
   const categoryName =
     categories.find((c: Category) => c.slug === selectedCategory)?.name || selectedCategory;
 
@@ -260,7 +259,8 @@ function FeaturedVideoCard({ video, priority = false }: { video: VideoType; prio
     video.thumbnail ||
     (video.youtubeId ? `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg` : "/placeholder.svg?height=256&width=512&text=Featured+Video");
   return (
-    <Link href={`/watch/${video.slug || video.id}`} className="group">
+    // === Canonical slug-only link ===
+    <Link href={`/watch/${video.slug}`} className="group">
       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full bg-gradient-to-br from-white to-gray-50">
         <div className="relative h-40 sm:h-48 lg:h-56 overflow-hidden">
           <Image
@@ -333,7 +333,8 @@ function VideoCard({ video }: { video: VideoType }) {
     video.thumbnail ||
     (video.youtubeId ? `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg` : "/placeholder.svg?height=192&width=384&text=Video");
   return (
-    <Link href={`/watch/${video.slug || video.id}`} className="group">
+    // === Canonical slug-only link ===
+    <Link href={`/watch/${video.slug}`} className="group">
       <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 bg-white">
         <div className="relative h-40 sm:h-48 overflow-hidden">
           <Image

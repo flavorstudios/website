@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/hooks/use-toast"
-import { Pagination } from "@/app/admin/dashboard/components/blog-manager"
+import { Pagination } from "@/components/admin/Pagination"  // <-- Updated import
 import { cn } from "@/lib/utils"
 
 interface CategoryFormProps {

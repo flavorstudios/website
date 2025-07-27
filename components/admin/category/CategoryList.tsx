@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { toast } from "@/hooks/use-toast"
 import { GripVertical, Edit, Trash2 } from "lucide-react"
 import * as Icons from "lucide-react"
 import type { LucideProps } from "lucide-react"
@@ -90,23 +91,34 @@ export default function CategoryList({
 
   const sensors = useSensors(useSensor(PointerSensor))
 
+  // --- DND Handler with feedback and rollback ---
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
     if (!over || active.id === over.id) return
     const oldIndex = items.findIndex((i) => i.id === active.id)
     const newIndex = items.findIndex((i) => i.id === over.id)
     const newItems = arrayMove(items, oldIndex, newIndex)
+    const prevItems = items
     setItems(newItems)
     try {
-      await fetch("/api/admin/categories/reorder", {
+      const res = await fetch("/api/admin/categories/reorder", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ ids: newItems.map((c) => c.id), type: type.toLowerCase() }),
       })
+      if (res.ok) {
+        toast("Categories reordered")
+      } else {
+        const data = await res.json().catch(() => ({}))
+        toast(data.error || "Failed to update order", { variant: "destructive" })
+        setItems(prevItems)
+      }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to reorder categories", err)
+      toast("Failed to update order", { variant: "destructive" })
+      setItems(prevItems)
     }
   }
 

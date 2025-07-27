@@ -1,14 +1,6 @@
 // lib/categories.ts
 
-// --------- CATEGORY TYPE ---------
-export interface Category {
-  id: string
-  name: string
-  slug: string
-  description?: string
-  count?: number
-  type?: string // Optional: for future filtering ("BLOG" | "VIDEO")
-}
+import type { Category } from "@/types/category" // Use the shared type
 
 // --------- CATEGORY FETCH (DEPRECATED, MERGES BLOG & VIDEO) ---------
 

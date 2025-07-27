@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import CategoryList, { Category, CategoryType } from "./CategoryList"
 import CategoryBulkActions from "./CategoryBulkActions"
+import IconSelector from "./IconSelector"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -41,8 +42,17 @@ function CategoryForm({ category, onSave, onCancel }: CategoryFormProps) {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleIconChange = (icon: string) => {
+    setFormData((prev) => ({ ...prev, icon }))
+  }
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    // Validate hex color
+    if (formData.color && !/^#[0-9A-Fa-f]{6}$/.test(formData.color.trim())) {
+      toast("Please select a valid hex color.", { variant: "destructive" })
+      return
+    }
     onSave(formData)
   }
 
@@ -84,12 +94,7 @@ function CategoryForm({ category, onSave, onCancel }: CategoryFormProps) {
           </div>
           <div>
             <Label htmlFor="cat-icon">Icon</Label>
-            <Input
-              id="cat-icon"
-              name="icon"
-              value={formData.icon ?? ""}
-              onChange={handleChange}
-            />
+            <IconSelector value={formData.icon ?? ""} onChange={handleIconChange} />
           </div>
           <div>
             <Label htmlFor="cat-desc">Description</Label>
@@ -200,7 +205,6 @@ export default function CategoryManager() {
     await loadData(type)
   }
 
-  // Deletion with reassignment dialog
   const performDelete = async (cat: Category, replaceId?: string) => {
     try {
       const url = replaceId
@@ -232,7 +236,6 @@ export default function CategoryManager() {
     }
   }
 
-  // Open the delete confirmation dialog
   const openDeleteDialog = (cat: Category) => {
     setDeleting(cat)
     setReplacement("")

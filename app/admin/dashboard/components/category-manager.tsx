@@ -42,7 +42,7 @@ export interface Category {
 }
 
 export interface CategoryListProps {
-  categories: Category[]
+  categories?: Category[] | null // Defensive!
   type: CategoryType
   onEdit: (category: Category) => void
   onDelete: (category: Category) => void
@@ -109,7 +109,8 @@ function CategoryCard({
           )}
         </div>
         <div className="flex items-center gap-3">
-          <span>Status:{" "}
+          <span>
+            Status:{" "}
             <Switch
               checked={category.isActive}
               onCheckedChange={(v) => onToggleStatus(category.id, !!v)}
@@ -134,12 +135,14 @@ export default function CategoryList({
   toggleSelect,
   toggleSelectAll,
 }: CategoryListProps) {
+  // Defensive: always an array, never breaks if categories is missing/null/undefined
+  const categoryArray = Array.isArray(categories) ? categories : []
   const [items, setItems] = useState<Category[]>([])
   const [width, setWidth] = useState<number>(1024) // screen size for mobile/table
 
   useEffect(() => {
-    setItems([...categories].sort((a, b) => a.order - b.order))
-  }, [categories])
+    setItems([...categoryArray].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)))
+  }, [categoryArray])
 
   useEffect(() => {
     // Simple resize handler to toggle mobile/table
@@ -167,7 +170,6 @@ export default function CategoryList({
       })
     } catch (err) {
       toast("Failed to reorder categories")
-      // console.error("Failed to reorder categories", err)
     }
   }
 
@@ -175,6 +177,11 @@ export default function CategoryList({
 
   // --- Responsive: Card view for mobile (sm breakpoint < 640px)
   if (width < 640) {
+    if (items.length === 0) {
+      return (
+        <div className="p-6 text-center text-gray-400">No categories found.</div>
+      )
+    }
     return (
       <div>
         <div className="flex items-center gap-2 mb-2">
@@ -201,6 +208,12 @@ export default function CategoryList({
   }
 
   // --- Table view for desktop/tablet
+  if (items.length === 0) {
+    return (
+      <div className="p-6 text-center text-gray-400">No categories found.</div>
+    )
+  }
+
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <SortableContext items={items.map((c) => c.id)} strategy={verticalListSortingStrategy}>

@@ -206,14 +206,14 @@ export async function generateRssFeed(): Promise<string> {
         return {
           title: video.title,
           description: truncateDescription(stripHtml(video.description)),
-          link: getCanonicalUrl(`/watch/${video.slug || video.id}`),
+          link: getCanonicalUrl(`/watch/${video.slug}`), // Use only slug, never fallback to id
           pubDate: formatRSSDate(video.publishedAt),
           // Multi-category support: prefer first .categories[] or fallback to .category
           category: Array.isArray(video.categories) && video.categories.length > 0
             ? video.categories[0]
             : video.category || "General",
           author: SITE_NAME,
-          guid: getCanonicalUrl(`/watch/${video.slug || video.id}`),
+          guid: getCanonicalUrl(`/watch/${video.slug}`), // Use only slug
           enclosure,
         };
       })

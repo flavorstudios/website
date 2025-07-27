@@ -5,7 +5,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 
-// Import the Category type (adjust the import if the path is different)
+// Unified Category type
 import type { Category } from "@/types/category";
 
 const CATEGORIES_PATH = path.join(process.cwd(), "content-data", "categories.json");
@@ -33,17 +33,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     // Find and update category by ID (both blog & watch arrays)
     let found = false;
     ["blog", "watch"].forEach((type) => {
-      json.CATEGORIES[type] = json.CATEGORIES[type].map((cat: Category) => {
-        if (cat.id === params.id) {
+      json.CATEGORIES[type] = json.CATEGORIES[type].map((cat: Record<string, unknown>) => {
+        if ((cat as { id: string }).id === params.id) {
           found = true;
           // Only destructure ...rest, avoid unused `name`
-          const { /* name, */ ...rest } = data;
+          const { name: _name, ...rest } = data;
           return {
             ...cat,
             ...rest,
             tooltip: rest.tooltip ?? cat.tooltip,
-            id: cat.id,
-            title: rest.title ?? cat.title,
+            id: (cat as { id: string }).id,
+            title: rest.title ?? (cat as { title?: string }).title,
           };
         }
         return cat;
@@ -58,9 +58,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     // Return updated category with `name` for dashboard
     const updated = [...json.CATEGORIES.blog, ...json.CATEGORIES.watch].find(
-      (cat: Category) => cat.id === params.id
+      (cat: Record<string, unknown>) => (cat as { id: string }).id === params.id
     );
-    return NextResponse.json({ category: { ...updated, name: updated.title } });
+    return NextResponse.json({ category: { ...updated, name: (updated as { title?: string }).title } });
   } catch (error: unknown) {
     // Use type guard for error
     const message = error instanceof Error ? error.message : "Failed to update category";
@@ -82,7 +82,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     let removed = false;
     ["blog", "watch"].forEach((type) => {
       const origLength = json.CATEGORIES[type].length;
-      json.CATEGORIES[type] = json.CATEGORIES[type].filter((cat: Category) => cat.id !== params.id);
+      json.CATEGORIES[type] = json.CATEGORIES[type].filter(
+        (cat: Record<string, unknown>) => (cat as { id: string }).id !== params.id
+      );
       if (json.CATEGORIES[type].length !== origLength) {
         removed = true;
       }

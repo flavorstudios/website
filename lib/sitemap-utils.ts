@@ -1,5 +1,8 @@
 // lib/sitemap-utils.ts
 
+import type { BlogPost } from "./content-store";
+import type { Video } from "./content-store";
+
 export interface SitemapUrl {
   url: string;
   priority: string; // e.g. "0.5", "1.0"
@@ -147,7 +150,3 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
 
   return dynamicPages;
 }
-
-// --- Add these imports at the top if not already present: ---
-import type { BlogPost } from "./content-store";
-import type { Video } from "./content-store";

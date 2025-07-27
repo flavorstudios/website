@@ -26,7 +26,7 @@ export function formatPublicBlog(blog: BlogPost) {
     views: blog.views,
     seoTitle: blog.seoTitle,
     seoDescription: blog.seoDescription,
-    commentCount: typeof blog.commentCount === "number" ? blog.commentCount : 0, // Codex: expose comment count
+    commentCount: typeof blog.commentCount === "number" ? blog.commentCount : 0,
   };
 }
 
@@ -39,7 +39,7 @@ export function formatPublicVideo(video: Video) {
   return {
     id: video.id,
     title: video.title,
-    slug: video.slug || video.id,
+    slug: video.slug, // Use slug only; no fallback to id
     youtubeId: video.youtubeId,
     thumbnail: video.thumbnail,
     description: video.description,

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import CategoryList, { CategoryType } from "./CategoryList"
-import type { Category } from "@/types/category"         // <--- Unified type import
+import type { Category } from "@/types/category"
 import CategoryBulkActions from "./CategoryBulkActions"
 import IconSelector from "./IconSelector"
 import { Input } from "@/components/ui/input"
@@ -206,7 +206,12 @@ export default function CategoryManager() {
     await loadData(type)
   }
 
-  const performDelete = async (cat: Category, replaceId?: string) => {
+  // --- Perform Delete (with refresh control for bulk ops)
+  const performDelete = async (
+    cat: Category,
+    replaceId?: string,
+    refresh = true
+  ) => {
     try {
       const url = replaceId
         ? `/api/admin/categories/${cat.id}/reassign`
@@ -227,7 +232,9 @@ export default function CategoryManager() {
             onClick: () => restoreCategory(cat),
           },
         })
-        await loadData(type)
+        if (refresh) {
+          await loadData(type)
+        }
       } else {
         const d = await res.json()
         toast(d.error || "Delete failed")
@@ -288,10 +295,11 @@ export default function CategoryManager() {
     ids.forEach((id) => toggleStatus(id, false))
     setSelected(new Set())
   }
+  // --- Bulk Delete: only reload once at the end
   const bulkDelete = async (ids: string[]) => {
     if (!confirm(`Delete ${ids.length} categor${ids.length === 1 ? "y" : "ies"}?`)) return
     for (const cat of categories.filter((c) => ids.includes(c.id))) {
-      await performDelete(cat)
+      await performDelete(cat, undefined, false)
     }
     setSelected(new Set())
     await loadData(type)

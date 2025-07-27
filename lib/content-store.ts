@@ -27,6 +27,7 @@ export interface BlogPost {
 
 export interface Video {
   id: string;
+  slug: string; // <--- ADDED
   title: string;
   description: string;
   youtubeId: string;
@@ -86,6 +87,7 @@ export const BlogPostSchema = z.object({
 
 export const VideoSchema = z.object({
   id: z.string(),
+  slug: z.string(), // <--- ADDED
   title: z.string(),
   description: z.string(),
   youtubeId: z.string(),
@@ -206,7 +208,7 @@ export const blogStore = {
   },
 };
 
-// --- Video Store (unchanged) ---
+// --- Video Store ---
 export const videoStore = {
   async getAll(): Promise<Video[]> {
     const snap = await adminDb.collection("videos").orderBy("createdAt", "desc").get();

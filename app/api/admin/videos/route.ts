@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
     const formattedVideos = videos.map((video) => ({
       id: video.id,
-      slug: video.slug || video.id,
+      slug: video.slug, // <--- Always use slug, no fallback
       title: video.title,
       description: video.description,
       youtubeId: video.youtubeId,
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Failed to fetch videos",
-        videos: [], // Return empty array as fallback
+        videos: [],
       },
       { status: 500 },
     )
@@ -49,10 +49,10 @@ export async function POST(request: NextRequest) {
     const videoData = await request.json()
 
     // Validate required fields
-    if (!videoData.title || !videoData.youtubeId) {
+    if (!videoData.title || !videoData.youtubeId || !videoData.slug) {
       return NextResponse.json(
         {
-          error: "Title and YouTube ID are required",
+          error: "Title, slug and YouTube ID are required",
         },
         { status: 400 },
       )
@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
 
     const video = await videoStore.create({
       title: videoData.title,
+      slug: videoData.slug, // <--- Save the slug
       description: videoData.description || "",
       youtubeId: videoData.youtubeId,
       thumbnail: videoData.thumbnail || `https://img.youtube.com/vi/${videoData.youtubeId}/maxresdefault.jpg`,

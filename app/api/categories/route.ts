@@ -1,17 +1,7 @@
 // app/api/categories/route.ts
 
 import { NextResponse, type NextRequest } from "next/server";
-
-// Define Category interface if not already imported elsewhere.
-// If you have a shared type, import it instead.
-interface Category {
-  isActive: boolean
-  order?: number
-  title: string
-  postCount?: number
-  tooltip?: string
-  [key: string]: unknown  // For forward compatibility
-}
+import type { Category } from "@/types/category"; // Unified import
 
 // Helper to format categories (works for both blog & watch arrays)
 function format(arr: Category[]) {

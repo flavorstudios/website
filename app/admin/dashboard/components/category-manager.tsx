@@ -125,7 +125,7 @@ function CategoryCard({
 }
 
 // --- Main Table/List ---
-export default function CategoryList({
+export function CategoryManager({
   categories,
   type,
   onEdit,
@@ -262,7 +262,6 @@ interface SortableRowProps {
   onDelete: (category: Category) => void
   onToggleStatus: (id: string, isActive: boolean) => void
   toggleSelect: (id: string) => void
-  // dndProps REMOVED (was unused)
 }
 
 function SortableRow({

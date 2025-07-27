@@ -1,7 +1,7 @@
 // app/watch/[slug]/page.tsx
 
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL } from "@/lib/constants"; // <- removed SITE_DEFAULT_IMAGE here
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,7 +47,6 @@ function toIsoDuration(duration: string): string | undefined {
 }
 
 // --- Fetch video utility ---
-// *** ONLY THIS FUNCTION IS UPDATED! ***
 async function getVideo(slug: string): Promise<Video | null> {
   try {
     const response = await fetch(
@@ -59,12 +58,11 @@ async function getVideo(slug: string): Promise<Video | null> {
       return null;
     }
     const data = await response.json();
-    // --- Codex fix: Accept array or { videos: [...] } shape
     const videos: Video[] = Array.isArray(data) ? data : data.videos || [];
+    // === Only match by slug, never by id ===
     return (
       videos.find(
-        (video) =>
-          (video.slug === slug || video.id === slug) && video.status === "published"
+        (video) => video.slug === slug && video.status === "published"
       ) || null
     );
   } catch (error) {
@@ -111,7 +109,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     });
   }
 
-  const canonicalUrl = getCanonicalUrl(`/watch/${video.slug || params.slug}`);
+  const canonicalUrl = getCanonicalUrl(`/watch/${video.slug}`);
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
   const seoTitle = `${video.title} – Watch | ${SITE_NAME}`;
   const seoDescription =
@@ -121,7 +119,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return getMetadata({
     title: seoTitle,
     description: seoDescription,
-    path: `/watch/${video.slug || params.slug}`,
+    path: `/watch/${video.slug}`,
     robots: "index,follow",
     openGraph: {
       title: seoTitle,
@@ -154,7 +152,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
     notFound();
   }
 
-  const canonicalUrl = getCanonicalUrl(`/watch/${video.slug || params.slug}`);
+  const canonicalUrl = getCanonicalUrl(`/watch/${video.slug}`);
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
   const embedUrl = `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`;
   const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtubeId}`;
@@ -163,7 +161,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
   // --- JSON-LD VideoObject Schema ---
   const schema = getSchema({
     type: "VideoObject",
-    path: `/watch/${video.slug || params.slug}`,
+    path: `/watch/${video.slug}`,
     name: video.title,
     description: video.description || "No description available.",
     thumbnailUrl: [thumbnailUrl],

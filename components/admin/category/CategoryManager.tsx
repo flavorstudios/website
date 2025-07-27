@@ -121,6 +121,8 @@ export default function CategoryManager() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [showCreate, setShowCreate] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
+  const [deleting, setDeleting] = useState<Category | null>(null)
+  const [replacement, setReplacement] = useState<string>("")
   const PER_PAGE = 10
 
   useEffect(() => {
@@ -197,15 +199,23 @@ export default function CategoryManager() {
     await loadData(type)
   }
 
-  const deleteCategory = async (cat: Category) => {
-    if (!confirm(`Delete ${cat.name}?`)) return
+  // Updated: Advanced deletion with reassignment dialog
+  const performDelete = async (cat: Category, replaceId?: string) => {
     try {
-      const res = await fetch(`/api/admin/categories/${cat.id}`, {
-        method: "DELETE",
+      const url = replaceId
+        ? `/api/admin/categories/${cat.id}/reassign`
+        : `/api/admin/categories/${cat.id}`
+      const options: RequestInit = {
+        method: replaceId ? "POST" : "DELETE",
         credentials: "include",
-      })
+      }
+      if (replaceId) {
+        options.headers = { "Content-Type": "application/json" }
+        options.body = JSON.stringify({ newCategoryId: replaceId })
+      }
+      const res = await fetch(url, options)
       if (res.ok) {
-        toast("Category deleted", {
+        toast(replaceId ? "Category reassigned" : "Category deleted", {
           action: {
             label: "Undo",
             onClick: () => restoreCategory(cat),
@@ -219,6 +229,20 @@ export default function CategoryManager() {
     } catch {
       toast("Delete failed")
     }
+  }
+
+  // Open the delete confirmation dialog (instead of browser confirm)
+  const openDeleteDialog = (cat: Category) => {
+    setDeleting(cat)
+    setReplacement("")
+  }
+
+  // Handle the final delete with/without reassignment
+  const confirmDeleteCategory = async () => {
+    if (!deleting) return
+    await performDelete(deleting, replacement || undefined)
+    setDeleting(null)
+    setReplacement("")
   }
 
   const toggleStatus = async (id: string, isActive: boolean) => {
@@ -260,11 +284,14 @@ export default function CategoryManager() {
     ids.forEach((id) => toggleStatus(id, false))
     setSelected(new Set())
   }
-  const bulkDelete = (ids: string[]) => {
-    categories
-      .filter((c) => ids.includes(c.id))
-      .forEach((c) => deleteCategory(c))
+  // Updated: use advanced delete dialog for each category in bulk delete
+  const bulkDelete = async (ids: string[]) => {
+    if (!confirm(`Delete ${ids.length} categor${ids.length === 1 ? "y" : "ies"}?`)) return
+    for (const cat of categories.filter((c) => ids.includes(c.id))) {
+      await performDelete(cat)
+    }
     setSelected(new Set())
+    await loadData(type)
   }
 
   const filtered = categories.filter((c) =>
@@ -339,7 +366,7 @@ export default function CategoryManager() {
         categories={paginated}
         type={type}
         onEdit={(cat) => setEditing(cat)}
-        onDelete={deleteCategory}
+        onDelete={openDeleteDialog}
         onToggleStatus={toggleStatus}
         selected={selected}
         toggleSelect={toggleSelect}
@@ -359,6 +386,51 @@ export default function CategoryManager() {
           onSave={(data) => updateCategory(editing.id, data)}
           onCancel={() => setEditing(null)}
         />
+      )}
+      {/* Delete dialog with reassignment support */}
+      {deleting && (
+        <Dialog open onOpenChange={() => setDeleting(null)}>
+          <DialogContent className="max-w-md space-y-4">
+            <DialogHeader>
+              <DialogTitle>Delete Category</DialogTitle>
+            </DialogHeader>
+            <p>Are you sure you want to delete {deleting.name}?</p>
+            {deleting.postCount && deleting.postCount > 0 && (
+              <div className="space-y-2">
+                <Label>Reassign posts/videos to:</Label>
+                <Select value={replacement} onValueChange={setReplacement}>
+                  <SelectTrigger aria-label="Replacement category">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories
+                      .filter((c) => c.id !== deleting.id)
+                      .map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setDeleting(null)}>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={
+                  !!(deleting.postCount && deleting.postCount > 0 && !replacement)
+                }
+                onClick={confirmDeleteCategory}
+              >
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   )

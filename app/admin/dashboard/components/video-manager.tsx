@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState, useEffect } from "react";
-import Image from "next/image"; // Lint: For optimized image rendering in Next.js
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Info, Eye, Pencil, Trash2, Upload, Archive } from "lucide-react";
 import { VideoForm } from "@/components/ui/video-form";
+import { cn } from "@/lib/utils";
 
 // Types
 interface Category {
@@ -115,7 +116,7 @@ function VideoStatusBadge({ status }: { status: Video["status"] }) {
   return <Badge className={styles[status]}>{status}</Badge>;
 }
 
-// Bulk Actions
+// Bulk Actions (Sticky on mobile)
 function VideoBulkActions({
   count,
   onPublish,
@@ -129,16 +130,21 @@ function VideoBulkActions({
 }) {
   if (count === 0) return null;
   return (
-    <div className="flex items-center gap-2 my-2">
-      <span className="text-sm text-muted-foreground mr-2">{count} selected</span>
+    <div className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 border-t bg-white p-2 shadow sm:static sm:justify-start sm:border-0 sm:p-0 sm:shadow-none">
+      <span className="mr-2 text-sm text-muted-foreground">{count} selected</span>
       <Button variant="outline" size="sm" onClick={onPublish}>
-        <Upload className="h-4 w-4 mr-1" /> Publish
+        <Upload className="mr-1 h-4 w-4" /> Publish
       </Button>
       <Button variant="outline" size="sm" onClick={onUnpublish}>
-        <Archive className="h-4 w-4 mr-1" /> Unpublish
+        <Archive className="mr-1 h-4 w-4" /> Unpublish
       </Button>
-      <Button variant="outline" size="sm" className="text-red-600" onClick={onDelete}>
-        <Trash2 className="h-4 w-4 mr-1" /> Delete
+      <Button
+        variant="outline"
+        size="sm"
+        className="text-red-600"
+        onClick={onDelete}
+      >
+        <Trash2 className="mr-1 h-4 w-4" /> Delete
       </Button>
     </div>
   );
@@ -480,28 +486,8 @@ export function VideoManager() {
     setCurrentPage(1);
   }, [searchTerm, filterCategory, filterStatus, sortBy]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <Info className="h-12 w-12 text-red-500 mb-4" />
-        <p className="text-lg text-gray-800">{error}</p>
-        <Button onClick={loadData} className="mt-6" aria-label="Retry loading">
-          Retry
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
+    <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}>
       {/* Header */}
       <div className="flex justify-between items-center flex-wrap gap-2">
         <div>
@@ -540,7 +526,7 @@ export function VideoManager() {
           className="w-full sm:w-48"
         />
         <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val as "all" | "draft" | "published" | "unlisted")}>
-          <SelectTrigger className="w-40" aria-label="Status">
+          <SelectTrigger className="w-full sm:w-40" aria-label="Status">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -551,7 +537,7 @@ export function VideoManager() {
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="w-40" aria-label="Sort By">
+          <SelectTrigger className="w-full sm:w-40" aria-label="Sort By">
             <SelectValue placeholder="Sort By" />
           </SelectTrigger>
           <SelectContent>
@@ -562,7 +548,7 @@ export function VideoManager() {
         </Select>
       </div>
 
-      {/* Bulk Actions */}
+      {/* Bulk Actions (sticky) */}
       <VideoBulkActions
         count={selected.size}
         onPublish={() => handleBulk("publish")}
@@ -571,7 +557,19 @@ export function VideoManager() {
       />
 
       {/* Table or Empty State */}
-      {paginatedVideos.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <Info className="h-12 w-12 text-red-500 mb-4" />
+          <p className="text-lg text-gray-800">{error}</p>
+          <Button onClick={loadData} className="mt-6" aria-label="Retry loading">
+            Retry
+          </Button>
+        </div>
+      ) : paginatedVideos.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-gray-400">
           <svg
             width="56"

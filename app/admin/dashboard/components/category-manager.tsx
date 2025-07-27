@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { GripVertical, Edit, Trash2 } from "lucide-react"
+import CategoryBulkActions from "@/components/admin/category/CategoryBulkActions"
 import {
   DndContext,
   closestCenter,
@@ -50,6 +51,9 @@ export interface CategoryListProps {
   selected: Set<string>
   toggleSelect: (id: string) => void
   toggleSelectAll: (checked: boolean) => void
+  onEnableSelected?: (ids: string[]) => void
+  onDisableSelected?: (ids: string[]) => void
+  onDeleteSelected?: (ids: string[]) => void
 }
 
 // --- Responsive Card for Mobile ---
@@ -134,6 +138,9 @@ export function CategoryManager({
   selected,
   toggleSelect,
   toggleSelectAll,
+  onEnableSelected,
+  onDisableSelected,
+  onDeleteSelected,
 }: CategoryListProps) {
   const categoryArray = useMemo(() => Array.isArray(categories) ? categories : [], [categories])
   const [items, setItems] = useState<Category[]>([])
@@ -182,13 +189,21 @@ export function CategoryManager({
     }
     return (
       <div>
-        <div className="flex items-center gap-2 mb-2">
-          <Checkbox
-            checked={allSelected}
-            onCheckedChange={(v) => toggleSelectAll(!!v)}
-            aria-label="Select all categories"
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={allSelected}
+              onCheckedChange={(v) => toggleSelectAll(!!v)}
+              aria-label="Select all categories"
+            />
+            <span className="text-xs">Select all</span>
+          </div>
+          <CategoryBulkActions
+            count={selected.size}
+            onPublish={() => onEnableSelected?.(Array.from(selected))}
+            onUnpublish={() => onDisableSelected?.(Array.from(selected))}
+            onDelete={() => onDeleteSelected?.(Array.from(selected))}
           />
-          <span className="text-xs">Select all</span>
         </div>
         {items.map((cat) => (
           <CategoryCard
@@ -213,45 +228,55 @@ export function CategoryManager({
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={items.map((c) => c.id)} strategy={verticalListSortingStrategy}>
-        <div className="overflow-x-auto border rounded-lg">
-          <table className="min-w-full bg-white text-sm">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-500 sticky top-0 z-10">
-              <tr>
-                <th className="p-3 w-8">
-                  <Checkbox
-                    checked={allSelected}
-                    onCheckedChange={(v) => toggleSelectAll(!!v)}
-                    aria-label="Select all categories"
+    <div>
+      <div className="mb-2 flex justify-end">
+        <CategoryBulkActions
+          count={selected.size}
+          onPublish={() => onEnableSelected?.(Array.from(selected))}
+          onUnpublish={() => onDisableSelected?.(Array.from(selected))}
+          onDelete={() => onDeleteSelected?.(Array.from(selected))}
+        />
+      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+          <div className="overflow-x-auto border rounded-lg">
+            <table className="min-w-full bg-white text-sm">
+              <thead className="bg-gray-50 text-xs uppercase text-gray-500 sticky top-0 z-10">
+                <tr>
+                  <th className="p-3 w-8">
+                    <Checkbox
+                      checked={allSelected}
+                      onCheckedChange={(v) => toggleSelectAll(!!v)}
+                      aria-label="Select all categories"
+                    />
+                  </th>
+                  <th className="p-3 w-8" />
+                  <th className="p-3 text-left">Name</th>
+                  <th className="p-3 text-left">Slug</th>
+                  <th className="p-3 text-left">Description</th>
+                  <th className="p-3 text-center">Status</th>
+                  <th className="p-3 text-right">Posts</th>
+                  <th className="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((cat) => (
+                  <SortableRow
+                    key={cat.id}
+                    category={cat}
+                    selected={selected.has(cat.id)}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onToggleStatus={onToggleStatus}
+                    toggleSelect={toggleSelect}
                   />
-                </th>
-                <th className="p-3 w-8" />
-                <th className="p-3 text-left">Name</th>
-                <th className="p-3 text-left">Slug</th>
-                <th className="p-3 text-left">Description</th>
-                <th className="p-3 text-center">Status</th>
-                <th className="p-3 text-right">Posts</th>
-                <th className="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((cat) => (
-                <SortableRow
-                  key={cat.id}
-                  category={cat}
-                  selected={selected.has(cat.id)}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onToggleStatus={onToggleStatus}
-                  toggleSelect={toggleSelect}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </SortableContext>
-    </DndContext>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SortableContext>
+      </DndContext>
+    </div>
   )
 }
 

@@ -1,0 +1,26 @@
+{
+  "CATEGORIES": {
+    "blog": [
+      {
+        "id": "sample-blog-category",
+        "slug": "general",
+        "title": "General",
+        "description": "Sample blog category",
+        "isActive": true,
+        "order": 1,
+        "postCount": 0
+      }
+    ],
+    "watch": [
+      {
+        "id": "sample-video-category",
+        "slug": "videos",
+        "title": "Videos",
+        "description": "Sample video category",
+        "isActive": true,
+        "order": 1,
+        "postCount": 0
+      }
+    ]
+  }
+}

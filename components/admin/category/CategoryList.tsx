@@ -24,24 +24,9 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import type { Category } from "@/types/category" // <-- Unified import
 
 export type CategoryType = "BLOG" | "VIDEO"
-
-export interface Category {
-  id: string
-  name: string
-  slug: string
-  type: CategoryType
-  description?: string | null
-  tooltip?: string | null
-  color?: string | null
-  icon?: string | null
-  order: number
-  isActive: boolean
-  createdAt?: string
-  updatedAt?: string
-  postCount?: number | null
-}
 
 export interface CategoryListProps {
   categories: Category[]

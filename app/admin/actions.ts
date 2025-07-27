@@ -3,7 +3,7 @@
 import { blogStore, videoStore, commentStore, pageStore } from "@/lib/content-store"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { requireAdminAction } from "@/lib/admin-auth" // <-- Added
+import { requireAdminAction } from "@/lib/admin-auth"
 
 // Blog actions
 export async function createBlogPost(formData: FormData) {
@@ -77,6 +77,7 @@ export async function createVideo(formData: FormData) {
   if (!(await requireAdminAction())) throw new Error("Unauthorized")
 
   const title = formData.get("title") as string
+  const slug = formData.get("slug") as string // <-- ADDED
   const description = formData.get("description") as string
   const youtubeId = formData.get("youtubeId") as string
   const thumbnail = formData.get("thumbnail") as string
@@ -91,6 +92,7 @@ export async function createVideo(formData: FormData) {
 
   await videoStore.create({
     title,
+    slug, // <-- ADDED
     description,
     youtubeId,
     thumbnail,
@@ -109,6 +111,7 @@ export async function updateVideo(id: string, formData: FormData) {
 
   const updates = {
     title: formData.get("title") as string,
+    slug: formData.get("slug") as string, // <-- ADDED
     description: formData.get("description") as string,
     youtubeId: formData.get("youtubeId") as string,
     thumbnail: formData.get("thumbnail") as string,

@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/hooks/use-toast"
 import { Pagination } from "@/app/admin/dashboard/components/blog-manager"
+import { cn } from "@/lib/utils"
 
 interface CategoryFormProps {
   category?: Partial<Category>
@@ -199,7 +200,7 @@ export default function CategoryManager() {
     await loadData(type)
   }
 
-  // Updated: Advanced deletion with reassignment dialog
+  // Deletion with reassignment dialog
   const performDelete = async (cat: Category, replaceId?: string) => {
     try {
       const url = replaceId
@@ -231,13 +232,12 @@ export default function CategoryManager() {
     }
   }
 
-  // Open the delete confirmation dialog (instead of browser confirm)
+  // Open the delete confirmation dialog
   const openDeleteDialog = (cat: Category) => {
     setDeleting(cat)
     setReplacement("")
   }
 
-  // Handle the final delete with/without reassignment
   const confirmDeleteCategory = async () => {
     if (!deleting) return
     await performDelete(deleting, replacement || undefined)
@@ -284,7 +284,6 @@ export default function CategoryManager() {
     ids.forEach((id) => toggleStatus(id, false))
     setSelected(new Set())
   }
-  // Updated: use advanced delete dialog for each category in bulk delete
   const bulkDelete = async (ids: string[]) => {
     if (!confirm(`Delete ${ids.length} categor${ids.length === 1 ? "y" : "ies"}?`)) return
     for (const cat of categories.filter((c) => ids.includes(c.id))) {
@@ -323,11 +322,11 @@ export default function CategoryManager() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className={cn("space-y-4", selected.size > 0 && "pb-20 sm:pb-4")}>
       <div className="flex flex-wrap justify-between gap-2">
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap w-full sm:w-auto">
           <Select value={type} onValueChange={(v) => setType(v as CategoryType)}>
-            <SelectTrigger className="w-32" aria-label="Type">
+            <SelectTrigger className="w-full sm:w-32" aria-label="Type">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -339,10 +338,10 @@ export default function CategoryManager() {
             placeholder="Search..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-40"
+            className="w-full sm:w-40"
           />
           <Select value={sortBy} onValueChange={(v) => setSortBy(v)}>
-            <SelectTrigger className="w-32" aria-label="Sort By">
+            <SelectTrigger className="w-full sm:w-32" aria-label="Sort By">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
@@ -106,8 +106,9 @@ export default function CategoryList({
         <div className="p-6 text-center text-gray-400">No categories found.</div>
       )
     }
+    // pb-20 if any selected to avoid overlap with sticky actions
     return (
-      <div>
+      <div className={selected.size > 0 ? "pb-20" : ""}>
         <div className="flex items-center gap-2 mb-2">
           <Checkbox
             checked={allSelected}
@@ -291,8 +292,13 @@ function SortableRow({
           aria-label={`Select ${category.name}`}
         />
       </td>
-      <td className="p-3 cursor-grab" {...attributes} {...listeners} aria-label="Drag handle">
-        <GripVertical className="h-4 w-4 text-gray-400" />
+      <td
+        className="p-3 cursor-grab touch-none"
+        {...attributes}
+        {...listeners}
+        aria-label="Drag handle"
+      >
+        <GripVertical className="h-6 w-6 text-gray-400 sm:h-4 sm:w-4" />
       </td>
       <td className="p-3 flex items-center gap-2">
         <span

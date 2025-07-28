@@ -35,6 +35,7 @@ export interface Comment {
   content: string
   status: "pending" | "approved" | "rejected"
   createdAt: string
+  flagged?: boolean        // <-- ADDED for moderation support
 }
 
 export interface PageContent {

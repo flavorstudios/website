@@ -1,6 +1,7 @@
 "use server"
 
-import { blogStore, videoStore, commentStore, pageStore } from "@/lib/content-store"
+import { blogStore, videoStore, pageStore } from "@/lib/content-store"
+import { commentStore } from "@/lib/comment-store"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { requireAdminAction } from "@/lib/admin-auth"

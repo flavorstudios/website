@@ -98,6 +98,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
       ip: ip || "",
       userAgent: userAgent || "",
+      flagged: isFlagged, // <-- Persist flagged status!
       status,
       scores: scores || {
         toxicity: null,

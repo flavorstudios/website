@@ -245,11 +245,11 @@ export async function logAdminAuditFailure(
 
 /**
  * Creates a new admin session and refresh token for the given UID.
- * Returns the short-lived session cookie and the newly issued refresh token.
+ * Sets the session and refresh token cookies, and returns the new refresh token.
  */
 export async function createRefreshSession(
   uid: string,
-): Promise<{ sessionCookie: string; refreshToken: string }> {
+): Promise<string> {
   try {
     const customToken = await adminAuth.createCustomToken(uid);
 
@@ -283,7 +283,24 @@ export async function createRefreshSession(
       .doc(refreshToken)
       .set({ uid, createdAt: new Date().toISOString() });
 
-    return { sessionCookie, refreshToken };
+    // Set cookies (server context)
+    const cookieStore = cookies();
+    cookieStore.set("admin-session", sessionCookie, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 2,
+      path: "/",
+    });
+    cookieStore.set("admin-refresh-token", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+    });
+
+    return refreshToken;
   } catch (err) {
     logError("admin-auth:createRefreshSession", err);
     throw err;

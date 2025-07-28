@@ -15,9 +15,10 @@ interface AdminHeaderProps {
 export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
-      {/* flex-wrap and responsive gap for mobile-friendliness */}
       <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
-        <div className="flex items-center gap-4">
+        {/* Left Section: Sidebar toggle, Logo, Search */}
+        <div className="flex items-center gap-4 flex-1 min-w-0">
+          {/* Sidebar button (mobile only) */}
           <Button
             variant="ghost"
             size="sm"
@@ -28,18 +29,38 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
             <Menu className="h-5 w-5" />
           </Button>
 
-          <div className="hidden md:flex items-center gap-4">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Flavor Studios Admin
-            </h1>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input placeholder="Search..." className="pl-10 w-64" />
+          {/* Logo/title (always visible) */}
+          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap">
+            Flavor Studios Admin
+          </h1>
+
+          {/* Desktop search input */}
+          <div className="hidden md:block flex-1 max-w-xs ml-4">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search..."
+                className="pl-10 w-full"
+                aria-label="Search"
+              />
             </div>
           </div>
         </div>
 
+        {/* Right Section: Actions, Avatar, Logout */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+          {/* Mobile search input (below md) */}
+          <div className="w-full md:hidden order-2 flex-1">
+            <div className="relative w-full mt-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search..."
+                className="pl-10 w-full"
+                aria-label="Search"
+              />
+            </div>
+          </div>
+
           <Button
             variant="outline"
             size="sm"
@@ -52,6 +73,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
 
           <NotificationBell />
 
+          {/* Avatar and Admin info */}
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
               <AvatarImage src="/admin-avatar.jpg" />
@@ -65,6 +87,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
             </div>
           </div>
 
+          {/* Logout button */}
           <Button
             variant="ghost"
             size="sm"

@@ -302,3 +302,7 @@ export const pageStore = {
     return entry;
   },
 };
+
+// --- Codex: re-export commentStore and systemStore for central access ---
+export { commentStore } from "./comment-store";
+export { systemStore } from "./system-store";

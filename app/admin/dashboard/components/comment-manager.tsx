@@ -22,6 +22,7 @@ interface Comment {
   status: "pending" | "approved" | "spam" | "trash"
   createdAt: string
   ip: string
+  flagged?: boolean // <-- Added for flagged status
 }
 
 export function CommentManager() {

@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createRefreshSession } from "@/lib/admin-auth";
-import { adminDb, adminAuth } from "@/lib/firebase-admin";
+import { adminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 
 /**
@@ -35,9 +35,8 @@ export async function POST(req: NextRequest) {
     }
     const { uid } = doc.data() as { uid: string };
 
-    // Create a new custom token, then session and refresh
-    const customToken = await adminAuth.createCustomToken(uid);
-    const { sessionCookie, refreshToken: newRefreshToken } = await createRefreshSession(customToken);
+    // Create new session and refresh token using the Codex helper
+    const { sessionCookie, refreshToken: newRefreshToken } = await createRefreshSession(uid);
 
     // Delete the old refresh token (one-time use)
     await adminDb.collection("refreshTokens").doc(refreshToken).delete();

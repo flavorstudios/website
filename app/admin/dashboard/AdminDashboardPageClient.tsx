@@ -8,7 +8,6 @@ import { DashboardOverview } from "./components/dashboard-overview"
 import { BlogManager } from "./components/blog-manager"
 import { VideoManager } from "./components/video-manager"
 import { CommentManager } from "./components/comment-manager"
-// REMOVED: import { PageCustomizer } from "./components/page-customizer"
 import { SystemTools } from "./components/system-tools"
 import { UserRoleManager } from "./components/user-role-manager"
 import { AdminHeader } from "./components/admin-header"
@@ -30,9 +29,9 @@ export default function AdminDashboardPageClient({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [error, setError] = useState("")
-  const pathname = usePathname() // <-- NEW: Next.js App Router current route
+  const pathname = usePathname() // Current Next.js App Router path
 
-  // --- Initialization on first load ---
+  // --- On mount, mark as ready ---
   useEffect(() => {
     setMounted(true)
     fetch("/api/admin/init", { method: "POST" }).catch((err) => {
@@ -40,7 +39,7 @@ export default function AdminDashboardPageClient({
     })
   }, [])
 
-  // --- Section navigation event ---
+  // --- Listen for section navigation events (optional) ---
   useEffect(() => {
     const handleNavigation = (event: Event) => {
       const customEvent = event as CustomEvent<string>
@@ -50,9 +49,9 @@ export default function AdminDashboardPageClient({
     return () => window.removeEventListener("admin-navigate", handleNavigation)
   }, [])
 
-  // --- Sync activeSection with current route (for sidebar/content consistency) ---
+  // --- Keep activeSection in sync with the current route ---
   useEffect(() => {
-    // Map route paths to section IDs
+    // Map sidebar routes to their section IDs
     const map = [
       { id: "overview", href: "/admin/dashboard" },
       { id: "blogs", href: "/admin/dashboard/blog-posts" },
@@ -70,9 +69,9 @@ export default function AdminDashboardPageClient({
     if (matched && matched.id !== activeSection) {
       setActiveSection(matched.id)
     }
-  }, [pathname]) // <-- runs instantly on route change
+  }, [pathname])
 
-  // --- Data refresh interval ---
+  // --- Refresh data periodically ---
   useEffect(() => {
     const interval = setInterval(() => {
       window.dispatchEvent(new CustomEvent("admin-refresh"))
@@ -80,7 +79,7 @@ export default function AdminDashboardPageClient({
     return () => clearInterval(interval)
   }, [])
 
-  // --- Responsive sidebar (hide on small screens) ---
+  // --- Sidebar responsive toggle ---
   useEffect(() => {
     if (typeof window === "undefined") return
     const handleResize = () => {
@@ -92,13 +91,13 @@ export default function AdminDashboardPageClient({
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // --- Logout: Clear Firebase + server session cookie ---
+  // --- Logout logic (Firebase + server) ---
   const handleLogout = useCallback(async () => {
     try {
       if (firebaseInitError || !app) {
         setError(
           firebaseInitError?.message ||
-            "Firebase not initialized. Cannot log out safely."
+          "Firebase not initialized. Cannot log out safely."
         )
         return
       }
@@ -125,6 +124,7 @@ export default function AdminDashboardPageClient({
     )
   }
 
+  // Renders the main section content based on activeSection
   const renderContent = () => {
     switch (activeSection) {
       case "overview":
@@ -139,8 +139,6 @@ export default function AdminDashboardPageClient({
         return <CommentManager />
       case "inbox":
         return <EmailInbox />
-      // REMOVED: case "pages":
-      //   return <PageCustomizer />
       case "system":
         return <SystemTools />
       case "users":

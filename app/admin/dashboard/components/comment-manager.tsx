@@ -20,6 +20,7 @@ import {
 import { Check, X, Trash2, MessageSquare, Search, AlertTriangle, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
+import CommentStatsChart from "@/components/admin/comment/CommentStatsChart" // <-- ADDED
 
 interface Comment {
   id: string
@@ -167,6 +168,9 @@ export function CommentManager() {
           />
         </div>
       </div>
+
+      {/* --- COMMENT STATS CHART (RECHARTS) INSERTED HERE --- */}
+      <CommentStatsChart />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">

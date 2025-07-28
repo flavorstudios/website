@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { usePathname } from "next/navigation"
 import AdminAuthGuard from "@/components/AdminAuthGuard"
 import { AdminSidebar } from "./components/admin-sidebar"
 import { DashboardOverview } from "./components/dashboard-overview"
@@ -29,6 +30,7 @@ export default function AdminDashboardPageClient({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [error, setError] = useState("")
+  const pathname = usePathname() // <-- NEW: Next.js App Router current route
 
   // --- Initialization on first load ---
   useEffect(() => {
@@ -47,6 +49,28 @@ export default function AdminDashboardPageClient({
     window.addEventListener("admin-navigate", handleNavigation)
     return () => window.removeEventListener("admin-navigate", handleNavigation)
   }, [])
+
+  // --- Sync activeSection with current route (for sidebar/content consistency) ---
+  useEffect(() => {
+    // Map route paths to section IDs
+    const map = [
+      { id: "overview", href: "/admin/dashboard" },
+      { id: "blogs", href: "/admin/dashboard/blog-posts" },
+      { id: "videos", href: "/admin/dashboard/videos" },
+      { id: "categories", href: "/admin/dashboard/categories" },
+      { id: "comments", href: "/admin/dashboard/comments" },
+      { id: "inbox", href: "/admin/dashboard/inbox" },
+      { id: "users", href: "/admin/dashboard/users" },
+      { id: "settings", href: "/admin/dashboard/settings" },
+      { id: "system", href: "/admin/dashboard/system" },
+    ]
+    const matched = map
+      .filter((m) => pathname === m.href || pathname.startsWith(`${m.href}/`))
+      .sort((a, b) => b.href.length - a.href.length)[0]
+    if (matched && matched.id !== activeSection) {
+      setActiveSection(matched.id)
+    }
+  }, [pathname]) // <-- runs instantly on route change
 
   // --- Data refresh interval ---
   useEffect(() => {

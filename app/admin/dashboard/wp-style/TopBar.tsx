@@ -18,29 +18,28 @@ export default function TopBar({ onQuickAction }: TopBarProps) {
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    // emit event for search
     window.dispatchEvent(new CustomEvent("admin-search", { detail: term }))
   }
 
   return (
     <div className="flex items-center justify-between gap-3 p-3 border-b bg-white">
-      <form onSubmit={submitSearch} className="relative w-64">
+      <form onSubmit={submitSearch} className="relative w-full sm:w-64">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
           placeholder="Search..."
-          className="pl-8"
+          className="pl-8 w-full"
           value={term}
           onChange={(e) => setTerm(e.target.value)}
+          aria-label="Search"
         />
       </form>
-
       <div className="flex items-center gap-3">
         {actions.map((a) => (
           <Button key={a.id} size="sm" onClick={() => onQuickAction?.(a.id)}>
             <Plus className="h-4 w-4 mr-2" /> {a.label}
           </Button>
         ))}
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" aria-label="Notifications">
           <Bell className="h-5 w-5" />
         </Button>
       </div>

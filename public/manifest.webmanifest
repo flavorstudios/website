@@ -69,33 +69,6 @@
       "icons": [{ "src": "/icons/android-chrome-192x192.png", "sizes": "192x192" }]
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshots/app-desktop.png",
-      "sizes": "1200x900",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Homepage (Desktop)"
-    },
-    {
-      "src": "/screenshots/app-home.png",
-      "sizes": "1080x2340",
-      "type": "image/png",
-      "label": "Home — Latest Anime News & Originals"
-    },
-    {
-      "src": "/screenshots/app-episode.png",
-      "sizes": "1080x2340",
-      "type": "image/png",
-      "label": "Watch — Original Animated Episodes"
-    },
-    {
-      "src": "/screenshots/app-play.png",
-      "sizes": "1080x2340",
-      "type": "image/png",
-      "label": "Play — Interactive Anime Games"
-    }
-  ],
   "related_applications": [],
   "id": "/"
 }

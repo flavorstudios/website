@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { Check, X, Trash2, MessageSquare, Search, AlertTriangle, Shield } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface Comment {
   id: string
@@ -22,7 +23,12 @@ interface Comment {
   status: "pending" | "approved" | "spam" | "trash"
   createdAt: string
   ip: string
-  flagged?: boolean // <-- Added for flagged status
+  flagged?: boolean // <-- Flagged status
+  scores?: {
+    toxicity: number
+    insult: number
+    threat: number
+  }
 }
 
 export function CommentManager() {
@@ -230,7 +236,12 @@ function CommentCard({
   }
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card
+      className={[
+        "hover:shadow-lg transition-shadow",
+        comment.flagged ? "border-red-500 bg-red-50" : "",
+      ].join(" ")}
+    >
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
           <Avatar className="h-12 w-12">
@@ -263,13 +274,41 @@ function CommentCard({
                   <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
-              <Badge className={getStatusBadge(comment.status)} aria-label={`Status: ${comment.status}`}>
-                {comment.status}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge
+                  className={getStatusBadge(comment.status)}
+                  aria-label={`Status: ${comment.status}`}
+                >
+                  {comment.status}
+                </Badge>
+                {comment.flagged && (
+                  <Badge variant="destructive" aria-label="Flagged comment">
+                    Flagged
+                  </Badge>
+                )}
+              </div>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-gray-700 leading-relaxed">{comment.content}</p>
+              {comment.scores && (
+                <table className="mt-2 text-xs text-gray-600">
+                  <tbody>
+                    <tr>
+                      <td className="pr-2">Toxicity:</td>
+                      <td>{comment.scores.toxicity.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                      <td className="pr-2">Insult:</td>
+                      <td>{comment.scores.insult.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                      <td className="pr-2">Threat:</td>
+                      <td>{comment.scores.threat.toFixed(2)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              )}
             </div>
 
             <div className="flex items-center justify-between">

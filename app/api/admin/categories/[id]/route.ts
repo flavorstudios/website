@@ -17,9 +17,13 @@ async function writeJSON(newData: unknown) {
   await fs.writeFile(CATEGORIES_PATH, JSON.stringify(newData, null, 2), "utf-8");
 }
 
-// Basic payload validation (extend as needed)
-function isValidCategoryUpdate(data: any): data is Partial<Category> {
-  return data && typeof data === "object" && ("name" in data || "title" in data);
+// Type-safe payload validation
+function isValidCategoryUpdate(data: unknown): data is Partial<Category> {
+  return (
+    typeof data === "object" &&
+    data !== null &&
+    ("name" in data || "title" in data)
+  );
 }
 
 export async function PUT(

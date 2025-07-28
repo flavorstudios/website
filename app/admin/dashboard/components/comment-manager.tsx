@@ -150,25 +150,26 @@ export function CommentManager() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Comments & Reviews</h2>
           <p className="text-gray-600">Moderate user comments and feedback</p>
         </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        {/* Responsive search input */}
+        <div className="relative w-full sm:w-auto">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             placeholder="Search comments..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-64"
+            className="pl-10 w-full sm:w-64"
             aria-label="Search comments"
           />
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-gray-900">{statusCounts.all}</div>
@@ -212,7 +213,7 @@ export function CommentManager() {
 
       {/* Comments Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full">
+        <TabsList className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full">
           <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
           <TabsTrigger value="pending">Pending ({statusCounts.pending})</TabsTrigger>
           <TabsTrigger value="approved">Approved ({statusCounts.approved})</TabsTrigger>
@@ -282,6 +283,7 @@ export function CommentManager() {
   )
 }
 
+// Responsive: stack avatar/info/actions vertically on mobile
 function CommentCard({
   comment,
   onUpdateStatus,
@@ -320,7 +322,7 @@ function CommentCard({
           className="mt-2 mr-4 accent-purple-600 h-5 w-5"
           aria-label="Select comment"
         />
-        <div className="flex items-start gap-4 w-full">
+        <div className="flex flex-col sm:flex-row items-start gap-4 w-full">
           <Avatar className="h-12 w-12">
             <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.author}`} />
             <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-white">
@@ -329,10 +331,10 @@ function CommentCard({
           </Avatar>
 
           <div className="flex-1 space-y-3">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
               <div>
                 <h4 className="font-semibold text-gray-900">{comment.author}</h4>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
                   <span>{comment.email}</span>
                   {comment.website && (
                     <>
@@ -388,7 +390,7 @@ function CommentCard({
               )}
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="text-sm text-gray-500">
                 <span className="font-medium">On:</span> {comment.postTitle} ({comment.postType})
               </div>

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import AdminAuthGuard from "@/components/AdminAuthGuard"; // Import the guard
+import AdminAuthGuard from "@/components/AdminAuthGuard";
+import CommentStatsChart from "@/components/admin/comment/CommentStatsChart"; // <-- NEW IMPORT
 
 // Match your latest Firestore Comment structure
 type Comment = {
@@ -52,6 +53,10 @@ export default function AdminCommentsPage() {
     <AdminAuthGuard>
       <div style={{ padding: 32, maxWidth: 1100, margin: "0 auto" }}>
         <h1 style={{ marginBottom: 24 }}>Flagged & Recent Comments</h1>
+        {/* COMMENT STATS CHART INSERTED HERE */}
+        <div style={{ marginBottom: 24 }}>
+          <CommentStatsChart />
+        </div>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 15 }}>
           <thead>
             <tr style={{ background: "#f6f6f6" }}>

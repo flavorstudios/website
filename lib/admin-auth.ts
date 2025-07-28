@@ -240,3 +240,52 @@ export async function logAdminAuditFailure(
     logError("admin-auth: logAdminAuditFailure", err);
   }
 }
+
+// === Codex Audit Addition: createRefreshSession ===
+
+/**
+ * Creates a new admin session and refresh token for the given UID.
+ * Returns the short-lived session cookie and the newly issued refresh token.
+ */
+export async function createRefreshSession(
+  uid: string,
+): Promise<{ sessionCookie: string; refreshToken: string }> {
+  try {
+    const customToken = await adminAuth.createCustomToken(uid);
+
+    // Exchange custom token for ID token and refresh token via Firebase REST API
+    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "";
+    const resp = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: customToken, returnSecureToken: true }),
+      }
+    );
+
+    const data = await resp.json();
+    if (!resp.ok) {
+      logError("admin-auth:createRefreshSession signIn", data);
+      throw new Error("Failed to sign in with custom token");
+    }
+
+    const idToken = data.idToken as string;
+    const refreshToken = data.refreshToken as string;
+
+    const sessionCookie = await adminAuth.createSessionCookie(idToken, {
+      expiresIn: 1000 * 60 * 60 * 2, // 2 hours
+    });
+
+    // Persist refresh token for later validation
+    await adminDb
+      .collection("refreshTokens")
+      .doc(refreshToken)
+      .set({ uid, createdAt: new Date().toISOString() });
+
+    return { sessionCookie, refreshToken };
+  } catch (err) {
+    logError("admin-auth:createRefreshSession", err);
+    throw err;
+  }
+}

@@ -21,39 +21,27 @@ export async function POST(req: NextRequest) {
     const { refreshToken } = await req.json();
 
     if (!refreshToken) {
-      const res = NextResponse.json({ error: "Missing refresh token." }, { status: 401 });
-      res.cookies.set("admin-session", "", { maxAge: 0, path: "/" });
-      return res;
+      // The helper clears cookies if needed, so just respond
+      return NextResponse.json({ error: "Missing refresh token." }, { status: 401 });
     }
 
     // Lookup the refresh token in Firestore
     const doc = await adminDb.collection("refreshTokens").doc(refreshToken).get();
     if (!doc.exists) {
-      const res = NextResponse.json({ error: "Invalid refresh token" }, { status: 401 });
-      res.cookies.set("admin-session", "", { maxAge: 0, path: "/" });
-      return res;
+      return NextResponse.json({ error: "Invalid refresh token" }, { status: 401 });
     }
     const { uid } = doc.data() as { uid: string };
 
     // Create new session and refresh token using the Codex helper
-    const { sessionCookie, refreshToken: newRefreshToken } = await createRefreshSession(uid);
+    // The helper sets cookies in the server context
+    const newRefreshToken = await createRefreshSession(uid);
 
     // Delete the old refresh token (one-time use)
     await adminDb.collection("refreshTokens").doc(refreshToken).delete();
 
-    const res = NextResponse.json({ ok: true, refreshToken: newRefreshToken });
-    res.cookies.set("admin-session", sessionCookie, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 2, // 2 hours
-      path: "/",
-    });
-    return res;
+    return NextResponse.json({ ok: true, refreshToken: newRefreshToken });
   } catch (error) {
     logError("refresh-session: final catch", error);
-    const res = NextResponse.json({ error: "Session refresh failed." }, { status: 401 });
-    res.cookies.set("admin-session", "", { maxAge: 0, path: "/" });
-    return res;
+    return NextResponse.json({ error: "Session refresh failed." }, { status: 401 });
   }
 }

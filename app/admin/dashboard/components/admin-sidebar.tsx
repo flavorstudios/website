@@ -26,10 +26,8 @@ interface AdminSidebarProps {
   setSidebarOpen: (open: boolean) => void
 }
 
-// FIX: Remove unused _activeSection param
 export function AdminSidebar({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  activeSection: _activeSection,
+  activeSection: _activeSection, // no longer needed—route-based highlight only
   setActiveSection,
   sidebarOpen,
   setSidebarOpen,
@@ -53,13 +51,13 @@ export function AdminSidebar({
     (item) => accessibleSections.includes(item.id) || item.id === "overview"
   )
 
-  // --- KEY FIX: Highlight active based on route, not local state ---
-  // Finds the best matching menu item based on the current path (handles child routes too)
+  // --- KEY: Always highlight based on current path, not state ---
   const getActiveId = () => {
     const match = filteredNavItems
-      .filter(item =>
-        item.href &&
-        (pathname === item.href || pathname.startsWith(`${item.href}/`))
+      .filter(
+        (item) =>
+          item.href &&
+          (pathname === item.href || pathname.startsWith(`${item.href}/`))
       )
       .sort((a, b) => (b.href!.length - a.href!.length))[0]
     return match?.id

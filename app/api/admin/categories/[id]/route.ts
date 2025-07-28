@@ -17,8 +17,8 @@ async function writeJSON(newData: unknown) {
   await fs.writeFile(CATEGORIES_PATH, JSON.stringify(newData, null, 2), "utf-8");
 }
 
+// Basic payload validation (extend as needed)
 function isValidCategoryUpdate(data: any): data is Partial<Category> {
-  // Extend with more robust validation if needed
   return data && typeof data === "object" && ("name" in data || "title" in data);
 }
 
@@ -39,14 +39,13 @@ export async function PUT(
       );
     }
 
-    // Map dashboard `name` to `title` if necessary
+    // Map dashboard `name` to `title` if needed
     if (data.name && !data.title) {
       data.title = data.name;
     }
 
     const json = await readJSON();
 
-    // Update category by ID in both blog & watch arrays
     let found = false;
     ["blog", "watch"].forEach((type) => {
       json.CATEGORIES[type] = json.CATEGORIES[type].map(
@@ -54,7 +53,7 @@ export async function PUT(
           if ((cat as { id: string }).id === params.id) {
             found = true;
             const rest = { ...data };
-            delete rest.name; // Remove `name` from spread to avoid duplication
+            delete rest.name;
             return {
               ...cat,
               ...rest,
@@ -86,7 +85,7 @@ export async function PUT(
       category: { ...updated, name: (updated as { title?: string }).title },
     });
   } catch (error: unknown) {
-    // Improved error logging for debugging
+    // Improved error logging
     console.error("PUT /api/admin/categories/[id] error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to update category";
@@ -104,7 +103,6 @@ export async function DELETE(
   try {
     const json = await readJSON();
 
-    // Remove category by ID from both blog & watch arrays
     let removed = false;
     ["blog", "watch"].forEach((type) => {
       const origLength = json.CATEGORIES[type].length;

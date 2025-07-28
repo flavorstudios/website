@@ -4,8 +4,6 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { type NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
-
-// Unified Category type
 import type { Category } from "@/types/category";
 
 const CATEGORIES_PATH = path.join(process.cwd(), "content-data", "categories.json");
@@ -14,40 +12,60 @@ async function readJSON() {
   const data = await fs.readFile(CATEGORIES_PATH, "utf-8");
   return JSON.parse(data);
 }
+
 async function writeJSON(newData: unknown) {
   await fs.writeFile(CATEGORIES_PATH, JSON.stringify(newData, null, 2), "utf-8");
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+function isValidCategoryUpdate(data: any): data is Partial<Category> {
+  // Extend with more robust validation if needed
+  return data && typeof data === "object" && ("name" in data || "title" in data);
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
     const data = await request.json();
-    // Accept dashboard `name`, map to `title`
+
+    if (!isValidCategoryUpdate(data)) {
+      return NextResponse.json(
+        { error: "Invalid category data" },
+        { status: 400 }
+      );
+    }
+
+    // Map dashboard `name` to `title` if necessary
     if (data.name && !data.title) {
       data.title = data.name;
     }
+
     const json = await readJSON();
 
-    // Find and update category by ID (both blog & watch arrays)
+    // Update category by ID in both blog & watch arrays
     let found = false;
     ["blog", "watch"].forEach((type) => {
-      json.CATEGORIES[type] = json.CATEGORIES[type].map((cat: Record<string, unknown>) => {
-        if ((cat as { id: string }).id === params.id) {
-          found = true;
-          // Only destructure ...rest, avoid unused `name`
-          const { name: _name, ...rest } = data;
-          return {
-            ...cat,
-            ...rest,
-            tooltip: rest.tooltip ?? cat.tooltip,
-            id: (cat as { id: string }).id,
-            title: rest.title ?? (cat as { title?: string }).title,
-          };
+      json.CATEGORIES[type] = json.CATEGORIES[type].map(
+        (cat: Record<string, unknown>) => {
+          if ((cat as { id: string }).id === params.id) {
+            found = true;
+            const rest = { ...data };
+            delete rest.name; // Remove `name` from spread to avoid duplication
+            return {
+              ...cat,
+              ...rest,
+              tooltip: rest.tooltip ?? cat.tooltip,
+              id: (cat as { id: string }).id,
+              title: rest.title ?? (cat as { title?: string }).title,
+            };
+          }
+          return cat;
         }
-        return cat;
-      });
+      );
     });
 
     if (!found) {
@@ -56,34 +74,43 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     await writeJSON(json);
 
-    // Return updated category with `name` for dashboard
-    const updated = [...json.CATEGORIES.blog, ...json.CATEGORIES.watch].find(
-      (cat: Record<string, unknown>) => (cat as { id: string }).id === params.id
+    // Return updated category with `name` for dashboard compatibility
+    const updated = [
+      ...json.CATEGORIES.blog,
+      ...json.CATEGORIES.watch,
+    ].find(
+      (cat: Record<string, unknown>) =>
+        (cat as { id: string }).id === params.id
     );
-    return NextResponse.json({ category: { ...updated, name: (updated as { title?: string }).title } });
+    return NextResponse.json({
+      category: { ...updated, name: (updated as { title?: string }).title },
+    });
   } catch (error: unknown) {
-    // Use type guard for error
-    const message = error instanceof Error ? error.message : "Failed to update category";
-    return NextResponse.json(
-      { error: message },
-      { status: 400 }
-    );
+    // Improved error logging for debugging
+    console.error("PUT /api/admin/categories/[id] error:", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to update category";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
     const json = await readJSON();
 
-    // Remove category by ID (both blog & watch arrays)
+    // Remove category by ID from both blog & watch arrays
     let removed = false;
     ["blog", "watch"].forEach((type) => {
       const origLength = json.CATEGORIES[type].length;
       json.CATEGORIES[type] = json.CATEGORIES[type].filter(
-        (cat: Record<string, unknown>) => (cat as { id: string }).id !== params.id
+        (cat: Record<string, unknown>) =>
+          (cat as { id: string }).id !== params.id
       );
       if (json.CATEGORIES[type].length !== origLength) {
         removed = true;
@@ -98,10 +125,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to delete category";
-    return NextResponse.json(
-      { error: message },
-      { status: 400 }
-    );
+    console.error("DELETE /api/admin/categories/[id] error:", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to delete category";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

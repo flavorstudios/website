@@ -8,6 +8,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Check, X, Trash2, MessageSquare, Search, AlertTriangle, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
@@ -38,6 +47,7 @@ export function CommentManager() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("pending")
+  const [deleteIds, setDeleteIds] = useState<string[] | null>(null)
 
   useEffect(() => {
     loadComments()
@@ -45,9 +55,7 @@ export function CommentManager() {
 
   const loadComments = async () => {
     try {
-      const response = await fetch("/api/admin/comments", {
-        credentials: "include",
-      })
+      const response = await fetch("/api/admin/comments", { credentials: "include" })
       const data = await response.json()
       setComments(data.comments || [])
     } catch (error) {
@@ -65,30 +73,32 @@ export function CommentManager() {
         body: JSON.stringify({ status }),
         credentials: "include",
       })
-
-      if (response.ok) {
-        await loadComments()
-      }
+      if (response.ok) await loadComments()
     } catch (error) {
       console.error("Failed to update comment:", error)
     }
   }
 
+  // Only modal, not browser confirm
   const deleteComment = async (id: string) => {
-    if (!confirm("Are you sure you want to permanently delete this comment?")) return
+    setDeleteIds([id])
+  }
 
-    try {
-      const response = await fetch(`/api/admin/comments/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      })
-
-      if (response.ok) {
-        await loadComments()
+  const confirmDelete = async () => {
+    if (!deleteIds) return
+    for (const id of deleteIds) {
+      try {
+        await fetch(`/api/admin/comments/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+        })
+      } catch (error) {
+        // Optional: handle error feedback here
       }
-    } catch (error) {
-      console.error("Failed to delete comment:", error)
     }
+    setSelectedIds((ids) => ids.filter((id) => !deleteIds.includes(id)))
+    setDeleteIds(null)
+    await loadComments()
   }
 
   // Bulk Actions
@@ -107,11 +117,7 @@ export function CommentManager() {
   }
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Delete ${selectedIds.length} selected comments?`)) return
-    for (const id of selectedIds) {
-      await deleteComment(id)
-    }
-    setSelectedIds([])
+    setDeleteIds(selectedIds)
   }
 
   const filteredComments = comments.filter((comment) => {
@@ -119,20 +125,17 @@ export function CommentManager() {
       comment.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
       comment.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
       comment.postTitle.toLowerCase().includes(searchTerm.toLowerCase())
-
     const matchesTab = activeTab === "all" || comment.status === activeTab
     return matchesSearch && matchesTab
   })
 
-  const getStatusCounts = () => {
-    return {
-      all: comments.length,
-      pending: comments.filter((c) => c.status === "pending").length,
-      approved: comments.filter((c) => c.status === "approved").length,
-      spam: comments.filter((c) => c.status === "spam").length,
-      trash: comments.filter((c) => c.status === "trash").length,
-    }
-  }
+  const getStatusCounts = () => ({
+    all: comments.length,
+    pending: comments.filter((c) => c.status === "pending").length,
+    approved: comments.filter((c) => c.status === "approved").length,
+    spam: comments.filter((c) => c.status === "spam").length,
+    trash: comments.filter((c) => c.status === "trash").length,
+  })
 
   const statusCounts = getStatusCounts()
 
@@ -237,7 +240,7 @@ export function CommentManager() {
                   key={comment.id}
                   comment={comment}
                   onUpdateStatus={updateCommentStatus}
-                  onDelete={deleteComment}
+                  onDelete={() => deleteComment(comment.id)}
                   selected={selectedIds.includes(comment.id)}
                   onSelect={() =>
                     setSelectedIds((ids) =>
@@ -254,6 +257,27 @@ export function CommentManager() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Modal for single or bulk delete confirmation */}
+      {deleteIds && (
+        <AlertDialog open onOpenChange={(open) => !open && setDeleteIds(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Delete {deleteIds.length > 1 ? "Comments" : "Comment"}
+              </AlertDialogTitle>
+            </AlertDialogHeader>
+            <p>
+              Are you sure you want to delete {deleteIds.length > 1 ? "these" : "this"} comment
+              {deleteIds.length > 1 ? "s" : ""}? This action cannot be undone.
+            </p>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   )
 }
@@ -267,7 +291,7 @@ function CommentCard({
 }: {
   comment: Comment
   onUpdateStatus: (id: string, status: Comment["status"]) => void
-  onDelete: (id: string) => void
+  onDelete: () => void
   selected?: boolean
   onSelect?: () => void
 }) {
@@ -409,7 +433,7 @@ function CommentCard({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onDelete(comment.id)}
+                      onClick={onDelete}
                       aria-label="Delete comment"
                       className="text-gray-600 border-gray-200 hover:bg-gray-50"
                     >

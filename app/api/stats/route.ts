@@ -1,7 +1,7 @@
 // app/api/stats/route.ts
 
 import { NextResponse } from "next/server";
-import { systemStore } from "@/lib/content-store"; // Firestore-backed stats
+import { systemStore } from "@/lib/system-store"; // Firestore-backed stats
 
 export async function GET() {
   try {

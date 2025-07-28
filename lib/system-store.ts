@@ -1,3 +1,5 @@
+import { adminDb } from "@/lib/firebase-admin";
+
 export interface SystemStats {
   totalPosts: number;
   totalVideos: number;
@@ -10,15 +12,46 @@ export interface SystemStats {
 
 export const systemStore = {
   async getStats(): Promise<SystemStats> {
-    // Placeholder implementation returning default stats
-    return {
-      totalPosts: 0,
-      totalVideos: 0,
-      totalComments: 0,
-      pendingComments: 0,
-      totalViews: 0,
-      lastBackup: "",
-      storageUsed: "",
-    };
+    try {
+      const [postsSnap, videosSnap, commentsSnap, pendingSnap] = await Promise.all([
+        adminDb.collection("blogs").get(),
+        adminDb.collection("videos").get(),
+        adminDb.collectionGroup("entries").get(),
+        adminDb.collectionGroup("entries").where("status", "==", "pending").get(),
+      ]);
+
+      const totalPosts = postsSnap.size;
+      const totalVideos = videosSnap.size;
+      const totalComments = commentsSnap.size;
+      const pendingComments = pendingSnap.size;
+      const totalViews =
+        postsSnap.docs.reduce((sum, d) => sum + (d.data().views || 0), 0) +
+        videosSnap.docs.reduce((sum, d) => sum + (d.data().views || 0), 0);
+
+      // Optionally fetch meta data (backup/storage)
+      const systemDoc = await adminDb.collection("system").doc("metrics").get().catch(() => null);
+      const meta = systemDoc && systemDoc.exists ? systemDoc.data() : {};
+
+      return {
+        totalPosts,
+        totalVideos,
+        totalComments,
+        pendingComments,
+        totalViews,
+        lastBackup: (meta as Record<string, string>).lastBackup ?? "",
+        storageUsed: (meta as Record<string, string>).storageUsed ?? "",
+      };
+    } catch (error) {
+      console.error("Failed to fetch system stats:", error);
+      return {
+        totalPosts: 0,
+        totalVideos: 0,
+        totalComments: 0,
+        pendingComments: 0,
+        totalViews: 0,
+        lastBackup: "",
+        storageUsed: "",
+      };
+    }
   },
 };

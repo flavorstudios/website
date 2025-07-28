@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { Check, X, Trash2, MessageSquare, Search, AlertTriangle, Shield } from "lucide-react"
 import { cn } from "@/lib/utils"
+import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
 
 interface Comment {
   id: string
@@ -23,7 +24,7 @@ interface Comment {
   status: "pending" | "approved" | "spam" | "trash"
   createdAt: string
   ip: string
-  flagged?: boolean // <-- Flagged status
+  flagged?: boolean
   scores?: {
     toxicity: number
     insult: number
@@ -33,6 +34,7 @@ interface Comment {
 
 export function CommentManager() {
   const [comments, setComments] = useState<Comment[]>([])
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("pending")
@@ -87,6 +89,29 @@ export function CommentManager() {
     } catch (error) {
       console.error("Failed to delete comment:", error)
     }
+  }
+
+  // Bulk Actions
+  const handleBulkApprove = async () => {
+    for (const id of selectedIds) {
+      await updateCommentStatus(id, "approved")
+    }
+    setSelectedIds([])
+  }
+
+  const handleBulkSpam = async () => {
+    for (const id of selectedIds) {
+      await updateCommentStatus(id, "spam")
+    }
+    setSelectedIds([])
+  }
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Delete ${selectedIds.length} selected comments?`)) return
+    for (const id of selectedIds) {
+      await deleteComment(id)
+    }
+    setSelectedIds([])
   }
 
   const filteredComments = comments.filter((comment) => {
@@ -173,6 +198,15 @@ export function CommentManager() {
         </Card>
       </div>
 
+      {/* Bulk Actions Bar */}
+      <CommentBulkActions
+        selectedIds={selectedIds}
+        onApprove={handleBulkApprove}
+        onSpam={handleBulkSpam}
+        onDelete={handleBulkDelete}
+        disabled={loading}
+      />
+
       {/* Comments Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full">
@@ -204,6 +238,14 @@ export function CommentManager() {
                   comment={comment}
                   onUpdateStatus={updateCommentStatus}
                   onDelete={deleteComment}
+                  selected={selectedIds.includes(comment.id)}
+                  onSelect={() =>
+                    setSelectedIds((ids) =>
+                      ids.includes(comment.id)
+                        ? ids.filter((i) => i !== comment.id)
+                        : [...ids, comment.id]
+                    )
+                  }
                 />
               ))}
             </div>
@@ -220,10 +262,14 @@ function CommentCard({
   comment,
   onUpdateStatus,
   onDelete,
+  selected,
+  onSelect,
 }: {
   comment: Comment
   onUpdateStatus: (id: string, status: Comment["status"]) => void
   onDelete: (id: string) => void
+  selected?: boolean
+  onSelect?: () => void
 }) {
   const getStatusBadge = (status: Comment["status"]) => {
     const styles = {
@@ -237,13 +283,20 @@ function CommentCard({
 
   return (
     <Card
-      className={[
-        "hover:shadow-lg transition-shadow",
-        comment.flagged ? "border-red-500 bg-red-50" : "",
-      ].join(" ")}
+      className={cn(
+        "hover:shadow-lg transition-shadow flex",
+        comment.flagged && "border-red-500 bg-red-50"
+      )}
     >
-      <CardContent className="p-6">
-        <div className="flex items-start gap-4">
+      <CardContent className="p-6 flex w-full">
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onSelect}
+          className="mt-2 mr-4 accent-purple-600 h-5 w-5"
+          aria-label="Select comment"
+        />
+        <div className="flex items-start gap-4 w-full">
           <Avatar className="h-12 w-12">
             <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${comment.author}`} />
             <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-white">

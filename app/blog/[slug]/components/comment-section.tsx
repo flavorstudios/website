@@ -17,6 +17,7 @@ interface Comment {
   status: "pending" | "approved" | "spam" | "trash"
   createdAt: string
   parentId?: string
+  flagged?: boolean // <-- Added for flagged status
 }
 
 interface CommentSectionProps {

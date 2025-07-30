@@ -14,6 +14,15 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Info, Eye, Pencil, Trash2, Upload, Archive } from "lucide-react";
 import { VideoForm } from "@/components/ui/video-form";
 import { cn } from "@/lib/utils";
@@ -313,6 +322,7 @@ export function VideoManager() {
   const [currentPage, setCurrentPage] = useState(1);
   const VIDEOS_PER_PAGE = 10;
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
 
   useEffect(() => {
     loadData();
@@ -383,25 +393,37 @@ export function VideoManager() {
     }
   };
 
-  const deleteVideo = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this video? This cannot be undone.")) return;
-    try {
-      const response = await fetch(`/api/admin/videos/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      if (response.ok) {
-        toast("Video deleted.");
-        await loadData();
-        setSelected((prev) => {
-          const s = new Set(prev);
-          s.delete(id);
-          return s;
+  // NEW: Show AlertDialog, not browser confirm
+  const deleteVideo = (id: string) => {
+    setDeleteTargets([id]);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTargets) return;
+    for (const id of deleteTargets) {
+      try {
+        const response = await fetch(`/api/admin/videos/${id}`, {
+          method: "DELETE",
+          credentials: "include",
         });
+        if (response.ok) {
+          toast("Video deleted.");
+          setSelected((prev) => {
+            const s = new Set(prev);
+            s.delete(id);
+            return s;
+          });
+        } else {
+          const data = await response.json();
+          toast(data.error || "Failed to delete video.", { variant: "destructive" });
+        }
+      } catch {
+        toast("Failed to delete video.", { variant: "destructive" });
       }
-    } catch {
-      toast("Failed to delete video.");
     }
+    setDeleteTargets(null);
+    setSelected(new Set());
+    await loadData();
   };
 
   const togglePublish = async (id: string, publish: boolean) => {
@@ -445,10 +467,12 @@ export function VideoManager() {
   const handleBulk = async (action: "publish" | "unpublish" | "delete") => {
     const ids = Array.from(selected);
     if (ids.length === 0) return;
-    if (action === "delete" && !confirm(`Delete ${ids.length} video(s)? This cannot be undone.`)) return;
+    if (action === "delete") {
+      setDeleteTargets(ids);
+      return;
+    }
     for (const id of ids) {
-      if (action === "delete") await deleteVideo(id);
-      else await togglePublish(id, action === "publish");
+      await togglePublish(id, action === "publish");
     }
     setSelected(new Set());
     await loadData();
@@ -602,6 +626,27 @@ export function VideoManager() {
           }}
           categories={categories}
         />
+      )}
+
+      {/* Delete Modal for single and bulk */}
+      {deleteTargets && (
+        <AlertDialog open onOpenChange={(open) => !open && setDeleteTargets(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Delete {deleteTargets.length > 1 ? "Videos" : "Video"}
+              </AlertDialogTitle>
+            </AlertDialogHeader>
+            <p>
+              Are you sure you want to delete {deleteTargets.length > 1 ? "these" : "this"} video
+              {deleteTargets.length > 1 ? "s" : ""}? This action cannot be undone.
+            </p>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </div>
   );

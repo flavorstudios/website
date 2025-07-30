@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { X } from "lucide-react"
 import Link from "next/link"
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 
 const COOKIE_NAME = "adblockBannerDismissed"
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 // 7 days in seconds
+const HEADING_ID = "adblock-banner-heading"
 
 function getCookie(name: string) {
   if (typeof document === "undefined") return null
@@ -21,6 +22,8 @@ function setCookie(name: string, value: string, maxAge: number) {
 
 export default function AdblockBanner() {
   const [visible, setVisible] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
+  const previousFocus = useRef<Element | null>(null)
 
   useEffect(() => {
     if (getCookie(COOKIE_NAME)) return
@@ -35,13 +38,51 @@ export default function AdblockBanner() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!visible) return
+    previousFocus.current = document.activeElement
+    const first = modalRef.current?.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+    first?.focus()
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        )
+        if (focusable.length === 0) return
+        const firstEl = focusable[0]
+        const lastEl = focusable[focusable.length - 1]
+        if (e.shiftKey) {
+          if (document.activeElement === firstEl) {
+            e.preventDefault()
+            lastEl.focus()
+          }
+        } else {
+          if (document.activeElement === lastEl) {
+            e.preventDefault()
+            firstEl.focus()
+          }
+        }
+      } else if (e.key === 'Escape') {
+        dismiss()
+      }
+    }
+
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('keydown', handleKey)
+      ;(previousFocus.current as HTMLElement | null)?.focus()
+    }
+  }, [visible])
+
   const dismiss = () => {
     setCookie(COOKIE_NAME, "true", COOKIE_MAX_AGE)
     setVisible(false)
   }
 
   const allowAds = () => {
-    setCookie(COOKIE_NAME, "true", COOKIE_MAX_AGE)
     location.reload()
   }
 
@@ -59,7 +100,11 @@ export default function AdblockBanner() {
             onClick={dismiss}
           />
           <motion.div
-            className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 text-center shadow-xl dark:bg-slate-900"
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={HEADING_ID}
+            className="relative z-10 w-full max-w-md rounded-lg bg-white p-4 text-center shadow-xl dark:bg-slate-900 sm:p-6"
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -20, opacity: 0 }}
@@ -67,14 +112,14 @@ export default function AdblockBanner() {
             <button
               aria-label="Dismiss"
               onClick={dismiss}
-              className="absolute right-4 top-4 text-gray-500 transition hover:text-gray-700 dark:hover:text-gray-300"
+              className="absolute right-4 top-4 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-ring text-gray-500 transition hover:text-gray-700 dark:hover:text-gray-300"
             >
               <X className="h-5 w-5" />
             </button>
-            <h2 className="mb-2 text-lg font-semibold">
+            <h2 id={HEADING_ID} className="mb-2 text-lg font-semibold text-gray-900 dark:text-slate-50">
               Quality content needs supporters. Will you be one?
             </h2>
-            <p className="mb-4 text-sm text-muted-foreground">
+            <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
               You currently have an AD blocker on. Ads and support help keep Flavor Studios running.
             </p>
             <div className="flex justify-center gap-4">

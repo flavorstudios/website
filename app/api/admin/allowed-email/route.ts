@@ -7,7 +7,8 @@ import { logError } from "@/lib/log"; // Consistent server logging
 
 export async function GET() {
   // Retrieve session cookie
-  const sessionCookie = cookies().get("admin-session")?.value;
+  const cookieStore = await cookies(); // Await here
+  const sessionCookie = cookieStore.get("admin-session")?.value;
   if (!sessionCookie) {
     console.warn("[allowed-email] No admin-session cookie found");
     return NextResponse.json({ isAllowed: false }, { status: 401 });

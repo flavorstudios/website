@@ -69,7 +69,7 @@ export default function AdminDashboardPageClient({
     if (matched && matched.id !== activeSection) {
       setActiveSection(matched.id)
     }
-  }, [pathname])
+  }, [pathname, activeSection]) // ✅ FIX: added activeSection
 
   // --- Refresh data periodically ---
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { commentStore } from "@/lib/comment-store"
-import type { Comment } from "@/lib/comment-store" // Import the Comment type
+import type { Comment } from "@/lib/comment-store" // Now Comment is exported!
 
 export async function GET(request: NextRequest) {
   try {
@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
       userAgent: request.headers.get("user-agent") ?? "",
     })
 
+    // If the comment isn't pending (shouldn't happen unless moderation logic is changed), force it
     if (comment.status !== "pending") {
       await commentStore.updateStatus(postId, comment.id, "pending")
       comment.status = "pending"

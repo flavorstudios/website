@@ -3,7 +3,10 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Share2, Facebook, Twitter, Linkedin, Mail, MessageCircle, Copy, Check, Instagram, Send } from "lucide-react"
+import {
+  Share2, Facebook, Twitter, Linkedin, Mail, MessageCircle,
+  Copy, Check, Instagram, Send, Pinterest
+} from "lucide-react" // Use Pinterest icon if available; otherwise, keep Instagram for demo
 
 interface SocialShareProps {
   title: string
@@ -37,7 +40,7 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
   }
 
   const handleNativeShare = async () => {
-    if (navigator.share) {
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
       try {
         await navigator.share(shareData)
       } catch (error) {
@@ -60,6 +63,9 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
     window.open(shareLinks[platform], "_blank", "width=600,height=400")
   }
 
+  // Helper for mobile native share availability
+  const isNativeShareSupported = typeof navigator !== "undefined" && typeof navigator.share === "function"
+
   return (
     <Card className="mb-8">
       <CardContent className="p-6">
@@ -68,9 +74,8 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
           <h3 className="text-lg font-semibold text-gray-900">Share this post</h3>
         </div>
 
-        {/* Responsive grid for share buttons: 1 col on mobile, more on larger screens */}
+        {/* Responsive grid for share buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-          {/* Facebook */}
           <Button
             variant="outline"
             size="sm"
@@ -80,8 +85,6 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
             <Facebook className="h-5 w-5" />
             <span className="text-xs">Facebook</span>
           </Button>
-
-          {/* Twitter/X */}
           <Button
             variant="outline"
             size="sm"
@@ -91,8 +94,6 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
             <Twitter className="h-5 w-5" />
             <span className="text-xs">Twitter</span>
           </Button>
-
-          {/* LinkedIn */}
           <Button
             variant="outline"
             size="sm"
@@ -102,8 +103,6 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
             <Linkedin className="h-5 w-5" />
             <span className="text-xs">LinkedIn</span>
           </Button>
-
-          {/* WhatsApp */}
           <Button
             variant="outline"
             size="sm"
@@ -113,8 +112,6 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
             <MessageCircle className="h-5 w-5" />
             <span className="text-xs">WhatsApp</span>
           </Button>
-
-          {/* Telegram */}
           <Button
             variant="outline"
             size="sm"
@@ -124,8 +121,6 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
             <Send className="h-5 w-5" />
             <span className="text-xs">Telegram</span>
           </Button>
-
-          {/* Email */}
           <Button
             variant="outline"
             size="sm"
@@ -135,8 +130,6 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
             <Mail className="h-5 w-5" />
             <span className="text-xs">Email</span>
           </Button>
-
-          {/* Pinterest */}
           {image && (
             <Button
               variant="outline"
@@ -144,12 +137,10 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
               onClick={() => handleShare("pinterest")}
               className="flex flex-col items-center gap-1 h-auto py-3 hover:bg-red-50 hover:border-red-200 hover:text-red-600"
             >
-              <Instagram className="h-5 w-5" />
+              <Pinterest className="h-5 w-5" />
               <span className="text-xs">Pinterest</span>
             </Button>
           )}
-
-          {/* Copy Link */}
           <Button
             variant="outline"
             size="sm"
@@ -161,8 +152,8 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
           </Button>
         </div>
 
-        {/* Native Share (Mobile) */}
-        {typeof navigator !== "undefined" && navigator.share && (
+        {/* Native Share (Mobile/Supported Browsers Only) */}
+        {isNativeShareSupported && (
           <div className="mt-4 pt-4 border-t">
             <Button
               onClick={handleNativeShare}
@@ -174,7 +165,6 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
           </div>
         )}
 
-        {/* Share Stats */}
         <div className="mt-4 pt-4 border-t">
           <p className="text-sm text-gray-500 text-center">
             Help us reach more anime enthusiasts by sharing this post! 🌟

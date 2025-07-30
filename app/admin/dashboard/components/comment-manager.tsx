@@ -60,8 +60,8 @@ export function CommentManager() {
       const response = await fetch("/api/admin/comments", { credentials: "include" })
       const data = await response.json()
       setComments(data.comments || [])
-    } catch (error) {
-      console.error("Failed to load comments:", error)
+    } catch {
+      console.error("Failed to load comments")
       toast("Failed to load comments", { variant: "destructive" })
     } finally {
       setLoading(false)
@@ -93,8 +93,8 @@ export function CommentManager() {
         const data = await response.json()
         toast(data.error || "Failed to update comment", { variant: "destructive" })
       }
-    } catch (error) {
-      console.error("Failed to update comment:", error)
+    } catch {
+      console.error("Failed to update comment")
       toast("Failed to update comment", { variant: "destructive" })
     }
   }
@@ -120,7 +120,7 @@ export function CommentManager() {
           const data = await res.json()
           toast(data.error || "Failed to delete comment", { variant: "destructive" })
         }
-      } catch (error) {
+      } catch {
         toast("Failed to delete comment", { variant: "destructive" })
       }
     }

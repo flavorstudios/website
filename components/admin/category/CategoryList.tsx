@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
@@ -43,7 +44,16 @@ export interface CategoryListProps {
 const renderIcon = (name?: string | null) => {
   if (!name) return null
   if (name.startsWith("http") || name.startsWith("/")) {
-    return <img src={name} alt="" className="w-4 h-4" />
+    return (
+      <Image
+        src={name}
+        alt=""
+        width={16}
+        height={16}
+        className="w-4 h-4"
+        unoptimized
+      />
+    )
   }
   const Icon = (Icons as Record<string, React.ComponentType<LucideProps>>)[name]
   if (!Icon) return null

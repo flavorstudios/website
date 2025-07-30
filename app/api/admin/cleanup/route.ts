@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 import { blogStore } from "@/lib/content-store"
-import { videoStore } from "@/lib/comment-store"
+import { videoStore } from "@/lib/content-store" // <-- Correct import, not comment-store!
 import { logError } from "@/lib/log"
 
 export async function POST(request: NextRequest) {
@@ -76,26 +76,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Clean up invalid categories (optional)
-    let deletedBlogCategories = 0
-    let deletedVideoCategories = 0
-    if (typeof blogStore.cleanupInvalidCategories === "function") {
-      deletedBlogCategories = await blogStore.cleanupInvalidCategories()
-    }
-    if (typeof videoStore.cleanupInvalidCategories === "function") {
-      deletedVideoCategories = await videoStore.cleanupInvalidCategories()
-    }
+    // Remove invalid category cleanup (function does not exist in your stores)
+    // If you add this in future, add back as needed:
+    // let deletedBlogCategories = 0
+    // let deletedVideoCategories = 0
 
     // Fetch latest categories dynamically from your content store or API as needed
-    // For demo, just leave empty arrays or fetch dynamically here
     const currentBlogCategories: string[] = []
     const currentWatchCategories: string[] = []
 
     const report = {
       blogPostsDeleted: deletedBlogs,
-      blogCategoriesDeleted: deletedBlogCategories,
+      // blogCategoriesDeleted: deletedBlogCategories,
       watchVideosDeleted: deletedVideos,
-      watchCategoriesDeleted: deletedVideoCategories,
+      // watchCategoriesDeleted: deletedVideoCategories,
       validBlogCategories: currentBlogCategories,
       validWatchCategories: currentWatchCategories,
       timestamp: new Date().toISOString(),

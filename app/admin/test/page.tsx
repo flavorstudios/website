@@ -38,13 +38,12 @@ export const metadata = getMetadata({
 
 export default async function AdminTest() {
   // Secure: Only show page if session is authenticated via Firebase
-  const cookieStore = cookies();
+  const cookieStore = await cookies(); // Await here
   const session = cookieStore.get("admin-session");
 
-  // Call requireAdmin with a mock NextRequest (SSR: not available, so simple check)
-  // If you want stricter SSR auth, use middleware, or convert this to a Server Component route handler
+  // Pass the actual cookies object, not a function, to requireAdmin
   const isAuthenticated = session?.value
-    ? await requireAdmin({ cookies: () => cookieStore })
+    ? await requireAdmin({ cookies: cookieStore })
     : false;
 
   if (!isAuthenticated) {

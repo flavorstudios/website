@@ -3,14 +3,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { Category } from "@/types/category"; // Unified import
 
-// Helper to format categories (works for both blog & watch arrays)
-function format(arr: Category[]) {
+// Helper to format categories (adds name & type fields)
+function format(arr: any[], type: "blog" | "video"): Category[] {
   return (arr || [])
     .filter((c) => c.isActive)
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     .map((c) => ({
       ...c,
-      name: c.title,                  // Alias for compatibility
+      name: c.title,                        // For compatibility/UI
+      type,                                 // Now fulfills Category type!
       count: c.postCount ?? 0,
       tooltip: c.tooltip ?? undefined,
     }));
@@ -18,7 +19,7 @@ function format(arr: Category[]) {
 
 export async function GET(request: NextRequest) {
   try {
-    // 👇 Dynamic import is required in Next.js API routes!
+    // Dynamic import: for Next.js API route compatibility!
     const siteData = await import('@/content-data/categories.json').then(m => m.default);
 
     const type = request.nextUrl.searchParams.get("type");
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     if (type === "blog") {
       const response = NextResponse.json({
-        categories: format(blog),
+        categories: format(blog, "blog"),
       });
       response.headers.set("Cache-Control", "public, max-age=300");
       return response;
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     if (type === "video") {
       const response = NextResponse.json({
-        categories: format(watch),
+        categories: format(watch, "video"),
       });
       response.headers.set("Cache-Control", "public, max-age=300");
       return response;
@@ -42,8 +43,8 @@ export async function GET(request: NextRequest) {
 
     // No type: return both blog and video categories
     const response = NextResponse.json({
-      blogCategories: format(blog),
-      videoCategories: format(watch),
+      blogCategories: format(blog, "blog"),
+      videoCategories: format(watch, "video"),
     });
     response.headers.set("Cache-Control", "public, max-age=300");
     return response;

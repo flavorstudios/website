@@ -10,7 +10,9 @@ const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "pr
 
 export async function GET() {
   try {
-    const sessionCookie = cookies().get("admin-session")?.value;
+    // Fix: Await cookies() as it's now async in Next.js 14+
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("admin-session")?.value;
 
     if (!sessionCookie) {
       if (debug) {

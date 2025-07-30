@@ -1,13 +1,15 @@
 // app/blog/category/[slug]/page.tsx
+// If advanced routing is needed, extend BlogPage to accept `category` and
+// `blogPosts` props directly and update app/blog/page.tsx to match.
 
 import siteData from "@/content-data/categories.json";
 import BlogPage from "../../page";
-import type { BlogPost } from "@/lib/types"; // Correct canonical type import
+import Link from "next/link";
 
 /**
  * Blog Category Route
  * Finds the blog category from JSON (static) by slug.
- * You can replace blogPosts logic with a live data fetch when ready.
+ * To support passing category/blogPosts, update BlogPage props in app/blog/page.tsx.
  */
 export default async function BlogCategoryPage({
   params,
@@ -25,29 +27,35 @@ export default async function BlogCategoryPage({
     ) || null;
 
   if (!category) {
+    // On-brand, friendly fallback with gradient and SVG
     return (
-      <div className="max-w-2xl mx-auto py-24 text-center text-lg font-semibold text-gray-600">
-        Category not found
+      <div className="flex min-h-[60vh] items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 px-4">
+        <div className="max-w-md text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl">
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            className="mx-auto mb-6 h-16 w-16 text-purple-500 drop-shadow-lg"
+            fill="currentColor"
+          >
+            <path d="M12 2l2.9 7.5L22 10l-5.6 4.2L17.9 22 12 17.6 6.1 22l1.5-7.8L2 10l7.1-.5L12 2z" />
+          </svg>
+          <h2 className="mb-4 text-xl font-bold text-gray-800">
+            Sorry, this category doesn&apos;t exist.
+          </h2>
+          <Link href="/blog" className="text-blue-600 font-medium hover:underline">
+            &larr; Back to Blog
+          </Link>
+        </div>
       </div>
     );
   }
 
-  // --- TODO: Fetch blog posts for this category (replace this placeholder) ---
-  // Codex: If you have a static blog source, filter by category/categories array
-  // If you move to dynamic DB fetch, replace this logic accordingly
-  // Example (static): 
-  // const blogPosts = (siteData.BLOG_POSTS || []).filter(
-  //   (post) =>
-  //     post.category === categorySlug ||
-  //     (Array.isArray(post.categories) && post.categories.includes(categorySlug))
-  // );
-  const blogPosts: BlogPost[] = [];
+  // --- If you wish to filter blogPosts, do it here. ---
+  // e.g. const blogPosts = ...
 
+  // BlogPage currently only accepts `searchParams`.
+  // To pass `category` or `blogPosts`, extend BlogPage’s props in app/blog/page.tsx.
   return (
-    <BlogPage
-      searchParams={{ ...searchParams, category: categorySlug }}
-      category={category}
-      blogPosts={blogPosts}
-    />
+    <BlogPage searchParams={{ ...searchParams, category: categorySlug }} />
   );
 }

@@ -27,7 +27,7 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({
-  activeSection: _activeSection, // no longer needed—route-based highlight only
+  // activeSection: _activeSection, // Removed as it's unused
   setActiveSection,
   sidebarOpen,
   setSidebarOpen,

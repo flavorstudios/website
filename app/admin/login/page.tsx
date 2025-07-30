@@ -32,9 +32,15 @@ export const metadata = getMetadata({
     description: `Access all admin tools to manage posts, videos, comments, and more for ${SITE_NAME} from a single secure dashboard.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   // No JSON-LD/schema for admin pages
 });
+
+// -- Correct way to set viewport in Next.js App Router --
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export default function AdminLoginPage() {
   // No client-side redirect or session check; handled by middleware!

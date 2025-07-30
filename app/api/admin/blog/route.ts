@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
+import type { BlogPost } from "@/lib/content-store" // <-- Import your BlogPost type
 
 export async function POST(request: NextRequest) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
   }
   try {
     // In a real implementation, this would fetch from Firestore
-    const posts = []
+    const posts: BlogPost[] = [] // <-- Typed explicitly!
 
     return NextResponse.json({ posts })
   } catch (error) {

@@ -1,11 +1,11 @@
 "use client"
 
-import { Bold, Italic, Underline } from "lucide-react"
+import { Bold, Italic, Underline as UnderlineIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import TiptapEditor from "../components/tiptap-editor"
 import { useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
-import UnderlineExtension from "@tiptap/extension-underline"
+import { Underline } from "@tiptap/extension-underline"
 
 interface Props {
   value: string
@@ -14,7 +14,7 @@ interface Props {
 
 export default function RichEditor({ value, onChange }: Props) {
   const editor = useEditor({
-    extensions: [StarterKit, UnderlineExtension],
+    extensions: [StarterKit, Underline],
     content: value,
     onUpdate({ editor }) {
       onChange(editor.getHTML())
@@ -37,7 +37,7 @@ export default function RichEditor({ value, onChange }: Props) {
           <Italic className="h-4 w-4" />
         </Button>
         <Button variant="ghost" size="sm" onClick={() => toggle(() => editor.chain().focus().toggleUnderline().run())}>
-          <Underline className="h-4 w-4" />
+          <UnderlineIcon className="h-4 w-4" />
         </Button>
       </div>
       <TiptapEditor value={value} onChange={onChange} />

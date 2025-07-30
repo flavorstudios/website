@@ -5,15 +5,12 @@ import { adminAuth, adminDb, getAllowedAdminEmails } from "@/lib/firebase-admin"
 import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Centralized logging
 
-// Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
 const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    // If user is already authenticated as admin, skip re-login
     if (await requireAdmin(req)) {
       if (debug) {
-        // eslint-disable-next-line no-console
         console.log("google-session: User already logged in as admin.");
       }
       return NextResponse.json({ ok: true, message: "Already logged in." });
@@ -22,7 +19,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const { idToken } = await req.json();
 
     if (!idToken) {
-      logError("google-session: Missing ID token in request.");
+      logError("google-session: Missing ID token in request.", {});
       return NextResponse.json({ error: "Missing ID token." }, { status: 400 });
     }
 
@@ -31,7 +28,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
       decoded = await adminAuth.verifyIdToken(idToken, true);
       if (debug) {
-        // eslint-disable-next-line no-console
         console.log("google-session: ID token verified for email:", decoded.email);
       }
     } catch (err: unknown) {
@@ -41,7 +37,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         "code" in err &&
         (err as { code?: string }).code === "auth/id-token-revoked"
       ) {
-        logError("google-session: Token revoked for email", (err as { email?: string })?.email);
+        logError("google-session: Token revoked for email", (err as { email?: string })?.email || {});
         return NextResponse.json({ error: "Token revoked" }, { status: 401 });
       }
       logError("google-session: verifyIdToken failed", err);
@@ -52,19 +48,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (debug) {
       const normalizedLoginEmail = decoded.email?.trim().toLowerCase();
       const allowedAdminEmails = getAllowedAdminEmails();
-      // eslint-disable-next-line no-console
       console.log("[google-session] Normalized login email:", `"${normalizedLoginEmail}"`);
-      // eslint-disable-next-line no-console
       console.log("[google-session] Allowed admin emails:", allowedAdminEmails.map(e => `"${e}"`));
     }
 
     // --- Check admin email authorization securely (server-side only) ---
     try {
-      // Use a short-lived session just to verify admin email (never exposed to client)
       const testSessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn: 5 * 60 * 1000 });
       await verifyAdminSession(testSessionCookie); // Throws if not allowed
       if (debug) {
-        // eslint-disable-next-line no-console
         console.log("google-session: Admin email authorized:", decoded.email);
       }
     } catch (err: unknown) {
@@ -91,7 +83,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // --- LOGGING: Cookie issued for admin ---
     if (debug) {
-      // eslint-disable-next-line no-console
       console.log("google-session: Admin session cookie set for", decoded.email);
     }
 

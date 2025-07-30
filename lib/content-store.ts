@@ -23,6 +23,8 @@ export interface BlogPost {
   views: number;
   readTime?: string;
   commentCount?: number;      // <--- Codex: comment count for API/UI
+  schemaType?: string;        // <--- ADDED for SEO & preview
+  openGraphImage?: string;    // <--- ADDED for SEO & preview
 }
 
 export interface Video {
@@ -83,6 +85,8 @@ export const BlogPostSchema = z.object({
   views: z.number(),
   readTime: z.string().optional(),
   commentCount: z.number().optional(),           // <--- Codex: optional
+  schemaType: z.string().optional(),             // <--- ADDED for SEO & preview
+  openGraphImage: z.string().optional(),         // <--- ADDED for SEO & preview
 });
 
 export const VideoSchema = z.object({

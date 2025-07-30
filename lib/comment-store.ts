@@ -1,7 +1,34 @@
 // --- COMMENT STORE ---
 
-import { adminDb } from "@/lib/firebase-admin"; // Place at top of your file
+import { adminDb } from "@/lib/firebase-admin";
 
+// --- Define and export Comment type ---
+export type Comment = {
+  id: string;
+  postId: string;      // blog/video post id
+  postSlug?: string;   // optional: for convenience
+  postType: "blog" | "video"; // <-- Added, required by your API POST logic!
+  author?: string;     // commenter name
+  user?: string;       // user id or name (optional)
+  email?: string;
+  website?: string;
+  content: string;
+  parentId?: string | null;
+  ip?: string;
+  userAgent?: string;
+  status: "approved" | "pending" | "rejected";
+  scores?: {
+    toxicity?: number;
+    insult?: number;
+    threat?: number;
+    [key: string]: number | undefined;
+  };
+  flagged?: boolean;
+  createdAt: string;
+  [key: string]: any; // Firestore data extension
+};
+
+// --- COMMENT STORE LOGIC ---
 export const commentStore = {
   // Fetch all comments (across all posts), flattened list
   async getAll(): Promise<Comment[]> {
@@ -35,7 +62,7 @@ export const commentStore = {
   // Create a new comment: runs Perspective moderation and saves with status
   async create(comment: Omit<Comment, "id" | "createdAt" | "status" | "scores">): Promise<Comment> {
     const PERSPECTIVE_API_KEY = process.env.PERSPECTIVE_API_KEY;
-    const THRESHOLD = 0.75; // Adjust as needed
+    const THRESHOLD = 0.75;
 
     // --- Perspective Moderation ---
     let moderation: unknown = {};
@@ -61,7 +88,7 @@ export const commentStore = {
       throw new Error("Comment moderation failed");
     }
 
-    // Type guard for expected moderation structure
+    // Extract moderation scores
     const attr = (moderation as {
       attributeScores?: Record<string, { summaryScore: { value: number } }>;
     })?.attributeScores;

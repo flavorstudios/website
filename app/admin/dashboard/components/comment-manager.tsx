@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Check, X, Trash2, MessageSquare, Search, AlertTriangle, Shield, Info } from "lucide-react"
+import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
 import CommentStatsChart from "@/components/admin/comment/CommentStatsChart"
@@ -61,6 +62,7 @@ export function CommentManager() {
       setComments(data.comments || [])
     } catch (error) {
       console.error("Failed to load comments:", error)
+      toast("Failed to load comments", { variant: "destructive" })
     } finally {
       setLoading(false)
     }
@@ -78,9 +80,22 @@ export function CommentManager() {
         body: JSON.stringify({ status, postId, commentId: id }),
         credentials: "include",
       })
-      if (response.ok) await loadComments()
+      if (response.ok) {
+        await loadComments()
+        toast(
+          status === "approved"
+            ? "Comment approved."
+            : status === "spam"
+            ? "Comment marked as spam."
+            : "Comment updated."
+        )
+      } else {
+        const data = await response.json()
+        toast(data.error || "Failed to update comment", { variant: "destructive" })
+      }
     } catch (error) {
       console.error("Failed to update comment:", error)
+      toast("Failed to update comment", { variant: "destructive" })
     }
   }
 
@@ -93,14 +108,20 @@ export function CommentManager() {
     if (!deleteTargets) return
     for (const { id, postId } of deleteTargets) {
       try {
-        await fetch(`/api/admin/comments/${postId}/${id}`, {
+        const res = await fetch(`/api/admin/comments/${postId}/${id}`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ postId, commentId: id }),
           credentials: "include",
         })
+        if (res.ok) {
+          toast("Comment deleted.")
+        } else {
+          const data = await res.json()
+          toast(data.error || "Failed to delete comment", { variant: "destructive" })
+        }
       } catch (error) {
-        // Optional: handle error feedback here
+        toast("Failed to delete comment", { variant: "destructive" })
       }
     }
     setSelectedIds((ids) =>

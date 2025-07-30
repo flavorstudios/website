@@ -85,6 +85,7 @@ const orgSchema = getSchema({
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { headers } from "next/headers";
 import Script from "next/script"; // ADDED for GTM
+import AdblockBanner from "@/components/AdblockBanner"; // ⭐️ Add this line
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const h = headers();
@@ -146,6 +147,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* END GTM (NOSCRIPT) */}
 
         <Toaster />
+
+        {/* ⭐️ AdBlock Support Banner (only for non-admin routes) */}
+        {!isAdmin && <AdblockBanner />}
 
         {!isAdmin && (
           <Header blogCategories={blogCategories} videoCategories={videoCategories} />

@@ -48,7 +48,7 @@ export function CommentManager() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("pending")
-  const [deleteIds, setDeleteIds] = useState<string[] | null>(null)
+  const [deleteTargets, setDeleteTargets] = useState<{ id: string; postId: string }[] | null>(null)
 
   useEffect(() => {
     loadComments()
@@ -66,12 +66,16 @@ export function CommentManager() {
     }
   }
 
-  const updateCommentStatus = async (id: string, status: Comment["status"]) => {
+  const updateCommentStatus = async (
+    id: string,
+    postId: string,
+    status: Comment["status"]
+  ) => {
     try {
-      const response = await fetch(`/api/admin/comments/${id}`, {
+      const response = await fetch(`/api/admin/comments/${postId}/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, postId, commentId: id }),
         credentials: "include",
       })
       if (response.ok) await loadComments()
@@ -81,44 +85,57 @@ export function CommentManager() {
   }
 
   // Only modal, not browser confirm
-  const deleteComment = async (id: string) => {
-    setDeleteIds([id])
+  const deleteComment = async (id: string, postId: string) => {
+    setDeleteTargets([{ id, postId }])
   }
 
   const confirmDelete = async () => {
-    if (!deleteIds) return
-    for (const id of deleteIds) {
+    if (!deleteTargets) return
+    for (const { id, postId } of deleteTargets) {
       try {
-        await fetch(`/api/admin/comments/${id}`, {
+        await fetch(`/api/admin/comments/${postId}/${id}`, {
           method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ postId, commentId: id }),
           credentials: "include",
         })
       } catch (error) {
         // Optional: handle error feedback here
       }
     }
-    setSelectedIds((ids) => ids.filter((id) => !deleteIds.includes(id)))
-    setDeleteIds(null)
+    setSelectedIds((ids) =>
+      ids.filter((id) => !deleteTargets.some((t) => t.id === id))
+    )
+    setDeleteTargets(null)
     await loadComments()
   }
 
   // Bulk Actions
   const handleBulkApprove = async () => {
     for (const id of selectedIds) {
-      await updateCommentStatus(id, "approved")
+      const postId = comments.find((c) => c.id === id)?.postId
+      if (postId) {
+        await updateCommentStatus(id, postId, "approved")
+      }
     }
     setSelectedIds([])
   }
 
   const handleBulkSpam = async () => {
     for (const id of selectedIds) {
-      await updateCommentStatus(id, "spam")
+      const postId = comments.find((c) => c.id === id)?.postId
+      if (postId) {
+        await updateCommentStatus(id, postId, "spam")
+      }
     }
     setSelectedIds([])
   }
 
   const handleBulkDelete = async () => {
-    setDeleteIds(selectedIds)
+    const targets = comments
+      .filter((c) => selectedIds.includes(c.id))
+      .map((c) => ({ id: c.id, postId: c.postId }))
+    setDeleteTargets(targets)
   }
 
   const filteredComments = comments.filter((comment) => {
@@ -244,8 +261,10 @@ export function CommentManager() {
                 <CommentCard
                   key={comment.id}
                   comment={comment}
-                  onUpdateStatus={updateCommentStatus}
-                  onDelete={() => deleteComment(comment.id)}
+                  onUpdateStatus={(id, postId, status) =>
+                    updateCommentStatus(id, postId, status)
+                  }
+                  onDelete={() => deleteComment(comment.id, comment.postId)}
                   selected={selectedIds.includes(comment.id)}
                   onSelect={() =>
                     setSelectedIds((ids) =>
@@ -264,17 +283,17 @@ export function CommentManager() {
       </Tabs>
 
       {/* Modal for single or bulk delete confirmation */}
-      {deleteIds && (
-        <AlertDialog open onOpenChange={(open) => !open && setDeleteIds(null)}>
+      {deleteTargets && (
+        <AlertDialog open onOpenChange={(open) => !open && setDeleteTargets(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>
-                Delete {deleteIds.length > 1 ? "Comments" : "Comment"}
+                Delete {deleteTargets.length > 1 ? "Comments" : "Comment"}
               </AlertDialogTitle>
             </AlertDialogHeader>
             <p>
-              Are you sure you want to delete {deleteIds.length > 1 ? "these" : "this"} comment
-              {deleteIds.length > 1 ? "s" : ""}? This action cannot be undone.
+              Are you sure you want to delete {deleteTargets.length > 1 ? "these" : "this"} comment
+              {deleteTargets.length > 1 ? "s" : ""}? This action cannot be undone.
             </p>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -296,7 +315,7 @@ function CommentCard({
   onSelect,
 }: {
   comment: Comment
-  onUpdateStatus: (id: string, status: Comment["status"]) => void
+  onUpdateStatus: (id: string, postId: string, status: Comment["status"]) => void
   onDelete: () => void
   selected?: boolean
   onSelect?: () => void
@@ -406,7 +425,7 @@ function CommentCard({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onUpdateStatus(comment.id, "approved")}
+                        onClick={() => onUpdateStatus(comment.id, comment.postId, "approved")}
                         aria-label="Approve comment"
                         className="text-green-600 border-green-200 hover:bg-green-50"
                       >
@@ -423,7 +442,7 @@ function CommentCard({
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onUpdateStatus(comment.id, "spam")}
+                        onClick={() => onUpdateStatus(comment.id, comment.postId, "spam")}
                         aria-label="Mark as spam"
                         className="text-red-600 border-red-200 hover:bg-red-50"
                       >

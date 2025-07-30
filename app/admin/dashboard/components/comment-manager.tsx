@@ -210,8 +210,8 @@ export function CommentManager() {
       {/* --- COMMENT STATS CHART (RECHARTS) INSERTED HERE --- */}
       <CommentStatsChart />
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
+      {/* Stats Cards: mobile wraps, 2-col; sm=3, md=5 */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-gray-900">{statusCounts.all}</div>
@@ -254,9 +254,9 @@ export function CommentManager() {
         disabled={loading}
       />
 
-      {/* Comments Tabs */}
+      {/* Comments Tabs: wraps on mobile */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full">
           <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
           <TabsTrigger value="pending">Pending ({statusCounts.pending})</TabsTrigger>
           <TabsTrigger value="approved">Approved ({statusCounts.approved})</TabsTrigger>

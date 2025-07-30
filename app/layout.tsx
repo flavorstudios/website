@@ -14,6 +14,7 @@ import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 import PwaServiceWorker from "@/components/PwaServiceWorker";
 import Toaster from "@/components/ui/toaster";
+import AdblockBanner from "@/components/AdblockBanner";
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -85,7 +86,6 @@ const orgSchema = getSchema({
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { headers } from "next/headers";
 import Script from "next/script"; // ADDED for GTM
-import AdblockBanner from "@/components/AdblockBanner"; // ⭐️ Add this line
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const h = headers();
@@ -162,6 +162,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <Footer />
             <BackToTop />
             <PwaServiceWorker />
+            {/* ⭐️ LOAD the stealth detection script only for non-admin */}
+            <Script src="/js/_support_banner.js" strategy="afterInteractive" />
           </>
         )}
       </body>

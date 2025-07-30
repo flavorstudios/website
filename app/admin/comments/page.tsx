@@ -14,6 +14,7 @@ type Comment = {
   postType: "blog" | "video";
   createdAt: string;
   status: "pending" | "approved" | "spam" | "trash";
+  flagged?: boolean; // <-- ADDED as per Codex audit
   scores?: { toxicity: number; insult: number; threat: number };
 };
 

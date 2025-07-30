@@ -17,10 +17,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Check, X, Trash2, MessageSquare, Search, AlertTriangle, Shield } from "lucide-react"
+import { Check, X, Trash2, MessageSquare, Search, AlertTriangle, Shield, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
-import CommentStatsChart from "@/components/admin/comment/CommentStatsChart" // <-- ADDED
+import CommentStatsChart from "@/components/admin/comment/CommentStatsChart"
 
 interface Comment {
   id: string
@@ -394,22 +394,32 @@ function CommentCard({
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="text-gray-700 leading-relaxed">{comment.content}</p>
               {comment.scores && (
-                <table className="mt-2 text-xs text-gray-600">
-                  <tbody>
-                    <tr>
-                      <td className="pr-2">Toxicity:</td>
-                      <td>{comment.scores.toxicity.toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                      <td className="pr-2">Insult:</td>
-                      <td>{comment.scores.insult.toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                      <td className="pr-2">Threat:</td>
-                      <td>{comment.scores.threat.toFixed(2)}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                <span className="inline-flex items-center mt-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-4 w-4 text-gray-500 inline ml-1 cursor-pointer" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="p-0">
+                      <table className="text-xs text-gray-600">
+                        <tbody>
+                          <tr>
+                            <td className="pr-2">Toxicity:</td>
+                            <td>{comment.scores.toxicity.toFixed(2)}</td>
+                          </tr>
+                          <tr>
+                            <td className="pr-2">Insult:</td>
+                            <td>{comment.scores.insult.toFixed(2)}</td>
+                          </tr>
+                          <tr>
+                            <td className="pr-2">Threat:</td>
+                            <td>{comment.scores.threat.toFixed(2)}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </TooltipContent>
+                  </Tooltip>
+                  <span className="ml-2 text-xs text-gray-400">(Moderation scores)</span>
+                </span>
               )}
             </div>
 

@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect, useCallback, useRef } from "react"
 import { Search, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -37,27 +36,18 @@ interface SearchResults {
 // Debounce hook
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value)
-
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-
-    return () => {
-      clearTimeout(handler)
-    }
+    const handler = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(handler)
   }, [value, delay])
-
   return debouncedValue
 }
 
 // Highlight search terms in text
 function highlightText(text: string, searchTerm: string) {
   if (!searchTerm.trim()) return text
-
   const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi")
   const parts = text.split(regex)
-
   return parts.map((part, index) =>
     regex.test(part) ? (
       <mark key={index} className="bg-blue-100 text-blue-900 rounded px-1">
@@ -85,14 +75,12 @@ export function SearchFeature() {
       setResults({ blogs: [], videos: [] })
       return
     }
-
     setIsLoading(true)
     try {
       const [blogsResponse, videosResponse] = await Promise.allSettled([
         fetch("/api/blogs"),
         fetch("/api/videos"),
       ])
-
       let blogs: BlogPost[] = []
       let videos: Video[] = []
 
@@ -110,7 +98,6 @@ export function SearchFeature() {
             const categories = Array.isArray(blog.categories) && blog.categories.length
               ? blog.categories.map((c) => c.toLowerCase())
               : [blog.category?.toLowerCase()]
-
             return (
               title.includes(search) ||
               slug.includes(search) ||
@@ -120,7 +107,6 @@ export function SearchFeature() {
           })
           .slice(0, 5)
       }
-
       // Process videos
       if (videosResponse.status === "fulfilled" && videosResponse.value.ok) {
         const videosData = await videosResponse.value.json()
@@ -132,7 +118,6 @@ export function SearchFeature() {
           )
           .slice(0, 5)
       }
-
       setResults({ blogs, videos })
     } catch (error) {
       console.error("Search error:", error)
@@ -161,17 +146,14 @@ export function SearchFeature() {
         }
       }
     }
-
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [isOpen])
 
   // Handle modal keyboard navigation
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleModalKeyDown = (e: React.KeyboardEvent) => {
     if ("ontouchstart" in window) return
-
     const totalResults = results.blogs.length + results.videos.length
-
     if (e.key === "ArrowDown") {
       e.preventDefault()
       setSelectedIndex((prev) => (prev + 1) % totalResults)
@@ -220,18 +202,18 @@ export function SearchFeature() {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent
           className="max-w-full max-h-full sm:max-w-2xl p-0 gap-0 border-none bg-transparent sm:bg-white sm:border sm:rounded-lg"
-          onKeyDown={handleKeyDown}
+          onKeyDown={handleModalKeyDown}
         >
           <div className="fixed inset-0 sm:relative bg-background/95 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none flex flex-col">
             <div className="flex-shrink-0 border-b bg-white p-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 w-full sm:w-auto">
                 <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                 <Input
                   ref={inputRef}
                   placeholder="Search blog posts, videos, or support content…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-0 focus-visible:ring-0 text-base sm:text-lg flex-1"
+                  className="border-0 focus-visible:ring-0 text-base sm:text-lg flex-1 w-full"
                   autoComplete="off"
                 />
                 {isLoading && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground flex-shrink-0" />}

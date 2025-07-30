@@ -15,6 +15,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { toast } from "@/components/ui/toast"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 import BlogTable from "@/components/admin/blog/BlogTable"
 import BlogBulkActions from "@/components/admin/blog/BlogBulkActions"
@@ -23,7 +32,7 @@ import type { BlogPost } from "@/lib/content-store"
 import type { CategoryData } from "@/lib/dynamic-categories"
 import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions"
 import { cn } from "@/lib/utils"
-import { Pagination } from "@/components/admin/Pagination" // <-- Now using the shared Pagination
+import { Pagination } from "@/components/admin/Pagination"
 
 export const BlogManager = () => {
   const [isRevalidating, setIsRevalidating] = useState(false)
@@ -42,6 +51,7 @@ export const BlogManager = () => {
 
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
+  const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null) // <-- for AlertDialog
 
   useEffect(() => {
     loadData()
@@ -72,7 +82,7 @@ export const BlogManager = () => {
       )
     } catch (err) {
       console.error("Failed to load posts:", err)
-      toast("Failed to load posts")
+      toast("Failed to load posts", { variant: "destructive" })
       setError("Could not load blog posts. Please refresh or try again later.")
     } finally {
       setLoading(false)
@@ -86,7 +96,7 @@ export const BlogManager = () => {
       toast(result.message)
     } catch (error) {
       console.error("Failed to revalidate blog:", error)
-      toast("Failed to revalidate blog section.")
+      toast("Failed to revalidate blog section.", { variant: "destructive" })
     } finally {
       setIsRevalidating(false)
     }
@@ -96,29 +106,56 @@ export const BlogManager = () => {
     router.push("/admin/blog/create")
   }
 
-  const deletePost = async (id: string) => {
-    if (!confirm("Delete this post? This cannot be undone.")) return
-    try {
-      const res = await fetch(`/api/admin/blogs/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      })
-      if (res.ok) {
-        toast("Post deleted")
-        await loadData()
-        setSelected((prev) => {
-          const s = new Set(prev)
-          s.delete(id)
-          return s
+  // --- DELETE POST MODAL HANDLER (single or bulk) ---
+  const deletePost = (id: string) => {
+    setDeleteTargets([id])
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTargets) return
+    for (const id of deleteTargets) {
+      try {
+        const res = await fetch(`/api/admin/blogs/${id}`, {
+          method: "DELETE",
+          credentials: "include",
         })
-      } else {
-        const data = await res.json()
-        toast(data.error || "Failed to delete")
+        if (res.ok) {
+          toast("Post deleted")
+          setSelected((prev) => {
+            const s = new Set(prev)
+            s.delete(id)
+            return s
+          })
+        } else {
+          const data = await res.json()
+          toast(data.error || "Failed to delete", { variant: "destructive" })
+        }
+      } catch (err) {
+        console.error("Delete failed", err)
+        toast("Failed to delete", { variant: "destructive" })
       }
-    } catch (err) {
-      console.error("Delete failed", err)
-      toast("Failed to delete")
     }
+    setDeleteTargets(null)
+    setSelected((prev) => {
+      const next = new Set(prev)
+      deleteTargets.forEach(id => next.delete(id))
+      return next
+    })
+    await loadData()
+  }
+
+  const handleBulk = async (action: "publish" | "unpublish" | "delete") => {
+    const ids = Array.from(selected)
+    if (ids.length === 0) return
+    if (action === "delete") {
+      setDeleteTargets(ids)
+      return // confirmation handled by modal
+    }
+    for (const id of ids) {
+      await togglePublish(id, action === "publish")
+    }
+    setSelected(new Set())
+    await loadData()
   }
 
   const togglePublish = async (id: string, publish: boolean) => {
@@ -134,11 +171,11 @@ export const BlogManager = () => {
         await loadData()
       } else {
         const data = await res.json()
-        toast(data.error || "Update failed")
+        toast(data.error || "Update failed", { variant: "destructive" })
       }
     } catch (err) {
       console.error("Publish toggle failed", err)
-      toast("Update failed")
+      toast("Update failed", { variant: "destructive" })
     }
   }
 
@@ -157,18 +194,6 @@ export const BlogManager = () => {
     } else {
       setSelected(new Set())
     }
-  }
-
-  const handleBulk = async (action: "publish" | "unpublish" | "delete") => {
-    const ids = Array.from(selected)
-    if (ids.length === 0) return
-    if (action === "delete" && !confirm(`Delete ${ids.length} post(s)? This cannot be undone.`)) return
-    for (const id of ids) {
-      if (action === "delete") await deletePost(id)
-      else await togglePublish(id, action === "publish")
-    }
-    setSelected(new Set())
-    await loadData()
   }
 
   // Filters, sorting, pagination
@@ -339,6 +364,27 @@ export const BlogManager = () => {
           totalPages={totalPages}
           onPageChange={setCurrentPage}
         />
+
+        {/* Delete Confirmation Modal */}
+        {deleteTargets && (
+          <AlertDialog open onOpenChange={(open) => !open && setDeleteTargets(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  Delete {deleteTargets.length > 1 ? "Posts" : "Post"}
+                </AlertDialogTitle>
+              </AlertDialogHeader>
+              <p>
+                Are you sure you want to delete {deleteTargets.length > 1 ? "these" : "this"} post
+                {deleteTargets.length > 1 ? "s" : ""}? This action cannot be undone.
+              </p>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
     </div>
   )

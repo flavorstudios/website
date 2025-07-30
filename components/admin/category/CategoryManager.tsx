@@ -15,10 +15,19 @@ import {
   SelectItem,
 } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/hooks/use-toast"
-import { Pagination } from "@/components/admin/Pagination"  // <-- Updated import
+import { toast } from "@/components/ui/toast"
+import { Pagination } from "@/components/admin/Pagination"
 import { cn } from "@/lib/utils"
 
 interface CategoryFormProps {
@@ -49,7 +58,6 @@ function CategoryForm({ category, onSave, onCancel }: CategoryFormProps) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    // Validate hex color
     if (formData.color && !/^#[0-9A-Fa-f]{6}$/.test(formData.color.trim())) {
       toast("Please select a valid hex color.", { variant: "destructive" })
       return
@@ -130,6 +138,7 @@ export default function CategoryManager() {
   const [editing, setEditing] = useState<Category | null>(null)
   const [deleting, setDeleting] = useState<Category | null>(null)
   const [replacement, setReplacement] = useState<string>("")
+  const [bulkDeleteIds, setBulkDeleteIds] = useState<string[] | null>(null)
   const PER_PAGE = 10
 
   useEffect(() => {
@@ -256,6 +265,17 @@ export default function CategoryManager() {
     setReplacement("")
   }
 
+  // Bulk Delete (modal, not browser confirm)
+  const confirmBulkDelete = async () => {
+    if (!bulkDeleteIds) return
+    for (const cat of categories.filter((c) => bulkDeleteIds.includes(c.id))) {
+      await performDelete(cat, undefined, false)
+    }
+    setBulkDeleteIds(null)
+    setSelected(new Set())
+    await loadData(type)
+  }
+
   const toggleStatus = async (id: string, isActive: boolean) => {
     try {
       await fetch(`/api/admin/categories/${id}`, {
@@ -295,14 +315,10 @@ export default function CategoryManager() {
     ids.forEach((id) => toggleStatus(id, false))
     setSelected(new Set())
   }
-  // --- Bulk Delete: only reload once at the end
-  const bulkDelete = async (ids: string[]) => {
-    if (!confirm(`Delete ${ids.length} categor${ids.length === 1 ? "y" : "ies"}?`)) return
-    for (const cat of categories.filter((c) => ids.includes(c.id))) {
-      await performDelete(cat, undefined, false)
-    }
-    setSelected(new Set())
-    await loadData(type)
+  // Updated: open a modal dialog instead of browser confirm
+  const bulkDelete = (ids: string[]) => {
+    if (ids.length === 0) return
+    setBulkDeleteIds(ids)
   }
 
   const filtered = categories.filter((c) =>
@@ -398,7 +414,7 @@ export default function CategoryManager() {
           onCancel={() => setEditing(null)}
         />
       )}
-      {/* Delete dialog with reassignment support */}
+      {/* Single Delete dialog with reassignment support */}
       {deleting && (
         <Dialog open onOpenChange={() => setDeleting(null)}>
           <DialogContent className="max-w-md space-y-4">
@@ -442,6 +458,26 @@ export default function CategoryManager() {
             </div>
           </DialogContent>
         </Dialog>
+      )}
+      {/* Bulk Delete Modal */}
+      {bulkDeleteIds && (
+        <AlertDialog open onOpenChange={(open) => !open && setBulkDeleteIds(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Delete {bulkDeleteIds.length > 1 ? "Categories" : "Category"}
+              </AlertDialogTitle>
+            </AlertDialogHeader>
+            <p>
+              Are you sure you want to delete {bulkDeleteIds.length > 1 ? "these" : "this"} categor
+              {bulkDeleteIds.length > 1 ? "ies" : "y"}?
+            </p>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmBulkDelete}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </div>
   )

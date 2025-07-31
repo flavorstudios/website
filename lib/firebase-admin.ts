@@ -1,8 +1,8 @@
 // lib/firebase-admin.ts
 
 import { cert, getApps, initializeApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
+import { getAuth, Auth } from "firebase-admin/auth";
+import { getFirestore, Firestore } from "firebase-admin/firestore";
 
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
 const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
@@ -78,5 +78,23 @@ export const getAllowedAdminEmails = (): string[] => {
 };
 
 // ✅ Export Firebase Admin Services - export undefined if not initialized!
-export const adminAuth = serviceAccountKey && parsedCredentials ? getAuth() : undefined;
-export const adminDb = serviceAccountKey && parsedCredentials ? getFirestore() : undefined;
+export const adminAuth: Auth | undefined = serviceAccountKey && parsedCredentials ? getAuth() : undefined;
+export const adminDb: Firestore | undefined = serviceAccountKey && parsedCredentials ? getFirestore() : undefined;
+
+/**
+ * Safe getter for adminAuth that throws with a clear error if unavailable.
+ * Use for type-safety and DX.
+ */
+export function getAdminAuth(): Auth {
+  if (!adminAuth) throw new Error("Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY missing or invalid.");
+  return adminAuth;
+}
+
+/**
+ * Safe getter for adminDb that throws with a clear error if unavailable.
+ * Use for type-safety and DX.
+ */
+export function getAdminDb(): Firestore {
+  if (!adminDb) throw new Error("Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY missing or invalid.");
+  return adminDb;
+}

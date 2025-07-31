@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
-import { blogStore } from "@/lib/comment-store"
+import { blogStore } from "@/lib/content-store" // <-- Updated as per Codex
 
 // GET: Fetch all blogs for admin dashboard
 export async function GET(request: NextRequest) {

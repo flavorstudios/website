@@ -4,9 +4,28 @@ import { SITE_URL, SITE_NAME } from "@/lib/constants";
 import { getCanonicalUrl } from "@/lib/seo-utils";
 import fs from "fs";
 import path from "path";
-import type { BlogPost, Video } from "@/lib/content-store"; // <-- FIXED: Video now from content-store
+import type { BlogPost } from "@/lib/content-store";
 
-// Detects MIME type from file extension
+// ---- Video interface with categories? ----
+export interface Video {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  youtubeId?: string;
+  thumbnail?: string;
+  duration?: string;
+  category?: string;
+  categories?: string[]; // <-- Added as per Codex audit
+  publishedAt: string;
+  views?: number;
+  featured?: boolean;
+  status?: string;
+  tags?: string[];
+  [key: string]: unknown;
+}
+// ------------------------------------------
+
 function getMimeType(url: string): string {
   if (url.endsWith(".png")) return "image/png";
   if (url.endsWith(".webp")) return "image/webp";
@@ -14,7 +33,6 @@ function getMimeType(url: string): string {
   return "application/octet-stream";
 }
 
-// Gets byte length for local (public/) files; undefined for remote
 async function getFileSize(url: string): Promise<string | undefined> {
   if (url.startsWith("/")) {
     try {
@@ -83,7 +101,6 @@ export function truncateDescription(text: string, maxLength = 200): string {
   return text.substring(0, maxLength).trim() + "...";
 }
 
-// Codex: Securely load admin contact from env, fallback only if missing.
 function getRssAdminContact(): string {
   return (
     process.env.RSS_ADMIN_CONTACT ||
@@ -99,7 +116,6 @@ function getRssManagingEditor(): string {
   );
 }
 
-// RSS 2.0 XML builder (SEO-friendly, always canonical URLs)
 export function generateRSSXML(channel: RSSChannel, items: RSSItem[]): string {
   const xmlItems = items
     .map(
@@ -179,7 +195,6 @@ export async function generateRssFeed(): Promise<string> {
       description: truncateDescription(stripHtml(post.excerpt || post.content)),
       link: getCanonicalUrl(`/blog/${post.slug}`),
       pubDate: formatRSSDate(post.publishedAt),
-      // Multi-category support: prefer first .categories[] or fallback to .category
       category: Array.isArray(post.categories) && post.categories.length > 0
         ? post.categories[0]
         : post.category || "General",
@@ -207,7 +222,6 @@ export async function generateRssFeed(): Promise<string> {
           description: truncateDescription(stripHtml(video.description)),
           link: getCanonicalUrl(`/watch/${video.slug}`), // Use only slug, never fallback to id
           pubDate: formatRSSDate(video.publishedAt),
-          // Multi-category support: prefer first .categories[] or fallback to .category
           category: Array.isArray(video.categories) && video.categories.length > 0
             ? video.categories[0]
             : video.category || "General",

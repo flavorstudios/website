@@ -618,7 +618,7 @@ export default function PlayPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-3 text-sm sm:text-base leading-relaxed">
-                We're working on adding more exciting games with various difficulty levels and multiplayer options.
+                We&apos;re working on adding more exciting games with various difficulty levels and multiplayer options.
               </p>
               <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs sm:text-sm">
                 Stay Tuned for Updates

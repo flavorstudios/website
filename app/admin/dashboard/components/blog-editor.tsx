@@ -27,6 +27,9 @@ import {
 import { toast } from "sonner"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
+// --- Use external BlogPost type, as per Codex suggestion ---
+import type { BlogPost } from "@/lib/content-store"
+
 const titleMin = 50
 const titleMax = 60
 const descMin = 120
@@ -43,33 +46,6 @@ export interface BlogCategory {
   name: string
   slug: string
   tooltip?: string
-}
-
-export interface BlogPost {
-  id: string
-  title: string
-  slug: string
-  content: string
-  excerpt: string
-  category: string
-  categories: string[]
-  tags: string[]
-  featuredImage: string
-  seoTitle: string
-  seoDescription: string
-  seoKeywords: string
-  openGraphImage: string
-  schemaType: string
-  status: "draft" | "published" | "scheduled"
-  featured: boolean
-  publishedAt?: Date
-  scheduledFor?: Date
-  author: string
-  wordCount: number
-  readTime: string
-  createdAt?: string
-  updatedAt?: string
-  views?: number
 }
 
 export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> }) {
@@ -289,10 +265,10 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
 
   const host = typeof window !== "undefined" ? window.location.host : "example.com"
 
-  // Ensure previewPost satisfies BlogPost (add default fields)
+  // --- Codex fix: publishedAt stays Date or undefined, not string ---
   const previewPost: BlogPost = {
     ...post,
-    publishedAt: post.publishedAt ? post.publishedAt.toISOString() : "",
+    publishedAt: post.publishedAt ?? undefined,
     createdAt: post.createdAt ?? new Date().toISOString(),
     updatedAt: post.updatedAt ?? new Date().toISOString(),
     views: post.views ?? 0,

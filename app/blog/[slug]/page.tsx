@@ -66,9 +66,10 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     });
   }
 
+  // --- Codex fix: use featuredImage, not coverImage ---
   const ogImage =
     post.openGraphImage ||
-    post.coverImage ||
+    post.featuredImage ||
     SITE_DEFAULT_IMAGE;
 
   const seoTitle = post.seoTitle || post.title;
@@ -104,13 +105,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // If post is not found or not published, trigger Next.js not-found page.
   if (!post) notFound();
 
-  // Article Schema JSON-LD (SEO)
+  // --- Codex fix: use featuredImage, not coverImage ---
   const articleSchema = getSchema({
     type: post.schemaType || "Article",
     path: `/blog/${post.slug}`,
     title: post.seoTitle || post.title,
     description: post.seoDescription || post.excerpt,
-    image: post.openGraphImage || post.coverImage || SITE_DEFAULT_IMAGE,
+    image: post.openGraphImage || post.featuredImage || SITE_DEFAULT_IMAGE,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
     author:

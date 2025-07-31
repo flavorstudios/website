@@ -39,7 +39,7 @@ export const commentStore = {
       const snap = await adminDb.collectionGroup("entries").get();
       return snap.docs.map(doc => ({
         id: doc.id,
-        ...(doc.data() as Comment),
+        ...(doc.data() as Omit<Comment, "id">), // << Fix: exclude id from spread
       }));
     } catch (error) {
       console.error("Failed to fetch comments:", error);
@@ -60,7 +60,7 @@ export const commentStore = {
         .get();
       return snap.docs.map(doc => ({
         id: doc.id,
-        ...(doc.data() as Comment),
+        ...(doc.data() as Omit<Comment, "id">), // << Fix: exclude id from spread
       }));
     } catch (error) {
       console.error(`Failed to fetch comments for post ${postId}:`, error);
@@ -159,7 +159,7 @@ export const commentStore = {
       await ref.update({ status });
       const doc = await ref.get();
       if (!doc.exists) return null;
-      return { id: doc.id, ...(doc.data() as Comment) };
+      return { id: doc.id, ...(doc.data() as Omit<Comment, "id">) }; // << Fix: exclude id from spread
     } catch (error) {
       console.error(`Failed to update status for comment ${commentId}:`, error);
       throw new Error("Failed to update comment status");

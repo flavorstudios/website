@@ -9,7 +9,6 @@ import { SITE_NAME, SITE_URL } from "@/lib/constants";
 // --- SEO imports ---
 import { getMetadata } from "@/lib/seo/metadata";
 import { getSchema } from "@/lib/seo/schema";
-import { getCanonicalUrl } from "@/lib/seo/canonical";
 import { StructuredData } from "@/components/StructuredData";
 
 // --- Metadata API for Next.js (fully dynamic) ---
@@ -30,9 +29,6 @@ export const metadata = getMetadata({
     description: `This page does not exist. Discover original anime, news, and stories on ${SITE_NAME} or explore our popular sections.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  // alternates: {
-  //   canonical: getCanonicalUrl("/404"),
-  // },
 });
 
 // --- JSON-LD Schema ---

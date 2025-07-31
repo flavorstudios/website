@@ -15,6 +15,9 @@ const DEFAULT_TITLE_SUFFIX = `${DEFAULT_TITLE_SEPARATOR} ${SITE_NAME}`;
 const OG_IMAGE_DEFAULT_WIDTH = 1200;
 const OG_IMAGE_DEFAULT_HEIGHT = 630;
 
+// Explicit OpenGraph image type
+type OGImage = { url: string; width?: number; height?: number; alt?: string };
+
 /**
  * SEO Metadata helper for Flavor Studios.
  * Supports title, description, canonical, Open Graph, Twitter, Schema, and robots meta.
@@ -32,7 +35,7 @@ export function getMetadata({
   title: string;
   description: string;
   path: string;
-  ogImage?: string | { url: string; width?: number; height?: number; alt?: string };
+  ogImage?: string | OGImage;
   schema?: WithContext<Thing>;
   robots?: string;
   openGraph?: Record<string, unknown>;
@@ -45,7 +48,7 @@ export function getMetadata({
 
   const canonical = getCanonicalUrl(path);
 
-  const ogImagesArray: Array<{ url: string; width?: number; height?: number; alt?: string }> =
+  const ogImagesArray: OGImage[] =
     typeof ogImage === "string"
       ? [{ url: ogImage, width: OG_IMAGE_DEFAULT_WIDTH, height: OG_IMAGE_DEFAULT_HEIGHT, alt: description }]
       : ogImage && typeof ogImage === "object" && "url" in ogImage
@@ -80,15 +83,16 @@ export function getMetadata({
     images: ogImagesArray.map((img) => img.url),
   };
 
+  // ---------- PATCHED BELOW ----------
   const mergedOpenGraph = {
     ...defaultOpenGraph,
     ...openGraph,
     siteName: SITE_NAME,
     url: canonical,
     images:
-      Array.isArray((openGraph as any).images) && (openGraph as any).images.length > 0
-        ? (openGraph as any).images.map(
-            (img: { url: string; width?: number; height?: number; alt?: string }) => ({
+      Array.isArray((openGraph as { images?: OGImage[] }).images) && (openGraph as { images?: OGImage[] }).images!.length > 0
+        ? (openGraph as { images: OGImage[] }).images.map(
+            (img) => ({
               url: img.url,
               width: img.width || OG_IMAGE_DEFAULT_WIDTH,
               height: img.height || OG_IMAGE_DEFAULT_HEIGHT,
@@ -104,12 +108,13 @@ export function getMetadata({
     site: SITE_BRAND_TWITTER,
     creator: SITE_BRAND_TWITTER,
     images:
-      Array.isArray((twitter as any).images) && (twitter as any).images.length > 0
-        ? (twitter as any).images.map(
-            (img: string | { url: string }) => (typeof img === "string" ? img : img.url)
+      Array.isArray((twitter as { images?: (string | { url: string })[] }).images) && (twitter as { images?: (string | { url: string })[] }).images!.length > 0
+        ? (twitter as { images: (string | { url: string })[] }).images.map(
+            (img) => (typeof img === "string" ? img : img.url)
           )
         : defaultTwitter.images,
   };
+  // ---------- END PATCH ----------
 
   return {
     title: fullTitle,

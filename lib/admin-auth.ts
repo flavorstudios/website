@@ -198,7 +198,12 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
     const firestoreEmails = await getFirestoreAdminEmails();
 
     if (debug) {
-      console.log("[admin-auth] Creating session cookie for email:", `"${decoded.email?.trim?.toLowerCase?.()}"`);
+      // ---- THIS IS THE ONLY LINE CHANGED AS REQUESTED ----
+      console.log(
+        "[admin-auth] Creating session cookie for email:",
+        `"${decoded.email?.trim()?.toLowerCase()}"`
+      );
+      // -----------------------------------------------------
       console.log("[admin-auth] Allowed emails:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
     }
 

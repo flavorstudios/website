@@ -15,7 +15,7 @@ import {
   Youtube,
   Calendar,
 } from "lucide-react";
-import { formatDate } from "@/lib/date"; // <-- Added import
+import { formatDate } from "@/lib/date";
 import { notFound } from "next/navigation";
 
 // --- Type for video object
@@ -163,7 +163,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
   const schema = getSchema({
     type: "VideoObject",
     path: `/watch/${video.slug}`,
-    name: video.title,
+    title: video.title, // <- CHANGED from name: to title:
     description: video.description || "No description available.",
     thumbnailUrl: [thumbnailUrl],
     uploadDate: video.publishedAt,

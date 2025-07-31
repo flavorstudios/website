@@ -520,7 +520,7 @@ export function VideoManager() {
             name: cat.name,
             slug: cat.slug,
             count: cat.postCount,
-            tooltip: cat.tooltip,
+            tooltip: cat.tooltip ?? undefined, // <-- FIXED HERE
             order: cat.order ?? 0,
             isActive: true,
           }))}

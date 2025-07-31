@@ -111,7 +111,7 @@ export function getSchema<T extends Record<string, unknown>>({
 
   // --- Base schema object ---
   const baseSchema: Partial<Thing> = {
-    "@type": type as any, // <- changed!
+    "@type": type as Thing["@type"], // <- Codex fix here!
     name: title,
     description,
     url,

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
-import { formatDate } from "@/lib/date"; // <-- NEW: import for date formatting
+import { formatDate } from "@/lib/date";
 type Category = { name: string; slug: string };
 
 export const metadata = getMetadata({
@@ -50,7 +50,7 @@ export const metadata = getMetadata({
 const schema = getSchema({
   type: "WebPage",
   path: "/watch",
-  name: `${SITE_NAME} Videos`,
+  title: `${SITE_NAME} Videos`,
   description: `Watch original anime, studio films, and exclusive video content from ${SITE_NAME}. Discover our creative world—stream the latest now.`,
   url: getCanonicalUrl("/watch"),
 });
@@ -162,7 +162,7 @@ export default async function WatchPage({
       </div>
 
       {/* Category Tabs */}
-      <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/watch" type="video" />
+      <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/watch" />
 
       {/* Featured Videos */}
       {featuredVideos.length > 0 && (

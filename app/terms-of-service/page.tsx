@@ -1,5 +1,5 @@
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"; // Removed unused SITE_LOGO_URL
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -217,60 +217,66 @@ export default function TermsOfServicePage() {
 
           {/* Main Sections */}
           <div className="space-y-4 sm:space-y-6 md:space-y-8 mb-8 sm:mb-12 md:mb-16">
-            {sections.map((section, index) => (
-              <Card key={index} id={section.id} className="scroll-mt-20 mb-6 sm:mb-8 md:mb-12">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <section.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
-                    </div>
-                    {section.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4 sm:space-y-6">
-                  {section.content.map((item, itemIndex) => (
-                    <div key={itemIndex}>
-                      <p className="text-sm sm:text-base text-gray-700 leading-relaxed sm:leading-loose mb-3">
-                        {item.text}
-                      </p>
-                      {item.list && (
-                        <ul className="space-y-2 ml-4">
-                          {item.list.map((listItem, listIndex) => (
-                            <li key={listIndex} className="flex items-start gap-2">
-                              <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
-                              <span className="text-sm sm:text-base text-gray-700 leading-relaxed sm:leading-loose">
-                                {listItem}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            ))}
+            {sections.map((section, index) => {
+              const Icon = section.icon;
+              return (
+                <Card key={index} id={section.id} className="scroll-mt-20 mb-6 sm:mb-8 md:mb-12">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
+                      </div>
+                      {section.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4 sm:space-y-6">
+                    {section.content.map((item, itemIndex) => (
+                      <div key={itemIndex}>
+                        <p className="text-sm sm:text-base text-gray-700 leading-relaxed sm:leading-loose mb-3">
+                          {item.text}
+                        </p>
+                        {item.list && (
+                          <ul className="space-y-2 ml-4">
+                            {item.list.map((listItem, listIndex) => (
+                              <li key={listIndex} className="flex items-start gap-2">
+                                <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
+                                <span className="text-sm sm:text-base text-gray-700 leading-relaxed sm:leading-loose">
+                                  {listItem}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           {/* Legal Sections */}
           <div className="space-y-4 sm:space-y-6 md:space-y-8 mb-8 sm:mb-12 md:mb-16">
             <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Legal Provisions</h2>
             <div className="grid gap-6 sm:gap-8">
-              {legalSections.map((section, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
-                      <div className="p-2 bg-blue-100 rounded-lg">
-                        <section.icon className="h-5 w-5 text-blue-600" aria-hidden="true" />
-                      </div>
-                      {section.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm sm:text-base text-gray-700 leading-relaxed sm:leading-loose">{section.text}</p>
-                  </CardContent>
-                </Card>
-              ))}
+              {legalSections.map((section, index) => {
+                const Icon = section.icon;
+                return (
+                  <Card key={index} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <Icon className="h-5 w-5 text-blue-600" aria-hidden="true" />
+                        </div>
+                        {section.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm sm:text-base text-gray-700 leading-relaxed sm:leading-loose">{section.text}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
 

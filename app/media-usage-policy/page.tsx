@@ -10,7 +10,7 @@ import {
   Mail, Shield, CheckCircle, XCircle, Eye, FileText, Phone, Globe,
   AlertTriangle, Copyright, Users, Scale, MessageSquare, Download,
   Edit, Gavel, RefreshCw, AlertCircle, Cookie,
-} from "lucide-react"; // All necessary Lucide icons are correctly imported.
+} from "lucide-react";
 import Link from "next/link";
 
 // === SEO METADATA ===
@@ -18,7 +18,7 @@ export const metadata = getMetadata({
   title: `Media Usage Policy – Copyright & Attribution | ${SITE_NAME}`,
   description: `Understand how you can use ${SITE_NAME}'s media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.`,
   path: "/media-usage-policy",
-  robots: "index,follow", // CORRECTED: Public legal pages should be indexed and followed.
+  robots: "index,follow",
   openGraph: {
     title: `Media Usage Policy – Copyright & Attribution | ${SITE_NAME}`,
     description: `Understand how you can use ${SITE_NAME}'s media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.`,
@@ -41,8 +41,7 @@ const schema = getSchema({
   path: "/media-usage-policy",
   title: `Media Usage Policy – Copyright & Attribution | ${SITE_NAME}`,
   description: `Understand how you can use ${SITE_NAME}'s media assets, animations, and images. Review rules for personal, commercial, and editorial use, including attribution requirements.`,
-  image: SITE_LOGO_URL, // Using the site's logo for consistency in legal documents.
-  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
+  image: SITE_LOGO_URL,
 });
 
 export default function MediaUsagePolicyPage() {
@@ -89,7 +88,7 @@ export default function MediaUsagePolicyPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6">Media Usage Policy</h1>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
             <div className="flex items-start gap-3">
-              <Copyright className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" /> {/* Added aria-hidden */}
+              <Copyright className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-sm sm:text-base text-blue-800 font-medium mb-2">Effective Date: May 9, 2025</p>
                 <p className="text-sm sm:text-base text-blue-700 leading-relaxed">
@@ -105,7 +104,7 @@ export default function MediaUsagePolicyPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
               <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" aria-hidden="true" />
               </div>
               Permissible Uses
             </CardTitle>
@@ -115,17 +114,20 @@ export default function MediaUsagePolicyPage() {
               Media assets provided by Flavor Studios may be used for the following purposes, provided appropriate credit is given:
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-6">
-              {permissibleUses.map((use, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 sm:p-4 bg-green-50 rounded-lg border border-green-200">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <use.icon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" aria-hidden="true" /> {/* Added aria-hidden */}
+              {permissibleUses.map((use, index) => {
+                const Icon = use.icon
+                return (
+                  <div key={index} className="flex items-start gap-3 p-3 sm:p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" aria-hidden="true" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm sm:text-base text-green-900 mb-1">{use.title}</h4>
+                      <p className="text-xs sm:text-sm text-green-800 leading-relaxed">{use.description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-sm sm:text-base text-green-900 mb-1">{use.title}</h4>
-                    <p className="text-xs sm:text-sm text-green-800 leading-relaxed">{use.description}</p>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6">
               <h4 className="font-semibold text-blue-900 mb-2 text-sm sm:text-base">Attribution Requirement</h4>
@@ -182,26 +184,29 @@ export default function MediaUsagePolicyPage() {
               The following uses of our media assets are strictly prohibited:
             </p>
             <div className="space-y-3 sm:space-y-4">
-              {prohibitedUses.map((prohibition, index) => (
-                <div
-                  key={index}
-                  className={`flex items-start gap-3 p-3 sm:p-4 rounded-lg border ${
-                    prohibition.severity === "high" ? "bg-red-50 border-red-200" : "bg-orange-50 border-orange-200"
-                  }`}
-                >
-                  <div className={`p-2 rounded-lg ${prohibition.severity === "high" ? "bg-red-100" : "bg-orange-100"}`}>
-                    <prohibition.icon className={`h-4 w-4 sm:h-5 sm:w-5 ${prohibition.severity === "high" ? "text-red-600" : "text-orange-600"}`} aria-hidden="true" />
+              {prohibitedUses.map((prohibition, index) => {
+                const Icon = prohibition.icon
+                return (
+                  <div
+                    key={index}
+                    className={`flex items-start gap-3 p-3 sm:p-4 rounded-lg border ${
+                      prohibition.severity === "high" ? "bg-red-50 border-red-200" : "bg-orange-50 border-orange-200"
+                    }`}
+                  >
+                    <div className={`p-2 rounded-lg ${prohibition.severity === "high" ? "bg-red-100" : "bg-orange-100"}`}>
+                      <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${prohibition.severity === "high" ? "text-red-600" : "text-orange-600"}`} aria-hidden="true" />
+                    </div>
+                    <div>
+                      <h4 className={`font-semibold text-sm sm:text-base mb-1 ${prohibition.severity === "high" ? "text-red-900" : "text-orange-900"}`}>
+                        {prohibition.title}
+                      </h4>
+                      <p className={`text-xs sm:text-sm leading-relaxed ${prohibition.severity === "high" ? "text-red-800" : "text-orange-800"}`}>
+                        {prohibition.description}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className={`font-semibold text-sm sm:text-base mb-1 ${prohibition.severity === "high" ? "text-red-900" : "text-orange-900"}`}>
-                      {prohibition.title}
-                    </h4>
-                    <p className={`text-xs sm:text-sm leading-relaxed ${prohibition.severity === "high" ? "text-red-800" : "text-orange-800"}`}>
-                      {prohibition.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </CardContent>
         </Card>

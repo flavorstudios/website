@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Mail, Shield, Eye, Lock, Users, FileText, AlertCircle, Phone, Cookie, Copyright
-} from "lucide-react"; // All necessary Lucide icons are correctly imported.
+} from "lucide-react";
 import Link from "next/link";
 
 // === SEO METADATA (using centralized handler) ===
@@ -229,44 +229,47 @@ export default function PrivacyPolicyPage() {
 
         {/* Main Sections */}
         <div className="space-y-4 sm:space-y-6 md:space-y-8 mb-6 sm:mb-8 md:mb-12">
-          {sections.map((section, index) => (
-            <Card key={index} id={section.id} className="scroll-mt-20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <section.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
-                  </div>
-                  {section.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 sm:space-y-6">
-                {section.content.map((item, itemIndex) => (
-                  <div key={itemIndex}>
-                    {"subtitle" in item && (
-                      <h4 className="font-semibold text-sm sm:text-base md:text-lg text-gray-900 mb-2">
-                        {item.subtitle}
-                      </h4>
-                    )}
-                    <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose mb-3">
-                      {item.text}
-                    </p>
-                    {"list" in item && item.list && (
-                      <ul className="space-y-2 ml-4">
-                        {item.list.map((listItem: string, listIndex: number) => (
-                          <li key={listIndex} className="flex items-start gap-2">
-                            <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
-                            <span className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose">
-                              {listItem}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          ))}
+          {sections.map((section, index) => {
+            const Icon = section.icon;
+            return (
+              <Card key={index} id={section.id} className="scroll-mt-20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
+                    </div>
+                    {section.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 sm:space-y-6">
+                  {section.content.map((item, itemIndex) => (
+                    <div key={itemIndex}>
+                      {"subtitle" in item && (
+                        <h4 className="font-semibold text-sm sm:text-base md:text-lg text-gray-900 mb-2">
+                          {item.subtitle}
+                        </h4>
+                      )}
+                      <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose mb-3">
+                        {item.text}
+                      </p>
+                      {"list" in item && item.list && (
+                        <ul className="space-y-2 ml-4">
+                          {item.list.map((listItem: string, listIndex: number) => (
+                            <li key={listIndex} className="flex items-start gap-2">
+                              <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
+                              <span className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose">
+                                {listItem}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
 
         {/* Additional Sections */}

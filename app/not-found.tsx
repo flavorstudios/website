@@ -70,10 +70,10 @@ export default function NotFound() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4 py-8"> {/* Added py-8 for vertical padding */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4 py-8">
       {/* SEO: Inject JSON-LD */}
       <StructuredData schema={schema} />
-      <div className="max-w-4xl mx-auto text-center w-full"> {/* Added w-full */}
+      <div className="max-w-4xl mx-auto text-center w-full">
         {/* 404 Animation */}
         <div className="mb-6 sm:mb-8">
           <div className="relative">
@@ -112,24 +112,27 @@ export default function NotFound() {
           <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">
             Or explore these popular sections:
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"> {/* Adjusted grid columns for better layout */}
-            {quickLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="group">
-                <Card className="h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
-                  <CardContent className="p-4 sm:p-5 text-center"> {/* Adjusted sm:p-6 to sm:p-5 */}
-                    <div
-                      className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r ${link.color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
-                    >
-                      <link.icon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors text-sm sm:text-base">
-                      {link.title}
-                    </h4>
-                    <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">{link.description}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {quickLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link key={link.href} href={link.href} className="group">
+                  <Card className="h-full transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25">
+                    <CardContent className="p-4 sm:p-5 text-center">
+                      <div
+                        className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 rounded-full bg-gradient-to-r ${link.color} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                      >
+                        <Icon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+                      </div>
+                      <h4 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors text-sm sm:text-base">
+                        {link.title}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">{link.description}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         </div>
 

@@ -212,7 +212,10 @@ export default function ContactPageClient() {
                 {contactInfo.map((info, index) => (
                   <div key={index} className="flex items-start gap-3">
                     <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                      <info.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                      {(() => {
+                        const Icon = info.icon;
+                        return Icon ? <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" /> : null;
+                      })()}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-semibold text-sm sm:text-base">{info.title}</div>
@@ -262,7 +265,10 @@ export default function ContactPageClient() {
                       className="justify-start h-9 sm:h-10 text-xs sm:text-sm"
                     >
                       <Link href={social.href} target="_blank" rel="noopener noreferrer">
-                        <social.icon className={`mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 ${social.color}`} />
+                        {(() => {
+                          const Icon = social.icon;
+                          return Icon ? <Icon className={`mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 ${social.color}`} /> : null;
+                        })()}
                         {social.name}
                       </Link>
                     </Button>
@@ -500,7 +506,10 @@ export default function ContactPageClient() {
                         <CardHeader className="pb-3 sm:pb-4">
                           <div className="flex items-center gap-2 sm:gap-3 mb-2">
                             <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
-                              <process.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                              {(() => {
+                                const Icon = process.icon;
+                                return Icon ? <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" /> : null;
+                              })()}
                             </div>
                             <CardTitle className="text-lg sm:text-xl">{process.title}</CardTitle>
                           </div>

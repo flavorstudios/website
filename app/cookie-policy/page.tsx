@@ -127,7 +127,10 @@ export default function CookiePolicyPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
                     <div className={`p-2 rounded-lg ${cookie.color}`}>
-                      <cookie.icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                      {(() => {
+                        const Icon = cookie.icon;
+                        return Icon ? <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> : null;
+                      })()}
                     </div>
                     {cookie.title}
                     {!cookie.canDisable && (
@@ -177,7 +180,10 @@ export default function CookiePolicyPage() {
               {usagePurposes.map((purpose, index) => (
                 <div key={index} className="flex items-start gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
                   <div className="p-2 bg-white rounded-lg shadow-sm">
-                    <purpose.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" />
+                    {(() => {
+                      const Icon = purpose.icon;
+                      return Icon ? <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" /> : null;
+                    })()}
                   </div>
                   <div>
                     <h4 className="font-semibold text-sm sm:text-base text-gray-900 mb-1">{purpose.title}</h4>

@@ -160,7 +160,6 @@ export default function PlayPageClient() {
       gameState.board,
       gameState.winner,
       gameState.isGameActive,
-      // gameState.currentPlayer, // <-- FIX: removed from dependencies
       checkWinner
     ],
   )
@@ -375,19 +374,22 @@ export default function PlayPageClient() {
         <div className="mb-6 sm:mb-8 lg:mb-12">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 sm:mb-6 lg:mb-8 text-center">Game Features</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-            {gameFeatures.map((feature, index) => (
-              <Card key={index} className="text-center h-full">
-                <CardHeader className="pb-2 sm:pb-3">
-                  <div className="mx-auto mb-2 sm:mb-3 p-2 bg-blue-100 rounded-full w-fit">
-                    <feature.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
-                  </div>
-                  <CardTitle className="text-sm sm:text-base">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-xs sm:text-sm leading-relaxed text-gray-600">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+            {gameFeatures.map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <Card key={index} className="text-center h-full">
+                  <CardHeader className="pb-2 sm:pb-3">
+                    <div className="mx-auto mb-2 sm:mb-3 p-2 bg-blue-100 rounded-full w-fit">
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                    </div>
+                    <CardTitle className="text-sm sm:text-base">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-xs sm:text-sm leading-relaxed text-gray-600">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
 

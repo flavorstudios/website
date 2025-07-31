@@ -170,7 +170,10 @@ export default function DisclaimerPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-base sm:text-xl">
                   <div className={`p-2 rounded-lg ${section.color}`}>
-                    <section.icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                    {(() => {
+                      const Icon = section.icon;
+                      return Icon ? <Icon className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> : null;
+                    })()}
                   </div>
                   {section.title}
                 </CardTitle>
@@ -191,7 +194,10 @@ export default function DisclaimerPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3 text-lg sm:text-xl">
                     <div className="p-2 bg-gray-100 rounded-lg">
-                      <section.icon className="h-5 w-5 text-gray-600" aria-hidden="true" />
+                      {(() => {
+                        const Icon = section.icon;
+                        return Icon ? <Icon className="h-5 w-5 text-gray-600" aria-hidden="true" /> : null;
+                      })()}
                     </div>
                     {section.title}
                   </CardTitle>

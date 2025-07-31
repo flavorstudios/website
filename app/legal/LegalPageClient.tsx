@@ -153,30 +153,33 @@ export default function LegalPageClient() {
 
         {/* Legal Documents Grid */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 mb-12 sm:mb-16">
-          {filteredDocuments.map((doc, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow h-full" aria-label={doc.title}>
-              <CardHeader>
-                <div
-                  className={`p-2 rounded-lg flex items-center justify-between mb-3 ${doc.color} ring-1 ring-inset ring-blue-100`}
-                >
-                  <doc.icon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
-                  <Badge variant="secondary" className="text-xs">{doc.category}</Badge>
-                </div>
-                <CardTitle className="text-lg sm:text-xl">{doc.title}</CardTitle>
-                <CardDescription className="text-sm sm:text-base leading-relaxed">
-                  {doc.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 flex flex-col justify-between flex-1">
-                <div className="mb-4">
-                  <p className="text-xs sm:text-sm text-gray-500">Last updated: {doc.lastUpdated}</p>
-                </div>
-                <Button asChild className="w-full h-9 sm:h-10 text-xs sm:text-sm" aria-label={`Read ${doc.title}`}>
-                  <Link href={doc.href}>Read {doc.title}</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          {filteredDocuments.map((doc, index) => {
+            const Icon = doc.icon
+            return (
+              <Card key={index} className="hover:shadow-lg transition-shadow h-full" aria-label={doc.title}>
+                <CardHeader>
+                  <div
+                    className={`p-2 rounded-lg flex items-center justify-between mb-3 ${doc.color} ring-1 ring-inset ring-blue-100`}
+                  >
+                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+                    <Badge variant="secondary" className="text-xs">{doc.category}</Badge>
+                  </div>
+                  <CardTitle className="text-lg sm:text-xl">{doc.title}</CardTitle>
+                  <CardDescription className="text-sm sm:text-base leading-relaxed">
+                    {doc.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0 flex flex-col justify-between flex-1">
+                  <div className="mb-4">
+                    <p className="text-xs sm:text-sm text-gray-500">Last updated: {doc.lastUpdated}</p>
+                  </div>
+                  <Button asChild className="w-full h-9 sm:h-10 text-xs sm:text-sm" aria-label={`Read ${doc.title}`}>
+                    <Link href={doc.href}>Read {doc.title}</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
 
         {/* Quick Summary */}

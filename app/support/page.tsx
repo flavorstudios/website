@@ -1,7 +1,7 @@
 // app/support/page.tsx
 
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"; // Removed unused SITE_LOGO_URL
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -183,24 +183,27 @@ export default function SupportPage() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {impactAreas.map((area, index) => (
-              <Card
-                key={index}
-                className="group hover:shadow-xl transition-all duration-300 border-0 bg-white shadow-lg hover:-translate-y-1"
-              >
-                <CardHeader className="text-center pb-3 sm:pb-4">
-                  <div
-                    className={`mx-auto mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-r ${area.color} rounded-2xl w-fit shadow-lg`}
-                  >
-                    <area.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" aria-hidden="true" />
-                  </div>
-                  <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold">{area.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{area.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+            {impactAreas.map((area, index) => {
+              const Icon = area.icon;
+              return (
+                <Card
+                  key={index}
+                  className="group hover:shadow-xl transition-all duration-300 border-0 bg-white shadow-lg hover:-translate-y-1"
+                >
+                  <CardHeader className="text-center pb-3 sm:pb-4">
+                    <div
+                      className={`mx-auto mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-r ${area.color} rounded-2xl w-fit shadow-lg`}
+                    >
+                      <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" aria-hidden="true" />
+                    </div>
+                    <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold">{area.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{area.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </section>
 
@@ -278,29 +281,32 @@ export default function SupportPage() {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {supportWays.map((way, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <CardHeader className="text-center pb-3 sm:pb-4">
-                  <div className="mx-auto mb-3 sm:mb-4 p-3 bg-blue-100 group-hover:bg-blue-200 rounded-xl w-fit transition-colors">
-                    <way.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
-                  </div>
-                  <CardTitle className="text-base sm:text-lg font-bold">{way.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-sm text-gray-600 mb-3 sm:mb-4">{way.description}</p>
-                  <Button variant="outline" size="sm" className="w-full h-10 sm:h-11 text-xs sm:text-sm" asChild>
-                    <Link
-                      href={way.href}
-                      target={way.external ? "_blank" : undefined}
-                      rel={way.external ? "noopener noreferrer" : undefined}
-                    >
-                      {way.action}
-                      {way.external && <ExternalLink className="ml-2 h-3 w-3" aria-hidden="true" />}
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+            {supportWays.map((way, index) => {
+              const Icon = way.icon;
+              return (
+                <Card key={index} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <CardHeader className="text-center pb-3 sm:pb-4">
+                    <div className="mx-auto mb-3 sm:mb-4 p-3 bg-blue-100 group-hover:bg-blue-200 rounded-xl w-fit transition-colors">
+                      <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
+                    </div>
+                    <CardTitle className="text-base sm:text-lg font-bold">{way.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <p className="text-sm text-gray-600 mb-3 sm:mb-4">{way.description}</p>
+                    <Button variant="outline" size="sm" className="w-full h-10 sm:h-11 text-xs sm:text-sm" asChild>
+                      <Link
+                        href={way.href}
+                        target={way.external ? "_blank" : undefined}
+                        rel={way.external ? "noopener noreferrer" : undefined}
+                      >
+                        {way.action}
+                        {way.external && <ExternalLink className="ml-2 h-3 w-3" aria-hidden="true" />}
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </section>
 

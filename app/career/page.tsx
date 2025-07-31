@@ -6,7 +6,6 @@ import {
   SITE_URL,
   SITE_BRAND_TWITTER,
   SITE_DEFAULT_IMAGE,
-  // SITE_LOGO_URL, // Unused, removed for ESLint
 } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import {
@@ -148,7 +147,7 @@ const stayConnectedOptions = [
     description: "Watch our content and see our creative process in action",
     icon: Youtube,
     action: "Subscribe",
-    href: "https://www.youtube.com/@flavorstudios", // Fixed to canonical YouTube channel URL
+    href: "https://www.youtube.com/@flavorstudios",
     external: true,
     color: "bg-red-600 hover:bg-red-700",
   },
@@ -299,7 +298,12 @@ export default function CareerPage() {
               <Card key={index} className="text-center hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3 sm:pb-4">
                   <div className="mx-auto mb-3 sm:mb-4 p-3 bg-gray-100 rounded-xl w-fit">
-                    <option.icon className="h-6 w-6 sm:h-8 sm:w-8 text-gray-700" aria-hidden="true" />
+                    {(() => {
+                      const Icon = option.icon;
+                      return Icon ? (
+                        <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-gray-700" aria-hidden="true" />
+                      ) : null;
+                    })()}
                   </div>
                   <CardTitle className="text-base sm:text-lg lg:text-xl text-gray-900">{option.title}</CardTitle>
                   <CardDescription className="text-sm sm:text-base leading-relaxed text-gray-600">

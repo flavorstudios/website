@@ -161,7 +161,12 @@ export default function AboutPage() {
               <Card key={index} className="text-center h-full">
                 <CardHeader className="pb-3 sm:pb-4">
                   <div className="mx-auto mb-3 sm:mb-4 p-2 sm:p-2.5 lg:p-3 bg-blue-100 rounded-full w-fit">
-                    <value.icon className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-blue-600" />
+                    {(() => {
+                      const Icon = value.icon;
+                      return Icon ? (
+                        <Icon className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-blue-600" />
+                      ) : null;
+                    })()}
                   </div>
                   <CardTitle className="text-sm sm:text-base lg:text-lg">{value.title}</CardTitle>
                 </CardHeader>

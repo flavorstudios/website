@@ -41,7 +41,6 @@ const schema = getSchema({
   title: `DMCA Takedown Policy – ${SITE_NAME}`,
   description: `Learn how to file a DMCA takedown notice with ${SITE_NAME}. Understand your rights and our copyright policy for protecting original content.`,
   image: SITE_LOGO_URL,
-  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
 });
 
 export default function DMCAPage() {
@@ -88,8 +87,6 @@ export default function DMCAPage() {
     "Your name, address, telephone number, and email address",
     "Consent to jurisdiction of courts in India and acceptance of service of process",
   ];
-
-  // Removed: additionalSections and riskFactors (unused)
 
   return (
     <div className="min-h-screen py-8 sm:py-12">
@@ -144,7 +141,10 @@ export default function DMCAPage() {
                         <CardHeader className="pb-3 sm:pb-4">
                           <div className="flex items-center gap-2 sm:gap-3 mb-2">
                             <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
-                              <step.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" />
+                              {(() => {
+                                const Icon = step.icon;
+                                return Icon ? <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" aria-hidden="true" /> : null;
+                              })()}
                             </div>
                             <CardTitle className="text-lg sm:text-xl">{step.title}</CardTitle>
                           </div>
@@ -241,7 +241,7 @@ export default function DMCAPage() {
 
         {/* Additional Policies Section */}
         <div className="grid gap-6 sm:gap-8 mb-12 sm:mb-16">
-          <Card>
+          <Card id="repeat-infringer">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl">
                 <div className="p-2 bg-red-100 rounded-lg">
@@ -256,7 +256,7 @@ export default function DMCAPage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="border-amber-200 bg-amber-50">
+          <Card className="border-amber-200 bg-amber-50" id="misuse-dmca">
             <CardHeader>
               <CardTitle className="flex items-center gap-3 text-xl sm:text-2xl text-amber-900">
                 <div className="p-2 bg-amber-100 rounded-lg">

@@ -713,27 +713,30 @@ export default function FAQPage() {
             Explore related pages and resources to get the most out of Flavor Studios.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {quickLinks.map((link) => (
-              <Card key={link.title} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
-                      <link.icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+            {quickLinks.map((link) => {
+              const Icon = link.icon
+              return (
+                <Card key={link.title} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                        <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm sm:text-base mb-1">{link.title}</h3>
+                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-3">{link.description}</p>
+                        <Button asChild variant="outline" size="sm" className="h-7 sm:h-8 text-xs">
+                          <Link href={link.href}>
+                            Visit
+                            <ExternalLink className="ml-1 h-3 w-3" />
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-sm sm:text-base mb-1">{link.title}</h3>
-                      <p className="text-xs sm:text-sm text-gray-600 leading-relaxed mb-3">{link.description}</p>
-                      <Button asChild variant="outline" size="sm" className="h-7 sm:h-8 text-xs">
-                        <Link href={link.href}>
-                          Visit
-                          <ExternalLink className="ml-1 h-3 w-3" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </section>
 

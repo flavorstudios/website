@@ -24,6 +24,7 @@ import { getSchema } from "@/lib/seo/schema";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import type { BlogPost } from "@/lib/types";
+import { formatDate } from "@/lib/date"; // <-- Added import
 
 // --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
@@ -387,9 +388,9 @@ function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority
               </span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">{new Date(post.publishedAt).toLocaleDateString()}</span>
+                <span className="hidden sm:inline">{formatDate(post.publishedAt)}</span>
                 <span className="sm:hidden">
-                  {new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  {formatDate(post.publishedAt, { month: "short", day: "numeric" })}
                 </span>
               </span>
             </div>
@@ -449,9 +450,9 @@ function BlogPostCard({ post }: { post: BlogPost }) {
             </Badge>
             <span className="text-xs text-gray-500 flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              <span className="hidden sm:inline">{new Date(post.publishedAt).toLocaleDateString()}</span>
+              <span className="hidden sm:inline">{formatDate(post.publishedAt)}</span>
               <span className="sm:hidden">
-                {new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                {formatDate(post.publishedAt, { month: "short", day: "numeric" })}
               </span>
             </span>
           </div>

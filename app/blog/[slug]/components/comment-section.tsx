@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { MessageCircle, Send, User, Clock, AlertCircle, CheckCircle } from "lucide-react"
+import { formatDate } from "@/lib/date" // <-- Added import
 
 interface Comment {
   id: string
@@ -38,7 +39,6 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   const [savedName, setSavedName] = useState<string | null>(null)
 
   useEffect(() => {
-    // Autofill name if present in localStorage
     if (typeof window !== "undefined") {
       const name = localStorage.getItem(AUTHOR_KEY)
       if (name) {
@@ -47,13 +47,11 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       }
     }
     fetchComments()
-    // eslint-disable-next-line
   }, [postId])
 
   const fetchComments = async () => {
     try {
       setLoading(true)
-      // 🟢 Changed: Use public API endpoint!
       const response = await fetch(`/api/comments?postId=${postId}&postType=blog`)
       if (response.ok) {
         const data = await response.json()
@@ -74,13 +72,11 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
     try {
       const name = formData.name.trim() || "Anonymous"
-      // Save author name to localStorage for pseudo-auth (used for pending comment visibility)
       if (typeof window !== "undefined") {
         localStorage.setItem(AUTHOR_KEY, name)
         setSavedName(name)
       }
 
-      // 🟢 Changed: Use public API endpoint!
       const response = await fetch("/api/comments", {
         method: "POST",
         headers: {
@@ -110,7 +106,6 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   }
 
   const approvedComments = comments.filter((comment) => comment.status === "approved")
-  // Only show *pending* comments authored by this browser's user (by name match)
   const pendingComments = comments.filter(
     (comment) =>
       comment.status === "pending" &&
@@ -176,8 +171,6 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                 required
               />
             </div>
-
-            {/* Accessible submit status */}
             <p aria-live="polite" className="flex items-center gap-2 text-sm min-h-[24px]">
               {submitStatus === "success" && (
                 <>
@@ -194,7 +187,6 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                 </>
               )}
             </p>
-
             <Button type="submit" disabled={submitting || !formData.content.trim()} className="w-full sm:w-auto">
               {submitting ? (
                 <>
@@ -264,7 +256,7 @@ function CommentCard({ comment, isPending = false }: { comment: Comment; isPendi
               <h4 className="font-medium text-gray-900">{comment.author}</h4>
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Clock className="h-3 w-3" />
-                {new Date(comment.createdAt).toLocaleDateString()}
+                {formatDate(comment.createdAt)}
               </div>
             </div>
           </div>

@@ -18,6 +18,7 @@ import {
 import { getMetadata } from "@/lib/seo/metadata";
 import { getCanonicalUrl } from "@/lib/seo/canonical";
 import { getSchema } from "@/lib/seo/schema";
+import { formatDate } from "@/lib/date"; // <-- Added import
 
 // === TYPES ===
 interface BlogPost {
@@ -247,7 +248,7 @@ export default async function HomePage() {
                             )}
                         <span className="text-sm text-gray-500 flex items-center gap-1">
                           <Calendar className="h-3 w-3" aria-hidden="true" />
-                          {new Date(post.publishedAt).toLocaleDateString()}
+                          {formatDate(post.publishedAt)}
                         </span>
                         <span className="text-sm text-gray-500 flex items-center gap-1">
                           <Clock className="h-3 w-3" aria-hidden="true" />
@@ -358,7 +359,7 @@ export default async function HomePage() {
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" aria-hidden="true" />
-                          {video.publishedAt ? new Date(video.publishedAt).toLocaleDateString() : ""}
+                          {video.publishedAt ? formatDate(video.publishedAt) : ""}
                         </span>
                       </div>
                     </CardContent>

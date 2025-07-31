@@ -20,6 +20,7 @@ import {
 import { Check, X, Trash2, MessageSquare, Search, AlertTriangle, Shield, Info } from "lucide-react"
 import { toast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
+import { formatDate } from "@/lib/date"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
 import CommentStatsChart from "@/components/admin/comment/CommentStatsChart"
 
@@ -395,7 +396,7 @@ function CommentCard({
                     </>
                   )}
                   <span>•</span>
-                  <span>{new Date(comment.createdAt).toLocaleDateString()}</span>
+                  <span>{formatDate(comment.createdAt)}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">

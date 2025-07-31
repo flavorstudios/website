@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
-type Category = { name: string; slug: string }; // Adjust as needed
+import { formatDate } from "@/lib/date"; // <-- NEW: import for date formatting
+type Category = { name: string; slug: string };
 
 export const metadata = getMetadata({
   title: `${SITE_NAME} Videos | Original Anime, Studio Films & More`,
@@ -259,7 +260,6 @@ function FeaturedVideoCard({ video, priority = false }: { video: VideoType; prio
     video.thumbnail ||
     (video.youtubeId ? `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg` : "/placeholder.svg?height=256&width=512&text=Featured+Video");
   return (
-    // === Canonical slug-only link ===
     <Link href={`/watch/${video.slug}`} className="group">
       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full bg-gradient-to-br from-white to-gray-50">
         <div className="relative h-40 sm:h-48 lg:h-56 overflow-hidden">
@@ -305,10 +305,7 @@ function FeaturedVideoCard({ video, priority = false }: { video: VideoType; prio
             <div className="flex items-center gap-2 sm:gap-3">
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3 sm:h-4 sm:w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">{new Date(video.publishedAt).toLocaleDateString()}</span>
-                <span className="sm:hidden">
-                  {new Date(video.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                </span>
+                {formatDate(video.publishedAt)}
               </span>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
@@ -333,7 +330,6 @@ function VideoCard({ video }: { video: VideoType }) {
     video.thumbnail ||
     (video.youtubeId ? `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg` : "/placeholder.svg?height=192&width=384&text=Video");
   return (
-    // === Canonical slug-only link ===
     <Link href={`/watch/${video.slug}`} className="group">
       <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 bg-white">
         <div className="relative h-40 sm:h-48 overflow-hidden">
@@ -369,10 +365,7 @@ function VideoCard({ video }: { video: VideoType }) {
             </Badge>
             <span className="text-xs text-gray-500 flex items-center gap-1">
               <Calendar className="h-3 w-3" aria-hidden="true" />
-              <span className="hidden sm:inline">{new Date(video.publishedAt).toLocaleDateString()}</span>
-              <span className="sm:hidden">
-                {new Date(video.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-              </span>
+              {formatDate(video.publishedAt)}
             </span>
           </div>
           <CardTitle className="text-base sm:text-lg lg:text-xl line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">

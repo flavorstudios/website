@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Play, Eye, Calendar, Youtube, Clock, Video } from "lucide-react"
 import { useState, useEffect } from "react"
-import type { Category } from "@/types/category" // <-- Unified import
+import type { Category } from "@/types/category"
+import { formatDate } from "@/lib/date" // <-- Consistent date formatting
 
 interface VideoType {
   id: string
@@ -50,7 +51,6 @@ export function WatchPageClient({
 
       if (videosResponse.ok) {
         const videosData = await videosResponse.json()
-        // Handles both array and { videos: [...] }
         const allVideos: VideoType[] = Array.isArray(videosData)
           ? videosData
           : videosData.videos || []
@@ -79,7 +79,6 @@ export function WatchPageClient({
     }
   }
 
-  // Filter by category SLUG
   const filteredVideos =
     selectedCategory === "all"
       ? videos
@@ -88,7 +87,6 @@ export function WatchPageClient({
   const featuredVideos = filteredVideos.filter((video) => video.featured)
   const regularVideos = filteredVideos.filter((video) => !video.featured)
 
-  // Get category name for proper heading
   const categoryName =
     categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory
 
@@ -247,7 +245,7 @@ function FeaturedVideoCard({ video }: { video: VideoType }) {
               </span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                {new Date(video.publishedAt).toLocaleDateString()}
+                {formatDate(video.publishedAt)}
               </span>
             </div>
           </div>
@@ -294,7 +292,7 @@ function VideoCard({ video }: { video: VideoType }) {
           <div className="flex items-center justify-between text-sm text-gray-500">
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />
-              {new Date(video.publishedAt).toLocaleDateString()}
+              {formatDate(video.publishedAt)}
             </div>
             <div className="flex items-center gap-1">
               <Eye className="h-4 w-4" />

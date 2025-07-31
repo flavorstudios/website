@@ -3,6 +3,7 @@
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth, Auth } from "firebase-admin/auth";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
+import type { ServiceAccount } from "firebase-admin"; // Strict type import
 
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
 const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
@@ -23,18 +24,18 @@ export const adminEmailsEnv = rawEmails !== "" ? rawEmails : process.env.ADMIN_E
 // ======= ENVIRONMENT VARIABLE VALIDATION =======
 
 // If missing, warn and export undefined. Do NOT throw!
-let parsedCredentials: Record<string, unknown> | null = null;
+let parsedCredentials: ServiceAccount | null = null;
 if (!serviceAccountKey) {
   if (debug) {
     console.warn("[Firebase Admin] FIREBASE_SERVICE_ACCOUNT_KEY not set. Admin features are disabled.");
   }
 } else {
   try {
-    parsedCredentials = JSON.parse(serviceAccountKey);
+    parsedCredentials = JSON.parse(serviceAccountKey) as ServiceAccount;
     // 🛡 Initialize Firebase Admin SDK (only once)
     if (!getApps().length) {
       initializeApp({
-        credential: cert(parsedCredentials as any),
+        credential: cert(parsedCredentials),
       });
       if (debug) {
         console.log("[Firebase Admin] Firebase Admin initialized successfully.");

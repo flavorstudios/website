@@ -5,14 +5,10 @@ import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Calendar } from "@/components/ui/calendar"
@@ -22,7 +18,7 @@ import BlogPostRenderer from "@/components/BlogPostRenderer"
 import { RichTextEditor } from "./rich-text-editor"
 import Image from "next/image"
 import {
-  Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info, ChevronDown,
+  Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info
 } from "lucide-react"
 import { toast } from "sonner"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
@@ -93,10 +89,22 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [showScheduler, setShowScheduler] = useState(false)
   const [scheduledDate, setScheduledDate] = useState<Date>()
+  const [scheduledTime, setScheduledTime] = useState("")
   const [imageUploading, setImageUploading] = useState(false)
   const [tagInput, setTagInput] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [showPreview, setShowPreview] = useState(false)
+
+  // Helper to combine scheduled date + time
+  const getScheduledDateTime = () => {
+    if (!scheduledDate || !scheduledTime) return undefined
+    const [hours, minutes] = scheduledTime.split(":").map(Number)
+    const dt = new Date(scheduledDate)
+    if (!isNaN(hours)) dt.setHours(hours)
+    if (!isNaN(minutes)) dt.setMinutes(minutes)
+    dt.setSeconds(0, 0)
+    return dt
+  }
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -178,7 +186,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
           ...post,
           category: post.categories[0] || post.category || "",
           publishedAt: post.status === "published" ? new Date() : undefined,
-          scheduledFor: post.status === "scheduled" ? scheduledDate : undefined,
+          scheduledFor: post.status === "scheduled" ? getScheduledDateTime() : undefined,
         }),
         credentials: "include",
       })
@@ -206,7 +214,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   }
 
   const schedulePost = async () => {
-    if (scheduledDate) {
+    if (scheduledDate && scheduledTime) {
       setPost((prev) => ({ ...prev, status: "scheduled" }))
       await savePost()
       setShowScheduler(false)
@@ -476,8 +484,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                       setPost((prev) => ({
                         ...prev,
                         schemaType: e.target.value,
-                      }))
-                    }
+                      }))}
                     placeholder="Article"
                   />
                 </div>
@@ -523,21 +530,28 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                     {post.status}
                   </Badge>
                 </div>
+                {/* Featured Post Switch */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Featured Post</span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Switch
-                        aria-label="Featured post"
-                        checked={post.featured}
-                        onCheckedChange={(featured) =>
-                          setPost((prev) => ({ ...prev, featured }))
-                        }
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>Toggle featured post</TooltipContent>
-                  </Tooltip>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="featured-switch" className="text-sm font-medium">
+                      Featured Post
+                    </Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-4 w-4 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>Toggle featured post</TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <Switch
+                    id="featured-switch"
+                    checked={post.featured}
+                    onCheckedChange={(featured) =>
+                      setPost((prev) => ({ ...prev, featured }))
+                    }
+                  />
                 </div>
+                {/* Schedule Popover */}
                 <Popover open={showScheduler} onOpenChange={setShowScheduler}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full flex items-center gap-2" aria-label="Schedule Post">
@@ -545,15 +559,26 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                       Schedule Post
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0 z-50">
                     <Calendar
                       mode="single"
                       selected={scheduledDate}
                       onSelect={setScheduledDate}
                       disabled={(date) => date < new Date()}
                     />
+                    <div className="px-3 pb-3">
+                      <label htmlFor="scheduled-time" className="block text-sm font-medium mt-2">
+                        Time
+                      </label>
+                      <Input
+                        id="scheduled-time"
+                        type="time"
+                        value={scheduledTime}
+                        onChange={(e) => setScheduledTime(e.target.value)}
+                      />
+                    </div>
                     <div className="p-3 border-t">
-                      <Button onClick={schedulePost} disabled={!scheduledDate} className="w-full">
+                      <Button onClick={schedulePost} disabled={!scheduledDate || !scheduledTime} className="w-full">
                         Schedule
                       </Button>
                     </div>
@@ -570,33 +595,18 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Multi-select categories */}
+                {/* Multi-select categories as vertical checkboxes */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Categories</label>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-full justify-between">
-                        <span className="truncate">
-                          {post.categories.length > 0
-                            ? post.categories
-                                .map(
-                                  (slug) =>
-                                    categories.find((cat) => cat.slug === slug)?.name || slug
-                                )
-                                .join(", ")
-                            : "Select categories"}
-                        </span>
-                        <ChevronDown className="h-4 w-4 opacity-50" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="max-h-64 overflow-y-auto">
-                      {categories.map((category) => (
-                        <DropdownMenuCheckboxItem
-                          key={category.slug}
+                  <div className="space-y-2 max-h-64 overflow-y-auto border rounded-md p-2">
+                    {categories.map((category) => (
+                      <div key={category.slug} className="flex items-start gap-2">
+                        <Checkbox
+                          id={`cat-${category.slug}`}
                           checked={post.categories.includes(category.slug)}
                           onCheckedChange={(checked) => {
                             setPost((prev) => {
-                              const categories = checked
+                              const categories = !!checked
                                 ? [...prev.categories, category.slug]
                                 : prev.categories.filter((c) => c !== category.slug)
                               return {
@@ -607,33 +617,57 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                             })
                           }}
                           className="capitalize"
-                        >
+                        />
+                        <label htmlFor={`cat-${category.slug}`} className="capitalize text-sm">
                           {category.name}
-                          {category.tooltip && (
-                            <span title={category.tooltip}>
-                              <Info className="ml-2 h-4 w-4 text-blue-400" />
-                            </span>
-                          )}
-                        </DropdownMenuCheckboxItem>
+                        </label>
+                        {category.tooltip && (
+                          <span title={category.tooltip}>
+                            <Info className="ml-1 h-4 w-4 text-blue-400" />
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  {post.categories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {selectedCategories.map((cat) => (
+                        <Badge key={cat.slug} variant="secondary" className="flex items-center gap-1 capitalize">
+                          {cat.name}
+                          <X
+                            className="h-3 w-3 cursor-pointer"
+                            onClick={() =>
+                              setPost((prev) => {
+                                const categories = prev.categories.filter((c) => c !== cat.slug)
+                                return {
+                                  ...prev,
+                                  categories,
+                                  category: categories[0] || "",
+                                }
+                              })
+                            }
+                          />
+                        </Badge>
                       ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    </div>
+                  )}
                   {selectedCategories[0]?.tooltip && (
                     <div className="text-xs text-gray-500 mt-2 flex items-center gap-1">
                       <Info className="h-3 w-3" /> {selectedCategories[0]?.tooltip}
                     </div>
                   )}
                 </div>
+                {/* Tags */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Tags</label>
-                  <div className="flex gap-2 mb-2">
+                  <div className="flex gap-2 mb-2 items-start">
                     <Input
                       value={tagInput}
                       onChange={(e) => setTagInput(e.target.value)}
                       placeholder="Add tag..."
                       onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
                     />
-                    <Button onClick={addTag} size="sm">
+                    <Button onClick={addTag} size="sm" className="self-start">
                       Add
                     </Button>
                   </div>
@@ -672,14 +706,15 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                       >
                         Remove Image
                       </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        disabled={imageUploading}
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        {imageUploading ? "Uploading..." : "Change Image"}
-                      </Button>
+                      <label htmlFor="image-upload" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          disabled={imageUploading}
+                        >
+                          {imageUploading ? "Uploading..." : "Change Image"}
+                        </Button>
+                      </label>
                     </div>
                   </div>
                 ) : (
@@ -704,8 +739,6 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                       <Button
                         variant="outline"
                         disabled={imageUploading}
-                        asChild
-                        onClick={() => fileInputRef.current?.click()}
                       >
                         <span>{imageUploading ? "Uploading..." : "Choose Image"}</span>
                       </Button>

@@ -1,16 +1,16 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useRef } from "react"
 import { motion } from "framer-motion"
 import {
   Bold,
   Italic,
-  Underline,
+  Underline as UnderlineIcon,
   List,
   ListOrdered,
   Quote,
   Code,
-  Link,
+  Link as LinkIcon,
   ImageIcon,
   Type,
   AlignLeft,
@@ -19,6 +19,13 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useEditor, EditorContent } from "@tiptap/react"
+import StarterKit from "@tiptap/starter-kit"
+import Underline from "@tiptap/extension-underline"
+import Link from "@tiptap/extension-link"
+import Image from "@tiptap/extension-image"
+import TextAlign from "@tiptap/extension-text-align"
+import DOMPurify from "dompurify"
 
 interface RichTextEditorProps {
   value: string
@@ -28,53 +35,65 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ value, onChange, placeholder, className }: RichTextEditorProps) {
-  const editorRef = useRef<HTMLDivElement>(null)
   const [showLinkDialog, setShowLinkDialog] = useState(false)
   const [linkUrl, setLinkUrl] = useState("")
   const [linkText, setLinkText] = useState("")
 
-  useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== value) {
-      editorRef.current.innerHTML = value
-    }
-  }, [value])
+  // TipTap Editor Instance
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+      Underline,
+      Link.configure({ openOnClick: false }),
+      Image,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+    ],
+    content: value,
+    onUpdate({ editor }) {
+      const html = DOMPurify.sanitize(editor.getHTML())
+      onChange(html)
+    },
+  })
 
-  const execCommand = (command: string, value?: string) => {
-    document.execCommand(command, false, value)
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML)
-    }
+  // Keep TipTap in sync with prop changes
+  if (editor && value !== editor.getHTML()) {
+    editor.commands.setContent(value, false)
   }
 
-  const handleInput = () => {
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML)
-    }
-  }
-
+  // Insert Link Handler
   const insertLink = () => {
-    if (linkUrl && linkText) {
-      execCommand("insertHTML", `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`)
+    if (!editor) return
+    if (linkUrl) {
+      if (linkText) {
+        editor
+          .chain()
+          .focus()
+          .insertContent(
+            `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`,
+          )
+          .run()
+      } else {
+        editor.chain().focus().extendMarkRange("link").setLink({ href: linkUrl }).run()
+      }
       setShowLinkDialog(false)
       setLinkUrl("")
       setLinkText("")
     }
   }
 
+  // Image Insert Handler (by URL only)
   const insertImage = () => {
     const url = prompt("Enter image URL:")
-    if (url) {
-      execCommand("insertHTML", `<img src="${url}" alt="Blog image" style="max-width: 100%; height: auto;" />`)
+    if (editor && url) {
+      editor.chain().focus().setImage({ src: url }).run()
     }
   }
 
-  const formatBlock = (tag: string) => {
-    execCommand("formatBlock", tag)
-  }
+  if (!editor) return null
 
   return (
     <motion.div
-      className={`border border-gray-300 rounded-lg overflow-hidden bg-white ${className}`}
+      className={`border border-gray-300 rounded-lg overflow-hidden bg-white ${className || ""}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -82,13 +101,13 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
       {/* Toolbar */}
       <div className="border-b border-gray-200 p-3 bg-gray-50">
         <div className="flex flex-wrap gap-2">
-          {/* Text Formatting */}
+          {/* Headings */}
           <div className="flex gap-1 border-r border-gray-300 pr-2">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => formatBlock("h1")}
+              onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
               className="h-8 w-8 p-0"
               title="Heading 1"
             >
@@ -98,7 +117,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => formatBlock("h2")}
+              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
               className="h-8 w-8 p-0 text-sm font-bold"
               title="Heading 2"
             >
@@ -108,21 +127,20 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => formatBlock("h3")}
+              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
               className="h-8 w-8 p-0 text-sm font-bold"
               title="Heading 3"
             >
               H3
             </Button>
           </div>
-
           {/* Style Formatting */}
           <div className="flex gap-1 border-r border-gray-300 pr-2">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => execCommand("bold")}
+              onClick={() => editor.chain().focus().toggleBold().run()}
               className="h-8 w-8 p-0"
               title="Bold"
             >
@@ -132,7 +150,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => execCommand("italic")}
+              onClick={() => editor.chain().focus().toggleItalic().run()}
               className="h-8 w-8 p-0"
               title="Italic"
             >
@@ -142,21 +160,20 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => execCommand("underline")}
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
               className="h-8 w-8 p-0"
               title="Underline"
             >
-              <Underline className="h-4 w-4" />
+              <UnderlineIcon className="h-4 w-4" />
             </Button>
           </div>
-
           {/* Lists */}
           <div className="flex gap-1 border-r border-gray-300 pr-2">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => execCommand("insertUnorderedList")}
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
               className="h-8 w-8 p-0"
               title="Bullet List"
             >
@@ -166,21 +183,20 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => execCommand("insertOrderedList")}
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
               className="h-8 w-8 p-0"
               title="Numbered List"
             >
               <ListOrdered className="h-4 w-4" />
             </Button>
           </div>
-
           {/* Alignment */}
           <div className="flex gap-1 border-r border-gray-300 pr-2">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => execCommand("justifyLeft")}
+              onClick={() => editor.chain().focus().setTextAlign("left").run()}
               className="h-8 w-8 p-0"
               title="Align Left"
             >
@@ -190,7 +206,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => execCommand("justifyCenter")}
+              onClick={() => editor.chain().focus().setTextAlign("center").run()}
               className="h-8 w-8 p-0"
               title="Align Center"
             >
@@ -200,21 +216,20 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => execCommand("justifyRight")}
+              onClick={() => editor.chain().focus().setTextAlign("right").run()}
               className="h-8 w-8 p-0"
               title="Align Right"
             >
               <AlignRight className="h-4 w-4" />
             </Button>
           </div>
-
           {/* Special Elements */}
           <div className="flex gap-1">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => formatBlock("blockquote")}
+              onClick={() => editor.chain().focus().toggleBlockquote().run()}
               className="h-8 w-8 p-0"
               title="Quote"
             >
@@ -224,7 +239,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => execCommand("formatBlock", "pre")}
+              onClick={() => editor.chain().focus().toggleCodeBlock().run()}
               className="h-8 w-8 p-0"
               title="Code Block"
             >
@@ -238,7 +253,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
               className="h-8 w-8 p-0"
               title="Insert Link"
             >
-              <Link className="h-4 w-4" />
+              <LinkIcon className="h-4 w-4" />
             </Button>
             <Button
               type="button"
@@ -255,17 +270,14 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
       </div>
 
       {/* Editor */}
-      <div
-        ref={editorRef}
-        contentEditable
-        onInput={handleInput}
+      <EditorContent
+        editor={editor}
+        data-placeholder={placeholder}
         className="min-h-[400px] p-4 focus:outline-none prose prose-lg max-w-none"
         style={{
           lineHeight: "1.6",
           fontSize: "16px",
         }}
-        dangerouslySetInnerHTML={{ __html: value }}
-        data-placeholder={placeholder}
       />
 
       {/* Link Dialog */}
@@ -306,31 +318,31 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
       )}
 
       <style jsx>{`
-        [contenteditable]:empty:before {
+        [data-placeholder]:empty:before {
           content: attr(data-placeholder);
           color: #9ca3af;
           pointer-events: none;
         }
         
-        [contenteditable] h1 {
+        .prose h1 {
           font-size: 2rem;
           font-weight: bold;
           margin: 1rem 0;
         }
         
-        [contenteditable] h2 {
+        .prose h2 {
           font-size: 1.5rem;
           font-weight: bold;
           margin: 0.75rem 0;
         }
         
-        [contenteditable] h3 {
+        .prose h3 {
           font-size: 1.25rem;
           font-weight: bold;
           margin: 0.5rem 0;
         }
         
-        [contenteditable] blockquote {
+        .prose blockquote {
           border-left: 4px solid #e5e7eb;
           padding-left: 1rem;
           margin: 1rem 0;
@@ -338,7 +350,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           color: #6b7280;
         }
         
-        [contenteditable] pre {
+        .prose pre {
           background: #f3f4f6;
           padding: 1rem;
           border-radius: 0.5rem;
@@ -346,12 +358,12 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           font-family: monospace;
         }
         
-        [contenteditable] ul, [contenteditable] ol {
+        .prose ul, .prose ol {
           margin: 1rem 0;
           padding-left: 2rem;
         }
         
-        [contenteditable] a {
+        .prose a {
           color: #3b82f6;
           text-decoration: underline;
         }

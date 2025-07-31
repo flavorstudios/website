@@ -34,7 +34,8 @@ export default function IconSelector({ value, onChange }: IconSelectorProps) {
       </SelectTrigger>
       <SelectContent>
         {ICON_NAMES.map((name) => {
-          const Icon = (Icons as Record<string, React.ComponentType<LucideProps>>)[name]
+          const Icon =
+            (Icons as unknown as Record<string, React.ComponentType<LucideProps>>)[name]
           return (
             <SelectItem key={name} value={name}>
               <div className="flex items-center gap-2">

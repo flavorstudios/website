@@ -30,9 +30,9 @@ export const metadata = getMetadata({
     description: `This page does not exist. Discover original anime, news, and stories on ${SITE_NAME} or explore our popular sections.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  alternates: {
-    canonical: getCanonicalUrl("/404"),
-  },
+  // alternates: {
+  //   canonical: getCanonicalUrl("/404"),
+  // },
 });
 
 // --- JSON-LD Schema ---

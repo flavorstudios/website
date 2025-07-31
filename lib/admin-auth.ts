@@ -73,7 +73,6 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
   try {
     decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
     if (debug) {
-      // @ts-expect-error Firebase DecodedIdToken may not have email: safe for logging
       console.log("[admin-auth] Session cookie verified for:", decoded.email);
     }
   } catch {
@@ -82,7 +81,6 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
       const secret = process.env.ADMIN_JWT_SECRET || "";
       decoded = jwt.verify(sessionCookie, secret) as jwt.JwtPayload;
       if (debug) {
-        // @ts-expect-error JWT payload may not have email: safe for logging
         console.log("[admin-auth] JWT session verified for:", decoded.email);
       }
     } catch (jwtErr) {
@@ -94,20 +92,16 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
   firestoreEmails = await getFirestoreAdminEmails();
 
   if (debug) {
-    // @ts-expect-error Decoded may not have email: only for debug logging
     console.log("[admin-auth] Email from session:", `"${decoded.email?.trim?.().toLowerCase?.()}"`);
     console.log("[admin-auth] Allowed emails after merging:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
   }
 
-  // @ts-expect-error Decoded may not have email: used for admin validation
   if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
-    // @ts-expect-error Decoded may not have email: for logging unauthorized attempts
     logError("admin-auth: verifyAdminSession (unauthorized email)", decoded.email || "");
     throw new Error("Unauthorized admin email");
   }
 
   // Always pass BOTH uid and email for fallback admin role logic!
-  // @ts-expect-error Decoded may not have uid/email: user role assignment
   const role = await getUserRole(decoded.uid as string, decoded.email as string);
   return { ...(decoded as jwt.JwtPayload), role } as VerifiedAdmin;
 }
@@ -204,14 +198,11 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
     const firestoreEmails = await getFirestoreAdminEmails();
 
     if (debug) {
-      // @ts-expect-error Decoded may not have email: debug only
       console.log("[admin-auth] Creating session cookie for email:", `"${decoded.email?.trim?.toLowerCase?.()}"`);
       console.log("[admin-auth] Allowed emails:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
     }
 
-    // @ts-expect-error Decoded may not have email: admin validation
     if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
-      // @ts-expect-error Decoded may not have email: logging for audit
       logError("admin-auth: createSessionCookieFromIdToken (unauthorized email)", decoded.email || "");
       throw new Error("Unauthorized admin email");
     }

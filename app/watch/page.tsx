@@ -42,9 +42,9 @@ export const metadata = getMetadata({
     description: `Watch original anime, studio films, and exclusive video content from ${SITE_NAME}. Discover our creative world—stream the latest now.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  alternates: {
-    canonical: getCanonicalUrl("/watch"),
-  },
+  // alternates: {
+  //   canonical: getCanonicalUrl("/watch"),
+  // },
 });
 
 const schema = getSchema({

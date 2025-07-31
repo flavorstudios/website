@@ -51,7 +51,7 @@ export default function VideoTable({ videos, selected, toggleSelect, toggleSelec
               </td>
               <td className="p-3 hidden md:table-cell">{video.category}</td>
               <td className="p-3">
-                <VideoStatusBadge status={video.status as Video['status']} />
+                <VideoStatusBadge status={video.status as AdminVideo["status"]} />
               </td>
               <td className="p-3 hidden sm:table-cell">
                 {formatDate(video.publishedAt || video.createdAt)}

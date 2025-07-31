@@ -247,12 +247,10 @@ export function CommentManager() {
 
       {/* Bulk Actions Bar */}
       <CommentBulkActions
-        selectedIds={selectedIds}
         count={selectedIds.length}
         onApprove={handleBulkApprove}
         onSpam={handleBulkSpam}
         onDelete={handleBulkDelete}
-        disabled={loading}
       />
 
       {/* Comments Tabs: wraps on mobile */}

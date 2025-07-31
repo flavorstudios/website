@@ -4,8 +4,7 @@ import { SITE_URL, SITE_NAME } from "@/lib/constants";
 import { getCanonicalUrl } from "@/lib/seo-utils";
 import fs from "fs";
 import path from "path";
-import type { BlogPost } from "@/lib/content-store";
-import type { Video } from "@/lib/video-store";
+import type { BlogPost, Video } from "@/lib/content-store"; // <-- FIXED: Video now from content-store
 
 // Detects MIME type from file extension
 function getMimeType(url: string): string {

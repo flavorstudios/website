@@ -104,9 +104,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         description: fallbackDescription,
         images: [fallbackImage],
       },
-      alternates: {
-        canonical: getCanonicalUrl(`/watch/${params.slug}`),
-      },
+      // alternates: {
+      //   canonical: getCanonicalUrl(`/watch/${params.slug}`),
+      // },
     });
   }
 
@@ -139,9 +139,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       description: seoDescription,
       images: [thumbnailUrl],
     },
-    alternates: {
-      canonical: canonicalUrl,
-    },
+    // alternates: {
+    //   canonical: canonicalUrl,
+    // },
   });
 }
 

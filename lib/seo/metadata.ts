@@ -86,8 +86,8 @@ export function getMetadata({
     siteName: SITE_NAME,
     url: canonical,
     images:
-      Array.isArray((openGraph as Record<string, unknown>).images) && (openGraph as Record<string, unknown>).images.length > 0
-        ? (openGraph as Record<string, { url: string; width?: number; height?: number; alt?: string }[]>).images.map(
+      Array.isArray((openGraph as any).images) && (openGraph as any).images.length > 0
+        ? (openGraph as any).images.map(
             (img: { url: string; width?: number; height?: number; alt?: string }) => ({
               url: img.url,
               width: img.width || OG_IMAGE_DEFAULT_WIDTH,
@@ -104,8 +104,8 @@ export function getMetadata({
     site: SITE_BRAND_TWITTER,
     creator: SITE_BRAND_TWITTER,
     images:
-      Array.isArray((twitter as Record<string, unknown>).images) && (twitter as Record<string, unknown>).images.length > 0
-        ? (twitter as Record<string, (string | { url: string })[]>).images.map(
+      Array.isArray((twitter as any).images) && (twitter as any).images.length > 0
+        ? (twitter as any).images.map(
             (img: string | { url: string }) => (typeof img === "string" ? img : img.url)
           )
         : defaultTwitter.images,

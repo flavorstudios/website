@@ -5,30 +5,8 @@ import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
-
-// BlogPost type interface for type safety (multi-category aware)
-interface BlogPost {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  category: string;
-  categories?: string[];
-  publishedAt: string; // ISO 8601 string
-  updatedAt?: string; // ISO 8601 string, optional
-  author?: string;
-  views?: number;
-  readTime?: string;
-  coverImage?: string;
-  seoTitle?: string;
-  seoDescription?: string;
-  seoKeywords?: string;
-  openGraphImage?: string;
-  schemaType?: string;
-  status: "published" | "draft";
-  tags?: string[];
-}
+// ⬇️ Use shared type instead of declaring locally!
+import type { BlogPost } from "@/lib/content-store";
 
 // Fetch blog post by slug from PUBLIC API
 async function getBlogPost(slug: string): Promise<BlogPost | null> {

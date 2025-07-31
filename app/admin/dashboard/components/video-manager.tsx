@@ -27,10 +27,8 @@ import { Info, Eye, Pencil, Trash2, Upload, Archive } from "lucide-react";
 import { VideoForm } from "@/components/ui/video-form";
 import { cn } from "@/lib/utils";
 
-// TYPES — Import your unified Category interface!
 import type { Category } from "@/types/category";
 
-// Video type is still local (or you can unify elsewhere)
 interface Video {
   id: string;
   title: string;
@@ -49,7 +47,6 @@ interface Video {
   season?: string;
 }
 
-// Pagination Helper
 function Pagination({
   currentPage,
   totalPages,
@@ -103,7 +100,6 @@ function Pagination({
   );
 }
 
-// Status Badge
 function VideoStatusBadge({ status }: { status: Video["status"] }) {
   const styles: Record<Video["status"], string> = {
     draft: "bg-gray-100 text-gray-800",
@@ -113,7 +109,6 @@ function VideoStatusBadge({ status }: { status: Video["status"] }) {
   return <Badge className={styles[status]}>{status}</Badge>;
 }
 
-// Bulk Actions (Sticky on mobile)
 function VideoBulkActions({
   count,
   onPublish,
@@ -147,7 +142,6 @@ function VideoBulkActions({
   );
 }
 
-// Table View (with accessible Tooltips & aria-labels)
 function VideoTable({
   videos,
   selected,
@@ -307,7 +301,6 @@ function VideoTable({
   );
 }
 
-// Main Component
 export function VideoManager() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
@@ -393,7 +386,6 @@ export function VideoManager() {
     }
   };
 
-  // NEW: Show AlertDialog, not browser confirm
   const deleteVideo = (id: string) => {
     setDeleteTargets([id]);
   };
@@ -478,11 +470,9 @@ export function VideoManager() {
     await loadData();
   };
 
-  // Filtering, Sorting, Pagination
   const sortedVideos = [...filteredVideos].sort((a, b) => {
     if (sortBy === "title") return a.title.localeCompare(b.title);
     if (sortBy === "status") return a.status.localeCompare(b.status);
-    // Only using publishedAt, since createdAt does not exist
     return (
       new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     );
@@ -526,12 +516,13 @@ export function VideoManager() {
           aria-label="Search by title"
         />
         <CategoryDropdown
-          categories={categories.map((cat) => ({
+          categories={categories.map(cat => ({
             name: cat.name,
             slug: cat.slug,
             count: cat.postCount,
             tooltip: cat.tooltip,
-            // ...add other props if needed by your CategoryData type
+            order: cat.order ?? 0,
+            isActive: true,
           }))}
           selectedCategory={filterCategory}
           onCategoryChange={setFilterCategory}

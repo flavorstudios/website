@@ -50,9 +50,9 @@ export const metadata = getMetadata({
     description: `Review the Terms of Service for using ${SITE_NAME}’s website, original content, and community features. Stay informed and protected.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  alternates: {
-    canonical: getCanonicalUrl("/terms-of-service"),
-  },
+  // alternates: {
+  //   canonical: getCanonicalUrl("/terms-of-service"),
+  // },
 });
 
 // === JSON-LD WebPage Schema for Terms of Service (Structured Data) ===

@@ -67,6 +67,9 @@ export interface BlogPost {
   author: string
   wordCount: number
   readTime: string
+  createdAt?: string
+  updatedAt?: string
+  views?: number
 }
 
 export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> }) {
@@ -95,6 +98,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     readTime: initialPost?.readTime ?? "1 min read",
     publishedAt: initialPost?.publishedAt ? new Date(initialPost.publishedAt) : undefined,
     scheduledFor: initialPost?.scheduledFor ? new Date(initialPost.scheduledFor) : undefined,
+    createdAt: initialPost?.createdAt ?? new Date().toISOString(),
+    updatedAt: initialPost?.updatedAt ?? new Date().toISOString(),
+    views: initialPost?.views ?? 0,
   }))
 
   const [categories, setCategories] = useState<BlogCategory[]>([])
@@ -282,10 +288,14 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   }
 
   const host = typeof window !== "undefined" ? window.location.host : "example.com"
-  // Ensure publishedAt is a string for BlogPostRenderer
-  const previewPost = {
+
+  // Ensure previewPost satisfies BlogPost (add default fields)
+  const previewPost: BlogPost = {
     ...post,
-    publishedAt: post.publishedAt ? post.publishedAt.toISOString() : undefined,
+    publishedAt: post.publishedAt ? post.publishedAt.toISOString() : "",
+    createdAt: post.createdAt ?? new Date().toISOString(),
+    updatedAt: post.updatedAt ?? new Date().toISOString(),
+    views: post.views ?? 0,
   }
 
   return (

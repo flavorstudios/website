@@ -27,7 +27,7 @@ interface MegaMenuProps {
 export function MegaMenu({ items, className }: MegaMenuProps) {
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
   const [focusedIndex, setFocusedIndex] = useState(-1)
-  const timeoutRef = useRef<NodeJS.Timeout>()
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null) // UPDATED
   const menuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
 

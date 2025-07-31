@@ -62,9 +62,9 @@ export const metadata = getMetadata({
     description: `Play fun, anime-inspired games like Tic-Tac-Toe and more. Challenge our AI or your friends in multiple modes—only on ${SITE_NAME}.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  alternates: {
-    canonical: getCanonicalUrl("/play"), // Explicit canonical URL for this page.
-  },
+  // alternates: {
+  //   canonical: getCanonicalUrl("/play"), // Explicit canonical URL for this page.
+  // },
 });
 
 // --- JSON-LD Schema for the Play Page (WebPage with ItemList of VideoGame) ---

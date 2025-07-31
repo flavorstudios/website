@@ -24,14 +24,14 @@ export function UserRoleManager() {
       })
       const data = await res.json()
       if (res.ok) {
-        toast({ title: "Role updated" })
+        toast("Role updated")
         setUid("")
       } else {
-        toast({ title: data.error || "Error", variant: "destructive" })
+        toast(data.error || "Error")
       }
     } catch (err) {
       console.error("Failed to update role", err)
-      toast({ title: "Update failed", variant: "destructive" })
+      toast("Update failed")
     } finally {
       setSaving(false)
     }

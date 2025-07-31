@@ -17,7 +17,7 @@ export function SocialShare({ url, title, description }: SocialShareProps) {
   }
 
   const handleNativeShare = async () => {
-    if (navigator.share) {
+    if (typeof navigator.share === "function") {
       try {
         await navigator.share(shareData)
       } catch (error) {
@@ -34,7 +34,7 @@ export function SocialShare({ url, title, description }: SocialShareProps) {
 
   return (
     <div className="flex items-center gap-2">
-      {navigator.share && (
+      {typeof navigator.share === "function" && (
         <Button onClick={handleNativeShare} size="sm" variant="outline">
           <Share2 className="h-4 w-4 mr-2" />
           Share

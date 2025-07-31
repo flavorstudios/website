@@ -18,7 +18,7 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
       ? post.categories[0]
       : post.category;
 
-  const image = post.openGraphImage || post.coverImage || post.featuredImage;
+  const image = post.openGraphImage || post.featuredImage; // UPDATED
 
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

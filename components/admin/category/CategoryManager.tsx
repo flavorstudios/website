@@ -59,7 +59,7 @@ function CategoryForm({ category, onSave, onCancel }: CategoryFormProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (formData.color && !/^#[0-9A-Fa-f]{6}$/.test(formData.color.trim())) {
-      toast("Please select a valid hex color.", { variant: "destructive" })
+      toast("Please select a valid hex color.")
       return
     }
     onSave(formData)

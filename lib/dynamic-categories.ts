@@ -20,13 +20,13 @@ export interface DynamicCategoriesResult {
 // --- Utility: Normalize and format category list ---
 function format(list: Record<string, unknown>[]): CategoryData[] {
   return (list || [])
-    .filter((c) => (c as CategoryData).isActive)
+    .filter(c => (c as CategoryData).isActive)
     .sort((a, b) => ((a as CategoryData).order ?? 0) - ((b as CategoryData).order ?? 0))
-    .map(({ title, postCount, ...rest }: Record<string, unknown>) => ({
-      ...rest,
-      name: title,
-      count: postCount ?? 0,
-    }));
+    .map(({ title, postCount, ...rest }) => ({
+      ...(rest as Partial<CategoryData>),
+      name: typeof title === "string" ? title : "",
+      count: typeof postCount === "number" ? postCount : 0,
+    })) as CategoryData[];
 }
 
 // --- Server Helpers ---

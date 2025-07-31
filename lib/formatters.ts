@@ -33,7 +33,7 @@ export function formatPublicBlog(blog: BlogPost) {
 /**
  * Formats a video object for safe public API responses.
  * Only exposes non-admin fields.
- * Adds .categories[] for multi-category support (fallbacks to [category]).
+ * Adds .categories[] as an array with only the single category.
  */
 export function formatPublicVideo(video: Video) {
   return {
@@ -44,9 +44,7 @@ export function formatPublicVideo(video: Video) {
     thumbnail: video.thumbnail,
     description: video.description,
     category: video.category,
-    categories: Array.isArray(video.categories) && video.categories.length > 0
-      ? video.categories
-      : [video.category],
+    categories: [video.category], // <-- Only single category as array
     tags: video.tags,
     duration: video.duration,
     publishedAt: video.publishedAt,

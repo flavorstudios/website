@@ -111,7 +111,7 @@ export function getSchema<T extends Record<string, unknown>>({
 
   // --- Base schema object ---
   const baseSchema: Partial<Thing> = {
-    "@type": type as Thing["@type"],
+    "@type": type as any, // <- changed!
     name: title,
     description,
     url,
@@ -137,8 +137,7 @@ export function getSchema<T extends Record<string, unknown>>({
 
   // Merge with additional fields in a type-safe way (TS strict mode happy!)
   return {
-    // The context is added by WithContext automatically on cast
-    ...(baseSchema as Thing),
+    ...baseSchema,
     ...(rest && typeof rest === "object" ? rest : {}),
   } as WithContext<Thing>;
 }

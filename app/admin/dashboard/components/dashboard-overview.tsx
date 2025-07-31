@@ -36,9 +36,9 @@ export function DashboardOverview() {
 
   // Utility to extract debug info from API error response
   const extractDebugInfo = (data: Record<string, unknown>) => ({
-    role: data.role || "unknown",
-    email: data.email || "unknown",
-    uid: data.uid || "unknown",
+    role: typeof data.role === "string" ? data.role : "unknown",
+    email: typeof data.email === "string" ? data.email : "unknown",
+    uid: typeof data.uid === "string" ? data.uid : "unknown",
   })
 
   const loadDashboardData = async () => {

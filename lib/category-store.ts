@@ -1,4 +1,4 @@
-// lib/category-store.ts
+// --- CATEGORY STORE ---
 
 import fs from "fs/promises";
 import path from "path";
@@ -47,11 +47,11 @@ export const categoryStore = {
       throw new Error(`Category "${category.title}" already exists for ${category.type}`);
     }
 
-    const newCategory: Category = {
-      ...category,
+    const newCategory = {
+      ...(category as Category),
       id: crypto.randomUUID(),
       postCount: 0,
-    };
+    } as Category;
 
     arr.push(newCategory);
     await this.writeJSON(data);

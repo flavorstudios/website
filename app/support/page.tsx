@@ -48,9 +48,9 @@ export const metadata = getMetadata({
     description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  alternates: {
-    canonical: getCanonicalUrl("/support"),
-  },
+  // alternates: {
+  //   canonical: getCanonicalUrl("/support"),
+  // },
 });
 
 // === JSON-LD WebPage Schema for Support Page ===

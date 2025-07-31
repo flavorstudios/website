@@ -55,7 +55,8 @@ const renderIcon = (name?: string | null) => {
       />
     )
   }
-  const Icon = (Icons as Record<string, React.ComponentType<LucideProps>>)[name]
+  const Icon =
+    (Icons as unknown as Record<string, React.ComponentType<LucideProps>>)[name]
   if (!Icon) return null
   return <Icon className="w-4 h-4" />
 }
@@ -106,13 +107,13 @@ export default function CategoryList({
         toast("Categories reordered")
       } else {
         const data = await res.json().catch(() => ({}))
-        toast(data.error || "Failed to update order", { variant: "destructive" })
+        toast(data.error || "Failed to update order")
         setItems(prevItems)
       }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Failed to reorder categories", err)
-      toast("Failed to update order", { variant: "destructive" })
+      toast("Failed to update order")
       setItems(prevItems)
     }
   }

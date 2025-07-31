@@ -91,24 +91,43 @@ import Script from "next/script"; // ADDED for GTM
 import type { Category } from "@/types/category";
 import type { CategoryData } from "@/lib/dynamic-categories";
 
-function mapCategoryDataToCategory(cat: CategoryData, fallbackType: "blog" | "video"): Category {
-  // You can adjust how you handle the missing fields if your backend doesn't provide them
+// 🟩 UPDATED GUARD: All fields properly checked!
+function mapCategoryDataToCategory(
+  cat: CategoryData,
+  fallbackType: "blog" | "video",
+): Category {
   return {
-    id: cat.id ?? cat.slug ?? `${fallbackType}-${cat.slug ?? cat.name}`,
-    name: cat.name ?? "",
-    slug: cat.slug ?? "",
-    title: cat.title ?? cat.name ?? "",
-    type: (cat.type as "blog" | "video") ?? fallbackType,
-    postCount: (cat.postCount ?? cat.count ?? 0) as number,
-    order: cat.order ?? 0,
-    isActive: cat.isActive ?? true,
-    tooltip: cat.tooltip ?? "",
-    // ...add/patch other fields if needed
+    id: typeof cat.id === "string"
+      ? cat.id
+      : typeof cat.slug === "string"
+      ? `${fallbackType}-${cat.slug}`
+      : `${fallbackType}-unknown`,
+    name: typeof cat.name === "string" ? cat.name : "",
+    slug: typeof cat.slug === "string" ? cat.slug : "",
+    title: typeof cat.title === "string"
+      ? cat.title
+      : typeof cat.name === "string"
+      ? cat.name
+      : "",
+    type:
+      cat.type === "blog" || cat.type === "video"
+        ? cat.type
+        : fallbackType,
+    postCount: Number(
+      typeof cat.postCount !== "undefined"
+        ? cat.postCount
+        : typeof cat.count !== "undefined"
+        ? cat.count
+        : 0
+    ),
+    order: typeof cat.order === "number" ? cat.order : 0,
+    isActive: typeof cat.isActive === "boolean" ? cat.isActive : true,
+    tooltip: typeof cat.tooltip === "string" ? cat.tooltip : "",
   };
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const h = await headers(); // <-- Await headers()!
+  const h = await headers();
   const pathname =
     h.get("next-url") ||
     h.get("x-invoke-path") ||

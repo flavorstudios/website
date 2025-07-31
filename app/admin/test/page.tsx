@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import Link from "next/link";
-import { requireAdmin } from "@/lib/admin-auth";
+// Change: import requireAdminAction instead of requireAdmin
+import { requireAdminAction } from "@/lib/admin-auth";
 
 // === SEO METADATA (noindex for internal pages, but still structured) ===
 export const metadata = getMetadata({
@@ -41,9 +42,9 @@ export default async function AdminTest() {
   const cookieStore = await cookies(); // Await here
   const session = cookieStore.get("admin-session");
 
-  // Pass the actual cookies object, not a function, to requireAdmin
+  // CHANGE: Use requireAdminAction (no params)
   const isAuthenticated = session?.value
-    ? await requireAdmin({ cookies: cookieStore })
+    ? await requireAdminAction()
     : false;
 
   if (!isAuthenticated) {

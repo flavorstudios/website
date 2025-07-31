@@ -37,11 +37,10 @@ export const commentStore = {
   async getAll(): Promise<Comment[]> {
     try {
       const snap = await adminDb.collectionGroup("entries").get();
-      return snap.docs.map((doc) => {
-        // TS: Spread doc data, but always assign id as string
-        const data = doc.data() as FirestoreCommentDoc;
-        return { id: doc.id, ...data };
-      });
+      return snap.docs.map(doc => ({
+        id: doc.id,
+        ...(doc.data() as Comment),
+      }));
     } catch (error) {
       console.error("Failed to fetch comments:", error);
       throw new Error("Failed to fetch comments");
@@ -53,16 +52,16 @@ export const commentStore = {
     try {
       const snap = await adminDb
         .collection("comments")
-        .doc(postId)
+        .doc(String(postId))
         .collection("entries")
         .where("postType", "==", postType)
         .where("status", "==", "approved")
         .orderBy("createdAt", "desc")
         .get();
-      return snap.docs.map((doc) => {
-        const data = doc.data() as FirestoreCommentDoc;
-        return { id: doc.id, ...data };
-      });
+      return snap.docs.map(doc => ({
+        id: doc.id,
+        ...(doc.data() as Comment),
+      }));
     } catch (error) {
       console.error(`Failed to fetch comments for post ${postId}:`, error);
       throw new Error("Failed to fetch comments for this post");
@@ -133,7 +132,7 @@ export const commentStore = {
     try {
       await adminDb
         .collection("comments")
-        .doc(comment.postId)
+        .doc(String(comment.postId))
         .collection("entries")
         .doc(newComment.id)
         .set(newComment);
@@ -153,15 +152,14 @@ export const commentStore = {
     try {
       const ref = adminDb
         .collection("comments")
-        .doc(postId)
+        .doc(String(postId))
         .collection("entries")
         .doc(commentId);
 
       await ref.update({ status });
       const doc = await ref.get();
       if (!doc.exists) return null;
-      const data = doc.data() as FirestoreCommentDoc;
-      return { id: doc.id, ...data };
+      return { id: doc.id, ...(doc.data() as Comment) };
     } catch (error) {
       console.error(`Failed to update status for comment ${commentId}:`, error);
       throw new Error("Failed to update comment status");
@@ -173,7 +171,7 @@ export const commentStore = {
     try {
       const ref = adminDb
         .collection("comments")
-        .doc(postId)
+        .doc(String(postId))
         .collection("entries")
         .doc(commentId);
 

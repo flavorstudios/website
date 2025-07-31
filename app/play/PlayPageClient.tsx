@@ -38,8 +38,8 @@ const INITIAL_STATE: GameState = {
 }
 
 export default function PlayPageClient() {
+  const [autoResetTimer, setAutoResetTimer] = useState<NodeJS.Timeout | null>(null)
   const [gameState, setGameState] = useState<GameState>(INITIAL_STATE)
-  const [autoResetTimer, setAutoResetTimer] = useState<number | null>(null)
   const [countdown, setCountdown] = useState<number>(0)
   const [resetFeedback, setResetFeedback] = useState(false)
 
@@ -64,7 +64,6 @@ export default function PlayPageClient() {
           return { ...prev, timeLeft: prev.timeLeft - 1 }
         })
       }, 1000)
-
       return () => clearInterval(timer)
     }
   }, [
@@ -72,7 +71,7 @@ export default function PlayPageClient() {
     gameState.isGameActive,
     gameState.winner,
     gameState.gameMode,
-    gameState.turnTimeLimit
+    gameState.turnTimeLimit,
   ])
 
   const checkWinner = useCallback((board: Player[]): Player | "tie" | null => {
@@ -125,7 +124,7 @@ export default function PlayPageClient() {
       }
       return availableMoves[Math.floor(Math.random() * availableMoves.length)]!
     },
-    [checkWinner],
+    [checkWinner]
   )
 
   const makeMove = useCallback(
@@ -161,7 +160,7 @@ export default function PlayPageClient() {
       gameState.winner,
       gameState.isGameActive,
       checkWinner
-    ],
+    ]
   )
 
   // Computer move effect
@@ -179,7 +178,7 @@ export default function PlayPageClient() {
             makeMove(move)
           }
         },
-        Math.random() * 800 + 400,
+        Math.random() * 800 + 400
       )
       return () => clearTimeout(timer)
     }
@@ -287,11 +286,11 @@ export default function PlayPageClient() {
         moveHistory: [],
       }))
     },
-    [gameState.gameMode],
+    [gameState.gameMode]
   )
 
   const getStatusMessage = () => {
-    if (gameState.winner === "tie") return "It&apos;s a tie! 🤝"
+    if (gameState.winner === "tie") return "It's a tie! 🤝"
     if (gameState.winner) {
       if (gameState.gameMode === "p2c") {
         return gameState.winner === "X" ? "You win! 🎉" : "Computer wins! 🤖"
@@ -301,7 +300,7 @@ export default function PlayPageClient() {
     if (gameState.gameMode === "p2c") {
       return gameState.currentPlayer === "X" ? "Your turn" : "Computer thinking..."
     }
-    return `Player ${gameState.currentPlayer}&apos;s turn`
+    return `Player ${gameState.currentPlayer}'s turn`
   }
 
   const getDifficultyDescription = (mode: GameMode, difficulty: Difficulty) => {
@@ -375,7 +374,7 @@ export default function PlayPageClient() {
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 sm:mb-6 lg:mb-8 text-center">Game Features</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {gameFeatures.map((feature, index) => {
-              const Icon = feature.icon;
+              const Icon = feature.icon
               return (
                 <Card key={index} className="text-center h-full">
                   <CardHeader className="pb-2 sm:pb-3">
@@ -388,7 +387,7 @@ export default function PlayPageClient() {
                     <p className="text-xs sm:text-sm leading-relaxed text-gray-600">{feature.description}</p>
                   </CardContent>
                 </Card>
-              );
+              )
             })}
           </div>
         </div>
@@ -619,7 +618,7 @@ export default function PlayPageClient() {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-3 text-sm sm:text-base leading-relaxed">
-                We&apos;re working on adding more exciting games with various difficulty levels and multiplayer options.
+                We're working on adding more exciting games with various difficulty levels and multiplayer options.
               </p>
               <Badge variant="outline" className="text-blue-600 border-blue-600 text-xs sm:text-sm">
                 Stay Tuned for Updates

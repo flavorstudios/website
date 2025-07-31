@@ -70,9 +70,9 @@ export const metadata = getMetadata({
     description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  alternates: {
-    canonical: getCanonicalUrl("/"),
-  },
+  // alternates: {
+  //   canonical: getCanonicalUrl("/"),
+  // },
 });
 
 // --- JSON-LD WebPage Schema ---

@@ -9,9 +9,7 @@ const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "pr
 
 // === EARLY LOGS FOR ENV DEBUGGING ===
 if (debug) {
-  // eslint-disable-next-line no-console
   console.log("[ENV] ADMIN_EMAIL:", process.env.ADMIN_EMAIL);
-  // eslint-disable-next-line no-console
   console.log("[ENV] ADMIN_EMAILS:", process.env.ADMIN_EMAILS);
 }
 
@@ -23,52 +21,41 @@ const rawEmails = (process.env.ADMIN_EMAILS ?? "").trim();
 export const adminEmailsEnv = rawEmails !== "" ? rawEmails : process.env.ADMIN_EMAIL;
 
 // ======= ENVIRONMENT VARIABLE VALIDATION =======
+
+// If missing, warn and export undefined. Do NOT throw!
+let parsedCredentials: Record<string, unknown> | null = null;
 if (!serviceAccountKey) {
   if (debug) {
-    // eslint-disable-next-line no-console
-    console.error("[Firebase Admin] Missing FIREBASE_SERVICE_ACCOUNT_KEY environment variable.");
+    console.warn("[Firebase Admin] FIREBASE_SERVICE_ACCOUNT_KEY not set. Admin features are disabled.");
   }
-  throw new Error("FIREBASE_SERVICE_ACCOUNT_KEY is required.");
-}
-
-if (!adminEmailsEnv) {
-  if (debug) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      "[Firebase Admin] Warning: ADMIN_EMAIL or ADMIN_EMAILS environment variable is missing. Admin routes will deny all access!"
-    );
+} else {
+  try {
+    parsedCredentials = JSON.parse(serviceAccountKey);
+    // 🛡 Initialize Firebase Admin SDK (only once)
+    if (!getApps().length) {
+      initializeApp({
+        credential: cert(parsedCredentials as any),
+      });
+      if (debug) {
+        console.log("[Firebase Admin] Firebase Admin initialized successfully.");
+      }
+    }
+  } catch (error) {
+    console.error("[Firebase Admin] Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:", error);
+    // Don't throw, just disable admin features!
+    parsedCredentials = null;
   }
-  // Not throwing here, just warn (in dev)
 }
 
-// ✅ Parse service account credentials safely
-let parsedCredentials;
-try {
-  parsedCredentials = JSON.parse(serviceAccountKey);
-} catch (error) {
-  // eslint-disable-next-line no-console
-  console.error("[Firebase Admin] Failed to parse service account key.");
-  throw error;
-}
-
-// 🛡 Initialize Firebase Admin SDK (only once)
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(parsedCredentials),
-  });
-}
-
-// ---- LOG ON STARTUP: current adminEmailsEnv (for diagnosis) ----
 if (debug) {
-  // eslint-disable-next-line no-console
+  if (!adminEmailsEnv) {
+    console.warn("[Firebase Admin] Warning: ADMIN_EMAIL or ADMIN_EMAILS environment variable is missing. Admin routes will deny all access!");
+  }
   console.log("[Firebase Admin] STARTUP Loaded ADMIN_EMAILS/ADMIN_EMAIL:", adminEmailsEnv);
 }
 
 /**
  * Helper: Get allowed admin emails as a lowercase array
- * - Supports: 
- *    - ADMIN_EMAILS (comma-separated)
- *    - ADMIN_EMAIL (single email)
  */
 export const getAllowedAdminEmails = (): string[] => {
   const allowedEmails = (adminEmailsEnv || "")
@@ -77,16 +64,10 @@ export const getAllowedAdminEmails = (): string[] => {
     .filter(Boolean);
 
   if (debug) {
-    // eslint-disable-next-line no-console
     console.log("[Firebase Admin] DEBUG_ADMIN enabled");
-    // eslint-disable-next-line no-console
     console.log("[Firebase Admin] Loaded ADMIN_EMAILS:", process.env.ADMIN_EMAILS);
-    // eslint-disable-next-line no-console
     console.log("[Firebase Admin] Loaded ADMIN_EMAIL:", process.env.ADMIN_EMAIL);
-    // eslint-disable-next-line no-console
     console.log("[Firebase Admin] Final allowed admin emails:", allowedEmails);
-    // One-time dump of critical envs (for troubleshooting)
-    // eslint-disable-next-line no-console
     console.log("[ENV DUMP]", JSON.stringify({
       ADMIN_EMAIL: process.env.ADMIN_EMAIL,
       ADMIN_EMAILS: process.env.ADMIN_EMAILS,
@@ -96,6 +77,6 @@ export const getAllowedAdminEmails = (): string[] => {
   return allowedEmails;
 };
 
-// ✅ Export Firebase Admin Services
-export const adminAuth = getAuth();
-export const adminDb = getFirestore();
+// ✅ Export Firebase Admin Services - export undefined if not initialized!
+export const adminAuth = serviceAccountKey && parsedCredentials ? getAuth() : undefined;
+export const adminDb = serviceAccountKey && parsedCredentials ? getFirestore() : undefined;

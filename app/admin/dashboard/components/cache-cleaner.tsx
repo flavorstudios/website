@@ -32,20 +32,13 @@ export function CacheCleaner() {
       sessionKeysToRemove.forEach((key) => sessionStorage.removeItem(key))
 
       setLastCleared(new Date().toLocaleString())
-      toast({
-        title: "Frontend Cache Cleared",
-        description: "Browser cache and local storage cleared successfully",
-      })
+      toast("Frontend Cache Cleared")
 
       // Trigger data refresh
       window.dispatchEvent(new CustomEvent("admin-refresh"))
     } catch (error) {
       console.error("Failed to clear frontend cache:", error)
-      toast({
-        title: "Cache Clear Failed",
-        description: "Failed to clear frontend cache",
-        variant: "destructive",
-      })
+      toast("Cache Clear Failed")
     } finally {
       setLoading(false)
     }
@@ -61,21 +54,14 @@ export function CacheCleaner() {
       })
 
       if (response.ok) {
-        toast({
-          title: "Backend Cache Cleared",
-          description: "Server cache invalidated successfully",
-        })
+        toast("Backend Cache Cleared")
         setLastCleared(new Date().toLocaleString())
       } else {
         throw new Error("Backend cache clear failed")
       }
     } catch (error) {
       console.error("Failed to clear backend cache:", error)
-      toast({
-        title: "Backend Cache Clear Failed",
-        description: "Failed to clear server cache",
-        variant: "destructive",
-      })
+      toast("Backend Cache Clear Failed")
     } finally {
       setLoading(false)
     }
@@ -86,10 +72,7 @@ export function CacheCleaner() {
     try {
       await Promise.all([clearFrontendCache(), clearBackendCache()])
 
-      toast({
-        title: "All Caches Cleared",
-        description: "Frontend and backend caches cleared successfully",
-      })
+      toast("All Caches Cleared")
 
       // Force page refresh after clearing all caches
       setTimeout(() => {

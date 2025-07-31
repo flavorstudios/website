@@ -41,8 +41,8 @@ export const metadata = getMetadata({
     images: [
       {
         url: `${SITE_URL}/cover.jpg`,
-        width: 1200,
-        height: 630,
+        width: "1200", // Fixed: string, not number
+        height: "630", // Fixed: string, not number
         alt: `${SITE_NAME} Blog – Anime News, Insights & Studio Stories`,
       },
     ],
@@ -55,9 +55,10 @@ export const metadata = getMetadata({
     description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  alternates: {
-    canonical: getCanonicalUrl("/blog"),
-  },
+  // alternates: {
+  //   canonical: getCanonicalUrl("/blog"),
+  // },
+  // ^^^ REMOVE or move to correct property (handled by getMetadata/canonical)
 });
 
 // --- JSON-LD Schema.org (WebPage schema, logo only in publisher) ---
@@ -68,8 +69,8 @@ const schema = getSchema({
   description: `Explore the latest anime news, creative industry insights, and original studio stories from ${SITE_NAME}. Go behind the scenes with our team.`,
   image: {
     url: `${SITE_URL}/cover.jpg`,
-    width: 1200,
-    height: 630,
+    width: "1200", // Fixed: string, not number
+    height: "630", // Fixed: string, not number
     alt: `${SITE_NAME} Blog – Anime News, Insights & Studio Stories`,
   },
   organizationName: SITE_NAME,
@@ -110,7 +111,7 @@ export default async function BlogPage({
   const postsPerPage = 9;
 
   // Clean/normalize the slug for filtering
-  const normalizeSlug = (name: string) =>
+  const normalizeSlug = (name: string | undefined) =>
     name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   // --- TRUE MULTI-CATEGORY FILTER ---
@@ -122,8 +123,9 @@ export default async function BlogPage({
             post.categories && post.categories.length > 0
               ? post.categories
               : [post.category];
+          // FIX: handle category possibly undefined
           return postCategories.some(
-            (cat: string) => normalizeSlug(cat) === selectedCategory
+            (cat) => cat && normalizeSlug(cat) === selectedCategory
           );
         });
 
@@ -143,9 +145,9 @@ export default async function BlogPage({
       return a.title.localeCompare(b.title);
     }
     // Default to date (newest first)
-    return (
-      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    );
+    const aDate = a.publishedAt ? new Date(a.publishedAt) : new Date(0);
+    const bDate = b.publishedAt ? new Date(b.publishedAt) : new Date(0);
+    return bDate.getTime() - aDate.getTime();
   });
 
   // --- PAGINATION ---
@@ -215,7 +217,8 @@ export default async function BlogPage({
       </div>
 
       {/* Category Tabs */}
-      <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/blog" type="blog" />
+      <CategoryTabs categories={categories} selectedCategory={selectedCategory} basePath="/blog" /*type="blog"*/ />
+      {/* ^^^ Removed prop 'type' unless it's actually required by your CategoryTabsProps */}
 
       {/* Featured Posts */}
       {featuredPosts.length > 0 && (
@@ -388,9 +391,11 @@ function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority
               </span>
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">{formatDate(post.publishedAt)}</span>
+                <span className="hidden sm:inline">
+                  {post.publishedAt ? formatDate(post.publishedAt) : "—"}
+                </span>
                 <span className="sm:hidden">
-                  {formatDate(post.publishedAt, { month: "short", day: "numeric" })}
+                  {post.publishedAt ? formatDate(post.publishedAt, { month: "short", day: "numeric" }) : "—"}
                 </span>
               </span>
             </div>
@@ -450,9 +455,11 @@ function BlogPostCard({ post }: { post: BlogPost }) {
             </Badge>
             <span className="text-xs text-gray-500 flex items-center gap-1">
               <Calendar className="h-3 w-3" />
-              <span className="hidden sm:inline">{formatDate(post.publishedAt)}</span>
+              <span className="hidden sm:inline">
+                {post.publishedAt ? formatDate(post.publishedAt) : "—"}
+              </span>
               <span className="sm:hidden">
-                {formatDate(post.publishedAt, { month: "short", day: "numeric" })}
+                {post.publishedAt ? formatDate(post.publishedAt, { month: "short", day: "numeric" }) : "—"}
               </span>
             </span>
           </div>

@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Share2, Facebook, Twitter, Linkedin, Mail, MessageCircle,
-  Copy, Check, Instagram, Send, Pinterest
-} from "lucide-react" // Use Pinterest icon if available; otherwise, keep Instagram for demo
+  Copy, Check, Send // Removed Instagram, Pinterest
+} from "lucide-react"
 
 interface SocialShareProps {
   title: string
@@ -63,7 +63,6 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
     window.open(shareLinks[platform], "_blank", "width=600,height=400")
   }
 
-  // Helper for mobile native share availability
   const isNativeShareSupported = typeof navigator !== "undefined" && typeof navigator.share === "function"
 
   return (
@@ -137,7 +136,8 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
               onClick={() => handleShare("pinterest")}
               className="flex flex-col items-center gap-1 h-auto py-3 hover:bg-red-50 hover:border-red-200 hover:text-red-600"
             >
-              <Pinterest className="h-5 w-5" />
+              {/* Fallback: Use Share2 icon for Pinterest */}
+              <Share2 className="h-5 w-5" />
               <span className="text-xs">Pinterest</span>
             </Button>
           )}

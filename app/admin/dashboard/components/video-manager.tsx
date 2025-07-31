@@ -415,10 +415,10 @@ export function VideoManager() {
           });
         } else {
           const data = await response.json();
-          toast(data.error || "Failed to delete video.", { variant: "destructive" });
+          toast(data.error || "Failed to delete video.");
         }
       } catch {
-        toast("Failed to delete video.", { variant: "destructive" });
+        toast("Failed to delete video.");
       }
     }
     setDeleteTargets(null);
@@ -482,9 +482,9 @@ export function VideoManager() {
   const sortedVideos = [...filteredVideos].sort((a, b) => {
     if (sortBy === "title") return a.title.localeCompare(b.title);
     if (sortBy === "status") return a.status.localeCompare(b.status);
+    // Only using publishedAt, since createdAt does not exist
     return (
-      new Date(b.publishedAt || b.createdAt).getTime() -
-      new Date(a.publishedAt || a.createdAt).getTime()
+      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     );
   });
 
@@ -531,6 +531,7 @@ export function VideoManager() {
             slug: cat.slug,
             count: cat.postCount,
             tooltip: cat.tooltip,
+            // ...add other props if needed by your CategoryData type
           }))}
           selectedCategory={filterCategory}
           onCategoryChange={setFilterCategory}
@@ -618,7 +619,7 @@ export function VideoManager() {
       {/* Create/Edit Form Modal */}
       {(showCreateForm || editingVideo) && (
         <VideoForm
-          video={editingVideo}
+          video={editingVideo || undefined}
           onSave={editingVideo ? (data) => updateVideo(editingVideo.id, data) : createVideo}
           onCancel={() => {
             setShowCreateForm(false);

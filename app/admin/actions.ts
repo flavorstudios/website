@@ -78,7 +78,7 @@ export async function createVideo(formData: FormData) {
   if (!(await requireAdminAction())) throw new Error("Unauthorized")
 
   const title = formData.get("title") as string
-  const slug = formData.get("slug") as string // <-- ADDED
+  const slug = formData.get("slug") as string
   const description = formData.get("description") as string
   const youtubeId = formData.get("youtubeId") as string
   const thumbnail = formData.get("thumbnail") as string
@@ -93,7 +93,7 @@ export async function createVideo(formData: FormData) {
 
   await videoStore.create({
     title,
-    slug, // <-- ADDED
+    slug,
     description,
     youtubeId,
     thumbnail,
@@ -112,7 +112,7 @@ export async function updateVideo(id: string, formData: FormData) {
 
   const updates = {
     title: formData.get("title") as string,
-    slug: formData.get("slug") as string, // <-- ADDED
+    slug: formData.get("slug") as string,
     description: formData.get("description") as string,
     youtubeId: formData.get("youtubeId") as string,
     thumbnail: formData.get("thumbnail") as string,
@@ -136,16 +136,20 @@ export async function deleteVideo(id: string) {
   revalidatePath("/admin/dashboard")
 }
 
-// Comment actions
-export async function updateCommentStatus(id: string, status: "pending" | "approved" | "spam" | "trash") {
+// Comment actions (updated for correct argument structure)
+export async function updateCommentStatus(
+  postId: string,
+  commentId: string,
+  status: "pending" | "approved" | "spam" | "trash"
+) {
   if (!(await requireAdminAction())) throw new Error("Unauthorized")
-  await commentStore.updateStatus(id, status)
+  await commentStore.updateStatus(postId, commentId, status)
   revalidatePath("/admin/dashboard")
 }
 
-export async function deleteComment(id: string) {
+export async function deleteComment(postId: string, commentId: string) {
   if (!(await requireAdminAction())) throw new Error("Unauthorized")
-  await commentStore.delete(id)
+  await commentStore.delete(postId, commentId)
   revalidatePath("/admin/dashboard")
 }
 

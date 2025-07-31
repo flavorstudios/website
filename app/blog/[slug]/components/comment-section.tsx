@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { MessageCircle, Send, User, Clock, AlertCircle, CheckCircle } from "lucide-react"
-import { formatDate } from "@/lib/date" // <-- Added import
+import { formatDate } from "@/lib/date"
 
 interface Comment {
   id: string
@@ -18,7 +18,7 @@ interface Comment {
   status: "pending" | "approved" | "spam" | "trash"
   createdAt: string
   parentId?: string
-  flagged?: boolean // <-- Added for flagged status
+  flagged?: boolean
 }
 
 interface CommentSectionProps {
@@ -38,18 +38,8 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
   const [savedName, setSavedName] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const name = localStorage.getItem(AUTHOR_KEY)
-      if (name) {
-        setSavedName(name)
-        setFormData((prev) => ({ ...prev, name }))
-      }
-    }
-    fetchComments()
-  }, [postId])
-
-  const fetchComments = async () => {
+  // --- Memoized fetchComments, future proof! ---
+  const fetchComments = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/comments?postId=${postId}&postType=blog`)
@@ -62,7 +52,18 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [postId])
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const name = localStorage.getItem(AUTHOR_KEY)
+      if (name) {
+        setSavedName(name)
+        setFormData((prev) => ({ ...prev, name }))
+      }
+    }
+    fetchComments()
+  }, [postId, fetchComments])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

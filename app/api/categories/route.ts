@@ -1,20 +1,20 @@
 // app/api/categories/route.ts
 
 import { NextResponse, type NextRequest } from "next/server";
-import type { Category } from "@/types/category"; // Unified import
+import type { Category } from "@/types/category";
 
 // Helper to format categories (adds name & type fields)
-function format(arr: any[], type: "blog" | "video"): Category[] {
+function format(arr: Partial<Category>[], type: "blog" | "video"): Category[] {
   return (arr || [])
     .filter((c) => c.isActive)
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     .map((c) => ({
       ...c,
-      name: c.title,                        // For compatibility/UI
-      type,                                 // Now fulfills Category type!
+      name: c.title, // For compatibility/UI
+      type,          // Now fulfills Category type!
       count: c.postCount ?? 0,
       tooltip: c.tooltip ?? undefined,
-    }));
+    })) as Category[];
 }
 
 export async function GET(request: NextRequest) {

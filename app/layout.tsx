@@ -87,8 +87,28 @@ import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { headers } from "next/headers";
 import Script from "next/script"; // ADDED for GTM
 
+// --- Type "Category" should have id, title, type, postCount, name, slug, tooltip, etc. ---
+import type { Category } from "@/types/category";
+import type { CategoryData } from "@/lib/dynamic-categories";
+
+function mapCategoryDataToCategory(cat: CategoryData, fallbackType: "blog" | "video"): Category {
+  // You can adjust how you handle the missing fields if your backend doesn't provide them
+  return {
+    id: cat.id ?? cat.slug ?? `${fallbackType}-${cat.slug ?? cat.name}`,
+    name: cat.name ?? "",
+    slug: cat.slug ?? "",
+    title: cat.title ?? cat.name ?? "",
+    type: (cat.type as "blog" | "video") ?? fallbackType,
+    postCount: (cat.postCount ?? cat.count ?? 0) as number,
+    order: cat.order ?? 0,
+    isActive: cat.isActive ?? true,
+    tooltip: cat.tooltip ?? "",
+    // ...add/patch other fields if needed
+  };
+}
+
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const h = headers();
+  const h = await headers(); // <-- Await headers()!
   const pathname =
     h.get("next-url") ||
     h.get("x-invoke-path") ||
@@ -97,9 +117,19 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   const isAdmin = pathname.startsWith("/admin");
 
-  const { blogCategories, videoCategories } = isAdmin
-    ? { blogCategories: [], videoCategories: [] }
-    : await getDynamicCategories();
+  let blogCategories: Category[] = [];
+  let videoCategories: Category[] = [];
+
+  if (!isAdmin) {
+    const categories = await getDynamicCategories();
+    // Map to full Category type expected by Header
+    blogCategories = (categories.blogCategories || []).map((cat: CategoryData) =>
+      mapCategoryDataToCategory(cat, "blog")
+    );
+    videoCategories = (categories.videoCategories || []).map((cat: CategoryData) =>
+      mapCategoryDataToCategory(cat, "video")
+    );
+  }
 
   return (
     <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>
@@ -152,7 +182,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {!isAdmin && <AdblockBanner />}
 
         {!isAdmin && (
-          <Header blogCategories={blogCategories} videoCategories={videoCategories} />
+          <Header
+            blogCategories={blogCategories}
+            videoCategories={videoCategories}
+          />
         )}
 
         <main>{children}</main>

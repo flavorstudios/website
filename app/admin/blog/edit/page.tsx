@@ -3,6 +3,7 @@ import { blogStore } from "@/lib/content-store";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import BlogEditorPageClient from "./BlogEditorPageClient";
+import type { BlogPost } from "@/types/blog"; // <-- Adjust path to your real BlogPost type!
 
 interface PageProps {
   searchParams: { id?: string; slug?: string };
@@ -38,7 +39,7 @@ export const metadata = getMetadata({
 
 export default async function BlogEditPage({ searchParams }: PageProps) {
   const { id, slug } = searchParams;
-  let post = null;
+  let post: BlogPost | null = null;
   if (id) {
     post = await blogStore.getById(id);
   } else if (slug) {
@@ -46,5 +47,16 @@ export default async function BlogEditPage({ searchParams }: PageProps) {
   }
   if (!post) notFound();
 
-  return <BlogEditorPageClient post={post} />;
+  // Fill missing properties without `any` and without TS warnings:
+  // Only include *known* BlogPost properties and safe fallbacks.
+  const safePost: BlogPost = {
+    ...post,
+    seoKeywords: post.seoKeywords ?? "",
+    featured: post.featured ?? false,
+    wordCount: post.wordCount ?? 0,
+    categories: post.categories ?? [],
+    openGraphImage: post.openGraphImage ?? "",
+  };
+
+  return <BlogEditorPageClient post={safePost} />;
 }

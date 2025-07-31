@@ -82,7 +82,7 @@ export const BlogManager = () => {
       )
     } catch (err) {
       console.error("Failed to load posts:", err)
-      toast("Failed to load posts", { variant: "destructive" })
+      toast("Failed to load posts")
       setError("Could not load blog posts. Please refresh or try again later.")
     } finally {
       setLoading(false)
@@ -96,7 +96,7 @@ export const BlogManager = () => {
       toast(result.message)
     } catch (error) {
       console.error("Failed to revalidate blog:", error)
-      toast("Failed to revalidate blog section.", { variant: "destructive" })
+      toast("Failed to revalidate blog section.")
     } finally {
       setIsRevalidating(false)
     }
@@ -128,11 +128,11 @@ export const BlogManager = () => {
           })
         } else {
           const data = await res.json()
-          toast(data.error || "Failed to delete", { variant: "destructive" })
+          toast(data.error || "Failed to delete")
         }
       } catch (err) {
         console.error("Delete failed", err)
-        toast("Failed to delete", { variant: "destructive" })
+        toast("Failed to delete")
       }
     }
     setDeleteTargets(null)
@@ -171,11 +171,11 @@ export const BlogManager = () => {
         await loadData()
       } else {
         const data = await res.json()
-        toast(data.error || "Update failed", { variant: "destructive" })
+        toast(data.error || "Update failed")
       }
     } catch (err) {
       console.error("Publish toggle failed", err)
-      toast("Update failed", { variant: "destructive" })
+      toast("Update failed")
     }
   }
 

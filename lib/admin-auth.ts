@@ -73,8 +73,7 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
   try {
     decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
     if (debug) {
-      // Firebase DecodedIdToken may not type email, but this is fine for logging
-      // @ts-ignore
+      // @ts-expect-error Firebase DecodedIdToken may not have email: safe for logging
       console.log("[admin-auth] Session cookie verified for:", decoded.email);
     }
   } catch {
@@ -83,7 +82,7 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
       const secret = process.env.ADMIN_JWT_SECRET || "";
       decoded = jwt.verify(sessionCookie, secret) as jwt.JwtPayload;
       if (debug) {
-        // @ts-ignore
+        // @ts-expect-error JWT payload may not have email: safe for logging
         console.log("[admin-auth] JWT session verified for:", decoded.email);
       }
     } catch (jwtErr) {
@@ -92,33 +91,29 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
     }
   }
 
-  // --- Firestore-based admin users ---
   firestoreEmails = await getFirestoreAdminEmails();
 
-  // --- LOG BOTH EMAILS FOR DEBUG ---
   if (debug) {
-    // @ts-ignore
+    // @ts-expect-error Decoded may not have email: only for debug logging
     console.log("[admin-auth] Email from session:", `"${decoded.email?.trim?.().toLowerCase?.()}"`);
     console.log("[admin-auth] Allowed emails after merging:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
   }
 
-  // --- Check env + Firestore merged ---
-  // @ts-ignore
+  // @ts-expect-error Decoded may not have email: used for admin validation
   if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
-    // @ts-ignore
+    // @ts-expect-error Decoded may not have email: for logging unauthorized attempts
     logError("admin-auth: verifyAdminSession (unauthorized email)", decoded.email || "");
     throw new Error("Unauthorized admin email");
   }
 
-  // IMPORTANT: Always pass BOTH uid and email for fallback admin role logic!
-  // @ts-ignore
+  // Always pass BOTH uid and email for fallback admin role logic!
+  // @ts-expect-error Decoded may not have uid/email: user role assignment
   const role = await getUserRole(decoded.uid as string, decoded.email as string);
   return { ...(decoded as jwt.JwtPayload), role } as VerifiedAdmin;
 }
 
 // Returns the decoded admin session and role (or null if verification fails).
 export async function getSessionAndRole(req: NextRequest): Promise<VerifiedAdmin | null> {
-  // --- FIX: .cookies is a property, not a Promise, in NextRequest, so .get is OK ---
   const sessionCookie = req.cookies.get("admin-session")?.value;
   if (!sessionCookie) return null;
   try {
@@ -137,7 +132,6 @@ export async function getSessionAndRole(req: NextRequest): Promise<VerifiedAdmin
 export async function getSessionInfo(
   req: NextRequest,
 ): Promise<VerifiedAdmin | null> {
-  // --- FIX: .cookies is a property, not a Promise, in NextRequest ---
   const sessionCookie = req.cookies.get("admin-session")?.value;
   if (!sessionCookie) return null;
   try {
@@ -177,13 +171,9 @@ export async function requireAdmin(
 export async function requireAdminAction(
   permission?: keyof import("./role-permissions").RolePermissions,
 ): Promise<boolean> {
-  // --- FIX: cookies() returns a Promise in some Next.js versions, so use await ---
-  // Also, always check type of cookies() for your Next.js version!
-  // Below code works for Next.js 13/14 App Router
-
   // (1) Get the cookies instance
-  const cookieStore = cookies();
-  // (2) .get() is valid in App Router (not Promise)
+  const cookieStore = await cookies(); // App Router: cookies() may be Promise
+  // (2) .get() is valid
   const sessionCookie = cookieStore.get("admin-session")?.value;
   if (!sessionCookie) return false;
   try {
@@ -210,18 +200,18 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
     // Validate and decode token (throws if invalid/revoked)
     const decoded = await adminAuth.verifyIdToken(idToken, true);
 
-    // --- Firestore-based admin users ---
+    // Firestore-based admin users
     const firestoreEmails = await getFirestoreAdminEmails();
 
     if (debug) {
-      // @ts-ignore
-      console.log("[admin-auth] Creating session cookie for email:", `"${decoded.email?.trim?.().toLowerCase?.()}"`);
+      // @ts-expect-error Decoded may not have email: debug only
+      console.log("[admin-auth] Creating session cookie for email:", `"${decoded.email?.trim?.toLowerCase?.()}"`);
       console.log("[admin-auth] Allowed emails:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
     }
 
-    // @ts-ignore
+    // @ts-expect-error Decoded may not have email: admin validation
     if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
-      // @ts-ignore
+      // @ts-expect-error Decoded may not have email: logging for audit
       logError("admin-auth: createSessionCookieFromIdToken (unauthorized email)", decoded.email || "");
       throw new Error("Unauthorized admin email");
     }
@@ -234,7 +224,6 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
 }
 
 // Logs failed admin validations to Firestore for auditing.
-// Now supports an optional 'reason' string for better diagnostics.
 export async function logAdminAuditFailure(
   email: string | null,
   ip: string,
@@ -295,8 +284,7 @@ export async function createRefreshSession(
       .set({ uid, createdAt: new Date().toISOString() });
 
     // Set cookies (server context)
-    const cookieStore = cookies();
-    // .set() is valid for App Router (not a Promise)
+    const cookieStore = await cookies();
     cookieStore.set("admin-session", sessionCookie, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

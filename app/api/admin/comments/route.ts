@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/admin-auth"
+import { requireAdmin } from "@/lib/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 
@@ -11,7 +11,7 @@ type Comment = {
   status: "approved" | "pending" | "rejected";
   flagged?: boolean;
   createdAt: string;
-  [key: string]: any; // Allow extra fields
+  // [key: string]: any; // REMOVE this for better type safety!
 };
 
 // --- Fetch all flagged (and all) comments, grouped by postSlug (admin only) ---
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get all comment parent docs (each post's comments)
     const postsSnap = await adminDb.collection("comments").get();
-    let allComments: Comment[] = []; // ← Explicitly typed
+    let allComments: Comment[] = [];
 
     // Iterate through each post (slug = post ID)
     for (const postDoc of postsSnap.docs) {
@@ -36,12 +36,15 @@ export async function GET(request: NextRequest) {
         .orderBy("createdAt", "desc")
         .get();
 
-      // Map entries to unified structure
-      const comments = entriesSnap.docs.map((doc) => ({
-        id: doc.id,
-        postSlug: slug,
-        ...doc.data(),
-      })) as Comment[];
+      // Map entries to unified structure (typed)
+      const comments: Comment[] = entriesSnap.docs.map((doc) => {
+        const data = doc.data() as Omit<Comment, "id" | "postSlug">;
+        return {
+          id: doc.id,
+          postSlug: slug,
+          ...data,
+        };
+      });
       allComments = allComments.concat(comments);
     }
 

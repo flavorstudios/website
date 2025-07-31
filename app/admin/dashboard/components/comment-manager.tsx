@@ -63,7 +63,7 @@ export function CommentManager() {
       setComments(data.comments || [])
     } catch {
       console.error("Failed to load comments")
-      toast("Failed to load comments", { variant: "destructive" })
+      toast("Failed to load comments")
     } finally {
       setLoading(false)
     }
@@ -92,11 +92,11 @@ export function CommentManager() {
         )
       } else {
         const data = await response.json()
-        toast(data.error || "Failed to update comment", { variant: "destructive" })
+        toast(data.error || "Failed to update comment")
       }
     } catch {
       console.error("Failed to update comment")
-      toast("Failed to update comment", { variant: "destructive" })
+      toast("Failed to update comment")
     }
   }
 
@@ -119,10 +119,10 @@ export function CommentManager() {
           toast("Comment deleted.")
         } else {
           const data = await res.json()
-          toast(data.error || "Failed to delete comment", { variant: "destructive" })
+          toast(data.error || "Failed to delete comment")
         }
       } catch {
-        toast("Failed to delete comment", { variant: "destructive" })
+        toast("Failed to delete comment")
       }
     }
     setSelectedIds((ids) =>

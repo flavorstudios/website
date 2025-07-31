@@ -41,9 +41,19 @@ function resetRate(ip: string) {
   rateMap.delete(ip);
 }
 
+// --- Helper to get IP address from request (Next.js 13/14 safe) ---
+function getRequestIp(request: NextRequest): string {
+  // x-forwarded-for could be "clientIP, proxy1, proxy2"
+  const xfwd = request.headers.get("x-forwarded-for");
+  if (xfwd) return xfwd.split(",")[0].trim();
+  // (If you use Vercel Edge, you might want to check other headers, but this is safest)
+  return "unknown";
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const ip = request.ip ?? request.headers.get("x-forwarded-for") ?? "unknown";
+  const ip = getRequestIp(request);
+
   const isLoginPage =
     pathname === "/admin/login" ||
     pathname === "/admin/login/" ||
@@ -70,9 +80,6 @@ export async function middleware(request: NextRequest) {
           if (process.env.NODE_ENV !== "production") {
             try {
               const role = await getUserRole(session.uid);
-              // You can enhance this log to include permission checks if you want
-              // Example: canViewAnalytics, canEdit, etc.
-              // For now, just log the role
               // eslint-disable-next-line no-console
               console.log(`[Admin Middleware] Verified session for email: ${session.email} (uid: ${session.uid}), role: ${role}`);
             } catch (e) {

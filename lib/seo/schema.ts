@@ -1,19 +1,19 @@
-// lib/seo/schema.ts
-
 import { SITE_NAME, SITE_URL, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { getCanonicalUrl } from "./canonical";
 import type { WithContext, Thing, ImageObject, Organization } from "schema-dts";
 
-const OG_IMAGE_DEFAULT_WIDTH = 1200;
-const OG_IMAGE_DEFAULT_HEIGHT = 630;
-const LOGO_DEFAULT_WIDTH = 600;
-const LOGO_DEFAULT_HEIGHT = 60;
+const OG_IMAGE_DEFAULT_WIDTH = "1200";
+const OG_IMAGE_DEFAULT_HEIGHT = "630";
+const LOGO_DEFAULT_WIDTH = "600";
+const LOGO_DEFAULT_HEIGHT = "60";
 
-// Allow alt/caption for legacy SEO (optional)
 type ImageObjectWithCaption = ImageObject & { caption?: string; alt?: string };
 
-/** Ensures all schema.org URLs are absolute */
+// Always return an absolute canonical URL for schema fields.
 function getAbsoluteCanonicalUrlForSchema(inputUrl: string): string {
+  if (typeof inputUrl !== "string") {
+    return String(inputUrl);
+  }
   if (
     inputUrl.startsWith("http://") ||
     inputUrl.startsWith("https://") ||
@@ -24,11 +24,17 @@ function getAbsoluteCanonicalUrlForSchema(inputUrl: string): string {
   return getCanonicalUrl(inputUrl);
 }
 
-/**
- * Universal Schema.org JSON-LD generator for any context
- * Usage:
- *   getSchema({ type: "Blog", ...props })
- */
+// Helper to extract url (string) from unknown types
+function extractUrl(url: unknown): string {
+  if (!url) return SITE_DEFAULT_IMAGE;
+  if (typeof url === "string") return url;
+  if (typeof url === "object" && url !== null && "@id" in url) {
+    return String((url as Record<string, unknown>)["@id"]);
+  }
+  return String(url);
+}
+
+// Accepts a generic T for extra properties
 export function getSchema<T extends Record<string, unknown>>({
   type = "WebPage",
   path = "/",
@@ -41,9 +47,9 @@ export function getSchema<T extends Record<string, unknown>>({
   authorName,
   datePublished,
   dateModified,
-  ...rest // Everything else (mainEntity, sameAs, etc)
+  ...rest
 }: {
-  type?: string;
+  type?: "WebPage" | "Article" | "VideoObject" | "NewsArticle" | "BlogPosting" | "FAQPage" | "CollectionPage" | "Organization" | "ImageObject" | string;
   path?: string;
   title: string;
   description: string;
@@ -57,7 +63,7 @@ export function getSchema<T extends Record<string, unknown>>({
 } & T): WithContext<Thing> {
   const url = getCanonicalUrl(path);
 
-  // Main image
+  // --- Schema image ---
   let schemaImage: ImageObject;
   if (typeof image === "string") {
     schemaImage = {
@@ -71,9 +77,9 @@ export function getSchema<T extends Record<string, unknown>>({
     const img = image as Partial<ImageObjectWithCaption>;
     schemaImage = {
       "@type": "ImageObject",
-      url: getAbsoluteCanonicalUrlForSchema(img.url!),
-      width: img.width || OG_IMAGE_DEFAULT_WIDTH,
-      height: img.height || OG_IMAGE_DEFAULT_HEIGHT,
+      url: getAbsoluteCanonicalUrlForSchema(extractUrl(img.url)),
+      width: img.width ? String(img.width) : OG_IMAGE_DEFAULT_WIDTH,
+      height: img.height ? String(img.height) : OG_IMAGE_DEFAULT_HEIGHT,
       caption: img.caption || img.alt || description,
     };
   } else {
@@ -86,7 +92,7 @@ export function getSchema<T extends Record<string, unknown>>({
     };
   }
 
-  // Logo for publisher (always absolute)
+  // --- Schema logo ---
   const schemaLogo: ImageObject = {
     "@type": "ImageObject",
     url: getAbsoluteCanonicalUrlForSchema(logoUrl),
@@ -95,7 +101,7 @@ export function getSchema<T extends Record<string, unknown>>({
     caption: `${organizationName} logo`,
   };
 
-  // Publisher object
+  // --- Publisher object ---
   const publisherObject: Organization = {
     "@type": "Organization",
     name: organizationName,
@@ -103,10 +109,9 @@ export function getSchema<T extends Record<string, unknown>>({
     logo: schemaLogo,
   };
 
-  // Base schema object
-  const baseSchema: Thing = {
-    "@context": "https://schema.org",
-    "@type": type,
+  // --- Base schema object ---
+  const baseSchema: Partial<Thing> = {
+    "@type": type as Thing["@type"],
     name: title,
     description,
     url,
@@ -128,12 +133,12 @@ export function getSchema<T extends Record<string, unknown>>({
           headline: title,
         }
       : {}),
-    // FAQPage, VideoObject, etc: ...rest below
   };
 
-  // Spread all additional fields
+  // Merge with additional fields in a type-safe way (TS strict mode happy!)
   return {
-    ...baseSchema,
-    ...rest,
+    // The context is added by WithContext automatically on cast
+    ...(baseSchema as Thing),
+    ...(rest && typeof rest === "object" ? rest : {}),
   } as WithContext<Thing>;
 }

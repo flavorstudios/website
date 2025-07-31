@@ -7,7 +7,7 @@ export type Comment = {
   id: string;
   postId: string;      // blog/video post id
   postSlug?: string;   // optional: for convenience
-  postType: "blog" | "video"; // <-- Added, required by your API POST logic!
+  postType: "blog" | "video"; // <-- Required!
   author?: string;     // commenter name
   user?: string;       // user id or name (optional)
   email?: string;
@@ -16,7 +16,7 @@ export type Comment = {
   parentId?: string | null;
   ip?: string;
   userAgent?: string;
-  status: "approved" | "pending" | "rejected";
+  status: "approved" | "pending" | "rejected" | "spam" | "trash";
   scores?: {
     toxicity?: number;
     insult?: number;
@@ -25,8 +25,11 @@ export type Comment = {
   };
   flagged?: boolean;
   createdAt: string;
-  [key: string]: any; // Firestore data extension
+  [key: string]: unknown; // Firestore data extension
 };
+
+// Utility: Type for Firestore comment doc (wider than our Comment, but type-safe)
+type FirestoreCommentDoc = Omit<Comment, "id"> & { id?: string };
 
 // --- COMMENT STORE LOGIC ---
 export const commentStore = {
@@ -34,7 +37,11 @@ export const commentStore = {
   async getAll(): Promise<Comment[]> {
     try {
       const snap = await adminDb.collectionGroup("entries").get();
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Comment[];
+      return snap.docs.map((doc) => {
+        // TS: Spread doc data, but always assign id as string
+        const data = doc.data() as FirestoreCommentDoc;
+        return { id: doc.id, ...data };
+      });
     } catch (error) {
       console.error("Failed to fetch comments:", error);
       throw new Error("Failed to fetch comments");
@@ -52,7 +59,10 @@ export const commentStore = {
         .where("status", "==", "approved")
         .orderBy("createdAt", "desc")
         .get();
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Comment[];
+      return snap.docs.map((doc) => {
+        const data = doc.data() as FirestoreCommentDoc;
+        return { id: doc.id, ...data };
+      });
     } catch (error) {
       console.error(`Failed to fetch comments for post ${postId}:`, error);
       throw new Error("Failed to fetch comments for this post");
@@ -60,7 +70,9 @@ export const commentStore = {
   },
 
   // Create a new comment: runs Perspective moderation and saves with status
-  async create(comment: Omit<Comment, "id" | "createdAt" | "status" | "scores">): Promise<Comment> {
+  async create(
+    comment: Omit<Comment, "id" | "createdAt" | "status" | "scores">
+  ): Promise<Comment> {
     const PERSPECTIVE_API_KEY = process.env.PERSPECTIVE_API_KEY;
     const THRESHOLD = 0.75;
 
@@ -88,9 +100,12 @@ export const commentStore = {
       throw new Error("Comment moderation failed");
     }
 
-    // Extract moderation scores
+    // --- Type the moderation response instead of 'any'
     const attr = (moderation as {
-      attributeScores?: Record<string, { summaryScore: { value: number } }>;
+      attributeScores?: Record<
+        "TOXICITY" | "INSULT" | "THREAT",
+        { summaryScore: { value: number } }
+      >;
     })?.attributeScores;
 
     const scores = {
@@ -106,7 +121,7 @@ export const commentStore = {
 
     const status: Comment["status"] = isFlagged ? "pending" : "approved";
 
-    // --- Store in Firestore ---
+    // --- Ensure all required fields are present for Comment type ---
     const newComment: Comment = {
       ...comment,
       id: `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -130,7 +145,11 @@ export const commentStore = {
   },
 
   // Update comment status (approve/spam/etc)
-  async updateStatus(postId: string, commentId: string, status: Comment["status"]): Promise<Comment | null> {
+  async updateStatus(
+    postId: string,
+    commentId: string,
+    status: Comment["status"]
+  ): Promise<Comment | null> {
     try {
       const ref = adminDb
         .collection("comments")
@@ -140,7 +159,9 @@ export const commentStore = {
 
       await ref.update({ status });
       const doc = await ref.get();
-      return doc.exists ? (doc.data() as Comment) : null;
+      if (!doc.exists) return null;
+      const data = doc.data() as FirestoreCommentDoc;
+      return { id: doc.id, ...data };
     } catch (error) {
       console.error(`Failed to update status for comment ${commentId}:`, error);
       throw new Error("Failed to update comment status");

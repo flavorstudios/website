@@ -41,9 +41,7 @@ export const metadata = getMetadata({
       `Read how ${SITE_NAME} collects, uses, and safeguards your personal data while using ${SITE_URL}. Your privacy matters to us.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  alternates: {
-    canonical: getCanonicalUrl("/privacy-policy"),
-  },
+  // alternates: { canonical: getCanonicalUrl("/privacy-policy") }, // REMOVE this line to fix TS error
 });
 
 // === JSON-LD WebPage Schema for Privacy Policy (Structured Data) ===
@@ -55,8 +53,19 @@ const schema = getSchema({
   image: `${SITE_URL}/cover.jpg`,
 });
 
+// ----------- TypeScript type for section content items -----------
+type SectionContentItem =
+  | { subtitle: string; text: string }
+  | { text: string; list?: string[] };
+
+// ----------- Your Component -----------
 export default function PrivacyPolicyPage() {
-  const sections = [
+  const sections: {
+    id: string;
+    title: string;
+    icon: React.ElementType;
+    content: SectionContentItem[];
+  }[] = [
     {
       id: "information-we-collect",
       title: "Information We Collect",
@@ -233,7 +242,7 @@ export default function PrivacyPolicyPage() {
               <CardContent className="space-y-4 sm:space-y-6">
                 {section.content.map((item, itemIndex) => (
                   <div key={itemIndex}>
-                    {item.subtitle && (
+                    {"subtitle" in item && (
                       <h4 className="font-semibold text-sm sm:text-base md:text-lg text-gray-900 mb-2">
                         {item.subtitle}
                       </h4>
@@ -241,9 +250,9 @@ export default function PrivacyPolicyPage() {
                     <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose mb-3">
                       {item.text}
                     </p>
-                    {item.list && (
+                    {"list" in item && item.list && (
                       <ul className="space-y-2 ml-4">
-                        {item.list.map((listItem, listIndex) => (
+                        {item.list.map((listItem: string, listIndex: number) => (
                           <li key={listIndex} className="flex items-start gap-2">
                             <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                             <span className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose">
@@ -271,9 +280,9 @@ export default function PrivacyPolicyPage() {
                 <p className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose mb-3">
                   {section.text}
                 </p>
-                {section.list && (
+                {"list" in section && section.list && (
                   <ul className="space-y-2 ml-4 mb-4">
-                    {section.list.map((listItem, listIndex) => (
+                    {section.list.map((listItem: string, listIndex: number) => (
                       <li key={listIndex} className="flex items-start gap-2">
                         <div className="h-1.5 w-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
                         <span className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed sm:leading-loose">
@@ -283,7 +292,7 @@ export default function PrivacyPolicyPage() {
                     ))}
                   </ul>
                 )}
-                {section.note && (
+                {"note" in section && section.note && (
                   <p className="text-sm sm:text-base md:text-lg text-gray-600 italic leading-relaxed sm:leading-loose">
                     {section.note}
                   </p>

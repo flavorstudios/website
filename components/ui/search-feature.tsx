@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge" // Added for multi-category support
+import { formatDate } from "@/lib/date" // <-- Added
 
 interface BlogPost {
   id: string
@@ -275,7 +276,7 @@ export function SearchFeature() {
                               </Badge>
                             )}
                             <span className="text-xs text-muted-foreground ml-2">
-                              {new Date(blog.publishedAt).toLocaleDateString()}
+                              {formatDate(blog.publishedAt)}
                             </span>
                           </div>
                           <div className="text-xs text-muted-foreground line-clamp-2">
@@ -306,7 +307,7 @@ export function SearchFeature() {
                           </div>
                           <div className="text-xs text-muted-foreground">
                             🎥 {video.views.toLocaleString()} views • {video.duration} •{" "}
-                            {new Date(video.publishedAt).toLocaleDateString()}
+                            {formatDate(video.publishedAt)}
                           </div>
                         </Link>
                       ))}

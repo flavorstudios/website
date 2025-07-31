@@ -15,6 +15,7 @@ import {
   Youtube,
   Calendar,
 } from "lucide-react";
+import { formatDate } from "@/lib/date"; // <-- Added import
 import { notFound } from "next/navigation";
 
 // --- Type for video object
@@ -200,7 +201,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
                 <Badge variant="outline">{video.category}</Badge>
                 <span className="text-sm text-gray-500 flex items-center gap-1">
                   <Calendar className="h-3 w-3" aria-hidden="true" />
-                  {new Date(video.publishedAt).toLocaleDateString()}
+                  {formatDate(video.publishedAt)}
                 </span>
               </div>
               <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
@@ -303,7 +304,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
                   <div className="flex justify-between">
                     <span className="text-gray-600">Published</span>
                     <span className="font-medium">
-                      {new Date(video.publishedAt).toLocaleDateString()}
+                      {formatDate(video.publishedAt)}
                     </span>
                   </div>
                   <div className="flex justify-between">

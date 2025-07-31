@@ -7,6 +7,7 @@ import BlogStatusBadge from "./BlogStatusBadge"
 import BlogRowActions from "./BlogRowActions"
 import type { BlogPost } from "@/lib/content-store"
 import Image from "next/image" // ✅ Import Image
+import { formatDate } from "@/lib/date" // <-- Added
 
 export interface BlogTableProps {
   posts: BlogPost[]
@@ -153,7 +154,7 @@ export default function BlogTable({
 
               {/* Date */}
               <td className="p-3 hidden sm:table-cell">
-                {new Date(post.publishedAt || post.createdAt).toLocaleDateString()}
+                {formatDate(post.publishedAt || post.createdAt)}
               </td>
 
               {/* Views */}

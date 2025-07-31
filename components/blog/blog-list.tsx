@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, User, Clock } from "lucide-react"
+import { formatDate } from "@/lib/date" // <-- Added
 
 interface BlogPost {
   id: string
@@ -87,7 +88,7 @@ export function BlogList({ posts = [], category = "all", searchQuery = "" }: Blo
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
               <Calendar className="w-4 h-4" />
-              <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
+              <span>{formatDate(post.publishedAt)}</span>
               <User className="w-4 h-4 ml-2" />
               <span>{post.author}</span>
             </div>

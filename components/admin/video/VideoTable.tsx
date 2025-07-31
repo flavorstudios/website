@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Checkbox } from '@/components/ui/checkbox'
 import VideoStatusBadge from './VideoStatusBadge'
 import VideoRowActions, { AdminVideo } from './VideoRowActions'
+import { formatDate } from "@/lib/date" // <-- Added
 
 export interface VideoTableProps {
   videos: AdminVideo[]
@@ -53,7 +54,7 @@ export default function VideoTable({ videos, selected, toggleSelect, toggleSelec
                 <VideoStatusBadge status={video.status as Video['status']} />
               </td>
               <td className="p-3 hidden sm:table-cell">
-                {new Date(video.publishedAt || video.createdAt).toLocaleDateString()}
+                {formatDate(video.publishedAt || video.createdAt)}
               </td>
               <td className="p-3 text-right hidden sm:table-cell">{video.views?.toLocaleString?.() ?? 0}</td>
               <td className="p-3 hidden md:table-cell">{video.duration}</td>

@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Play, Clock, Calendar } from "lucide-react"
+import { formatDate } from "@/lib/date" // <-- Added
 
 interface Video {
   id: string
@@ -116,7 +117,7 @@ export default function VideoGrid({ videos = [], category = "all", searchQuery =
             <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                <span>{new Date(video.publishedAt).toLocaleDateString()}</span>
+                <span>{formatDate(video.publishedAt)}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="w-4 h-4" />

@@ -6,19 +6,7 @@ import { X } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
-const COOKIE_NAME = "adblockBannerDismissed"
-const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 // 7 days in seconds
 const HEADING_ID = "adblock-banner-heading"
-
-function getCookie(name: string) {
-  if (typeof document === "undefined") return null
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"))
-  return match ? match[2] : null
-}
-
-function setCookie(name: string, value: string, maxAge: number) {
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAge}`
-}
 
 export default function AdblockBanner() {
   const [visible, setVisible] = useState(false)
@@ -26,8 +14,7 @@ export default function AdblockBanner() {
   const previousFocus = useRef<Element | null>(null)
 
   useEffect(() => {
-    if (getCookie(COOKIE_NAME)) return
-
+    // No cookie logic: always show when detected!
     const handle = () => setVisible(true)
 
     if (document.body.classList.contains("adblock-detected")) {
@@ -77,8 +64,8 @@ export default function AdblockBanner() {
     }
   }, [visible])
 
+  // Only closes for this pageview—no cookie set!
   const dismiss = () => {
-    setCookie(COOKIE_NAME, "true", COOKIE_MAX_AGE)
     setVisible(false)
   }
 

@@ -46,7 +46,7 @@ export interface BlogCategory {
 }
 
 export interface BlogPost {
-  id?: string
+  id: string
   title: string
   slug: string
   content: string
@@ -74,6 +74,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [post, setPost] = useState<BlogPost>(() => ({
+    id: initialPost?.id ?? "",
     title: initialPost?.title ?? "",
     slug: initialPost?.slug ?? "",
     content: initialPost?.content ?? "",
@@ -92,7 +93,6 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     author: initialPost?.author ?? "Admin",
     wordCount: initialPost?.wordCount ?? 0,
     readTime: initialPost?.readTime ?? "1 min read",
-    id: initialPost?.id,
     publishedAt: initialPost?.publishedAt ? new Date(initialPost.publishedAt) : undefined,
     scheduledFor: initialPost?.scheduledFor ? new Date(initialPost.scheduledFor) : undefined,
   }))
@@ -282,6 +282,11 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   }
 
   const host = typeof window !== "undefined" ? window.location.host : "example.com"
+  // Ensure publishedAt is a string for BlogPostRenderer
+  const previewPost = {
+    ...post,
+    publishedAt: post.publishedAt ? post.publishedAt.toISOString() : undefined,
+  }
 
   return (
     <>
@@ -291,7 +296,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Header - UPDATED FOR MOBILE SUPPORT */}
+        {/* Header */}
         <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-4">
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <Button variant="ghost" onClick={() => router.back()} className="flex items-center gap-2">
@@ -313,7 +318,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               <Save className="h-4 w-4" />
               {saving ? "Saving..." : "Save Draft"}
             </Button>
-            {/* 🟢 Preview Button */}
+            {/* Preview Button */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -470,7 +475,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                     placeholder="Article"
                   />
                 </div>
-                {/* --- Google-style Search Preview --- */}
+                {/* Google-style Search Preview */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Search Preview</label>
                   <div className="border rounded-lg p-4 bg-white space-y-1">
@@ -481,7 +486,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                         width={600}
                         height={128}
                         className="w-full h-32 object-cover rounded mb-2"
-                        unoptimized // You can remove this if your images are always absolute URLs
+                        unoptimized
                       />
                     )}
                     <p className="text-xs text-green-700 truncate">{`${host}/${post.slug}`}</p>
@@ -593,7 +598,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                         >
                           {category.name}
                           {category.tooltip && (
-                            <Info className="ml-2 h-4 w-4 text-blue-400" title={category.tooltip} />
+                            <span title={category.tooltip}>
+                              <Info className="ml-2 h-4 w-4 text-blue-400" />
+                            </span>
                           )}
                         </DropdownMenuCheckboxItem>
                       ))}
@@ -728,7 +735,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       {/* Preview Modal */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="max-w-5xl overflow-y-auto max-h-screen">
-          <BlogPostRenderer post={post} />
+          <BlogPostRenderer post={previewPost} />
         </DialogContent>
       </Dialog>
     </>

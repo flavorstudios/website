@@ -6,25 +6,10 @@ import { Calendar, Eye, User, Clock } from "lucide-react";
 import CommentSection from "@/app/blog/[slug]/components/comment-section";
 import SocialShare from "@/app/blog/[slug]/components/social-share";
 import { SITE_URL } from "@/lib/constants";
+import type { BlogPost } from "@/lib/content-store"; // Use your central type!
 
 interface BlogPostRendererProps {
-  post: {
-    id: string;
-    slug: string;
-    title: string;
-    excerpt: string;
-    content: string;
-    category?: string;
-    categories?: string[];
-    publishedAt?: string;
-    author?: string;
-    views?: number;
-    readTime?: string;
-    coverImage?: string;
-    featuredImage?: string;
-    openGraphImage?: string;
-    tags?: string[];
-  };
+  post: BlogPost;
 }
 
 export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
@@ -120,7 +105,7 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
           </div>
         </div>
       )}
-      <CommentSection postId={post.id} postSlug={post.slug} />
+      <CommentSection postId={post.id} />
     </article>
   );
 }

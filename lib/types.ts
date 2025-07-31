@@ -15,6 +15,7 @@ export interface BlogPost {
   views?: number;
   featured?: boolean;
   commentCount?: number;
+  shareCount?: number; // <-- Added for share metrics, default 0 if missing
 }
 
 export interface Video {

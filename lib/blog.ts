@@ -12,6 +12,7 @@ export interface BlogPost {
   featured: boolean
   imageUrl?: string
   commentCount?: number      // <-- Always present, default 0 if missing
+  shareCount?: number        // <-- Always present, default 0 if missing
 }
 
 export const blogStore = {
@@ -24,13 +25,14 @@ export const blogStore = {
       if (response.ok) {
         const posts = await response.json()
         // Always ensure categories[] exists (for old posts)
-        // and commentCount is present
+        // and commentCount/shareCount are present
         return (posts || []).map((post: BlogPost) => ({
           ...post,
           categories: Array.isArray(post.categories) && post.categories.length > 0
             ? post.categories
             : [post.category],
           commentCount: typeof post.commentCount === "number" ? post.commentCount : 0,
+          shareCount: typeof post.shareCount === "number" ? post.shareCount : 0,
         }))
       }
     } catch (error) {

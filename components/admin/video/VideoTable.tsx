@@ -56,7 +56,9 @@ export default function VideoTable({ videos, selected, toggleSelect, toggleSelec
               <td className="p-3 hidden sm:table-cell">
                 {formatDate(video.publishedAt || video.createdAt)}
               </td>
-              <td className="p-3 text-right hidden sm:table-cell">{video.views?.toLocaleString?.() ?? 0}</td>
+              <td className="p-3 text-right hidden sm:table-cell">
+                {(typeof video.views === "number" ? video.views : 0).toLocaleString()}
+              </td>
               <td className="p-3 hidden md:table-cell">{video.duration}</td>
               <td className="p-3 text-right">
                 <VideoRowActions

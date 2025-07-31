@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
       views: blog.views,
       readTime: blog.readTime,
       commentCount: blog.commentCount ?? 0, // Always return a number
+      shareCount: blog.shareCount ?? 0,     // Always return a number
     }))
 
     return NextResponse.json({ posts: formattedBlogs }, { status: 200 })
@@ -73,11 +74,14 @@ export async function POST(request: NextRequest) {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "")
 
-    const excerpt =
-      blogData.excerpt ||
-      (blogData.content.length > 160
-        ? blogData.content.substring(0, 160) + "..."
-        : blogData.content)
+    // Always strip HTML for the excerpt!
+    const plain =
+      typeof blogData.content === "string"
+        ? blogData.content.replace(/<[^>]*>/g, "")
+        : ""
+    const generatedExcerpt =
+      plain.length > 160 ? plain.substring(0, 160) + "..." : plain
+    const excerpt = blogData.excerpt || generatedExcerpt
 
     // Create the blog post
     const blog = await blogStore.create({
@@ -94,9 +98,16 @@ export async function POST(request: NextRequest) {
       author: blogData.author || "Flavor Studios",
       publishedAt: blogData.publishedAt || new Date().toISOString(),
       readTime: blogData.readTime || "5 min read",
+      // commentCount and shareCount default to 0 by the store model
     })
 
-    return NextResponse.json({ blog }, { status: 201 })
+    return NextResponse.json({
+      blog: {
+        ...blog,
+        commentCount: blog.commentCount ?? 0,
+        shareCount: blog.shareCount ?? 0,
+      }
+    }, { status: 201 })
   } catch (error) {
     console.error("Error creating blog:", error)
     return NextResponse.json(

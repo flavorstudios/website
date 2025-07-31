@@ -26,8 +26,9 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { authors } from "@/lib/authors"
 
-// --- Use external BlogPost type, as per Codex suggestion ---
 import type { BlogPost } from "@/lib/content-store"
 
 const titleMin = 50
@@ -40,6 +41,12 @@ function getLengthClass(length: number, min: number, max: number) {
   if (length < min) return "text-yellow-600"
   if (length > max) return "text-red-600"
   return "text-green-600"
+}
+function getLengthMessage(length: number, min: number, max: number) {
+  if (length === 0) return `Recommended ${min}-${max} characters`
+  if (length < min) return `Too short – aim for ${min}-${max}`
+  if (length > max) return `Too long – aim for ${min}-${max}`
+  return "Perfect length"
 }
 
 export interface BlogCategory {
@@ -77,6 +84,8 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     createdAt: initialPost?.createdAt ?? new Date().toISOString(),
     updatedAt: initialPost?.updatedAt ?? new Date().toISOString(),
     views: initialPost?.views ?? 0,
+    commentCount: initialPost?.commentCount ?? 0,
+    shareCount: initialPost?.shareCount ?? 0,
   }))
 
   const [categories, setCategories] = useState<BlogCategory[]>([])
@@ -110,6 +119,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
           }))
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("Failed to load categories:", error)
       }
     }
@@ -128,6 +138,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post.title])
 
+  // Patch: auto-generate excerpt if empty (HTML stripped)
   useEffect(() => {
     const text = post.content.replace(/<[^>]*>/g, "")
     const words = text
@@ -136,10 +147,12 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       .filter((word) => word.length > 0)
     const wordCount = words.length
     const readTime = Math.max(1, Math.ceil(wordCount / 200))
+    const suggestedExcerpt = text.length > 160 ? text.substring(0, 160) + "..." : text
     setPost((prev) => ({
       ...prev,
       wordCount,
       readTime: `${readTime} min read`,
+      excerpt: prev.excerpt.trim() === "" ? suggestedExcerpt : prev.excerpt,
     }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post.content])
@@ -178,6 +191,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         throw new Error("Save failed")
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Failed to save post:", error)
       toast.error(isAutoSave ? "Auto-save failed" : "Failed to save post")
     } finally {
@@ -220,6 +234,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         toast.success("Image uploaded successfully!")
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Failed to upload image:", error)
       toast.error("Failed to upload image")
     } finally {
@@ -265,13 +280,15 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
 
   const host = typeof window !== "undefined" ? window.location.host : "example.com"
 
-  // --- Codex fix: publishedAt stays Date or undefined, not string ---
+  // Ensure publishedAt stays Date | undefined (never string)
   const previewPost: BlogPost = {
     ...post,
     publishedAt: post.publishedAt ?? undefined,
     createdAt: post.createdAt ?? new Date().toISOString(),
     updatedAt: post.updatedAt ?? new Date().toISOString(),
     views: post.views ?? 0,
+    commentCount: post.commentCount ?? 0,
+    shareCount: post.shareCount ?? 0,
   }
 
   return (
@@ -366,6 +383,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                     placeholder="Brief description of your post..."
                     rows={3}
                   />
+                  <p className="text-xs mt-1 text-gray-500">{post.excerpt.length}/160 characters</p>
                 </div>
               </CardContent>
             </Card>
@@ -404,6 +422,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   <p className={`text-xs mt-1 ${getLengthClass(post.seoTitle.length, titleMin, titleMax)}`}>
                     {post.seoTitle.length}/{titleMax} characters
                   </p>
+                  <p className={`text-xs ${getLengthClass(post.seoTitle.length, titleMin, titleMax)}`}>{getLengthMessage(post.seoTitle.length, titleMin, titleMax)}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Meta Description</label>
@@ -421,6 +440,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   <p className={`text-xs mt-1 ${getLengthClass(post.seoDescription.length, descMin, descMax)}`}>
                     {post.seoDescription.length}/{descMax} characters
                   </p>
+                  <p className={`text-xs ${getLengthClass(post.seoDescription.length, descMin, descMax)}`}>{getLengthMessage(post.seoDescription.length, descMin, descMax)}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Keywords</label>
@@ -461,7 +481,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                     placeholder="Article"
                   />
                 </div>
-                {/* Google-style Search Preview */}
+                {/* PATCHED: Google-style Search Preview */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Search Preview</label>
                   <div className="border rounded-lg p-4 bg-white space-y-1">
@@ -476,8 +496,14 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                       />
                     )}
                     <p className="text-xs text-green-700 truncate">{`${host}/${post.slug}`}</p>
-                    <p className="text-blue-800 text-lg leading-snug">{post.seoTitle || post.title || "Untitled"}</p>
-                    <p className="text-gray-700 text-sm line-clamp-2">{post.seoDescription || post.excerpt}</p>
+                    <p className="text-blue-800 text-lg leading-snug">
+                      {(post.seoTitle || post.title || "Untitled").substring(0, titleMax)}
+                      {((post.seoTitle || post.title || "").length > titleMax) ? "…" : ""}
+                    </p>
+                    <p className="text-gray-700 text-sm line-clamp-2">
+                      {(post.seoDescription || post.excerpt || "").substring(0, descMax)}
+                      {((post.seoDescription || post.excerpt || "").length > descMax) ? "…" : ""}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -708,9 +734,38 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   <span className="text-sm text-gray-600">Read Time</span>
                   <span className="text-sm font-medium">{post.readTime}</span>
                 </div>
+                {/* Author Dropdown */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Author</label>
+                  <Select
+                    value={post.author}
+                    onValueChange={(val) =>
+                      setPost((prev) => ({ ...prev, author: val }))
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select author" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {authors.map((a) => (
+                        <SelectItem key={a.id} value={a.name}>
+                          {a.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Author</span>
-                  <span className="text-sm font-medium">{post.author}</span>
+                  <span className="text-sm text-gray-600">Views</span>
+                  <span className="text-sm font-medium">{post.views ?? 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Comments</span>
+                  <span className="text-sm font-medium">{post.commentCount ?? 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">Shares</span>
+                  <span className="text-sm font-medium">{post.shareCount ?? 0}</span>
                 </div>
               </CardContent>
             </Card>

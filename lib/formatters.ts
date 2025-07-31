@@ -7,7 +7,7 @@ import type { Video } from "./content-store";    // Adjust path if needed
  * Formats a blog object for safe public API responses.
  * Only exposes non-admin fields.
  * Adds .categories[] for multi-category support (fallbacks to [category]).
- * Adds .commentCount for badge support.
+ * Adds .commentCount and .shareCount for badge support.
  */
 export function formatPublicBlog(blog: BlogPost) {
   return {
@@ -27,6 +27,7 @@ export function formatPublicBlog(blog: BlogPost) {
     seoTitle: blog.seoTitle,
     seoDescription: blog.seoDescription,
     commentCount: typeof blog.commentCount === "number" ? blog.commentCount : 0,
+    shareCount: typeof blog.shareCount === "number" ? blog.shareCount : 0,
   };
 }
 

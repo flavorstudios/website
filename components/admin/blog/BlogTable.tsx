@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import BlogStatusBadge from "./BlogStatusBadge"
 import BlogRowActions from "./BlogRowActions"
 import type { BlogPost } from "@/lib/content-store"
-import Image from "next/image" // ✅ Import Image
-import { formatDate } from "@/lib/date" // <-- Added
+import Image from "next/image"
+import { formatDate } from "@/lib/date"
 
 export interface BlogTableProps {
   posts: BlogPost[]
@@ -53,7 +53,7 @@ export default function BlogTable({
 
   return (
     <div className="overflow-x-auto border rounded-lg">
-      <table className="min-w-full bg-white text-sm">
+      <table className="min-w-full bg-white text-sm table-fixed">
         <thead className="bg-gray-50 text-xs uppercase text-gray-500">
           <tr>
             <th className="p-3 w-8">
@@ -63,7 +63,7 @@ export default function BlogTable({
                 aria-label="Select all"
               />
             </th>
-            <th className="p-3 text-left">Title</th>
+            <th className="p-3 text-left max-w-[12rem] truncate">Title</th>
             <th className="p-3 text-left hidden md:table-cell">SEO</th>
             <th className="p-3 text-left">Author</th>
             <th className="p-3 text-left hidden md:table-cell">Image</th>
@@ -92,8 +92,8 @@ export default function BlogTable({
                 />
               </td>
 
-              {/* Title with link */}
-              <td className="p-3">
+              {/* Title with link (truncated for overflow) */}
+              <td className="p-3 max-w-[12rem] truncate">
                 <a
                   href={`/admin/blog/edit?id=${post.id}`}
                   className="text-blue-600 hover:underline font-medium"
@@ -107,7 +107,7 @@ export default function BlogTable({
               <td className="p-3 hidden md:table-cell">
                 <span
                   title={
-                    post.seoTitle.length === 0
+                    !post.seoTitle || post.seoTitle.length === 0
                       ? "Missing SEO title"
                       : post.seoTitle.length < 50
                       ? "SEO title is too short"
@@ -116,7 +116,7 @@ export default function BlogTable({
                       : "SEO title length is optimal"
                   }
                   className={
-                    post.seoTitle.length === 0
+                    !post.seoTitle || post.seoTitle.length === 0
                       ? "text-gray-500"
                       : post.seoTitle.length < 50
                       ? "text-yellow-600"
@@ -125,16 +125,16 @@ export default function BlogTable({
                       : "text-green-600"
                   }
                 >
-                  {post.seoTitle.length}
+                  {post.seoTitle?.length ?? 0}
                 </span>
               </td>
 
               {/* Author */}
               <td className="p-3">{post.author}</td>
 
-              {/* Image Preview - Replaced <img> with <Image> */}
+              {/* Image Preview */}
               <td className="p-3 hidden md:table-cell">
-                {post.featuredImage && (
+                {post.featuredImage ? (
                   <Image
                     src={post.featuredImage}
                     alt={`Featured image for ${post.title}`}
@@ -144,6 +144,8 @@ export default function BlogTable({
                     style={{ objectFit: "cover" }}
                     unoptimized
                   />
+                ) : (
+                  <span className="text-xs text-gray-400">—</span>
                 )}
               </td>
 
@@ -159,7 +161,7 @@ export default function BlogTable({
 
               {/* Views */}
               <td className="p-3 text-right hidden sm:table-cell">
-                {post.views?.toLocaleString?.() ?? 0}
+                {(typeof post.views === "number" ? post.views : 0).toLocaleString()}
               </td>
 
               {/* Comments */}
@@ -169,7 +171,12 @@ export default function BlogTable({
 
               {/* Tags */}
               <td className="p-3 hidden lg:table-cell">
-                {post.tags?.join(", ")}
+                {post.tags?.length
+                  ? post.tags.slice(0, 3).map((tag, i) => (
+                      <Badge key={i} variant="secondary" className="mr-1">{tag}</Badge>
+                    ))
+                  : <span className="text-xs text-gray-400">—</span>
+                }
               </td>
 
               {/* Row Actions */}

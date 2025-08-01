@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/toast"
 import { Pagination } from "@/components/admin/Pagination"
 import { cn } from "@/lib/utils"
+import AdminPageHeader from "@/components/AdminPageHeader"
 
 interface CategoryFormProps {
   category?: Partial<Category>
@@ -351,6 +352,10 @@ export default function CategoryManager() {
 
   return (
     <div className={cn("space-y-4", selected.size > 0 && "pb-20 sm:pb-4")}>
+      <AdminPageHeader
+        title="Categories"
+        subtitle="Manage your blog and video categories"
+      />
       <div className="flex flex-wrap justify-between gap-2">
         <div className="flex gap-2 flex-wrap w-full sm:w-auto">
           <Select value={type} onValueChange={(v) => setType(v as CategoryType)}>

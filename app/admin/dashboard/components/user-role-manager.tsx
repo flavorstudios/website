@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/hooks/use-toast"
 import type { UserRole } from "@/lib/role-permissions"
-import AdminPageHeader from "@/components/AdminPageHeader" // <-- Add this import
+import AdminPageHeader from "@/components/AdminPageHeader"
 
 export function UserRoleManager() {
   const [uid, setUid] = useState("")

@@ -36,6 +36,7 @@ import type { CategoryData } from "@/lib/dynamic-categories"
 import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions"
 import { cn } from "@/lib/utils"
 import { Pagination } from "@/components/admin/Pagination"
+import AdminPageHeader from "@/components/AdminPageHeader" // ✨ Import the new header
 
 export const BlogManager = () => {
   const [isRevalidating, setIsRevalidating] = useState(false)
@@ -256,8 +257,14 @@ export const BlogManager = () => {
   // --- Main UI ---
   return (
     <div>
-      <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
-        <h2 className="text-2xl font-semibold">Blog Management</h2>
+      {/* ✨ Updated header: standardized and professional */}
+      <div className="mb-4">
+        <AdminPageHeader
+          title="Blog Management"
+          subtitle="Manage all blog posts and editorial actions"
+        />
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex flex-wrap gap-2">
           <Button
             onClick={handleRevalidateBlog}

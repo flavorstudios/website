@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import AdminPageHeader from "@/components/AdminPageHeader"
 
 interface Submission {
   id: string
@@ -19,7 +20,7 @@ interface Submission {
   createdAt?: string
 }
 
-export default function CareerApplications() {
+export default function Applications() {
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState("all")
@@ -52,8 +53,12 @@ export default function CareerApplications() {
 
   return (
     <div className="space-y-6">
+      {/* --- Standardized Admin Section Header --- */}
+      <AdminPageHeader
+        title="Applications"
+        subtitle="Manage all user submissions and job applications"
+      />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <h2 className="text-2xl font-bold">Career Applications</h2>
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Input placeholder="Search" value={search} onChange={e => setSearch(e.target.value)} className="w-full sm:w-64" />
           <Select value={filter} onValueChange={setFilter}>

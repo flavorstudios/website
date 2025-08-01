@@ -21,8 +21,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 // ✨ ADD: MediaLibrary import for Media tab
 import MediaLibrary from "./components/media/MediaLibrary"
 
-// ✨ ADD: CareerApplications import
-import CareerApplications from "./components/career-applications"
+// ✨ ADD: Applications import (renamed from CareerApplications for clarity)
+import CareerApplications from "./components/career-applications" // Keep component as is if not renamed yet
 
 interface AdminDashboardPageClientProps {
   initialSection?: string
@@ -62,11 +62,11 @@ export default function AdminDashboardPageClient({
       { id: "overview", href: "/admin/dashboard" },
       { id: "blogs", href: "/admin/dashboard/blog-posts" },
       { id: "videos", href: "/admin/dashboard/videos" },
-      // ✨ ADD: Media tab mapping
+      // ✨ Media tab mapping
       { id: "media", href: "/admin/dashboard/media" },
       { id: "categories", href: "/admin/dashboard/categories" },
       { id: "comments", href: "/admin/dashboard/comments" },
-      { id: "career-applications", href: "/admin/dashboard/career-applications" }, // <-- ADDED
+      { id: "applications", href: "/admin/dashboard/applications" }, // ← NEW
       { id: "inbox", href: "/admin/dashboard/inbox" },
       { id: "users", href: "/admin/dashboard/users" },
       { id: "settings", href: "/admin/dashboard/settings" },
@@ -78,7 +78,7 @@ export default function AdminDashboardPageClient({
     if (matched && matched.id !== activeSection) {
       setActiveSection(matched.id)
     }
-  }, [pathname, activeSection]) // ✅ FIX: added activeSection
+  }, [pathname, activeSection])
 
   // --- Refresh data periodically ---
   useEffect(() => {
@@ -106,7 +106,7 @@ export default function AdminDashboardPageClient({
       if (firebaseInitError || !app) {
         setError(
           firebaseInitError?.message ||
-          "Firebase not initialized. Cannot log out safely."
+            "Firebase not initialized. Cannot log out safely."
         )
         return
       }
@@ -142,14 +142,14 @@ export default function AdminDashboardPageClient({
         return <BlogManager />
       case "videos":
         return <VideoManager />
-      // ✨ ADD: Media tab case
+      // ✨ Media tab case
       case "media":
         return <MediaLibrary />
       case "categories":
         return <CategoryManager />
       case "comments":
         return <CommentManager />
-      case "career-applications": // <-- ADDED
+      case "applications": // ← NEW
         return <CareerApplications />
       case "inbox":
         return <EmailInbox />

@@ -26,8 +26,8 @@ import {
 import { Info, Eye, Pencil, Trash2, Upload, Archive, Image as ImageIcon } from "lucide-react";
 import { VideoForm } from "@/components/ui/video-form";
 import { cn } from "@/lib/utils";
+import AdminPageHeader from "@/components/AdminPageHeader"; // 🟣 Admin header component
 
-// ✨ ADD: MediaPickerDialog import
 import MediaPickerDialog from "./media/MediaPickerDialog";
 
 import type { Category } from "@/types/category";
@@ -320,7 +320,6 @@ export function VideoManager() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
 
-  // ✨ ADD: Media Library Dialog state
   const [showMediaPicker, setShowMediaPicker] = useState(false);
 
   useEffect(() => {
@@ -496,12 +495,12 @@ export function VideoManager() {
 
   return (
     <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}>
-      {/* Header */}
+      {/* 🟣 Admin Dashboard Header */}
       <div className="flex justify-between items-center flex-wrap gap-2">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Video Manager</h2>
-          <p className="text-gray-600">Manage your YouTube content and episodes</p>
-        </div>
+        <AdminPageHeader
+          title="Video Manager"
+          subtitle="Manage your YouTube content and episodes"
+        />
         <div className="flex gap-2">
           <Button
             onClick={() => setShowCreateForm(true)}
@@ -511,7 +510,6 @@ export function VideoManager() {
           >
             Add New Video
           </Button>
-          {/* ✨ ADD: Media Library Button */}
           <Button
             variant="outline"
             size="sm"
@@ -661,11 +659,11 @@ export function VideoManager() {
         </AlertDialog>
       )}
 
-      {/* ✨ ADD: Media Picker Dialog */}
+      {/* Media Picker Dialog */}
       <MediaPickerDialog
         open={showMediaPicker}
         onOpenChange={setShowMediaPicker}
-        // onSelect={(media) => { ... }} // Integrate if/when needed for video thumbnails
+        // onSelect={(media) => { ... }}
       />
     </div>
   );

@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils"
 import { formatDate } from "@/lib/date"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
 import CommentStatsChart from "@/components/admin/comment/CommentStatsChart"
+import AdminPageHeader from "@/components/AdminPageHeader"
 
 interface Comment {
   id: string
@@ -100,7 +101,6 @@ export function CommentManager() {
     }
   }
 
-  // Only modal, not browser confirm
   const deleteComment = async (id: string, postId: string) => {
     setDeleteTargets([{ id, postId }])
   }
@@ -189,12 +189,12 @@ export function CommentManager() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* --- Standardized Admin Section Header --- */}
+      <AdminPageHeader
+        title="Comments & Reviews"
+        subtitle="Moderate user comments and feedback"
+      />
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Comments & Reviews</h2>
-          <p className="text-gray-600">Moderate user comments and feedback</p>
-        </div>
         {/* Responsive search input */}
         <div className="relative w-full sm:w-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -208,10 +208,8 @@ export function CommentManager() {
         </div>
       </div>
 
-      {/* --- COMMENT STATS CHART (RECHARTS) INSERTED HERE --- */}
       <CommentStatsChart />
 
-      {/* Stats Cards: mobile wraps, 2-col; sm=3, md=5 */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
@@ -245,7 +243,6 @@ export function CommentManager() {
         </Card>
       </div>
 
-      {/* Bulk Actions Bar */}
       <CommentBulkActions
         count={selectedIds.length}
         onApprove={handleBulkApprove}
@@ -253,7 +250,6 @@ export function CommentManager() {
         onDelete={handleBulkDelete}
       />
 
-      {/* Comments Tabs: wraps on mobile */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full">
           <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
@@ -303,7 +299,6 @@ export function CommentManager() {
         </TabsContent>
       </Tabs>
 
-      {/* Modal for single or bulk delete confirmation */}
       {deleteTargets && (
         <AlertDialog open onOpenChange={(open) => !open && setDeleteTargets(null)}>
           <AlertDialogContent>
@@ -327,7 +322,7 @@ export function CommentManager() {
   )
 }
 
-// Responsive: stack avatar/info/actions vertically on mobile
+// ...CommentCard and EmptyState remain unchanged (as in your provided code)...
 function CommentCard({
   comment,
   onUpdateStatus,

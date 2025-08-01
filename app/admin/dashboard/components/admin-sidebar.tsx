@@ -15,7 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Mail,
-  ClipboardList,     // <-- Import for Career Applications
+  ClipboardList,     // <-- Import for Applications
   Users,
 } from "lucide-react"
 import { useRole } from "../contexts/role-context"
@@ -44,7 +44,8 @@ export function AdminSidebar({
     { id: "media", label: "Media", icon: Image, count: null, href: "/admin/dashboard/media" },
     { id: "categories", label: "Categories", icon: Edit, count: null, href: "/admin/dashboard/categories" },
     { id: "comments", label: "Comments", icon: MessageSquare, count: null, href: "/admin/dashboard/comments" },
-    { id: "career-applications", label: "Career Applications", icon: ClipboardList, count: null, href: "/admin/dashboard/career-applications" }, // <-- ADDED
+    // --- APPLICATIONS tab ---
+    { id: "applications", label: "Applications", icon: ClipboardList, count: null, href: "/admin/dashboard/applications" },
     { id: "inbox", label: "Email Inbox", icon: Mail, count: null, href: "/admin/dashboard/inbox" },
     { id: "users", label: "Users", icon: Users, count: null, href: "/admin/dashboard/users" },
     { id: "settings", label: "Settings", icon: Settings, count: null, href: "/admin/dashboard/settings" },

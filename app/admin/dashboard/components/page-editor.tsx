@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Eye, Save, FileText, Smartphone, Monitor } from "lucide-react"
+import AdminPageHeader from "@/components/AdminPageHeader"
 
 interface PageData {
   id: string
@@ -55,7 +56,6 @@ export function PageEditor() {
   const [selectedPage, setSelectedPage] = useState<PageData | null>(samplePages[0])
   const [previewMode, setPreviewMode] = useState<"desktop" | "tablet" | "mobile">("desktop")
   // Removed: const [isEditing, setIsEditing] = useState(false) // Unused as per lint
-  // Removed: const getPreviewIcon = ... // Unused as per lint
 
   const handleSave = () => {
     // Save logic would go here
@@ -79,13 +79,11 @@ export function PageEditor() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            Page Editor
-          </h2>
-          <p className="text-muted-foreground">Edit and manage your website pages</p>
-        </div>
+      <div className="flex items-center justify-between mb-4">
+        <AdminPageHeader
+          title="Page Editor"
+          subtitle="Edit and manage your website pages"
+        />
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">
             <Eye className="h-4 w-4 mr-2" />

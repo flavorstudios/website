@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import AdminPageHeader from "@/components/AdminPageHeader"
 
 interface ContactMessage {
   id: string
@@ -41,7 +42,6 @@ export function EmailInbox() {
   const [emailError, setEmailError] = useState<string | null>(null)
   const [loadingState, setLoadingState] = useState(true)
 
-  // Load admin email addresses from server
   useEffect(() => {
     fetch("/api/admin/from-addresses")
       .then((res) => res.json())
@@ -162,10 +162,12 @@ export function EmailInbox() {
 
   return (
     <div className="space-y-6">
+      {/* --- Standardized Admin Section Header --- */}
+      <AdminPageHeader
+        title="Email Inbox"
+        subtitle="View and respond to contact messages"
+      />
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          Email Inbox
-        </h2>
         <Badge variant="secondary" className="bg-blue-100 text-blue-700">
           {messages.filter((m) => m.status === "unread").length} unread
         </Badge>

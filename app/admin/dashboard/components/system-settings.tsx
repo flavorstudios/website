@@ -29,6 +29,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import AdminPageHeader from "@/components/AdminPageHeader"
 
 interface SystemStats {
   cpuUsage: number
@@ -105,13 +106,11 @@ export function SystemSettings() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            System Settings
-          </h2>
-          <p className="text-muted-foreground">Configure your website and system preferences</p>
-        </div>
+      <div className="flex items-center justify-between mb-4">
+        <AdminPageHeader
+          title="System Settings"
+          subtitle="Configure your website and system preferences"
+        />
         <div className="flex items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>

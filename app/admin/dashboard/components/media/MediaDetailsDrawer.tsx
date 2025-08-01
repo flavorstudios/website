@@ -28,15 +28,21 @@ export default function MediaDetailsDrawer({
         <div>
           <p className="font-semibold">{media.filename}</p>
           <p className="text-sm text-gray-500">{media.mime}</p>
-          <p className="text-xs text-gray-400">Size: {(media.size / 1024).toFixed(1)} KB</p>
+          <p className="text-xs text-gray-400">
+            Size: {(media.size / 1024).toFixed(1)} KB
+          </p>
           <p className="text-xs text-gray-400">
             Dimensions: {media.width} × {media.height}
           </p>
-          <p className="text-xs text-gray-400">Uploaded: {new Date(media.createdAt).toLocaleString()}</p>
+          <p className="text-xs text-gray-400">
+            Uploaded: {new Date(media.createdAt).toLocaleString()}
+          </p>
         </div>
         {media.alt && (
           <div>
-            <label className="block text-xs font-semibold mb-1 text-gray-700">ALT Text</label>
+            <label className="block text-xs font-semibold mb-1 text-gray-700">
+              ALT Text
+            </label>
             <p className="text-xs bg-gray-50 px-2 py-1 rounded">{media.alt}</p>
           </div>
         )}

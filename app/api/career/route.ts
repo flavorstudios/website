@@ -1,5 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
+import nodemailer from "nodemailer";
+
+const notifyEnabled = process.env.NOTIFY_NEW_SUBMISSION === "true";
+const adminEmailsEnv = process.env.ADMIN_EMAILS;
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT || 587),
+  secure: process.env.SMTP_SECURE === "true",
+  auth: process.env.SMTP_USER
+    ? {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      }
+    : undefined,
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,6 +45,26 @@ export async function POST(request: NextRequest) {
 
     const ref = adminDb.collection("careerSubmissions").doc();
     await ref.set({ id: ref.id, ...data });
+
+    // === Notify all admins if enabled ===
+    if (notifyEnabled && adminEmailsEnv) {
+      const recipients = adminEmailsEnv
+        .split(",")
+        .map((e) => e.trim())
+        .filter(Boolean)
+        .join(",");
+      try {
+        await transporter.sendMail({
+          from: process.env.SMTP_USER,
+          to: recipients,
+          subject: "New career submission",
+          text: `${firstName} ${lastName} <${email}> applied.\nSkills: ${skills}\nPortfolio: ${portfolio}\n\n${message}`,
+        });
+      } catch (err) {
+        console.error("[CAREER_NOTIFY_ERROR]", err);
+        // Do not fail the request if notification email fails
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

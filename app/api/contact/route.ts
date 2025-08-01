@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
+import nodemailer from "nodemailer";
 
 const PERSPECTIVE_API_KEY = process.env.PERSPECTIVE_API_KEY!;
 const THRESHOLD = 0.7;
+
+const notifyEnabled = process.env.NOTIFY_NEW_SUBMISSION === "true";
+const adminEmailsEnv = process.env.ADMIN_EMAILS;
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT || 587),
+  secure: process.env.SMTP_SECURE === "true",
+  auth: process.env.SMTP_USER
+    ? {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      }
+    : undefined,
+});
 
 async function moderateText(text: string) {
   try {
@@ -56,6 +72,26 @@ export async function POST(request: NextRequest) {
       flagged,
       scores: scores || null,
     });
+
+    // === Notify all admins if enabled ===
+    if (notifyEnabled && adminEmailsEnv) {
+      const recipients = adminEmailsEnv
+        .split(",")
+        .map((e) => e.trim())
+        .filter(Boolean)
+        .join(",");
+      try {
+        await transporter.sendMail({
+          from: process.env.SMTP_USER,
+          to: recipients,
+          subject: `New contact submission: ${subject}`,
+          text: `${firstName} ${lastName} <${email}> wrote:\n\n${message}`,
+        });
+      } catch (err) {
+        console.error('[CONTACT_NOTIFY_ERROR]', err);
+        // Don't block user if email fails
+      }
+    }
 
     return NextResponse.json({ success: true, flagged });
   } catch (error) {

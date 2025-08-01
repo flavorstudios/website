@@ -9,7 +9,8 @@ import { BlogManager } from "./components/blog-manager"
 import { VideoManager } from "./components/video-manager"
 import { CommentManager } from "./components/comment-manager"
 import { SystemTools } from "./components/system-tools"
-import { UserRoleManager } from "./components/user-role-manager"
+// import { UserRoleManager } from "./components/user-role-manager" // ❌ No longer used for "users"
+import UserManagement from "./components/user-management/UserManagement" // ✅ NEW: The correct import
 import { AdminHeader } from "./components/admin-header"
 import CategoryManager from "@/components/admin/category/CategoryManager"
 import { RoleProvider } from "./contexts/role-context"
@@ -156,7 +157,7 @@ export default function AdminDashboardPageClient({
       case "system":
         return <SystemTools />
       case "users":
-        return <UserRoleManager />
+        return <UserManagement /> // ✅ Swapped in the new User Management page!
       default:
         return <DashboardOverview />
     }

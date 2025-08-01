@@ -1,5 +1,6 @@
 "use client"
 
+import { useRef } from "react"
 import { motion } from "framer-motion"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
@@ -27,6 +28,7 @@ export default function BlogTable({
   onTogglePublish,
 }: BlogTableProps) {
   const allSelected = posts.length > 0 && posts.every((p) => selected.has(p.id))
+  const rowRefs = useRef<HTMLTableRowElement[]>([])
 
   if (posts.length === 0) {
     return (
@@ -76,12 +78,23 @@ export default function BlogTable({
           </tr>
         </thead>
         <tbody>
-          {posts.map((post) => (
+          {posts.map((post, idx) => (
             <motion.tr
               key={post.id}
+              ref={el => (rowRefs.current[idx] = el!)}
+              tabIndex={0}
+              onKeyDown={e => {
+                if (e.key === "ArrowDown") {
+                  e.preventDefault()
+                  rowRefs.current[idx + 1]?.focus()
+                } else if (e.key === "ArrowUp") {
+                  e.preventDefault()
+                  rowRefs.current[idx - 1]?.focus()
+                }
+              }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="border-b last:border-b-0 hover:bg-gray-50"
+              className="border-b last:border-b-0 hover:bg-gray-50 focus-visible:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               {/* Select checkbox */}
               <td className="p-3">

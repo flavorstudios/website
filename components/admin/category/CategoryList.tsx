@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
@@ -25,7 +25,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import type { Category } from "@/types/category" // <-- Unified import
+import type { Category } from "@/types/category"
 
 export type CategoryType = "BLOG" | "VIDEO"
 
@@ -73,6 +73,7 @@ export default function CategoryList({
 }: CategoryListProps) {
   const [items, setItems] = useState<Category[]>([])
   const [width, setWidth] = useState<number>(1024)
+  const rowRefs = useRef<HTMLTableRowElement[]>([])
 
   useEffect(() => {
     setItems([...categories].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)))
@@ -184,7 +185,7 @@ export default function CategoryList({
               </tr>
             </thead>
             <tbody>
-              {items.map((cat) => (
+              {items.map((cat, idx) => (
                 <SortableRow
                   key={cat.id}
                   category={cat}
@@ -193,6 +194,9 @@ export default function CategoryList({
                   onDelete={onDelete}
                   onToggleStatus={onToggleStatus}
                   toggleSelect={toggleSelect}
+                  rowRef={(el) => (rowRefs.current[idx] = el!)}
+                  rowRefs={rowRefs}
+                  index={idx}
                 />
               ))}
             </tbody>
@@ -210,6 +214,9 @@ interface SortableRowProps {
   onDelete: (category: Category) => void
   onToggleStatus: (id: string, isActive: boolean) => void
   toggleSelect: (id: string) => void
+  rowRef: (el: HTMLTableRowElement | null) => void
+  rowRefs: React.MutableRefObject<HTMLTableRowElement[]>
+  index: number
 }
 
 function CategoryCard({
@@ -219,7 +226,7 @@ function CategoryCard({
   onDelete,
   onToggleStatus,
   toggleSelect,
-}: Omit<SortableRowProps, "attributes" | "listeners" | "setNodeRef" | "transform" | "transition">) {
+}: Omit<SortableRowProps, "rowRef" | "rowRefs" | "index">) {
   return (
     <div className="sm:hidden bg-white border-b last:border-b-0 p-3 flex flex-col gap-2 rounded-lg shadow-sm mt-2">
       <div className="flex items-center gap-2 justify-between">
@@ -291,6 +298,9 @@ function SortableRow({
   onDelete,
   onToggleStatus,
   toggleSelect,
+  rowRef,
+  rowRefs,
+  index,
 }: SortableRowProps) {
   const {
     attributes,
@@ -306,7 +316,21 @@ function SortableRow({
   }
 
   return (
-    <tr ref={setNodeRef} style={style} className="border-b last:border-b-0 hover:bg-gray-50">
+    <tr
+      ref={node => { setNodeRef(node); rowRef(node) }}
+      tabIndex={0}
+      onKeyDown={e => {
+        if (e.key === "ArrowDown") {
+          e.preventDefault()
+          rowRefs.current[index + 1]?.focus()
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault()
+          rowRefs.current[index - 1]?.focus()
+        }
+      }}
+      style={style}
+      className="border-b last:border-b-0 hover:bg-gray-50 focus-visible:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+    >
       <td className="p-3">
         <Checkbox
           checked={selected}

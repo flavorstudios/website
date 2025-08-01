@@ -3,7 +3,16 @@ import { adminDb } from "@/lib/firebase-admin";
 import type { MediaDoc, MediaVariant } from "@/types/media";
 import crypto from "node:crypto";
 
-const bucket = getStorage().bucket();
+// --- Bucket name logic: pick server env, fallback to public, or error ---
+const bucketName =
+  process.env.FIREBASE_STORAGE_BUCKET ||
+  process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+if (!bucketName) {
+  throw new Error(
+    "FIREBASE_STORAGE_BUCKET env var is required for media operations"
+  );
+}
+const bucket = getStorage().bucket(bucketName);
 const collection = adminDb.collection("media");
 
 function genId() {
@@ -15,7 +24,11 @@ export async function listMedia(limit = 50): Promise<MediaDoc[]> {
   return snap.docs.map((d) => d.data() as MediaDoc);
 }
 
-export async function uploadMedia(buffer: Buffer, name: string, mimeType: string): Promise<MediaDoc> {
+export async function uploadMedia(
+  buffer: Buffer,
+  name: string,
+  mimeType: string
+): Promise<MediaDoc> {
   const id = genId();
   const file = bucket.file(`media/${id}/${name}`);
   await file.save(buffer, { contentType: mimeType });
@@ -37,7 +50,7 @@ export async function uploadMedia(buffer: Buffer, name: string, mimeType: string
     createdBy: "",
     variants: [],
   };
-  // Dynamically import sharp to avoid Vercel cold start/serverless issues
+  // Dynamically import sharp to avoid Vercel/serverless cold start issues
   const sharp = (await import("sharp")).default;
   const meta = await sharp(buffer).metadata();
   doc.width = meta.width || 0;
@@ -46,7 +59,10 @@ export async function uploadMedia(buffer: Buffer, name: string, mimeType: string
   return doc;
 }
 
-export async function updateMedia(id: string, updates: Partial<MediaDoc>): Promise<MediaDoc | null> {
+export async function updateMedia(
+  id: string,
+  updates: Partial<MediaDoc>
+): Promise<MediaDoc | null> {
   await collection.doc(id).set(
     { ...updates, updatedAt: Date.now() },
     { merge: true }
@@ -59,7 +75,9 @@ export async function deleteMedia(id: string): Promise<boolean> {
   const doc = await collection.doc(id).get();
   if (!doc.exists) return false;
   const data = doc.data() as MediaDoc;
-  const filePath = data.url.split(`https://storage.googleapis.com/${bucket.name}/`)[1];
+  const filePath = data.url.split(
+    `https://storage.googleapis.com/${bucket.name}/`
+  )[1];
   await bucket.file(filePath).delete().catch(() => {});
   await collection.doc(id).delete();
   return true;
@@ -73,12 +91,19 @@ export async function cropMedia(
   const docSnap = await collection.doc(id).get();
   if (!docSnap.exists) return null;
   const data = docSnap.data() as MediaDoc;
-  const filePath = data.url.split(`https://storage.googleapis.com/${bucket.name}/`)[1];
+  const filePath = data.url.split(
+    `https://storage.googleapis.com/${bucket.name}/`
+  )[1];
   const origBuffer = await bucket.file(filePath).download();
   // Dynamically import sharp here too!
   const sharp = (await import("sharp")).default;
   const outBuffer = await sharp(origBuffer[0])
-    .extract({ width: options.width, height: options.height, left: options.x, top: options.y })
+    .extract({
+      width: options.width,
+      height: options.height,
+      left: options.x,
+      top: options.y,
+    })
     .toBuffer();
   const variantFile = bucket.file(`media/${id}/${variantName}`);
   await variantFile.save(outBuffer, { contentType: data.mime });

@@ -20,22 +20,27 @@ export default function MediaDetailsDrawer({
       <SheetContent className="p-4 space-y-4 max-w-md w-full">
         <Image
           src={media.url}
-          alt={media.alt || media.filename}
+          alt={media.alt || media.filename || media.name}
           width={400}
           height={400}
           className="object-cover w-full h-auto rounded"
         />
         <div>
-          <p className="font-semibold">{media.filename}</p>
-          <p className="text-sm text-gray-500">{media.mime}</p>
-          <p className="text-xs text-gray-400">
-            Size: {(media.size / 1024).toFixed(1)} KB
+          <p className="font-semibold">{media.filename || media.name}</p>
+          <p className="text-sm text-gray-500">
+            {media.mime || media.mimeType}
           </p>
           <p className="text-xs text-gray-400">
-            Dimensions: {media.width} × {media.height}
+            Size: {media.size ? (media.size / 1024).toFixed(1) : "—"} KB
           </p>
           <p className="text-xs text-gray-400">
-            Uploaded: {new Date(media.createdAt).toLocaleString()}
+            Dimensions: {media.width ?? "?"} × {media.height ?? "?"}
+          </p>
+          <p className="text-xs text-gray-400">
+            Uploaded:{" "}
+            {media.createdAt
+              ? new Date(media.createdAt).toLocaleString()
+              : "—"}
           </p>
         </div>
         {media.alt && (

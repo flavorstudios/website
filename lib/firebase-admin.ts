@@ -34,11 +34,18 @@ if (!serviceAccountKey) {
     parsedCredentials = JSON.parse(serviceAccountKey) as ServiceAccount;
     // 🛡 Initialize Firebase Admin SDK (only once)
     if (!getApps().length) {
+      // --- MAIN UPDATE: pass storageBucket from env, fallback to NEXT_PUBLIC for local/dev
       initializeApp({
         credential: cert(parsedCredentials),
+        storageBucket:
+          process.env.FIREBASE_STORAGE_BUCKET ||
+          process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       });
       if (debug) {
         console.log("[Firebase Admin] Firebase Admin initialized successfully.");
+        console.log("[Firebase Admin] Using storage bucket:",
+          process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+        );
       }
     }
   } catch (error) {

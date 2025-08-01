@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   FileText,
   Video,
+  Image,            // <-- Import for Media section
   MessageSquare,
   Edit,
   Settings,
@@ -27,7 +28,6 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({
-  // activeSection: _activeSection, // Removed as it's unused
   setActiveSection,
   sidebarOpen,
   setSidebarOpen,
@@ -40,6 +40,7 @@ export function AdminSidebar({
     { id: "overview", label: "Dashboard", icon: LayoutDashboard, count: null, href: "/admin/dashboard" },
     { id: "blogs", label: "Blog Posts", icon: FileText, count: null, href: "/admin/dashboard/blog-posts" },
     { id: "videos", label: "Videos", icon: Video, count: null, href: "/admin/dashboard/videos" },
+    { id: "media", label: "Media", icon: Image, count: null, href: "/admin/dashboard/media" }, // <-- ADDED
     { id: "categories", label: "Categories", icon: Edit, count: null, href: "/admin/dashboard/categories" },
     { id: "comments", label: "Comments", icon: MessageSquare, count: null, href: "/admin/dashboard/comments" },
     { id: "inbox", label: "Email Inbox", icon: Mail, count: null, href: "/admin/dashboard/inbox" },

@@ -3,6 +3,7 @@ export type UserRole = string
 export interface RolePermissions {
   canManageBlogs: boolean
   canManageVideos: boolean
+  canManageMedia: boolean   // <-- Added
   canManageComments: boolean
   canManageUsers: boolean
   canViewAnalytics: boolean
@@ -15,6 +16,7 @@ export const defaultRolePermissions: Record<string, RolePermissions> = {
   admin: {
     canManageBlogs: true,
     canManageVideos: true,
+    canManageMedia: true,     // <-- Added
     canManageComments: true,
     canManageUsers: true,
     canViewAnalytics: true,
@@ -25,6 +27,7 @@ export const defaultRolePermissions: Record<string, RolePermissions> = {
   editor: {
     canManageBlogs: true,
     canManageVideos: true,
+    canManageMedia: true,     // <-- Added
     canManageComments: true,
     canManageUsers: false,
     canViewAnalytics: true,
@@ -35,6 +38,7 @@ export const defaultRolePermissions: Record<string, RolePermissions> = {
   support: {
     canManageBlogs: false,
     canManageVideos: false,
+    canManageMedia: false,    // <-- Added
     canManageComments: true,
     canManageUsers: false,
     canViewAnalytics: false,
@@ -72,6 +76,7 @@ export function getAccessibleSections(userRole: UserRole): string[] {
 
   if (permissions.canManageBlogs) sections.push("blogs")
   if (permissions.canManageVideos) sections.push("videos")
+  if (permissions.canManageMedia) sections.push("media") // <-- Added
   if (permissions.canManageCategories) sections.push("categories")
   if (permissions.canManageComments) sections.push("comments")
   if (permissions.canManageUsers) sections.push("users")

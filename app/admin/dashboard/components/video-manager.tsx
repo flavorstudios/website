@@ -23,11 +23,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Info, Eye, Pencil, Trash2, Upload, Archive, Image as ImageIcon } from "lucide-react";
+import { Info, Eye, Pencil, Trash2, Upload, Archive } from "lucide-react";
 import { VideoForm } from "@/components/ui/video-form";
 import { cn } from "@/lib/utils";
-import AdminPageHeader from "@/components/AdminPageHeader"; // 🟣 Admin header component
-
+import AdminPageHeader from "@/components/AdminPageHeader";
 import MediaPickerDialog from "./media/MediaPickerDialog";
 
 import type { Category } from "@/types/category";
@@ -319,7 +318,6 @@ export function VideoManager() {
   const VIDEOS_PER_PAGE = 10;
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
-
   const [showMediaPicker, setShowMediaPicker] = useState(false);
 
   useEffect(() => {
@@ -510,17 +508,7 @@ export function VideoManager() {
           >
             Add New Video
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowMediaPicker(true)}
-            className="flex items-center gap-2"
-            aria-label="Open Media Library"
-            title="Media Library"
-          >
-            <ImageIcon className="h-4 w-4" />
-            Media Library
-          </Button>
+          {/* Media Library button removed */}
         </div>
       </div>
 
@@ -659,7 +647,7 @@ export function VideoManager() {
         </AlertDialog>
       )}
 
-      {/* Media Picker Dialog */}
+      {/* Media Picker Dialog is still available for modal use if needed */}
       <MediaPickerDialog
         open={showMediaPicker}
         onOpenChange={setShowMediaPicker}

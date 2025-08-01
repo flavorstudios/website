@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { RefreshCw, PlusCircle, AlertCircle, Image as ImageIcon } from "lucide-react"
+import { RefreshCw, PlusCircle, AlertCircle } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,15 +28,12 @@ import {
 import BlogTable from "@/components/admin/blog/BlogTable"
 import BlogBulkActions from "@/components/admin/blog/BlogBulkActions"
 
-// ✨ ADD: MediaPickerDialog import for Media Library integration
-import MediaPickerDialog from "./media/MediaPickerDialog"
-
 import type { BlogPost } from "@/lib/content-store"
 import type { CategoryData } from "@/lib/dynamic-categories"
 import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions"
 import { cn } from "@/lib/utils"
 import { Pagination } from "@/components/admin/Pagination"
-import AdminPageHeader from "@/components/AdminPageHeader" // ✨ Import the new header
+import AdminPageHeader from "@/components/AdminPageHeader"
 
 export const BlogManager = () => {
   const [isRevalidating, setIsRevalidating] = useState(false)
@@ -55,10 +52,7 @@ export const BlogManager = () => {
 
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
-  const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null) // <-- for AlertDialog
-
-  // ✨ ADD: Media Library Dialog state
-  const [showMediaPicker, setShowMediaPicker] = useState(false)
+  const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null)
 
   useEffect(() => {
     loadData()
@@ -257,15 +251,13 @@ export const BlogManager = () => {
   // --- Main UI ---
   return (
     <div>
-      {/* ✨ Updated header: standardized and professional */}
-      <div className="mb-4">
+      {/* Header with right-aligned action buttons */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <AdminPageHeader
           title="Blog Management"
           subtitle="Manage all blog posts and editorial actions"
         />
-      </div>
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex gap-2">
           <Button
             onClick={handleRevalidateBlog}
             disabled={isRevalidating}
@@ -286,18 +278,6 @@ export const BlogManager = () => {
           >
             <PlusCircle className="h-4 w-4" />
             Create New Post
-          </Button>
-          {/* ✨ ADD: Media Library Button */}
-          <Button
-            onClick={() => setShowMediaPicker(true)}
-            size="sm"
-            variant="outline"
-            className="flex items-center gap-2"
-            aria-label="Open Media Library"
-            title="Media Library"
-          >
-            <ImageIcon className="h-4 w-4" />
-            Media Library
           </Button>
         </div>
       </div>
@@ -344,7 +324,7 @@ export const BlogManager = () => {
           </Select>
         </div>
 
-        {/* Bulk Actions (sticky bar on mobile) */}
+        {/* Bulk Actions */}
         <BlogBulkActions
           count={selected.size}
           onPublish={() => handleBulk("publish")}
@@ -410,13 +390,6 @@ export const BlogManager = () => {
             </AlertDialogContent>
           </AlertDialog>
         )}
-
-        {/* ✨ ADD: Media Picker Dialog */}
-        <MediaPickerDialog
-          open={showMediaPicker}
-          onOpenChange={setShowMediaPicker}
-          // onSelect={(media) => { ... }} // Integrate with blog editor if needed
-        />
       </div>
     </div>
   )

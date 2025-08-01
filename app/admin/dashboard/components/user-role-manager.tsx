@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/hooks/use-toast"
 import type { UserRole } from "@/lib/role-permissions"
+import AdminPageHeader from "@/components/AdminPageHeader" // <-- Add this import
 
 export function UserRoleManager() {
   const [uid, setUid] = useState("")
@@ -38,26 +39,37 @@ export function UserRoleManager() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Change User Role</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Input placeholder="User UID" value={uid} onChange={(e) => setUid(e.target.value)} />
-        <Select value={role} onValueChange={(v) => setRole(v as UserRole)}>
-          <SelectTrigger className="w-40">
-            <SelectValue placeholder="Role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="admin">Admin</SelectItem>
-            <SelectItem value="editor">Editor</SelectItem>
-            <SelectItem value="support">Support</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button onClick={handleSave} disabled={saving || !uid}>
-          {saving ? "Saving..." : "Save"}
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      {/* Page Heading and Subheading */}
+      <AdminPageHeader
+        title="Users"
+        subtitle="Manage all users, roles, and permissions"
+      />
+      <Card>
+        <CardHeader>
+          <CardTitle>Change User Role</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Input
+            placeholder="User UID"
+            value={uid}
+            onChange={(e) => setUid(e.target.value)}
+          />
+          <Select value={role} onValueChange={(v) => setRole(v as UserRole)}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="editor">Editor</SelectItem>
+              <SelectItem value="support">Support</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={handleSave} disabled={saving || !uid}>
+            {saving ? "Saving..." : "Save"}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

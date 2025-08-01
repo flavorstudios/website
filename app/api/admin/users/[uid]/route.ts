@@ -18,6 +18,7 @@ export async function GET(
       user: {
         uid: userRecord.uid,
         email: userRecord.email,
+        emailVerified: userRecord.emailVerified, // <-- Added for verified badge
         displayName: userRecord.displayName,
         photoURL: userRecord.photoURL,
         disabled: userRecord.disabled,

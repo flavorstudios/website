@@ -4,6 +4,15 @@ import BulkActionsBar from "./BulkActionsBar";
 import UserProfileDrawer from "./UserProfileDrawer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface UserRow {
   uid: string;
@@ -22,10 +31,20 @@ export default function UserList() {
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeUid, setActiveUid] = useState<string | null>(null);
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("created");
 
   const loadUsers = async (token?: string | null) => {
     setLoading(true);
-    const res = await fetch(`/api/admin/users?pageToken=${token || ""}&search=${encodeURIComponent(search)}`);
+    const params = new URLSearchParams({
+      pageToken: token || "",
+      search,
+      role: roleFilter,
+      status: statusFilter,
+      sort: sortBy,
+    });
+    const res = await fetch(`/api/admin/users?${params.toString()}`);
     const data = await res.json();
     if (res.ok) {
       setUsers(data.users);
@@ -37,36 +56,77 @@ export default function UserList() {
   useEffect(() => {
     loadUsers(pageToken);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageToken]);
+  }, [pageToken, roleFilter, statusFilter, sortBy]);
 
   const handleSearch = () => {
     setPageToken(null);
     loadUsers(null);
   };
 
+  const handleRoleChange = (val: string) => {
+    setRoleFilter(val);
+    setPageToken(null);
+  };
+
+  const handleStatusChange = (val: string) => {
+    setStatusFilter(val);
+    setPageToken(null);
+  };
+
+  const handleSortChange = (val: string) => {
+    setSortBy(val);
+    setPageToken(null);
+  };
+
   const bulkDisable = async (disable: boolean) => {
-    await fetch("/api/admin/users/bulk", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: selected, disabled: disable }),
-    });
-    setSelected([]);
-    loadUsers(pageToken);
+    try {
+      const res = await fetch("/api/admin/users/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selected, disabled: disable }),
+      });
+      const d = await res.json();
+      if (res.ok) {
+        toast.success(disable ? "Users disabled" : "Users enabled");
+      } else {
+        toast.error(d.error || "Update failed");
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Bulk update failed", err);
+      toast.error("Update failed");
+    } finally {
+      setSelected([]);
+      loadUsers(pageToken);
+    }
   };
 
   const bulkMakeAdmin = async () => {
-    await fetch("/api/admin/users/bulk", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: selected, role: "admin" }),
-    });
-    setSelected([]);
-    loadUsers(pageToken);
+    try {
+      const res = await fetch("/api/admin/users/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selected, role: "admin" }),
+      });
+      const d = await res.json();
+      if (res.ok) {
+        toast.success("Users updated");
+      } else {
+        toast.error(d.error || "Update failed");
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Bulk update failed", err);
+      toast.error("Update failed");
+    } finally {
+      setSelected([]);
+      loadUsers(pageToken);
+    }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <Input
           placeholder="Search users"
           value={search}
@@ -74,6 +134,38 @@ export default function UserList() {
           className="w-64"
         />
         <Button onClick={handleSearch}>Search</Button>
+        <Select value={roleFilter} onValueChange={handleRoleChange}>
+          <SelectTrigger className="w-40" aria-label="Role">
+            <SelectValue placeholder="Role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="editor">Editor</SelectItem>
+            <SelectItem value="support">Support</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={statusFilter} onValueChange={handleStatusChange}>
+          <SelectTrigger className="w-40" aria-label="Status">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="disabled">Disabled</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={handleSortChange}>
+          <SelectTrigger className="w-40" aria-label="Sort">
+            <SelectValue placeholder="Sort" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="created">Created</SelectItem>
+            <SelectItem value="email">Email</SelectItem>
+            <SelectItem value="role">Role</SelectItem>
+            <SelectItem value="status">Status</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {loading ? (
@@ -83,11 +175,11 @@ export default function UserList() {
           <thead>
             <tr className="bg-gray-50">
               <th className="p-2 text-left">
-                <input
-                  type="checkbox"
+                <Checkbox
+                  aria-label="Select all users"
                   checked={selected.length === users.length && users.length > 0}
-                  onChange={(e) =>
-                    setSelected(e.target.checked ? users.map((u) => u.uid) : [])
+                  onCheckedChange={(checked) =>
+                    setSelected(checked ? users.map((u) => u.uid) : [])
                   }
                 />
               </th>
@@ -101,21 +193,31 @@ export default function UserList() {
             {users.map((u) => (
               <tr
                 key={u.uid}
-                className="border-t hover:bg-gray-50 cursor-pointer"
+                className="border-t hover:bg-gray-50 cursor-pointer focus-visible:bg-blue-50 focus-visible:outline-none"
+                tabIndex={0}
                 onClick={() => setActiveUid(u.uid)}
+                onKeyDown={(e) => {
+                  if (
+                    (e.key === "Enter" || e.key === " ") &&
+                    e.target === e.currentTarget
+                  ) {
+                    e.preventDefault();
+                    setActiveUid(u.uid);
+                  }
+                }}
               >
                 <td className="p-2">
-                  <input
-                    type="checkbox"
+                  <Checkbox
+                    aria-label={`Select user ${u.email ?? u.uid}`}
                     checked={selected.includes(u.uid)}
-                    onChange={(e) => {
-                      e.stopPropagation();
+                    onCheckedChange={(checked) => {
                       setSelected((ids) =>
-                        ids.includes(u.uid)
-                          ? ids.filter((i) => i !== u.uid)
-                          : [...ids, u.uid]
+                        checked
+                          ? [...ids, u.uid]
+                          : ids.filter((i) => i !== u.uid)
                       );
                     }}
+                    onClick={(e) => e.stopPropagation()}
                   />
                 </td>
                 <td className="p-2">{u.email}</td>

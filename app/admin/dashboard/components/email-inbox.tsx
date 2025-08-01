@@ -13,13 +13,21 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 interface ContactMessage {
   id: string
-  name: string
+  firstName: string
+  lastName: string
   email: string
   subject: string
   message: string
-  timestamp: string | Date
+  createdAt: string | Date
   status: "unread" | "read" | "replied" | "archived"
   priority: "low" | "medium" | "high"
+  flagged?: boolean
+  scores?: {
+    toxicity?: number
+    insult?: number
+    threat?: number
+    [key: string]: unknown
+  } | null
 }
 
 export function EmailInbox() {
@@ -31,7 +39,7 @@ export function EmailInbox() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
   const [emailError, setEmailError] = useState<string | null>(null)
-  const [loadingState, setLoadingState] = useState(true) // Now actively used
+  const [loadingState, setLoadingState] = useState(true)
 
   // Load admin email addresses from server
   useEffect(() => {
@@ -68,8 +76,9 @@ export function EmailInbox() {
   }, [])
 
   const filteredMessages = messages.filter((message) => {
+    const fullName = `${message.firstName} ${message.lastName}`.toLowerCase()
     const matchesSearch =
-      message.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      fullName.includes(searchTerm.toLowerCase()) ||
       message.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       message.subject.toLowerCase().includes(searchTerm.toLowerCase())
 
@@ -78,8 +87,17 @@ export function EmailInbox() {
     return matchesSearch && matchesFilter
   })
 
-  const updateMessageStatus = (id: string, status: ContactMessage["status"]) => {
+  const updateMessageStatus = async (id: string, status: ContactMessage["status"]) => {
     setMessages((prev) => prev.map((msg) => (msg.id === id ? { ...msg, status } : msg)))
+    try {
+      await fetch("/api/admin/contact-messages", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status }),
+      })
+    } catch (err) {
+      console.error("Failed to update message status", err)
+    }
   }
 
   const handleReply = async () => {
@@ -218,10 +236,7 @@ export function EmailInbox() {
                       <div className="flex items-start gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarFallback className="bg-gradient-to-br from-purple-400 to-blue-400 text-white text-xs">
-                            {message.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
+                            {`${message.firstName?.[0] ?? ""}${message.lastName?.[0] ?? ""}`}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
@@ -229,18 +244,23 @@ export function EmailInbox() {
                             <p
                               className={`font-medium text-sm ${message.status === "unread" ? "text-gray-900" : "text-gray-700"}`}
                             >
-                              {message.name}
+                              {`${message.firstName} ${message.lastName}`}
                             </p>
                             <div className="flex items-center gap-1">
                               <Badge className={`text-xs ${getPriorityColor(message.priority)}`}>
                                 {message.priority}
                               </Badge>
+                              {message.flagged && (
+                                <Badge variant="destructive" className="ml-1" aria-label="Flagged message">
+                                  Flagged
+                                </Badge>
+                              )}
                             </div>
                           </div>
                           <p className="text-sm text-gray-600 truncate mt-1">{message.subject}</p>
                           <div className="flex items-center justify-between mt-2">
                             <Badge className={`text-xs ${getStatusColor(message.status)}`}>{message.status}</Badge>
-                            <p className="text-xs text-gray-400">{formatDate(message.timestamp)}</p>
+                            <p className="text-xs text-gray-400">{formatDate(message.createdAt)}</p>
                           </div>
                         </div>
                       </div>
@@ -260,10 +280,29 @@ export function EmailInbox() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-lg">{selectedMessage.subject}</CardTitle>
+                    {selectedMessage.flagged && (
+                      <Badge variant="destructive" className="ml-2" aria-label="Flagged message">Flagged</Badge>
+                    )}
                     <p className="text-sm text-gray-600 mt-1">
-                      From: {selectedMessage.name} &lt;{selectedMessage.email}&gt;
+                      From: {selectedMessage.firstName} {selectedMessage.lastName} &lt;{selectedMessage.email}&gt;
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">{formatDate(selectedMessage.timestamp, true)}</p>
+                    <p className="text-xs text-gray-400 mt-1">{formatDate(selectedMessage.createdAt, true)}</p>
+                    {selectedMessage.scores && (
+                      <div className="mt-2 text-xs text-gray-600">
+                        <p className="font-semibold mb-1">Moderation scores:</p>
+                        <ul className="list-disc ml-4 space-y-0.5">
+                          {typeof selectedMessage.scores.toxicity === "number" && (
+                            <li>Toxicity: {selectedMessage.scores.toxicity.toFixed(2)}</li>
+                          )}
+                          {typeof selectedMessage.scores.insult === "number" && (
+                            <li>Insult: {selectedMessage.scores.insult.toFixed(2)}</li>
+                          )}
+                          {typeof selectedMessage.scores.threat === "number" && (
+                            <li>Threat: {selectedMessage.scores.threat.toFixed(2)}</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <Button

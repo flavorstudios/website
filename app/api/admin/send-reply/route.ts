@@ -4,19 +4,6 @@ import { adminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 import nodemailer from "nodemailer";
 
-// Initialize Nodemailer transporter from environment
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT || 587),
-  secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
-  auth: process.env.SMTP_USER
-    ? {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      }
-    : undefined,
-});
-
 export async function POST(req: NextRequest) {
   if (!(await requireAdmin(req, "canHandleContacts"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -42,11 +29,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  // Ensure from address matches allowed domain if specified
-  const domain = process.env.EMAIL_DOMAIN || process.env.ADMIN_DOMAIN || "";
-  if (domain && !from.toLowerCase().endsWith(`@${domain}`)) {
+  // Validate allowed "from" addresses
+  const allowedEnv =
+    process.env.CONTACT_REPLY_EMAILS || process.env.ADMIN_EMAILS || "";
+  const allowed = allowedEnv
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (!allowed.includes(from.toLowerCase())) {
     return NextResponse.json({ error: "Invalid from address" }, { status: 400 });
   }
+
+  // Map "from" to SMTP_USER_<NAME> and SMTP_PASS_<NAME>
+  const prefix = from.split("@")[0].replace(/[^a-zA-Z0-9]/g, "_").toUpperCase();
+  const smtpUser = process.env[`SMTP_USER_${prefix}`];
+  const smtpPass = process.env[`SMTP_PASS_${prefix}`];
+
+  if (!smtpUser || !smtpPass) {
+    return NextResponse.json({ error: "Missing SMTP credentials" }, { status: 500 });
+  }
+
+  // Build transporter with per-sender credentials
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: { user: smtpUser, pass: smtpPass },
+  });
 
   try {
     const info = await transporter.sendMail({

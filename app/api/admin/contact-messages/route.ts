@@ -4,13 +4,21 @@ import { requireAdminAction } from "@/lib/admin-auth";
 
 export interface ContactMessage {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   subject: string;
   message: string;
-  timestamp: string;
+  createdAt: string;
   status: "unread" | "read" | "replied" | "archived";
   priority: "low" | "medium" | "high";
+  flagged?: boolean;
+  scores?: {
+    toxicity?: number;
+    insult?: number;
+    threat?: number;
+    [key: string]: unknown;
+  } | null;
 }
 
 // GET /api/admin/contact-messages
@@ -26,22 +34,46 @@ export async function GET(req: NextRequest) {
   const search = (searchParams.get("search") || "").toLowerCase();
 
   try {
-    const snap = await adminDb
-      .collection("contact_messages")
-      .orderBy("timestamp", "desc")
+    // Try new collection first
+    let snap = await adminDb
+      .collection("contactMessages")
+      .orderBy("createdAt", "desc")
       .get();
-    let messages: ContactMessage[] = snap.docs.map((d) => ({
-      id: d.id,
-      ...(d.data() as Omit<ContactMessage, "id">),
-    }));
+
+    // Fallback to legacy collection if empty
+    if (snap.empty) {
+      snap = await adminDb
+        .collection("contact_messages")
+        .orderBy("timestamp", "desc")
+        .get();
+    }
+
+    let messages: ContactMessage[] = snap.docs.map((d) => {
+      const data = d.data() as any;
+      return {
+        id: d.id,
+        firstName: data.firstName || (data.name?.split(" ")[0] ?? "Unknown"),
+        lastName: data.lastName || (data.name?.split(" ").slice(1).join(" ") ?? ""),
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
+        createdAt: data.createdAt || data.timestamp || new Date().toISOString(),
+        status: data.status ?? "unread",
+        priority: data.priority ?? "medium",
+        flagged: !!data.flagged,
+        scores: data.scores ?? null,
+      };
+    });
 
     if (search) {
-      messages = messages.filter(
-        (m) =>
-          m.name.toLowerCase().includes(search) ||
+      messages = messages.filter((m) => {
+        const fullName = `${m.firstName} ${m.lastName}`.toLowerCase();
+        return (
+          fullName.includes(search) ||
           m.email.toLowerCase().includes(search) ||
           m.subject.toLowerCase().includes(search)
-      );
+        );
+      });
     }
 
     const total = messages.length;
@@ -71,7 +103,17 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Missing id or status" }, { status: 400 });
     }
 
-    await adminDb.collection("contact_messages").doc(String(id)).update({ status });
+    // Update both collections (for legacy support)
+    try {
+      await adminDb.collection("contactMessages").doc(String(id)).set({ status }, { merge: true });
+    } catch (e) {
+      console.warn("[ADMIN_CONTACT_MESSAGES_PUT] Failed to update contactMessages", e);
+    }
+    try {
+      await adminDb.collection("contact_messages").doc(String(id)).set({ status }, { merge: true });
+    } catch (e) {
+      console.warn("[ADMIN_CONTACT_MESSAGES_PUT] Failed to update contact_messages (legacy)", e);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

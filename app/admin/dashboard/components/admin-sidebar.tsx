@@ -8,14 +8,14 @@ import {
   LayoutDashboard,
   FileText,
   Video,
-  Image,            // <-- Import for Media section
+  Image,
   MessageSquare,
   Edit,
   Settings,
   ChevronLeft,
   ChevronRight,
   Mail,
-  ClipboardList,     // <-- Import for Applications
+  ClipboardList,
   Users,
 } from "lucide-react"
 import { useRole } from "../contexts/role-context"
@@ -44,7 +44,6 @@ export function AdminSidebar({
     { id: "media", label: "Media", icon: Image, count: null, href: "/admin/dashboard/media" },
     { id: "categories", label: "Categories", icon: Edit, count: null, href: "/admin/dashboard/categories" },
     { id: "comments", label: "Comments", icon: MessageSquare, count: null, href: "/admin/dashboard/comments" },
-    // --- APPLICATIONS tab ---
     { id: "applications", label: "Applications", icon: ClipboardList, count: null, href: "/admin/dashboard/applications" },
     { id: "inbox", label: "Email Inbox", icon: Mail, count: null, href: "/admin/dashboard/inbox" },
     { id: "users", label: "Users", icon: Users, count: null, href: "/admin/dashboard/users" },
@@ -55,7 +54,7 @@ export function AdminSidebar({
     (item) => accessibleSections.includes(item.id) || item.id === "overview"
   )
 
-  // --- KEY: Always highlight based on current path, not state ---
+  // Always highlight based on current path, not state
   const getActiveId = () => {
     const match = filteredNavItems
       .filter(
@@ -87,12 +86,15 @@ export function AdminSidebar({
 
       <aside
         className={`
-          bg-white border-r border-gray-200 fixed left-0 top-0 h-screen overflow-y-auto z-50
-          transform transition-transform duration-300 ease-in-out
+          bg-white border-r border-gray-200
+          ${isMobile
+            ? "fixed left-0 top-0 h-screen z-50 transform transition-transform duration-300 ease-in-out"
+            : "sticky top-0 h-screen"}
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           w-64 md:translate-x-0 ${sidebarOpen ? "md:w-64" : "md:w-20"}
           flex flex-col md:relative md:z-auto
         `}
+        style={{ height: "100vh" }}
       >
         {/* Sidebar Header */}
         <div className={`${sidebarOpen ? "p-4" : "p-2"} border-b border-gray-200 min-h-[80px] flex items-center`}>
@@ -138,8 +140,8 @@ export function AdminSidebar({
         )}
 
         {/* Navigation Menu */}
-        <nav className="flex-1 p-2 overflow-y-auto">
-          <div className="space-y-1">
+        <nav className="flex-1 p-2 overflow-y-visible md:overflow-y-visible" /* <- no scroll on sidebar itself */>
+          <div className="space-y-1 max-h-[calc(100vh-230px)] overflow-y-auto" /* <- menu container scrolls ONLY if needed */>
             {filteredNavItems.map((item) => {
               const active = item.id === activeId
               const Icon = item.icon

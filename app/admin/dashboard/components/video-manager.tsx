@@ -23,9 +23,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Info, Eye, Pencil, Trash2, Upload, Archive } from "lucide-react";
+import { Info, Eye, Pencil, Trash2, Upload, Archive, Image as ImageIcon } from "lucide-react";
 import { VideoForm } from "@/components/ui/video-form";
 import { cn } from "@/lib/utils";
+
+// ✨ ADD: MediaPickerDialog import
+import MediaPickerDialog from "./media/MediaPickerDialog";
 
 import type { Category } from "@/types/category";
 
@@ -317,6 +320,9 @@ export function VideoManager() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
 
+  // ✨ ADD: Media Library Dialog state
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
+
   useEffect(() => {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -496,14 +502,28 @@ export function VideoManager() {
           <h2 className="text-2xl font-bold text-gray-900">Video Manager</h2>
           <p className="text-gray-600">Manage your YouTube content and episodes</p>
         </div>
-        <Button
-          onClick={() => setShowCreateForm(true)}
-          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-          aria-label="Add new video"
-          title="Add new video"
-        >
-          Add New Video
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setShowCreateForm(true)}
+            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            aria-label="Add new video"
+            title="Add new video"
+          >
+            Add New Video
+          </Button>
+          {/* ✨ ADD: Media Library Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowMediaPicker(true)}
+            className="flex items-center gap-2"
+            aria-label="Open Media Library"
+            title="Media Library"
+          >
+            <ImageIcon className="h-4 w-4" />
+            Media Library
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -520,7 +540,7 @@ export function VideoManager() {
             name: cat.name,
             slug: cat.slug,
             count: cat.postCount,
-            tooltip: cat.tooltip ?? undefined, // <-- FIXED HERE
+            tooltip: cat.tooltip ?? undefined,
             order: cat.order ?? 0,
             isActive: true,
           }))}
@@ -640,6 +660,13 @@ export function VideoManager() {
           </AlertDialogContent>
         </AlertDialog>
       )}
+
+      {/* ✨ ADD: Media Picker Dialog */}
+      <MediaPickerDialog
+        open={showMediaPicker}
+        onOpenChange={setShowMediaPicker}
+        // onSelect={(media) => { ... }} // Integrate if/when needed for video thumbnails
+      />
     </div>
   );
 }

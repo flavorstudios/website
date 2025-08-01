@@ -18,6 +18,9 @@ import { getAuth, signOut } from "firebase/auth"
 import app, { firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
+// ✨ ADD: MediaLibrary import for Media tab
+import MediaLibrary from "./components/media/MediaLibrary"
+
 interface AdminDashboardPageClientProps {
   initialSection?: string
 }
@@ -56,6 +59,8 @@ export default function AdminDashboardPageClient({
       { id: "overview", href: "/admin/dashboard" },
       { id: "blogs", href: "/admin/dashboard/blog-posts" },
       { id: "videos", href: "/admin/dashboard/videos" },
+      // ✨ ADD: Media tab mapping
+      { id: "media", href: "/admin/dashboard/media" },
       { id: "categories", href: "/admin/dashboard/categories" },
       { id: "comments", href: "/admin/dashboard/comments" },
       { id: "inbox", href: "/admin/dashboard/inbox" },
@@ -133,6 +138,9 @@ export default function AdminDashboardPageClient({
         return <BlogManager />
       case "videos":
         return <VideoManager />
+      // ✨ ADD: Media tab case
+      case "media":
+        return <MediaLibrary />
       case "categories":
         return <CategoryManager />
       case "comments":

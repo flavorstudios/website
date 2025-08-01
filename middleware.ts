@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyAdminSession, logAdminAuditFailure } from "@/lib/admin-auth";
 import { adminAuth } from "@/lib/firebase-admin";
-import { getUserRole } from "@/lib/user-roles"; // <- Add for role lookup if needed
+import { getUserRole } from "@/lib/user-roles"; // <- For role lookup
 
 // --- In-memory rate limiter (per Codex) ---
 type RateInfo = { count: number; lastAttempt: number };
@@ -46,7 +46,6 @@ function getRequestIp(request: NextRequest): string {
   // x-forwarded-for could be "clientIP, proxy1, proxy2"
   const xfwd = request.headers.get("x-forwarded-for");
   if (xfwd) return xfwd.split(",")[0].trim();
-  // (If you use Vercel Edge, you might want to check other headers, but this is safest)
   return "unknown";
 }
 
@@ -54,11 +53,25 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const ip = getRequestIp(request);
 
+  // --- PROTECT ALL /api/media ROUTES (Codex: must verify admin session and log denied attempts) ---
+  if (pathname.startsWith("/api/media")) {
+    const sessionCookie = request.cookies.get("admin-session")?.value || "";
+    try {
+      await verifyAdminSession(sessionCookie);
+      resetRate(ip);
+    } catch {
+      await logAdminAuditFailure(null, ip, "invalid_session_media_api");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.next();
+  }
+
   const isLoginPage =
     pathname === "/admin/login" ||
     pathname === "/admin/login/" ||
     pathname.startsWith("/admin/login?");
 
+  // --- All /admin routes
   if (pathname.startsWith("/admin")) {
     const sessionCookie = request.cookies.get("admin-session")?.value || "";
 
@@ -72,7 +85,6 @@ export async function middleware(request: NextRequest) {
     if (isLoginPage) {
       if (sessionCookie) {
         try {
-          // If the session is valid, skip login and go to dashboard
           const session = await verifyAdminSession(sessionCookie);
           resetRate(ip);
 
@@ -98,8 +110,6 @@ export async function middleware(request: NextRequest) {
           } catch {}
           recordFailure(ip);
           await logAdminAuditFailure(email, ip, "invalid_session_login");
-
-          // --- DEV ONLY: Extra debug for allowlist failures
           if (process.env.NODE_ENV !== "production") {
             // eslint-disable-next-line no-console
             console.log(`[Admin Middleware] Invalid session for email: ${email}. Possible allowlist mismatch. Check ADMIN_EMAILS/ADMIN_EMAIL env.`);
@@ -118,7 +128,6 @@ export async function middleware(request: NextRequest) {
     }
 
     try {
-      // If the session is valid, proceed to admin route
       const session = await verifyAdminSession(sessionCookie);
       resetRate(ip);
 
@@ -143,12 +152,10 @@ export async function middleware(request: NextRequest) {
       recordFailure(ip);
       await logAdminAuditFailure(email, ip, "invalid_session_route");
 
-      // --- DEV ONLY: Extra debug for allowlist failures
       if (process.env.NODE_ENV !== "production") {
         // eslint-disable-next-line no-console
         console.log(`[Admin Middleware] Unauthorized session for email: ${email}. Check allowlist in ADMIN_EMAILS/ADMIN_EMAIL.`);
       }
-
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
   }
@@ -159,6 +166,6 @@ export async function middleware(request: NextRequest) {
 
 // Multi-admin compatible! Supports ADMIN_EMAILS (comma-separated) and ADMIN_EMAIL (single email).
 export const config = {
-  matcher: "/admin/:path*",
+  matcher: ["/admin/:path*", "/api/media/:path*"],
   runtime: "nodejs",
 };

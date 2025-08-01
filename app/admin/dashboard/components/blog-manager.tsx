@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { RefreshCw, PlusCircle, AlertCircle } from "lucide-react"
+import { RefreshCw, PlusCircle, AlertCircle, Image as ImageIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,6 +28,9 @@ import {
 import BlogTable from "@/components/admin/blog/BlogTable"
 import BlogBulkActions from "@/components/admin/blog/BlogBulkActions"
 
+// ✨ ADD: MediaPickerDialog import for Media Library integration
+import MediaPickerDialog from "./media/MediaPickerDialog"
+
 import type { BlogPost } from "@/lib/content-store"
 import type { CategoryData } from "@/lib/dynamic-categories"
 import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions"
@@ -52,6 +55,9 @@ export const BlogManager = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
   const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null) // <-- for AlertDialog
+
+  // ✨ ADD: Media Library Dialog state
+  const [showMediaPicker, setShowMediaPicker] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -274,6 +280,18 @@ export const BlogManager = () => {
             <PlusCircle className="h-4 w-4" />
             Create New Post
           </Button>
+          {/* ✨ ADD: Media Library Button */}
+          <Button
+            onClick={() => setShowMediaPicker(true)}
+            size="sm"
+            variant="outline"
+            className="flex items-center gap-2"
+            aria-label="Open Media Library"
+            title="Media Library"
+          >
+            <ImageIcon className="h-4 w-4" />
+            Media Library
+          </Button>
         </div>
       </div>
 
@@ -385,6 +403,13 @@ export const BlogManager = () => {
             </AlertDialogContent>
           </AlertDialog>
         )}
+
+        {/* ✨ ADD: Media Picker Dialog */}
+        <MediaPickerDialog
+          open={showMediaPicker}
+          onOpenChange={setShowMediaPicker}
+          // onSelect={(media) => { ... }} // Integrate with blog editor if needed
+        />
       </div>
     </div>
   )

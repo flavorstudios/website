@@ -11,6 +11,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const media = await listMedia();
-  return NextResponse.json({ media });
+  // Read query params for filtering, search, ordering, pagination
+  const { searchParams } = new URL(request.url);
+  const limit = parseInt(searchParams.get("limit") || "50", 10);
+  const search = searchParams.get("search") || undefined;
+  const type = searchParams.get("type") || undefined;
+  const order = searchParams.get("order") === "asc" ? "asc" : "desc";
+  const cursorParam = searchParams.get("cursor");
+  const startAfter = cursorParam ? parseInt(cursorParam, 10) : undefined;
+
+  // Fetch paginated media list with options
+  const result = await listMedia({ limit, search, type, order, startAfter });
+
+  return NextResponse.json(result);
 }

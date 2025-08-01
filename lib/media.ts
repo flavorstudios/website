@@ -19,10 +19,66 @@ function genId() {
   return crypto.randomBytes(8).toString("hex");
 }
 
-export async function listMedia(limit = 50): Promise<MediaDoc[]> {
-  const snap = await collection.orderBy("createdAt", "desc").limit(limit).get();
-  return snap.docs.map((d) => d.data() as MediaDoc);
+// --- New types for paginated/media search listing ---
+export interface ListMediaOptions {
+  limit?: number;
+  search?: string;
+  type?: string;
+  order?: "asc" | "desc";
+  startAfter?: number;
 }
+
+export interface ListMediaResult {
+  media: MediaDoc[];
+  cursor: number | null;
+}
+
+// --- Enhanced, backward-compatible listMedia() ---
+export async function listMedia(
+  options: ListMediaOptions | number = 50
+): Promise<ListMediaResult> {
+  // If called with just a number, act as legacy usage
+  let limit = 50;
+  let search, type, order, startAfter;
+
+  if (typeof options === "number") {
+    limit = options;
+    order = "desc";
+  } else {
+    limit = options.limit ?? 50;
+    search = options.search;
+    type = options.type;
+    order = options.order ?? "desc";
+    startAfter = options.startAfter;
+  }
+
+  let query: FirebaseFirestore.Query = collection.orderBy("createdAt", order);
+
+  if (type) {
+    query = query.where("mime", "==", type);
+  }
+
+  if (search) {
+    // Search by basename (case-insensitive, Firestore workaround)
+    const term = search.toLowerCase();
+    query = query
+      .where("basename", ">=", term)
+      .where("basename", "<=", term + "\uf8ff");
+  }
+
+  if (startAfter) {
+    query = query.startAfter(startAfter);
+  }
+
+  const snap = await query.limit(limit).get();
+  const media = snap.docs.map((d) => d.data() as MediaDoc);
+  const last = snap.docs[snap.docs.length - 1];
+  const cursor = last ? (last.get("createdAt") as number) : null;
+
+  return { media, cursor };
+}
+
+// --- Unchanged: uploadMedia, updateMedia, deleteMedia, cropMedia, suggestAltText, validateFile ---
 
 export async function uploadMedia(
   buffer: Buffer,

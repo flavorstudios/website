@@ -20,3 +20,18 @@ This is the official website of **Flavor Studios** — your source for Anime New
    ```bash
    git clone https://github.com/flavorstudios/flavorstudios-website.git
    cd flavorstudios-website
+```
+
+2. **Set up your environment and install dependencies:**
+   ```bash
+   cp env.example .env.local
+   pnpm install  # or `npm install`
+   ```
+
+3. **Common development scripts:**
+   ```bash
+   pnpm dev    # start the local development server
+   pnpm lint   # run eslint checks
+   pnpm test   # execute unit tests
+   pnpm build  # create an optimized production build
+   pnpm start  # run the production server

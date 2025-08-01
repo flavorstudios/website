@@ -21,6 +21,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 // ✨ ADD: MediaLibrary import for Media tab
 import MediaLibrary from "./components/media/MediaLibrary"
 
+// ✨ ADD: CareerApplications import
+import CareerApplications from "./components/career-applications"
+
 interface AdminDashboardPageClientProps {
   initialSection?: string
 }
@@ -63,6 +66,7 @@ export default function AdminDashboardPageClient({
       { id: "media", href: "/admin/dashboard/media" },
       { id: "categories", href: "/admin/dashboard/categories" },
       { id: "comments", href: "/admin/dashboard/comments" },
+      { id: "career-applications", href: "/admin/dashboard/career-applications" }, // <-- ADDED
       { id: "inbox", href: "/admin/dashboard/inbox" },
       { id: "users", href: "/admin/dashboard/users" },
       { id: "settings", href: "/admin/dashboard/settings" },
@@ -145,6 +149,8 @@ export default function AdminDashboardPageClient({
         return <CategoryManager />
       case "comments":
         return <CommentManager />
+      case "career-applications": // <-- ADDED
+        return <CareerApplications />
       case "inbox":
         return <EmailInbox />
       case "system":

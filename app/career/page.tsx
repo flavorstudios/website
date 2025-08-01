@@ -17,9 +17,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Heart,
   MapPin,
@@ -33,6 +30,9 @@ import {
   UserPlus,
 } from "lucide-react";
 import Link from "next/link";
+
+// --- TalentForm import ---
+import TalentForm from "./TalentForm";
 
 // --- SEO METADATA & SCHEMA (WebPage) ---
 export const metadata = getMetadata({
@@ -345,61 +345,8 @@ export default function CareerPage() {
 
           <Card className="max-w-2xl mx-auto">
             <CardContent className="space-y-4 sm:space-y-6 p-6 sm:p-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-sm sm:text-base text-gray-700">
-                    First Name
-                  </Label>
-                  <Input id="firstName" placeholder="Your first name" className="h-10 sm:h-11" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-sm sm:text-base text-gray-700">
-                    Last Name
-                  </Label>
-                  <Input id="lastName" placeholder="Your last name" className="h-10 sm:h-11" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm sm:text-base text-gray-700">
-                  Email
-                </Label>
-                <Input id="email" type="email" placeholder="your.email@example.com" className="h-10 sm:h-11" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="skills" className="text-sm sm:text-base text-gray-700">
-                  Skills &amp; Interests
-                </Label>
-                <Input id="skills" placeholder="e.g., Animation, Voice Acting, Writing..." className="h-10 sm:h-11" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="portfolio" className="text-sm sm:text-base text-gray-700">
-                  Portfolio/Website (Optional)
-                </Label>
-                <Input id="portfolio" placeholder="https://yourportfolio.com" className="h-10 sm:h-11" />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="message" className="text-sm sm:text-base text-gray-700">
-                  Tell Us About Yourself
-                </Label>
-                <Textarea
-                  id="message"
-                  placeholder="Share your experience, passion for animation, or what excites you about Flavor Studios..."
-                  className="min-h-[100px] sm:min-h-[120px] resize-none text-sm sm:text-base"
-                />
-              </div>
-
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-11 text-sm sm:text-base">
-                <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
-                Join Talent List
-              </Button>
-
-              <p className="text-xs sm:text-sm text-gray-500 text-center leading-relaxed">
-                We&apos;ll only contact you about relevant opportunities and updates.
-              </p>
+              {/* Replace static form with TalentForm */}
+              <TalentForm />
             </CardContent>
           </Card>
         </section>

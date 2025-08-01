@@ -80,7 +80,8 @@ export function getAccessibleSections(userRole: UserRole): string[] {
   if (permissions.canManageCategories) sections.push("categories")
   if (permissions.canManageComments) sections.push("comments")
   if (permissions.canManageUsers) sections.push("users")
-  if (permissions.canHandleContacts) sections.push("inbox")
+  if (permissions.canHandleContacts)
+    sections.push("inbox", "career-applications") // <-- Added: show both if canHandleContacts
   if (permissions.canManageSystem) sections.push("pages", "system")
 
   return sections

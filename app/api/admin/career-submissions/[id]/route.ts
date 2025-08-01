@@ -1,0 +1,27 @@
+import { requireAdmin } from "@/lib/admin-auth"
+import { type NextRequest, NextResponse } from "next/server"
+import { adminDb } from "@/lib/firebase-admin"
+
+interface Submission {
+  [key: string]: unknown
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  if (!(await requireAdmin(request, "canHandleContacts"))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+  try {
+    const { reviewed } = await request.json()
+    await adminDb.collection("careerSubmissions").doc(params.id).update({ reviewed: !!reviewed })
+    const doc = await adminDb.collection("careerSubmissions").doc(params.id).get()
+    return NextResponse.json({
+      submission: { id: doc.id, ...(doc.data() as Submission) },
+    })
+  } catch (err) {
+    console.error("[CAREER_SUBMISSIONS_PUT]", err)
+    return NextResponse.json({ error: "Failed to update submission" }, { status: 500 })
+  }
+}

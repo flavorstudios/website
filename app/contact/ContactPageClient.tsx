@@ -39,7 +39,7 @@ export default function ContactPageClient() {
     privacyAccepted: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error" | "flagged">("idle");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const contactInfo = [
@@ -86,13 +86,13 @@ export default function ContactPageClient() {
       step: "2",
       title: "Initial Assessment",
       description:
-        "You&apos;ll receive an immediate confirmation. Our team reviews all inquiries within 24 hours during business days.",
+        "You'll receive an immediate confirmation. Our team reviews all inquiries within 24 hours during business days.",
       icon: CheckCircle,
     },
     {
       step: "3",
       title: "Personalized Response",
-      description: "We&apos;ll respond with tailored information addressing your specific questions or concerns.",
+      description: "We'll respond with tailored information addressing your specific questions or concerns.",
       icon: MessageSquare,
     },
     {
@@ -105,9 +105,9 @@ export default function ContactPageClient() {
   ];
 
   const expectations = [
-    "You&apos;ll receive an email confirmation immediately.",
+    "You'll receive an email confirmation immediately.",
     "Our team will review your message within 24 hours.",
-    "We&apos;ll respond with helpful information or next steps.",
+    "We'll respond with helpful information or next steps.",
     "For complex inquiries, we may schedule a follow-up call.",
   ];
 
@@ -157,10 +157,33 @@ export default function ContactPageClient() {
     setSubmitStatus("idle");
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        }),
+      });
 
-      // Mock success
+      if (!res.ok) {
+        setSubmitStatus("error");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const data = await res.json();
+
+      // If flagged by Perspective API moderation, inform user
+      if (data.flagged) {
+        setSubmitStatus("flagged");
+        setIsSubmitting(false);
+        return;
+      }
+
       setSubmitStatus("success");
       setFormData({
         firstName: "",
@@ -195,8 +218,8 @@ export default function ContactPageClient() {
             Get In Touch
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-            Whether you have a question about our content, want to collaborate, or just want to say hello, we&apos;re here to
-            help. Fill out the form and we&apos;ll get back to you as soon as possible.
+            Whether you have a question about our content, want to collaborate, or just want to say hello, we're here to
+            help. Fill out the form and we'll get back to you as soon as possible.
           </p>
         </div>
 
@@ -284,7 +307,7 @@ export default function ContactPageClient() {
               <CardHeader>
                 <CardTitle className="text-xl sm:text-2xl">Send us a Message</CardTitle>
                 <CardDescription className="text-sm sm:text-base">
-                  Fill out the form below and we&apos;ll get back to you as soon as possible.
+                  Fill out the form below and we'll get back to you as soon as possible.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6">
@@ -293,7 +316,19 @@ export default function ContactPageClient() {
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <div>
                       <h4 className="font-semibold text-green-800">Message sent successfully!</h4>
-                      <p className="text-sm text-green-700">We&apos;ll get back to you within 24-48 hours.</p>
+                      <p className="text-sm text-green-700">We'll get back to you within 24-48 hours.</p>
+                    </div>
+                  </div>
+                )}
+
+                {submitStatus === "flagged" && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-yellow-800">Message Submitted — Needs Review</h4>
+                      <p className="text-sm text-yellow-700">
+                        Thank you for your message! Our system flagged it for moderation and a team member will review and respond if appropriate.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -531,7 +566,7 @@ export default function ContactPageClient() {
           <HelpCircle className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-blue-600" />
           <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-blue-900">Need Quick Answers?</h2>
           <p className="text-base sm:text-lg text-blue-700 mb-4 sm:mb-6 max-w-2xl mx-auto px-4">
-            Before reaching out, check our comprehensive FAQ page where we&apos;ve answered the most common questions about
+            Before reaching out, check our comprehensive FAQ page where we've answered the most common questions about
             our content, collaborations, and services.
           </p>
           <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 h-10 sm:h-12 px-6 sm:px-8">

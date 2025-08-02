@@ -1,0 +1,16 @@
+# Always ignore env files and secrets
+.env
+.env.*
+!.env.example
+
+# Node modules (already ignored, but keep as backup)
+node_modules/
+npm-debug.log
+
+# Git & system files
+.git
+.gitignore
+.DS_Store
+
+# Logs
+*.log

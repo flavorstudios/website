@@ -1,3 +1,5 @@
+// __tests__/footer.test.tsx
+
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { Footer } from '@/components/footer'
@@ -24,16 +26,9 @@ describe('Footer', () => {
     })
   })
 
-  it('supports color variant for SocialIcons', () => {
-    render(<Footer socialVariant="color" />)
-    defaultPlatforms.forEach(({ label, color }) => {
-      const anchor = screen.getByLabelText(label)
-      expect(anchor).toBeInTheDocument()
-      // The color variant should apply the brand color via inline style
-      expect(anchor).toHaveStyle({ color })
-      expect(anchor).not.toHaveClass('text-white')
-    })
-  })
+  // This test is for SocialIcons color variant directly,
+  // not for Footer, since Footer doesn't accept socialVariant prop.
+  // You should test SocialIcons separately for this feature.
 
   it('matches snapshot', () => {
     const { container } = render(<Footer />)

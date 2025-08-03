@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { motion } from "framer-motion"
 import {
   Bold,
@@ -38,6 +38,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
   const [showLinkDialog, setShowLinkDialog] = useState(false)
   const [linkUrl, setLinkUrl] = useState("")
   const [linkText, setLinkText] = useState("")
+  const linkInputRef = useRef<HTMLInputElement>(null)
 
   // TipTap Editor Instance
   const editor = useEditor({
@@ -55,10 +56,19 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
     },
   })
 
-  // Keep TipTap in sync with prop changes
-  if (editor && value !== editor.getHTML()) {
-    editor.commands.setContent(value, false)
-  }
+  // Keep TipTap in sync with prop changes (avoid infinite loop)
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value, false)
+    }
+  }, [editor, value])
+
+  // Focus the first input in link dialog for accessibility
+  useEffect(() => {
+    if (showLinkDialog) {
+      linkInputRef.current?.focus()
+    }
+  }, [showLinkDialog])
 
   // Insert Link Handler
   const insertLink = () => {
@@ -278,6 +288,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           lineHeight: "1.6",
           fontSize: "16px",
         }}
+        data-testid="rich-text-editor"
       />
 
       {/* Link Dialog */}
@@ -293,16 +304,31 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Insert Link"
           >
             <h3 className="text-lg font-semibold mb-4">Insert Link</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Link Text</label>
-                <Input value={linkText} onChange={(e) => setLinkText(e.target.value)} placeholder="Enter link text" />
+                <label className="block text-sm font-medium mb-2" htmlFor="link-text-input">Link Text</label>
+                <Input
+                  id="link-text-input"
+                  ref={linkInputRef}
+                  value={linkText}
+                  onChange={(e) => setLinkText(e.target.value)}
+                  placeholder="Enter link text"
+                  autoFocus
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">URL</label>
-                <Input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="https://example.com" />
+                <label className="block text-sm font-medium mb-2" htmlFor="link-url-input">URL</label>
+                <Input
+                  id="link-url-input"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  placeholder="https://example.com"
+                />
               </div>
               <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={() => setShowLinkDialog(false)}>
@@ -323,25 +349,25 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           color: #9ca3af;
           pointer-events: none;
         }
-        
+
         .prose h1 {
           font-size: 2rem;
           font-weight: bold;
           margin: 1rem 0;
         }
-        
+
         .prose h2 {
           font-size: 1.5rem;
           font-weight: bold;
           margin: 0.75rem 0;
         }
-        
+
         .prose h3 {
           font-size: 1.25rem;
           font-weight: bold;
           margin: 0.5rem 0;
         }
-        
+
         .prose blockquote {
           border-left: 4px solid #e5e7eb;
           padding-left: 1rem;
@@ -349,7 +375,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           font-style: italic;
           color: #6b7280;
         }
-        
+
         .prose pre {
           background: #f3f4f6;
           padding: 1rem;
@@ -357,12 +383,12 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
           overflow-x: auto;
           font-family: monospace;
         }
-        
+
         .prose ul, .prose ol {
           margin: 1rem 0;
           padding-left: 2rem;
         }
-        
+
         .prose a {
           color: #3b82f6;
           text-decoration: underline;

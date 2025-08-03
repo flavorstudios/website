@@ -1,0 +1,473 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Footer matches snapshot 1`] = `
+<div>
+  <footer
+    class="bg-black text-white"
+  >
+    <div
+      class="container mx-auto max-w-7xl px-4 py-10 md:py-16"
+    >
+      <div
+        class="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-6 md:gap-8 lg:gap-10"
+      >
+        <div
+          class="space-y-5 lg:pr-8"
+        >
+          <a
+            class="flex items-center space-x-2"
+            href="/"
+          >
+            <span
+              class="font-bold text-xl"
+            >
+              Flavor Studios
+            </span>
+          </a>
+          <p
+            class="text-white text-sm leading-relaxed"
+          >
+            Crafting stories with soul, one frame at a time. Flavor Studios is a global animation studio dedicated to creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth, we aim to inspire, heal, and connect audiences worldwide.
+          </p>
+          <div
+            class="flex flex-wrap sm:flex-nowrap gap-2 pt-2"
+          >
+            <a
+              aria-label="YouTube"
+              class="flex h-8 w-8 items-center justify-center rounded transition-transform duration-200 hover:scale-110 hover:shadow-[0_0_8px_currentColor] text-white hover:text-white"
+              href="https://www.youtube.com/@flavorstudios"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <svg
+                class="lucide lucide-youtube h-4 w-4"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"
+                />
+                <path
+                  d="m10 15 5-3-5-3z"
+                />
+              </svg>
+              <span
+                class="sr-only"
+              >
+                YouTube
+              </span>
+            </a>
+            <a
+              aria-label="Facebook"
+              class="flex h-8 w-8 items-center justify-center rounded transition-transform duration-200 hover:scale-110 hover:shadow-[0_0_8px_currentColor] text-white hover:text-white"
+              href="https://www.facebook.com/flavourstudios"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <svg
+                class="lucide lucide-facebook h-4 w-4"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"
+                />
+              </svg>
+              <span
+                class="sr-only"
+              >
+                Facebook
+              </span>
+            </a>
+            <a
+              aria-label="Instagram"
+              class="flex h-8 w-8 items-center justify-center rounded transition-transform duration-200 hover:scale-110 hover:shadow-[0_0_8px_currentColor] text-white hover:text-white"
+              href="https://www.instagram.com/flavorstudios"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <svg
+                class="lucide lucide-instagram h-4 w-4"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <rect
+                  height="20"
+                  rx="5"
+                  ry="5"
+                  width="20"
+                  x="2"
+                  y="2"
+                />
+                <path
+                  d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"
+                />
+                <line
+                  x1="17.5"
+                  x2="17.51"
+                  y1="6.5"
+                  y2="6.5"
+                />
+              </svg>
+              <span
+                class="sr-only"
+              >
+                Instagram
+              </span>
+            </a>
+            <a
+              aria-label="Twitter"
+              class="flex h-8 w-8 items-center justify-center rounded transition-transform duration-200 hover:scale-110 hover:shadow-[0_0_8px_currentColor] text-white hover:text-white"
+              href="https://twitter.com/flavor_studios"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <svg
+                class="lucide lucide-twitter h-4 w-4"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"
+                />
+              </svg>
+              <span
+                class="sr-only"
+              >
+                Twitter
+              </span>
+            </a>
+            <a
+              aria-label="Discord"
+              class="flex h-8 w-8 items-center justify-center rounded transition-transform duration-200 hover:scale-110 hover:shadow-[0_0_8px_currentColor] text-white hover:text-white"
+              href="https://discord.com/channels/@flavorstudios"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <svg
+                class="lucide lucide-message-circle h-4 w-4"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"
+                />
+              </svg>
+              <span
+                class="sr-only"
+              >
+                Discord
+              </span>
+            </a>
+            <a
+              aria-label="Telegram"
+              class="flex h-8 w-8 items-center justify-center rounded transition-transform duration-200 hover:scale-110 hover:shadow-[0_0_8px_currentColor] text-white hover:text-white"
+              href="https://t.me/flavorstudios"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <svg
+                class="lucide lucide-send h-4 w-4"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"
+                />
+                <path
+                  d="m21.854 2.147-10.94 10.939"
+                />
+              </svg>
+              <span
+                class="sr-only"
+              >
+                Telegram
+              </span>
+            </a>
+            <a
+              aria-label="Threads"
+              class="flex h-8 w-8 items-center justify-center rounded transition-transform duration-200 hover:scale-110 hover:shadow-[0_0_8px_currentColor] text-white hover:text-white"
+              href="https://www.threads.net/@flavorstudios"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <svg
+                class="lucide lucide-message-circle h-4 w-4"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"
+                />
+              </svg>
+              <span
+                class="sr-only"
+              >
+                Threads
+              </span>
+            </a>
+            <a
+              aria-label="Reddit"
+              class="flex h-8 w-8 items-center justify-center rounded transition-transform duration-200 hover:scale-110 hover:shadow-[0_0_8px_currentColor] text-white hover:text-white"
+              href="https://www.reddit.com/r/flavorstudios/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <svg
+                class="lucide lucide-users h-4 w-4"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                />
+                <circle
+                  cx="9"
+                  cy="7"
+                  r="4"
+                />
+                <path
+                  d="M22 21v-2a4 4 0 0 0-3-3.87"
+                />
+                <path
+                  d="M16 3.13a4 4 0 0 1 0 7.75"
+                />
+              </svg>
+              <span
+                class="sr-only"
+              >
+                Reddit
+              </span>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h3
+            class="font-semibold text-lg mb-4 text-white"
+          >
+            Company
+          </h3>
+          <ul
+            class="space-y-3"
+          >
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/"
+              >
+                Home
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/about"
+              >
+                About
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/career"
+              >
+                Career
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/contact"
+              >
+                Contact
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3
+            class="font-semibold text-lg mb-4 text-white"
+          >
+            Discover
+          </h3>
+          <ul
+            class="space-y-3"
+          >
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/blog"
+              >
+                Blog
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/watch"
+              >
+                Watch
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/play"
+              >
+                Play
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/faq"
+              >
+                FAQ
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/support"
+              >
+                Support
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3
+            class="font-semibold text-lg mb-4 text-white"
+          >
+            Legal
+          </h3>
+          <ul
+            class="space-y-3"
+          >
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/privacy-policy"
+              >
+                Privacy Policy
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/terms-of-service"
+              >
+                Terms of Service
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/dmca"
+              >
+                DMCA
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/cookie-policy"
+              >
+                Cookie Policy
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/disclaimer"
+              >
+                Disclaimer
+              </a>
+            </li>
+            <li>
+              <a
+                class="text-white hover:text-gray-400 transition-colors text-sm"
+                href="/media-usage-policy"
+              >
+                Media Usage Policy
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div
+        class="border-t border-white mt-8 pt-6 text-center space-y-2"
+      >
+        <p
+          class="text-white text-sm"
+        >
+          © 
+          2024
+           Flavor Studios. All rights reserved.
+        </p>
+        <p
+          class="text-white text-xs"
+        >
+          Built with Passion. Powered by Dreams.
+        </p>
+      </div>
+    </div>
+  </footer>
+</div>
+`;

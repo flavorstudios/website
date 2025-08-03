@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { commentStore } from "@/lib/comment-store"
-import type { Comment } from "@/lib/comment-store" // Now Comment is exported!
+import type { Comment } from "@/lib/comment-store"
 
 // --- In-memory per-IP rate limiter (safe for single server, dev, Vercel Hobby) ---
 type RateInfo = { count: number; lastAttempt: number }
 const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
 const MAX_COMMENTS = 5
+const globalRate = globalThis as { __commentRateMap?: Map<string, RateInfo> }
 const rateMap: Map<string, RateInfo> =
-  (globalThis as any).__commentRateMap ||
-  ((globalThis as any).__commentRateMap = new Map())
+  globalRate.__commentRateMap || (globalRate.__commentRateMap = new Map())
 
 function recordAttempt(ip: string) {
   const now = Date.now()
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       website: "",
       content,
       parentId: null,
-      ip: request.headers.get("x-forwarded-for") ?? "",
+      ip,
       userAgent: request.headers.get("user-agent") ?? "",
     })
 

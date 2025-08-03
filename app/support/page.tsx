@@ -1,6 +1,6 @@
 // app/support/page.tsx
 
-import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
+import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
@@ -20,6 +20,7 @@ import {
   Youtube,
 } from "lucide-react";
 import Link from "next/link";
+import { SocialIcons } from "@/components/social-icons"; // ⬅️ NEW: Import SocialIcons
 
 // === SEO METADATA (using centralized handler) ===
 export const metadata = getMetadata({
@@ -48,9 +49,6 @@ export const metadata = getMetadata({
     description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  // alternates: {
-  //   canonical: getCanonicalUrl("/support"),
-  // },
 });
 
 // === JSON-LD WebPage Schema for Support Page ===
@@ -309,6 +307,12 @@ export default function SupportPage() {
             })}
           </div>
         </section>
+
+        {/* === Social Icons Row (NEW, as per audit) === */}
+        <section className="flex justify-center py-6 sm:py-8">
+          <SocialIcons variant="color" className="gap-4" />
+        </section>
+        {/* === End Social Icons Row === */}
 
         {/* FAQ Link - Full Width */}
         <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg">

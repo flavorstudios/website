@@ -25,6 +25,9 @@ import {
 import Link from "next/link";
 import { platformIcons } from "@/components/platformIcons"; // <-- Centralized platform icons
 
+type SubmitStatus = "idle" | "success" | "error" | "flagged";
+type FormErrors = Record<string, string>;
+
 export default function ContactPageClient() {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -35,8 +38,8 @@ export default function ContactPageClient() {
     privacyAccepted: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error" | "flagged">("idle");
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const contactInfo = [
     {
@@ -113,7 +116,7 @@ export default function ContactPageClient() {
   ];
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+    const newErrors: FormErrors = {};
 
     if (!formData.firstName.trim()) {
       newErrors.firstName = "First name is required";
@@ -147,12 +150,10 @@ export default function ContactPageClient() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
     setSubmitStatus("idle");
@@ -201,7 +202,7 @@ export default function ContactPageClient() {
     }
   };
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: keyof typeof formData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
@@ -281,7 +282,7 @@ export default function ContactPageClient() {
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                   {socialLinks.map(({ name, href, color }) => {
-                    const Icon = platformIcons[name];
+                    const Icon = platformIcons[name as keyof typeof platformIcons];
                     if (!Icon) return null;
                     return (
                       <Button
@@ -458,7 +459,7 @@ export default function ContactPageClient() {
                       id="privacy"
                       className="mt-0.5"
                       checked={formData.privacyAccepted}
-                      onCheckedChange={(checked) => handleInputChange("privacyAccepted", !!checked)}
+                      onCheckedChange={(checked: boolean) => handleInputChange("privacyAccepted", !!checked)}
                       aria-invalid={!!errors.privacyAccepted}
                       aria-describedby={errors.privacyAccepted ? "privacy-error" : undefined}
                     />

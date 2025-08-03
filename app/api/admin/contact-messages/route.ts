@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
   }
 
   const searchParams = req.nextUrl.searchParams;
-  const page = Math.max(parseInt(searchParams.get("page") || "1", 10), 1);
-  const limit = Math.max(parseInt(searchParams.get("limit") || "20", 10), 1);
+  const page = Math.max(Number(searchParams.get("page") || 1), 1);
+  const limit = Math.max(Number(searchParams.get("limit") || 20), 1);
   const search = (searchParams.get("search") || "").toLowerCase();
 
   try {
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
     }
 
     let messages: ContactMessage[] = snap.docs.map((d) => {
-      const data = d.data() as any;
+      const data = d.data() as Record<string, any>;
       return {
         id: d.id,
         firstName: data.firstName || (data.name?.split(" ")[0] ?? "Unknown"),
@@ -65,13 +65,14 @@ export async function GET(req: NextRequest) {
       };
     });
 
+    // Filter by search if provided
     if (search) {
       messages = messages.filter((m) => {
         const fullName = `${m.firstName} ${m.lastName}`.toLowerCase();
         return (
           fullName.includes(search) ||
-          m.email.toLowerCase().includes(search) ||
-          m.subject.toLowerCase().includes(search)
+          m.email?.toLowerCase().includes(search) ||
+          m.subject?.toLowerCase().includes(search)
         );
       });
     }
@@ -98,21 +99,28 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const { id, status } = await req.json();
+    const { id, status } = await req.json() as { id?: string, status?: ContactMessage["status"] };
     if (!id || !status) {
       return NextResponse.json({ error: "Missing id or status" }, { status: 400 });
     }
 
     // Update both collections (for legacy support)
+    let updated = false;
     try {
       await adminDb.collection("contactMessages").doc(String(id)).set({ status }, { merge: true });
+      updated = true;
     } catch (e) {
       console.warn("[ADMIN_CONTACT_MESSAGES_PUT] Failed to update contactMessages", e);
     }
     try {
       await adminDb.collection("contact_messages").doc(String(id)).set({ status }, { merge: true });
+      updated = true;
     } catch (e) {
       console.warn("[ADMIN_CONTACT_MESSAGES_PUT] Failed to update contact_messages (legacy)", e);
+    }
+
+    if (!updated) {
+      return NextResponse.json({ error: "Update failed" }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

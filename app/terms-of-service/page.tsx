@@ -1,4 +1,4 @@
-import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
+import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 

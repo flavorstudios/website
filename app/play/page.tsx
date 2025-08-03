@@ -2,7 +2,7 @@
 
 import { StructuredData } from "@/components/StructuredData";
 import { SITE_NAME, SITE_URL, SITE_LOGO_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
-import { getCanonicalUrl, getMetadata, getSchema } from "@/lib/seo-utils"; // Using the consolidated seo-utils import
+import { getMetadata, getSchema } from "@/lib/seo-utils"; // Using the consolidated seo-utils import
 import PlayPageClient from "./PlayPageClient"; // PlayPageClient no longer expects a prop
 
 // --- Sample Games Data ---

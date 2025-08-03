@@ -4,22 +4,23 @@ import { adminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 import nodemailer from "nodemailer";
 
+type ReplyPayload = {
+  messageId?: string;
+  to?: string;
+  from?: string;
+  subject?: string;
+  message?: string;
+};
+
 export async function POST(req: NextRequest) {
   if (!(await requireAdmin(req, "canHandleContacts"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let payload: {
-    messageId?: string;
-    to?: string;
-    from?: string;
-    subject?: string;
-    message?: string;
-  };
-
+  let payload: ReplyPayload;
   try {
     payload = await req.json();
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 

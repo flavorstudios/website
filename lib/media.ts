@@ -163,7 +163,6 @@ export async function cropMedia(
     .toBuffer();
   const variantFile = bucket.file(`media/${id}/${variantName}`);
   await variantFile.save(outBuffer, { contentType: data.mime });
-  const variantUrl = `https://storage.googleapis.com/${bucket.name}/media/${id}/${variantName}`;
   const variant: MediaVariant = {
     id: genId(),
     path: `media/${id}/${variantName}`,

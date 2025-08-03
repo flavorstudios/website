@@ -28,9 +28,6 @@ export type Comment = {
   [key: string]: unknown; // Firestore data extension
 };
 
-// Utility: Type for Firestore comment doc (wider than our Comment, but type-safe)
-type FirestoreCommentDoc = Omit<Comment, "id"> & { id?: string };
-
 // --- COMMENT STORE LOGIC ---
 export const commentStore = {
   // Fetch all comments (across all posts), flattened list
@@ -39,7 +36,7 @@ export const commentStore = {
       const snap = await adminDb.collectionGroup("entries").get();
       return snap.docs.map(doc => ({
         id: doc.id,
-        ...(doc.data() as Omit<Comment, "id">), // << Fix: exclude id from spread
+        ...(doc.data() as Omit<Comment, "id">),
       }));
     } catch (error) {
       console.error("Failed to fetch comments:", error);
@@ -60,7 +57,7 @@ export const commentStore = {
         .get();
       return snap.docs.map(doc => ({
         id: doc.id,
-        ...(doc.data() as Omit<Comment, "id">), // << Fix: exclude id from spread
+        ...(doc.data() as Omit<Comment, "id">),
       }));
     } catch (error) {
       console.error(`Failed to fetch comments for post ${postId}:`, error);
@@ -99,7 +96,7 @@ export const commentStore = {
       throw new Error("Comment moderation failed");
     }
 
-    // --- Type the moderation response instead of 'any'
+    // --- Type the moderation response
     const attr = (moderation as {
       attributeScores?: Record<
         "TOXICITY" | "INSULT" | "THREAT",
@@ -159,7 +156,7 @@ export const commentStore = {
       await ref.update({ status });
       const doc = await ref.get();
       if (!doc.exists) return null;
-      return { id: doc.id, ...(doc.data() as Omit<Comment, "id">) }; // << Fix: exclude id from spread
+      return { id: doc.id, ...(doc.data() as Omit<Comment, "id">) };
     } catch (error) {
       console.error(`Failed to update status for comment ${commentId}:`, error);
       throw new Error("Failed to update comment status");

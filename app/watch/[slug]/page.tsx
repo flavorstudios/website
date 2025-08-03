@@ -1,6 +1,6 @@
 // app/watch/[slug]/page.tsx
 
-import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
+import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
@@ -104,13 +104,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         description: fallbackDescription,
         images: [fallbackImage],
       },
-      // alternates: {
-      //   canonical: getCanonicalUrl(`/watch/${params.slug}`),
-      // },
     });
   }
 
-  const canonicalUrl = getCanonicalUrl(`/watch/${video.slug}`);
+  const canonicalUrl = `${SITE_URL}/watch/${video.slug}`;
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
   const seoTitle = `${video.title} – Watch | ${SITE_NAME}`;
   const seoDescription =
@@ -139,9 +136,6 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       description: seoDescription,
       images: [thumbnailUrl],
     },
-    // alternates: {
-    //   canonical: canonicalUrl,
-    // },
   });
 }
 
@@ -153,7 +147,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
     notFound();
   }
 
-  const canonicalUrl = getCanonicalUrl(`/watch/${video.slug}`);
+  const canonicalUrl = `${SITE_URL}/watch/${video.slug}`;
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
   const embedUrl = `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`;
   const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtubeId}`;
@@ -163,7 +157,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
   const schema = getSchema({
     type: "VideoObject",
     path: `/watch/${video.slug}`,
-    title: video.title, // <- CHANGED from name: to title:
+    title: video.title,
     description: video.description || "No description available.",
     thumbnailUrl: [thumbnailUrl],
     uploadDate: video.publishedAt,

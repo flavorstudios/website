@@ -1,23 +1,28 @@
-import * as functions from "firebase-functions";
-import type { Request, Response } from "express";
+import { onRequest } from "firebase-functions/v2/https";
 import { db } from "../config";
+import { FieldValue } from "firebase-admin/firestore";
 import nodemailer from "nodemailer";
 
-const config = functions.config();
-const PERSPECTIVE_API_KEY = config.perspective.key as string;
+// Config variables (Firebase environment)
+const config = process.env.FUNCTIONS_EMULATOR
+  ? require("firebase-functions").config()
+  : (global as any).firebaseConfig || {};
+const PERSPECTIVE_API_KEY = config.perspective?.key as string;
 const THRESHOLD = 0.7;
 const notifyEnabled = config.notify?.new_submission === "true";
 const adminEmailsEnv = config.admin?.emails;
 
+// Nodemailer transporter
 const transporter = nodemailer.createTransport({
-  host: config.smtp.host,
-  port: Number(config.smtp.port || 587),
-  secure: config.smtp.secure === "true",
-  auth: config.smtp.user
+  host: config.smtp?.host,
+  port: Number(config.smtp?.port || 587),
+  secure: config.smtp?.secure === "true",
+  auth: config.smtp?.user
     ? { user: config.smtp.user, pass: config.smtp.pass }
     : undefined,
 });
 
+// Perspective API moderation
 async function moderateText(text: string) {
   try {
     const res = await fetch(
@@ -45,8 +50,10 @@ async function moderateText(text: string) {
   }
 }
 
-export const submitContact = functions.https.onRequest(
-  async (req: Request, res: Response) => {
+// The main contact endpoint
+export const submitContact = onRequest(
+  { cors: true }, // Enable CORS on the function!
+  async (req, res) => {
     if (req.method !== "POST") {
       res.status(405).end();
       return;
@@ -74,7 +81,7 @@ export const submitContact = functions.https.onRequest(
         email,
         subject,
         message,
-        createdAt: new Date().toISOString(),
+        createdAt: FieldValue.serverTimestamp(),
         flagged,
         scores: scores || null,
       });
@@ -87,7 +94,7 @@ export const submitContact = functions.https.onRequest(
           .join(",");
         try {
           await transporter.sendMail({
-            from: config.smtp.user,
+            from: config.smtp?.user,
             to: recipients,
             subject: `New contact submission: ${subject}`,
             text: `${firstName} ${lastName} <${email}> wrote:\n\n${message}`,

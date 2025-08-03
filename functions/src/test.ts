@@ -1,9 +1,10 @@
-import * as functions from "firebase-functions";
-import type { Request, Response } from "express";
+import { onRequest } from "firebase-functions/v2/https";
 
-// Minimal hello world for Cloud Functions
-export const helloTest = functions.https.onRequest(
-  async (req: Request, res: Response) => {
+export const helloTest = onRequest(
+  {
+    cors: true // Allow all origins, for dev/testing
+  },
+  async (req, res) => {
     res.json({ status: "OK", msg: "Hello from test!" });
   }
 );

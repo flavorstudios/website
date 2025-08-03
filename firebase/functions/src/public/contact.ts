@@ -20,6 +20,7 @@ const transporter = nodemailer.createTransport({
     : undefined,
 });
 
+// Perspective API moderation
 async function moderateText(text: string) {
   try {
     const res = await fetch(
@@ -47,6 +48,7 @@ async function moderateText(text: string) {
   }
 }
 
+// Firebase HTTPS Function for Contact Form
 export const submitContact = functions
   .region("us-central1")
   .https.onRequest(async (req, res) => {

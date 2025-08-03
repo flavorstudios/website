@@ -1,32 +1,16 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
 import { setGlobalOptions } from "firebase-functions";
-// import { onRequest } from "firebase-functions/https";
-// import * as logger from "firebase-functions/logger";
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
-
+// Set global function options (e.g. max concurrent instances)
 setGlobalOptions({ maxInstances: 10 });
 
-// Export your functions from submodules here, e.g.:
+// Export public API endpoints
 export * from "./public/contact";
-export * from "./public/blogs";
-// export * from "./public/videos";
-// export * from "./admin/auth";
-// ...add more exports as you migrate endpoints
+export * from "./public/blogs";      // ✅ Enable blogs endpoint! (now plural)
 
-// Health check function for debugging:
+// Export test endpoint (for health check or debugging)
 export * from "./test";
 
-// If you want to keep the example function, uncomment and update:
-// export const helloWorld = onRequest((request, response) => {
-//   response.send("Hello from Firebase!");
-// });
+// Add more exports as you migrate new features:
+// export * from "./public/other-endpoint";
+// export * from "./admin/auth";
+// ...etc.

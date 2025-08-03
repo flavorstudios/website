@@ -7,6 +7,10 @@ export const SITE_NAME = "Flavor Studios";
 export const SITE_URL = "https://flavorstudios.in";
 export const SITE_BRAND = SITE_NAME;
 
+// ✅ Centralized site description for all SEO/meta/schema
+export const SITE_DESCRIPTION =
+  "Flavor Studios brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.";
+
 // Email constants
 export const SUPPORT_EMAIL = "contact@flavorstudios.in";
 // REMOVE ADMIN_EMAIL export! Use process.env.ADMIN_EMAIL everywhere in secure code

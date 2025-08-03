@@ -22,17 +22,18 @@ import {
   SITE_URL,
   SITE_LOGO_URL,
   SITE_BRAND_TWITTER,
+  SITE_DESCRIPTION, // ✅ Import SITE_DESCRIPTION
 } from "@/lib/constants";
 
 // --- SEO Default Metadata (App Router global metadata) ---
 const baseMetadata = getMetadata({
   title: SITE_NAME,
-  description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+  description: SITE_DESCRIPTION, // ✅ Use constant only
   path: "/",
   robots: "index,follow",
   openGraph: {
     title: SITE_NAME,
-    description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+    description: SITE_DESCRIPTION, // ✅ Use constant only
     type: "website",
     images: [{ url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }],
     appId: "1404440770881914",
@@ -42,7 +43,7 @@ const baseMetadata = getMetadata({
     site: SITE_BRAND_TWITTER,
     creator: SITE_BRAND_TWITTER,
     title: SITE_NAME,
-    description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+    description: SITE_DESCRIPTION, // ✅ Use constant only
     images: [`${SITE_URL}/cover.jpg`],
   },
 });
@@ -67,7 +68,7 @@ const orgSchema = getSchema({
   type: "Organization",
   path: "/",
   title: SITE_NAME,
-  description: `${SITE_NAME} brings you the latest anime news, exclusive updates, and original animated stories crafted with heart. Stay inspired with our creator-driven platform.`,
+  description: SITE_DESCRIPTION, // ✅ Use constant only
   image: SITE_LOGO_URL,
   sameAs: [
     "https://www.youtube.com/@flavorstudios",
@@ -127,7 +128,7 @@ function mapCategoryDataToCategory(
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const h = await headers();
+  const h = headers(); // ✅ await removed, headers() is synchronous now
   const pathname =
     h.get("next-url") ||
     h.get("x-invoke-path") ||

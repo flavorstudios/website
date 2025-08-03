@@ -1,9 +1,24 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
+import { adminDb } from "@/lib/firebase-admin"
+import { AggregateField } from "firebase-admin/firestore"
 
-// This API returns dashboard analytics stats for authorized admins only.
+// Type for the stats response
+type Stats = {
+  totalPosts: number
+  totalVideos: number
+  totalComments: number
+  totalViews: number
+  pendingComments: number
+  publishedPosts: number
+  featuredVideos: number
+  monthlyGrowth: number
+}
+
+// Short-lived cache (60s) to avoid expensive repeat queries
+let statsCache: { data: Stats; expires: number } | null = null
+
 export async function GET(request: NextRequest) {
-  // Use the new helper for session info (audit-ready)
   const sessionInfo = await getSessionInfo(request)
 
   if (process.env.DEBUG_ADMIN === "true") {
@@ -26,7 +41,6 @@ export async function GET(request: NextRequest) {
         uid: sessionInfo?.uid,
       })
     }
-    // 401 includes computed role, email, and uid for diagnostics
     return NextResponse.json(
       {
         error: "Unauthorized",
@@ -39,17 +53,51 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // TODO: Replace placeholder zeros with actual Firestore queries
-    const stats = {
-      totalPosts: 0,         // Real: await adminDb.collection("blogs").count()
-      totalVideos: 0,        // Real: await adminDb.collection("videos").count()
-      totalComments: 0,      // Real: await adminDb.collection("comments").count()
-      totalViews: 0,         // Real: await analyticsDb.collection("views").sum("count")
-      pendingComments: 0,    // Real: await adminDb.collection("comments").where("approved", "==", false).count()
-      publishedPosts: 0,     // Real: await adminDb.collection("blogs").where("status", "==", "published").count()
-      featuredVideos: 0,     // Real: await adminDb.collection("videos").where("featured", "==", true).count()
-      monthlyGrowth: 0,      // Real: calculate based on current/prior month
+    if (!adminDb) throw new Error("Firestore not initialized")
+
+    // Serve from cache if available (TTL: 60s)
+    const now = Date.now()
+    if (statsCache && statsCache.expires > now) {
+      if (process.env.DEBUG_ADMIN === "true") {
+        console.log("[admin-stats] Returning cached stats:", statsCache.data)
+      }
+      return NextResponse.json(statsCache.data, { status: 200 })
     }
+
+    // Fetch Firestore stats in parallel
+    const [
+      totalPostsSnap,
+      totalVideosSnap,
+      totalCommentsSnap,
+      blogViewsSnap,
+      videoViewsSnap,
+      pendingCommentsSnap,
+      publishedPostsSnap,
+      featuredVideosSnap,
+    ] = await Promise.all([
+      adminDb.collection("blogs").count().get(),
+      adminDb.collection("videos").count().get(),
+      adminDb.collection("comments").count().get(),
+      adminDb.collection("blogs").aggregate({ views: AggregateField.sum("views") }).get(),
+      adminDb.collection("videos").aggregate({ views: AggregateField.sum("views") }).get(),
+      adminDb.collection("comments").where("approved", "==", false).count().get(),
+      adminDb.collection("blogs").where("status", "==", "published").count().get(),
+      adminDb.collection("videos").where("featured", "==", true).count().get(),
+    ])
+
+    const stats: Stats = {
+      totalPosts: totalPostsSnap.data().count,
+      totalVideos: totalVideosSnap.data().count,
+      totalComments: totalCommentsSnap.data().count,
+      totalViews: (blogViewsSnap.data().views || 0) + (videoViewsSnap.data().views || 0),
+      pendingComments: pendingCommentsSnap.data().count,
+      publishedPosts: publishedPostsSnap.data().count,
+      featuredVideos: featuredVideosSnap.data().count,
+      monthlyGrowth: 0, // TODO: Implement monthly growth if needed
+    }
+
+    // Update cache
+    statsCache = { data: stats, expires: now + 60_000 }
 
     if (process.env.DEBUG_ADMIN === "true") {
       console.log("[admin-stats] Returning stats:", stats)

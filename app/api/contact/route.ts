@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 import nodemailer from "nodemailer";
+import { z } from "zod";
 
 const PERSPECTIVE_API_KEY = process.env.PERSPECTIVE_API_KEY!;
 const THRESHOLD = 0.7;
@@ -18,6 +19,15 @@ const transporter = nodemailer.createTransport({
         pass: process.env.SMTP_PASS,
       }
     : undefined,
+});
+
+// ✅ Zod schema for validation
+const contactSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email"),
+  subject: z.string().min(1, "Subject is required"),
+  message: z.string().min(1, "Message is required"),
 });
 
 async function moderateText(text: string) {
@@ -49,11 +59,17 @@ async function moderateText(text: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { firstName, lastName, email, subject, message } = await request.json();
-
-    if (!firstName || !lastName || !email || !subject || !message) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    // Validate input using zod
+    const body = await request.json();
+    const parsed = contactSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid request", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
+
+    const { firstName, lastName, email, subject, message } = parsed.data;
 
     const scores = await moderateText(message);
     const flagged = scores

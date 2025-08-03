@@ -2,6 +2,42 @@ import { NextRequest, NextResponse } from "next/server"
 import { commentStore } from "@/lib/comment-store"
 import type { Comment } from "@/lib/comment-store" // Now Comment is exported!
 
+// --- In-memory per-IP rate limiter (safe for single server, dev, Vercel Hobby) ---
+type RateInfo = { count: number; lastAttempt: number }
+const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
+const MAX_COMMENTS = 5
+const rateMap: Map<string, RateInfo> =
+  (globalThis as any).__commentRateMap ||
+  ((globalThis as any).__commentRateMap = new Map())
+
+function recordAttempt(ip: string) {
+  const now = Date.now()
+  const info = rateMap.get(ip)
+  if (!info || now - info.lastAttempt > RATE_LIMIT_WINDOW) {
+    rateMap.set(ip, { count: 1, lastAttempt: now })
+  } else {
+    info.count += 1
+    info.lastAttempt = now
+    rateMap.set(ip, info)
+  }
+}
+
+function isRateLimited(ip: string): boolean {
+  const info = rateMap.get(ip)
+  if (!info) return false
+  if (Date.now() - info.lastAttempt > RATE_LIMIT_WINDOW) {
+    rateMap.delete(ip)
+    return false
+  }
+  return info.count > MAX_COMMENTS
+}
+
+function getRequestIp(request: NextRequest): string {
+  const xfwd = request.headers.get("x-forwarded-for")
+  if (xfwd) return xfwd.split(",")[0].trim()
+  return "unknown"
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -41,7 +77,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // TODO: Implement rate limiting or spam protection
+    // --- Rate limiting before comment creation ---
+    const ip = getRequestIp(request)
+    if (isRateLimited(ip)) {
+      console.warn(`[Comments API] Rate limit exceeded for IP: ${ip}`)
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+    }
+    recordAttempt(ip)
+
     const comment = await commentStore.create({
       postId,
       postType,

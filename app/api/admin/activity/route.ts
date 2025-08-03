@@ -1,20 +1,28 @@
-import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
-import { NextRequest, NextResponse } from "next/server"
+import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
+import { adminDb } from "@/lib/firebase-admin";
+import { NextRequest, NextResponse } from "next/server";
 
 // GET /api/admin/activity - Only for authorized admins
 export async function GET(req: NextRequest) {
   // Use the improved getSessionInfo helper
-  const sessionInfo = await getSessionInfo(req)
+  const sessionInfo = await getSessionInfo(req);
 
   if (process.env.DEBUG_ADMIN === "true") {
-    console.log("[admin-activity] Incoming request at", new Date().toISOString())
-    console.log("[admin-activity] sessionInfo:", sessionInfo)
+    console.log("[admin-activity] Incoming request at", new Date().toISOString());
+    console.log("[admin-activity] sessionInfo:", sessionInfo);
   }
 
-  const hasAccess = await requireAdmin(req, "canViewAnalytics")
+  const hasAccess = await requireAdmin(req, "canViewAnalytics");
 
   if (process.env.DEBUG_ADMIN === "true") {
-    console.log("[admin-activity] hasAccess:", hasAccess, "| role:", sessionInfo?.role, "| email:", sessionInfo?.email)
+    console.log(
+      "[admin-activity] hasAccess:",
+      hasAccess,
+      "| role:",
+      sessionInfo?.role,
+      "| email:",
+      sessionInfo?.email
+    );
   }
 
   if (!hasAccess) {
@@ -24,7 +32,7 @@ export async function GET(req: NextRequest) {
         role: sessionInfo?.role,
         email: sessionInfo?.email,
         uid: sessionInfo?.uid,
-      })
+      });
     }
     // Include the computed role, email, and uid in the error response for debugging
     return NextResponse.json(
@@ -35,20 +43,43 @@ export async function GET(req: NextRequest) {
         uid: sessionInfo?.uid || "unknown",
       },
       { status: 401 }
-    )
+    );
   }
   try {
-    // TODO: Replace with real Firestore query for activity log
+    // 🔥 Real Firestore query for activity log, most recent first
+    const snap = await adminDb
+      .collection("activityLog")
+      .orderBy("timestamp", "desc")
+      .get();
+
+    const activities = snap.docs.map((doc) => {
+      const data = doc.data() as {
+        action?: string;
+        user?: string;
+        timestamp?: { toDate(): Date } | string;
+      };
+      return {
+        id: doc.id,
+        action: data.action || "",
+        user: data.user || "",
+        timestamp:
+          typeof data.timestamp === "string"
+            ? data.timestamp
+            : data.timestamp?.toDate().toISOString(),
+      };
+    });
+
     const payload = {
-      activities: [], // Placeholder, replace with fetched activities
+      activities,
       success: true,
-    }
+    };
+
     if (process.env.DEBUG_ADMIN === "true") {
-      console.log("[admin-activity] Returning payload:", payload)
+      console.log("[admin-activity] Returning payload:", payload);
     }
-    return NextResponse.json(payload, { status: 200 })
+    return NextResponse.json(payload, { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch activity:", error)
-    return NextResponse.json({ error: "Failed to fetch activity" }, { status: 500 })
+    console.error("Failed to fetch activity:", error);
+    return NextResponse.json({ error: "Failed to fetch activity" }, { status: 500 });
   }
 }

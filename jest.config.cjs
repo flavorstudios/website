@@ -10,6 +10,8 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
+  // 🟩 Codex update: Ignore serverless/functions code during tests!
+  testPathIgnorePatterns: ['<rootDir>/functions/'],
 }
 
 module.exports = createJestConfig(customJestConfig)

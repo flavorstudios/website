@@ -20,7 +20,7 @@ import {
   Youtube,
 } from "lucide-react";
 import Link from "next/link";
-import { SocialIcons } from "@/components/social-icons"; // ⬅️ NEW: Import SocialIcons
+import SocialIcons from "@/components/SocialIcons"; // ⬅️ Corrected import
 
 // === SEO METADATA (using centralized handler) ===
 export const metadata = getMetadata({

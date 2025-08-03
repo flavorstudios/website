@@ -1,15 +1,15 @@
-import Link from "next/link"
-import { SocialIcons } from "@/components/social-icons"
+import Link from "next/link";
+import SocialIcons from "@/components/SocialIcons";
 
 export function Footer() {
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
 
   const companyLinks = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Career", href: "/career" },
     { name: "Contact", href: "/contact" },
-  ]
+  ];
 
   const discoverLinks = [
     { name: "Blog", href: "/blog" },
@@ -17,7 +17,7 @@ export function Footer() {
     { name: "Play", href: "/play" },
     { name: "FAQ", href: "/faq" },
     { name: "Support", href: "/support" },
-  ]
+  ];
 
   const legalLinks = [
     { name: "Privacy Policy", href: "/privacy-policy" },
@@ -26,7 +26,7 @@ export function Footer() {
     { name: "Cookie Policy", href: "/cookie-policy" },
     { name: "Disclaimer", href: "/disclaimer" },
     { name: "Media Usage Policy", href: "/media-usage-policy" },
-  ]
+  ];
 
   return (
     <footer className="bg-black text-white">
@@ -52,7 +52,10 @@ export function Footer() {
             <ul className="space-y-3">
               {companyLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-white hover:text-gray-400 transition-colors text-sm">
+                  <Link
+                    href={link.href}
+                    className="text-white hover:text-gray-400 transition-colors text-sm"
+                  >
                     {link.name}
                   </Link>
                 </li>
@@ -66,7 +69,10 @@ export function Footer() {
             <ul className="space-y-3">
               {discoverLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-white hover:text-gray-400 transition-colors text-sm">
+                  <Link
+                    href={link.href}
+                    className="text-white hover:text-gray-400 transition-colors text-sm"
+                  >
                     {link.name}
                   </Link>
                 </li>
@@ -80,7 +86,10 @@ export function Footer() {
             <ul className="space-y-3">
               {legalLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-white hover:text-gray-400 transition-colors text-sm">
+                  <Link
+                    href={link.href}
+                    className="text-white hover:text-gray-400 transition-colors text-sm"
+                  >
                     {link.name}
                   </Link>
                 </li>
@@ -95,5 +104,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

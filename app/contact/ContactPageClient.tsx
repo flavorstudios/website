@@ -23,7 +23,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { platformIcons } from "@/components/platformIcons"; // <-- Centralized platform icons
+import { platformIcons } from "@/lib/platform-icons"; // <-- Canonical, centralized import
 
 type SubmitStatus = "idle" | "success" | "error" | "flagged";
 type FormErrors = Record<string, string>;
@@ -292,7 +292,7 @@ export default function ContactPageClient() {
                         className="justify-start h-9 sm:h-10 text-xs sm:text-sm"
                       >
                         <Link href={href} target="_blank" rel="noopener noreferrer" aria-label={name}>
-                          <Icon className={`mr-2 h-4 w-4 sm:h-5 sm:w-5 ${color}`} />
+                          <Icon className={`mr-2 h-4 w-4 sm:h-5 sm:w-5 ${color}`} aria-hidden="true" />
                           {name}
                         </Link>
                       </Button>

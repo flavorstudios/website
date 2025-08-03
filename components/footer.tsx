@@ -1,23 +1,9 @@
 import Link from "next/link"
-
-import { Youtube, Facebook, Instagram, Twitter, MessageCircle, Send, Users } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { SocialIcons } from "@/components/social-icons"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
 
-  const socialLinks = [
-    { name: "YouTube", href: "https://www.youtube.com/@flavorstudios", icon: Youtube },
-    { name: "Facebook", href: "https://www.facebook.com/flavourstudios", icon: Facebook },
-    { name: "Instagram", href: "https://www.instagram.com/flavorstudios", icon: Instagram },
-    { name: "Twitter", href: "https://twitter.com/flavor_studios", icon: Twitter },
-    { name: "Discord", href: "https://discord.com/channels/@flavorstudios", icon: MessageCircle },
-    { name: "Telegram", href: "https://t.me/flavorstudios", icon: Send },
-    { name: "Threads", href: "https://www.threads.net/@flavorstudios", icon: MessageCircle },
-    { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/", icon: Users },
-  ]
-
-  // UPDATED: Changed first link to Home, and Studio -> Company below
   const companyLinks = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
@@ -46,7 +32,7 @@ export function Footer() {
     <footer className="bg-black text-white">
       <div className="container mx-auto max-w-7xl px-4 py-10 md:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-6 md:gap-8 lg:gap-10">
-          {/* Brand Section - Takes more space */}
+          {/* Brand Section */}
           <div className="space-y-5 lg:pr-8">
             <Link href="/" className="flex items-center space-x-2">
               <span className="font-bold text-xl">Flavor Studios</span>
@@ -56,19 +42,11 @@ export function Footer() {
               creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth,
               we aim to inspire, heal, and connect audiences worldwide.
             </p>
-            <div className="flex flex-wrap gap-2 pt-2">
-              {socialLinks.map((social) => (
-                <Button key={social.name} variant="ghost" size="icon" asChild className="hover:bg-blue-600 h-8 w-8">
-                  <Link href={social.href} target="_blank" rel="noopener noreferrer">
-                    <social.icon className="h-4 w-4 text-white" />
-                    <span className="sr-only">{social.name}</span>
-                  </Link>
-                </Button>
-              ))}
-            </div>
+            {/* Use SocialIcons for all social branding */}
+            <SocialIcons className="pt-2" variant="color" />
           </div>
 
-          {/* Company Links (was Studio) */}
+          {/* Company Links */}
           <div>
             <h3 className="font-semibold text-lg mb-4 text-white">Company</h3>
             <ul className="space-y-3">

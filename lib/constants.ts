@@ -37,5 +37,7 @@ export const SOCIAL_LINKS = {
   github: "https://github.com/flavorstudios",
   reddit: "https://www.reddit.com/r/flavorstudios/",
   linkedin: "https://www.linkedin.com/company/flavorstudios",
+  bluesky: "https://bsky.app/profile/flavorstudios.in",
+  mastodon: "https://mastodon.social/@flavorstudios",
   // Add new links below as needed
 };

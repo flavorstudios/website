@@ -13,11 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Mail,
   Clock,
-  MessageCircle,
-  Youtube,
-  Facebook,
-  Instagram,
-  Twitter,
   HelpCircle,
   Send,
   CheckCircle,
@@ -28,6 +23,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { platformIcons } from "@/components/platformIcons"; // <-- Centralized platform icons
 
 export default function ContactPageClient() {
   const [formData, setFormData] = useState({
@@ -50,7 +46,7 @@ export default function ContactPageClient() {
       description: "For general inquiries and support",
     },
     {
-      icon: MessageCircle,
+      icon: Users,
       title: "Social Media",
       details: "@FlavorStudios",
       description: "DM us on any social platform",
@@ -63,15 +59,20 @@ export default function ContactPageClient() {
     },
   ];
 
+  // Centralized, platform-accurate icons (from platformIcons mapping)
   const socialLinks = [
-    { name: "YouTube", href: "https://www.youtube.com/@flavorstudios", icon: Youtube, color: "text-red-600" },
-    { name: "Facebook", href: "https://www.facebook.com/flavourstudios", icon: Facebook, color: "text-blue-700" },
-    { name: "Instagram", href: "https://www.instagram.com/flavorstudios", icon: Instagram, color: "text-pink-600" },
-    { name: "Twitter", href: "https://twitter.com/flavor_studios", icon: Twitter, color: "text-blue-600" },
-    { name: "Discord", href: "https://discord.com/channels/@flavorstudios", icon: MessageCircle, color: "text-indigo-600" },
-    { name: "Telegram", href: "https://t.me/flavorstudios", icon: Send, color: "text-blue-500" },
-    { name: "Threads", href: "https://www.threads.net/@flavorstudios", icon: MessageCircle, color: "text-gray-600" },
-    { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/", icon: Users, color: "text-orange-600" },
+    { name: "YouTube", href: "https://www.youtube.com/@flavorstudios", color: "text-red-600" },
+    { name: "Facebook", href: "https://www.facebook.com/flavourstudios", color: "text-blue-700" },
+    { name: "Instagram", href: "https://www.instagram.com/flavorstudios", color: "text-pink-600" },
+    { name: "X", href: "https://twitter.com/flavor_studios", color: "text-blue-600" },
+    { name: "Discord", href: "https://discord.gg/flavorstudios", color: "text-indigo-600" },
+    { name: "Telegram", href: "https://t.me/flavorstudios", color: "text-blue-500" },
+    { name: "Threads", href: "https://www.threads.net/@flavorstudios", color: "text-gray-600" },
+    { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/", color: "text-orange-600" },
+    { name: "WhatsApp", href: "https://wa.me/", color: "text-green-500" },
+    { name: "Mastodon", href: "https://mastodon.social/@flavorstudios", color: "text-purple-700" },
+    { name: "Bluesky", href: "https://bsky.app/profile/flavorstudios", color: "text-sky-600" },
+    { name: "GitHub", href: "https://github.com/flavorstudios", color: "text-gray-900" },
   ];
 
   const contactProcess = [
@@ -177,7 +178,6 @@ export default function ContactPageClient() {
 
       const data = await res.json();
 
-      // If flagged by Perspective API moderation, inform user
       if (data.flagged) {
         setSubmitStatus("flagged");
         setIsSubmitting(false);
@@ -280,22 +280,23 @@ export default function ContactPageClient() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                  {socialLinks.map((social) => (
-                    <Button
-                      key={social.name}
-                      variant="outline"
-                      asChild
-                      className="justify-start h-9 sm:h-10 text-xs sm:text-sm"
-                    >
-                      <Link href={social.href} target="_blank" rel="noopener noreferrer">
-                        {(() => {
-                          const Icon = social.icon;
-                          return Icon ? <Icon className={`mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 ${social.color}`} /> : null;
-                        })()}
-                        {social.name}
-                      </Link>
-                    </Button>
-                  ))}
+                  {socialLinks.map(({ name, href, color }) => {
+                    const Icon = platformIcons[name];
+                    if (!Icon) return null;
+                    return (
+                      <Button
+                        key={name}
+                        variant="outline"
+                        asChild
+                        className="justify-start h-9 sm:h-10 text-xs sm:text-sm"
+                      >
+                        <Link href={href} target="_blank" rel="noopener noreferrer" aria-label={name}>
+                          <Icon className={`mr-2 h-4 w-4 sm:h-5 sm:w-5 ${color}`} />
+                          {name}
+                        </Link>
+                      </Button>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>

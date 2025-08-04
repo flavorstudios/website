@@ -3,17 +3,29 @@ import SocialIcons, { defaultPlatforms, type SocialPlatform } from '@/components
 import { FaYoutube, FaGithub } from 'react-icons/fa6'
 
 describe('SocialIcons', () => {
-  it('renders all default platforms as links with correct unique aria-labels', () => {
+  it('renders all default platforms as links with correct unique aria-labels and focus styles', () => {
     render(<SocialIcons />)
     const links = screen.getAllByRole('link')
     expect(links).toHaveLength(defaultPlatforms.length)
 
-    // Ensure no duplicate labels and all are present
+    // Ensure no duplicate labels and all are present; also check focus styles and color
     const seenLabels = new Set<string>()
-    defaultPlatforms.forEach(({ label }) => {
-      expect(screen.getByLabelText(label)).toBeInTheDocument()
+    defaultPlatforms.forEach(({ label, color }) => {
+      const anchor = screen.getByLabelText(label)
+      expect(anchor).toBeInTheDocument()
       expect(seenLabels.has(label)).toBe(false)
       seenLabels.add(label)
+      // Always expect text-white (as fallback/base)
+      expect(anchor).toHaveClass('text-white')
+      // If color is set and not text-white, expect it as a class
+      if (color && color !== 'text-white') {
+        expect(anchor).toHaveClass(color)
+      }
+      // Focus/keyboard accessibility classes
+      expect(anchor).toHaveClass('focus:outline-none')
+      expect(anchor).toHaveClass('focus:ring-2')
+      expect(anchor).toHaveClass('focus:ring-blue-400')
+      expect(anchor).toHaveClass('rounded-full')
     })
   })
 
@@ -57,7 +69,7 @@ describe('SocialIcons', () => {
     const monoSvgs = monoContainer.querySelectorAll('svg')
     monoSvgs.forEach((svg, idx) => {
       const color = defaultPlatforms[idx]?.color
-      if (color) {
+      if (color && color !== 'text-white') {
         if (color.startsWith("#")) {
           expect(svg.hasAttribute('color')).toBe(false)
         } else {

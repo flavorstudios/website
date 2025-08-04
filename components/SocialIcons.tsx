@@ -130,13 +130,17 @@ export function SocialIcons({
           aria-label={label}
           target="_blank"
           rel="noopener noreferrer"
-          className="focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full"
+          // Only apply the color class if not 'text-white', always fallback to 'text-white'
+          className={cn(
+            "focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full",
+            color && color !== "text-white" ? color : "text-white"
+          )}
         >
           <Icon
             size={size}
-            // Tailwind color (preferred) or fallback to HEX if provided and not a class
-            className={variant === "color" ? (color.startsWith("#") ? "" : color) : ""}
-            color={variant === "color" && color.startsWith("#") ? color : undefined}
+            // Only set Tailwind class if color variant and color is not a hex
+            className={variant === "color" && color && !color.startsWith("#") && color !== "text-white" ? color : ""}
+            color={variant === "color" && color && color.startsWith("#") ? color : undefined}
             aria-hidden="true"
           />
           <span className="sr-only">{label}</span>

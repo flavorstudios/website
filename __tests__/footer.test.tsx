@@ -21,8 +21,8 @@ describe('Footer', () => {
       expect(anchor).toBeInTheDocument()
       // Always expect text-white (as the fallback class)
       expect(anchor).toHaveClass('text-white')
-      // If color is set, expect that class too (color variant is default in Footer)
-      if (color) {
+      // Only expect custom color if not 'text-white'
+      if (color && color !== 'text-white') {
         expect(anchor).toHaveClass(color)
       }
       // Ensure focus accessibility classes are present
@@ -38,8 +38,8 @@ describe('Footer', () => {
     defaultPlatforms.forEach(({ label, color }) => {
       const anchor = screen.getByLabelText(label)
       expect(anchor).toBeInTheDocument()
-      // Monochrome variant should NOT have the specific color class
-      if (color) {
+      // Monochrome variant should NOT have the specific color class if not text-white
+      if (color && color !== 'text-white') {
         expect(anchor).not.toHaveClass(color)
       }
       expect(anchor).toHaveClass('text-white')

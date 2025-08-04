@@ -90,53 +90,51 @@ export function Footer() {
           </section>
 
           {/* Navigation Section */}
-          <section>
-            <nav aria-label="Footer Navigation" className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-              <div>
-                <h3 className="font-semibold text-lg mb-4 text-white">Company</h3>
-                <ul className="space-y-3">
-                  {companyLinks.map((link) => (
-                    <li key={link.name}>
-                      <Link
-                        href={link.href}
-                        className="text-white hover:text-gray-400 transition-colors text-sm"
-                      >
-                        {link.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-4 text-white">Discover</h3>
-                <ul className="space-y-3">
-                  {discoverLinks.map((link) => (
-                    <li key={link.name}>
-                      <Link
-                        href={link.href}
-                        className="text-white hover:text-gray-400 transition-colors text-sm"
-                      >
-                        {link.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-4 text-white">Legal</h3>
-                <ul className="space-y-3">
-                  {legalLinks.map((link) => (
-                    <li key={link.name}>
-                      <Link
-                        href={link.href}
-                        className="text-white hover:text-gray-400 transition-colors text-sm"
-                      >
-                        {link.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+          <section id="footer-navigation" className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            <nav aria-label="Company">
+              <h3 className="font-semibold text-lg mb-4 text-white">Company</h3>
+              <ul className="space-y-3">
+                {companyLinks.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-white hover:text-gray-400 transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <nav aria-label="Discover">
+              <h3 className="font-semibold text-lg mb-4 text-white">Discover</h3>
+              <ul className="space-y-3">
+                {discoverLinks.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-white hover:text-gray-400 transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <nav aria-label="Legal">
+              <h3 className="font-semibold text-lg mb-4 text-white">Legal</h3>
+              <ul className="space-y-3">
+                {legalLinks.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-white hover:text-gray-400 transition-colors text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </nav>
           </section>
 
@@ -147,7 +145,11 @@ export function Footer() {
               {appBadges.length > 0 && (
                 <div className="flex flex-wrap gap-4">
                   {appBadges.map((badge) => (
-                    <Link key={badge.label} href={badge.href}>
+                    <Link
+                      key={badge.label}
+                      href={badge.href}
+                      className="focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black rounded"
+                    >
                       <img
                         src={badge.imgSrc}
                         alt={badge.label}
@@ -161,7 +163,7 @@ export function Footer() {
                 <div>
                   <Link
                     href={sitemapHref}
-                    className="text-sm text-gray-400 hover:text-white"
+                    className="text-sm text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
                   >
                     Sitemap
                   </Link>

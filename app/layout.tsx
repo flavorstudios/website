@@ -184,6 +184,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* END GTM (HEAD) */}
       </head>
       <body className="antialiased">
+        {/* --- ACCESSIBILITY: Skip-link to footer navigation --- */}
+        <a
+          href="#footer-navigation"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-black text-white p-2"
+        >
+          Skip to footer navigation
+        </a>
+
         {/* GTM (NOSCRIPT) */}
         <noscript>
           <iframe

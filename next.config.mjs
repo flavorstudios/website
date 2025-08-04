@@ -29,10 +29,6 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: false },
-  i18n: {
-    locales: ['en','es','hi','fr','ar','zh','ja','de','ru','pt'],
-    defaultLocale: 'en'
-  },
   // experimental: {
   //   nodeMiddleware: true, // Codex: Enable Node middleware support (REMOVED, not needed for stable Next.js)
   // },

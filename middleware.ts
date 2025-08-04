@@ -209,11 +209,7 @@ export async function middleware(request: NextRequest) {
 // Multi-admin compatible! Supports ADMIN_EMAILS (comma-separated) and ADMIN_EMAIL (single email).
 export const config = {
   matcher: [
-    // Locale-prefixed public routes
-    "/:locale((en|es|hi|fr|ar|zh|ja|de|ru|pt))/((?!api|_next|.*\\..*).*)",
-    // Un-prefixed public routes (catch and rewrite)
     "/((?!api|_next|.*\\..*).*)",
-    // Admin and media
     "/admin/:path*",
     "/api/media/:path*",
   ],

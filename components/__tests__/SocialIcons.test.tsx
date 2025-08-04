@@ -76,4 +76,12 @@ describe('SocialIcons', () => {
       expect(svg).toHaveAttribute('height', `${size}`)
     })
   })
+
+  // OPTIONAL: Audit-proof assertion for container class
+  it('uses horizontal gap-x-2 class on container for spacing', () => {
+    const { container } = render(<SocialIcons />)
+    // The container should have gap-x-2 (horizontal spacing)
+    const wrapper = container.firstChild as HTMLElement
+    expect(wrapper.className).toMatch(/gap-x-2/)
+  })
 })

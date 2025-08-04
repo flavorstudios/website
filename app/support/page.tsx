@@ -20,7 +20,7 @@ import {
   Youtube,
 } from "lucide-react";
 import Link from "next/link";
-import SocialIcons from "@/components/SocialIcons"; // ⬅️ Corrected import
+import FollowUs from "@/components/FollowUs"; // ✅ Added centralized section
 
 // === SEO METADATA (using centralized handler) ===
 export const metadata = getMetadata({
@@ -308,11 +308,11 @@ export default function SupportPage() {
           </div>
         </section>
 
-        {/* === Social Icons Row (NEW, as per audit) === */}
-        <section className="flex justify-center py-6 sm:py-8">
-          <SocialIcons variant="color" className="gap-4" />
+        {/* === Follow Us Section (as per audit, centralized component) === */}
+        <section className="py-6 sm:py-8">
+          <FollowUs />
         </section>
-        {/* === End Social Icons Row === */}
+        {/* === End Follow Us Section === */}
 
         {/* FAQ Link - Full Width */}
         <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg">

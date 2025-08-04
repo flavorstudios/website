@@ -122,7 +122,7 @@ export function SocialIcons({
   platforms = defaultPlatforms,
 }: SocialIconsProps) {
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center gap-x-2", className)}>
       {platforms.map(({ label, href, icon: Icon, color }) => (
         <Link
           key={label}

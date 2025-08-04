@@ -14,7 +14,7 @@ describe('Footer', () => {
     jest.useRealTimers()
   })
 
-  it('renders all default social links with correct accessible labels and color classes', () => {
+  it('renders all default social links with correct accessible labels, color classes, and focus ring', () => {
     render(<Footer />)
     defaultPlatforms.forEach(({ label, color }) => {
       const anchor = screen.getByLabelText(label)
@@ -25,11 +25,15 @@ describe('Footer', () => {
       if (color) {
         expect(anchor).toHaveClass(color)
       }
+      // Ensure focus accessibility classes are present
+      expect(anchor).toHaveClass('focus:outline-none')
+      expect(anchor).toHaveClass('focus:ring-2')
+      expect(anchor).toHaveClass('focus:ring-blue-400')
+      expect(anchor).toHaveClass('rounded-full')
     })
   })
 
-  // Test SocialIcons variant="monochrome" separately (isolated responsibility)
-  it('renders SocialIcons in monochrome variant without color classes', () => {
+  it('renders SocialIcons in monochrome variant without color classes, but with correct focus ring', () => {
     render(<SocialIcons variant="monochrome" />)
     defaultPlatforms.forEach(({ label, color }) => {
       const anchor = screen.getByLabelText(label)
@@ -39,6 +43,11 @@ describe('Footer', () => {
         expect(anchor).not.toHaveClass(color)
       }
       expect(anchor).toHaveClass('text-white')
+      // Ensure focus accessibility classes are present
+      expect(anchor).toHaveClass('focus:outline-none')
+      expect(anchor).toHaveClass('focus:ring-2')
+      expect(anchor).toHaveClass('focus:ring-blue-400')
+      expect(anchor).toHaveClass('rounded-full')
     })
   })
 

@@ -1,7 +1,9 @@
-import SocialIcons, { defaultPlatforms, type SocialPlatform } from "@/components/SocialIcons"
+"use client";
+
+import SocialIcons, { defaultPlatforms, type SocialPlatform } from "@/components/SocialIcons";
 
 interface FollowUsProps {
-  platforms?: SocialPlatform[]
+  platforms?: SocialPlatform[];
 }
 
 export function FollowUs({ platforms = defaultPlatforms }: FollowUsProps) {
@@ -16,7 +18,7 @@ export function FollowUs({ platforms = defaultPlatforms }: FollowUsProps) {
         variant="color"
       />
     </section>
-  )
+  );
 }
 
-export default FollowUs
+export default FollowUs;

@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Renders a list of social media links using brand icons from `react-icons`.
  *
@@ -20,8 +22,8 @@
  * ```
  */
 
-import { cn } from "@/lib/utils"
-import type { IconType } from "react-icons"
+import { clsx } from "clsx";
+import type { IconType } from "react-icons";
 import {
   FaYoutube,
   FaInstagram,
@@ -32,17 +34,17 @@ import {
   FaMastodon,
   FaDiscord,
   FaGithub,
-} from "react-icons/fa6"
-import { SiBluesky } from "react-icons/si"
-import Link from "next/link"
+} from "react-icons/fa6";
+import { SiBluesky } from "react-icons/si";
+import Link from "next/link";
 
-export type SocialVariant = "monochrome" | "color"
+export type SocialVariant = "monochrome" | "color";
 
 export interface SocialPlatform {
-  label: string
-  href: string
-  icon: IconType
-  color: string // Tailwind class or HEX
+  label: string;
+  href: string;
+  icon: IconType;
+  color: string; // Tailwind class or HEX
 }
 
 export const defaultPlatforms: SocialPlatform[] = [
@@ -106,13 +108,13 @@ export const defaultPlatforms: SocialPlatform[] = [
     icon: FaGithub,
     color: "text-white",
   },
-]
+];
 
 export interface SocialIconsProps {
-  size?: number
-  className?: string
-  variant?: SocialVariant
-  platforms?: SocialPlatform[]
+  size?: number;
+  className?: string;
+  variant?: SocialVariant;
+  platforms?: SocialPlatform[];
 }
 
 export function SocialIcons({
@@ -122,7 +124,7 @@ export function SocialIcons({
   platforms = defaultPlatforms,
 }: SocialIconsProps) {
   return (
-    <div className={cn("flex items-center gap-x-2", className)}>
+    <div className={clsx("flex items-center gap-x-2", className)}>
       {platforms.map(({ label, href, icon: Icon, color }) => (
         <Link
           key={label}
@@ -130,16 +132,18 @@ export function SocialIcons({
           aria-label={label}
           target="_blank"
           rel="noopener noreferrer"
-          // Only apply the color class if not 'text-white', always fallback to 'text-white'
-          className={cn(
-            "focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full",
-            color && color !== "text-white" ? color : "text-white"
+          className={clsx(
+            "focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full text-white",
+            variant === "color" && color && color !== "text-white" && color
           )}
         >
           <Icon
             size={size}
-            // Only set Tailwind class if color variant and color is not a hex
-            className={variant === "color" && color && !color.startsWith("#") && color !== "text-white" ? color : ""}
+            className={
+              variant === "color" && color && !color.startsWith("#") && color !== "text-white"
+                ? color
+                : ""
+            }
             color={variant === "color" && color && color.startsWith("#") ? color : undefined}
             aria-hidden="true"
           />
@@ -147,7 +151,7 @@ export function SocialIcons({
         </Link>
       ))}
     </div>
-  )
+  );
 }
 
-export default SocialIcons
+export default SocialIcons;

@@ -1,3 +1,5 @@
+"use client"
+
 // components/footer.tsx
 
 import { useState } from "react";

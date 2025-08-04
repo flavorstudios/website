@@ -1,5 +1,3 @@
-// app/about/page.tsx
-
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
@@ -19,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import MissionStatement from "@/components/about/MissionStatement"; // <-- Import here!
 
 // --- Metadata Export for Next.js 15 App Router ---
 export const metadata = getMetadata({
@@ -178,22 +177,8 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Mission Statement */}
-        <div className="mb-8 sm:mb-12 lg:mb-16">
-          <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
-            <CardContent className="p-4 sm:p-6 lg:p-8 text-center">
-              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-3 lg:mb-4 text-blue-900">
-                Our Belief
-              </h2>
-              <p className="text-base sm:text-lg lg:text-xl text-blue-800 font-medium mb-2 sm:mb-3 lg:mb-4">
-                At Flavor Studios, we believe that every story has the power to connect, inspire, and leave a legacy.
-              </p>
-              <p className="text-sm sm:text-base lg:text-lg text-blue-700">
-                Welcome to a place where animation meets meaning.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Mission Statement (now client component with clamp/toggle) */}
+        <MissionStatement />
 
         {/* Our Journey Timeline */}
         <div className="mb-8 sm:mb-12 lg:mb-16 text-center">

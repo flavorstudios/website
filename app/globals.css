@@ -72,6 +72,14 @@
   overflow: hidden;
 }
 
+/* NEW: For toggling “More”/“Less” in footer and elsewhere */
+.line-clamp-none {
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: vertical;
+  overflow: visible;
+}
+
 /* Admin Panel Specific Styles */
 .admin-gradient {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

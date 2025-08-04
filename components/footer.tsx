@@ -1,22 +1,43 @@
-"use client"
+"use client";
 
 // components/footer.tsx
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import Cookies from "js-cookie";
 import { cn } from "@/lib/utils";
-import FollowUs from "@/components/FollowUs";
+import SocialLinks from "@/components/SocialLinks"; // <-- Updated import
 
+// Expand languages for full i18n support
 const languages = [
   { value: "en", label: "English" },
   { value: "es", label: "Español" },
+  { value: "hi", label: "हिन्दी" },
+  { value: "fr", label: "Français" },
+  { value: "ar", label: "العربية" },
+  { value: "zh", label: "中文" },
+  { value: "ja", label: "日本語" },
+  { value: "de", label: "Deutsch" },
+  { value: "ru", label: "Русский" },
+  { value: "pt", label: "Português" },
 ];
+const SUPPORTED_LOCALES = languages.map(l => l.value);
 
 const sitemapHref = "/sitemap.xml";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const [showMore, setShowMore] = useState(false);
+
+  // For language change
+  const router = useRouter();
+  const pathname = usePathname();
+  // Detect current locale from path (default 'en' if missing)
+  const currentLocale = (() => {
+    const parts = pathname.split("/");
+    return SUPPORTED_LOCALES.includes(parts[1]) ? parts[1] : "en";
+  })();
 
   const companyLinks = [
     { name: "Home", href: "/" },
@@ -59,6 +80,21 @@ export function Footer() {
       imgSrc: "https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png",
     },
   ].filter(Boolean);
+
+  // Handle language change
+  function handleLanguageChange(e) {
+    const selected = e.target.value;
+    Cookies.set("lang", selected, { expires: 365, path: "/" });
+    const parts = pathname.split("/");
+    let rest = pathname;
+    // Remove old locale from path if present
+    if (SUPPORTED_LOCALES.includes(parts[1])) {
+      rest = "/" + parts.slice(2).join("/");
+      if (rest === "/") rest = "";
+    }
+    const newPath = `/${selected}${rest}`;
+    router.push(newPath);
+  }
 
   return (
     <footer className="bg-black text-white">
@@ -142,7 +178,13 @@ export function Footer() {
 
           {/* Social + Optional Blocks Section */}
           <section className="space-y-6">
-            <FollowUs />
+            {/* Social Links */}
+            <section aria-labelledby="follow-us-heading" className="space-y-4">
+              <h3 id="follow-us-heading" className="font-semibold text-lg text-white">
+                Follow us
+              </h3>
+              <SocialLinks />
+            </section>
             <div className="space-y-4">
               {appBadges.length > 0 && (
                 <div className="flex flex-wrap gap-4">
@@ -179,12 +221,15 @@ export function Footer() {
           <p className="text-white text-xs">Built with Passion. Powered by Dreams.</p>
           {/* Single Language selector, bottom only */}
           <div>
-            <label htmlFor="language" className="sr-only">
+            <label htmlFor="language-select" className="sr-only">
               Language
             </label>
             <select
-              id="language"
+              id="language-select"
+              aria-label="Select language"
               className="bg-black border border-gray-700 rounded-md px-3 py-2 text-sm"
+              value={currentLocale}
+              onChange={handleLanguageChange}
             >
               {languages.map((lang) => (
                 <option key={lang.value} value={lang.value}>

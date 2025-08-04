@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "title": "Flavor Studios",
+    "description": "Creando historias con alma, un cuadro a la vez."
+  },
+  "layout": {
+    "skipToFooter": "Saltar a la navegación del pie de página"
+  },
+  "header": {
+    "home": "Inicio",
+    "blog": "Blog",
+    "watch": "Ver",
+    "play": "Jugar",
+    "about": "Acerca de",
+    "ourStory": "Nuestra Historia",
+    "careers": "Carreras",
+    "faq": "Preguntas Frecuentes",
+    "contact": "Contacto",
+    "buyCoffee": "Cómprame un café",
+    "ourStoryDesc": "Conoce Flavor Studios",
+    "careersDesc": "Únete a nuestro equipo creativo",
+    "faqDesc": "Preguntas frecuentes",
+    "toggleMenu": "Mostrar menú",
+    "allPosts": "Todas las publicaciones",
+    "browseAllPosts": "Explora todo nuestro contenido del blog",
+    "allVideos": "Todos los videos",
+    "browseAllVideos": "Explora toda nuestra biblioteca de videos",
+    "postsLabel": "publicaciones",
+    "videosLabel": "videos"
+  },
+  "footer": {
+    "company": "Compañía",
+    "discover": "Descubrir",
+    "legal": "Legal",
+    "home": "Inicio",
+    "about": "Acerca de",
+    "career": "Carrera",
+    "contact": "Contacto",
+    "blog": "Blog",
+    "watch": "Ver",
+    "play": "Jugar",
+    "faq": "Preguntas Frecuentes",
+    "support": "Soporte",
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfService": "Términos de Servicio",
+    "dmca": "DMCA",
+    "cookiePolicy": "Política de Cookies",
+    "disclaimer": "Descargo de responsabilidad",
+    "mediaUsagePolicy": "Política de Uso de Medios",
+    "more": "Más",
+    "less": "Menos",
+    "sitemap": "Mapa del sitio",
+    "brandDescription": "Creando historias con alma, un cuadro a la vez. Flavor Studios es un estudio de animación global dedicado a crear animaciones 3D significativas y anime original. A través de poderosas narraciones y profundidad emocional, buscamos inspirar, sanar y conectar audiencias en todo el mundo.",
+    "copyright": "© {year} Flavor Studios. Todos los derechos reservados.",
+    "tagline": "Construido con pasión. Impulsado por sueños.",
+    "language": "Idioma"
+  }
+}

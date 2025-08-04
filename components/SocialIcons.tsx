@@ -33,7 +33,9 @@ import {
   FaTelegram,
   FaMastodon,
   FaDiscord,
-  FaGithub,
+  FaLinkedin,
+  FaTumblr,
+  FaRedditAlien,
 } from "react-icons/fa6";
 import { SiBluesky } from "react-icons/si";
 import Link from "next/link";
@@ -70,13 +72,25 @@ export const defaultPlatforms: SocialPlatform[] = [
     label: "X",
     href: "https://twitter.com/flavor_studios",
     icon: FaXTwitter,
-    color: "text-white",
+    color: "text-black", // black, as X brand (use "text-white" if on dark bg)
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/flavorstudios",
+    icon: FaLinkedin,
+    color: "text-blue-700",
   },
   {
     label: "Threads",
     href: "https://www.threads.net/@flavorstudios",
     icon: FaThreads,
-    color: "text-white",
+    color: "text-black", // white/black, adjust if needed for bg
+  },
+  {
+    label: "Tumblr",
+    href: "https://flavorstudios.tumblr.com",
+    icon: FaTumblr,
+    color: "text-blue-700",
   },
   {
     label: "Bluesky",
@@ -103,10 +117,10 @@ export const defaultPlatforms: SocialPlatform[] = [
     color: "text-indigo-500",
   },
   {
-    label: "GitHub",
-    href: "https://github.com/flavorstudios",
-    icon: FaGithub,
-    color: "text-white",
+    label: "Reddit",
+    href: "https://www.reddit.com/r/flavorstudios/",
+    icon: FaRedditAlien,
+    color: "text-orange-600",
   },
 ];
 
@@ -133,7 +147,7 @@ export function SocialIcons({
           target="_blank"
           rel="noopener noreferrer"
           className={clsx(
-            "focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full text-white",
+            "focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full",
             variant === "color" && color && color !== "text-white" && color
           )}
         >

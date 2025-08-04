@@ -24,20 +24,19 @@ export const SITE_BRAND_TWITTER = "@flavor_studios";
 // Site logo (ideal for schema.org publisher/logo, PWA, favicon, etc.)
 export const SITE_LOGO_URL = `${SITE_URL}/logo.png`; // Make sure this file exists in your public/ folder
 
-// --- Official Social Media Links ---
+// --- Official Social Media Links (canonical order, no deprecated/duplicate keys) ---
 export const SOCIAL_LINKS = {
   youtube: "https://www.youtube.com/@flavorstudios",
-  facebook: "https://www.facebook.com/flavourstudios",   // Note: spelling is "flavour"
   instagram: "https://www.instagram.com/flavorstudios",
-  twitter: "https://twitter.com/flavor_studios",
-  threads: "https://www.threads.net/@flavorstudios",
-  telegram: "https://t.me/flavorstudios",
-  discord: "https://discord.gg/agSZAAeRzn", // Discord invite link (best for joining)
-  discordChannel: "https://discord.com/channels/@flavorstudios", // Direct channel/user link (optional)
-  github: "https://github.com/flavorstudios",
-  reddit: "https://www.reddit.com/r/flavorstudios/",
+  facebook: "https://www.facebook.com/flavourstudios",   // Note: spelling is "flavour"
+  x: "https://twitter.com/flavor_studios",               // X/Twitter
   linkedin: "https://www.linkedin.com/company/flavorstudios",
+  threads: "https://www.threads.net/@flavorstudios",
+  tumblr: "https://flavorstudios.tumblr.com",
   bluesky: "https://bsky.app/profile/flavorstudios.in",
+  telegram: "https://t.me/flavorstudios",
   mastodon: "https://mastodon.social/@flavorstudios",
-  // Add new links below as needed
+  discord: "https://discord.gg/agSZAAeRzn",
+  reddit: "https://www.reddit.com/r/flavorstudios/"
+  // Add new links below as needed, keeping order and no deprecated keys
 };

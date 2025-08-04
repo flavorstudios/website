@@ -1,9 +1,8 @@
 // app/watch/[slug]/page.tsx
 
-import { getMetadata, getSchema } from "@/lib/seo-utils";
+import { getMetadata, getSchema, getCanonicalUrl } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,7 @@ import {
 } from "lucide-react";
 import { formatDate } from "@/lib/date";
 import { notFound } from "next/navigation";
+import { getTranslator, locales, defaultLocale } from "@/lib/i18n";
 
 // --- Type for video object
 export interface Video {
@@ -73,18 +73,34 @@ async function getVideo(slug: string): Promise<Video | null> {
 }
 
 // === DYNAMIC METADATA ===
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string; locale?: string };
+}) {
+  const locale = params?.locale || defaultLocale;
+  const tSite = getTranslator(locale, "site");
+  const t = getTranslator(locale, "watch");
   const video = await getVideo(params.slug);
 
+  const pathWithoutLocale = `/watch/${params.slug}`;
+  const path = locale === defaultLocale ? pathWithoutLocale : `/${locale}${pathWithoutLocale}`;
+  const languageAlternates = Object.fromEntries(
+    locales.map((l) => [
+      l,
+      getCanonicalUrl(l === defaultLocale ? pathWithoutLocale : `/${l}${pathWithoutLocale}`),
+    ]),
+  );
+
   if (!video) {
-    const fallbackTitle = `Video Not Found – ${SITE_NAME}`;
-    const fallbackDescription = `Sorry, this video could not be found. Explore more inspiring anime videos at ${SITE_NAME}.`;
+    const fallbackTitle = t("notFoundTitle", { siteName: tSite("title") });
+    const fallbackDescription = t("notFoundDescription", { siteName: tSite("title") });
     const fallbackImage = `${SITE_URL}/cover.jpg`;
 
-    return getMetadata({
+    const meta = getMetadata({
       title: fallbackTitle,
       description: fallbackDescription,
-      path: `/watch/${params.slug}`,
+      path,
       robots: "noindex, follow",
       openGraph: {
         title: fallbackTitle,
@@ -94,10 +110,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
             url: fallbackImage,
             width: 1200,
             height: 630,
-            alt: `${SITE_NAME} – Not Found`,
+            alt: `${tSite("title")} – Not Found`,
           },
         ],
         type: "video.other",
+        locale,
+        alternateLocale: locales.filter((l) => l !== locale),
       },
       twitter: {
         title: fallbackTitle,
@@ -105,19 +123,24 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         images: [fallbackImage],
       },
     });
+
+    return {
+      ...meta,
+      alternates: { ...meta.alternates, languages: languageAlternates },
+    };
   }
 
   const canonicalUrl = `${SITE_URL}/watch/${video.slug}`;
   const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
-  const seoTitle = `${video.title} – Watch | ${SITE_NAME}`;
+  const seoTitle = `${video.title} – Watch | ${tSite("title")}`;
   const seoDescription =
     video.description ||
-    `Watch original anime content crafted by ${SITE_NAME} — emotionally driven storytelling, 3D animation, and passion for creative expression.`;
+    `Watch original anime content crafted by ${tSite("title")} — emotionally driven storytelling, 3D animation, and passion for creative expression.`;
 
-  return getMetadata({
+  const meta = getMetadata({
     title: seoTitle,
     description: seoDescription,
-    path: `/watch/${video.slug}`,
+    path,
     robots: "index,follow",
     openGraph: {
       title: seoTitle,
@@ -130,6 +153,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
           height: 720,
         },
       ],
+      locale,
+      alternateLocale: locales.filter((l) => l !== locale),
     },
     twitter: {
       title: seoTitle,
@@ -137,10 +162,19 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       images: [thumbnailUrl],
     },
   });
+
+  return {
+    ...meta,
+    alternates: { ...meta.alternates, languages: languageAlternates },
+  };
 }
 
 // === PAGE COMPONENT ===
-export default async function VideoPage({ params }: { params: { slug: string } }) {
+export default async function VideoPage({
+  params,
+}: {
+  params: { slug: string; locale?: string };
+}) {
   const video = await getVideo(params.slug);
 
   if (!video) {

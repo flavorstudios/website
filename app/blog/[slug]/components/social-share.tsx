@@ -4,8 +4,8 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
-  Share2, Facebook, Twitter, Linkedin, Mail, MessageCircle,
-  Copy, Check, Send // Removed Instagram, Pinterest
+  Share2, Facebook, Twitter, Linkedin, Mail, Send,
+  Copy, Check
 } from "lucide-react"
 
 interface SocialShareProps {
@@ -27,16 +27,14 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
   const encodedUrl = encodeURIComponent(url)
   const encodedTitle = encodeURIComponent(title)
   const encodedText = encodeURIComponent(excerpt)
-  const encodedImage = image ? encodeURIComponent(image) : ""
 
+  // Only OFFICIAL platforms
   const shareLinks = {
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
     twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}&via=FlavorStudios`,
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-    whatsapp: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
     telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,
     email: `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0A${encodedUrl}`,
-    pinterest: `https://pinterest.com/pin/create/button/?url=${encodedUrl}&media=${encodedImage}&description=${encodedTitle}`,
   }
 
   const handleNativeShare = async () => {
@@ -105,15 +103,6 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
           <Button
             variant="outline"
             size="sm"
-            onClick={() => handleShare("whatsapp")}
-            className="flex flex-col items-center gap-1 h-auto py-3 hover:bg-green-50 hover:border-green-200 hover:text-green-600"
-          >
-            <MessageCircle className="h-5 w-5" />
-            <span className="text-xs">WhatsApp</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
             onClick={() => handleShare("telegram")}
             className="flex flex-col items-center gap-1 h-auto py-3 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-500"
           >
@@ -129,18 +118,6 @@ export default function SocialShare({ title, excerpt, url, image }: SocialShareP
             <Mail className="h-5 w-5" />
             <span className="text-xs">Email</span>
           </Button>
-          {image && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleShare("pinterest")}
-              className="flex flex-col items-center gap-1 h-auto py-3 hover:bg-red-50 hover:border-red-200 hover:text-red-600"
-            >
-              {/* Fallback: Use Share2 icon for Pinterest */}
-              <Share2 className="h-5 w-5" />
-              <span className="text-xs">Pinterest</span>
-            </Button>
-          )}
           <Button
             variant="outline"
             size="sm"

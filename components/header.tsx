@@ -8,7 +8,8 @@ import { Menu, Coffee } from "lucide-react"
 import { MegaMenu, type MenuItem } from "./mega-menu"
 import { MobileMegaMenu } from "./mobile-mega-menu"
 import { SearchFeature } from "./ui/search-feature"
-import type { Category } from "@/types/category" // <--- Unified type
+import { useTranslations } from "@/lib/i18n"
+import type { Category } from "@/types/category"
 
 // Helper: only include "All" if it's not present in the categories
 function buildCategorySubItems(
@@ -44,40 +45,41 @@ export function Header({
   videoCategories?: Category[]
 }) {
   const [isOpen, setIsOpen] = useState(false)
+  const t = useTranslations("header")
 
-  // Use the DB slugs here so we don't get a double "All" if present
+  // Use translation keys for "All" items and descriptions
   const blogSubItems = buildCategorySubItems(
     blogCategories,
-    "All Posts",
-    "all-posts", // Use the actual slug present in your DB
+    t("allPosts"),
+    "all-posts",
     "/blog",
-    "Browse all our blog content",
-    "posts"
+    t("browseAllPosts"),
+    t("postsLabel")
   )
 
   const videoSubItems = buildCategorySubItems(
     videoCategories,
-    "All Videos",
-    "all-videos", // Use the actual slug present in your DB
+    t("allVideos"),
+    "all-videos",
     "/watch",
-    "Browse our complete video library",
-    "videos"
+    t("browseAllVideos"),
+    t("videosLabel")
   )
 
   const menuItems: MenuItem[] = [
-    { label: "Home", href: "/" },
-    { label: "Blog", href: "/blog", subItems: blogSubItems },
-    { label: "Watch", href: "/watch", subItems: videoSubItems },
-    { label: "Play", href: "/play" },
+    { label: t("home"), href: "/" },
+    { label: t("blog"), href: "/blog", subItems: blogSubItems },
+    { label: t("watch"), href: "/watch", subItems: videoSubItems },
+    { label: t("play"), href: "/play" },
     {
-      label: "About",
+      label: t("about"),
       subItems: [
-        { label: "Our Story", href: "/about", description: "Learn about Flavor Studios" },
-        { label: "Careers", href: "/career", description: "Join our creative team" },
-        { label: "FAQ", href: "/faq", description: "Frequently asked questions" },
+        { label: t("ourStory"), href: "/about", description: t("ourStoryDesc") },
+        { label: t("careers"), href: "/career", description: t("careersDesc") },
+        { label: t("faq"), href: "/faq", description: t("faqDesc") },
       ],
     },
-    { label: "Contact", href: "/contact" },
+    { label: t("contact"), href: "/contact" },
   ]
 
   return (
@@ -103,7 +105,7 @@ export function Header({
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle menu</span>
+                  <span className="sr-only">{t("toggleMenu")}</span>
                 </Button>
               </SheetTrigger>
             </div>
@@ -119,7 +121,7 @@ export function Header({
             <Button asChild className="bg-orange-600 hover:bg-orange-700">
               <Link href="/support">
                 <Coffee className="mr-2 h-4 w-4" />
-                Buy Me a Coffee
+                {t("buyCoffee")}
               </Link>
             </Button>
           </div>

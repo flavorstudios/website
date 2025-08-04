@@ -2,12 +2,13 @@ import { notFound } from "next/navigation";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
 import { blogStore, type BlogPost } from "@/lib/content-store";
 import { getMetadata, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
+import { SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE, SITE_NAME } from "@/lib/constants";
+import { getTranslator, defaultLocale } from "@/lib/i18n";
 import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
 
 interface PreviewPageProps {
-  params: { id: string };
+  params: { id: string; locale?: string };
 }
 
 async function getPost(id: string): Promise<BlogPost | null> {
@@ -19,13 +20,18 @@ async function getPost(id: string): Promise<BlogPost | null> {
   }
 }
 
+// === METADATA WITH I18N SUPPORT ===
 export async function generateMetadata({ params }: PreviewPageProps) {
+  const locale = params?.locale || defaultLocale;
+  const tSite = getTranslator(locale, "site");
+  const t = getTranslator(locale, "blog");
   const post = await getPost(params.id);
   if (!post) {
-    const title = `Post Not Found – ${SITE_NAME}`;
+    const title = t("notFoundTitle", { siteName: tSite("title") });
+    const description = t("notFoundDescription", { siteName: tSite("title") });
     return getMetadata({
       title,
-      description: "Post not found",
+      description,
       path: `/admin/preview/${params.id}`,
       robots: "noindex, nofollow",
     });
@@ -55,6 +61,7 @@ export async function generateMetadata({ params }: PreviewPageProps) {
   });
 }
 
+// === MAIN PAGE COMPONENT ===
 export default async function PreviewPage({ params }: PreviewPageProps) {
   const post = await getPost(params.id);
   if (!post) notFound();
@@ -67,7 +74,10 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
     image: post.openGraphImage || post.featuredImage || SITE_DEFAULT_IMAGE,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
-    author: { "@type": "Person", name: post.author || SITE_NAME },
+    author:
+      post.author === SITE_NAME
+        ? { "@type": "Organization", name: SITE_NAME }
+        : { "@type": "Person", name: post.author || SITE_NAME },
     headline: post.title,
   });
 

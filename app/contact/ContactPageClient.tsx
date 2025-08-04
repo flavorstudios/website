@@ -23,7 +23,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { platformIcons } from "@/lib/platform-icons"; // <-- Canonical, centralized import
+import SocialLinks from "@/components/SocialLinks"; // <-- New canonical import
 
 type SubmitStatus = "idle" | "success" | "error" | "flagged";
 type FormErrors = Record<string, string>;
@@ -60,22 +60,6 @@ export default function ContactPageClient() {
       details: "Within 24-48 hours during business days (Monday-Friday)",
       description: "We try to respond as quickly as possible",
     },
-  ];
-
-  // Centralized, platform-accurate icons (from platformIcons mapping)
-  const socialLinks = [
-    { name: "YouTube", href: "https://www.youtube.com/@flavorstudios", color: "text-red-600" },
-    { name: "Facebook", href: "https://www.facebook.com/flavourstudios", color: "text-blue-700" },
-    { name: "Instagram", href: "https://www.instagram.com/flavorstudios", color: "text-pink-600" },
-    { name: "X", href: "https://twitter.com/flavor_studios", color: "text-blue-600" },
-    { name: "Discord", href: "https://discord.gg/flavorstudios", color: "text-indigo-600" },
-    { name: "Telegram", href: "https://t.me/flavorstudios", color: "text-blue-500" },
-    { name: "Threads", href: "https://www.threads.net/@flavorstudios", color: "text-gray-600" },
-    { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/", color: "text-orange-600" },
-    { name: "WhatsApp", href: "https://wa.me/", color: "text-green-500" },
-    { name: "Mastodon", href: "https://mastodon.social/@flavorstudios", color: "text-purple-700" },
-    { name: "Bluesky", href: "https://bsky.app/profile/flavorstudios", color: "text-sky-600" },
-    { name: "GitHub", href: "https://github.com/flavorstudios", color: "text-gray-900" },
   ];
 
   const contactProcess = [
@@ -280,25 +264,7 @@ export default function ContactPageClient() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-                  {socialLinks.map(({ name, href, color }) => {
-                    const Icon = platformIcons[name as keyof typeof platformIcons];
-                    if (!Icon) return null;
-                    return (
-                      <Button
-                        key={name}
-                        variant="outline"
-                        asChild
-                        className="justify-start h-9 sm:h-10 text-xs sm:text-sm"
-                      >
-                        <Link href={href} target="_blank" rel="noopener noreferrer" aria-label={name}>
-                          <Icon className={`mr-2 h-4 w-4 sm:h-5 sm:w-5 ${color}`} aria-hidden="true" />
-                          {name}
-                        </Link>
-                      </Button>
-                    );
-                  })}
-                </div>
+                <SocialLinks showLabels />
               </CardContent>
             </Card>
           </div>

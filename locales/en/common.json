@@ -1,0 +1,58 @@
+{
+  "metadata": {
+    "title": "Flavor Studios",
+    "description": "Crafting stories with soul, one frame at a time."
+  },
+  "layout": {
+    "skipToFooter": "Skip to footer navigation"
+  },
+  "header": {
+    "home": "Home",
+    "blog": "Blog",
+    "watch": "Watch",
+    "play": "Play",
+    "about": "About",
+    "ourStory": "Our Story",
+    "careers": "Careers",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "buyCoffee": "Buy Me a Coffee",
+    "ourStoryDesc": "Learn about Flavor Studios",
+    "careersDesc": "Join our creative team",
+    "faqDesc": "Frequently asked questions",
+    "toggleMenu": "Toggle menu",
+    "allPosts": "All Posts",
+    "browseAllPosts": "Browse all our blog content",
+    "allVideos": "All Videos",
+    "browseAllVideos": "Browse our complete video library",
+    "postsLabel": "posts",
+    "videosLabel": "videos"
+  },
+  "footer": {
+    "company": "Company",
+    "discover": "Discover",
+    "legal": "Legal",
+    "home": "Home",
+    "about": "About",
+    "career": "Career",
+    "contact": "Contact",
+    "blog": "Blog",
+    "watch": "Watch",
+    "play": "Play",
+    "faq": "FAQ",
+    "support": "Support",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "dmca": "DMCA",
+    "cookiePolicy": "Cookie Policy",
+    "disclaimer": "Disclaimer",
+    "mediaUsagePolicy": "Media Usage Policy",
+    "more": "More",
+    "less": "Less",
+    "sitemap": "Sitemap",
+    "brandDescription": "Crafting stories with soul, one frame at a time. Flavor Studios is a global animation studio dedicated to creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth, we aim to inspire, heal, and connect audiences worldwide.",
+    "copyright": "© {year} Flavor Studios. All rights reserved.",
+    "tagline": "Built with Passion. Powered by Dreams.",
+    "language": "Language"
+  }
+}

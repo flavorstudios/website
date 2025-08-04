@@ -1,24 +1,21 @@
 "use client"
 
 import React from "react";
-
-const languages = [
-  { value: "en", label: "English" },
-  { value: "es", label: "Español" },
-];
+import { locales } from "@/i18n"; // Make sure this path matches your project structure
 
 export default function LanguageSelect() {
   return (
     <div>
-      <label htmlFor="language" className="sr-only">
+      <label htmlFor="language-select" className="sr-only">
         Language
       </label>
       <select
-        id="language"
+        id="language-select"
+        aria-label="Select language"
         className="bg-black border border-gray-700 rounded-md px-3 py-2 text-sm"
       >
-        {languages.map((lang) => (
-          <option key={lang.value} value={lang.value}>
+        {locales.map((lang) => (
+          <option key={lang.code} value={lang.code}>
             {lang.label}
           </option>
         ))}

@@ -20,7 +20,7 @@ import {
   Youtube,
 } from "lucide-react";
 import Link from "next/link";
-import FollowUs from "@/components/FollowUs"; // ✅ Added centralized section
+import SocialLinks from "@/components/SocialLinks"; // ✅ Use centralized component
 
 // === SEO METADATA (using centralized handler) ===
 export const metadata = getMetadata({
@@ -310,7 +310,13 @@ export default function SupportPage() {
 
         {/* === Follow Us Section (as per audit, centralized component) === */}
         <section className="py-6 sm:py-8">
-          <FollowUs />
+          {/* <FollowUs /> */}
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg">
+              Follow us
+            </h3>
+            <SocialLinks />
+          </div>
         </section>
         {/* === End Follow Us Section === */}
 

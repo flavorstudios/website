@@ -5,8 +5,8 @@ import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
-// ⬇️ Use shared type instead of declaring locally!
 import type { BlogPost } from "@/lib/content-store";
+import { getTranslator, locales, defaultLocale } from "@/lib/i18n";
 
 // Fetch blog post by slug from PUBLIC API
 async function getBlogPost(slug: string): Promise<BlogPost | null> {
@@ -30,30 +30,45 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
 }
 
 interface BlogPostPageProps {
-  params: { slug: string };
+  params: { slug: string; locale?: string };
 }
 
 // SEO metadata (dynamic per post, using Next.js generateMetadata API)
 export async function generateMetadata({ params }: BlogPostPageProps) {
+  const locale = params?.locale || defaultLocale;
+  const tSite = getTranslator(locale, "site");
+  const t = getTranslator(locale, "blog");
+
   const post = await getBlogPost(params.slug);
+  const pathWithoutLocale = `/blog/${params.slug}`;
+  const path = locale === defaultLocale ? pathWithoutLocale : `/${locale}${pathWithoutLocale}`;
+
+  const languageAlternates = Object.fromEntries(
+    locales.map((l) => [
+      l,
+      getCanonicalUrl(l === defaultLocale ? pathWithoutLocale : `/${l}${pathWithoutLocale}`),
+    ]),
+  );
 
   // Fallback metadata for posts not found or not published (noindex, follow)
   if (!post) {
-    const fallbackTitle = `Post Not Found – ${SITE_NAME}`;
-    const fallbackDescription = `Sorry, this blog post could not be found. Explore more inspiring anime blog posts at ${SITE_NAME}.`;
+    const fallbackTitle = t("notFoundTitle", { siteName: tSite("title") });
+    const fallbackDescription = t("notFoundDescription", { siteName: tSite("title") });
     const fallbackImage = `${SITE_URL}/cover.jpg`;
 
-    return getMetadata({
+    const meta = getMetadata({
       title: fallbackTitle,
       description: fallbackDescription,
-      path: `/blog/${params.slug}`,
+      path,
       robots: "noindex, follow",
       openGraph: {
         title: fallbackTitle,
         description: fallbackDescription,
-        url: getCanonicalUrl(`/blog/${params.slug}`),
+        url: getCanonicalUrl(path),
         type: "article",
         images: [{ url: fallbackImage, width: 1200, height: 630 }],
+        locale,
+        alternateLocale: locales.filter((l) => l !== locale),
       },
       twitter: {
         card: "summary_large_image",
@@ -64,6 +79,14 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
         images: [fallbackImage],
       },
     });
+
+    return {
+      ...meta,
+      alternates: {
+        ...meta.alternates,
+        languages: languageAlternates,
+      },
+    };
   }
 
   // --- Codex fix: use featuredImage, not coverImage ---
@@ -76,16 +99,18 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
   const seoDescription = post.seoDescription || post.excerpt;
   const schemaType = post.schemaType || "Article";
 
-  return getMetadata({
-    title: `${seoTitle} – ${SITE_NAME}`,
+  const meta = getMetadata({
+    title: `${seoTitle} – ${tSite("title")}`,
     description: seoDescription,
-    path: `/blog/${post.slug}`,
+    path,
     robots: "index,follow",
     openGraph: {
       images: [{ url: ogImage, width: 1200, height: 630 }],
       type: schemaType,
       title: seoTitle,
       description: seoDescription,
+      locale,
+      alternateLocale: locales.filter((l) => l !== locale),
     },
     twitter: {
       card: "summary_large_image",
@@ -96,6 +121,14 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
       description: seoDescription,
     },
   });
+
+  return {
+    ...meta,
+    alternates: {
+      ...meta.alternates,
+      languages: languageAlternates,
+    },
+  };
 }
 
 // Main BlogPost page (server component)

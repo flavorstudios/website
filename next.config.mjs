@@ -2,6 +2,7 @@
 
 // Import the necessary modules
 import withPWA from 'next-pwa';
+import createNextIntlPlugin from 'next-intl/plugin';
 
 /**
  * Configure Next.js PWA settings.
@@ -20,17 +21,23 @@ const pwaConfig = withPWA({
   // Add other next-pwa options here if needed
 });
 
+const withNextIntl = createNextIntlPlugin('./i18n.ts');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true, // Add this for best practice, optional
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: false },
+  i18n: {
+    locales: ['en','es','hi','fr','ar','zh','ja','de','ru','pt'],
+    defaultLocale: 'en'
+  },
   // experimental: {
   //   nodeMiddleware: true, // Codex: Enable Node middleware support (REMOVED, not needed for stable Next.js)
   // },
   // Add any other Next.js config here!
 };
 
-// Export the combined configuration, applying the PWA wrapper to the Next.js config.
-export default pwaConfig(nextConfig);
+// Export the combined configuration with i18n and PWA wrappers
+export default withNextIntl(pwaConfig(nextConfig));

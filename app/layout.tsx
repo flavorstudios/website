@@ -22,18 +22,23 @@ import {
   SITE_URL,
   SITE_LOGO_URL,
   SITE_BRAND_TWITTER,
-  SITE_DESCRIPTION, // ✅ Import SITE_DESCRIPTION
+  SITE_DESCRIPTION,
 } from "@/lib/constants";
+
+// i18n additions
+import { locales, defaultLocale } from "../i18n";
+import { NextIntlProvider } from "@/lib/i18n";
+import { headers } from "next/headers";
 
 // --- SEO Default Metadata (App Router global metadata) ---
 const baseMetadata = getMetadata({
   title: SITE_NAME,
-  description: SITE_DESCRIPTION, // ✅ Use constant only
+  description: SITE_DESCRIPTION,
   path: "/",
   robots: "index,follow",
   openGraph: {
     title: SITE_NAME,
-    description: SITE_DESCRIPTION, // ✅ Use constant only
+    description: SITE_DESCRIPTION,
     type: "website",
     images: [{ url: `${SITE_URL}/cover.jpg`, width: 1200, height: 630 }],
     appId: "1404440770881914",
@@ -43,7 +48,7 @@ const baseMetadata = getMetadata({
     site: SITE_BRAND_TWITTER,
     creator: SITE_BRAND_TWITTER,
     title: SITE_NAME,
-    description: SITE_DESCRIPTION, // ✅ Use constant only
+    description: SITE_DESCRIPTION,
     images: [`${SITE_URL}/cover.jpg`],
   },
 });
@@ -64,11 +69,12 @@ export const metadata = {
 };
 
 // --- Global Organization Schema (JSON-LD) ---
+// 🟩 Official platforms only, in audit-correct order; GitHub removed, Tumblr/LinkedIn included
 const orgSchema = getSchema({
   type: "Organization",
   path: "/",
   title: SITE_NAME,
-  description: SITE_DESCRIPTION, // ✅ Use constant only
+  description: SITE_DESCRIPTION,
   image: SITE_LOGO_URL,
   sameAs: [
     "https://www.youtube.com/@flavorstudios",
@@ -77,18 +83,17 @@ const orgSchema = getSchema({
     "https://www.facebook.com/flavourstudios",
     "https://www.linkedin.com/company/flavorstudios",
     "https://www.threads.net/@flavorstudios",
+    "https://flavorstudios.tumblr.com",
     "https://discord.gg/agSZAAeRzn",
     "https://t.me/flavorstudios",
     "https://www.reddit.com/r/flavorstudios/",
-    "https://bsky.app/profile/flavorstudios.bsky.social",
+    "https://bsky.app/profile/flavorstudios.in",
+    "https://mastodon.social/@flavorstudios"
   ],
 });
 
 import { getDynamicCategories } from "@/lib/dynamic-categories";
-import { headers } from "next/headers";
-import Script from "next/script"; // ADDED for GTM
-
-// --- Type "Category" should have id, title, type, postCount, name, slug, tooltip, etc. ---
+import Script from "next/script";
 import type { Category } from "@/types/category";
 import type { CategoryData } from "@/lib/dynamic-categories";
 
@@ -127,8 +132,15 @@ function mapCategoryDataToCategory(
   };
 }
 
+// --- i18n: dynamic locale/message loading ---
+function getLocaleFromPath(pathname: string): string {
+  const parts = pathname.split("/");
+  const maybeLocale = parts[1];
+  return locales.includes(maybeLocale as any) ? maybeLocale : defaultLocale;
+}
+
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const h = headers(); // ✅ await removed, headers() is synchronous now
+  const h = headers();
   const pathname =
     h.get("next-url") ||
     h.get("x-invoke-path") ||
@@ -142,7 +154,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   if (!isAdmin) {
     const categories = await getDynamicCategories();
-    // Map to full Category type expected by Header
     blogCategories = (categories.blogCategories || []).map((cat: CategoryData) =>
       mapCategoryDataToCategory(cat, "blog")
     );
@@ -151,8 +162,17 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     );
   }
 
+  // --- i18n: determine and load locale/messages ---
+  const locale = getLocaleFromPath(pathname);
+  let messages: any = {};
+  try {
+    messages = (await import(`../locales/${locale}/common.json`)).default;
+  } catch {
+    messages = (await import(`../locales/${defaultLocale}/common.json`)).default;
+  }
+
   return (
-    <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>
+    <html lang={locale} style={{ fontFamily: "var(--font-poppins)" }}>
       <head>
         {/* Meta viewport fallback for bots/legacy */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -184,49 +204,52 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* END GTM (HEAD) */}
       </head>
       <body className="antialiased">
-        {/* --- ACCESSIBILITY: Skip-link to footer navigation --- */}
-        <a
-          href="#footer-navigation"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-black text-white p-2"
-        >
-          Skip to footer navigation
-        </a>
+        <NextIntlProvider locale={locale} messages={messages}>
+          {/* --- ACCESSIBILITY: Skip-link to footer navigation (translated) --- */}
+          <a
+            href="#footer-navigation"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-black text-white p-2"
+          >
+            {/* Use translated skip link if available */}
+            {messages?.layout?.skipToFooter || "Skip to footer navigation"}
+          </a>
 
-        {/* GTM (NOSCRIPT) */}
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-            title="Google Tag Manager NoScript"
-          />
-        </noscript>
-        {/* END GTM (NOSCRIPT) */}
+          {/* GTM (NOSCRIPT) */}
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+              title="Google Tag Manager NoScript"
+            />
+          </noscript>
+          {/* END GTM (NOSCRIPT) */}
 
-        <Toaster />
+          <Toaster />
 
-        {/* ⭐️ AdBlock Support Banner (only for non-admin routes) */}
-        {!isAdmin && <AdblockBanner />}
+          {/* ⭐️ AdBlock Support Banner (only for non-admin routes) */}
+          {!isAdmin && <AdblockBanner />}
 
-        {!isAdmin && (
-          <Header
-            blogCategories={blogCategories}
-            videoCategories={videoCategories}
-          />
-        )}
+          {!isAdmin && (
+            <Header
+              blogCategories={blogCategories}
+              videoCategories={videoCategories}
+            />
+          )}
 
-        <main>{children}</main>
+          <main>{children}</main>
 
-        {!isAdmin && (
-          <>
-            <Footer />
-            <BackToTop />
-            <PwaServiceWorker />
-            {/* ⭐️ LOAD the stealth detection script only for non-admin */}
-            <Script src="/js/_support_banner.js" strategy="afterInteractive" />
-          </>
-        )}
+          {!isAdmin && (
+            <>
+              <Footer />
+              <BackToTop />
+              <PwaServiceWorker />
+              {/* ⭐️ LOAD the stealth detection script only for non-admin */}
+              <Script src="/js/_support_banner.js" strategy="afterInteractive" />
+            </>
+          )}
+        </NextIntlProvider>
       </body>
     </html>
   );

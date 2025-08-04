@@ -49,9 +49,51 @@ function getRequestIp(request: NextRequest): string {
   return "unknown";
 }
 
+// --- Supported locales (should match i18n.ts) ---
+const supportedLocales = [
+  "en", "es", "hi", "fr", "ar", "zh", "ja", "de", "ru", "pt",
+];
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const ip = getRequestIp(request);
+
+  // --- Locale detection & rewrite (runs before admin/media checks) ---
+  const pathLocale = pathname.split("/")[1];
+  const pathnameMissingLocale = !supportedLocales.includes(pathLocale);
+  const isPublicPath =
+    !pathname.startsWith("/api") &&
+    !pathname.startsWith("/admin") &&
+    !pathname.startsWith("/_next") &&
+    !pathname.includes(".");
+
+  if (pathnameMissingLocale && isPublicPath) {
+    let locale = request.cookies.get("NEXT_LOCALE")?.value;
+
+    if (!locale || !supportedLocales.includes(locale)) {
+      const acceptLang = request.headers.get("accept-language");
+      if (acceptLang) {
+        const accepted = acceptLang
+          .split(",")
+          .map((l) => l.split(";")[0].trim());
+        for (const lang of accepted) {
+          const base = lang.split("-")[0];
+          if (supportedLocales.includes(base)) {
+            locale = base;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!locale || !supportedLocales.includes(locale)) {
+      locale = "en";
+    }
+
+    const url = request.nextUrl.clone();
+    url.pathname = `/${locale}${pathname}`;
+    return NextResponse.rewrite(url);
+  }
 
   // --- PROTECT ALL /api/media ROUTES (Codex: must verify admin session and log denied attempts) ---
   if (pathname.startsWith("/api/media")) {
@@ -166,6 +208,14 @@ export async function middleware(request: NextRequest) {
 
 // Multi-admin compatible! Supports ADMIN_EMAILS (comma-separated) and ADMIN_EMAIL (single email).
 export const config = {
-  matcher: ["/admin/:path*", "/api/media/:path*"],
+  matcher: [
+    // Locale-prefixed public routes
+    "/:locale((en|es|hi|fr|ar|zh|ja|de|ru|pt))/((?!api|_next|.*\\..*).*)",
+    // Un-prefixed public routes (catch and rewrite)
+    "/((?!api|_next|.*\\..*).*)",
+    // Admin and media
+    "/admin/:path*",
+    "/api/media/:path*",
+  ],
   runtime: "nodejs",
 };

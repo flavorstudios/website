@@ -68,13 +68,13 @@ export const defaultPlatforms: SocialPlatform[] = [
     label: "X",
     href: "https://twitter.com/flavor_studios",
     icon: FaXTwitter,
-    color: "text-black dark:text-white",
+    color: "text-white",
   },
   {
     label: "Threads",
     href: "https://www.threads.net/@flavorstudios",
     icon: FaThreads,
-    color: "text-black dark:text-white",
+    color: "text-white",
   },
   {
     label: "Bluesky",
@@ -104,7 +104,7 @@ export const defaultPlatforms: SocialPlatform[] = [
     label: "GitHub",
     href: "https://github.com/flavorstudios",
     icon: FaGithub,
-    color: "text-gray-800 dark:text-white",
+    color: "text-white",
   },
 ]
 

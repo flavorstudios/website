@@ -14,7 +14,7 @@ describe('Footer', () => {
     jest.useRealTimers()
   })
 
-  it('renders all default social links in monochrome by default', () => {
+  it('renders all default social links', () => {
     render(<Footer />)
     // Each platform gets a link with an accessible label
     defaultPlatforms.forEach(({ label }) => {

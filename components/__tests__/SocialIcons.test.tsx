@@ -37,23 +37,33 @@ describe('SocialIcons', () => {
   })
 
   it('switches icon color based on variant prop', () => {
-    // Color variant: SVG should have color attribute matching the platform color
+    // Color variant: check SVG for Tailwind class or color attribute
     const { container: colorContainer } = render(<SocialIcons variant="color" />)
     const colorSvgs = colorContainer.querySelectorAll('svg')
     expect(colorSvgs.length).toBeGreaterThan(0)
     colorSvgs.forEach((svg, idx) => {
-      // Only check if color is defined for that platform
       const color = defaultPlatforms[idx]?.color
       if (color) {
-        expect(svg).toHaveAttribute('color', color)
+        if (color.startsWith("#")) {
+          expect(svg).toHaveAttribute('color', color)
+        } else {
+          expect(svg).toHaveClass(color)
+        }
       }
     })
 
-    // Monochrome variant: No color attribute should be present
+    // Monochrome variant: no Tailwind color class or color attribute
     const { container: monoContainer } = render(<SocialIcons variant="monochrome" />)
     const monoSvgs = monoContainer.querySelectorAll('svg')
-    monoSvgs.forEach((svg) => {
-      expect(svg.hasAttribute('color')).toBe(false)
+    monoSvgs.forEach((svg, idx) => {
+      const color = defaultPlatforms[idx]?.color
+      if (color) {
+        if (color.startsWith("#")) {
+          expect(svg.hasAttribute('color')).toBe(false)
+        } else {
+          expect(svg).not.toHaveClass(color)
+        }
+      }
     })
   })
 

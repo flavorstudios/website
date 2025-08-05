@@ -20,7 +20,8 @@ import {
   Youtube,
 } from "lucide-react";
 import Link from "next/link";
-import SocialLinks from "@/components/SocialLinks"; // ✅ Use centralized component
+import SocialLinks from "@/components/SocialLinks";
+import { useTranslations } from "@/lib/i18n";
 
 // === SEO METADATA (using centralized handler) ===
 export const metadata = getMetadata({
@@ -61,22 +62,24 @@ const schema = getSchema({
 });
 
 export default function SupportPage() {
+  const t = useTranslations("support");
+
   const impactAreas = [
     {
-      title: "Creative Freedom",
-      description: "Maintain creative independence and artistic integrity in all our projects.",
+      title: t("impact.items.creativeFreedom.title"),
+      description: t("impact.items.creativeFreedom.description"),
       icon: Palette,
       color: "from-purple-500 to-pink-500",
     },
     {
-      title: "Quality Content",
-      description: "Invest in better tools, training, and resources to elevate animation quality.",
+      title: t("impact.items.qualityContent.title"),
+      description: t("impact.items.qualityContent.description"),
       icon: Award,
       color: "from-blue-500 to-cyan-500",
     },
     {
-      title: "Community Growth",
-      description: "Build a thriving community of animation enthusiasts and independent creators.",
+      title: t("impact.items.communityGrowth.title"),
+      description: t("impact.items.communityGrowth.description"),
       icon: Users,
       color: "from-green-500 to-emerald-500",
     },
@@ -84,26 +87,26 @@ export default function SupportPage() {
 
   const supportWays = [
     {
-      title: "Share Our Content",
-      description: "Help us reach more anime fans on YouTube",
+      title: t("otherWays.shareContent.title"),
+      description: t("otherWays.shareContent.description"),
       icon: Youtube,
-      action: "Visit YouTube",
+      action: t("otherWays.shareContent.action"),
       href: "https://www.youtube.com/@flavorstudios",
       external: true,
     },
     {
-      title: "Leave Reviews",
-      description: "Join discussions on our Reddit community",
+      title: t("otherWays.leaveReviews.title"),
+      description: t("otherWays.leaveReviews.description"),
       icon: Star,
-      action: "Join Reddit",
+      action: t("otherWays.leaveReviews.action"),
       href: "https://www.reddit.com/r/flavorstudios/",
       external: true,
     },
     {
-      title: "Join Community",
-      description: "Connect with us on Discord",
+      title: t("otherWays.joinCommunity.title"),
+      description: t("otherWays.joinCommunity.description"),
       icon: Zap,
-      action: "Join Discord",
+      action: t("otherWays.joinCommunity.action"),
       href: "https://discord.gg/agSZAAeRzn",
       external: true,
     },
@@ -119,14 +122,13 @@ export default function SupportPage() {
         <div className="container mx-auto max-w-6xl px-3 sm:px-4 lg:px-6">
           <div className="text-center">
             <Badge className="mb-3 sm:mb-4 lg:mb-6 bg-blue-600 text-white px-3 py-1 text-xs sm:text-sm">
-              Independent Animation Studio
+              {t("badge")}
             </Badge>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 lg:mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
-              Support Our Creative Vision
+              {t("title")}
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed mb-6 sm:mb-8 lg:mb-10 px-2">
-              We&apos;re committed to crafting emotionally powerful anime, original 3D animations, and meaningful
-              storytelling experiences — all built independently using Blender and open-source tools.
+              {t("description")}
             </p>
 
             {/* Primary CTA */}
@@ -138,7 +140,7 @@ export default function SupportPage() {
               >
                 <Link href="https://buymeacoffee.com/flavorstudios" target="_blank" rel="noopener noreferrer">
                   <Coffee className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                  Buy Me a Coffee
+                  {t("buyCoffee")}
                   <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Link>
               </Button>
@@ -150,7 +152,7 @@ export default function SupportPage() {
               >
                 <Link href="/contact">
                   <MessageCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                  Contact
+                  {t("contact")}
                 </Link>
               </Button>
               <Button
@@ -161,12 +163,12 @@ export default function SupportPage() {
               >
                 <Link href="/faq">
                   <HelpCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                  FAQ
+                  {t("faq")}
                 </Link>
               </Button>
             </div>
 
-            <p className="text-xs sm:text-sm text-gray-500 px-2">Secure payments processed through Buy Me a Coffee</p>
+            <p className="text-xs sm:text-sm text-gray-500 px-2">{t("securePayments")}</p>
           </div>
         </div>
       </section>
@@ -175,9 +177,9 @@ export default function SupportPage() {
         {/* Impact Section */}
         <section className="py-8 sm:py-12 lg:py-16">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Your Support Makes a Difference</h2>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">{t("impact.title")}</h2>
             <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-2">
-              Every contribution directly impacts our ability to create and share amazing content
+              {t("impact.description")}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
@@ -210,8 +212,7 @@ export default function SupportPage() {
           <Card className="bg-gradient-to-r from-blue-600 to-purple-600 border-0 shadow-2xl">
             <CardContent className="p-6 sm:p-8 lg:p-12 text-center">
               <blockquote className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-medium text-white leading-relaxed">
-                &quot;If you believe in the value of independent animation and want to support our work, your contribution
-                can help us continue producing high-quality content and grow our creative mission.&quot;
+                {t("quote.text")}
               </blockquote>
             </CardContent>
           </Card>
@@ -223,10 +224,10 @@ export default function SupportPage() {
             <div className="container mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12 lg:py-16">
               <div className="text-center mb-8 sm:mb-12">
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">
-                  Ready to Support Our Journey?
+                  {t("mainSupport.title")}
                 </h2>
                 <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto px-2">
-                  Every contribution, no matter the size, helps us bring our creative vision to life
+                  {t("mainSupport.description")}
                 </p>
               </div>
               <div className="max-w-3xl mx-auto text-center">
@@ -234,10 +235,9 @@ export default function SupportPage() {
                   <div className="bg-yellow-200 rounded-full p-6 sm:p-8 w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-6 sm:mb-8 flex items-center justify-center shadow-lg">
                     <Coffee className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-700" aria-hidden="true" />
                   </div>
-                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">Support Us Today</h3>
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">{t("mainSupport.supportUs")}</h3>
                   <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
-                    Your support is processed securely through Buy Me a Coffee and helps us continue creating amazing
-                    content
+                    {t("mainSupport.supportUsDescription")}
                   </p>
                 </div>
                 <Button
@@ -247,22 +247,22 @@ export default function SupportPage() {
                 >
                   <Link href="https://buymeacoffee.com/flavorstudios" target="_blank" rel="noopener noreferrer">
                     <Coffee className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
-                    Buy Me a Coffee
+                    {t("mainSupport.button")}
                     <ExternalLink className="ml-2 sm:ml-3 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                   </Link>
                 </Button>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
                   <div className="flex items-center text-xs sm:text-sm text-gray-500">
                     <div className="w-2 h-2 bg-green-500 rounded-full mr-2" aria-hidden="true"></div>
-                    Secure payments
+                    {t("mainSupport.benefits.securePayments")}
                   </div>
                   <div className="flex items-center text-xs sm:text-sm text-gray-500">
                     <div className="w-2 h-2 bg-green-500 rounded-full mr-2" aria-hidden="true"></div>
-                    Instant processing
+                    {t("mainSupport.benefits.instantProcessing")}
                   </div>
                   <div className="flex items-center text-xs sm:text-sm text-gray-500">
                     <div className="w-2 h-2 bg-green-500 rounded-full mr-2" aria-hidden="true"></div>
-                    No account required
+                    {t("mainSupport.benefits.noAccountRequired")}
                   </div>
                 </div>
               </div>
@@ -273,9 +273,9 @@ export default function SupportPage() {
         {/* Other Ways to Support Section */}
         <section className="py-8 sm:py-12 lg:py-16">
           <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">Other Ways to Help</h2>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">{t("otherWays.title")}</h2>
             <p className="text-base sm:text-lg text-gray-600 px-2">
-              Connect with us across our social platforms and help grow our community
+              {t("otherWays.description")}
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -310,10 +310,9 @@ export default function SupportPage() {
 
         {/* === Follow Us Section (as per audit, centralized component) === */}
         <section className="py-6 sm:py-8">
-          {/* <FollowUs /> */}
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">
-              Follow us
+              {t("followUs.title")}
             </h3>
             <SocialLinks />
           </div>
@@ -325,10 +324,9 @@ export default function SupportPage() {
           <div className="container mx-auto max-w-6xl px-4 sm:px-6">
             <div className="text-center">
               <HelpCircle className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 sm:mb-6 text-blue-600" aria-hidden="true" />
-              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">Have Questions?</h3>
+              <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">{t("faqSection.title")}</h3>
               <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
-                Find comprehensive answers about supporting our work, our creative process, and how your contributions
-                make a difference
+                {t("faqSection.description")}
               </p>
               <Button
                 variant="default"
@@ -337,7 +335,7 @@ export default function SupportPage() {
                 className="w-full sm:w-auto h-12 sm:h-14 px-6 sm:px-8 bg-blue-600 hover:bg-blue-700 text-base sm:text-lg"
               >
                 <Link href="/faq">
-                  View FAQ Page
+                  {t("faqSection.button")}
                   <ExternalLink className="ml-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
                 </Link>
               </Button>

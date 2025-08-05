@@ -55,5 +55,212 @@
     "copyright": "© {year} Flavor Studios. सर्वाधिकार सुरक्षित।",
     "tagline": "जुनून से निर्मित। सपनों से प्रेरित।",
     "language": "भाषा"
+  },
+  "contact": {
+    "badge": "Connect With Us",
+    "title": "Get In Touch",
+    "intro": "Whether you have a question about our content, want to collaborate, or just want to say hello, we're here to help. Fill out the form and we'll get back to you as soon as possible.",
+    "info": {
+      "title": "Contact Information",
+      "email": {
+        "title": "Email",
+        "description": "For general inquiries and support"
+      },
+      "social": {
+        "title": "Social Media",
+        "description": "DM us on any social platform"
+      },
+      "response": {
+        "title": "Response Time",
+        "details": "Within 24-48 hours during business days (Monday-Friday)",
+        "description": "We try to respond as quickly as possible"
+      }
+    },
+    "business": {
+      "title": "Business Inquiries",
+      "description": "For sponsorships, business partnerships, or collaboration opportunities:"
+    },
+    "follow": {
+      "title": "Follow Us",
+      "description": "Connect with us on social media for updates and community discussions."
+    },
+    "form": {
+      "title": "Send us a Message",
+      "description": "Fill out the form below and we'll get back to you as soon as possible.",
+      "success": {
+        "title": "Message sent successfully!",
+        "description": "We'll get back to you within 24-48 hours."
+      },
+      "flagged": {
+        "title": "Message Submitted — Needs Review",
+        "description": "Thank you for your message! Our system flagged it for moderation and a team member will review and respond if appropriate."
+      },
+      "error": {
+        "title": "Failed to send message",
+        "description": "Please try again or contact us directly via email."
+      },
+      "fields": {
+        "firstName": {
+          "label": "First Name *",
+          "placeholder": "Your first name",
+          "error": {
+            "required": "First name is required"
+          }
+        },
+        "lastName": {
+          "label": "Last Name *",
+          "placeholder": "Your last name",
+          "error": {
+            "required": "Last name is required"
+          }
+        },
+        "email": {
+          "label": "Email *",
+          "placeholder": "your.email@example.com",
+          "error": {
+            "required": "Email is required",
+            "invalid": "Please enter a valid email address"
+          }
+        },
+        "subject": {
+          "label": "Subject *",
+          "placeholder": "Select a topic",
+          "error": {
+            "required": "Please select a subject"
+          },
+          "options": {
+            "general": "General Inquiry",
+            "collaboration": "Collaboration",
+            "business": "Business Partnership",
+            "press": "Press & Media",
+            "technical": "Technical Support",
+            "feedback": "Feedback",
+            "other": "Other"
+          }
+        },
+        "message": {
+          "label": "Message *",
+          "placeholder": "Tell us more about your inquiry...",
+          "error": {
+            "required": "Message is required",
+            "minLength": "Message must be at least 10 characters long"
+          }
+        },
+        "privacy": {
+          "label": "I agree to the <privacyPolicy>Privacy Policy</privacyPolicy> *",
+          "error": {
+            "required": "You must accept the privacy policy"
+          }
+        }
+      },
+      "buttons": {
+        "sending": "Sending...",
+        "send": "Send Message"
+      }
+    },
+    "expectations": {
+      "title": "What to Expect",
+      "items": {
+        "1": "You'll receive an email confirmation immediately.",
+        "2": "Our team will review your message within 24 hours.",
+        "3": "We'll respond with helpful information or next steps.",
+        "4": "For complex inquiries, we may schedule a follow-up call."
+      }
+    },
+    "process": {
+      "title": "Our Contact Process",
+      "steps": {
+        "1": {
+          "title": "Submit Your Message",
+          "description": "Fill out our contact form with your details and inquiry. Be as specific as possible to help us understand your needs."
+        },
+        "2": {
+          "title": "Initial Assessment",
+          "description": "You'll receive an immediate confirmation. Our team reviews all inquiries within 24 hours during business days."
+        },
+        "3": {
+          "title": "Personalized Response",
+          "description": "We'll respond with tailored information addressing your specific questions or concerns."
+        },
+        "4": {
+          "title": "Ongoing Support",
+          "description": "For complex matters, we may schedule additional communication to ensure your inquiry is fully resolved."
+        }
+      }
+    },
+    "cta": {
+      "title": "Need Quick Answers?",
+      "description": "Before reaching out, check our comprehensive FAQ page where we've answered the most common questions about our content, collaborations, and services.",
+      "button": "Browse FAQ"
+    }
+  },
+  "support": {
+    "badge": "Independent Animation Studio",
+    "title": "Support Our Creative Vision",
+    "description": "We're committed to crafting emotionally powerful anime, original 3D animations, and meaningful storytelling experiences — all built independently using Blender and open-source tools.",
+    "buyCoffee": "Buy Me a Coffee",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "securePayments": "Secure payments processed through Buy Me a Coffee",
+    "impact": {
+      "title": "Your Support Makes a Difference",
+      "description": "Every contribution directly impacts our ability to create and share amazing content",
+      "items": {
+        "creativeFreedom": {
+          "title": "Creative Freedom",
+          "description": "Maintain creative independence and artistic integrity in all our projects."
+        },
+        "qualityContent": {
+          "title": "Quality Content",
+          "description": "Invest in better tools, training, and resources to elevate animation quality."
+        },
+        "communityGrowth": {
+          "title": "Community Growth",
+          "description": "Build a thriving community of animation enthusiasts and independent creators."
+        }
+      }
+    },
+    "quote": {
+      "text": "\"If you believe in the value of independent animation and want to support our work, your contribution can help us continue producing high-quality content and grow our creative mission.\""
+    },
+    "mainSupport": {
+      "title": "Ready to Support Our Journey?",
+      "description": "Every contribution, no matter the size, helps us bring our creative vision to life",
+      "supportUs": "Support Us Today",
+      "supportUsDescription": "Your support is processed securely through Buy Me a Coffee and helps us continue creating amazing content",
+      "button": "Buy Me a Coffee",
+      "benefits": {
+        "securePayments": "Secure payments",
+        "instantProcessing": "Instant processing",
+        "noAccountRequired": "No account required"
+      }
+    },
+    "otherWays": {
+      "title": "Other Ways to Help",
+      "description": "Connect with us across our social platforms and help grow our community",
+      "shareContent": {
+        "title": "Share Our Content",
+        "description": "Help us reach more anime fans on YouTube",
+        "action": "Visit YouTube"
+      },
+      "leaveReviews": {
+        "title": "Leave Reviews",
+        "description": "Join discussions on our Reddit community",
+        "action": "Join Reddit"
+      },
+      "joinCommunity": {
+        "title": "Join Community",
+        "description": "Connect with us on Discord",
+        "action": "Join Discord"
+      }
+    },
+    "followUs": {
+      "title": "Follow us"
+    },
+    "faqSection": {
+      "title": "Have Questions?",
+      "description": "Find comprehensive answers about supporting our work, our creative process, and how your contributions make a difference",
+      "button": "View FAQ Page"
+    }
   }
 }

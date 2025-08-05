@@ -23,12 +23,15 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
-import SocialLinks from "@/components/SocialLinks"; // <-- New canonical import
+import SocialLinks from "@/components/SocialLinks";
+import { useTranslations } from "@/lib/i18n";
 
 type SubmitStatus = "idle" | "success" | "error" | "flagged";
 type FormErrors = Record<string, string>;
 
 export default function ContactPageClient() {
+  const t = useTranslations("contact");
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -44,90 +47,87 @@ export default function ContactPageClient() {
   const contactInfo = [
     {
       icon: Mail,
-      title: "Email",
+      title: t("info.email.title"),
       details: "contact@flavorstudios.in",
-      description: "For general inquiries and support",
+      description: t("info.email.description"),
     },
     {
       icon: Users,
-      title: "Social Media",
+      title: t("info.social.title"),
       details: "@FlavorStudios",
-      description: "DM us on any social platform",
+      description: t("info.social.description"),
     },
     {
       icon: Clock,
-      title: "Response Time",
-      details: "Within 24-48 hours during business days (Monday-Friday)",
-      description: "We try to respond as quickly as possible",
+      title: t("info.response.title"),
+      details: t("info.response.details"),
+      description: t("info.response.description"),
     },
   ];
 
   const contactProcess = [
     {
       step: "1",
-      title: "Submit Your Message",
-      description:
-        "Fill out our contact form with your details and inquiry. Be as specific as possible to help us understand your needs.",
+      title: t("process.steps.1.title"),
+      description: t("process.steps.1.description"),
       icon: Send,
     },
     {
       step: "2",
-      title: "Initial Assessment",
-      description:
-        "You'll receive an immediate confirmation. Our team reviews all inquiries within 24 hours during business days.",
+      title: t("process.steps.2.title"),
+      description: t("process.steps.2.description"),
       icon: CheckCircle,
     },
     {
       step: "3",
-      title: "Personalized Response",
-      description: "We'll respond with tailored information addressing your specific questions or concerns.",
+      title: t("process.steps.3.title"),
+      description: t("process.steps.3.description"),
       icon: MessageSquare,
     },
     {
       step: "4",
-      title: "Ongoing Support",
-      description:
-        "For complex matters, we may schedule additional communication to ensure your inquiry is fully resolved.",
+      title: t("process.steps.4.title"),
+      description: t("process.steps.4.description"),
       icon: Users,
     },
   ];
 
   const expectations = [
-    "You'll receive an email confirmation immediately.",
-    "Our team will review your message within 24 hours.",
-    "We'll respond with helpful information or next steps.",
-    "For complex inquiries, we may schedule a follow-up call.",
+    t("expectations.items.1"),
+    t("expectations.items.2"),
+    t("expectations.items.3"),
+    t("expectations.items.4"),
   ];
 
   const validateForm = () => {
     const newErrors: FormErrors = {};
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = "First name is required";
+      newErrors.firstName = t("form.fields.firstName.error.required");
     }
 
     if (!formData.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
+      newErrors.lastName = t("form.fields.lastName.error.required");
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
+      newErrors.email = t("form.fields.email.error.required");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = t("form.fields.email.error.invalid");
     }
 
     if (!formData.subject) {
-      newErrors.subject = "Please select a subject";
+      newErrors.subject = t("form.fields.subject.error.required");
     }
 
     if (!formData.message.trim()) {
-      newErrors.message = "Message is required";
+      newErrors.message = t("form.fields.message.error.required");
     } else if (formData.message.trim().length < 10) {
-      newErrors.message = "Message must be at least 10 characters long";
+      newErrors.message = t("form.fields.message.error.minLength");
     }
 
     if (!formData.privacyAccepted) {
-      newErrors.privacyAccepted = "You must accept the privacy policy";
+      newErrors.privacyAccepted = t("form.fields.privacy.error.required");
     }
 
     setErrors(newErrors);
@@ -198,13 +198,12 @@ export default function ContactPageClient() {
       <div className="container mx-auto max-w-6xl px-4 sm:px-6">
         {/* Header */}
         <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          <Badge className="mb-3 sm:mb-4 bg-blue-600 text-white px-3 py-1 text-xs sm:text-sm">Connect With Us</Badge>
+          <Badge className="mb-3 sm:mb-4 bg-blue-600 text-white px-3 py-1 text-xs sm:text-sm">{t("badge")}</Badge>
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-tight">
-            Get In Touch
+            {t("title")}
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto px-4">
-            Whether you have a question about our content, want to collaborate, or just want to say hello, we're here to
-            help. Fill out the form and we'll get back to you as soon as possible.
+            {t("intro")}
           </p>
         </div>
 
@@ -214,7 +213,7 @@ export default function ContactPageClient() {
             {/* Contact Information */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Contact Information</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">{t("info.title")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 sm:space-y-4">
                 {contactInfo.map((info, index) => (
@@ -238,9 +237,9 @@ export default function ContactPageClient() {
             {/* Business Inquiries */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Business Inquiries</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">{t("business.title")}</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                  For sponsorships, business partnerships, or collaboration opportunities:
+                  {t("business.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -258,9 +257,9 @@ export default function ContactPageClient() {
             {/* Social Media */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Follow Us</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">{t("follow.title")}</CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                  Connect with us on social media for updates and community discussions.
+                  {t("follow.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -273,9 +272,9 @@ export default function ContactPageClient() {
           <div className="lg:col-span-2 order-1 lg:order-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-xl sm:text-2xl">Send us a Message</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">{t("form.title")}</CardTitle>
                 <CardDescription className="text-sm sm:text-base">
-                  Fill out the form below and we'll get back to you as soon as possible.
+                  {t("form.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6">
@@ -283,8 +282,8 @@ export default function ContactPageClient() {
                   <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
                     <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
                     <div>
-                      <h4 className="font-semibold text-green-800">Message sent successfully!</h4>
-                      <p className="text-sm text-green-700">We'll get back to you within 24-48 hours.</p>
+                      <h4 className="font-semibold text-green-800">{t("form.success.title")}</h4>
+                      <p className="text-sm text-green-700">{t("form.success.description")}</p>
                     </div>
                   </div>
                 )}
@@ -293,10 +292,8 @@ export default function ContactPageClient() {
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
                     <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0" />
                     <div>
-                      <h4 className="font-semibold text-yellow-800">Message Submitted — Needs Review</h4>
-                      <p className="text-sm text-yellow-700">
-                        Thank you for your message! Our system flagged it for moderation and a team member will review and respond if appropriate.
-                      </p>
+                      <h4 className="font-semibold text-yellow-800">{t("form.flagged.title")}</h4>
+                      <p className="text-sm text-yellow-700">{t("form.flagged.description")}</p>
                     </div>
                   </div>
                 )}
@@ -305,8 +302,8 @@ export default function ContactPageClient() {
                   <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
                     <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
                     <div>
-                      <h4 className="font-semibold text-red-800">Failed to send message</h4>
-                      <p className="text-sm text-red-700">Please try again or contact us directly via email.</p>
+                      <h4 className="font-semibold text-red-800">{t("form.error.title")}</h4>
+                      <p className="text-sm text-red-700">{t("form.error.description")}</p>
                     </div>
                   </div>
                 )}
@@ -315,11 +312,11 @@ export default function ContactPageClient() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName" className="text-sm sm:text-base">
-                        First Name *
+                        {t("form.fields.firstName.label")}
                       </Label>
                       <Input
                         id="firstName"
-                        placeholder="Your first name"
+                        placeholder={t("form.fields.firstName.placeholder")}
                         className="h-10 sm:h-11"
                         value={formData.firstName}
                         onChange={(e) => handleInputChange("firstName", e.target.value)}
@@ -334,11 +331,11 @@ export default function ContactPageClient() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName" className="text-sm sm:text-base">
-                        Last Name *
+                        {t("form.fields.lastName.label")}
                       </Label>
                       <Input
                         id="lastName"
-                        placeholder="Your last name"
+                        placeholder={t("form.fields.lastName.placeholder")}
                         className="h-10 sm:h-11"
                         value={formData.lastName}
                         onChange={(e) => handleInputChange("lastName", e.target.value)}
@@ -355,12 +352,12 @@ export default function ContactPageClient() {
 
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm sm:text-base">
-                      Email *
+                      {t("form.fields.email.label")}
                     </Label>
                     <Input
                       id="email"
                       type="email"
-                      placeholder="your.email@example.com"
+                      placeholder={t("form.fields.email.placeholder")}
                       className="h-10 sm:h-11"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
@@ -376,20 +373,20 @@ export default function ContactPageClient() {
 
                   <div className="space-y-2">
                     <Label htmlFor="subject" className="text-sm sm:text-base">
-                      Subject *
+                      {t("form.fields.subject.label")}
                     </Label>
                     <Select value={formData.subject} onValueChange={(value) => handleInputChange("subject", value)}>
                       <SelectTrigger className="h-10 sm:h-11" aria-invalid={!!errors.subject}>
-                        <SelectValue placeholder="Select a topic" />
+                        <SelectValue placeholder={t("form.fields.subject.placeholder")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="general">General Inquiry</SelectItem>
-                        <SelectItem value="collaboration">Collaboration</SelectItem>
-                        <SelectItem value="business">Business Partnership</SelectItem>
-                        <SelectItem value="press">Press & Media</SelectItem>
-                        <SelectItem value="technical">Technical Support</SelectItem>
-                        <SelectItem value="feedback">Feedback</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="general">{t("form.fields.subject.options.general")}</SelectItem>
+                        <SelectItem value="collaboration">{t("form.fields.subject.options.collaboration")}</SelectItem>
+                        <SelectItem value="business">{t("form.fields.subject.options.business")}</SelectItem>
+                        <SelectItem value="press">{t("form.fields.subject.options.press")}</SelectItem>
+                        <SelectItem value="technical">{t("form.fields.subject.options.technical")}</SelectItem>
+                        <SelectItem value="feedback">{t("form.fields.subject.options.feedback")}</SelectItem>
+                        <SelectItem value="other">{t("form.fields.subject.options.other")}</SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.subject && (
@@ -401,11 +398,11 @@ export default function ContactPageClient() {
 
                   <div className="space-y-2">
                     <Label htmlFor="message" className="text-sm sm:text-base">
-                      Message *
+                      {t("form.fields.message.label")}
                     </Label>
                     <Textarea
                       id="message"
-                      placeholder="Tell us more about your inquiry..."
+                      placeholder={t("form.fields.message.placeholder")}
                       className="min-h-[100px] sm:min-h-[120px] resize-none"
                       value={formData.message}
                       onChange={(e) => handleInputChange("message", e.target.value)}
@@ -431,11 +428,13 @@ export default function ContactPageClient() {
                     />
                     <div className="space-y-1">
                       <Label htmlFor="privacy" className="text-xs sm:text-sm leading-relaxed">
-                        I agree to the{" "}
-                        <Link href="/privacy-policy" className="text-blue-600 hover:underline">
-                          Privacy Policy
-                        </Link>{" "}
-                        *
+                        {t.rich("form.fields.privacy.label", {
+                          privacyPolicy: (chunks) => (
+                            <Link href="/privacy-policy" className="text-blue-600 hover:underline">
+                              {chunks}
+                            </Link>
+                          ),
+                        })}
                       </Label>
                       {errors.privacyAccepted && (
                         <p id="privacy-error" className="text-sm text-red-600">
@@ -453,12 +452,12 @@ export default function ContactPageClient() {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Sending...
+                        {t("form.buttons.sending")}
                       </>
                     ) : (
                       <>
                         <Send className="mr-2 h-4 w-4" />
-                        Send Message
+                        {t("form.buttons.send")}
                       </>
                     )}
                   </Button>
@@ -466,7 +465,7 @@ export default function ContactPageClient() {
 
                 {/* What to Expect Section */}
                 <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold text-blue-900 mb-2 sm:mb-3 text-sm sm:text-base">What to Expect</h3>
+                  <h3 className="font-semibold text-blue-900 mb-2 sm:mb-3 text-sm sm:text-base">{t("expectations.title")}</h3>
                   <div className="space-y-2 sm:space-y-3">
                     {expectations.map((expectation, index) => (
                       <div key={index} className="flex items-start gap-3">
@@ -487,7 +486,7 @@ export default function ContactPageClient() {
 
         {/* Contact Process Timeline - Mobile Optimized */}
         <section className="mb-8 sm:mb-12 lg:mb-16">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 lg:mb-12">Our Contact Process</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 lg:mb-12">{t("process.title")}</h2>
           <div className="max-w-4xl mx-auto">
             <div className="relative">
               {/* Timeline line - Hidden on mobile, shown on larger screens */}
@@ -532,15 +531,14 @@ export default function ContactPageClient() {
         {/* FAQ Call-to-Action Section */}
         <section className="mt-8 sm:mt-12 lg:mt-16 text-center bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-6 sm:p-8">
           <HelpCircle className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4 text-blue-600" />
-          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-blue-900">Need Quick Answers?</h2>
+          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-blue-900">{t("cta.title")}</h2>
           <p className="text-base sm:text-lg text-blue-700 mb-4 sm:mb-6 max-w-2xl mx-auto px-4">
-            Before reaching out, check our comprehensive FAQ page where we've answered the most common questions about
-            our content, collaborations, and services.
+            {t("cta.description")}
           </p>
           <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 h-10 sm:h-12 px-6 sm:px-8">
             <Link href="/faq">
               <HelpCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-              Browse FAQ
+              {t("cta.button")}
             </Link>
           </Button>
         </section>

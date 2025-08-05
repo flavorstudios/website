@@ -29,9 +29,6 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: false },
-  // experimental: {
-  //   nodeMiddleware: true, // Codex: Enable Node middleware support (REMOVED, not needed for stable Next.js)
-  // },
   // Add any other Next.js config here!
 };
 

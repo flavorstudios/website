@@ -3,7 +3,8 @@ import AdminAuthGuard from "@/components/AdminAuthGuard";
 import { blogStore, type BlogPost } from "@/lib/content-store";
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE, SITE_NAME } from "@/lib/constants";
-import { getTranslator, defaultLocale } from "@/lib/i18n";
+import { locales, defaultLocale } from "@/i18n";
+import { createTranslator } from "next-intl";
 import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
 
@@ -23,8 +24,12 @@ async function getPost(id: string): Promise<BlogPost | null> {
 // === METADATA WITH I18N SUPPORT ===
 export async function generateMetadata({ params }: PreviewPageProps) {
   const locale = params?.locale || defaultLocale;
-  const tSite = getTranslator(locale, "site");
-  const t = getTranslator(locale, "blog");
+  const messages = (
+    await import(`@/locales/${locale}/common.json`)
+  ).default;
+  const tSite = createTranslator({ locale, messages, namespace: "site" });
+  const t = createTranslator({ locale, messages, namespace: "blog" });
+
   const post = await getPost(params.id);
   if (!post) {
     const title = t("notFoundTitle", { siteName: tSite("title") });

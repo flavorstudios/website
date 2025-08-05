@@ -6,7 +6,8 @@ import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/l
 import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
 import type { BlogPost } from "@/lib/content-store";
-import { getTranslator, locales, defaultLocale } from "@/lib/i18n";
+import { locales, defaultLocale } from "@/i18n";
+import { createTranslator } from "next-intl";
 
 // Fetch blog post by slug from PUBLIC API
 async function getBlogPost(slug: string): Promise<BlogPost | null> {
@@ -36,8 +37,11 @@ interface BlogPostPageProps {
 // SEO metadata (dynamic per post, using Next.js generateMetadata API)
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const locale = params?.locale || defaultLocale;
-  const tSite = getTranslator(locale, "site");
-  const t = getTranslator(locale, "blog");
+  const messages = (
+    await import(`@/locales/${locale}/common.json`)
+  ).default;
+  const tSite = createTranslator({ locale, messages, namespace: "site" });
+  const t = createTranslator({ locale, messages, namespace: "blog" });
 
   const post = await getBlogPost(params.slug);
   const pathWithoutLocale = `/blog/${params.slug}`;
@@ -89,7 +93,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     };
   }
 
-  // --- Codex fix: use featuredImage, not coverImage ---
+  // --- Use featuredImage, not coverImage ---
   const ogImage =
     post.openGraphImage ||
     post.featuredImage ||
@@ -138,7 +142,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // If post is not found or not published, trigger Next.js not-found page.
   if (!post) notFound();
 
-  // --- Codex fix: use featuredImage, not coverImage ---
+  // --- Use featuredImage, not coverImage ---
   const articleSchema = getSchema({
     type: post.schemaType || "Article",
     path: `/blog/${post.slug}`,

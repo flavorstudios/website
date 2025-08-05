@@ -34,7 +34,7 @@
     "legal": "Legal",
     "home": "Home",
     "about": "About",
-    "career": "Career",
+    "career": "Career",                 // For footer
     "contact": "Contact",
     "blog": "Blog",
     "watch": "Watch",
@@ -50,6 +50,7 @@
     "more": "More",
     "less": "Less",
     "sitemap": "Sitemap",
+    "followUs": "Follow us",
     "brandDescription": "Crafting stories with soul, one frame at a time. Flavor Studios is a global animation studio dedicated to creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth, we aim to inspire, heal, and connect audiences worldwide.",
     "copyright": "© {year} Flavor Studios. All rights reserved.",
     "tagline": "Built with Passion. Powered by Dreams.",

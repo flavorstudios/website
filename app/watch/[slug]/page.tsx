@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import { formatDate } from "@/lib/date";
 import { notFound } from "next/navigation";
-import { getTranslator, locales, defaultLocale } from "@/lib/i18n";
+import { locales, defaultLocale } from "@/i18n";
+import { createTranslator } from "next-intl";
 
 // --- Type for video object
 export interface Video {
@@ -79,8 +80,12 @@ export async function generateMetadata({
   params: { slug: string; locale?: string };
 }) {
   const locale = params?.locale || defaultLocale;
-  const tSite = getTranslator(locale, "site");
-  const t = getTranslator(locale, "watch");
+  const messages = (
+    await import(`@/locales/${locale}/common.json`)
+  ).default;
+  const tSite = createTranslator({ locale, messages, namespace: "site" });
+  const t = createTranslator({ locale, messages, namespace: "watch" });
+
   const video = await getVideo(params.slug);
 
   const pathWithoutLocale = `/watch/${params.slug}`;

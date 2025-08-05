@@ -29,6 +29,7 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: false },
+  // No i18n property here for App Router compatibility
   // Add any other Next.js config here!
 };
 

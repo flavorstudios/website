@@ -1,3 +1,4 @@
+
 'use client';
 
 // This is the main client component holding the offline UI.
@@ -17,11 +18,11 @@ export default function OfflinePageClient() {
   }
 
   function handleCheckConnection() {
-    if (typeof window !== "undefined" && window.navigator) {
-      if (window.navigator.onLine) {
-        alert('You are online!');
+    if (typeof window !== "undefined") {
+      if (window.navigator?.onLine) {
+        window.alert('You are online!');
       } else {
-        alert('Still offline');
+        window.alert('Still offline');
       }
     }
   }

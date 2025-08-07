@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 // This is the main client component holding the offline UI.
 export default function OfflinePageClient() {
   const [isClient, setIsClient] = useState(false);
+  const [connectionMessage, setConnectionMessage] = useState('');
 
   // This effect runs only on the client, after the component has mounted.
   useEffect(() => {
@@ -22,9 +23,9 @@ export default function OfflinePageClient() {
 
   function handleCheckConnection() {
     if (typeof navigator !== 'undefined' && navigator.onLine) {
-      alert('You are online!');
+      setConnectionMessage('You are online!');
     } else {
-      alert('Still offline');
+      setConnectionMessage('Still offline');
     }
   }
 
@@ -131,6 +132,9 @@ export default function OfflinePageClient() {
               Check Connection
             </button>
           </div>
+          {connectionMessage && (
+            <p className="mt-4 text-sm text-green-700" aria-live="polite">{connectionMessage}</p>
+          )}
         </div>
 
         {/* Footer Message */}

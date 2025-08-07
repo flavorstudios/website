@@ -13,15 +13,15 @@ export default function OfflinePageClient() {
 
   // Button handlers that can now safely use browser APIs.
   function handleReload() {
-    window.location.reload();
+    if (typeof window !== 'undefined') window.location.reload();
   }
 
   function handleGoBack() {
-    window.history.back();
+    if (typeof window !== 'undefined') window.history.back();
   }
 
   function handleCheckConnection() {
-    if (navigator.onLine) {
+    if (typeof navigator !== 'undefined' && navigator.onLine) {
       alert('You are online!');
     } else {
       alert('Still offline');

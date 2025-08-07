@@ -12,6 +12,7 @@ import { getAuth, signOut } from "firebase/auth"
 import app, { firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Spinner } from "@/components/ui/spinner"
+import ErrorBoundary from "@/components/admin/ErrorBoundary"
 
 const DashboardOverview = dynamic(() =>
   import("./components/dashboard-overview").then(m => m.DashboardOverview),
@@ -83,7 +84,7 @@ export default function AdminDashboardPageClient({
     applications: "a",
     inbox: "i",
     users: "u",
-    auditLogs: "l", // <-- new shortcut for audit logs (choose your own key)
+    auditLogs: "l",
     settings: "s",
     system: "y",
   }
@@ -132,7 +133,7 @@ export default function AdminDashboardPageClient({
       { id: "applications", href: "/admin/dashboard/applications" },
       { id: "inbox", href: "/admin/dashboard/inbox" },
       { id: "users", href: "/admin/dashboard/users" },
-      { id: "audit-logs", href: "/admin/dashboard/audit-logs" }, // <-- Added here
+      { id: "audit-logs", href: "/admin/dashboard/audit-logs" },
       { id: "settings", href: "/admin/dashboard/settings" },
       { id: "system", href: "/admin/dashboard/system" },
     ]
@@ -165,7 +166,7 @@ export default function AdminDashboardPageClient({
       [shortcuts.applications]: "/admin/dashboard/applications",
       [shortcuts.inbox]: "/admin/dashboard/inbox",
       [shortcuts.users]: "/admin/dashboard/users",
-      [shortcuts.auditLogs]: "/admin/dashboard/audit-logs", // <-- New shortcut
+      [shortcuts.auditLogs]: "/admin/dashboard/audit-logs",
       [shortcuts.settings]: "/admin/dashboard/settings",
       [shortcuts.system]: "/admin/dashboard/system",
     }
@@ -268,7 +269,7 @@ export default function AdminDashboardPageClient({
       case "inbox":
         return <EmailInbox />
       case "audit-logs":
-        return <AuditLogViewer /> // <-- Added for audit logs
+        return <AuditLogViewer />
       case "system":
         return <SystemTools />
       case "users":
@@ -289,7 +290,7 @@ export default function AdminDashboardPageClient({
     { combo: `g ${shortcuts.applications}`, description: "Go to Applications" },
     { combo: `g ${shortcuts.inbox}`, description: "Go to Inbox" },
     { combo: `g ${shortcuts.users}`, description: "Go to Users" },
-    { combo: `g ${shortcuts.auditLogs}`, description: "Go to Audit Logs" }, // <-- Added for audit logs
+    { combo: `g ${shortcuts.auditLogs}`, description: "Go to Audit Logs" },
     { combo: `g ${shortcuts.settings}`, description: "Go to Settings" },
     { combo: `g ${shortcuts.system}`, description: "Go to System" },
     { combo: "?", description: "Open this help" },
@@ -323,8 +324,11 @@ export default function AdminDashboardPageClient({
                     </AlertDescription>
                   </Alert>
                 )}
-                <Suspense fallback={<Spinner />}>
-                  {renderContent()}
+                {/* 🟩 Accessible Suspense fallback */}
+                <Suspense fallback={<Spinner className="py-4" aria-live="polite" />}>
+                  <ErrorBoundary key={activeSection}>
+                    {renderContent()}
+                  </ErrorBoundary>
                 </Suspense>
               </div>
             </main>

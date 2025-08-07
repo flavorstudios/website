@@ -134,10 +134,31 @@ function mapCategoryDataToCategory(
 }
 
 // --- i18n: dynamic locale/message loading ---
+// (Updated with deepMerge fallback & error logging)
 function getLocaleFromPath(pathname: string): string {
   const parts = pathname.split("/");
   const maybeLocale = parts[1];
   return locales.includes(maybeLocale as any) ? maybeLocale : defaultLocale;
+}
+
+// Deep merge helper for nested message objects
+function deepMerge(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>
+): Record<string, unknown> {
+  const output: Record<string, unknown> = { ...target };
+  for (const key of Object.keys(source)) {
+    const value = source[key];
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      output[key] = deepMerge(
+        (output[key] as Record<string, unknown>) || {},
+        value as Record<string, unknown>
+      );
+    } else {
+      output[key] = value;
+    }
+  }
+  return output;
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
@@ -165,12 +186,16 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   // --- i18n: determine and load locale/messages ---
   const locale = getLocaleFromPath(pathname);
-  let messages: any = {};
+
+  // Load English base and merge with current locale for fallback
+  const baseMessages = (await import(`../locales/en/common.json`)).default as Record<string, unknown>;
+  let localeMessages: Record<string, unknown> = {};
   try {
-    messages = (await import(`../locales/${locale}/common.json`)).default;
+    localeMessages = (await import(`../locales/${locale}/common.json`)).default;
   } catch {
-    messages = (await import(`../locales/${defaultLocale}/common.json`)).default;
+    localeMessages = baseMessages;
   }
+  const messages = deepMerge(baseMessages, localeMessages);
 
   return (
     <html lang={locale} style={{ fontFamily: "var(--font-poppins)" }}>
@@ -205,7 +230,22 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* END GTM (HEAD) */}
       </head>
       <body className="antialiased">
-        <NextIntlProvider locale={locale} messages={messages}>
+        <NextIntlProvider
+          locale={locale}
+          messages={messages}
+          onError={(error: unknown) => {
+            if (
+              typeof error === "object" &&
+              error !== null &&
+              "code" in error &&
+              (error as { code: string }).code === "MISSING_MESSAGE"
+            ) {
+              console.warn(error);
+            } else {
+              throw error;
+            }
+          }}
+        >
           {/* --- ACCESSIBILITY: Skip-link to footer navigation (translated) --- */}
           <a
             href="#footer-navigation"

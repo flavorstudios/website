@@ -50,6 +50,7 @@ export function SocialIcons({
           rel="noopener noreferrer"
           className={clsx(
             "focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full",
+            "motion-safe:transition-all motion-safe:hover:scale-105 motion-safe:hover:opacity-80",
             variant === "color" && color && color !== "text-white" && color
           )}
         >

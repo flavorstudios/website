@@ -1,29 +1,30 @@
-
 'use client';
 
-// This is the main client component holding the offline UI.
+import { useState, useEffect } from 'react';
 
+// This is the main client component holding the offline UI.
 export default function OfflinePageClient() {
-  // Button handlers are defined inside the component and only call browser APIs when executed
+  const [isClient, setIsClient] = useState(false);
+
+  // This effect runs only on the client, after the component has mounted.
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Button handlers that can now safely use browser APIs.
   function handleReload() {
-    if (typeof window !== "undefined") {
-      window.location.reload();
-    }
+    window.location.reload();
   }
 
   function handleGoBack() {
-    if (typeof window !== "undefined" && window.history) {
-      window.history.back();
-    }
+    window.history.back();
   }
 
   function handleCheckConnection() {
-    if (typeof window !== "undefined") {
-      if (window.navigator?.onLine) {
-        window.alert('You are online!');
-      } else {
-        window.alert('Still offline');
-      }
+    if (navigator.onLine) {
+      alert('You are online!');
+    } else {
+      alert('Still offline');
     }
   }
 
@@ -48,15 +49,16 @@ export default function OfflinePageClient() {
             You&apos;re Currently Offline
           </h2>
           <p className="text-base sm:text-lg text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
-            It looks like you&apos;ve lost your internet connection. Don&apos;t worry—once
-            you&apos;re back online, you&apos;ll be able to access all of our amazing
-            content again!
+            It looks like you&apos;ve lost your internet connection. Don&apos;t
+            worry—once you&apos;re back online, you&apos;ll be able to access
+            all of our amazing content again!
           </p>
           {/* Primary CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
             <button
               onClick={handleReload}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg transition-all duration-200"
+              disabled={!isClient}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Try Again"
             >
               <svg
@@ -77,7 +79,8 @@ export default function OfflinePageClient() {
             </button>
             <button
               onClick={handleGoBack}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium text-blue-700 bg-white border border-blue-200 hover:bg-blue-50 rounded-lg shadow-lg transition-all duration-200"
+              disabled={!isClient}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium text-blue-700 bg-white border border-blue-200 hover:bg-blue-50 rounded-lg shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Go Back"
             >
               <svg
@@ -107,7 +110,8 @@ export default function OfflinePageClient() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button
               onClick={handleCheckConnection}
-              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-green-700 bg-white border border-green-200 hover:bg-green-50 rounded-lg transition-all duration-200"
+              disabled={!isClient}
+              className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-green-700 bg-white border border-green-200 hover:bg-green-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-label="Check Connection"
             >
               <svg

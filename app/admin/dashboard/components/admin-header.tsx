@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, Menu, ExternalLink, LogOut } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
+import { ThemeToggle } from "./theme-toggle" // <-- Add this import
 
 interface AdminHeaderProps {
   onLogout: () => void
@@ -14,7 +15,7 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHeaderProps) {
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
         {/* Left Section: Sidebar toggle, Logo, Search */}
         <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -37,7 +38,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
           {/* Desktop search input */}
           <div className="hidden md:block flex-1 max-w-xs ml-4">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
               <Input
                 placeholder="Search..."
                 className="pl-10 w-full"
@@ -52,7 +53,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
           {/* Mobile search input (below md) */}
           <div className="w-full md:hidden order-2 flex-1">
             <div className="relative w-full mt-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" />
               <Input
                 placeholder="Search..."
                 className="pl-10 w-full"
@@ -72,6 +73,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
           </Button>
 
           <NotificationBell />
+          <ThemeToggle /> {/* Add theme toggle button here */}
 
           {/* Avatar and Admin info */}
           <div className="flex items-center gap-3">
@@ -83,7 +85,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
             </Avatar>
             <div className="hidden md:block">
               <p className="text-sm font-medium">Admin</p>
-              <p className="text-xs text-gray-500">Flavor Studios</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Flavor Studios</p>
             </div>
           </div>
 
@@ -92,7 +94,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
             variant="ghost"
             size="sm"
             onClick={onLogout}
-            className="text-red-600 hover:text-red-700"
+            className="text-red-600 hover:text-red-700 dark:text-red-500"
             aria-label="Logout"
           >
             <LogOut className="h-4 w-4" />

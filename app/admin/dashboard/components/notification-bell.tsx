@@ -32,7 +32,6 @@ export function NotificationBell() {
           setNotifications(data.notifications || [])
           setUnreadCount(data.notifications?.filter((n: Notification) => !n.read).length || 0)
         } else {
-          // No notifications available
           setNotifications([])
           setUnreadCount(0)
         }
@@ -46,8 +45,6 @@ export function NotificationBell() {
     }
 
     loadNotifications()
-
-    // Set up real-time updates every 30 seconds
     const interval = setInterval(loadNotifications, 30000)
     return () => clearInterval(interval)
   }, [])
@@ -72,7 +69,6 @@ export function NotificationBell() {
       await fetch("/api/admin/notifications/mark-all-read", {
         method: "POST",
       })
-
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
       setUnreadCount(0)
     } catch (error) {
@@ -96,19 +92,24 @@ export function NotificationBell() {
   const getTypeColor = (type: string) => {
     switch (type) {
       case "comment":
-        return "bg-blue-100 text-blue-600"
+        return "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300"
       case "contact":
-        return "bg-green-100 text-green-600"
+        return "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300"
       case "flagged":
-        return "bg-red-100 text-red-600"
+        return "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300"
       default:
-        return "bg-gray-100 text-gray-600"
+        return "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
     }
   }
 
   return (
     <div className="relative">
-      <Button variant="ghost" size="sm" className="relative" onClick={() => setIsOpen(!isOpen)}>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="relative text-gray-700 dark:text-gray-200"
+        onClick={() => setIsOpen(!isOpen)}
+      >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
           <motion.span
@@ -138,11 +139,11 @@ export function NotificationBell() {
               transition={{ duration: 0.2 }}
               className="absolute right-0 top-full mt-2 w-80 z-50"
             >
-              <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
+              <Card className="shadow-lg border-0 bg-white/95 dark:bg-gray-900 backdrop-blur-sm">
                 <CardContent className="p-0">
-                  <div className="p-4 border-b bg-gradient-to-r from-purple-50 to-blue-50">
+                  <div className="p-4 border-b bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900">Notifications</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notifications</h3>
                       <div className="flex items-center gap-2">
                         {unreadCount > 0 && (
                           <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs">
@@ -160,10 +161,10 @@ export function NotificationBell() {
                     {loading ? (
                       <div className="p-8 text-center">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto"></div>
-                        <p className="text-sm text-gray-500 mt-2">Loading notifications...</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Loading notifications...</p>
                       </div>
                     ) : notifications.length === 0 ? (
-                      <div className="p-8 text-center text-gray-500">
+                      <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                         <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
                         <p>No notifications yet</p>
                         <p className="text-xs mt-1">Real notifications will appear here</p>
@@ -174,8 +175,8 @@ export function NotificationBell() {
                           key={notification.id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className={`p-4 border-b last:border-b-0 cursor-pointer hover:bg-gray-50 transition-colors ${
-                            !notification.read ? "bg-blue-50/50" : ""
+                          className={`p-4 border-b last:border-b-0 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                            !notification.read ? "bg-blue-50/50 dark:bg-blue-950/50" : ""
                           }`}
                           onClick={() => markAsRead(notification.id)}
                         >
@@ -185,11 +186,11 @@ export function NotificationBell() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <p className="font-medium text-sm text-gray-900">{notification.title}</p>
+                                <p className="font-medium text-sm text-gray-900 dark:text-gray-100">{notification.title}</p>
                                 {!notification.read && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
                               </div>
-                              <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                              <p className="text-xs text-gray-400 mt-2">
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{notification.message}</p>
+                              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                                 {new Date(notification.timestamp).toLocaleString()}
                               </p>
                             </div>

@@ -1,29 +1,58 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
 import { usePathname } from "next/navigation"
+import dynamic from "next/dynamic"
 import AdminAuthGuard from "@/components/AdminAuthGuard"
 import { AdminSidebar } from "./components/admin-sidebar"
-import { DashboardOverview } from "./components/dashboard-overview"
-import { BlogManager } from "./components/blog-manager"
-import { VideoManager } from "./components/video-manager"
-import { CommentManager } from "./components/comment-manager"
-import { SystemTools } from "./components/system-tools"
-// import { UserRoleManager } from "./components/user-role-manager" // ❌ No longer used for "users"
-import UserManagement from "./components/user-management/UserManagement" // ✅ NEW: The correct import
 import { AdminHeader } from "./components/admin-header"
-import CategoryManager from "@/components/admin/category/CategoryManager"
 import { RoleProvider } from "./contexts/role-context"
-import { EmailInbox } from "./components/email-inbox"
 import { getAuth, signOut } from "firebase/auth"
 import app, { firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Spinner } from "@/components/ui/spinner"
 
-// ✨ ADD: MediaLibrary import for Media tab
-import MediaLibrary from "./components/media/MediaLibrary"
-
-// ✨ ADD: Applications import (renamed from CareerApplications for clarity)
-import CareerApplications from "./components/career-applications" // Keep component as is if not renamed yet
+// --- Dynamically imported dashboard sections for code splitting ---
+const DashboardOverview = dynamic(() =>
+  import("./components/dashboard-overview").then(m => m.DashboardOverview),
+  { suspense: true }
+)
+const BlogManager = dynamic(() =>
+  import("./components/blog-manager").then(m => m.BlogManager),
+  { suspense: true }
+)
+const VideoManager = dynamic(() =>
+  import("./components/video-manager").then(m => m.VideoManager),
+  { suspense: true }
+)
+const CommentManager = dynamic(() =>
+  import("./components/comment-manager").then(m => m.CommentManager),
+  { suspense: true }
+)
+const SystemTools = dynamic(() =>
+  import("./components/system-tools").then(m => m.SystemTools),
+  { suspense: true }
+)
+const UserManagement = dynamic(() =>
+  import("./components/user-management/UserManagement"),
+  { suspense: true }
+)
+const CategoryManager = dynamic(() =>
+  import("@/components/admin/category/CategoryManager"),
+  { suspense: true }
+)
+const EmailInbox = dynamic(() =>
+  import("./components/email-inbox").then(m => m.EmailInbox),
+  { suspense: true }
+)
+const MediaLibrary = dynamic(() =>
+  import("./components/media/MediaLibrary"),
+  { suspense: true }
+)
+const CareerApplications = dynamic(() =>
+  import("./components/career-applications"),
+  { suspense: true }
+)
 
 interface AdminDashboardPageClientProps {
   initialSection?: string
@@ -36,7 +65,7 @@ export default function AdminDashboardPageClient({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [error, setError] = useState("")
-  const pathname = usePathname() // Current Next.js App Router path
+  const pathname = usePathname()
 
   // --- On mount, mark as ready ---
   useEffect(() => {
@@ -58,16 +87,14 @@ export default function AdminDashboardPageClient({
 
   // --- Keep activeSection in sync with the current route ---
   useEffect(() => {
-    // Map sidebar routes to their section IDs
     const map = [
       { id: "overview", href: "/admin/dashboard" },
       { id: "blogs", href: "/admin/dashboard/blog-posts" },
       { id: "videos", href: "/admin/dashboard/videos" },
-      // ✨ Media tab mapping
       { id: "media", href: "/admin/dashboard/media" },
       { id: "categories", href: "/admin/dashboard/categories" },
       { id: "comments", href: "/admin/dashboard/comments" },
-      { id: "applications", href: "/admin/dashboard/applications" }, // ← NEW
+      { id: "applications", href: "/admin/dashboard/applications" },
       { id: "inbox", href: "/admin/dashboard/inbox" },
       { id: "users", href: "/admin/dashboard/users" },
       { id: "settings", href: "/admin/dashboard/settings" },
@@ -126,10 +153,8 @@ export default function AdminDashboardPageClient({
   if (!mounted) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex items-center space-x-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-          <span className="text-lg font-medium text-gray-700">Loading Admin Dashboard...</span>
-        </div>
+        <Spinner />
+        <span className="text-lg font-medium text-gray-700 ml-3">Loading Admin Dashboard...</span>
       </div>
     )
   }
@@ -143,21 +168,20 @@ export default function AdminDashboardPageClient({
         return <BlogManager />
       case "videos":
         return <VideoManager />
-      // ✨ Media tab case
       case "media":
         return <MediaLibrary />
       case "categories":
         return <CategoryManager />
       case "comments":
         return <CommentManager />
-      case "applications": // ← NEW
+      case "applications":
         return <CareerApplications />
       case "inbox":
         return <EmailInbox />
       case "system":
         return <SystemTools />
       case "users":
-        return <UserManagement /> // ✅ Swapped in the new User Management page!
+        return <UserManagement />
       default:
         return <DashboardOverview />
     }
@@ -186,7 +210,9 @@ export default function AdminDashboardPageClient({
                     </AlertDescription>
                   </Alert>
                 )}
-                {renderContent()}
+                <Suspense fallback={<Spinner />}>
+                  {renderContent()}
+                </Suspense>
               </div>
             </main>
           </div>

@@ -6,28 +6,29 @@ import { useState, useEffect } from 'react';
 export default function OfflinePageClient() {
   const [isClient, setIsClient] = useState(false);
   const [connectionMessage, setConnectionMessage] = useState('');
+  // Handlers are initialized as no-ops; will be set in useEffect
+  const [handleReload, setHandleReload] = useState<() => void>(() => () => {});
+  const [handleGoBack, setHandleGoBack] = useState<() => void>(() => () => {});
+  const [handleCheckConnection, setHandleCheckConnection] = useState<() => void>(() => () => {});
 
   // This effect runs only on the client, after the component has mounted.
   useEffect(() => {
     setIsClient(true);
+
+    setHandleReload(() => () => {
+      window.location.reload();
+    });
+    setHandleGoBack(() => () => {
+      window.history.back();
+    });
+    setHandleCheckConnection(() => () => {
+      if (navigator.onLine) {
+        setConnectionMessage('You are online!');
+      } else {
+        setConnectionMessage('Still offline');
+      }
+    });
   }, []);
-
-  // Button handlers that can now safely use browser APIs.
-  function handleReload() {
-    if (typeof window !== 'undefined') window.location.reload();
-  }
-
-  function handleGoBack() {
-    if (typeof window !== 'undefined') window.history.back();
-  }
-
-  function handleCheckConnection() {
-    if (typeof navigator !== 'undefined' && navigator.onLine) {
-      setConnectionMessage('You are online!');
-    } else {
-      setConnectionMessage('Still offline');
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4 py-8">

@@ -37,7 +37,7 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
   // --- Updated to use the new logout endpoint ---
   const handleLogout = async () => {
     try {
-      await fetch("/api/admin/logout", { method: "POST" }) // <<--- UPDATED ENDPOINT
+      await fetch("/api/admin/logout", { method: "POST" })
       window.location.href = "/admin/login"
     } catch (error) {
       console.error("Logout failed:", error)
@@ -46,17 +46,17 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="flex items-center space-x-3">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="text-lg font-medium text-gray-700">Loading Admin Dashboard...</span>
+          <span className="text-lg font-medium text-gray-700 dark:text-gray-300">Loading Admin Dashboard...</span>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
       <AdminSidebar
         activeSection={activeSection}
         setActiveSection={setActiveSection}

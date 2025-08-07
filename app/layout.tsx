@@ -15,6 +15,7 @@ import { BackToTop } from "@/components/back-to-top";
 import PwaServiceWorker from "@/components/PwaServiceWorker";
 import Toaster from "@/components/ui/toaster";
 import AdblockBanner from "@/components/AdblockBanner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -230,67 +231,69 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* END GTM (HEAD) */}
       </head>
       <body className="antialiased">
-        <NextIntlProvider
-          locale={locale}
-          messages={messages}
-          onError={(error: unknown) => {
-            if (
-              typeof error === "object" &&
-              error !== null &&
-              "code" in error &&
-              (error as { code: string }).code === "MISSING_MESSAGE"
-            ) {
-              console.warn(error);
-            } else {
-              throw error;
-            }
-          }}
-        >
-          {/* --- ACCESSIBILITY: Skip-link to footer navigation (translated) --- */}
-          <a
-            href="#footer-navigation"
-            className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-black text-white p-2"
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <NextIntlProvider
+            locale={locale}
+            messages={messages}
+            onError={(error: unknown) => {
+              if (
+                typeof error === "object" &&
+                error !== null &&
+                "code" in error &&
+                (error as { code: string }).code === "MISSING_MESSAGE"
+              ) {
+                console.warn(error);
+              } else {
+                throw error;
+              }
+            }}
           >
-            {/* Use translated skip link if available */}
-            {messages?.layout?.skipToFooter || "Skip to footer navigation"}
-          </a>
+            {/* --- ACCESSIBILITY: Skip-link to footer navigation (translated) --- */}
+            <a
+              href="#footer-navigation"
+              className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-black text-white p-2"
+            >
+              {/* Use translated skip link if available */}
+              {messages?.layout?.skipToFooter || "Skip to footer navigation"}
+            </a>
 
-          {/* GTM (NOSCRIPT) */}
-          <noscript>
-            <iframe
-              src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-              title="Google Tag Manager NoScript"
-            />
-          </noscript>
-          {/* END GTM (NOSCRIPT) */}
+            {/* GTM (NOSCRIPT) */}
+            <noscript>
+              <iframe
+                src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
+                height="0"
+                width="0"
+                style={{ display: "none", visibility: "hidden" }}
+                title="Google Tag Manager NoScript"
+              />
+            </noscript>
+            {/* END GTM (NOSCRIPT) */}
 
-          <Toaster />
+            <Toaster />
 
-          {/* ⭐️ AdBlock Support Banner (only for non-admin routes) */}
-          {!isAdmin && <AdblockBanner />}
+            {/* ⭐️ AdBlock Support Banner (only for non-admin routes) */}
+            {!isAdmin && <AdblockBanner />}
 
-          {!isAdmin && (
-            <Header
-              blogCategories={blogCategories}
-              videoCategories={videoCategories}
-            />
-          )}
+            {!isAdmin && (
+              <Header
+                blogCategories={blogCategories}
+                videoCategories={videoCategories}
+              />
+            )}
 
-          <main>{children}</main>
+            <main>{children}</main>
 
-          {!isAdmin && (
-            <>
-              <Footer />
-              <BackToTop />
-              <PwaServiceWorker />
-              {/* ⭐️ LOAD the stealth detection script only for non-admin */}
-              <Script src="/js/_support_banner.js" strategy="afterInteractive" />
-            </>
-          )}
-        </NextIntlProvider>
+            {!isAdmin && (
+              <>
+                <Footer />
+                <BackToTop />
+                <PwaServiceWorker />
+                {/* ⭐️ LOAD the stealth detection script only for non-admin */}
+                <Script src="/js/_support_banner.js" strategy="afterInteractive" />
+              </>
+            )}
+          </NextIntlProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,9 +1,31 @@
 'use client';
 
 // This is the main client component holding the offline UI.
-// No JSON-LD or SEO scripts are needed here!
 
 export default function OfflinePageClient() {
+  // Button handlers are defined inside the component and only call browser APIs when executed
+  function handleReload() {
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
+  }
+
+  function handleGoBack() {
+    if (typeof window !== "undefined" && window.history) {
+      window.history.back();
+    }
+  }
+
+  function handleCheckConnection() {
+    if (typeof window !== "undefined" && window.navigator) {
+      if (window.navigator.onLine) {
+        alert('You are online!');
+      } else {
+        alert('Still offline');
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center px-4 py-8">
       <div className="max-w-4xl mx-auto text-center w-full">
@@ -32,7 +54,7 @@ export default function OfflinePageClient() {
           {/* Primary CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-6 sm:mb-8">
             <button
-              onClick={() => window.location.reload()}
+              onClick={handleReload}
               className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-lg transition-all duration-200"
               aria-label="Try Again"
             >
@@ -53,7 +75,7 @@ export default function OfflinePageClient() {
               Try Again
             </button>
             <button
-              onClick={() => window.history.back()}
+              onClick={handleGoBack}
               className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium text-blue-700 bg-white border border-blue-200 hover:bg-blue-50 rounded-lg shadow-lg transition-all duration-200"
               aria-label="Go Back"
             >
@@ -83,11 +105,7 @@ export default function OfflinePageClient() {
           </h3>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button
-              onClick={() =>
-                typeof window !== "undefined" && window.navigator.onLine
-                  ? alert('You are online!')
-                  : alert('Still offline')
-              }
+              onClick={handleCheckConnection}
               className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-green-700 bg-white border border-green-200 hover:bg-green-50 rounded-lg transition-all duration-200"
               aria-label="Check Connection"
             >

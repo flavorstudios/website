@@ -57,210 +57,210 @@
     "language": "भाषा"
   },
   "contact": {
-    "badge": "Connect With Us",
-    "title": "Get In Touch",
-    "intro": "Whether you have a question about our content, want to collaborate, or just want to say hello, we're here to help. Fill out the form and we'll get back to you as soon as possible.",
+    "badge": "हमसे जुड़ें",
+    "title": "संपर्क करें",
+    "intro": "अगर आपके पास हमारे कंटेंट को लेकर कोई सवाल है, सहयोग करना चाहते हैं या सिर्फ़ नमस्ते कहना चाहते हैं, तो हम आपकी मदद के लिए यहाँ हैं। फ़ॉर्म भरें और हम जल्द से जल्द आपसे संपर्क करेंगे।",
     "info": {
-      "title": "Contact Information",
+      "title": "संपर्क जानकारी",
       "email": {
-        "title": "Email",
-        "description": "For general inquiries and support"
+        "title": "ईमेल",
+        "description": "सामान्य पूछताछ और सहायता के लिए"
       },
       "social": {
-        "title": "Social Media",
-        "description": "DM us on any social platform"
+        "title": "सोशल मीडिया",
+        "description": "किसी भी प्लेटफार्म पर हमें मैसेज करें"
       },
       "response": {
-        "title": "Response Time",
-        "details": "Within 24-48 hours during business days (Monday-Friday)",
-        "description": "We try to respond as quickly as possible"
+        "title": "उत्तर समय",
+        "details": "कार्यदिवसों में 24-48 घंटे के भीतर (सोमवार-शुक्रवार)",
+        "description": "हम यथाशीघ्र उत्तर देने का प्रयास करते हैं"
       }
     },
     "business": {
-      "title": "Business Inquiries",
-      "description": "For sponsorships, business partnerships, or collaboration opportunities:"
+      "title": "व्यापारिक पूछताछ",
+      "description": "प्रायोजन, व्यापारिक साझेदारी या सहयोग के अवसरों के लिए:"
     },
     "follow": {
-      "title": "Follow Us",
-      "description": "Connect with us on social media for updates and community discussions."
+      "title": "हमें फ़ॉलो करें",
+      "description": "अपडेट और समुदाय चर्चा के लिए सोशल मीडिया पर जुड़ें।"
     },
     "form": {
-      "title": "Send us a Message",
-      "description": "Fill out the form below and we'll get back to you as soon as possible.",
+      "title": "हमें संदेश भेजें",
+      "description": "नीचे दिया गया फ़ॉर्म भरें और हम जल्द से जल्द आपसे संपर्क करेंगे।",
       "success": {
-        "title": "Message sent successfully!",
-        "description": "We'll get back to you within 24-48 hours."
+        "title": "संदेश सफलतापूर्वक भेजा गया!",
+        "description": "हम आपसे 24-48 घंटे के भीतर संपर्क करेंगे।"
       },
       "flagged": {
-        "title": "Message Submitted — Needs Review",
-        "description": "Thank you for your message! Our system flagged it for moderation and a team member will review and respond if appropriate."
+        "title": "संदेश सबमिट — समीक्षा हेतु",
+        "description": "आपके संदेश के लिए धन्यवाद! हमारे सिस्टम ने इसे समीक्षा के लिए चिह्नित किया है, और हमारी टीम का सदस्य इसे जाँचकर उचित होने पर उत्तर देगा।"
       },
       "error": {
-        "title": "Failed to send message",
-        "description": "Please try again or contact us directly via email."
+        "title": "संदेश भेजने में विफल",
+        "description": "कृपया पुनः प्रयास करें या सीधे ईमेल द्वारा संपर्क करें।"
       },
       "fields": {
         "firstName": {
-          "label": "First Name *",
-          "placeholder": "Your first name",
+          "label": "पहला नाम *",
+          "placeholder": "आपका पहला नाम",
           "error": {
-            "required": "First name is required"
+            "required": "पहला नाम आवश्यक है"
           }
         },
         "lastName": {
-          "label": "Last Name *",
-          "placeholder": "Your last name",
+          "label": "अंतिम नाम *",
+          "placeholder": "आपका अंतिम नाम",
           "error": {
-            "required": "Last name is required"
+            "required": "अंतिम नाम आवश्यक है"
           }
         },
         "email": {
-          "label": "Email *",
+          "label": "ईमेल *",
           "placeholder": "your.email@example.com",
           "error": {
-            "required": "Email is required",
-            "invalid": "Please enter a valid email address"
+            "required": "ईमेल आवश्यक है",
+            "invalid": "कृपया एक मान्य ईमेल पता दर्ज करें"
           }
         },
         "subject": {
-          "label": "Subject *",
-          "placeholder": "Select a topic",
+          "label": "विषय *",
+          "placeholder": "कोई विषय चुनें",
           "error": {
-            "required": "Please select a subject"
+            "required": "कृपया विषय चुनें"
           },
           "options": {
-            "general": "General Inquiry",
-            "collaboration": "Collaboration",
-            "business": "Business Partnership",
-            "press": "Press & Media",
-            "technical": "Technical Support",
-            "feedback": "Feedback",
-            "other": "Other"
+            "general": "सामान्य पूछताछ",
+            "collaboration": "सहयोग",
+            "business": "व्यापारिक साझेदारी",
+            "press": "प्रेस और मीडिया",
+            "technical": "तकनीकी सहायता",
+            "feedback": "प्रतिक्रिया",
+            "other": "अन्य"
           }
         },
         "message": {
-          "label": "Message *",
-          "placeholder": "Tell us more about your inquiry...",
+          "label": "संदेश *",
+          "placeholder": "अपनी पूछताछ के बारे में विस्तार से बताएं...",
           "error": {
-            "required": "Message is required",
-            "minLength": "Message must be at least 10 characters long"
+            "required": "संदेश आवश्यक है",
+            "minLength": "संदेश कम से कम 10 अक्षर का होना चाहिए"
           }
         },
         "privacy": {
-          "label": "I agree to the <privacyPolicy>Privacy Policy</privacyPolicy> *",
+          "label": "मैं <privacyPolicy>गोपनीयता नीति</privacyPolicy> से सहमत हूँ *",
           "error": {
-            "required": "You must accept the privacy policy"
+            "required": "आपको गोपनीयता नीति स्वीकार करनी होगी"
           }
         }
       },
       "buttons": {
-        "sending": "Sending...",
-        "send": "Send Message"
+        "sending": "भेजा जा रहा है...",
+        "send": "संदेश भेजें"
       }
     },
     "expectations": {
-      "title": "What to Expect",
+      "title": "आप क्या अपेक्षा कर सकते हैं?",
       "items": {
-        "1": "You'll receive an email confirmation immediately.",
-        "2": "Our team will review your message within 24 hours.",
-        "3": "We'll respond with helpful information or next steps.",
-        "4": "For complex inquiries, we may schedule a follow-up call."
+        "1": "आपको तुरंत ईमेल पुष्टिकरण मिलेगा।",
+        "2": "हमारी टीम 24 घंटे के भीतर आपका संदेश देखेगी।",
+        "3": "हम उपयोगी जानकारी या अगले कदमों के साथ उत्तर देंगे।",
+        "4": "जटिल मामलों के लिए, हम आगे की कॉल निर्धारित कर सकते हैं।"
       }
     },
     "process": {
-      "title": "Our Contact Process",
+      "title": "हमारी संपर्क प्रक्रिया",
       "steps": {
         "1": {
-          "title": "Submit Your Message",
-          "description": "Fill out our contact form with your details and inquiry. Be as specific as possible to help us understand your needs."
+          "title": "अपना संदेश भेजें",
+          "description": "अपने विवरण और पूछताछ के साथ हमारा फ़ॉर्म भरें। कृपया अपनी आवश्यकताओं को समझाने के लिए यथासंभव स्पष्ट रहें।"
         },
         "2": {
-          "title": "Initial Assessment",
-          "description": "You'll receive an immediate confirmation. Our team reviews all inquiries within 24 hours during business days."
+          "title": "प्रारंभिक आकलन",
+          "description": "आपको तुरंत पुष्टि मिलेगी। हमारी टीम सभी पूछताछ कार्यदिवसों में 24 घंटे के भीतर देखती है।"
         },
         "3": {
-          "title": "Personalized Response",
-          "description": "We'll respond with tailored information addressing your specific questions or concerns."
+          "title": "व्यक्तिगत उत्तर",
+          "description": "हम आपके विशिष्ट प्रश्नों या चिंताओं का समाधान करने वाली जानकारी के साथ उत्तर देंगे।"
         },
         "4": {
-          "title": "Ongoing Support",
-          "description": "For complex matters, we may schedule additional communication to ensure your inquiry is fully resolved."
+          "title": "निरंतर सहायता",
+          "description": "जटिल मामलों के लिए, हम सुनिश्चित करेंगे कि आपकी पूछताछ पूरी तरह हल हो सके, इसके लिए अतिरिक्त संवाद कर सकते हैं।"
         }
       }
     },
     "cta": {
-      "title": "Need Quick Answers?",
-      "description": "Before reaching out, check our comprehensive FAQ page where we've answered the most common questions about our content, collaborations, and services.",
-      "button": "Browse FAQ"
+      "title": "जल्दी उत्तर चाहिए?",
+      "description": "हमारे कंटेंट, सहयोग और सेवाओं से जुड़े सामान्य प्रश्नों के उत्तर के लिए पहले हमारी व्यापक FAQ पेज देखें।",
+      "button": "FAQ देखें"
     }
   },
   "support": {
-    "badge": "Independent Animation Studio",
-    "title": "Support Our Creative Vision",
-    "description": "We're committed to crafting emotionally powerful anime, original 3D animations, and meaningful storytelling experiences — all built independently using Blender and open-source tools.",
-    "buyCoffee": "Buy Me a Coffee",
-    "contact": "Contact",
-    "faq": "FAQ",
-    "securePayments": "Secure payments processed through Buy Me a Coffee",
+    "badge": "स्वतंत्र एनीमेशन स्टूडियो",
+    "title": "हमारी रचनात्मक दृष्टि का समर्थन करें",
+    "description": "हम संवेदनशील और प्रभावशाली एनीमे, मूल 3D एनीमेशन और अर्थपूर्ण कहानी अनुभवों के निर्माण के लिए प्रतिबद्ध हैं — यह सब Blender और ओपन-सोर्स टूल्स से स्वतंत्र रूप से बनाया गया है।",
+    "buyCoffee": "मुझे कॉफ़ी खरीदें",
+    "contact": "संपर्क",
+    "faq": "प्रश्नोत्तर",
+    "securePayments": "Buy Me a Coffee के माध्यम से सुरक्षित भुगतान",
     "impact": {
-      "title": "Your Support Makes a Difference",
-      "description": "Every contribution directly impacts our ability to create and share amazing content",
+      "title": "आपका समर्थन फर्क़ लाता है",
+      "description": "हर योगदान हमारी अद्भुत सामग्री बनाने और साझा करने की क्षमता को सीधे प्रभावित करता है",
       "items": {
         "creativeFreedom": {
-          "title": "Creative Freedom",
-          "description": "Maintain creative independence and artistic integrity in all our projects."
+          "title": "रचनात्मक स्वतंत्रता",
+          "description": "सभी प्रोजेक्ट्स में रचनात्मक स्वतंत्रता और कलात्मक अखंडता बनाए रखें।"
         },
         "qualityContent": {
-          "title": "Quality Content",
-          "description": "Invest in better tools, training, and resources to elevate animation quality."
+          "title": "गुणवत्ता युक्त सामग्री",
+          "description": "एनीमेशन गुणवत्ता को बेहतर करने के लिए बेहतरीन टूल्स, प्रशिक्षण और संसाधनों में निवेश करें।"
         },
         "communityGrowth": {
-          "title": "Community Growth",
-          "description": "Build a thriving community of animation enthusiasts and independent creators."
+          "title": "समुदाय का विकास",
+          "description": "एनीमेशन प्रेमियों और स्वतंत्र निर्माताओं के समृद्ध समुदाय का निर्माण करें।"
         }
       }
     },
     "quote": {
-      "text": "\"If you believe in the value of independent animation and want to support our work, your contribution can help us continue producing high-quality content and grow our creative mission.\""
+      "text": "\"अगर आप स्वतंत्र एनीमेशन के महत्व में विश्वास रखते हैं और हमारे काम का समर्थन करना चाहते हैं, तो आपका योगदान हमें उच्च गुणवत्ता वाली सामग्री बनाते रहने और हमारी रचनात्मक मिशन को आगे बढ़ाने में मदद कर सकता है।\""
     },
     "mainSupport": {
-      "title": "Ready to Support Our Journey?",
-      "description": "Every contribution, no matter the size, helps us bring our creative vision to life",
-      "supportUs": "Support Us Today",
-      "supportUsDescription": "Your support is processed securely through Buy Me a Coffee and helps us continue creating amazing content",
-      "button": "Buy Me a Coffee",
+      "title": "क्या आप हमारे सफर का समर्थन करने के लिए तैयार हैं?",
+      "description": "हर योगदान, चाहे वह जितना भी छोटा हो, हमारी रचनात्मक दृष्टि को जीवन देने में मदद करता है",
+      "supportUs": "आज ही समर्थन करें",
+      "supportUsDescription": "आपका समर्थन Buy Me a Coffee के माध्यम से सुरक्षित रूप से संसाधित होता है और हमें अद्भुत सामग्री बनाते रहने में मदद करता है",
+      "button": "मुझे कॉफ़ी खरीदें",
       "benefits": {
-        "securePayments": "Secure payments",
-        "instantProcessing": "Instant processing",
-        "noAccountRequired": "No account required"
+        "securePayments": "सुरक्षित भुगतान",
+        "instantProcessing": "तत्काल प्रोसेसिंग",
+        "noAccountRequired": "कोई खाता आवश्यक नहीं"
       }
     },
     "otherWays": {
-      "title": "Other Ways to Help",
-      "description": "Connect with us across our social platforms and help grow our community",
+      "title": "सहायता के अन्य तरीके",
+      "description": "हमारे सभी सोशल प्लेटफार्मों पर हमारे साथ जुड़ें और समुदाय को आगे बढ़ाने में मदद करें",
       "shareContent": {
-        "title": "Share Our Content",
-        "description": "Help us reach more anime fans on YouTube",
-        "action": "Visit YouTube"
+        "title": "हमारी सामग्री साझा करें",
+        "description": "YouTube पर और अधिक एनीमे प्रेमियों तक पहुंचने में हमारी मदद करें",
+        "action": "YouTube देखें"
       },
       "leaveReviews": {
-        "title": "Leave Reviews",
-        "description": "Join discussions on our Reddit community",
-        "action": "Join Reddit"
+        "title": "समीक्षा लिखें",
+        "description": "हमारे Reddit समुदाय में चर्चा में शामिल हों",
+        "action": "Reddit से जुड़ें"
       },
       "joinCommunity": {
-        "title": "Join Community",
-        "description": "Connect with us on Discord",
-        "action": "Join Discord"
+        "title": "समुदाय से जुड़ें",
+        "description": "Discord पर हमारे साथ जुड़ें",
+        "action": "Discord से जुड़ें"
       }
     },
     "followUs": {
-      "title": "Follow us"
+      "title": "हमें फ़ॉलो करें"
     },
     "faqSection": {
-      "title": "Have Questions?",
-      "description": "Find comprehensive answers about supporting our work, our creative process, and how your contributions make a difference",
-      "button": "View FAQ Page"
+      "title": "क्या आपके पास प्रश्न हैं?",
+      "description": "हमारे काम को समर्थन देने, हमारी रचनात्मक प्रक्रिया और आपके योगदान का असर कैसे पड़ता है, इसके बारे में विस्तृत उत्तर पाएं",
+      "button": "FAQ पेज देखें"
     }
   }
 }

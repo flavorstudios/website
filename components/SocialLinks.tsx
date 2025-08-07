@@ -1,9 +1,10 @@
 "use client";
 
-import SocialIcons, { defaultPlatforms, type SocialPlatform } from "@/components/SocialIcons";
+import SocialIcons from "@/components/SocialIcons";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { SOCIAL_PLATFORMS, type SocialPlatform } from "@/lib/constants";
 
 interface SocialLinksProps {
   platforms?: SocialPlatform[];
@@ -12,7 +13,7 @@ interface SocialLinksProps {
 }
 
 export function SocialLinks({
-  platforms = defaultPlatforms,
+  platforms = SOCIAL_PLATFORMS,   // Default is always the canonical array
   showLabels = false,
   className,
 }: SocialLinksProps) {

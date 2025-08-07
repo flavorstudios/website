@@ -23,6 +23,7 @@ import {
   SITE_LOGO_URL,
   SITE_BRAND_TWITTER,
   SITE_DESCRIPTION,
+  SOCIAL_LINKS, // ⬅️ Now imported!
 } from "@/lib/constants";
 
 // i18n additions
@@ -69,7 +70,7 @@ export const metadata = {
 };
 
 // --- Global Organization Schema (JSON-LD) ---
-// 🟩 Official platforms only, in audit-correct order; GitHub removed, Tumblr/LinkedIn included
+// 🟩 Official platforms only, in audit-correct order, using centralized SOCIAL_LINKS
 const orgSchema = getSchema({
   type: "Organization",
   path: "/",
@@ -77,18 +78,18 @@ const orgSchema = getSchema({
   description: SITE_DESCRIPTION,
   image: SITE_LOGO_URL,
   sameAs: [
-    "https://www.youtube.com/@flavorstudios",
-    "https://www.instagram.com/flavorstudios",
-    "https://twitter.com/flavor_studios",
-    "https://www.facebook.com/flavourstudios",
-    "https://www.linkedin.com/company/flavorstudios",
-    "https://www.threads.net/@flavorstudios",
-    "https://flavorstudios.tumblr.com",
-    "https://discord.gg/agSZAAeRzn",
-    "https://t.me/flavorstudios",
-    "https://www.reddit.com/r/flavorstudios/",
-    "https://bsky.app/profile/flavorstudios.in",
-    "https://mastodon.social/@flavorstudios"
+    SOCIAL_LINKS.youtube,
+    SOCIAL_LINKS.facebook,
+    SOCIAL_LINKS.instagram,
+    SOCIAL_LINKS.linkedin,
+    SOCIAL_LINKS.threads,
+    SOCIAL_LINKS.bluesky,
+    SOCIAL_LINKS.reddit,
+    SOCIAL_LINKS.x,
+    SOCIAL_LINKS.tumblr,
+    SOCIAL_LINKS.telegram,
+    SOCIAL_LINKS.mastodon,
+    SOCIAL_LINKS.discord,
   ],
 });
 

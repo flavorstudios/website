@@ -5,11 +5,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "@/lib/i18n";
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const t = useTranslations("newsletter");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,19 +31,17 @@ export function NewsletterSignup() {
   };
 
   return (
-    // This 'relative' container is the key to the fix.
-    // It will now reliably contain the success/error messages.
     <div className="relative w-full">
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
         <Input
           type="email"
-          placeholder="Enter your email address"
+          placeholder={t("placeholder")}
           className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-blue-200 focus:bg-white/20"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           disabled={isSubmitting}
-          aria-label="Email address"
+          aria-label={t("ariaLabel")}
         />
         <Button
           type="submit"
@@ -51,10 +51,10 @@ export function NewsletterSignup() {
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-              Subscribing...
+              {t("subscribing")}
             </>
           ) : (
-            "Subscribe"
+            t("subscribe")
           )}
         </Button>
       </form>
@@ -62,13 +62,13 @@ export function NewsletterSignup() {
       {/* Messages are now outside the form but inside the relative container */}
       {submitStatus === "success" && (
         <div className="absolute left-0 right-0 -bottom-8 text-sm text-green-300">
-          Thank you for subscribing!
+          {t("success")}
         </div>
       )}
 
       {submitStatus === "error" && (
         <div className="absolute left-0 right-0 -bottom-8 text-sm text-red-300">
-          Something went wrong. Please try again.
+          {t("error")}
         </div>
       )}
     </div>

@@ -7,20 +7,7 @@
   "SITE_DEFAULT_IMAGE": "https://flavorstudios.in/cover.jpg",
   "SITE_BRAND_TWITTER": "@flavor_studios",
   "SITE_LOGO_URL": "https://flavorstudios.in/logo.png",
-  "SOCIAL_LINKS": {
-    "youtube": "https://www.youtube.com/@flavorstudios",
-    "instagram": "https://www.instagram.com/flavorstudios",
-    "facebook": "https://www.facebook.com/flavourstudios",
-    "x": "https://twitter.com/flavor_studios",
-    "linkedin": "https://www.linkedin.com/company/flavorstudios",
-    "threads": "https://www.threads.net/@flavorstudios",
-    "tumblr": "https://flavorstudios.tumblr.com",
-    "bluesky": "https://bsky.app/profile/flavorstudios.in",
-    "telegram": "https://t.me/flavorstudios",
-    "mastodon": "https://mastodon.social/@flavorstudios",
-    "discord": "https://discord.gg/agSZAAeRzn",
-    "reddit": "https://www.reddit.com/r/flavorstudios/"
-  },
+
   "CATEGORIES": {
   
     "blog": [

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import ErrorFallback from "@/components/home/ErrorFallback";
 import { formatDate } from "@/lib/date";
+import { useTranslations } from "@/lib/i18n";
 
 interface BlogPost {
   id: string;
@@ -20,13 +21,17 @@ interface BlogPost {
 }
 
 export default function LatestBlogsSection({ posts }: { posts: BlogPost[] }) {
+  const t = useTranslations("home");
+
   return (
     <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Latest Blog Posts</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            {t("latestBlogs.title")}
+          </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Dive into our latest articles covering anime reviews, industry insights, and creative storytelling.
+            {t("latestBlogs.description")}
           </p>
         </div>
         {posts.length > 0 ? (
@@ -66,7 +71,7 @@ export default function LatestBlogsSection({ posts }: { posts: BlogPost[] }) {
                       </span>
                       <span className="text-sm text-gray-500 flex items-center gap-1">
                         <Clock className="h-3 w-3" aria-hidden="true" />
-                        {post.readingTime || "5 min read"}
+                        {post.readingTime || t("latestBlogs.defaultReadingTime")}
                       </span>
                     </div>
                     <CardTitle className="line-clamp-2 text-lg leading-tight">{post.title}</CardTitle>
@@ -79,12 +84,12 @@ export default function LatestBlogsSection({ posts }: { posts: BlogPost[] }) {
             ))}
           </div>
         ) : (
-          <ErrorFallback section="blog posts" />
+          <ErrorFallback section={t("latestBlogs.errorSection")} />
         )}
         <div className="text-center">
           <Button asChild size="lg" variant="outline" className="px-8">
             <Link href="/blog">
-              View All Posts
+              {t("latestBlogs.viewAll")}
               <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>

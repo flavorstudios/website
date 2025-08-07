@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Eye, Clock, ArrowRight } from "lucide-react";
 import ErrorFallback from "@/components/home/ErrorFallback";
 import { formatDate } from "@/lib/date";
+import { useTranslations } from "@/lib/i18n";
 
 interface Video {
   id: string;
@@ -16,13 +17,17 @@ interface Video {
 }
 
 export default function WatchSection({ videos }: { videos: Video[] }) {
+  const t = useTranslations("home");
+
   return (
     <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Watch Our Originals</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            {t("watch.title")}
+          </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Experience our original anime content, behind-the-scenes footage, and exclusive video content.
+            {t("watch.description")}
           </p>
         </div>
         {videos.length > 0 ? (
@@ -56,7 +61,7 @@ export default function WatchSection({ videos }: { videos: Video[] }) {
                     <div className="flex items-center justify-between text-sm text-gray-500">
                       <span className="flex items-center gap-1">
                         <Eye className="h-3 w-3" aria-hidden="true" />
-                        {(video.views || 0).toLocaleString()} views
+                        {(video.views || 0).toLocaleString()} {t("watch.views")}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" aria-hidden="true" />
@@ -69,12 +74,12 @@ export default function WatchSection({ videos }: { videos: Video[] }) {
             ))}
           </div>
         ) : (
-          <ErrorFallback section="video content" />
+          <ErrorFallback section={t("watch.errorSection")} />
         )}
         <div className="text-center">
           <Button asChild size="lg" variant="outline" className="px-8">
             <Link href="/watch">
-              View All Videos
+              {t("watch.viewAll")}
               <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>

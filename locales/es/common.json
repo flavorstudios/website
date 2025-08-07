@@ -57,210 +57,210 @@
     "language": "Idioma"
   },
   "contact": {
-    "badge": "Connect With Us",
-    "title": "Get In Touch",
-    "intro": "Whether you have a question about our content, want to collaborate, or just want to say hello, we're here to help. Fill out the form and we'll get back to you as soon as possible.",
+    "badge": "Conéctate con nosotros",
+    "title": "Ponte en contacto",
+    "intro": "Ya sea que tengas una pregunta sobre nuestro contenido, quieras colaborar o simplemente quieras saludar, estamos aquí para ayudarte. Completa el formulario y te responderemos lo antes posible.",
     "info": {
-      "title": "Contact Information",
+      "title": "Información de Contacto",
       "email": {
-        "title": "Email",
-        "description": "For general inquiries and support"
+        "title": "Correo electrónico",
+        "description": "Para consultas generales y soporte"
       },
       "social": {
-        "title": "Social Media",
-        "description": "DM us on any social platform"
+        "title": "Redes sociales",
+        "description": "Envíanos un mensaje en cualquier plataforma"
       },
       "response": {
-        "title": "Response Time",
-        "details": "Within 24-48 hours during business days (Monday-Friday)",
-        "description": "We try to respond as quickly as possible"
+        "title": "Tiempo de respuesta",
+        "details": "Dentro de 24-48 horas durante días hábiles (lunes a viernes)",
+        "description": "Intentamos responder lo más rápido posible"
       }
     },
     "business": {
-      "title": "Business Inquiries",
-      "description": "For sponsorships, business partnerships, or collaboration opportunities:"
+      "title": "Consultas de negocios",
+      "description": "Para patrocinios, alianzas comerciales u oportunidades de colaboración:"
     },
     "follow": {
-      "title": "Follow Us",
-      "description": "Connect with us on social media for updates and community discussions."
+      "title": "Síguenos",
+      "description": "Conéctate con nosotros en redes sociales para actualizaciones y discusiones de la comunidad."
     },
     "form": {
-      "title": "Send us a Message",
-      "description": "Fill out the form below and we'll get back to you as soon as possible.",
+      "title": "Envíanos un mensaje",
+      "description": "Completa el siguiente formulario y te responderemos lo antes posible.",
       "success": {
-        "title": "Message sent successfully!",
-        "description": "We'll get back to you within 24-48 hours."
+        "title": "¡Mensaje enviado exitosamente!",
+        "description": "Te responderemos dentro de 24-48 horas."
       },
       "flagged": {
-        "title": "Message Submitted — Needs Review",
-        "description": "Thank you for your message! Our system flagged it for moderation and a team member will review and respond if appropriate."
+        "title": "Mensaje enviado — Necesita revisión",
+        "description": "¡Gracias por tu mensaje! Nuestro sistema lo marcó para moderación y un miembro del equipo lo revisará y responderá si es apropiado."
       },
       "error": {
-        "title": "Failed to send message",
-        "description": "Please try again or contact us directly via email."
+        "title": "No se pudo enviar el mensaje",
+        "description": "Por favor, inténtalo de nuevo o contáctanos directamente por correo electrónico."
       },
       "fields": {
         "firstName": {
-          "label": "First Name *",
-          "placeholder": "Your first name",
+          "label": "Nombre *",
+          "placeholder": "Tu nombre",
           "error": {
-            "required": "First name is required"
+            "required": "El nombre es obligatorio"
           }
         },
         "lastName": {
-          "label": "Last Name *",
-          "placeholder": "Your last name",
+          "label": "Apellido *",
+          "placeholder": "Tu apellido",
           "error": {
-            "required": "Last name is required"
+            "required": "El apellido es obligatorio"
           }
         },
         "email": {
-          "label": "Email *",
-          "placeholder": "your.email@example.com",
+          "label": "Correo electrónico *",
+          "placeholder": "tu.email@ejemplo.com",
           "error": {
-            "required": "Email is required",
-            "invalid": "Please enter a valid email address"
+            "required": "El correo electrónico es obligatorio",
+            "invalid": "Por favor ingresa un correo electrónico válido"
           }
         },
         "subject": {
-          "label": "Subject *",
-          "placeholder": "Select a topic",
+          "label": "Asunto *",
+          "placeholder": "Selecciona un tema",
           "error": {
-            "required": "Please select a subject"
+            "required": "Por favor selecciona un asunto"
           },
           "options": {
-            "general": "General Inquiry",
-            "collaboration": "Collaboration",
-            "business": "Business Partnership",
-            "press": "Press & Media",
-            "technical": "Technical Support",
-            "feedback": "Feedback",
-            "other": "Other"
+            "general": "Consulta general",
+            "collaboration": "Colaboración",
+            "business": "Alianza empresarial",
+            "press": "Prensa y medios",
+            "technical": "Soporte técnico",
+            "feedback": "Comentarios",
+            "other": "Otro"
           }
         },
         "message": {
-          "label": "Message *",
-          "placeholder": "Tell us more about your inquiry...",
+          "label": "Mensaje *",
+          "placeholder": "Cuéntanos más sobre tu consulta...",
           "error": {
-            "required": "Message is required",
-            "minLength": "Message must be at least 10 characters long"
+            "required": "El mensaje es obligatorio",
+            "minLength": "El mensaje debe tener al menos 10 caracteres"
           }
         },
         "privacy": {
-          "label": "I agree to the <privacyPolicy>Privacy Policy</privacyPolicy> *",
+          "label": "Acepto la <privacyPolicy>Política de Privacidad</privacyPolicy> *",
           "error": {
-            "required": "You must accept the privacy policy"
+            "required": "Debes aceptar la política de privacidad"
           }
         }
       },
       "buttons": {
-        "sending": "Sending...",
-        "send": "Send Message"
+        "sending": "Enviando...",
+        "send": "Enviar mensaje"
       }
     },
     "expectations": {
-      "title": "What to Expect",
+      "title": "¿Qué puedes esperar?",
       "items": {
-        "1": "You'll receive an email confirmation immediately.",
-        "2": "Our team will review your message within 24 hours.",
-        "3": "We'll respond with helpful information or next steps.",
-        "4": "For complex inquiries, we may schedule a follow-up call."
+        "1": "Recibirás una confirmación por correo electrónico de inmediato.",
+        "2": "Nuestro equipo revisará tu mensaje en un plazo de 24 horas.",
+        "3": "Te responderemos con información útil o próximos pasos.",
+        "4": "Para consultas complejas, podemos programar una llamada de seguimiento."
       }
     },
     "process": {
-      "title": "Our Contact Process",
+      "title": "Nuestro proceso de contacto",
       "steps": {
         "1": {
-          "title": "Submit Your Message",
-          "description": "Fill out our contact form with your details and inquiry. Be as specific as possible to help us understand your needs."
+          "title": "Envía tu mensaje",
+          "description": "Completa nuestro formulario de contacto con tus datos y consulta. Sé lo más específico posible para ayudarnos a comprender tus necesidades."
         },
         "2": {
-          "title": "Initial Assessment",
-          "description": "You'll receive an immediate confirmation. Our team reviews all inquiries within 24 hours during business days."
+          "title": "Evaluación inicial",
+          "description": "Recibirás una confirmación inmediata. Nuestro equipo revisa todas las consultas en un plazo de 24 horas durante días hábiles."
         },
         "3": {
-          "title": "Personalized Response",
-          "description": "We'll respond with tailored information addressing your specific questions or concerns."
+          "title": "Respuesta personalizada",
+          "description": "Te responderemos con información personalizada que aborde tus preguntas o inquietudes específicas."
         },
         "4": {
-          "title": "Ongoing Support",
-          "description": "For complex matters, we may schedule additional communication to ensure your inquiry is fully resolved."
+          "title": "Soporte continuo",
+          "description": "Para asuntos complejos, podemos programar comunicación adicional para asegurarnos de resolver completamente tu consulta."
         }
       }
     },
     "cta": {
-      "title": "Need Quick Answers?",
-      "description": "Before reaching out, check our comprehensive FAQ page where we've answered the most common questions about our content, collaborations, and services.",
-      "button": "Browse FAQ"
+      "title": "¿Necesitas respuestas rápidas?",
+      "description": "Antes de contactarnos, revisa nuestra página de preguntas frecuentes donde respondemos las preguntas más comunes sobre nuestro contenido, colaboraciones y servicios.",
+      "button": "Ver Preguntas Frecuentes"
     }
   },
   "support": {
-    "badge": "Independent Animation Studio",
-    "title": "Support Our Creative Vision",
-    "description": "We're committed to crafting emotionally powerful anime, original 3D animations, and meaningful storytelling experiences — all built independently using Blender and open-source tools.",
-    "buyCoffee": "Buy Me a Coffee",
-    "contact": "Contact",
-    "faq": "FAQ",
-    "securePayments": "Secure payments processed through Buy Me a Coffee",
+    "badge": "Estudio de animación independiente",
+    "title": "Apoya nuestra visión creativa",
+    "description": "Estamos comprometidos a crear anime emocionalmente poderoso, animaciones 3D originales y experiencias narrativas significativas — todo construido de forma independiente usando Blender y herramientas de código abierto.",
+    "buyCoffee": "Cómprame un café",
+    "contact": "Contacto",
+    "faq": "Preguntas Frecuentes",
+    "securePayments": "Pagos seguros procesados a través de Buy Me a Coffee",
     "impact": {
-      "title": "Your Support Makes a Difference",
-      "description": "Every contribution directly impacts our ability to create and share amazing content",
+      "title": "Tu apoyo marca la diferencia",
+      "description": "Cada contribución impacta directamente nuestra capacidad para crear y compartir contenido increíble",
       "items": {
         "creativeFreedom": {
-          "title": "Creative Freedom",
-          "description": "Maintain creative independence and artistic integrity in all our projects."
+          "title": "Libertad creativa",
+          "description": "Mantener la independencia creativa y la integridad artística en todos nuestros proyectos."
         },
         "qualityContent": {
-          "title": "Quality Content",
-          "description": "Invest in better tools, training, and resources to elevate animation quality."
+          "title": "Contenido de calidad",
+          "description": "Invertir en mejores herramientas, formación y recursos para elevar la calidad de la animación."
         },
         "communityGrowth": {
-          "title": "Community Growth",
-          "description": "Build a thriving community of animation enthusiasts and independent creators."
+          "title": "Crecimiento de la comunidad",
+          "description": "Construir una comunidad próspera de entusiastas de la animación y creadores independientes."
         }
       }
     },
     "quote": {
-      "text": "\"If you believe in the value of independent animation and want to support our work, your contribution can help us continue producing high-quality content and grow our creative mission.\""
+      "text": "\"Si crees en el valor de la animación independiente y quieres apoyar nuestro trabajo, tu contribución puede ayudarnos a seguir produciendo contenido de alta calidad y hacer crecer nuestra misión creativa.\""
     },
     "mainSupport": {
-      "title": "Ready to Support Our Journey?",
-      "description": "Every contribution, no matter the size, helps us bring our creative vision to life",
-      "supportUs": "Support Us Today",
-      "supportUsDescription": "Your support is processed securely through Buy Me a Coffee and helps us continue creating amazing content",
-      "button": "Buy Me a Coffee",
+      "title": "¿Listo para apoyar nuestro viaje?",
+      "description": "Cada contribución, sin importar el tamaño, nos ayuda a hacer realidad nuestra visión creativa",
+      "supportUs": "Apóyanos hoy",
+      "supportUsDescription": "Tu apoyo se procesa de forma segura a través de Buy Me a Coffee y nos ayuda a seguir creando contenido increíble",
+      "button": "Cómprame un café",
       "benefits": {
-        "securePayments": "Secure payments",
-        "instantProcessing": "Instant processing",
-        "noAccountRequired": "No account required"
+        "securePayments": "Pagos seguros",
+        "instantProcessing": "Procesamiento instantáneo",
+        "noAccountRequired": "No se requiere cuenta"
       }
     },
     "otherWays": {
-      "title": "Other Ways to Help",
-      "description": "Connect with us across our social platforms and help grow our community",
+      "title": "Otras formas de ayudar",
+      "description": "Conéctate con nosotros en todas nuestras plataformas sociales y ayuda a crecer nuestra comunidad",
       "shareContent": {
-        "title": "Share Our Content",
-        "description": "Help us reach more anime fans on YouTube",
-        "action": "Visit YouTube"
+        "title": "Comparte nuestro contenido",
+        "description": "Ayúdanos a llegar a más fans de anime en YouTube",
+        "action": "Visitar YouTube"
       },
       "leaveReviews": {
-        "title": "Leave Reviews",
-        "description": "Join discussions on our Reddit community",
-        "action": "Join Reddit"
+        "title": "Deja reseñas",
+        "description": "Únete a las discusiones en nuestra comunidad de Reddit",
+        "action": "Unirse a Reddit"
       },
       "joinCommunity": {
-        "title": "Join Community",
-        "description": "Connect with us on Discord",
-        "action": "Join Discord"
+        "title": "Únete a la comunidad",
+        "description": "Conéctate con nosotros en Discord",
+        "action": "Unirse a Discord"
       }
     },
     "followUs": {
-      "title": "Follow us"
+      "title": "Síguenos"
     },
     "faqSection": {
-      "title": "Have Questions?",
-      "description": "Find comprehensive answers about supporting our work, our creative process, and how your contributions make a difference",
-      "button": "View FAQ Page"
+      "title": "¿Tienes preguntas?",
+      "description": "Encuentra respuestas completas sobre cómo apoyar nuestro trabajo, nuestro proceso creativo y cómo tus contribuciones marcan la diferencia",
+      "button": "Ver página de Preguntas Frecuentes"
     }
   }
 }

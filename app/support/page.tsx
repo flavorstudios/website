@@ -21,48 +21,58 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import SocialLinks from "@/components/SocialLinks";
-import { useTranslations } from "@/lib/i18n";
+import { getTranslations, useTranslations } from "@/lib/i18n";
 
-// === SEO METADATA (using centralized handler) ===
-export const metadata = getMetadata({
-  title: `${SITE_NAME} – Fuel Anime & Stories`,
-  description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
-  path: "/support",
-  robots: "index,follow",
-  openGraph: {
-    title: `${SITE_NAME} – Fuel Anime & Stories`,
-    description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
-    type: "website",
-    siteName: SITE_NAME,
-    images: [
-      {
-        url: `${SITE_URL}/cover.jpg`,
-        width: 1200,
-        height: 630,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: SITE_BRAND_TWITTER,
-    creator: SITE_BRAND_TWITTER,
-    title: `${SITE_NAME} – Fuel Anime & Stories`,
-    description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
-    images: [`${SITE_URL}/cover.jpg`],
-  },
-});
+// === Internationalized SEO METADATA ===
+export async function generateMetadata() {
+  const t = await getTranslations();
+  const title = t("metadata.support.title", { siteName: SITE_NAME });
+  const description = t("metadata.support.description", { siteName: SITE_NAME });
+  return getMetadata({
+    title,
+    description,
+    path: "/support",
+    robots: "index,follow",
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      siteName: SITE_NAME,
+      images: [
+        {
+          url: `${SITE_URL}/cover.jpg`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: SITE_BRAND_TWITTER,
+      creator: SITE_BRAND_TWITTER,
+      title,
+      description,
+      images: [`${SITE_URL}/cover.jpg`],
+    },
+  });
+}
 
-// === JSON-LD WebPage Schema for Support Page ===
-const schema = getSchema({
-  type: "WebPage",
-  path: "/support",
-  title: `${SITE_NAME} – Fuel Anime & Stories`,
-  description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
-  image: `${SITE_URL}/cover.jpg`,
-});
+// === JSON-LD WebPage Schema for Support Page, i18n ===
+async function getI18nSchema() {
+  const t = await getTranslations();
+  return getSchema({
+    type: "WebPage",
+    path: "/support",
+    title: t("metadata.support.title", { siteName: SITE_NAME }),
+    description: t("metadata.support.description", { siteName: SITE_NAME }),
+    image: `${SITE_URL}/cover.jpg`,
+  });
+}
 
-export default function SupportPage() {
+export default async function SupportPage() {
   const t = useTranslations("support");
+  const mt = await getTranslations(); // For meta/schema (server)
+  const schema = await getI18nSchema();
 
   const impactAreas = [
     {

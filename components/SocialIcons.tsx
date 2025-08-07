@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * Renders a list of social media links using brand icons from `react-icons`.
+ * Renders a list of social media links using brand icons from `react-icons` and centralized platform data.
  *
  * --- SocialPlatform ---
- * Represents an individual social network link.
  * - `label`: Accessible name for the platform.
- * - `href`: Destination URL of the platform.
+ * - `href`: Destination URL.
  * - `icon`: Icon component from `react-icons`.
  * - `color`: Brand hex or Tailwind color class used when `variant` is `"color"`.
  *
@@ -14,115 +13,18 @@
  * - `size` (default `24`): Pixel size of each icon.
  * - `className`: Optional container class names.
  * - `variant` (default `"color"`): `"color"` displays brand color, `"monochrome"` inherits text color.
- * - `platforms` (default `defaultPlatforms`): List of platforms to render.
+ * - `platforms` (default `SOCIAL_PLATFORMS`): List of platforms to render.
  *
- * --- Example ---
- * ```tsx
+ * Example:
  * <SocialIcons size={32} variant="monochrome" />
- * ```
  */
 
 import { clsx } from "clsx";
-import type { IconType } from "react-icons";
-import {
-  FaYoutube,
-  FaInstagram,
-  FaFacebook,
-  FaXTwitter,
-  FaThreads,
-  FaTelegram,
-  FaMastodon,
-  FaDiscord,
-  FaLinkedin,
-  FaTumblr,
-  FaRedditAlien,
-} from "react-icons/fa6";
-import { SiBluesky } from "react-icons/si";
 import Link from "next/link";
+import type { IconType } from "react-icons";
+import { SOCIAL_PLATFORMS, type SocialPlatform } from "@/lib/constants";
 
 export type SocialVariant = "monochrome" | "color";
-
-export interface SocialPlatform {
-  label: string;
-  href: string;
-  icon: IconType;
-  color: string; // Tailwind class or HEX
-}
-
-export const defaultPlatforms: SocialPlatform[] = [
-  {
-    label: "YouTube",
-    href: "https://www.youtube.com/@flavorstudios",
-    icon: FaYoutube,
-    color: "text-red-600",
-  },
-  {
-    label: "Instagram",
-    href: "https://www.instagram.com/flavorstudios",
-    icon: FaInstagram,
-    color: "text-pink-500",
-  },
-  {
-    label: "Facebook",
-    href: "https://www.facebook.com/flavourstudios",
-    icon: FaFacebook,
-    color: "text-blue-600",
-  },
-  {
-    label: "X",
-    href: "https://twitter.com/flavor_studios",
-    icon: FaXTwitter,
-    color: "text-black", // black, as X brand (use "text-white" if on dark bg)
-  },
-  {
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/company/flavorstudios",
-    icon: FaLinkedin,
-    color: "text-blue-700",
-  },
-  {
-    label: "Threads",
-    href: "https://www.threads.net/@flavorstudios",
-    icon: FaThreads,
-    color: "text-black", // white/black, adjust if needed for bg
-  },
-  {
-    label: "Tumblr",
-    href: "https://flavorstudios.tumblr.com",
-    icon: FaTumblr,
-    color: "text-blue-700",
-  },
-  {
-    label: "Bluesky",
-    href: "https://bsky.app/profile/flavorstudios.in",
-    icon: SiBluesky,
-    color: "text-sky-600",
-  },
-  {
-    label: "Telegram",
-    href: "https://t.me/flavorstudios",
-    icon: FaTelegram,
-    color: "text-blue-400",
-  },
-  {
-    label: "Mastodon",
-    href: "https://mastodon.social/@flavorstudios",
-    icon: FaMastodon,
-    color: "text-purple-600",
-  },
-  {
-    label: "Discord",
-    href: "https://discord.gg/agSZAAeRzn",
-    icon: FaDiscord,
-    color: "text-indigo-500",
-  },
-  {
-    label: "Reddit",
-    href: "https://www.reddit.com/r/flavorstudios/",
-    icon: FaRedditAlien,
-    color: "text-orange-600",
-  },
-];
 
 export interface SocialIconsProps {
   size?: number;
@@ -135,7 +37,7 @@ export function SocialIcons({
   size = 24,
   className,
   variant = "color",
-  platforms = defaultPlatforms,
+  platforms = SOCIAL_PLATFORMS, // Default to centralized array
 }: SocialIconsProps) {
   return (
     <div className={clsx("flex items-center gap-x-2", className)}>

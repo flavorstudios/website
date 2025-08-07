@@ -6,6 +6,7 @@ import {
   SITE_URL,
   SITE_BRAND_TWITTER,
   SITE_DEFAULT_IMAGE,
+  SOCIAL_LINKS, // ⬅️ Import the centralized social links
 } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import {
@@ -124,6 +125,7 @@ const closedPositions = [
   },
 ];
 
+// 🟩 All social links below now reference SOCIAL_LINKS constants!
 const stayConnectedOptions = [
   {
     title: "Join Our Talent List",
@@ -138,7 +140,7 @@ const stayConnectedOptions = [
     description: "Stay updated with our latest projects and behind-the-scenes content",
     icon: Instagram,
     action: "Follow Instagram",
-    href: "https://www.instagram.com/flavorstudios",
+    href: SOCIAL_LINKS.instagram,   // ⬅️ CENTRALIZED
     external: true,
     color: "bg-pink-600 hover:bg-pink-700",
   },
@@ -147,13 +149,12 @@ const stayConnectedOptions = [
     description: "Watch our content and see our creative process in action",
     icon: Youtube,
     action: "Subscribe",
-    href: "https://www.youtube.com/@flavorstudios",
+    href: SOCIAL_LINKS.youtube,      // ⬅️ CENTRALIZED
     external: true,
     color: "bg-red-600 hover:bg-red-700",
   },
 ];
 
-// --- PAGE COMPONENT ---
 export default function CareerPage() {
   return (
     <div className="min-h-screen py-8 sm:py-12">

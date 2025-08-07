@@ -1,3 +1,5 @@
+import { useTranslations } from "@/lib/i18n";
+
 interface Stats {
   youtubeSubscribers?: number;
   originalEpisodes?: number;
@@ -6,6 +8,7 @@ interface Stats {
 }
 
 export default function StatsSection({ stats }: { stats: Stats | null }) {
+  const t = useTranslations("home");
   if (!stats) return null;
   return (
     <section className="py-16 bg-white">
@@ -15,25 +18,33 @@ export default function StatsSection({ stats }: { stats: Stats | null }) {
             <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">
               {stats.youtubeSubscribers ?? "—"}
             </div>
-            <div className="text-gray-600 font-medium">YouTube Subscribers</div>
+            <div className="text-gray-600 font-medium">
+              {t("stats.youtubeSubscribers")}
+            </div>
           </div>
           <div className="text-center">
             <div className="text-4xl md:text-5xl font-bold text-purple-600 mb-2">
               {stats.originalEpisodes ?? "—"}
             </div>
-            <div className="text-gray-600 font-medium">Original Episodes</div>
+            <div className="text-gray-600 font-medium">
+              {t("stats.originalEpisodes")}
+            </div>
           </div>
           <div className="text-center">
             <div className="text-4xl md:text-5xl font-bold text-cyan-600 mb-2">
               {stats.totalViews ?? "—"}
             </div>
-            <div className="text-gray-600 font-medium">Total Views</div>
+            <div className="text-gray-600 font-medium">
+              {t("stats.totalViews")}
+            </div>
           </div>
           <div className="text-center">
             <div className="text-4xl md:text-5xl font-bold text-indigo-600 mb-2">
               {stats.yearsCreating ?? "—"}
             </div>
-            <div className="text-gray-600 font-medium">Years Creating</div>
+            <div className="text-gray-600 font-medium">
+              {t("stats.yearsCreating")}
+            </div>
           </div>
         </div>
       </div>

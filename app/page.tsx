@@ -12,11 +12,11 @@ import {
   SITE_NAME,
   SITE_URL,
   SITE_BRAND_TWITTER,
-  SITE_DESCRIPTION, // ✅ Import centralized description
 } from "@/lib/constants";
 
 import { getMetadata } from "@/lib/seo/metadata";
 import { getSchema } from "@/lib/seo/schema";
+import { getTranslations } from "next-intl/server";
 
 // === TYPES ===
 interface BlogPost {
@@ -42,42 +42,50 @@ interface Video {
   status?: string;
 }
 
-// --- SEO: Metadata for Home Page ---
-export const metadata = getMetadata({
-  title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
-  description: SITE_DESCRIPTION, // ✅ Use constant
-  path: "/",
-  robots: "index,follow",
-  openGraph: {
-    title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
-    description: SITE_DESCRIPTION, // ✅ Use constant
-    type: "website",
-    images: [
-      {
-        url: `${SITE_URL}/cover.jpg`,
-        width: 1200,
-        height: 630,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: SITE_BRAND_TWITTER,
-    creator: SITE_BRAND_TWITTER,
-    title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
-    description: SITE_DESCRIPTION, // ✅ Use constant
-    images: [`${SITE_URL}/cover.jpg`],
-  },
-});
+// --- SEO: Metadata for Home Page (dynamic, locale-aware) ---
+export async function generateMetadata() {
+  const t = await getTranslations();
+  const title = t("metadata.home.title", { siteName: SITE_NAME });
+  const description = t("metadata.home.description");
+  return getMetadata({
+    title,
+    description,
+    path: "/",
+    robots: "index,follow",
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: [
+        {
+          url: `${SITE_URL}/cover.jpg`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: SITE_BRAND_TWITTER,
+      creator: SITE_BRAND_TWITTER,
+      title,
+      description,
+      images: [`${SITE_URL}/cover.jpg`],
+    },
+  });
+}
 
-// --- JSON-LD WebPage Schema ---
-const schema = getSchema({
-  type: "WebPage",
-  path: "/",
-  title: `${SITE_NAME} | Anime News & Original Stories That Inspire`,
-  description: SITE_DESCRIPTION, // ✅ Use constant
-  image: `${SITE_URL}/cover.jpg`,
-});
+// --- JSON-LD WebPage Schema (dynamic, locale-aware) ---
+async function getHomePageSchema() {
+  const t = await getTranslations();
+  return getSchema({
+    type: "WebPage",
+    path: "/",
+    title: t("metadata.home.title", { siteName: SITE_NAME }),
+    description: t("metadata.home.description"),
+    image: `${SITE_URL}/cover.jpg`,
+  });
+}
 
 async function getHomePageContent() {
   const fallbackContent = {
@@ -93,16 +101,13 @@ async function getHomePageContent() {
       fetch(`${baseUrl}/api/videos`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
       fetch(`${baseUrl}/api/blogs`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
     ]);
-    // Stats: just assign the object
     const stats = statsResult.status === "fulfilled" && statsResult.value ? statsResult.value : null;
-    // Videos: handle array or .videos (future-proof)
     const videos = videosResult.status === "fulfilled" && videosResult.value
       ? (Array.isArray(videosResult.value)
           ? videosResult.value
           : videosResult.value.videos || []
         ).filter((v: Video) => v.status === "published")
       : [];
-    // Blogs: handle array or .posts (future-proof)
     const blogs = blogsResult.status === "fulfilled" && blogsResult.value
       ? (Array.isArray(blogsResult.value)
           ? blogsResult.value
@@ -118,6 +123,7 @@ async function getHomePageContent() {
 
 export default async function HomePage() {
   const content = await getHomePageContent();
+  const schema = await getHomePageSchema();
   return (
     <div className="min-h-screen">
       {/* SEO: Inject JSON-LD */}

@@ -27,6 +27,7 @@ import {
   Download,
   Upload,
   Trash2,
+  Keyboard,
 } from "lucide-react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import AdminPageHeader from "@/components/AdminPageHeader"
@@ -71,6 +72,35 @@ export function SystemSettings() {
     cacheEnabled: true,
   })
 
+  // --- Keyboard shortcuts (customization logic) ---
+  const defaultShortcuts = {
+    overview: "d",
+    blogs: "b",
+    videos: "v",
+    media: "m",
+    categories: "c",
+    comments: "o",
+    applications: "a",
+    inbox: "i",
+    users: "u",
+    settings: "s",
+    system: "y",
+  }
+  const [shortcuts, setShortcuts] = useState(defaultShortcuts)
+
+  useEffect(() => {
+    const stored = localStorage.getItem("adminKeyMap")
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        setShortcuts({ ...defaultShortcuts, ...parsed })
+      } catch {
+        setShortcuts(defaultShortcuts)
+      }
+    }
+    // eslint-disable-next-line
+  }, [])
+
   // Fetch available admin emails (from-addresses) securely
   const [fromAddresses, setFromAddresses] = useState<string[]>([])
   useEffect(() => {
@@ -93,6 +123,8 @@ export function SystemSettings() {
   const handleSave = () => {
     // Save logic placeholder
     safeLogError("Settings saved:", settings)
+    localStorage.setItem("adminKeyMap", JSON.stringify(shortcuts))
+    safeLogError("Shortcuts saved:", shortcuts)
   }
 
   const handleBackup = () => {
@@ -479,6 +511,44 @@ export function SystemSettings() {
               </CardContent>
             </Card>
           </div>
+          {/* KEYBOARD SHORTCUTS CARD (as per Codex) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Keyboard className="h-5 w-5" aria-hidden="true" />
+                Keyboard Shortcuts
+              </CardTitle>
+              <CardDescription>Customize navigation keys (use with "g")</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {Object.entries(shortcuts).map(([section, key]) => (
+                <div key={section} className="flex items-center justify-between">
+                  <Label htmlFor={`sc-${section}`} className="capitalize">
+                    {section}
+                  </Label>
+                  <Input
+                    id={`sc-${section}`}
+                    value={key}
+                    onChange={(e) =>
+                      setShortcuts({ ...shortcuts, [section]: e.target.value })
+                    }
+                    className="w-16 text-center"
+                  />
+                </div>
+              ))}
+              <Button
+                className="mt-2"
+                onClick={() => {
+                  localStorage.setItem("adminKeyMap", JSON.stringify(shortcuts))
+                }}
+              >
+                Save Shortcuts
+              </Button>
+              <p className="text-xs text-muted-foreground">
+                Press ? in the dashboard to view these shortcuts.
+              </p>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Backup Settings */}

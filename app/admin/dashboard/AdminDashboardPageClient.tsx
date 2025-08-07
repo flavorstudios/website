@@ -1,18 +1,18 @@
 "use client"
 
 import { useState, useEffect, useCallback, Suspense } from "react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import dynamic from "next/dynamic"
 import AdminAuthGuard from "@/components/AdminAuthGuard"
 import { AdminSidebar } from "./components/admin-sidebar"
 import { AdminHeader } from "./components/admin-header"
+import HelpModal from "@/components/admin/HelpModal"
 import { RoleProvider } from "./contexts/role-context"
 import { getAuth, signOut } from "firebase/auth"
 import app, { firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Spinner } from "@/components/ui/spinner"
 
-// --- Dynamically imported dashboard sections for code splitting ---
 const DashboardOverview = dynamic(() =>
   import("./components/dashboard-overview").then(m => m.DashboardOverview),
   { suspense: true }
@@ -53,6 +53,10 @@ const CareerApplications = dynamic(() =>
   import("./components/career-applications"),
   { suspense: true }
 )
+const AuditLogViewer = dynamic(() =>
+  import("./components/audit-log-viewer").then(m => m.AuditLogViewer),
+  { suspense: true }
+)
 
 interface AdminDashboardPageClientProps {
   initialSection?: string
@@ -65,7 +69,38 @@ export default function AdminDashboardPageClient({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [error, setError] = useState("")
+  const [helpOpen, setHelpOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+
+  const defaultKeyMap = {
+    overview: "d",
+    blogs: "b",
+    videos: "v",
+    media: "m",
+    categories: "c",
+    comments: "o",
+    applications: "a",
+    inbox: "i",
+    users: "u",
+    auditLogs: "l", // <-- new shortcut for audit logs (choose your own key)
+    settings: "s",
+    system: "y",
+  }
+  const [shortcuts, setShortcuts] = useState(defaultKeyMap)
+
+  // Load custom shortcuts
+  useEffect(() => {
+    const stored = localStorage.getItem("adminKeyMap")
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        setShortcuts({ ...defaultKeyMap, ...parsed })
+      } catch {
+        setShortcuts(defaultKeyMap)
+      }
+    }
+  }, [])
 
   // --- On mount, mark as ready ---
   useEffect(() => {
@@ -97,6 +132,7 @@ export default function AdminDashboardPageClient({
       { id: "applications", href: "/admin/dashboard/applications" },
       { id: "inbox", href: "/admin/dashboard/inbox" },
       { id: "users", href: "/admin/dashboard/users" },
+      { id: "audit-logs", href: "/admin/dashboard/audit-logs" }, // <-- Added here
       { id: "settings", href: "/admin/dashboard/settings" },
       { id: "system", href: "/admin/dashboard/system" },
     ]
@@ -115,6 +151,59 @@ export default function AdminDashboardPageClient({
     }, 30000)
     return () => clearInterval(interval)
   }, [])
+
+  // --- Keyboard shortcuts ---
+  useEffect(() => {
+    let awaitingG = false
+    const keyToPath: Record<string, string> = {
+      [shortcuts.overview]: "/admin/dashboard",
+      [shortcuts.blogs]: "/admin/dashboard/blog-posts",
+      [shortcuts.videos]: "/admin/dashboard/videos",
+      [shortcuts.media]: "/admin/dashboard/media",
+      [shortcuts.categories]: "/admin/dashboard/categories",
+      [shortcuts.comments]: "/admin/dashboard/comments",
+      [shortcuts.applications]: "/admin/dashboard/applications",
+      [shortcuts.inbox]: "/admin/dashboard/inbox",
+      [shortcuts.users]: "/admin/dashboard/users",
+      [shortcuts.auditLogs]: "/admin/dashboard/audit-logs", // <-- New shortcut
+      [shortcuts.settings]: "/admin/dashboard/settings",
+      [shortcuts.system]: "/admin/dashboard/system",
+    }
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      )
+        return
+
+      if (e.key === "?" && !awaitingG) {
+        e.preventDefault()
+        setHelpOpen(true)
+        return
+      }
+
+      if (!awaitingG) {
+        if (e.key.toLowerCase() === "g") {
+          awaitingG = true
+          setTimeout(() => (awaitingG = false), 1000)
+        }
+        return
+      }
+
+      awaitingG = false
+      const path = keyToPath[e.key.toLowerCase()]
+      if (path) {
+        e.preventDefault()
+        router.push(path)
+      }
+    }
+
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [router, shortcuts])
 
   // --- Sidebar responsive toggle ---
   useEffect(() => {
@@ -178,6 +267,8 @@ export default function AdminDashboardPageClient({
         return <CareerApplications />
       case "inbox":
         return <EmailInbox />
+      case "audit-logs":
+        return <AuditLogViewer /> // <-- Added for audit logs
       case "system":
         return <SystemTools />
       case "users":
@@ -186,6 +277,23 @@ export default function AdminDashboardPageClient({
         return <DashboardOverview />
     }
   }
+
+  // Keyboard shortcut cheat sheet for help modal
+  const helpShortcuts = [
+    { combo: `g ${shortcuts.overview}`, description: "Go to Overview" },
+    { combo: `g ${shortcuts.blogs}`, description: "Go to Blog Posts" },
+    { combo: `g ${shortcuts.videos}`, description: "Go to Videos" },
+    { combo: `g ${shortcuts.media}`, description: "Go to Media" },
+    { combo: `g ${shortcuts.categories}`, description: "Go to Categories" },
+    { combo: `g ${shortcuts.comments}`, description: "Go to Comments" },
+    { combo: `g ${shortcuts.applications}`, description: "Go to Applications" },
+    { combo: `g ${shortcuts.inbox}`, description: "Go to Inbox" },
+    { combo: `g ${shortcuts.users}`, description: "Go to Users" },
+    { combo: `g ${shortcuts.auditLogs}`, description: "Go to Audit Logs" }, // <-- Added for audit logs
+    { combo: `g ${shortcuts.settings}`, description: "Go to Settings" },
+    { combo: `g ${shortcuts.system}`, description: "Go to System" },
+    { combo: "?", description: "Open this help" },
+  ]
 
   return (
     <AdminAuthGuard>
@@ -199,7 +307,12 @@ export default function AdminDashboardPageClient({
           />
 
           <div className="flex-1 flex flex-col">
-            <AdminHeader onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+            <AdminHeader
+              onLogout={handleLogout}
+              sidebarOpen={sidebarOpen}
+              setSidebarOpen={setSidebarOpen}
+              onShowHelp={() => setHelpOpen(true)}
+            />
 
             <main className="flex-1 p-6 overflow-auto">
               <div className="max-w-7xl mx-auto">
@@ -217,6 +330,7 @@ export default function AdminDashboardPageClient({
             </main>
           </div>
         </div>
+        <HelpModal open={helpOpen} setOpen={setHelpOpen} shortcuts={helpShortcuts} />
       </RoleProvider>
     </AdminAuthGuard>
   )

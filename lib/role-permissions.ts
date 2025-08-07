@@ -82,7 +82,7 @@ export function getAccessibleSections(userRole: UserRole): string[] {
   if (permissions.canManageUsers) sections.push("users")
   if (permissions.canHandleContacts)
     sections.push("inbox", "applications") // <-- Applications slug now!
-  if (permissions.canManageSystem) sections.push("pages", "system")
+  if (permissions.canManageSystem) sections.push("pages", "system", "audit-logs") // <-- Added "audit-logs" for admin/system
 
   return sections
 }

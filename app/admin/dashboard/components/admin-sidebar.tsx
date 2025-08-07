@@ -18,6 +18,7 @@ import {
   Mail,
   ClipboardList,
   Users,
+  History, // <-- Add icon for Audit Logs
 } from "lucide-react"
 import { useRole } from "../contexts/role-context"
 import { useState, useEffect } from "react"
@@ -49,6 +50,8 @@ export function AdminSidebar({
     { id: "applications", label: "Applications", icon: ClipboardList, count: null, href: "/admin/dashboard/applications" },
     { id: "inbox", label: "Email Inbox", icon: Mail, count: null, href: "/admin/dashboard/inbox" },
     { id: "users", label: "Users", icon: Users, count: null, href: "/admin/dashboard/users" },
+    // --- Audit Logs (visible only to admins/system) ---
+    { id: "audit-logs", label: "Audit Logs", icon: History, count: null, href: "/admin/dashboard/audit-logs" },
     { id: "settings", label: "Settings", icon: Settings, count: null, href: "/admin/dashboard/settings" },
   ]
 

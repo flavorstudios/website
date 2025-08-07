@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import BulkActionsBar from "./BulkActionsBar";
 import UserProfileDrawer from "./UserProfileDrawer";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { ColumnDef } from "@tanstack/react-table";
+import { VirtualizedTable } from "@/components/admin/table";
 
 interface UserRow {
   uid: string;
@@ -30,12 +32,66 @@ export default function UserList() {
   const [pageToken, setPageToken] = useState<string | null>(null);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");  // <-- error state
+  const [error, setError] = useState<string>("");
   const [activeUid, setActiveUid] = useState<string | null>(null);
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("created");
 
+  const allSelected = selected.length === users.length && users.length > 0;
+
+  // Columns for TanStack Table
+  const columns = useMemo<ColumnDef<UserRow>[]>(() => [
+    {
+      id: "select",
+      header: () => (
+        <Checkbox
+          aria-label="Select all users"
+          checked={allSelected}
+          onCheckedChange={checked =>
+            setSelected(checked ? users.map(u => u.uid) : [])
+          }
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          aria-label={`Select user ${row.original.email ?? row.original.uid}`}
+          checked={selected.includes(row.original.uid)}
+          onCheckedChange={checked => {
+            setSelected(ids =>
+              checked
+                ? [...ids, row.original.uid]
+                : ids.filter(i => i !== row.original.uid)
+            );
+          }}
+          onClick={e => e.stopPropagation()}
+        />
+      ),
+      size: 32,
+    },
+    {
+      accessorKey: "email",
+      header: () => "Email",
+      cell: ({ row }) => row.original.email,
+    },
+    {
+      accessorKey: "role",
+      header: () => "Role",
+      cell: ({ row }) => row.original.role,
+    },
+    {
+      id: "status",
+      header: () => "Status",
+      cell: ({ row }) => (row.original.disabled ? "Disabled" : "Active"),
+    },
+    {
+      accessorKey: "createdAt",
+      header: () => "Created",
+      cell: ({ row }) => row.original.createdAt,
+    },
+  ], [allSelected, selected, users]);
+
+  // Fetch logic remains the same
   const loadUsers = async (token?: string | null) => {
     setLoading(true);
     setError("");
@@ -143,7 +199,7 @@ export default function UserList() {
         <Input
           placeholder="Search users"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={e => setSearch(e.target.value)}
           className="w-64"
         />
         <Button onClick={handleSearch}>Search</Button>
@@ -189,65 +245,27 @@ export default function UserList() {
       ) : users.length === 0 ? (
         <div className="p-4 text-sm text-muted-foreground">No users found.</div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border text-sm">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="p-2 text-left">
-                  <Checkbox
-                    aria-label="Select all users"
-                    checked={selected.length === users.length && users.length > 0}
-                    onCheckedChange={(checked) =>
-                      setSelected(checked ? users.map((u) => u.uid) : [])
-                    }
-                  />
-                </th>
-                <th className="p-2 text-left">Email</th>
-                <th className="p-2 text-left">Role</th>
-                <th className="p-2 text-left">Status</th>
-                <th className="p-2 text-left">Created</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr
-                  key={u.uid}
-                  className="border-t hover:bg-gray-50 cursor-pointer focus-visible:bg-blue-50 focus-visible:outline-none"
-                  tabIndex={0}
-                  onClick={() => setActiveUid(u.uid)}
-                  onKeyDown={(e) => {
-                    if (
-                      (e.key === "Enter" || e.key === " ") &&
-                      e.target === e.currentTarget
-                    ) {
-                      e.preventDefault();
-                      setActiveUid(u.uid);
-                    }
-                  }}
-                >
-                  <td className="p-2">
-                    <Checkbox
-                      aria-label={`Select user ${u.email ?? u.uid}`}
-                      checked={selected.includes(u.uid)}
-                      onCheckedChange={(checked) => {
-                        setSelected((ids) =>
-                          checked
-                            ? [...ids, u.uid]
-                            : ids.filter((i) => i !== u.uid)
-                        );
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </td>
-                  <td className="p-2">{u.email}</td>
-                  <td className="p-2">{u.role}</td>
-                  <td className="p-2">{u.disabled ? "Disabled" : "Active"}</td>
-                  <td className="p-2">{u.createdAt}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <VirtualizedTable<UserRow>
+          data={users}
+          columns={columns}
+          className="overflow-x-auto border max-h-[600px]"
+          rowHeight={48}
+          getRowProps={row => ({
+            className:
+              "border-t hover:bg-gray-50 cursor-pointer focus-visible:bg-blue-50 focus-visible:outline-none",
+            tabIndex: 0,
+            onClick: () => setActiveUid(row.original.uid),
+            onKeyDown: e => {
+              if (
+                (e.key === "Enter" || e.key === " ") &&
+                e.target === e.currentTarget
+              ) {
+                e.preventDefault();
+                setActiveUid(row.original.uid);
+              }
+            },
+          })}
+        />
       )}
 
       <div className="flex gap-2">

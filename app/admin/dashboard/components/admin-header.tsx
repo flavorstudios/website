@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Search, Menu, ExternalLink, LogOut } from "lucide-react"
+import { Search, Menu, ExternalLink, LogOut, HelpCircle } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
 import { ThemeToggle } from "./theme-toggle"
 import { CommandPalette } from "@/components/admin/CommandPalette"
@@ -13,9 +13,10 @@ interface AdminHeaderProps {
   onLogout: () => void
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
+  onShowHelp: () => void
 }
 
-export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHeaderProps) {
+export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, onShowHelp }: AdminHeaderProps) {
   const [open, setOpen] = useState(false)
 
   // Listen for Ctrl+K or Cmd+K to open the command palette
@@ -90,6 +91,16 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
 
             <NotificationBell />
             <ThemeToggle />
+
+            {/* Keyboard shortcuts/help button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onShowHelp}
+              aria-label="Keyboard shortcuts"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </Button>
 
             {/* Avatar and Admin info */}
             <div className="flex items-center gap-3">

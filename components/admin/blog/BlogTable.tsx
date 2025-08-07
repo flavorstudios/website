@@ -1,22 +1,23 @@
-"use client"
+"use client";
 
-import { useRef } from "react"
-import { motion } from "framer-motion"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
-import BlogStatusBadge from "./BlogStatusBadge"
-import BlogRowActions from "./BlogRowActions"
-import type { BlogPost } from "@/lib/content-store"
-import Image from "next/image"
-import { formatDate } from "@/lib/date"
+import { useMemo } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import BlogStatusBadge from "./BlogStatusBadge";
+import BlogRowActions from "./BlogRowActions";
+import type { BlogPost } from "@/lib/content-store";
+import Image from "next/image";
+import { formatDate } from "@/lib/date";
+import type { ColumnDef } from "@tanstack/react-table";
+import { VirtualizedTable } from "../table";
 
 export interface BlogTableProps {
-  posts: BlogPost[]
-  selected: Set<string>
-  toggleSelect: (id: string) => void
-  toggleSelectAll: (checked: boolean) => void
-  onDelete: (id: string) => void
-  onTogglePublish: (id: string, publish: boolean) => void
+  posts: BlogPost[];
+  selected: Set<string>;
+  toggleSelect: (id: string) => void;
+  toggleSelectAll: (checked: boolean) => void;
+  onDelete: (id: string) => void;
+  onTogglePublish: (id: string, publish: boolean) => void;
 }
 
 export default function BlogTable({
@@ -27,8 +28,184 @@ export default function BlogTable({
   onDelete,
   onTogglePublish,
 }: BlogTableProps) {
-  const allSelected = posts.length > 0 && posts.every((p) => selected.has(p.id))
-  const rowRefs = useRef<HTMLTableRowElement[]>([])
+  const allSelected = posts.length > 0 && posts.every((p) => selected.has(p.id));
+
+  // ColumnDefs for TanStack Table
+  const columns = useMemo<ColumnDef<BlogPost>[]>(() => [
+    {
+      id: "select",
+      header: () => (
+        <Checkbox
+          checked={allSelected}
+          onCheckedChange={(v) => toggleSelectAll(!!v)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={selected.has(row.original.id)}
+          onCheckedChange={() => toggleSelect(row.original.id)}
+          aria-label={`Select blog post: ${row.original.title}`}
+        />
+      ),
+      size: 32,
+    },
+    {
+      accessorKey: "title",
+      header: () => <span className="max-w-[12rem] truncate">Title</span>,
+      cell: ({ row }) => (
+        <a
+          href={`/admin/blog/edit?id=${row.original.id}`}
+          className="text-blue-600 hover:underline font-medium max-w-[12rem] truncate"
+          aria-label={`Edit blog post: ${row.original.title}`}
+        >
+          {row.original.title}
+        </a>
+      ),
+      meta: {
+        headerClassName: "max-w-[12rem] truncate",
+        cellClassName: "max-w-[12rem] truncate",
+      },
+    },
+    {
+      id: "seo",
+      header: () => <span className="hidden md:inline">SEO</span>,
+      cell: ({ row }) => {
+        const seoTitle = row.original.seoTitle;
+        let cls = "text-green-600";
+        let title: string | undefined = "SEO title length is optimal";
+        if (!seoTitle || seoTitle.length === 0) {
+          cls = "text-gray-500";
+          title = "Missing SEO title";
+        } else if (seoTitle.length < 50) {
+          cls = "text-yellow-600";
+          title = "SEO title is too short";
+        } else if (seoTitle.length > 60) {
+          cls = "text-red-600";
+          title = "SEO title is too long";
+        }
+        return (
+          <span title={title} className={cls}>
+            {seoTitle?.length ?? 0}
+          </span>
+        );
+      },
+      meta: {
+        headerClassName: "hidden md:table-cell",
+        cellClassName: "hidden md:table-cell",
+      },
+    },
+    {
+      accessorKey: "author",
+      header: () => "Author",
+      cell: ({ row }) => row.original.author,
+    },
+    {
+      id: "image",
+      header: () => <span className="hidden md:inline">Image</span>,
+      cell: ({ row }) =>
+        row.original.featuredImage ? (
+          <Image
+            src={row.original.featuredImage}
+            alt={`Featured image for ${row.original.title}`}
+            width={64}
+            height={40}
+            className="h-10 w-16 object-cover rounded"
+            style={{ objectFit: "cover" }}
+            unoptimized
+          />
+        ) : (
+          <span className="text-xs text-gray-400">—</span>
+        ),
+      meta: {
+        headerClassName: "hidden md:table-cell",
+        cellClassName: "hidden md:table-cell",
+      },
+    },
+    {
+      id: "status",
+      header: () => "Status",
+      cell: ({ row }) => (
+        <BlogStatusBadge status={row.original.status as BlogPost["status"]} />
+      ),
+    },
+    {
+      id: "date",
+      header: () => <span className="hidden sm:inline">Date</span>,
+      cell: ({ row }) => (
+        <>{formatDate(row.original.publishedAt || row.original.createdAt)}</>
+      ),
+      meta: {
+        headerClassName: "hidden sm:table-cell",
+        cellClassName: "hidden sm:table-cell",
+      },
+    },
+    {
+      id: "views",
+      header: () => <span className="hidden sm:inline text-right">Views</span>,
+      cell: ({ row }) => (
+        <>
+          {(typeof row.original.views === "number"
+            ? row.original.views
+            : 0
+          ).toLocaleString()}
+        </>
+      ),
+      meta: {
+        headerClassName: "hidden sm:table-cell text-right",
+        cellClassName: "hidden sm:table-cell text-right",
+      },
+    },
+    {
+      id: "comments",
+      header: () => <span className="hidden sm:inline text-right">Comments</span>,
+      cell: ({ row }) => (
+        <Badge variant="outline">{row.original.commentCount ?? 0}</Badge>
+      ),
+      meta: {
+        headerClassName: "hidden sm:table-cell text-right",
+        cellClassName: "hidden sm:table-cell text-right",
+      },
+    },
+    {
+      id: "tags",
+      header: () => <span className="hidden lg:inline">Tags</span>,
+      cell: ({ row }) =>
+        row.original.tags?.length
+          ? row.original.tags.slice(0, 3).map((tag, i) => (
+              <Badge key={i} variant="secondary" className="mr-1">
+                {tag}
+              </Badge>
+            ))
+          : <span className="text-xs text-gray-400">—</span>,
+      meta: {
+        headerClassName: "hidden lg:table-cell",
+        cellClassName: "hidden lg:table-cell",
+      },
+    },
+    {
+      id: "actions",
+      header: () => <span className="text-right">Actions</span>,
+      cell: ({ row }) => (
+        <BlogRowActions
+          post={row.original}
+          onDelete={onDelete}
+          onTogglePublish={onTogglePublish}
+        />
+      ),
+      meta: {
+        cellClassName: "text-right",
+        headerClassName: "text-right",
+      },
+    },
+  ], [
+    allSelected,
+    selected,
+    toggleSelectAll,
+    toggleSelect,
+    onDelete,
+    onTogglePublish,
+  ]);
 
   if (posts.length === 0) {
     return (
@@ -50,160 +227,20 @@ export default function BlogTable({
         <span className="text-lg font-medium">No blog posts found</span>
         <span className="text-sm mt-2">Try changing your filters or create a new post.</span>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="overflow-x-auto border rounded-lg">
-      <table className="min-w-full bg-white text-sm table-fixed">
-        <thead className="bg-gray-50 text-xs uppercase text-gray-500">
-          <tr>
-            <th className="p-3 w-8">
-              <Checkbox
-                checked={allSelected}
-                onCheckedChange={(v) => toggleSelectAll(!!v)}
-                aria-label="Select all"
-              />
-            </th>
-            <th className="p-3 text-left max-w-[12rem] truncate">Title</th>
-            <th className="p-3 text-left hidden md:table-cell">SEO</th>
-            <th className="p-3 text-left">Author</th>
-            <th className="p-3 text-left hidden md:table-cell">Image</th>
-            <th className="p-3 text-left">Status</th>
-            <th className="p-3 text-left hidden sm:table-cell">Date</th>
-            <th className="p-3 text-right hidden sm:table-cell">Views</th>
-            <th className="p-3 text-right hidden sm:table-cell">Comments</th>
-            <th className="p-3 text-left hidden lg:table-cell">Tags</th>
-            <th className="p-3 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {posts.map((post, idx) => (
-            <motion.tr
-              key={post.id}
-              ref={el => (rowRefs.current[idx] = el!)}
-              tabIndex={0}
-              onKeyDown={e => {
-                if (e.key === "ArrowDown") {
-                  e.preventDefault()
-                  rowRefs.current[idx + 1]?.focus()
-                } else if (e.key === "ArrowUp") {
-                  e.preventDefault()
-                  rowRefs.current[idx - 1]?.focus()
-                }
-              }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="border-b last:border-b-0 hover:bg-gray-50 focus-visible:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-            >
-              {/* Select checkbox */}
-              <td className="p-3">
-                <Checkbox
-                  checked={selected.has(post.id)}
-                  onCheckedChange={() => toggleSelect(post.id)}
-                  aria-label={`Select blog post: ${post.title}`}
-                />
-              </td>
-
-              {/* Title with link (truncated for overflow) */}
-              <td className="p-3 max-w-[12rem] truncate">
-                <a
-                  href={`/admin/blog/edit?id=${post.id}`}
-                  className="text-blue-600 hover:underline font-medium"
-                  aria-label={`Edit blog post: ${post.title}`}
-                >
-                  {post.title}
-                </a>
-              </td>
-
-              {/* SEO Title Length */}
-              <td className="p-3 hidden md:table-cell">
-                <span
-                  title={
-                    !post.seoTitle || post.seoTitle.length === 0
-                      ? "Missing SEO title"
-                      : post.seoTitle.length < 50
-                      ? "SEO title is too short"
-                      : post.seoTitle.length > 60
-                      ? "SEO title is too long"
-                      : "SEO title length is optimal"
-                  }
-                  className={
-                    !post.seoTitle || post.seoTitle.length === 0
-                      ? "text-gray-500"
-                      : post.seoTitle.length < 50
-                      ? "text-yellow-600"
-                      : post.seoTitle.length > 60
-                      ? "text-red-600"
-                      : "text-green-600"
-                  }
-                >
-                  {post.seoTitle?.length ?? 0}
-                </span>
-              </td>
-
-              {/* Author */}
-              <td className="p-3">{post.author}</td>
-
-              {/* Image Preview */}
-              <td className="p-3 hidden md:table-cell">
-                {post.featuredImage ? (
-                  <Image
-                    src={post.featuredImage}
-                    alt={`Featured image for ${post.title}`}
-                    width={64}
-                    height={40}
-                    className="h-10 w-16 object-cover rounded"
-                    style={{ objectFit: "cover" }}
-                    unoptimized
-                  />
-                ) : (
-                  <span className="text-xs text-gray-400">—</span>
-                )}
-              </td>
-
-              {/* Status Badge */}
-              <td className="p-3">
-                <BlogStatusBadge status={post.status as BlogPost["status"]} />
-              </td>
-
-              {/* Date */}
-              <td className="p-3 hidden sm:table-cell">
-                {formatDate(post.publishedAt || post.createdAt)}
-              </td>
-
-              {/* Views */}
-              <td className="p-3 text-right hidden sm:table-cell">
-                {(typeof post.views === "number" ? post.views : 0).toLocaleString()}
-              </td>
-
-              {/* Comments */}
-              <td className="p-3 text-right hidden sm:table-cell">
-                <Badge variant="outline">{post.commentCount ?? 0}</Badge>
-              </td>
-
-              {/* Tags */}
-              <td className="p-3 hidden lg:table-cell">
-                {post.tags?.length
-                  ? post.tags.slice(0, 3).map((tag, i) => (
-                      <Badge key={i} variant="secondary" className="mr-1">{tag}</Badge>
-                    ))
-                  : <span className="text-xs text-gray-400">—</span>
-                }
-              </td>
-
-              {/* Row Actions */}
-              <td className="p-3 text-right">
-                <BlogRowActions
-                  post={post}
-                  onDelete={onDelete}
-                  onTogglePublish={onTogglePublish}
-                />
-              </td>
-            </motion.tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
+    <VirtualizedTable<BlogPost>
+      data={posts}
+      columns={columns}
+      rowHeight={80}
+      className="overflow-x-auto border rounded-lg max-h-[600px]"
+      getRowProps={() => ({
+        className:
+          "hover:bg-gray-50 focus-visible:bg-blue-50 focus-visible:outline-none",
+        tabIndex: 0,
+      })}
+    />
+  );
 }

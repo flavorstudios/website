@@ -29,6 +29,9 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: false },
+  // Limit the file extensions Next.js will treat as pages to avoid
+  // inadvertently including test files like `.test.tsx`.
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
   // No i18n property here for App Router compatibility
   // Add any other Next.js config here!
 };

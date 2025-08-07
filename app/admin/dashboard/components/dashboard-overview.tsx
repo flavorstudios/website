@@ -5,7 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { TrendingUp, FileText, Video, MessageSquare, Eye, Calendar, Activity, Plus, ExternalLink, Users } from "lucide-react"
+import {
+  TrendingUp, FileText, Video, MessageSquare, Eye, Calendar,
+  Activity, Plus, ExternalLink, Users,
+} from "lucide-react"
+import { LineChartCard } from "@/components/admin/charts/LineChartCard"
 
 interface DashboardStats {
   totalPosts: number
@@ -33,6 +37,7 @@ export function DashboardOverview() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [authInfo, setAuthInfo] = useState<{ role?: string; email?: string; uid?: string } | null>(null)
+  const [history, setHistory] = useState<{ date: string; posts: number; views: number; comments: number }[]>([])
 
   // Utility to extract debug info from API error response
   const extractDebugInfo = (data: Record<string, unknown>) => ({
@@ -52,10 +57,7 @@ export function DashboardOverview() {
       if (statsResponse.status === 401) {
         const data = await statsResponse.json().catch(() => ({}))
         // Log unauthorized info for debugging
-        console.error(
-          "Unauthorized stats access:",
-          extractDebugInfo(data)
-        )
+        console.error("Unauthorized stats access:", extractDebugInfo(data))
         if (process.env.NODE_ENV !== "production") {
           setAuthInfo(extractDebugInfo(data))
         }
@@ -82,10 +84,7 @@ export function DashboardOverview() {
       if (activityResponse.status === 401) {
         const data = await activityResponse.json().catch(() => ({}))
         // Log unauthorized info for debugging
-        console.error(
-          "Unauthorized activity access:",
-          extractDebugInfo(data)
-        )
+        console.error("Unauthorized activity access:", extractDebugInfo(data))
         if (process.env.NODE_ENV !== "production") {
           setAuthInfo(extractDebugInfo(data))
         }
@@ -104,6 +103,13 @@ export function DashboardOverview() {
       }
       const activityData = await activityResponse.json()
       setRecentActivity(activityData.activities || [])
+
+      // History for charts
+      const historyResponse = await fetch("/api/admin/stats/history", { credentials: "include" })
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json()
+        setHistory(historyData.history || [])
+      }
     } catch (error) {
       console.error("Failed to load dashboard data:", error)
       setError("Network error while loading dashboard data")
@@ -209,7 +215,7 @@ export function DashboardOverview() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">Welcome back! 👋</h1>
-            <p className="text-purple-100 text-lg">Here&apos;s what&apos;s happening with your Flavor Studios website today.</p>
+            <p className="text-purple-100 text-lg">Here's what's happening with your Flavor Studios website today.</p>
           </div>
           <div className="hidden md:block">
             <Button
@@ -224,7 +230,7 @@ export function DashboardOverview() {
         </div>
       </div>
 
-      {/* Real-time Stats Grid - Only Real Data */}
+      {/* Real-time Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
@@ -430,36 +436,45 @@ export function DashboardOverview() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                This Month
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-green-600">+{stats.monthlyGrowth}%</p>
-                  <p className="text-sm text-gray-600">Content Growth</p>
+          {/* CHARTS: Posts/Views/Comments Over Time */}
+          {history.length > 0 ? (
+            <>
+              <LineChartCard title="Posts Over Time" data={history} dataKey="posts" />
+              <LineChartCard title="Views Over Time" data={history} dataKey="views" />
+              <LineChartCard title="Comments Over Time" data={history} dataKey="comments" />
+            </>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  This Month
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-green-600">+{stats.monthlyGrowth}%</p>
+                    <p className="text-sm text-gray-600">Content Growth</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-sm">Total Posts</span>
+                      <span className="text-sm font-medium">{stats.totalPosts}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Total Videos</span>
+                      <span className="text-sm font-medium">{stats.totalVideos}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm">Total Views</span>
+                      <span className="text-sm font-medium">{stats.totalViews.toLocaleString()}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Total Posts</span>
-                    <span className="text-sm font-medium">{stats.totalPosts}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Total Videos</span>
-                    <span className="text-sm font-medium">{stats.totalVideos}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Total Views</span>
-                    <span className="text-sm font-medium">{stats.totalViews.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </div>

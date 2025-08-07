@@ -12,6 +12,8 @@ const customJestConfig = {
   },
   // 🟩 Codex update: Ignore serverless/functions code during tests!
   testPathIgnorePatterns: ['<rootDir>/functions/'],
+  // 🟩 Codex update: Add tests directory to Jest roots for test discovery
+  roots: ['<rootDir>', '<rootDir>/tests'],
 }
 
 module.exports = createJestConfig(customJestConfig)

@@ -53,7 +53,7 @@ export default function OfflinePageClient() {
               Try Again
             </button>
             <button
-              onClick={() => history.back()}
+              onClick={() => window.history.back()}
               className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-medium text-blue-700 bg-white border border-blue-200 hover:bg-blue-50 rounded-lg shadow-lg transition-all duration-200"
               aria-label="Go Back"
             >
@@ -84,7 +84,7 @@ export default function OfflinePageClient() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button
               onClick={() =>
-                navigator.onLine
+                typeof window !== "undefined" && window.navigator.onLine
                   ? alert('You are online!')
                   : alert('Still offline')
               }

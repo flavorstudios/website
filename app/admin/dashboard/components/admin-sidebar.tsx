@@ -94,7 +94,7 @@ export function AdminSidebar({
           w-64 md:translate-x-0 ${sidebarOpen ? "md:w-64" : "md:w-20"}
           flex flex-col md:relative md:z-auto
         `}
-        style={{ height: "100vh" }}
+        style={{ height: "100vh", overflowY: "hidden" }} // disables sidebar scroll completely
       >
         {/* Sidebar Header */}
         <div className={`${sidebarOpen ? "p-4" : "p-2"} border-b border-gray-200 min-h-[80px] flex items-center`}>
@@ -140,8 +140,8 @@ export function AdminSidebar({
         )}
 
         {/* Navigation Menu */}
-        <nav className="flex-1 p-2 overflow-y-visible md:overflow-y-visible" /* <- no scroll on sidebar itself */>
-          <div className="space-y-1 max-h-[calc(100vh-230px)] overflow-y-auto" /* <- menu container scrolls ONLY if needed */>
+        <nav className="flex-1 p-2 overflow-y-visible md:overflow-y-visible">
+          <div className="space-y-1 flex flex-col">
             {filteredNavItems.map((item) => {
               const active = item.id === activeId
               const Icon = item.icon

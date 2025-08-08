@@ -21,8 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import SocialLinks from "@/components/SocialLinks";
-import { useTranslations } from "@/lib/i18n"; // Client-only translation hook
-import { getTranslations } from "next-intl/server"; // Server-only for SSR/meta/schema
+import { getTranslations } from "next-intl/server"; // SSR i18n
 
 // === Internationalized SEO METADATA ===
 export async function generateMetadata() {
@@ -71,7 +70,7 @@ async function getI18nSchema() {
 }
 
 export default async function SupportPage() {
-  const t = useTranslations("support"); // Client-side translations
+  const t = await getTranslations("support"); // Server-side translations
   const schema = await getI18nSchema(); // Server-side schema
 
   const impactAreas = [

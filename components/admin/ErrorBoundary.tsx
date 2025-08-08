@@ -25,7 +25,12 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleRetry = () => {
-    this.setState({ hasError: false })
+    // Reset error, then notify listeners to refresh
+    this.setState({ hasError: false }, () => {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("admin-refresh"))
+      }
+    })
   }
 
   render() {

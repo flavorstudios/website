@@ -71,6 +71,7 @@ export default function AdminDashboardPageClient({
   const [mounted, setMounted] = useState(false)
   const [error, setError] = useState("")
   const [helpOpen, setHelpOpen] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0) // ⬅️ added
   const pathname = usePathname()
   const router = useRouter()
 
@@ -151,6 +152,13 @@ export default function AdminDashboardPageClient({
       window.dispatchEvent(new CustomEvent("admin-refresh"))
     }, 30000)
     return () => clearInterval(interval)
+  }, [])
+
+  // --- Listen for global admin-refresh and remount active section ---
+  useEffect(() => {
+    const handleRefresh = () => setRefreshKey((k) => k + 1)
+    window.addEventListener("admin-refresh", handleRefresh)
+    return () => window.removeEventListener("admin-refresh", handleRefresh)
   }, [])
 
   // --- Keyboard shortcuts ---
@@ -326,7 +334,7 @@ export default function AdminDashboardPageClient({
                 )}
                 {/* 🟩 Accessible Suspense fallback */}
                 <Suspense fallback={<Spinner className="py-4" aria-live="polite" />}>
-                  <ErrorBoundary key={activeSection}>
+                  <ErrorBoundary key={`${activeSection}-${refreshKey}`}>
                     {renderContent()}
                   </ErrorBoundary>
                 </Suspense>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -46,7 +46,12 @@ export function DashboardOverview() {
     uid: typeof data.uid === "string" ? data.uid : "unknown",
   })
 
-  const loadDashboardData = async () => {
+  // Mute error logs during test runs
+  const logError = (...args: unknown[]) => {
+    if (process.env.NODE_ENV !== "test") console.error(...args)
+  }
+
+  const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -56,8 +61,8 @@ export function DashboardOverview() {
       const statsResponse = await fetch("/api/admin/stats", { credentials: "include" })
       if (statsResponse.status === 401) {
         const data = await statsResponse.json().catch(() => ({}))
-        // Log unauthorized info for debugging
-        console.error("Unauthorized stats access:", extractDebugInfo(data))
+        // Log unauthorized info for debugging (muted in tests)
+        logError("Unauthorized stats access:", extractDebugInfo(data))
         if (process.env.NODE_ENV !== "production") {
           setAuthInfo(extractDebugInfo(data))
         }
@@ -83,8 +88,8 @@ export function DashboardOverview() {
       const activityResponse = await fetch("/api/admin/activity", { credentials: "include" })
       if (activityResponse.status === 401) {
         const data = await activityResponse.json().catch(() => ({}))
-        // Log unauthorized info for debugging
-        console.error("Unauthorized activity access:", extractDebugInfo(data))
+        // Log unauthorized info for debugging (muted in tests)
+        logError("Unauthorized activity access:", extractDebugInfo(data))
         if (process.env.NODE_ENV !== "production") {
           setAuthInfo(extractDebugInfo(data))
         }
@@ -111,21 +116,31 @@ export function DashboardOverview() {
         setHistory(historyData.history || [])
       }
     } catch (error) {
-      console.error("Failed to load dashboard data:", error)
+      logError("Failed to load dashboard data:", error)
       setError("Network error while loading dashboard data")
       setStats(null)
       setRecentActivity([])
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
+    // initial load
     loadDashboardData()
-    const interval = setInterval(loadDashboardData, 30000) // Refresh every 30 seconds
-    return () => clearInterval(interval)
-    // eslint-disable-next-line
-  }, [])
+
+    // periodic refresh every 30s
+    const interval = setInterval(loadDashboardData, 30000)
+
+    // refresh immediately on global event (from ErrorBoundary retry, page client, etc.)
+    const handleRefresh = () => loadDashboardData()
+    window.addEventListener("admin-refresh", handleRefresh)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener("admin-refresh", handleRefresh)
+    }
+  }, [loadDashboardData])
 
   const quickActions = [
     {

@@ -24,6 +24,7 @@ import { formatDate } from "@/lib/date"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
 import CommentStatsChart from "@/components/admin/comment/CommentStatsChart"
 import AdminPageHeader from "@/components/AdminPageHeader"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface Comment {
   id: string
@@ -283,11 +284,11 @@ export function CommentManager() {
                   }
                   onDelete={() => deleteComment(comment.id, comment.postId)}
                   selected={selectedIds.includes(comment.id)}
-                  onSelect={() =>
+                  onSelect={(checked) =>
                     setSelectedIds((ids) =>
-                      ids.includes(comment.id)
-                        ? ids.filter((i) => i !== comment.id)
-                        : [...ids, comment.id]
+                      !!checked
+                        ? (ids.includes(comment.id) ? ids : [...ids, comment.id])
+                        : ids.filter((i) => i !== comment.id)
                     )
                   }
                 />
@@ -334,7 +335,7 @@ function CommentCard({
   onUpdateStatus: (id: string, postId: string, status: Comment["status"]) => void
   onDelete: () => void
   selected?: boolean
-  onSelect?: () => void
+  onSelect?: (checked: boolean) => void
 }) {
   const getStatusBadge = (status: Comment["status"]) => {
     const styles = {
@@ -354,11 +355,10 @@ function CommentCard({
       )}
     >
       <CardContent className="p-6 flex w-full">
-        <input
-          type="checkbox"
-          checked={selected}
-          onChange={onSelect}
-          className="mt-2 mr-4 accent-purple-600 h-5 w-5"
+        <Checkbox
+          checked={!!selected}
+          onCheckedChange={(checked) => onSelect?.(!!checked)}
+          className="mt-2 mr-4 h-5 w-5"
           aria-label="Select comment"
         />
         <div className="flex flex-col sm:flex-row items-start gap-4 w-full">

@@ -5,7 +5,8 @@ import { Pencil, Eye, Archive, Upload, Trash2 } from 'lucide-react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import type { Video } from '@/lib/content-store'
 
-export type AdminVideo = Video & {
+export type AdminVideo = Omit<Video, 'status'> & {
+  status: 'draft' | 'published' | 'unlisted'
   slug: string
   episodeNumber?: number | string
   season?: string
@@ -37,6 +38,7 @@ export default function VideoRowActions({ video, onDelete, onTogglePublish }: Vi
         </TooltipTrigger>
         <TooltipContent>Edit</TooltipContent>
       </Tooltip>
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -46,13 +48,14 @@ export default function VideoRowActions({ video, onDelete, onTogglePublish }: Vi
             aria-label="View on site"
             title="View"
           >
-            <Link href={`/watch/${video.slug}`} target="_blank">
+            <Link href={`/watch/${video.slug}`} target="_blank" rel="noopener noreferrer">
               <Eye className="h-4 w-4" />
             </Link>
           </Button>
         </TooltipTrigger>
         <TooltipContent>View</TooltipContent>
       </Tooltip>
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -71,6 +74,7 @@ export default function VideoRowActions({ video, onDelete, onTogglePublish }: Vi
         </TooltipTrigger>
         <TooltipContent>{isPublished ? 'Unpublish' : 'Publish'}</TooltipContent>
       </Tooltip>
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

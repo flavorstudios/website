@@ -31,4 +31,9 @@ export interface Video {
   duration?: string;
   publishedAt?: string;
   featured?: boolean;
+
+  // New fields per Codex audit
+  status?: "draft" | "published" | "unlisted";
+  episodeNumber?: number;
+  season?: string;
 }

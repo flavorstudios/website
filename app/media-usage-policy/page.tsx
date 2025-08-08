@@ -72,7 +72,7 @@ export default function MediaUsagePolicyPage() {
     { context: "Video Review", example: `Footage courtesy of Flavor Studios - ${SITE_URL}` },
     {
       context: "Social Media",
-      example: `Credit: ${SITE_BRAND_TWITTER} | ${SITE_URL.replace(/^https?:\/\//, '')}`,
+      example: `Credit: @flavorstudios | ${SITE_URL.replace(/^https?:\/\//, '')}`,
     },
     { context: "Academic Paper", example: `Source: Flavor Studios. Retrieved from ${SITE_URL}` },
   ];
@@ -115,7 +115,7 @@ export default function MediaUsagePolicyPage() {
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-6">
               {permissibleUses.map((use, index) => {
-                const Icon = use.icon
+                const Icon = use.icon;
                 return (
                   <div key={index} className="flex items-start gap-3 p-3 sm:p-4 bg-green-50 rounded-lg border border-green-200">
                     <div className="p-2 bg-green-100 rounded-lg">
@@ -126,7 +126,7 @@ export default function MediaUsagePolicyPage() {
                       <p className="text-xs sm:text-sm text-green-800 leading-relaxed">{use.description}</p>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6">
@@ -185,7 +185,7 @@ export default function MediaUsagePolicyPage() {
             </p>
             <div className="space-y-3 sm:space-y-4">
               {prohibitedUses.map((prohibition, index) => {
-                const Icon = prohibition.icon
+                const Icon = prohibition.icon;
                 return (
                   <div
                     key={index}
@@ -205,7 +205,7 @@ export default function MediaUsagePolicyPage() {
                       </p>
                     </div>
                   </div>
-                )
+                );
               })}
             </div>
           </CardContent>

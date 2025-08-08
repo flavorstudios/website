@@ -30,7 +30,12 @@ export function AuditLogViewer() {
     setLoading(true)
     setError("")
     try {
-      const res = await fetch(`/api/admin/audit-logs/${uid}`)
+      const res = await fetch(`/api/admin/audit-logs/${uid}`, { credentials: "include" })
+      if (res.status === 401) {
+        setError("Unauthorized")
+        setLogs([])
+        return
+      }
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Failed to fetch logs")
       setLogs(data.logs || [])

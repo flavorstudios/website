@@ -307,7 +307,8 @@ export default function AdminDashboardPageClient({
   return (
     <AdminAuthGuard>
       <RoleProvider>
-        <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
+        {/* ⬇️ Only this line changed per your request */}
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex overflow-x-hidden">
           <AdminSidebar
             activeSection={activeSection}
             setActiveSection={setActiveSection}

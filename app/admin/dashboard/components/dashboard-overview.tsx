@@ -10,6 +10,7 @@ import {
   Activity, Plus, ExternalLink, Users,
 } from "lucide-react"
 import { LineChartCard } from "@/components/admin/charts/LineChartCard"
+import { Spinner } from "@/components/ui/spinner"
 
 interface DashboardStats {
   totalPosts: number
@@ -204,7 +205,7 @@ export function DashboardOverview() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        <Spinner />
         <span className="ml-3 text-gray-600">Loading real-time data...</span>
       </div>
     )

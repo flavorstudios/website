@@ -1,4 +1,5 @@
-export const dynamic = 'force-static'; // <-- Add this at the top!
+export const dynamic = 'force-static';
+export const revalidate = false;
 
 import type { Metadata } from 'next';
 import OfflinePageClient from './OfflinePageClient';

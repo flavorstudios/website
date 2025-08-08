@@ -54,6 +54,18 @@ export default function AdminLayout({
   return (
     <AdminAuthProvider>
       <TooltipProvider>
+        {/* Temporary CookieYes kill switch (visual-only backup) */}
+        <style
+          // Scope to admin only; prevents any CookieYes UI from flashing if cached
+          dangerouslySetInnerHTML={{
+            __html: `
+              #cookieYesBanner,
+              #cookieyes-banner,
+              #cky-consent-container,
+              .cky-btn-revisit { display: none !important; }
+            `,
+          }}
+        />
         {children}
       </TooltipProvider>
     </AdminAuthProvider>

@@ -16,6 +16,7 @@ import PwaServiceWorker from "@/components/PwaServiceWorker";
 import Toaster from "@/components/ui/toaster";
 import AdblockBanner from "@/components/AdblockBanner";
 import { ThemeProvider } from "@/components/theme-provider";
+import CookieConsent from "./components/CookieConsent"; // ⬅️ Added
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -24,7 +25,7 @@ import {
   SITE_LOGO_URL,
   SITE_BRAND_TWITTER,
   SITE_DESCRIPTION,
-  SOCIAL_LINKS, // ⬅️ Now imported!
+  SOCIAL_LINKS, // ⬅️ Already imported
 } from "@/lib/constants";
 
 // i18n additions
@@ -135,14 +136,12 @@ function mapCategoryDataToCategory(
 }
 
 // --- i18n: dynamic locale/message loading ---
-// (Updated with deepMerge fallback & error logging)
 function getLocaleFromPath(pathname: string): string {
   const parts = pathname.split("/");
   const maybeLocale = parts[1];
   return locales.includes(maybeLocale as any) ? maybeLocale : defaultLocale;
 }
 
-// Deep merge helper for nested message objects
 function deepMerge(
   target: Record<string, unknown>,
   source: Record<string, unknown>
@@ -185,10 +184,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     );
   }
 
-  // --- i18n: determine and load locale/messages ---
   const locale = getLocaleFromPath(pathname);
-
-  // Load English base and merge with current locale for fallback
   const baseMessages = (await import(`../locales/en/common.json`)).default as Record<string, unknown>;
   let localeMessages: Record<string, unknown> = {};
   try {
@@ -201,20 +197,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang={locale} style={{ fontFamily: "var(--font-poppins)" }}>
       <head>
-        {/* Meta viewport fallback for bots/legacy */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-        {/* Mastodon Verification */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
-
-        {/* Global Organization JSON-LD Schema */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
           suppressHydrationWarning
         />
-
-        {/* Google Tag Manager (HEAD) using next/script */}
         <Script
           id="gtm-head"
           strategy="afterInteractive"
@@ -228,7 +217,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             `,
           }}
         />
-        {/* END GTM (HEAD) */}
       </head>
       <body className="antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
@@ -248,16 +236,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               }
             }}
           >
-            {/* --- ACCESSIBILITY: Skip-link to footer navigation (translated) --- */}
             <a
               href="#footer-navigation"
               className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-black text-white p-2"
             >
-              {/* Use translated skip link if available */}
               {messages?.layout?.skipToFooter || "Skip to footer navigation"}
             </a>
 
-            {/* GTM (NOSCRIPT) */}
             <noscript>
               <iframe
                 src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
@@ -267,11 +252,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 title="Google Tag Manager NoScript"
               />
             </noscript>
-            {/* END GTM (NOSCRIPT) */}
 
             <Toaster />
+            <CookieConsent /> {/* ⬅️ Always render, component self-skips on /admin */}
 
-            {/* ⭐️ AdBlock Support Banner (only for non-admin routes) */}
             {!isAdmin && <AdblockBanner />}
 
             {!isAdmin && (
@@ -288,7 +272,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
                 <Footer />
                 <BackToTop />
                 <PwaServiceWorker />
-                {/* ⭐️ LOAD the stealth detection script only for non-admin */}
                 <Script src="/js/_support_banner.js" strategy="afterInteractive" />
               </>
             )}

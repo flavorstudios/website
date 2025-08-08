@@ -17,16 +17,20 @@ if (self.workbox) {
   const { registerRoute, NavigationRoute } = workbox.routing;
   const { NetworkFirst, StaleWhileRevalidate, CacheFirst } = workbox.strategies;
 
+  // ✅ Codex suggestion: add cache versioning so old assets are purged after deploy
+  const CACHE_VERSION = 'v2';
   const OFFLINE_FALLBACK = '/offline';
 
   registerRoute(
     new NavigationRoute(
       new NetworkFirst({
-        cacheName: 'navigations',
+        // ✅ versioned cache name
+        cacheName: `navigations-${CACHE_VERSION}`,
         plugins: [
           {
+            // ✅ read from the versioned cache on failure
             handlerDidError: async () => {
-              const cache = await caches.open('navigations');
+              const cache = await caches.open(`navigations-${CACHE_VERSION}`);
               const response = await cache.match(OFFLINE_FALLBACK);
               return response || Response.error();
             },

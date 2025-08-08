@@ -14,10 +14,8 @@ const pwaConfig = withPWA({
   skipWaiting: true, // Activate the new service worker immediately
   swSrc: 'app/sw.js', // Path to your custom service worker source file
   disable: process.env.NODE_ENV === 'development', // Disable PWA in development
-  // 💡 Ensures /offline is ALWAYS precached for robust offline fallback
-  additionalManifestEntries: [
-    { url: '/offline', revision: null }, // Precache the offline page
-  ],
+  // 💡 Provide an offline fallback page
+  fallbacks: { document: '/offline' },
   // Add other next-pwa options here if needed
 });
 

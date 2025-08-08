@@ -6,18 +6,58 @@ import sharp from "sharp"; // used in new helpers
 import { addStorageUsage, reduceStorageUsage } from "@/lib/storage-usage";
 import { FieldValue } from "firebase-admin/firestore"; // for detach field delete
 
-// --- Bucket name logic: pick server env, fallback to public, or error ---
-const bucketName =
-  process.env.FIREBASE_STORAGE_BUCKET ||
-  process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
-if (!bucketName) {
-  throw new Error(
-    "FIREBASE_STORAGE_BUCKET env var is required for media operations"
-  );
+/**
+ * Lazily resolve the storage bucket so builds don't require FIREBASE_STORAGE_BUCKET.
+ * Throws only when an operation actually needs the bucket.
+ */
+function getBucket() {
+  const name =
+    process.env.FIREBASE_STORAGE_BUCKET ||
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+  if (!name) {
+    throw new Error(
+      "FIREBASE_STORAGE_BUCKET env var is required for media operations"
+    );
+  }
+  return getStorage().bucket(name);
 }
-const bucket = getStorage().bucket(bucketName);
-const collection = adminDb.collection("media");
-const trashCollection = adminDb.collection("media_trash");
+
+/**
+ * Lazily resolve Firestore. Avoids build-time crashes where adminDb
+ * might not be initialized yet. We defer access until route/function use.
+ */
+function getDb(): FirebaseFirestore.Firestore {
+  const db = adminDb as FirebaseFirestore.Firestore | undefined;
+  if (!db) {
+    throw new Error("Firestore admin is not initialized");
+  }
+  return db;
+}
+
+/**
+ * Proxies so existing code continues to use `bucket.file(...)`, `bucket.name`,
+ * and `collection.doc(...)` without eager initialization.
+ */
+const bucket = new Proxy({} as ReturnType<typeof getBucket>, {
+  get(_t, p) {
+    // @ts-expect-error dynamic pass-through to live bucket
+    return (getBucket() as any)[p];
+  },
+}) as unknown as ReturnType<typeof getBucket>;
+
+const collection = new Proxy({} as FirebaseFirestore.CollectionReference, {
+  get(_t, p) {
+    // @ts-expect-error dynamic pass-through to real collection
+    return (getDb().collection("media") as any)[p];
+  },
+}) as unknown as FirebaseFirestore.CollectionReference;
+
+const trashCollection = new Proxy({} as FirebaseFirestore.CollectionReference, {
+  get(_t, p) {
+    // @ts-expect-error dynamic pass-through to real collection
+    return (getDb().collection("media_trash") as any)[p];
+  },
+}) as unknown as FirebaseFirestore.CollectionReference;
 
 function genId() {
   return crypto.randomBytes(8).toString("hex");
@@ -27,7 +67,7 @@ function genId() {
 function getStoragePathFromDoc(doc: any): string {
   if (doc?.storagePath) return doc.storagePath as string;
   // fallback: derive from URL (works with GCS public URLs)
-  const prefix = `https://storage.googleapis.com/${bucket.name}/`;
+  const prefix = `https://storage.googleapis.com/${getBucket().name}/`;
   if (!doc?.url?.startsWith(prefix)) {
     throw new Error("Cannot derive storage path from url; missing storagePath");
   }
@@ -340,7 +380,7 @@ export async function deleteMedia(id: string, actingUid?: string): Promise<boole
  * Soft-delete: move doc to media_trash.
  */
 export async function trashMedia(id: string, uid: string): Promise<boolean> {
-  return adminDb.runTransaction(async (tx) => {
+  return getDb().runTransaction(async (tx) => {
     const src = collection.doc(id);
     const dst = trashCollection.doc(id);
     const snap = await tx.get(src);
@@ -356,7 +396,7 @@ export async function trashMedia(id: string, uid: string): Promise<boolean> {
  * Restore from trash back to media.
  */
 export async function restoreMediaFromTrash(id: string): Promise<boolean> {
-  return adminDb.runTransaction(async (tx) => {
+  return getDb().runTransaction(async (tx) => {
     const src = trashCollection.doc(id);
     const dst = collection.doc(id);
     const snap = await tx.get(src);
@@ -715,7 +755,7 @@ export async function editMedia(
  * Writes folderId and bumps updatedAt. Non-destructive.
  */
 export async function moveMedia(ids: string[], folderId: string): Promise<void> {
-  const batch = adminDb.batch();
+  const batch = getDb().batch();
   const now = Date.now();
   ids.forEach((id) => {
     const ref = collection.doc(id);
@@ -729,7 +769,7 @@ export async function moveMedia(ids: string[], folderId: string): Promise<void> 
  * Sets both `attachedTo` and boolean `attached` for compatibility with filters.
  */
 export async function attachMedia(ids: string[], targetId: string): Promise<void> {
-  const batch = adminDb.batch();
+  const batch = getDb().batch();
   const now = Date.now();
   ids.forEach((id) => {
     const ref = collection.doc(id);
@@ -747,7 +787,7 @@ export async function attachMedia(ids: string[], targetId: string): Promise<void
  * Clears `attachedTo` and flips `attached` to false.
  */
 export async function detachMedia(ids: string[]): Promise<void> {
-  const batch = adminDb.batch();
+  const batch = getDb().batch();
   const now = Date.now();
   ids.forEach((id) => {
     const ref = collection.doc(id);

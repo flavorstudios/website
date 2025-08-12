@@ -1,6 +1,5 @@
 "use client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useState } from "react";
 import MediaLibrary from "./MediaLibrary";
 
 interface Props {

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, Menu, ExternalLink, LogOut } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
+import ThemeToggle from "@/components/theme-toggle"
 
 interface AdminHeaderProps {
   onLogout: () => void
@@ -14,7 +15,7 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHeaderProps) {
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className="bg-background border-b border-border px-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
         {/* Left Section: Sidebar toggle, Logo, Search */}
         <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -37,7 +38,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
           {/* Desktop search input */}
           <div className="hidden md:block flex-1 max-w-xs ml-4">
             <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Search..."
                 className="pl-10 w-full"
@@ -52,7 +53,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
           {/* Mobile search input (below md) */}
           <div className="w-full md:hidden order-2 flex-1">
             <div className="relative w-full mt-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Search..."
                 className="pl-10 w-full"
@@ -64,7 +65,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.open("https://flavorstudios.in", "_blank")}
+            onClick={() => window.open("https://flavorstudios.in", "_blank", "noopener,noreferrer")}
             className="hidden md:flex items-center gap-2"
           >
             <ExternalLink className="h-4 w-4" />
@@ -76,16 +77,19 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
           {/* Avatar and Admin info */}
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
-              <AvatarImage src="/admin-avatar.jpg" />
+              <AvatarImage src="/admin-avatar.jpg" alt="Admin avatar" />
               <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-white text-sm">
                 FS
               </AvatarFallback>
             </Avatar>
             <div className="hidden md:block">
-              <p className="text-sm font-medium">Admin</p>
-              <p className="text-xs text-gray-500">Flavor Studios</p>
+              <p className="text-sm font-medium text-foreground">Admin</p>
+              <p className="text-xs text-muted-foreground">Flavor Studios</p>
             </div>
           </div>
+
+          {/* Theme toggle */}
+          <ThemeToggle />
 
           {/* Logout button */}
           <Button

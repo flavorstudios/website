@@ -110,8 +110,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     });
   }
 
-  const canonicalUrl = getCanonicalUrl(`/watch/${video.slug}`);
-  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
+  const thumbnailUrl =
+    video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
   const seoTitle = `${video.title} – Watch | ${SITE_NAME}`;
   const seoDescription =
     video.description ||
@@ -140,7 +140,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       images: [thumbnailUrl],
     },
     // alternates: {
-    //   canonical: canonicalUrl,
+    //   canonical: getCanonicalUrl(`/watch/${video.slug}`),
     // },
   });
 }
@@ -154,10 +154,12 @@ export default async function VideoPage({ params }: { params: { slug: string } }
   }
 
   const canonicalUrl = getCanonicalUrl(`/watch/${video.slug}`);
-  const thumbnailUrl = video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
+  const thumbnailUrl =
+    video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
   const embedUrl = `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`;
   const youtubeUrl = `https://www.youtube.com/watch?v=${video.youtubeId}`;
-  const youtubeChannelUrl = "https://www.youtube.com/channel/UC5dNbnWOG-gTlpS8iGimAag"; // <-- Your actual channel
+  const youtubeChannelUrl =
+    "https://www.youtube.com/channel/UC5dNbnWOG-gTlpS8iGimAag"; // <-- Your actual channel
 
   // --- JSON-LD VideoObject Schema ---
   const schema = getSchema({

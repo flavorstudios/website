@@ -79,14 +79,14 @@ export function AdminSidebar({
       {/* Mobile Overlay */}
       {isMobile && sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden"
+          className="fixed inset-0 bg-black/50 z-50 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside
         className={`
-          bg-white border-r border-gray-200
+          bg-background border-r border-border
           ${isMobile
             ? "fixed left-0 top-0 h-screen z-50 transform transition-transform duration-300 ease-in-out"
             : "sticky top-0 h-screen"}
@@ -97,7 +97,7 @@ export function AdminSidebar({
         style={{ height: "100vh" }}
       >
         {/* Sidebar Header */}
-        <div className={`${sidebarOpen ? "p-4" : "p-2"} border-b border-gray-200 min-h-[80px] flex items-center`}>
+        <div className={`${sidebarOpen ? "p-4" : "p-2"} border-b border-border min-h-[80px] flex items-center`}>
           <div className="flex items-center justify-between w-full">
             {sidebarOpen ? (
               <div className="flex items-center gap-3">
@@ -105,8 +105,8 @@ export function AdminSidebar({
                   <span className="text-white font-bold text-sm">FS</span>
                 </div>
                 <div className="min-w-0">
-                  <span className="font-semibold text-gray-900 text-sm block truncate">Admin Panel</span>
-                  <span className="text-xs text-gray-500 block truncate">Flavor Studios</span>
+                  <span className="font-semibold text-foreground text-sm block truncate">Admin Panel</span>
+                  <span className="text-xs text-muted-foreground block truncate">Flavor Studios</span>
                 </div>
               </div>
             ) : (
@@ -133,9 +133,9 @@ export function AdminSidebar({
 
         {/* User Info */}
         {sidebarOpen && (
-          <div className="px-4 py-3 border-b border-gray-100">
-            <p className="font-medium text-gray-900 text-sm">Administrator</p>
-            <p className="text-xs text-gray-500">Manage your studio</p>
+          <div className="px-4 py-3 border-b border-border">
+            <p className="font-medium text-foreground text-sm">Administrator</p>
+            <p className="text-xs text-muted-foreground">Manage your studio</p>
           </div>
         )}
 
@@ -156,7 +156,7 @@ export function AdminSidebar({
                   } h-10 ${
                     active
                       ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
-                      : "text-gray-700 hover:bg-gray-100"
+                      : "text-muted-foreground hover:bg-muted"
                   }`}
                   title={!sidebarOpen ? item.label : undefined}
                   onClick={
@@ -178,7 +178,7 @@ export function AdminSidebar({
                             <Badge
                               variant="secondary"
                               className={`ml-2 text-xs ${
-                                active ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
+                                active ? "bg-white/20 text-white" : "bg-muted text-foreground"
                               }`}
                             >
                               {item.count}
@@ -196,7 +196,7 @@ export function AdminSidebar({
                           {item.count && (
                             <Badge
                               variant="secondary"
-                              className="ml-2 text-xs bg-gray-200 text-gray-700"
+                              className="ml-2 text-xs bg-muted text-foreground"
                             >
                               {item.count}
                             </Badge>
@@ -213,8 +213,8 @@ export function AdminSidebar({
 
         {/* Sidebar Footer */}
         {sidebarOpen && (
-          <div className="p-4 border-t border-gray-200 mt-auto">
-            <div className="text-xs text-gray-500 text-center">
+          <div className="p-4 border-t border-border mt-auto">
+            <div className="text-xs text-muted-foreground text-center">
               <p className="font-medium">Flavor Studios Admin</p>
               <p>Version 1.0.0</p>
             </div>

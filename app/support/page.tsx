@@ -1,7 +1,7 @@
 // app/support/page.tsx
 
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL, SITE_LOGO_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -130,7 +130,7 @@ export default function SupportPage() {
               Support Our Creative Vision
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed mb-6 sm:mb-8 lg:mb-10 px-2">
-              We're committed to crafting emotionally powerful anime, original 3D animations, and meaningful
+              We&apos;re committed to crafting emotionally powerful anime, original 3D animations, and meaningful
               storytelling experiences — all built independently using Blender and open-source tools.
             </p>
 
@@ -212,8 +212,8 @@ export default function SupportPage() {
           <Card className="bg-gradient-to-r from-blue-600 to-purple-600 border-0 shadow-2xl">
             <CardContent className="p-6 sm:p-8 lg:p-12 text-center">
               <blockquote className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-medium text-white leading-relaxed">
-                "If you believe in the value of independent animation and want to support our work, your contribution
-                can help us continue producing high-quality content and grow our creative mission."
+                &ldquo;If you believe in the value of independent animation and want to support our work, your contribution
+                can help us continue producing high-quality content and grow our creative mission.&rdquo;
               </blockquote>
             </CardContent>
           </Card>
@@ -224,7 +224,7 @@ export default function SupportPage() {
           <div className="bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 border-t-4 border-yellow-400 rounded-lg">
             <div className="container mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12 lg:py-16">
               <div className="text-center mb-8 sm:mb-12">
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">
+                <h2 className="text-2xl sm:text-3xl lg:4xl font-bold mb-3 sm:mb-4">
                   Ready to Support Our Journey?
                 </h2>
                 <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto px-2">

@@ -2,7 +2,7 @@
 export const viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#000000", // you can change this to match your brand
+  themeColor: "#ffffff",
 };
 
 import type { ReactNode } from "react";
@@ -15,6 +15,7 @@ import { BackToTop } from "@/components/back-to-top";
 import PwaServiceWorker from "@/components/PwaServiceWorker";
 import Toaster from "@/components/ui/toaster";
 import AdblockBanner from "@/components/AdblockBanner";
+import { ThemeProvider } from "@/components/theme-provider";
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -22,7 +23,7 @@ import {
   SITE_URL,
   SITE_LOGO_URL,
   SITE_BRAND_TWITTER,
-  SITE_DESCRIPTION, // ✅ Import SITE_DESCRIPTION
+  SITE_DESCRIPTION, // ✅ Use constant only
 } from "@/lib/constants";
 
 // --- SEO Default Metadata (App Router global metadata) ---
@@ -152,7 +153,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   }
 
   return (
-    <html lang="en" style={{ fontFamily: "var(--font-poppins)" }}>
+    <html
+      lang="en"
+      style={{ fontFamily: "var(--font-poppins)" }}
+      suppressHydrationWarning
+    >
       <head>
         {/* Meta viewport fallback for bots/legacy */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -184,41 +189,43 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* END GTM (HEAD) */}
       </head>
       <body className="antialiased">
-        {/* GTM (NOSCRIPT) */}
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-            title="Google Tag Manager NoScript"
-          />
-        </noscript>
-        {/* END GTM (NOSCRIPT) */}
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          {/* GTM (NOSCRIPT) */}
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+              title="Google Tag Manager NoScript"
+            />
+          </noscript>
+          {/* END GTM (NOSCRIPT) */}
 
-        <Toaster />
+          <Toaster />
 
-        {/* ⭐️ AdBlock Support Banner (only for non-admin routes) */}
-        {!isAdmin && <AdblockBanner />}
+          {/* ⭐️ AdBlock Support Banner (only for non-admin routes) */}
+          {!isAdmin && <AdblockBanner />}
 
-        {!isAdmin && (
-          <Header
-            blogCategories={blogCategories}
-            videoCategories={videoCategories}
-          />
-        )}
+          {!isAdmin && (
+            <Header
+              blogCategories={blogCategories}
+              videoCategories={videoCategories}
+            />
+          )}
 
-        <main>{children}</main>
+          <main>{children}</main>
 
-        {!isAdmin && (
-          <>
-            <Footer />
-            <BackToTop />
-            <PwaServiceWorker />
-            {/* ⭐️ LOAD the stealth detection script only for non-admin */}
-            <Script src="/js/_support_banner.js" strategy="afterInteractive" />
-          </>
-        )}
+          {!isAdmin && (
+            <>
+              <Footer />
+              <BackToTop />
+              <PwaServiceWorker />
+              {/* ⭐️ LOAD the stealth detection script only for non-admin */}
+              <Script src="/js/_support_banner.js" strategy="afterInteractive" />
+            </>
+          )}
+        </ThemeProvider>
       </body>
     </html>
   );

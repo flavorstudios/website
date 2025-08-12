@@ -39,7 +39,10 @@ export async function listMedia(
 ): Promise<ListMediaResult> {
   // If called with just a number, act as legacy usage
   let limit = 50;
-  let search, type, order, startAfter;
+  let search: string | undefined;
+  let type: string | undefined;
+  let order: "asc" | "desc" | undefined;
+  let startAfter: number | undefined;
 
   if (typeof options === "number") {
     limit = options;
@@ -52,10 +55,11 @@ export async function listMedia(
     startAfter = options.startAfter;
   }
 
-  let query: FirebaseFirestore.Query = collection.orderBy("createdAt", order);
+  let query: FirebaseFirestore.Query<MediaDoc> =
+    collection.orderBy("createdAt", order);
 
   if (type) {
-    query = query.where("mime", "==", type);
+    query = query.where("mime", "==", type) as FirebaseFirestore.Query<MediaDoc>;
   }
 
   if (search) {
@@ -63,11 +67,11 @@ export async function listMedia(
     const term = search.toLowerCase();
     query = query
       .where("basename", ">=", term)
-      .where("basename", "<=", term + "\uf8ff");
+      .where("basename", "<=", term + "\uf8ff") as FirebaseFirestore.Query<MediaDoc>;
   }
 
-  if (startAfter) {
-    query = query.startAfter(startAfter);
+  if (startAfter != null) {
+    query = query.startAfter(startAfter) as FirebaseFirestore.Query<MediaDoc>;
   }
 
   const snap = await query.limit(limit).get();
@@ -163,7 +167,7 @@ export async function cropMedia(
     .toBuffer();
   const variantFile = bucket.file(`media/${id}/${variantName}`);
   await variantFile.save(outBuffer, { contentType: data.mime });
-  const variantUrl = `https://storage.googleapis.com/${bucket.name}/media/${id}/${variantName}`;
+
   const variant: MediaVariant = {
     id: genId(),
     path: `media/${id}/${variantName}`,

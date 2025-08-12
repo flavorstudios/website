@@ -21,6 +21,24 @@ export interface ContactMessage {
   } | null;
 }
 
+/**
+ * Firestore shapes (new + legacy). Optional because historical docs may be sparse.
+ */
+type FirestoreContactMessageData = {
+  firstName?: string;
+  lastName?: string;
+  name?: string;
+  email?: string;
+  subject?: string;
+  message?: string;
+  createdAt?: string;
+  timestamp?: string;
+  status?: ContactMessage["status"];
+  priority?: ContactMessage["priority"];
+  flagged?: boolean;
+  scores?: Record<string, unknown> | null;
+};
+
 // GET /api/admin/contact-messages
 // Supports ?page=1&limit=20&search=foo
 export async function GET(req: NextRequest) {
@@ -49,18 +67,37 @@ export async function GET(req: NextRequest) {
     }
 
     let messages: ContactMessage[] = snap.docs.map((d) => {
-      const data = d.data() as any;
+      const data = d.data() as unknown as FirestoreContactMessageData;
+
+      const fullName = typeof data.name === "string" ? data.name : "";
+      const firstFromName = fullName ? fullName.split(" ")[0] : "";
+      const lastFromName =
+        fullName && fullName.includes(" ")
+          ? fullName.split(" ").slice(1).join(" ")
+          : "";
+
+      const createdAt =
+        (typeof data.createdAt === "string" && data.createdAt) ||
+        (typeof data.timestamp === "string" && data.timestamp) ||
+        new Date().toISOString();
+
       return {
         id: d.id,
-        firstName: data.firstName || (data.name?.split(" ")[0] ?? "Unknown"),
-        lastName: data.lastName || (data.name?.split(" ").slice(1).join(" ") ?? ""),
-        email: data.email,
-        subject: data.subject,
-        message: data.message,
-        createdAt: data.createdAt || data.timestamp || new Date().toISOString(),
+        firstName:
+          (typeof data.firstName === "string" && data.firstName) ||
+          firstFromName ||
+          "Unknown",
+        lastName:
+          (typeof data.lastName === "string" && data.lastName) ||
+          lastFromName ||
+          "",
+        email: typeof data.email === "string" ? data.email : "",
+        subject: typeof data.subject === "string" ? data.subject : "",
+        message: typeof data.message === "string" ? data.message : "",
+        createdAt,
         status: data.status ?? "unread",
         priority: data.priority ?? "medium",
-        flagged: !!data.flagged,
+        flagged: Boolean(data.flagged),
         scores: data.scores ?? null,
       };
     });
@@ -98,21 +135,48 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    const { id, status } = await req.json();
-    if (!id || !status) {
+    type UpdateBody = { id: string; status: ContactMessage["status"] };
+    const bodyUnknown = (await req.json()) as unknown;
+
+    if (!bodyUnknown || typeof bodyUnknown !== "object") {
+      return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+    }
+
+    const { id, status } = bodyUnknown as Partial<UpdateBody>;
+    const validStatuses: ContactMessage["status"][] = [
+      "unread",
+      "read",
+      "replied",
+      "archived",
+    ];
+
+    if (
+      typeof id !== "string" ||
+      typeof status !== "string" ||
+      !validStatuses.includes(status as ContactMessage["status"])
+    ) {
       return NextResponse.json({ error: "Missing id or status" }, { status: 400 });
     }
 
     // Update both collections (for legacy support)
     try {
-      await adminDb.collection("contactMessages").doc(String(id)).set({ status }, { merge: true });
+      await adminDb
+        .collection("contactMessages")
+        .doc(String(id))
+        .set({ status }, { merge: true });
     } catch (e) {
       console.warn("[ADMIN_CONTACT_MESSAGES_PUT] Failed to update contactMessages", e);
     }
     try {
-      await adminDb.collection("contact_messages").doc(String(id)).set({ status }, { merge: true });
+      await adminDb
+        .collection("contact_messages")
+        .doc(String(id))
+        .set({ status }, { merge: true });
     } catch (e) {
-      console.warn("[ADMIN_CONTACT_MESSAGES_PUT] Failed to update contact_messages (legacy)", e);
+      console.warn(
+        "[ADMIN_CONTACT_MESSAGES_PUT] Failed to update contact_messages (legacy)",
+        e
+      );
     }
 
     return NextResponse.json({ success: true });

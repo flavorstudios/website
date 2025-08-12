@@ -4,22 +4,25 @@ import { adminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 import nodemailer from "nodemailer";
 
-export async function POST(req: NextRequest) {
+type SendReplyPayload = {
+  messageId?: string;
+  to?: string;
+  from?: string;
+  subject?: string;
+  message?: string;
+};
+
+export async function POST(req: NextRequest): Promise<NextResponse> {
   if (!(await requireAdmin(req, "canHandleContacts"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let payload: {
-    messageId?: string;
-    to?: string;
-    from?: string;
-    subject?: string;
-    message?: string;
-  };
+  let payload: SendReplyPayload;
 
   try {
-    payload = await req.json();
-  } catch (err) {
+    payload = (await req.json()) as SendReplyPayload;
+  } catch {
+    // parameterless catch avoids no-unused-vars while keeping the catch block
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
@@ -38,7 +41,10 @@ export async function POST(req: NextRequest) {
     .filter(Boolean);
 
   if (!allowed.includes(from.toLowerCase())) {
-    return NextResponse.json({ error: "Invalid from address" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid from address" },
+      { status: 400 }
+    );
   }
 
   // Map "from" to SMTP_USER_<NAME> and SMTP_PASS_<NAME>
@@ -47,7 +53,10 @@ export async function POST(req: NextRequest) {
   const smtpPass = process.env[`SMTP_PASS_${prefix}`];
 
   if (!smtpUser || !smtpPass) {
-    return NextResponse.json({ error: "Missing SMTP credentials" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Missing SMTP credentials" },
+      { status: 500 }
+    );
   }
 
   // Build transporter with per-sender credentials

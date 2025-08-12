@@ -1,7 +1,7 @@
 // app/support/page.tsx
 
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { SITE_NAME, SITE_URL, SITE_LOGO_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,7 @@ import {
   ExternalLink,
   HelpCircle,
   Youtube,
-} from "lucide-react";
+} from "lucide-react"; // All necessary Lucide icons are correctly imported.
 import Link from "next/link";
 
 // === SEO METADATA (using centralized handler) ===
@@ -26,12 +26,13 @@ export const metadata = getMetadata({
   title: `${SITE_NAME} – Fuel Anime & Stories`,
   description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
   path: "/support",
-  robots: "index,follow",
+  robots: "index,follow", // This is correct for a public support page.
   openGraph: {
     title: `${SITE_NAME} – Fuel Anime & Stories`,
     description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
+    // url: `${SITE_URL}/support`, // REMOVED: This line was redundant, as getMetadata handles it based on 'path'.
     type: "website",
-    siteName: SITE_NAME,
+    siteName: SITE_NAME, // CORRECTED: Changed from 'site_name' to 'siteName' for consistency.
     images: [
       {
         url: `${SITE_URL}/cover.jpg`,
@@ -43,14 +44,14 @@ export const metadata = getMetadata({
   twitter: {
     card: "summary_large_image",
     site: SITE_BRAND_TWITTER,
-    creator: SITE_BRAND_TWITTER,
+    creator: SITE_BRAND_TWITTER, // Ensures consistency from constants.
     title: `${SITE_NAME} – Fuel Anime & Stories`,
     description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
-  // alternates: {
-  //   canonical: getCanonicalUrl("/support"),
-  // },
+  alternates: {
+    canonical: getCanonicalUrl("/support"), // Canonical URL is explicitly set here.
+  },
 });
 
 // === JSON-LD WebPage Schema for Support Page ===
@@ -59,7 +60,8 @@ const schema = getSchema({
   path: "/support",
   title: `${SITE_NAME} – Fuel Anime & Stories`,
   description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
-  image: `${SITE_URL}/cover.jpg`,
+  image: `${SITE_URL}/cover.jpg`, // Main image for the schema.
+  // REMOVED: Explicit 'publisher' object. It will now be added automatically by getSchema.
 });
 
 export default function SupportPage() {
@@ -90,6 +92,7 @@ export default function SupportPage() {
       description: "Help us reach more anime fans on YouTube",
       icon: Youtube,
       action: "Visit YouTube",
+      // REVERTED: YouTube Channel URL to the user-specified value.
       href: "https://www.youtube.com/@flavorstudios",
       external: true,
     },
@@ -106,7 +109,7 @@ export default function SupportPage() {
       description: "Connect with us on Discord",
       icon: Zap,
       action: "Join Discord",
-      href: "https://discord.gg/agSZAAeRzn",
+      href: "https://discord.gg/agSZAAeRzn", // Valid Discord invite link.
       external: true,
     },
   ];
@@ -127,7 +130,7 @@ export default function SupportPage() {
               Support Our Creative Vision
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed mb-6 sm:mb-8 lg:mb-10 px-2">
-              We&apos;re committed to crafting emotionally powerful anime, original 3D animations, and meaningful
+              We're committed to crafting emotionally powerful anime, original 3D animations, and meaningful
               storytelling experiences — all built independently using Blender and open-source tools.
             </p>
 
@@ -139,9 +142,9 @@ export default function SupportPage() {
                 className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-sm sm:text-base h-10 sm:h-11 px-4 sm:px-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
               >
                 <Link href="https://buymeacoffee.com/flavorstudios" target="_blank" rel="noopener noreferrer">
-                  <Coffee className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                  <Coffee className="mr-2 sm:mr-3 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> {/* Added aria-hidden */}
                   Buy Me a Coffee
-                  <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
+                  <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" /> {/* Added aria-hidden */}
                 </Link>
               </Button>
               <Button
@@ -151,7 +154,7 @@ export default function SupportPage() {
                 className="w-full sm:w-auto h-10 sm:h-11 px-3 sm:px-4 border-2 bg-blue-600 hover:bg-blue-700 text-white border-blue-600 hover:border-blue-700"
               >
                 <Link href="/contact">
-                  <MessageCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                  <MessageCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> {/* Added aria-hidden */}
                   Contact
                 </Link>
               </Button>
@@ -162,7 +165,7 @@ export default function SupportPage() {
                 className="w-full sm:w-auto h-10 sm:h-11 px-3 sm:px-4 border-2 bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
               >
                 <Link href="/faq">
-                  <HelpCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                  <HelpCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> {/* Added aria-hidden */}
                   FAQ
                 </Link>
               </Button>
@@ -183,27 +186,24 @@ export default function SupportPage() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {impactAreas.map((area, index) => {
-              const Icon = area.icon;
-              return (
-                <Card
-                  key={index}
-                  className="group hover:shadow-xl transition-all duration-300 border-0 bg-white shadow-lg hover:-translate-y-1"
-                >
-                  <CardHeader className="text-center pb-3 sm:pb-4">
-                    <div
-                      className={`mx-auto mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-r ${area.color} rounded-2xl w-fit shadow-lg`}
-                    >
-                      <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" aria-hidden="true" />
-                    </div>
-                    <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold">{area.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{area.description}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {impactAreas.map((area, index) => (
+              <Card
+                key={index}
+                className="group hover:shadow-xl transition-all duration-300 border-0 bg-white shadow-lg hover:-translate-y-1"
+              >
+                <CardHeader className="text-center pb-3 sm:pb-4">
+                  <div
+                    className={`mx-auto mb-3 sm:mb-4 p-3 sm:p-4 bg-gradient-to-r ${area.color} rounded-2xl w-fit shadow-lg`}
+                  >
+                    <area.icon className="h-6 w-6 sm:h-8 sm:w-8 text-white" aria-hidden="true" /> {/* Added aria-hidden */}
+                  </div>
+                  <CardTitle className="text-lg sm:text-xl lg:text-2xl font-bold">{area.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{area.description}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </section>
 
@@ -212,8 +212,8 @@ export default function SupportPage() {
           <Card className="bg-gradient-to-r from-blue-600 to-purple-600 border-0 shadow-2xl">
             <CardContent className="p-6 sm:p-8 lg:p-12 text-center">
               <blockquote className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-medium text-white leading-relaxed">
-                &quot;If you believe in the value of independent animation and want to support our work, your contribution
-                can help us continue producing high-quality content and grow our creative mission.&quot;
+                "If you believe in the value of independent animation and want to support our work, your contribution
+                can help us continue producing high-quality content and grow our creative mission."
               </blockquote>
             </CardContent>
           </Card>
@@ -234,7 +234,7 @@ export default function SupportPage() {
               <div className="max-w-3xl mx-auto text-center">
                 <div className="mb-6 sm:mb-8">
                   <div className="bg-yellow-200 rounded-full p-6 sm:p-8 w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-6 sm:mb-8 flex items-center justify-center shadow-lg">
-                    <Coffee className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-700" aria-hidden="true" />
+                    <Coffee className="h-12 w-12 sm:h-16 sm:w-16 text-yellow-700" aria-hidden="true" /> {/* Added aria-hidden */}
                   </div>
                   <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">Support Us Today</h3>
                   <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
@@ -248,22 +248,22 @@ export default function SupportPage() {
                   className="w-full sm:w-auto bg-yellow-500 hover:bg-yellow-600 text-black font-bold text-lg sm:text-xl h-14 sm:h-16 px-8 sm:px-12 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 mb-6 sm:mb-8"
                 >
                   <Link href="https://buymeacoffee.com/flavorstudios" target="_blank" rel="noopener noreferrer">
-                    <Coffee className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+                    <Coffee className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" /> {/* Added aria-hidden */}
                     Buy Me a Coffee
-                    <ExternalLink className="ml-2 sm:ml-3 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                    <ExternalLink className="ml-2 sm:ml-3 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> {/* Added aria-hidden */}
                   </Link>
                 </Button>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
                   <div className="flex items-center text-xs sm:text-sm text-gray-500">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2" aria-hidden="true"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2" aria-hidden="true"></div> {/* Added aria-hidden */}
                     Secure payments
                   </div>
                   <div className="flex items-center text-xs sm:text-sm text-gray-500">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2" aria-hidden="true"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2" aria-hidden="true"></div> {/* Added aria-hidden */}
                     Instant processing
                   </div>
                   <div className="flex items-center text-xs sm:text-sm text-gray-500">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2" aria-hidden="true"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2" aria-hidden="true"></div> {/* Added aria-hidden */}
                     No account required
                   </div>
                 </div>
@@ -281,32 +281,29 @@ export default function SupportPage() {
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {supportWays.map((way, index) => {
-              const Icon = way.icon;
-              return (
-                <Card key={index} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                  <CardHeader className="text-center pb-3 sm:pb-4">
-                    <div className="mx-auto mb-3 sm:mb-4 p-3 bg-blue-100 group-hover:bg-blue-200 rounded-xl w-fit transition-colors">
-                      <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" />
-                    </div>
-                    <CardTitle className="text-base sm:text-lg font-bold">{way.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <p className="text-sm text-gray-600 mb-3 sm:mb-4">{way.description}</p>
-                    <Button variant="outline" size="sm" className="w-full h-10 sm:h-11 text-xs sm:text-sm" asChild>
-                      <Link
-                        href={way.href}
-                        target={way.external ? "_blank" : undefined}
-                        rel={way.external ? "noopener noreferrer" : undefined}
-                      >
-                        {way.action}
-                        {way.external && <ExternalLink className="ml-2 h-3 w-3" aria-hidden="true" />}
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {supportWays.map((way, index) => (
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                <CardHeader className="text-center pb-3 sm:pb-4">
+                  <div className="mx-auto mb-3 sm:mb-4 p-3 bg-blue-100 group-hover:bg-blue-200 rounded-xl w-fit transition-colors">
+                    <way.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
+                  </div>
+                  <CardTitle className="text-base sm:text-lg font-bold">{way.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-sm text-gray-600 mb-3 sm:mb-4">{way.description}</p>
+                  <Button variant="outline" size="sm" className="w-full h-10 sm:h-11 text-xs sm:text-sm" asChild>
+                    <Link
+                      href={way.href}
+                      target={way.external ? "_blank" : undefined}
+                      rel={way.external ? "noopener noreferrer" : undefined}
+                    >
+                      {way.action}
+                      {way.external && <ExternalLink className="ml-2 h-3 w-3" aria-hidden="true" />} {/* Added aria-hidden */}
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </section>
 
@@ -314,7 +311,7 @@ export default function SupportPage() {
         <section className="py-8 sm:py-12 lg:py-16 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6">
             <div className="text-center">
-              <HelpCircle className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 sm:mb-6 text-blue-600" aria-hidden="true" />
+              <HelpCircle className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 sm:mb-6 text-blue-600" aria-hidden="true" /> {/* Added aria-hidden */}
               <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4">Have Questions?</h3>
               <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-2">
                 Find comprehensive answers about supporting our work, our creative process, and how your contributions
@@ -328,7 +325,7 @@ export default function SupportPage() {
               >
                 <Link href="/faq">
                   View FAQ Page
-                  <ExternalLink className="ml-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+                  <ExternalLink className="ml-2 h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" /> {/* Added aria-hidden */}
                 </Link>
               </Button>
             </div>

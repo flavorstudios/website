@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -16,6 +16,8 @@ interface AdminHeaderProps {
 }
 
 export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHeaderProps) {
+  const [avatar, setAvatar] = useState<string>("")
+
   // Ctrl/Cmd + K to open the command palette
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -26,6 +28,14 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
     }
     window.addEventListener("keydown", onKeyDown)
     return () => window.removeEventListener("keydown", onKeyDown)
+  }, [])
+
+  // Load avatar from user settings
+  useEffect(() => {
+    fetch("/api/admin/settings", { credentials: "include" })
+      .then((res) => res.ok ? res.json() : Promise.reject())
+      .then((data) => setAvatar(data?.settings?.profile?.avatar || ""))
+      .catch(() => {})
   }, [])
 
   return (
@@ -110,7 +120,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
             {/* Avatar and Admin info */}
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/admin-avatar.jpg" alt="Admin avatar" />
+                <AvatarImage src={avatar || "/admin-avatar.jpg"} alt="Admin avatar" />
                 <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-white text-sm">
                   FS
                 </AvatarFallback>

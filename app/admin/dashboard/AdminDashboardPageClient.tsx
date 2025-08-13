@@ -29,6 +29,8 @@ const CategoryManager = dynamic(() => import("@/components/admin/category/Catego
 const EmailInbox = dynamic(() => import("./components/email-inbox"), { ssr: false, loading: () => <Spinner /> });
 const MediaLibrary = dynamic(() => import("./components/media/MediaLibrary"), { ssr: false, loading: () => <Spinner /> });
 const CareerApplications = dynamic(() => import("./components/career-applications"), { ssr: false, loading: () => <Spinner /> });
+// ✨ New: Settings (lazy-loaded)
+const SystemSettings = dynamic(() => import("./components/system-settings"), { ssr: false, loading: () => <Spinner /> });
 const CommandPalette = dynamic(() => import("./components/command-palette"), { ssr: false });
 
 interface AdminDashboardPageClientProps {
@@ -128,6 +130,7 @@ export default function AdminDashboardPageClient({ initialSection = "overview" }
       case "inbox": return <EmailInbox />;
       case "system": return <SystemTools />;
       case "users": return <UserManagement />;
+      case "settings": return <SystemSettings />;
       default: return <DashboardOverview />;
     }
   };
@@ -141,7 +144,7 @@ export default function AdminDashboardPageClient({ initialSection = "overview" }
             <AdminSidebar activeSection={activeSection} setActiveSection={setActiveSection} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
             <div className="flex-1 flex flex-col">
               <AdminHeader onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-              <main className="flex-1 p-6 overflow-auto">
+              <main id="main" className="flex-1 p-6 overflow-auto">
                 <div className="max-w-7xl mx-auto">
                   {error && (
                     <Alert variant="destructive" className="mb-4 border-red-200 bg-red-50">

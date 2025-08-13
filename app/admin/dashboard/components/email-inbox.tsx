@@ -31,7 +31,7 @@ interface ContactMessage {
   } | null
 }
 
-export function EmailInbox() {
+export default function EmailInbox() {
   const [messages, setMessages] = useState<ContactMessage[]>([])
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null)
   const [replyText, setReplyText] = useState("")
@@ -155,18 +155,13 @@ export function EmailInbox() {
 
   const formatDate = (dt: string | Date, withTime = false) => {
     const dateObj = typeof dt === "string" ? new Date(dt) : dt
-    return withTime
-      ? dateObj.toLocaleString()
-      : dateObj.toLocaleDateString()
+    return withTime ? dateObj.toLocaleString() : dateObj.toLocaleDateString()
   }
 
   return (
     <div className="space-y-6">
       {/* --- Standardized Admin Section Header --- */}
-      <AdminPageHeader
-        title="Email Inbox"
-        subtitle="View and respond to contact messages"
-      />
+      <AdminPageHeader title="Email Inbox" subtitle="View and respond to contact messages" />
       <div className="flex items-center justify-between">
         <Badge variant="secondary" className="bg-blue-100 text-blue-700">
           {messages.filter((m) => m.status === "unread").length} unread
@@ -212,13 +207,9 @@ export function EmailInbox() {
             <CardContent className="p-0">
               <div className="max-h-96 overflow-y-auto">
                 {loadingState ? (
-                  <div className="flex justify-center items-center py-10 text-gray-400">
-                    Loading messages...
-                  </div>
+                  <div className="flex justify-center items-center py-10 text-gray-400">Loading messages...</div>
                 ) : filteredMessages.length === 0 ? (
-                  <div className="flex justify-center items-center py-10 text-gray-400">
-                    No messages found.
-                  </div>
+                  <div className="flex justify-center items-center py-10 text-gray-400">No messages found.</div>
                 ) : (
                   filteredMessages.map((message) => (
                     <motion.div
@@ -244,7 +235,9 @@ export function EmailInbox() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <p
-                              className={`font-medium text-sm ${message.status === "unread" ? "text-gray-900" : "text-gray-700"}`}
+                              className={`font-medium text-sm ${
+                                message.status === "unread" ? "text-gray-900" : "text-gray-700"
+                              }`}
                             >
                               {`${message.firstName} ${message.lastName}`}
                             </p>
@@ -283,7 +276,9 @@ export function EmailInbox() {
                   <div>
                     <CardTitle className="text-lg">{selectedMessage.subject}</CardTitle>
                     {selectedMessage.flagged && (
-                      <Badge variant="destructive" className="ml-2" aria-label="Flagged message">Flagged</Badge>
+                      <Badge variant="destructive" className="ml-2" aria-label="Flagged message">
+                        Flagged
+                      </Badge>
                     )}
                     <p className="text-sm text-gray-600 mt-1">
                       From: {selectedMessage.firstName} {selectedMessage.lastName} &lt;{selectedMessage.email}&gt;
@@ -368,7 +363,9 @@ export function EmailInbox() {
 
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-500">
-                      {emailError ? "Reply is disabled until addresses are available." : "This will trigger a manual API call for email sending"}
+                      {emailError
+                        ? "Reply is disabled until addresses are available."
+                        : "This will trigger a manual API call for email sending"}
                     </p>
                     <Button onClick={handleReply} disabled={!replyText.trim() || !!emailError}>
                       <Send className="h-4 w-4 mr-2" />

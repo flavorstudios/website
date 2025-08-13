@@ -45,7 +45,7 @@ interface Comment {
   }
 }
 
-export function CommentManager() {
+export default function CommentManager() {
   const [comments, setComments] = useState<Comment[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)

@@ -1,29 +1,30 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
+import dynamic from "next/dynamic"
 import { usePathname } from "next/navigation"
+
 import AdminAuthGuard from "@/components/AdminAuthGuard"
 import { AdminSidebar } from "./components/admin-sidebar"
-import { DashboardOverview } from "./components/dashboard-overview"
-import { BlogManager } from "./components/blog-manager"
-import { VideoManager } from "./components/video-manager"
-import { CommentManager } from "./components/comment-manager"
-import { SystemTools } from "./components/system-tools"
-// import { UserRoleManager } from "./components/user-role-manager" // ❌ No longer used for "users"
-import UserManagement from "./components/user-management/UserManagement" // ✅ NEW: The correct import
 import { AdminHeader } from "./components/admin-header"
-import CategoryManager from "@/components/admin/category/CategoryManager"
 import { RoleProvider } from "./contexts/role-context"
-import { EmailInbox } from "./components/email-inbox"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import Spinner from "@/components/ui/spinner"
+
 import { getAuth, signOut } from "firebase/auth"
 import app, { firebaseInitError } from "@/lib/firebase"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 
-// ✨ ADD: MediaLibrary import for Media tab
-import MediaLibrary from "./components/media/MediaLibrary"
-
-// ✨ ADD: Applications import (renamed from CareerApplications for clarity)
-import CareerApplications from "./components/career-applications" // Keep component as is if not renamed yet
+// Lazy sections (ensure each is a default export)
+const DashboardOverview = dynamic(() => import("./components/dashboard-overview"), { ssr: false, loading: () => <Spinner /> })
+const BlogManager = dynamic(() => import("./components/blog-manager"), { ssr: false, loading: () => <Spinner /> })
+const VideoManager = dynamic(() => import("./components/video-manager"), { ssr: false, loading: () => <Spinner /> })
+const CommentManager = dynamic(() => import("./components/comment-manager"), { ssr: false, loading: () => <Spinner /> })
+const SystemTools = dynamic(() => import("./components/system-tools"), { ssr: false, loading: () => <Spinner /> })
+const UserManagement = dynamic(() => import("./components/user-management/UserManagement"), { ssr: false, loading: () => <Spinner /> })
+const CategoryManager = dynamic(() => import("@/components/admin/category/CategoryManager"), { ssr: false, loading: () => <Spinner /> })
+const EmailInbox = dynamic(() => import("./components/email-inbox"), { ssr: false, loading: () => <Spinner /> })
+const MediaLibrary = dynamic(() => import("./components/media/MediaLibrary"), { ssr: false, loading: () => <Spinner /> })
+const CareerApplications = dynamic(() => import("./components/career-applications"), { ssr: false, loading: () => <Spinner /> })
 
 interface AdminDashboardPageClientProps {
   initialSection?: string
@@ -163,6 +164,8 @@ export default function AdminDashboardPageClient({
     }
   }
 
+  const content = renderContent()
+
   return (
     <AdminAuthGuard>
       <RoleProvider>
@@ -186,7 +189,9 @@ export default function AdminDashboardPageClient({
                     </AlertDescription>
                   </Alert>
                 )}
-                {renderContent()}
+                <Suspense fallback={<Spinner />}>
+                  {content}
+                </Suspense>
               </div>
             </main>
           </div>

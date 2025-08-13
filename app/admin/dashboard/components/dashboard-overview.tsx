@@ -27,7 +27,7 @@ interface ActivityItem {
   status: string
 }
 
-export function DashboardOverview() {
+export default function DashboardOverview() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
   const [loading, setLoading] = useState(true)

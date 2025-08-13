@@ -4,20 +4,20 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { RefreshCw } from "lucide-react"
 import { useState } from "react"
-import { toast } from "@/hooks/use-toast"                // <-- Add this line
+import { toast } from "@/hooks/use-toast"
 import { revalidateEntireWebsite } from "@/app/admin/actions"
 
-export const SystemTools = () => {
+export default function SystemTools() {
   const [isRevalidatingWebsite, setIsRevalidatingWebsite] = useState(false)
 
   const handleRevalidateWebsite = async () => {
     setIsRevalidatingWebsite(true)
     try {
       const result = await revalidateEntireWebsite()
-      toast(result.message)                              // <-- Use toast
+      toast(result.message)
     } catch (error) {
       console.error("Failed to revalidate website:", error)
-      toast("Failed to revalidate entire website.")       // <-- Use toast
+      toast("Failed to revalidate entire website.")
     } finally {
       setIsRevalidatingWebsite(false)
     }

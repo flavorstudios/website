@@ -35,7 +35,7 @@ import { cn } from "@/lib/utils"
 import { Pagination } from "@/components/admin/Pagination"
 import AdminPageHeader from "@/components/AdminPageHeader"
 
-export const BlogManager = () => {
+export default function BlogManager() {
   const [isRevalidating, setIsRevalidating] = useState(false)
   const router = useRouter()
 

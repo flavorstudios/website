@@ -303,7 +303,7 @@ function VideoTable({
   );
 }
 
-export function VideoManager() {
+export default function VideoManager() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

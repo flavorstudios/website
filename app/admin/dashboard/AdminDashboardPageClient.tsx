@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import Spinner from "@/components/ui/spinner";
 import MobileNav from "./components/mobile-nav";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Lazy sections
 const DashboardOverview = dynamic(() => import("./components/dashboard-overview"), { ssr: false, loading: () => <Spinner /> });
@@ -147,7 +148,9 @@ export default function AdminDashboardPageClient({ initialSection = "overview" }
                       <AlertDescription className="text-red-700 text-sm">{error}</AlertDescription>
                     </Alert>
                   )}
-                  <Suspense fallback={<Spinner />}>{renderContent()}</Suspense>
+                  <ErrorBoundary>
+                    <Suspense fallback={<Spinner />}>{renderContent()}</Suspense>
+                  </ErrorBoundary>
                 </div>
               </main>
               {isMobile && !keyboardOpen && (

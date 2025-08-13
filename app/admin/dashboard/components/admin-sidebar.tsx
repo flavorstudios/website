@@ -81,6 +81,7 @@ export function AdminSidebar({
         <div
           className="fixed inset-0 bg-black/50 z-50 md:hidden"
           onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
 
@@ -95,6 +96,7 @@ export function AdminSidebar({
           flex flex-col md:relative md:z-auto
         `}
         style={{ height: "100vh" }}
+        aria-label="Admin sidebar"
       >
         {/* Sidebar Header */}
         <div className={`${sidebarOpen ? "p-4" : "p-2"} border-b border-border min-h-[80px] flex items-center`}>
@@ -119,8 +121,10 @@ export function AdminSidebar({
               variant="ghost"
               size="sm"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="hidden md:flex p-1 h-8 w-8"
+              className="hidden md:flex p-1 h-8 w-8 focus:outline-none focus:ring"
               aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+              aria-expanded={sidebarOpen}
+              type="button"
             >
               {sidebarOpen ? (
                 <ChevronLeft className="h-4 w-4" />
@@ -140,8 +144,11 @@ export function AdminSidebar({
         )}
 
         {/* Navigation Menu */}
-        <nav className="flex-1 p-2 overflow-y-visible md:overflow-y-visible" /* <- no scroll on sidebar itself */>
-          <div className="space-y-1 max-h-[calc(100vh-230px)] overflow-y-auto" /* <- menu container scrolls ONLY if needed */>
+        <nav
+          className="flex-1 p-2 overflow-y-visible md:overflow-y-visible"
+          aria-label="Primary"
+        >
+          <div className="space-y-1 max-h-[calc(100vh-230px)] overflow-y-auto">
             {filteredNavItems.map((item) => {
               const active = item.id === activeId
               const Icon = item.icon
@@ -157,8 +164,9 @@ export function AdminSidebar({
                     active
                       ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
                       : "text-muted-foreground hover:bg-muted"
-                  }`}
+                  } focus:outline-none focus:ring`}
                   title={!sidebarOpen ? item.label : undefined}
+                  aria-label={!sidebarOpen ? item.label : undefined}
                   onClick={
                     item.href
                       ? (isMobile ? () => setSidebarOpen(false) : undefined)
@@ -167,9 +175,15 @@ export function AdminSidebar({
                           if (isMobile) setSidebarOpen(false)
                         }
                   }
+                  type="button"
                 >
                   {item.href ? (
-                    <Link href={item.href} className="flex items-center w-full">
+                    <Link
+                      href={item.href}
+                      className="flex items-center w-full"
+                      aria-label={item.label}
+                      aria-current={active ? "page" : undefined}
+                    >
                       <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />
                       {sidebarOpen && (
                         <>

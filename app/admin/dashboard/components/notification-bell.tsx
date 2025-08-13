@@ -21,14 +21,11 @@ interface Notification {
 export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const {
-    data,
-    error,
-    isLoading,
-    mutate,
-  } = useSWR<{ notifications: Notification[] }>("/api/admin/notifications", fetcher, {
-    refreshInterval: 30000,
-  });
+  const { data, error, isLoading, mutate } = useSWR<{ notifications: Notification[] }>(
+    "/api/admin/notifications",
+    fetcher,
+    { refreshInterval: 30000 }
+  );
 
   const notifications = data?.notifications || [];
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -85,18 +82,33 @@ export function NotificationBell() {
     }
   };
 
+  const titleId = "notifications-title";
+
   return (
     <div className="relative">
-      <Button variant="ghost" size="sm" className="relative" onClick={() => setIsOpen(!isOpen)}>
+      <Button
+        variant="ghost"
+        size="sm"
+        type="button"
+        className="relative focus:outline-none focus:ring"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Notifications"
+        aria-haspopup="dialog"
+        aria-expanded={isOpen}
+      >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
-          >
-            {unreadCount}
-          </motion.span>
+          <>
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+              aria-hidden="true"
+            >
+              {unreadCount}
+            </motion.span>
+            <span className="sr-only">{unreadCount} unread notifications</span>
+          </>
         )}
       </Button>
 
@@ -109,6 +121,7 @@ export function NotificationBell() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-40"
               onClick={() => setIsOpen(false)}
+              aria-hidden="true"
             />
             <motion.div
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -116,43 +129,69 @@ export function NotificationBell() {
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
               className="absolute right-0 top-full mt-2 w-80 z-50"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={titleId}
             >
               <Card className="shadow-lg border-0 bg-white/95 backdrop-blur-sm">
                 <CardContent className="p-0">
                   <div className="p-4 border-b bg-gradient-to-r from-purple-50 to-blue-50">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900">Notifications</h3>
+                      <h3 id={titleId} className="font-semibold text-gray-900">
+                        Notifications
+                      </h3>
                       <div className="flex items-center gap-2">
                         {unreadCount > 0 && (
-                          <Button variant="ghost" size="sm" onClick={markAllAsRead} className="text-xs">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            type="button"
+                            onClick={markAllAsRead}
+                            className="text-xs focus:outline-none focus:ring"
+                            aria-label="Mark all notifications as read"
+                          >
                             Mark all read
                           </Button>
                         )}
-                        <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          type="button"
+                          onClick={() => setIsOpen(false)}
+                          aria-label="Close notifications"
+                          className="focus:outline-none focus:ring"
+                        >
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
                   </div>
 
-                  <div className="max-h-96 overflow-y-auto">
+                  <div className="max-h-96 overflow-y-auto" role="list" aria-busy={isLoading}>
                     {isLoading ? (
                       <div className="p-8 text-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto"></div>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto" />
                         <p className="text-sm text-gray-500 mt-2">Loading notifications...</p>
                       </div>
                     ) : error ? (
                       <div className="p-8 text-center text-red-500">
                         Failed to load notifications.
                         <div className="mt-3">
-                          <Button size="sm" variant="outline" onClick={() => mutate()}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            type="button"
+                            onClick={() => mutate()}
+                            className="focus:outline-none focus:ring"
+                            aria-label="Retry loading notifications"
+                          >
                             Retry
                           </Button>
                         </div>
                       </div>
                     ) : notifications.length === 0 ? (
                       <div className="p-8 text-center text-gray-500">
-                        <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                        <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" aria-hidden="true" />
                         <p>No notifications yet</p>
                         <p className="text-xs mt-1">Real notifications will appear here</p>
                       </div>
@@ -166,15 +205,28 @@ export function NotificationBell() {
                             !notification.read ? "bg-blue-50/50" : ""
                           }`}
                           onClick={() => markAsRead(notification.id)}
+                          role="listitem"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              markAsRead(notification.id);
+                            }
+                          }}
+                          aria-label={`${
+                            notification.read ? "Read" : "Unread"
+                          } ${notification.type} notification: ${notification.title}`}
                         >
                           <div className="flex items-start gap-3">
-                            <div className={`p-2 rounded-full ${getTypeColor(notification.type)}`}>
+                            <div className={`p-2 rounded-full ${getTypeColor(notification.type)}`} aria-hidden="true">
                               {getIcon(notification.type)}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 <p className="font-medium text-sm text-gray-900">{notification.title}</p>
-                                {!notification.read && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+                                {!notification.read && (
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full" aria-label="Unread" />
+                                )}
                               </div>
                               <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
                               <p className="text-xs text-gray-400 mt-2">

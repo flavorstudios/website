@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -14,9 +15,30 @@ interface AdminHeaderProps {
 }
 
 export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHeaderProps) {
+  // Ctrl/Cmd + K to open the command palette
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault()
+        window.dispatchEvent(new Event("open-command-palette"))
+      }
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [])
+
   return (
     <header className="bg-background border-b border-border px-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
+        {/* SR-only button so screen reader users can open the command palette */}
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
+          className="sr-only"
+        >
+          Open command palette
+        </button>
+
         {/* Left Section: Sidebar toggle, Logo, Search */}
         <div className="flex items-center gap-4 flex-1 min-w-0">
           {/* Sidebar button (mobile only) */}

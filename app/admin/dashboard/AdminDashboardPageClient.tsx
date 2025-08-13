@@ -26,6 +26,12 @@ const EmailInbox = dynamic(() => import("./components/email-inbox"), { ssr: fals
 const MediaLibrary = dynamic(() => import("./components/media/MediaLibrary"), { ssr: false, loading: () => <Spinner /> })
 const CareerApplications = dynamic(() => import("./components/career-applications"), { ssr: false, loading: () => <Spinner /> })
 
+// NEW: Command Palette (mounted near the root)
+const CommandPalette = dynamic(() => import("./components/command-palette"), { ssr: false })
+
+// NEW: Mobile nav (render only on mobile and hide on keyboard open)
+const MobileNav = dynamic(() => import("./components/mobile-nav"), { ssr: false })
+
 interface AdminDashboardPageClientProps {
   initialSection?: string
 }
@@ -37,6 +43,8 @@ export default function AdminDashboardPageClient({
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [error, setError] = useState("")
+  const [isMobile, setIsMobile] = useState(false)          // <-- added
+  const [keyboardOpen, setKeyboardOpen] = useState(false)  // <-- added
   const pathname = usePathname() // Current Next.js App Router path
 
   // --- On mount, mark as ready ---
@@ -96,6 +104,20 @@ export default function AdminDashboardPageClient({
     const handleResize = () => {
       if (window.innerWidth < 1024) setSidebarOpen(false)
       else setSidebarOpen(true)
+    }
+    window.addEventListener("resize", handleResize)
+    handleResize()
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
+  // --- Mobile nav visibility & keyboard detection (for <768px only) ---
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const initialHeight = window.innerHeight
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+      // If the available height shrinks significantly, likely due to OSK
+      setKeyboardOpen(window.innerHeight < initialHeight - 150)
     }
     window.addEventListener("resize", handleResize)
     handleResize()
@@ -169,6 +191,9 @@ export default function AdminDashboardPageClient({
   return (
     <AdminAuthGuard>
       <RoleProvider>
+        {/* Command palette available across the dashboard */}
+        <CommandPalette />
+
         <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
           <AdminSidebar
             activeSection={activeSection}
@@ -194,6 +219,14 @@ export default function AdminDashboardPageClient({
                 </Suspense>
               </div>
             </main>
+
+            {/* Mobile bottom nav: visible under 768px and hidden when keyboard is open */}
+            {isMobile && !keyboardOpen && (
+              <MobileNav
+                activeSection={activeSection}
+                setActiveSection={setActiveSection}
+              />
+            )}
           </div>
         </div>
       </RoleProvider>

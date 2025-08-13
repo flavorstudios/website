@@ -1,9 +1,9 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 import { adminDb } from "@/lib/firebase-admin"
-import { AggregateField } from "firebase-admin/firestore"
+import { AggregateField, Timestamp } from "firebase-admin/firestore"
 
-// Type for the stats response
+// Base stats shape
 type Stats = {
   totalPosts: number
   totalVideos: number
@@ -15,8 +15,18 @@ type Stats = {
   monthlyGrowth: number
 }
 
-// Short-lived cache (60s) to avoid expensive repeat queries
-let statsCache: { data: Stats; expires: number } | null = null
+type MonthlyStats = {
+  month: string // e.g. "Jan"
+  posts: number
+  videos: number
+  comments: number
+}
+
+// Response can optionally include history
+type StatsResponse = Stats & { history?: MonthlyStats[] }
+
+// Short-lived cache (60s), keyed by `range`
+const statsCache: Record<string, { data: StatsResponse; expires: number }> = {}
 
 export async function GET(request: NextRequest) {
   const sessionInfo = await getSessionInfo(request)
@@ -55,13 +65,16 @@ export async function GET(request: NextRequest) {
   try {
     if (!adminDb) throw new Error("Firestore not initialized")
 
-    // Serve from cache if available (TTL: 60s)
+    const range = request.nextUrl.searchParams.get("range") || "default"
     const now = Date.now()
-    if (statsCache && statsCache.expires > now) {
+
+    // Serve from cache if available (TTL: 60s)
+    const cached = statsCache[range]
+    if (cached && cached.expires > now) {
       if (process.env.DEBUG_ADMIN === "true") {
-        console.log("[admin-stats] Returning cached stats:", statsCache.data)
+        console.log("[admin-stats] Returning cached stats (range:", range, "):", cached.data)
       }
-      return NextResponse.json(statsCache.data, { status: 200 })
+      return NextResponse.json(cached.data, { status: 200 })
     }
 
     // Fetch Firestore stats in parallel
@@ -85,7 +98,7 @@ export async function GET(request: NextRequest) {
       adminDb.collection("videos").where("featured", "==", true).count().get(),
     ])
 
-    const stats: Stats = {
+    const base: Stats = {
       totalPosts: totalPostsSnap.data().count,
       totalVideos: totalVideosSnap.data().count,
       totalComments: totalCommentsSnap.data().count,
@@ -93,17 +106,50 @@ export async function GET(request: NextRequest) {
       pendingComments: pendingCommentsSnap.data().count,
       publishedPosts: publishedPostsSnap.data().count,
       featuredVideos: featuredVideosSnap.data().count,
-      monthlyGrowth: 0, // TODO: Implement monthly growth if needed
+      monthlyGrowth: 0, // keep as-is; compute later if needed
     }
 
-    // Update cache
-    statsCache = { data: stats, expires: now + 60_000 }
+    let history: MonthlyStats[] | undefined
+
+    // Optional 12-month history for charts
+    if (range === "12mo") {
+      history = []
+      const current = new Date()
+
+      for (let i = 11; i >= 0; i--) {
+        const start = new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i, 1))
+        const end = new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i + 1, 1))
+
+        const startTs = Timestamp.fromDate(start)
+        const endTs = Timestamp.fromDate(end)
+
+        const [postSnap, videoSnap, commentSnap] = await Promise.all([
+          adminDb.collection("blogs").where("createdAt", ">=", startTs).where("createdAt", "<", endTs).count().get(),
+          adminDb.collection("videos").where("createdAt", ">=", startTs).where("createdAt", "<", endTs).count().get(),
+          // Adjust this to your comments collection structure.
+          // Using a collectionGroup example for nested comment entries:
+          adminDb.collectionGroup("entries").where("createdAt", ">=", startTs).where("createdAt", "<", endTs).count().get(),
+        ])
+
+        history.push({
+          month: start.toLocaleString("default", { month: "short" }),
+          posts: postSnap.data().count,
+          videos: videoSnap.data().count,
+          comments: commentSnap.data().count,
+        })
+      }
+    }
+
+    const response: StatsResponse = history ? { ...base, history } : base
+
+    // Update cache for this range
+    statsCache[range] = { data: response, expires: now + 60_000 }
 
     if (process.env.DEBUG_ADMIN === "true") {
-      console.log("[admin-stats] Returning stats:", stats)
+      console.log("[admin-stats] Returning stats (range:", range, "):", response)
     }
 
-    return NextResponse.json(stats, { status: 200 })
+    return NextResponse.json(response, { status: 200 })
   } catch (error) {
     console.error("Failed to fetch stats:", error)
     return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 })

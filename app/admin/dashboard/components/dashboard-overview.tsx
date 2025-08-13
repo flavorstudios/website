@@ -1,11 +1,36 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
+import dynamic from "next/dynamic"
+import { useTheme } from "next-themes"
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+  type ChartData,
+  type ChartOptions,
+} from "chart.js"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { TrendingUp, FileText, Video, MessageSquare, Eye, Calendar, Activity, Plus, ExternalLink, Users } from "lucide-react"
+
+// Register Chart.js primitives once
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
+
+// Dynamically load only the Bar component to keep bundle size small
+const Bar = dynamic(() => import("react-chartjs-2").then(m => m.Bar), { ssr: false })
+
+interface MonthlyStats {
+  month: string
+  posts: number
+  videos: number
+  comments: number
+}
 
 interface DashboardStats {
   totalPosts: number
@@ -16,6 +41,7 @@ interface DashboardStats {
   publishedPosts: number
   featuredVideos: number
   monthlyGrowth: number
+  history?: MonthlyStats[] // ← 12-month history (optional)
 }
 
 interface ActivityItem {
@@ -33,6 +59,7 @@ export default function DashboardOverview() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [authInfo, setAuthInfo] = useState<{ role?: string; email?: string; uid?: string } | null>(null)
+  const { theme } = useTheme()
 
   // Utility to extract debug info from API error response
   const extractDebugInfo = (data: Record<string, unknown>) => ({
@@ -47,8 +74,8 @@ export default function DashboardOverview() {
       setError(null)
       setAuthInfo(null)
 
-      // Stats
-      const statsResponse = await fetch("/api/admin/stats", { credentials: "include" })
+      // Stats (with 12-month history for chart)
+      const statsResponse = await fetch("/api/admin/stats?range=12mo", { credentials: "include" })
       if (statsResponse.status === 401) {
         const data = await statsResponse.json().catch(() => ({}))
         // Log unauthorized info for debugging
@@ -66,7 +93,7 @@ export default function DashboardOverview() {
       }
       if (!statsResponse.ok) {
         const data = await statsResponse.json().catch(() => ({}))
-        setError(data.error || "Failed to load stats")
+        setError((data as any).error || "Failed to load stats")
         setStats(null)
         setRecentActivity([])
         if (process.env.NODE_ENV !== "production") {
@@ -95,7 +122,7 @@ export default function DashboardOverview() {
       }
       if (!activityResponse.ok) {
         const data = await activityResponse.json().catch(() => ({}))
-        setError(data.error || "Failed to load activity")
+        setError((data as any).error || "Failed to load activity")
         setRecentActivity([])
         if (process.env.NODE_ENV !== "production") {
           setAuthInfo(extractDebugInfo(data))
@@ -120,6 +147,53 @@ export default function DashboardOverview() {
     return () => clearInterval(interval)
     // eslint-disable-next-line
   }, [])
+
+  // Chart data (theme-aware)
+  const chartData = useMemo<ChartData<"bar">>(() => {
+    if (!stats?.history?.length) return { labels: [], datasets: [] }
+    return {
+      labels: stats.history.map(h => h.month),
+      datasets: [
+        {
+          label: "Posts",
+          data: stats.history.map(h => h.posts),
+          backgroundColor: theme === "dark" ? "#60a5fa" : "#3b82f6",
+        },
+        {
+          label: "Videos",
+          data: stats.history.map(h => h.videos),
+          backgroundColor: theme === "dark" ? "#c084fc" : "#a855f7",
+        },
+        {
+          label: "Comments",
+          data: stats.history.map(h => h.comments),
+          backgroundColor: theme === "dark" ? "#34d399" : "#10b981",
+        },
+      ],
+    }
+  }, [stats, theme])
+
+  const chartOptions = useMemo<ChartOptions<"bar">>(() => {
+    const text = theme === "dark" ? "#d1d5db" : "#374151"
+    const grid = theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: text },
+        },
+        tooltip: {
+          intersect: false,
+          mode: "index",
+        },
+      },
+      scales: {
+        x: { ticks: { color: text }, grid: { color: grid } },
+        y: { ticks: { color: text }, grid: { color: grid } },
+      },
+    }
+  }, [theme])
 
   const quickActions = [
     {
@@ -295,6 +369,23 @@ export default function DashboardOverview() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 12-Month Activity Chart */}
+      {stats.history && stats.history.length > 0 && (
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Posts, Videos & Comments (12 months)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64">
+              <Bar data={chartData} options={chartOptions} />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick Actions & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

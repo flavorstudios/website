@@ -3,18 +3,19 @@
 import { useState, useEffect, useCallback, Suspense } from "react"
 import dynamic from "next/dynamic"
 import { usePathname } from "next/navigation"
+import { getAuth, signOut } from "firebase/auth"
+import app, { firebaseInitError } from "@/lib/firebase"
 
 import AdminAuthGuard from "@/components/AdminAuthGuard"
 import { AdminSidebar } from "./components/admin-sidebar"
 import { AdminHeader } from "./components/admin-header"
 import { RoleProvider } from "./contexts/role-context"
+import { ToastProvider } from "./components/ui/toast-provider"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Spinner from "@/components/ui/spinner"
+import MobileNav from "./components/mobile-nav"
 
-import { getAuth, signOut } from "firebase/auth"
-import app, { firebaseInitError } from "@/lib/firebase"
-
-// Lazy sections (ensure each is a default export)
+// Lazy sections
 const DashboardOverview = dynamic(() => import("./components/dashboard-overview"), { ssr: false, loading: () => <Spinner /> })
 const BlogManager = dynamic(() => import("./components/blog-manager"), { ssr: false, loading: () => <Spinner /> })
 const VideoManager = dynamic(() => import("./components/video-manager"), { ssr: false, loading: () => <Spinner /> })
@@ -25,72 +26,46 @@ const CategoryManager = dynamic(() => import("@/components/admin/category/Catego
 const EmailInbox = dynamic(() => import("./components/email-inbox"), { ssr: false, loading: () => <Spinner /> })
 const MediaLibrary = dynamic(() => import("./components/media/MediaLibrary"), { ssr: false, loading: () => <Spinner /> })
 const CareerApplications = dynamic(() => import("./components/career-applications"), { ssr: false, loading: () => <Spinner /> })
-
-// NEW: Command Palette (mounted near the root)
 const CommandPalette = dynamic(() => import("./components/command-palette"), { ssr: false })
-
-// NEW: Mobile nav (render only on mobile and hide on keyboard open)
-const MobileNav = dynamic(() => import("./components/mobile-nav"), { ssr: false })
 
 interface AdminDashboardPageClientProps {
   initialSection?: string
 }
 
-export default function AdminDashboardPageClient({
-  initialSection = "overview",
-}: AdminDashboardPageClientProps) {
+export default function AdminDashboardPageClient({ initialSection = "overview" }: AdminDashboardPageClientProps) {
   const [activeSection, setActiveSection] = useState(initialSection)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [error, setError] = useState("")
-  const [isMobile, setIsMobile] = useState(false)          // <-- added
-  const [keyboardOpen, setKeyboardOpen] = useState(false)  // <-- added
-  const pathname = usePathname() // Current Next.js App Router path
+  const [isMobile, setIsMobile] = useState(false)
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
+  const pathname = usePathname()
 
-  // --- On mount, mark as ready ---
   useEffect(() => {
     setMounted(true)
-    fetch("/api/admin/init", { method: "POST" }).catch((err) => {
+    fetch("/api/admin/init", { method: "POST" }).catch(err => {
       if (process.env.NODE_ENV !== "production") console.error("Admin init failed:", err)
     })
   }, [])
 
-  // --- Listen for section navigation events (optional) ---
   useEffect(() => {
-    const handleNavigation = (event: Event) => {
-      const customEvent = event as CustomEvent<string>
-      setActiveSection(customEvent.detail)
-    }
-    window.addEventListener("admin-navigate", handleNavigation)
-    return () => window.removeEventListener("admin-navigate", handleNavigation)
-  }, [])
-
-  // --- Keep activeSection in sync with the current route ---
-  useEffect(() => {
-    // Map sidebar routes to their section IDs
     const map = [
       { id: "overview", href: "/admin/dashboard" },
       { id: "blogs", href: "/admin/dashboard/blog-posts" },
       { id: "videos", href: "/admin/dashboard/videos" },
-      // ✨ Media tab mapping
       { id: "media", href: "/admin/dashboard/media" },
       { id: "categories", href: "/admin/dashboard/categories" },
       { id: "comments", href: "/admin/dashboard/comments" },
-      { id: "applications", href: "/admin/dashboard/applications" }, // ← NEW
+      { id: "applications", href: "/admin/dashboard/applications" },
       { id: "inbox", href: "/admin/dashboard/inbox" },
       { id: "users", href: "/admin/dashboard/users" },
       { id: "settings", href: "/admin/dashboard/settings" },
-      { id: "system", href: "/admin/dashboard/system" },
+      { id: "system", href: "/admin/dashboard/system" }
     ]
-    const matched = map
-      .filter((m) => pathname === m.href || pathname.startsWith(`${m.href}/`))
-      .sort((a, b) => b.href.length - a.href.length)[0]
-    if (matched && matched.id !== activeSection) {
-      setActiveSection(matched.id)
-    }
+    const matched = map.find(m => pathname === m.href || pathname.startsWith(`${m.href}/`))
+    if (matched && matched.id !== activeSection) setActiveSection(matched.id)
   }, [pathname, activeSection])
 
-  // --- Refresh data periodically ---
   useEffect(() => {
     const interval = setInterval(() => {
       window.dispatchEvent(new CustomEvent("admin-refresh"))
@@ -98,51 +73,29 @@ export default function AdminDashboardPageClient({
     return () => clearInterval(interval)
   }, [])
 
-  // --- Sidebar responsive toggle ---
   useEffect(() => {
-    if (typeof window === "undefined") return
     const handleResize = () => {
-      if (window.innerWidth < 1024) setSidebarOpen(false)
-      else setSidebarOpen(true)
-    }
-    window.addEventListener("resize", handleResize)
-    handleResize()
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
-
-  // --- Mobile nav visibility & keyboard detection (for <768px only) ---
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    const initialHeight = window.innerHeight
-    const handleResize = () => {
+      setSidebarOpen(window.innerWidth >= 1024)
       setIsMobile(window.innerWidth < 768)
-      // If the available height shrinks significantly, likely due to OSK
-      setKeyboardOpen(window.innerHeight < initialHeight - 150)
+      setKeyboardOpen(window.innerHeight < window.outerHeight - 150)
     }
     window.addEventListener("resize", handleResize)
     handleResize()
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // --- Logout logic (Firebase + server) ---
   const handleLogout = useCallback(async () => {
     try {
       if (firebaseInitError || !app) {
-        setError(
-          firebaseInitError?.message ||
-            "Firebase not initialized. Cannot log out safely."
-        )
+        setError(firebaseInitError?.message || "Firebase not initialized. Cannot log out safely.")
         return
       }
-      const auth = getAuth(app)
-      await signOut(auth)
+      await signOut(getAuth(app))
       await fetch("/api/admin/logout", { method: "POST" })
       window.location.href = "/admin/login"
     } catch (error) {
       setError("Logout failed. Please try again.")
-      if (process.env.NODE_ENV !== "production") {
-        console.error("Logout failed:", error)
-      }
+      if (process.env.NODE_ENV !== "production") console.error("Logout failed:", error)
     }
   }, [])
 
@@ -157,79 +110,48 @@ export default function AdminDashboardPageClient({
     )
   }
 
-  // Renders the main section content based on activeSection
   const renderContent = () => {
     switch (activeSection) {
-      case "overview":
-        return <DashboardOverview />
-      case "blogs":
-        return <BlogManager />
-      case "videos":
-        return <VideoManager />
-      // ✨ Media tab case
-      case "media":
-        return <MediaLibrary />
-      case "categories":
-        return <CategoryManager />
-      case "comments":
-        return <CommentManager />
-      case "applications": // ← NEW
-        return <CareerApplications />
-      case "inbox":
-        return <EmailInbox />
-      case "system":
-        return <SystemTools />
-      case "users":
-        return <UserManagement /> // ✅ Swapped in the new User Management page!
-      default:
-        return <DashboardOverview />
+      case "overview": return <DashboardOverview />
+      case "blogs": return <BlogManager />
+      case "videos": return <VideoManager />
+      case "media": return <MediaLibrary />
+      case "categories": return <CategoryManager />
+      case "comments": return <CommentManager />
+      case "applications": return <CareerApplications />
+      case "inbox": return <EmailInbox />
+      case "system": return <SystemTools />
+      case "users": return <UserManagement />
+      default: return <DashboardOverview />
     }
   }
 
-  const content = renderContent()
-
   return (
     <AdminAuthGuard>
-      <RoleProvider>
-        {/* Command palette available across the dashboard */}
-        <CommandPalette />
-
-        <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
-          <AdminSidebar
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-            sidebarOpen={sidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-          />
-
-          <div className="flex-1 flex flex-col">
-            <AdminHeader onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-            <main className="flex-1 p-6 overflow-auto">
-              <div className="max-w-7xl mx-auto">
-                {error && (
-                  <Alert variant="destructive" className="mb-4 border-red-200 bg-red-50">
-                    <AlertDescription className="text-red-700 text-sm">
-                      {error}
-                    </AlertDescription>
-                  </Alert>
-                )}
-                <Suspense fallback={<Spinner />}>
-                  {content}
-                </Suspense>
-              </div>
-            </main>
-
-            {/* Mobile bottom nav: visible under 768px and hidden when keyboard is open */}
-            {isMobile && !keyboardOpen && (
-              <MobileNav
-                activeSection={activeSection}
-                setActiveSection={setActiveSection}
-              />
-            )}
+      <ToastProvider>
+        <RoleProvider>
+          <CommandPalette />
+          <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
+            <AdminSidebar activeSection={activeSection} setActiveSection={setActiveSection} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+            <div className="flex-1 flex flex-col">
+              <AdminHeader onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+              <main className="flex-1 p-6 overflow-auto">
+                <div className="max-w-7xl mx-auto">
+                  {error && (
+                    <Alert variant="destructive" className="mb-4 border-red-200 bg-red-50">
+                      <AlertDescription className="text-red-700 text-sm">{error}</AlertDescription>
+                    </Alert>
+                  )}
+                  <Suspense fallback={<Spinner />}>{renderContent()}</Suspense>
+                </div>
+              </main>
+              {isMobile && !keyboardOpen && (
+                <MobileNav activeSection={activeSection} setActiveSection={setActiveSection} />
+              )}
+            </div>
           </div>
-        </div>
-      </RoleProvider>
+        </RoleProvider>
+      </ToastProvider>
     </AdminAuthGuard>
   )
 }

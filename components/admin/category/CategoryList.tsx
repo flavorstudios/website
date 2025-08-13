@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { toast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { GripVertical, Edit, Trash2 } from "lucide-react"
 import * as Icons from "lucide-react"
 import type { LucideProps } from "lucide-react"
@@ -74,6 +74,7 @@ export default function CategoryList({
   const [items, setItems] = useState<Category[]>([])
   const [width, setWidth] = useState<number>(1024)
   const rowRefs = useRef<HTMLTableRowElement[]>([])
+  const { toast } = useToast()
 
   useEffect(() => {
     setItems([...categories].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)))

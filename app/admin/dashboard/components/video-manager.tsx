@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CategoryDropdown } from "@/components/ui/category-dropdown";
-import { toast } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
 import {
   Tooltip,
   TooltipTrigger,
@@ -304,6 +304,7 @@ function VideoTable({
 }
 
 export default function VideoManager() {
+  const { toast } = useToast();
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

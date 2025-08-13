@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Check, X, Trash2, MessageSquare, Search, AlertTriangle, Shield, Info } from "lucide-react"
-import { toast } from "@/components/ui/toast"
+import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { formatDate } from "@/lib/date"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
@@ -52,7 +52,7 @@ export default function CommentManager() {
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("pending")
   const [deleteTargets, setDeleteTargets] = useState<{ id: string; postId: string }[] | null>(null)
-
+  const { toast } = useToast()
   useEffect(() => {
     loadComments()
   }, [])

@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { RefreshCw } from "lucide-react"
 import { useState } from "react"
-import { toast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { revalidateEntireWebsite } from "@/app/admin/actions"
 
 export default function SystemTools() {
+  const { toast } = useToast()
   const [isRevalidatingWebsite, setIsRevalidatingWebsite] = useState(false)
 
   const handleRevalidateWebsite = async () => {

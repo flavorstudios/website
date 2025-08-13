@@ -20,7 +20,7 @@ import Image from "next/image"
 import {
   Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info
 } from "lucide-react"
-import { toast } from "sonner"
+import { useToast } from "@/hooks/use-toast"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { authors } from "@/lib/authors"
@@ -52,6 +52,7 @@ export interface BlogCategory {
 }
 
 export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> }) {
+  const { toast } = useToast()
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
 

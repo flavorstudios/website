@@ -5,7 +5,7 @@ import UserProfileDrawer from "./UserProfileDrawer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -24,6 +24,7 @@ interface UserRow {
 }
 
 export default function UserList() {
+  const { toast } = useToast();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState("");

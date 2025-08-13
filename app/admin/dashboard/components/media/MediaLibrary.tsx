@@ -7,9 +7,10 @@ import MediaUpload from "./MediaUpload";
 import MediaBulkActions from "./MediaBulkActions";
 import MediaDetailsDrawer from "./MediaDetailsDrawer";
 import type { MediaDoc } from "@/types/media";
-import { toast } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) => void }) {
+  const { toast } = useToast();
   const [items, setItems] = useState<MediaDoc[]>([]);
   const [cursor, setCursor] = useState<number | null>(null); // Pagination cursor
   const [selectedItem, setSelectedItem] = useState<MediaDoc | null>(null);

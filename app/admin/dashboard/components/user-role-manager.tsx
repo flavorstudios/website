@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import type { UserRole } from "@/lib/role-permissions"
 import AdminPageHeader from "@/components/AdminPageHeader"
 
 export function UserRoleManager() {
+  const { toast } = useToast()
   const [uid, setUid] = useState("")
   const [role, setRole] = useState<UserRole>("support")
   const [saving, setSaving] = useState(false)

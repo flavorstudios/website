@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface UserProfileDrawerProps {
   uid: string | null;
@@ -31,6 +31,7 @@ interface UserData {
 }
 
 export default function UserProfileDrawer({ uid, open, onClose }: UserProfileDrawerProps) {
+  const { toast } = useToast();
   const [user, setUser] = useState<UserData | null>(null);
   const [role, setRole] = useState("support");
   const [disabled, setDisabled] = useState(false);

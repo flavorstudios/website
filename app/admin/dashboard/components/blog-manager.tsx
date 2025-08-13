@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { toast } from "@/components/ui/toast"
+import { useToast } from "@/hooks/use-toast"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +36,7 @@ import { Pagination } from "@/components/admin/Pagination"
 import AdminPageHeader from "@/components/AdminPageHeader"
 
 export default function BlogManager() {
+  const { toast } = useToast()
   const [isRevalidating, setIsRevalidating] = useState(false)
   const router = useRouter()
 

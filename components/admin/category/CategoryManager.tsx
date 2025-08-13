@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/toast"
+import { useToast } from "@/hooks/use-toast"
 import { Pagination } from "@/components/admin/Pagination"
 import { cn } from "@/lib/utils"
 import AdminPageHeader from "@/components/AdminPageHeader"
@@ -38,6 +38,7 @@ interface CategoryFormProps {
 }
 
 function CategoryForm({ category, onSave, onCancel }: CategoryFormProps) {
+  const { toast } = useToast()
   const [formData, setFormData] = useState<Partial<Category>>({
     name: category?.name ?? "",
     slug: category?.slug ?? "",
@@ -128,6 +129,7 @@ function CategoryForm({ category, onSave, onCancel }: CategoryFormProps) {
 }
 
 export default function CategoryManager() {
+  const { toast } = useToast()
   const [type, setType] = useState<CategoryType>("BLOG")
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)

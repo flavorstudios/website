@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { MediaDoc } from "@/types/media";
@@ -13,6 +13,13 @@ interface UploadItem {
 export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDoc) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploads, setUploads] = useState<UploadItem[]>([]);
+
+  // Open file dialog when global hotkey fires
+  useEffect(() => {
+    const openPicker = () => inputRef.current?.click();
+    window.addEventListener("admin-open-media-upload", openPicker);
+    return () => window.removeEventListener("admin-open-media-upload", openPicker);
+  }, []);
 
   // Handle file(s) from input or drop
   const handleFiles = (files: FileList | null) => {

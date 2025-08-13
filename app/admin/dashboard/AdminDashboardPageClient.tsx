@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react"
 import dynamic from "next/dynamic"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { getAuth, signOut } from "firebase/auth"
 import app, { firebaseInitError } from "@/lib/firebase"
+import useHotkeys from "./hooks/use-hotkeys"
 
 import AdminAuthGuard from "@/components/AdminAuthGuard"
 import { AdminSidebar } from "./components/admin-sidebar"
@@ -14,6 +15,7 @@ import { ToastProvider } from "./components/ui/toast-provider"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Spinner from "@/components/ui/spinner"
 import MobileNav from "./components/mobile-nav"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 // Lazy sections
 const DashboardOverview = dynamic(() => import("./components/dashboard-overview"), { ssr: false, loading: () => <Spinner /> })
@@ -39,7 +41,15 @@ export default function AdminDashboardPageClient({ initialSection = "overview" }
   const [error, setError] = useState("")
   const [isMobile, setIsMobile] = useState(false)
   const [keyboardOpen, setKeyboardOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
+
+  useHotkeys("n", () => router.push("/admin/blog/create"), undefined, [router])
+  useHotkeys("shift+u", () => window.dispatchEvent(new Event("admin-open-media-upload")))
+  // aligned event name with AdminHeader/CommandPalette listener
+  useHotkeys(["meta+/", "ctrl+/"], () => window.dispatchEvent(new Event("open-command-palette")))
+  useHotkeys("?", (e) => { e.preventDefault(); setShortcutsOpen(true) })
 
   useEffect(() => {
     setMounted(true)
@@ -150,6 +160,20 @@ export default function AdminDashboardPageClient({ initialSection = "overview" }
               )}
             </div>
           </div>
+          <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Keyboard Shortcuts</DialogTitle>
+                <DialogDescription>Navigate the admin dashboard faster</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm"><span>New blog post</span><kbd className="px-2 py-1 bg-muted rounded text-xs">n</kbd></div>
+                <div className="flex items-center justify-between text-sm"><span>Upload media</span><kbd className="px-2 py-1 bg-muted rounded text-xs">shift + u</kbd></div>
+                <div className="flex items-center justify-between text-sm"><span>Command palette</span><kbd className="px-2 py-1 bg-muted rounded text-xs">cmd/ctrl + /</kbd></div>
+                <div className="flex items-center justify-between text-sm"><span>Show this help</span><kbd className="px-2 py-1 bg-muted rounded text-xs">?</kbd></div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </RoleProvider>
       </ToastProvider>
     </AdminAuthGuard>

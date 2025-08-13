@@ -85,6 +85,7 @@
     "recharts": "^2.15.3",
     "sharp": "^0.34.3",
     "sonner": "^2.0.5",
+    "swr": "^2.3.6",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "tough-cookie": "^5.1.2",

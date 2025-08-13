@@ -1,8 +1,9 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useMemo } from "react"
-import dynamic from "next/dynamic"
-import { useTheme } from "next-themes"
+import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
+import { useTheme } from "next-themes";
+import useSWR from "swr";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,170 +13,114 @@ import {
   Legend,
   type ChartData,
   type ChartOptions,
-} from "chart.js"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { TrendingUp, FileText, Video, MessageSquare, Eye, Calendar, Activity, Plus, ExternalLink, Users } from "lucide-react"
+} from "chart.js";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  TrendingUp,
+  FileText,
+  Video,
+  MessageSquare,
+  Eye,
+  Calendar,
+  Activity,
+  Plus,
+  ExternalLink,
+  Users,
+} from "lucide-react";
+import { fetcher } from "@/lib/fetcher";
 
 // Register Chart.js primitives once
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend)
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 // Dynamically load only the Bar component to keep bundle size small
-const Bar = dynamic(() => import("react-chartjs-2").then(m => m.Bar), { ssr: false })
+const Bar = dynamic(() => import("react-chartjs-2").then((m) => m.Bar), { ssr: false });
 
 interface MonthlyStats {
-  month: string
-  posts: number
-  videos: number
-  comments: number
+  month: string;
+  posts: number;
+  videos: number;
+  comments: number;
 }
 
 interface DashboardStats {
-  totalPosts: number
-  totalVideos: number
-  totalComments: number
-  totalViews: number
-  pendingComments: number
-  publishedPosts: number
-  featuredVideos: number
-  monthlyGrowth: number
-  history?: MonthlyStats[] // ← 12-month history (optional)
+  totalPosts: number;
+  totalVideos: number;
+  totalComments: number;
+  totalViews: number;
+  pendingComments: number;
+  publishedPosts: number;
+  featuredVideos: number;
+  monthlyGrowth: number;
+  history?: MonthlyStats[]; // ← 12-month history (optional)
 }
 
 interface ActivityItem {
-  id: string
-  type: string
-  title: string
-  description: string
-  timestamp: string
-  status: string
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  timestamp: string;
+  status: string;
 }
 
 export default function DashboardOverview() {
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [authInfo, setAuthInfo] = useState<{ role?: string; email?: string; uid?: string } | null>(null)
-  const { theme } = useTheme()
+  const { theme } = useTheme();
 
-  // Utility to extract debug info from API error response
-  const extractDebugInfo = (data: Record<string, unknown>) => ({
-    role: typeof data.role === "string" ? data.role : "unknown",
-    email: typeof data.email === "string" ? data.email : "unknown",
-    uid: typeof data.uid === "string" ? data.uid : "unknown",
-  })
+  // SWR data sources
+  const {
+    data: stats,
+    error: statsError,
+    isLoading: statsLoading,
+    mutate: mutateStats,
+  } = useSWR<DashboardStats>("/api/admin/stats?range=12mo", fetcher, { refreshInterval: 30000 });
 
-  const loadDashboardData = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      setAuthInfo(null)
+  const {
+    data: activityData,
+    error: activityError,
+    isLoading: activityLoading,
+    mutate: mutateActivity,
+  } = useSWR<{ activities: ActivityItem[] }>("/api/admin/activity", fetcher, { refreshInterval: 30000 });
 
-      // Stats (with 12-month history for chart)
-      const statsResponse = await fetch("/api/admin/stats?range=12mo", { credentials: "include" })
-      if (statsResponse.status === 401) {
-        const data = await statsResponse.json().catch(() => ({}))
-        // Log unauthorized info for debugging
-        console.error(
-          "Unauthorized stats access:",
-          extractDebugInfo(data)
-        )
-        if (process.env.NODE_ENV !== "production") {
-          setAuthInfo(extractDebugInfo(data))
-        }
-        setError("You do not have permission to view dashboard analytics. Contact your admin.")
-        setStats(null)
-        setRecentActivity([])
-        return
-      }
-      if (!statsResponse.ok) {
-        const data = await statsResponse.json().catch(() => ({}))
-        setError((data as any).error || "Failed to load stats")
-        setStats(null)
-        setRecentActivity([])
-        if (process.env.NODE_ENV !== "production") {
-          setAuthInfo(extractDebugInfo(data))
-        }
-        return
-      }
-      const statsData = await statsResponse.json()
-      setStats(statsData)
+  const recentActivity = activityData?.activities || [];
+  const loading = statsLoading || activityLoading;
+  const hasError = Boolean(statsError || activityError);
 
-      // Activity
-      const activityResponse = await fetch("/api/admin/activity", { credentials: "include" })
-      if (activityResponse.status === 401) {
-        const data = await activityResponse.json().catch(() => ({}))
-        // Log unauthorized info for debugging
-        console.error(
-          "Unauthorized activity access:",
-          extractDebugInfo(data)
-        )
-        if (process.env.NODE_ENV !== "production") {
-          setAuthInfo(extractDebugInfo(data))
-        }
-        setError("You do not have permission to view recent activity. Contact your admin.")
-        setRecentActivity([])
-        return
-      }
-      if (!activityResponse.ok) {
-        const data = await activityResponse.json().catch(() => ({}))
-        setError((data as any).error || "Failed to load activity")
-        setRecentActivity([])
-        if (process.env.NODE_ENV !== "production") {
-          setAuthInfo(extractDebugInfo(data))
-        }
-        return
-      }
-      const activityData = await activityResponse.json()
-      setRecentActivity(activityData.activities || [])
-    } catch (error) {
-      console.error("Failed to load dashboard data:", error)
-      setError("Network error while loading dashboard data")
-      setStats(null)
-      setRecentActivity([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadDashboardData()
-    const interval = setInterval(loadDashboardData, 30000) // Refresh every 30 seconds
-    return () => clearInterval(interval)
-    // eslint-disable-next-line
-  }, [])
+  const refresh = () => {
+    mutateStats();
+    mutateActivity();
+  };
 
   // Chart data (theme-aware)
   const chartData = useMemo<ChartData<"bar">>(() => {
-    if (!stats?.history?.length) return { labels: [], datasets: [] }
+    if (!stats?.history?.length) return { labels: [], datasets: [] };
     return {
-      labels: stats.history.map(h => h.month),
+      labels: stats.history.map((h) => h.month),
       datasets: [
         {
           label: "Posts",
-          data: stats.history.map(h => h.posts),
+          data: stats.history.map((h) => h.posts),
           backgroundColor: theme === "dark" ? "#60a5fa" : "#3b82f6",
         },
         {
           label: "Videos",
-          data: stats.history.map(h => h.videos),
+          data: stats.history.map((h) => h.videos),
           backgroundColor: theme === "dark" ? "#c084fc" : "#a855f7",
         },
         {
           label: "Comments",
-          data: stats.history.map(h => h.comments),
+          data: stats.history.map((h) => h.comments),
           backgroundColor: theme === "dark" ? "#34d399" : "#10b981",
         },
       ],
-    }
-  }, [stats, theme])
+    };
+  }, [stats, theme]);
 
   const chartOptions = useMemo<ChartOptions<"bar">>(() => {
-    const text = theme === "dark" ? "#d1d5db" : "#374151"
-    const grid = theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"
+    const text = theme === "dark" ? "#d1d5db" : "#374151";
+    const grid = theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -192,66 +137,22 @@ export default function DashboardOverview() {
         x: { ticks: { color: text }, grid: { color: grid } },
         y: { ticks: { color: text }, grid: { color: grid } },
       },
-    }
-  }, [theme])
-
-  const quickActions = [
-    {
-      title: "Create New Post",
-      description: "Write a new blog article",
-      icon: FileText,
-      action: "blogs",
-      color: "bg-blue-500",
-    },
-    {
-      title: "Add Video",
-      description: "Upload new video content",
-      icon: Video,
-      action: "videos",
-      color: "bg-purple-500",
-    },
-    {
-      title: "Moderate Comments",
-      description: "Review pending comments",
-      icon: MessageSquare,
-      action: "comments",
-      color: "bg-green-500",
-    },
-    {
-      title: "Manage Users",
-      description: "Edit user roles and permissions",
-      icon: Users,
-      action: "users",
-      color: "bg-teal-500",
-    },
-  ]
-
-  const handleQuickAction = (action: string) => {
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("admin-navigate", { detail: action }))
-    }
-  }
+    };
+  }, [theme]);
 
   // Error overlay (UI block, retry supported)
-  if (error && !loading) {
+  if (hasError && !loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-red-600 mb-2">Unable to load dashboard data</p>
-          <p className="text-gray-600 mb-4">{error}</p>
-          {process.env.NODE_ENV !== "production" && authInfo && (
-            <div className="text-xs text-gray-500 mb-4">
-              <div>Role: {authInfo.role}</div>
-              <div>Email: {authInfo.email}</div>
-              <div>UID: {authInfo.uid}</div>
-            </div>
-          )}
-          <Button onClick={loadDashboardData} variant="outline">
+          <p className="text-gray-600 mb-4">Please try again.</p>
+          <Button onClick={refresh} variant="outline">
             Retry Dashboard
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   if (loading) {
@@ -260,7 +161,7 @@ export default function DashboardOverview() {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
         <span className="ml-3 text-gray-600">Loading real-time data...</span>
       </div>
-    )
+    );
   }
 
   if (!stats) {
@@ -268,12 +169,12 @@ export default function DashboardOverview() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
-          <Button onClick={loadDashboardData} variant="outline">
+          <Button onClick={refresh} variant="outline">
             Refresh Dashboard
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -399,14 +300,47 @@ export default function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {quickActions.map((action, index) => {
-                const Icon = action.icon
+              {[
+                {
+                  title: "Create New Post",
+                  description: "Write a new blog article",
+                  icon: FileText,
+                  action: "blogs",
+                  color: "bg-blue-500",
+                },
+                {
+                  title: "Add Video",
+                  description: "Upload new video content",
+                  icon: Video,
+                  action: "videos",
+                  color: "bg-purple-500",
+                },
+                {
+                  title: "Moderate Comments",
+                  description: "Review pending comments",
+                  icon: MessageSquare,
+                  action: "comments",
+                  color: "bg-green-500",
+                },
+                {
+                  title: "Manage Users",
+                  description: "Edit user roles and permissions",
+                  icon: Users,
+                  action: "users",
+                  color: "bg-teal-500",
+                },
+              ].map((action, index) => {
+                const Icon = action.icon;
                 return (
                   <Button
                     key={index}
                     variant="outline"
                     className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
-                    onClick={() => handleQuickAction(action.action)}
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        window.dispatchEvent(new CustomEvent("admin-navigate", { detail: action.action }));
+                      }
+                    }}
                   >
                     <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center`}>
                       <Icon className="w-4 h-4 text-white" />
@@ -416,7 +350,7 @@ export default function DashboardOverview() {
                       <p className="text-sm text-gray-500">{action.description}</p>
                     </div>
                   </Button>
-                )
+                );
               })}
             </div>
           </CardContent>
@@ -446,8 +380,8 @@ export default function DashboardOverview() {
                         activity.status === "success"
                           ? "bg-green-500"
                           : activity.status === "pending"
-                            ? "bg-yellow-500"
-                            : "bg-gray-500"
+                          ? "bg-yellow-500"
+                          : "bg-gray-500"
                       }`}
                     ></div>
                     <div className="flex-1">
@@ -554,5 +488,5 @@ export default function DashboardOverview() {
         </div>
       )}
     </div>
-  )
+  );
 }

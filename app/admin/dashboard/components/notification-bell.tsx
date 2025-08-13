@@ -1,110 +1,89 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Bell, X, MessageCircle, Mail, AlertTriangle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { useState } from "react";
+import useSWR from "swr";
+import { motion, AnimatePresence } from "framer-motion";
+import { Bell, X, MessageCircle, Mail, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { fetcher } from "@/lib/fetcher";
 
 interface Notification {
-  id: string
-  type: "comment" | "contact" | "flagged"
-  title: string
-  message: string
-  timestamp: Date
-  read: boolean
-  data?: Record<string, unknown>
+  id: string;
+  type: "comment" | "contact" | "flagged";
+  title: string;
+  message: string;
+  timestamp: Date | string;
+  read: boolean;
+  data?: Record<string, unknown>;
 }
 
 export function NotificationBell() {
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [isOpen, setIsOpen] = useState(false)
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const loadNotifications = async () => {
-      try {
-        setLoading(true)
-        const response = await fetch("/api/admin/notifications")
-        if (response.ok) {
-          const data = await response.json()
-          setNotifications(data.notifications || [])
-          setUnreadCount(data.notifications?.filter((n: Notification) => !n.read).length || 0)
-        } else {
-          // No notifications available
-          setNotifications([])
-          setUnreadCount(0)
-        }
-      } catch (error) {
-        console.error("Failed to load notifications:", error)
-        setNotifications([])
-        setUnreadCount(0)
-      } finally {
-        setLoading(false)
-      }
-    }
+  const {
+    data,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR<{ notifications: Notification[] }>("/api/admin/notifications", fetcher, {
+    refreshInterval: 30000,
+  });
 
-    loadNotifications()
-
-    // Set up real-time updates every 30 seconds
-    const interval = setInterval(loadNotifications, 30000)
-    return () => clearInterval(interval)
-  }, [])
+  const notifications = data?.notifications || [];
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const markAsRead = async (id: string) => {
     try {
       await fetch(`/api/admin/notifications/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ read: true }),
-      })
-
-      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)))
-      setUnreadCount((prev) => Math.max(0, prev - 1))
-    } catch (error) {
-      console.error("Failed to mark notification as read:", error)
+      });
+      await mutate();
+    } catch (err) {
+      console.error("Failed to mark notification as read:", err);
     }
-  }
+  };
 
   const markAllAsRead = async () => {
     try {
       await fetch("/api/admin/notifications/mark-all-read", {
         method: "POST",
-      })
-
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-      setUnreadCount(0)
-    } catch (error) {
-      console.error("Failed to mark all notifications as read:", error)
+        credentials: "include",
+      });
+      await mutate();
+    } catch (err) {
+      console.error("Failed to mark all notifications as read:", err);
     }
-  }
+  };
 
   const getIcon = (type: string) => {
     switch (type) {
       case "comment":
-        return <MessageCircle className="h-4 w-4" />
+        return <MessageCircle className="h-4 w-4" />;
       case "contact":
-        return <Mail className="h-4 w-4" />
+        return <Mail className="h-4 w-4" />;
       case "flagged":
-        return <AlertTriangle className="h-4 w-4" />
+        return <AlertTriangle className="h-4 w-4" />;
       default:
-        return <Bell className="h-4 w-4" />
+        return <Bell className="h-4 w-4" />;
     }
-  }
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
       case "comment":
-        return "bg-blue-100 text-blue-600"
+        return "bg-blue-100 text-blue-600";
       case "contact":
-        return "bg-green-100 text-green-600"
+        return "bg-green-100 text-green-600";
       case "flagged":
-        return "bg-red-100 text-red-600"
+        return "bg-red-100 text-red-600";
       default:
-        return "bg-gray-100 text-gray-600"
+        return "bg-gray-100 text-gray-600";
     }
-  }
+  };
 
   return (
     <div className="relative">
@@ -157,10 +136,19 @@ export function NotificationBell() {
                   </div>
 
                   <div className="max-h-96 overflow-y-auto">
-                    {loading ? (
+                    {isLoading ? (
                       <div className="p-8 text-center">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto"></div>
                         <p className="text-sm text-gray-500 mt-2">Loading notifications...</p>
+                      </div>
+                    ) : error ? (
+                      <div className="p-8 text-center text-red-500">
+                        Failed to load notifications.
+                        <div className="mt-3">
+                          <Button size="sm" variant="outline" onClick={() => mutate()}>
+                            Retry
+                          </Button>
+                        </div>
                       </div>
                     ) : notifications.length === 0 ? (
                       <div className="p-8 text-center text-gray-500">
@@ -205,5 +193,5 @@ export function NotificationBell() {
         )}
       </AnimatePresence>
     </div>
-  )
+  );
 }

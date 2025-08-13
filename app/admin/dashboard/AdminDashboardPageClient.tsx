@@ -1,62 +1,62 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react"
-import dynamic from "next/dynamic"
-import { usePathname, useRouter } from "next/navigation"
-import { getAuth, signOut } from "firebase/auth"
-import app, { firebaseInitError } from "@/lib/firebase"
-import useHotkeys from "./hooks/use-hotkeys"
+import { useState, useEffect, useCallback, Suspense } from "react";
+import dynamic from "next/dynamic";
+import { usePathname, useRouter } from "next/navigation";
+import { getAuth, signOut } from "firebase/auth";
+import app, { firebaseInitError } from "@/lib/firebase";
+import useHotkeys from "./hooks/use-hotkeys";
 
-import AdminAuthGuard from "@/components/AdminAuthGuard"
-import { AdminSidebar } from "./components/admin-sidebar"
-import { AdminHeader } from "./components/admin-header"
-import { RoleProvider } from "./contexts/role-context"
-import { ToastProvider } from "./components/ui/toast-provider"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import Spinner from "@/components/ui/spinner"
-import MobileNav from "./components/mobile-nav"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import AdminAuthGuard from "@/components/AdminAuthGuard";
+import { AdminSidebar } from "./components/admin-sidebar";
+import { AdminHeader } from "./components/admin-header";
+import { RoleProvider } from "./contexts/role-context";
+import { ToastProvider } from "./components/ui/toast-provider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import Spinner from "@/components/ui/spinner";
+import MobileNav from "./components/mobile-nav";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 // Lazy sections
-const DashboardOverview = dynamic(() => import("./components/dashboard-overview"), { ssr: false, loading: () => <Spinner /> })
-const BlogManager = dynamic(() => import("./components/blog-manager"), { ssr: false, loading: () => <Spinner /> })
-const VideoManager = dynamic(() => import("./components/video-manager"), { ssr: false, loading: () => <Spinner /> })
-const CommentManager = dynamic(() => import("./components/comment-manager"), { ssr: false, loading: () => <Spinner /> })
-const SystemTools = dynamic(() => import("./components/system-tools"), { ssr: false, loading: () => <Spinner /> })
-const UserManagement = dynamic(() => import("./components/user-management/UserManagement"), { ssr: false, loading: () => <Spinner /> })
-const CategoryManager = dynamic(() => import("@/components/admin/category/CategoryManager"), { ssr: false, loading: () => <Spinner /> })
-const EmailInbox = dynamic(() => import("./components/email-inbox"), { ssr: false, loading: () => <Spinner /> })
-const MediaLibrary = dynamic(() => import("./components/media/MediaLibrary"), { ssr: false, loading: () => <Spinner /> })
-const CareerApplications = dynamic(() => import("./components/career-applications"), { ssr: false, loading: () => <Spinner /> })
-const CommandPalette = dynamic(() => import("./components/command-palette"), { ssr: false })
+const DashboardOverview = dynamic(() => import("./components/dashboard-overview"), { ssr: false, loading: () => <Spinner /> });
+const BlogManager = dynamic(() => import("./components/blog-manager"), { ssr: false, loading: () => <Spinner /> });
+const VideoManager = dynamic(() => import("./components/video-manager"), { ssr: false, loading: () => <Spinner /> });
+const CommentManager = dynamic(() => import("./components/comment-manager"), { ssr: false, loading: () => <Spinner /> });
+const SystemTools = dynamic(() => import("./components/system-tools"), { ssr: false, loading: () => <Spinner /> });
+const UserManagement = dynamic(() => import("./components/user-management/UserManagement"), { ssr: false, loading: () => <Spinner /> });
+const CategoryManager = dynamic(() => import("@/components/admin/category/CategoryManager"), { ssr: false, loading: () => <Spinner /> });
+const EmailInbox = dynamic(() => import("./components/email-inbox"), { ssr: false, loading: () => <Spinner /> });
+const MediaLibrary = dynamic(() => import("./components/media/MediaLibrary"), { ssr: false, loading: () => <Spinner /> });
+const CareerApplications = dynamic(() => import("./components/career-applications"), { ssr: false, loading: () => <Spinner /> });
+const CommandPalette = dynamic(() => import("./components/command-palette"), { ssr: false });
 
 interface AdminDashboardPageClientProps {
-  initialSection?: string
+  initialSection?: string;
 }
 
 export default function AdminDashboardPageClient({ initialSection = "overview" }: AdminDashboardPageClientProps) {
-  const [activeSection, setActiveSection] = useState(initialSection)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [mounted, setMounted] = useState(false)
-  const [error, setError] = useState("")
-  const [isMobile, setIsMobile] = useState(false)
-  const [keyboardOpen, setKeyboardOpen] = useState(false)
-  const [shortcutsOpen, setShortcutsOpen] = useState(false)
-  const pathname = usePathname()
-  const router = useRouter()
+  const [activeSection, setActiveSection] = useState(initialSection);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
 
-  useHotkeys("n", () => router.push("/admin/blog/create"), undefined, [router])
-  useHotkeys("shift+u", () => window.dispatchEvent(new Event("admin-open-media-upload")))
+  useHotkeys("n", () => router.push("/admin/blog/create"), undefined, [router]);
+  useHotkeys("shift+u", () => window.dispatchEvent(new Event("admin-open-media-upload")));
   // aligned event name with AdminHeader/CommandPalette listener
-  useHotkeys(["meta+/", "ctrl+/"], () => window.dispatchEvent(new Event("open-command-palette")))
-  useHotkeys("?", (e) => { e.preventDefault(); setShortcutsOpen(true) })
+  useHotkeys(["meta+/", "ctrl+/"], () => window.dispatchEvent(new Event("open-command-palette")));
+  useHotkeys("?", (e) => { e.preventDefault(); setShortcutsOpen(true); });
 
   useEffect(() => {
-    setMounted(true)
+    setMounted(true);
     fetch("/api/admin/init", { method: "POST" }).catch(err => {
-      if (process.env.NODE_ENV !== "production") console.error("Admin init failed:", err)
-    })
-  }, [])
+      if (process.env.NODE_ENV !== "production") console.error("Admin init failed:", err);
+    });
+  }, []);
 
   useEffect(() => {
     const map = [
@@ -71,43 +71,38 @@ export default function AdminDashboardPageClient({ initialSection = "overview" }
       { id: "users", href: "/admin/dashboard/users" },
       { id: "settings", href: "/admin/dashboard/settings" },
       { id: "system", href: "/admin/dashboard/system" }
-    ]
-    const matched = map.find(m => pathname === m.href || pathname.startsWith(`${m.href}/`))
-    if (matched && matched.id !== activeSection) setActiveSection(matched.id)
-  }, [pathname, activeSection])
+    ];
+    const matched = map.find(m => pathname === m.href || pathname.startsWith(`${m.href}/`));
+    if (matched && matched.id !== activeSection) setActiveSection(matched.id);
+  }, [pathname, activeSection]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      window.dispatchEvent(new CustomEvent("admin-refresh"))
-    }, 30000)
-    return () => clearInterval(interval)
-  }, [])
+  // Removed manual setInterval-based refresh; SWR in child modules handles revalidation.
 
   useEffect(() => {
     const handleResize = () => {
-      setSidebarOpen(window.innerWidth >= 1024)
-      setIsMobile(window.innerWidth < 768)
-      setKeyboardOpen(window.innerHeight < window.outerHeight - 150)
-    }
-    window.addEventListener("resize", handleResize)
-    handleResize()
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+      setSidebarOpen(window.innerWidth >= 1024);
+      setIsMobile(window.innerWidth < 768);
+      setKeyboardOpen(window.innerHeight < window.outerHeight - 150);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleLogout = useCallback(async () => {
     try {
       if (firebaseInitError || !app) {
-        setError(firebaseInitError?.message || "Firebase not initialized. Cannot log out safely.")
-        return
+        setError(firebaseInitError?.message || "Firebase not initialized. Cannot log out safely.");
+        return;
       }
-      await signOut(getAuth(app))
-      await fetch("/api/admin/logout", { method: "POST" })
-      window.location.href = "/admin/login"
+      await signOut(getAuth(app));
+      await fetch("/api/admin/logout", { method: "POST" });
+      window.location.href = "/admin/login";
     } catch (error) {
-      setError("Logout failed. Please try again.")
-      if (process.env.NODE_ENV !== "production") console.error("Logout failed:", error)
+      setError("Logout failed. Please try again.");
+      if (process.env.NODE_ENV !== "production") console.error("Logout failed:", error);
     }
-  }, [])
+  }, []);
 
   if (!mounted) {
     return (
@@ -117,24 +112,24 @@ export default function AdminDashboardPageClient({ initialSection = "overview" }
           <span className="text-lg font-medium text-gray-700">Loading Admin Dashboard...</span>
         </div>
       </div>
-    )
+    );
   }
 
   const renderContent = () => {
     switch (activeSection) {
-      case "overview": return <DashboardOverview />
-      case "blogs": return <BlogManager />
-      case "videos": return <VideoManager />
-      case "media": return <MediaLibrary />
-      case "categories": return <CategoryManager />
-      case "comments": return <CommentManager />
-      case "applications": return <CareerApplications />
-      case "inbox": return <EmailInbox />
-      case "system": return <SystemTools />
-      case "users": return <UserManagement />
-      default: return <DashboardOverview />
+      case "overview": return <DashboardOverview />;
+      case "blogs": return <BlogManager />;
+      case "videos": return <VideoManager />;
+      case "media": return <MediaLibrary />;
+      case "categories": return <CategoryManager />;
+      case "comments": return <CommentManager />;
+      case "applications": return <CareerApplications />;
+      case "inbox": return <EmailInbox />;
+      case "system": return <SystemTools />;
+      case "users": return <UserManagement />;
+      default: return <DashboardOverview />;
     }
-  }
+  };
 
   return (
     <AdminAuthGuard>
@@ -177,5 +172,5 @@ export default function AdminDashboardPageClient({ initialSection = "overview" }
         </RoleProvider>
       </ToastProvider>
     </AdminAuthGuard>
-  )
+  );
 }

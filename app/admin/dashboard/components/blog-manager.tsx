@@ -1,20 +1,21 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { RefreshCw, PlusCircle, AlertCircle } from "lucide-react"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { RefreshCw, PlusCircle, AlertCircle } from "lucide-react";
+import useSWR from "swr";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { CategoryDropdown } from "@/components/ui/category-dropdown"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { CategoryDropdown } from "@/components/ui/category-dropdown";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,142 +24,152 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
-import BlogTable from "@/components/admin/blog/BlogTable"
-import BlogBulkActions from "@/components/admin/blog/BlogBulkActions"
+import BlogTable from "@/components/admin/blog/BlogTable";
+import BlogBulkActions from "@/components/admin/blog/BlogBulkActions";
 
-import type { BlogPost } from "@/lib/content-store"
-import type { CategoryData } from "@/lib/dynamic-categories"
-import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions"
-import { cn } from "@/lib/utils"
-import { Pagination } from "@/components/admin/Pagination"
-import AdminPageHeader from "@/components/AdminPageHeader"
+import type { BlogPost } from "@/lib/content-store";
+import type { CategoryData } from "@/lib/dynamic-categories";
+import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions";
+import { cn } from "@/lib/utils";
+import { Pagination } from "@/components/admin/Pagination";
+import AdminPageHeader from "@/components/AdminPageHeader";
+import { fetcher } from "@/lib/fetcher";
 
 export default function BlogManager() {
-  const { toast } = useToast()
-  const [isRevalidating, setIsRevalidating] = useState(false)
-  const router = useRouter()
+  const { toast } = useToast();
+  const [isRevalidating, setIsRevalidating] = useState(false);
+  const router = useRouter();
 
-  const [loading, setLoading] = useState(true)
-  const [posts, setPosts] = useState<BlogPost[]>([])
-  const [categories, setCategories] = useState<CategoryData[]>([])
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<CategoryData[]>([]);
 
-  const [search, setSearch] = useState("")
-  const [category, setCategory] = useState("all")
-  const [status, setStatus] = useState("all")
-  const [sortBy, setSortBy] = useState("date")
-  const [currentPage, setCurrentPage] = useState(1)
-  const POSTS_PER_PAGE = 10
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [status, setStatus] = useState("all");
+  const [sortBy, setSortBy] = useState("date");
+  const [currentPage, setCurrentPage] = useState(1);
+  const POSTS_PER_PAGE = 10;
 
-  const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [error, setError] = useState<string | null>(null)
-  const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null)
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
+
+  // SWR data sources
+  const {
+    data: postsData,
+    error: postsError,
+    isLoading: postsLoading,
+    mutate: mutatePosts,
+  } = useSWR<{ posts: BlogPost[] }>("/api/admin/blogs", fetcher, {
+    refreshInterval: 30000,
+  });
+
+  const {
+    data: categoriesData,
+    error: categoriesError,
+    isLoading: categoriesLoading,
+    mutate: mutateCategories,
+  } = useSWR<{ categories: Partial<CategoryData>[] }>(
+    "/api/admin/categories?type=blog",
+    fetcher,
+    { refreshInterval: 30000 },
+  );
+
+  // Reflect SWR data into local state used by filters/pagination
+  useEffect(() => {
+    if (postsData?.posts) setPosts(postsData.posts);
+  }, [postsData]);
 
   useEffect(() => {
-    loadData()
-  }, [])
-
-  const loadData = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const [postRes, catRes] = await Promise.all([
-        fetch("/api/admin/blogs", { credentials: "include" }),
-        fetch("/api/admin/categories?type=blog", { credentials: "include" }),
-      ])
-      if (!postRes.ok || !catRes.ok) {
-        throw new Error("Failed to load data.")
-      }
-      const postData = await postRes.json()
-      const catData = await catRes.json()
-
-      setPosts(postData.posts || [])
+    if (categoriesData?.categories) {
       setCategories(
-        (catData.categories || []).map((c: Partial<CategoryData>) => ({
+        categoriesData.categories.map((c: Partial<CategoryData>) => ({
           name: c.name ?? (c as { title?: string }).title ?? "",
           slug: c.slug ?? "",
           count: c.count ?? (c as { postCount?: number }).postCount ?? 0,
           tooltip: c.tooltip,
-        }))
-      )
-    } catch (err) {
-      console.error("Failed to load posts:", err)
-      toast("Failed to load posts")
-      setError("Could not load blog posts. Please refresh or try again later.")
-    } finally {
-      setLoading(false)
+        })),
+      );
     }
-  }
+  }, [categoriesData]);
+
+  const loading = postsLoading || categoriesLoading;
+  const displayError = postsError || categoriesError ? "Failed to load blog posts." : null;
+
+  const refreshData = async () => {
+    await Promise.all([mutatePosts(), mutateCategories()]);
+  };
 
   const handleRevalidateBlog = async () => {
-    setIsRevalidating(true)
+    setIsRevalidating(true);
     try {
-      const result = await revalidateBlogAndAdminDashboard()
-      toast(result.message)
+      const result = await revalidateBlogAndAdminDashboard();
+      toast(result.message);
+      await refreshData();
     } catch (error) {
-      console.error("Failed to revalidate blog:", error)
-      toast("Failed to revalidate blog section.")
+      console.error("Failed to revalidate blog:", error);
+      toast("Failed to revalidate blog section.");
     } finally {
-      setIsRevalidating(false)
+      setIsRevalidating(false);
     }
-  }
+  };
 
   const handleCreatePost = () => {
-    router.push("/admin/blog/create")
-  }
+    router.push("/admin/blog/create");
+  };
 
   // --- DELETE POST MODAL HANDLER (single or bulk) ---
   const deletePost = (id: string) => {
-    setDeleteTargets([id])
-  }
+    setDeleteTargets([id]);
+  };
 
   const confirmDelete = async () => {
-    if (!deleteTargets) return
+    if (!deleteTargets) return;
     for (const id of deleteTargets) {
       try {
         const res = await fetch(`/api/admin/blogs/${id}`, {
           method: "DELETE",
           credentials: "include",
-        })
+        });
         if (res.ok) {
-          toast("Post deleted")
+          toast("Post deleted");
           setSelected((prev) => {
-            const s = new Set(prev)
-            s.delete(id)
-            return s
-          })
+            const s = new Set(prev);
+            s.delete(id);
+            return s;
+          });
         } else {
-          const data = await res.json()
-          toast(data.error || "Failed to delete")
+          const data = await res.json();
+          toast(data.error || "Failed to delete");
         }
       } catch (err) {
-        console.error("Delete failed", err)
-        toast("Failed to delete")
+        console.error("Delete failed", err);
+        toast("Failed to delete");
       }
     }
-    setDeleteTargets(null)
+    setDeleteTargets(null);
     setSelected((prev) => {
-      const next = new Set(prev)
-      deleteTargets.forEach(id => next.delete(id))
-      return next
-    })
-    await loadData()
-  }
+      const next = new Set(prev);
+      deleteTargets.forEach((id) => next.delete(id));
+      return next;
+    });
+    await refreshData();
+  };
 
   const handleBulk = async (action: "publish" | "unpublish" | "delete") => {
-    const ids = Array.from(selected)
-    if (ids.length === 0) return
+    const ids = Array.from(selected);
+    if (ids.length === 0) return;
     if (action === "delete") {
-      setDeleteTargets(ids)
-      return // confirmation handled by modal
+      setDeleteTargets(ids);
+      return; // confirmation handled by modal
     }
     for (const id of ids) {
-      await togglePublish(id, action === "publish")
+      await togglePublish(id, action === "publish");
     }
-    setSelected(new Set())
-    await loadData()
-  }
+    setSelected(new Set());
+    await refreshData();
+  };
 
   const togglePublish = async (id: string, publish: boolean) => {
     try {
@@ -167,86 +178,86 @@ export default function BlogManager() {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ status: publish ? "published" : "draft" }),
-      })
+      });
       if (res.ok) {
-        toast(publish ? "Post published" : "Post unpublished")
-        await loadData()
+        toast(publish ? "Post published" : "Post unpublished");
+        await refreshData();
       } else {
-        const data = await res.json()
-        toast(data.error || "Update failed")
+        const data = await res.json();
+        toast(data.error || "Update failed");
       }
     } catch (err) {
-      console.error("Publish toggle failed", err)
-      toast("Update failed")
+      console.error("Publish toggle failed", err);
+      toast("Update failed");
     }
-  }
+  };
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
-      return next
-    })
-  }
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const toggleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelected(new Set(filteredPosts.map((p) => p.id)))
+      setSelected(new Set(filteredPosts.map((p) => p.id)));
     } else {
-      setSelected(new Set())
+      setSelected(new Set());
     }
-  }
+  };
 
   // Filters, sorting, pagination
   const filteredPosts = posts.filter((post) => {
     const inCategory =
       category === "all" ||
       post.category === category ||
-      (Array.isArray(post.categories) && post.categories.includes(category))
-    const inStatus = status === "all" || post.status === status
-    const matchesSearch = post.title.toLowerCase().includes(search.toLowerCase())
-    return inCategory && inStatus && matchesSearch
-  })
+      (Array.isArray(post.categories) && post.categories.includes(category));
+    const inStatus = status === "all" || post.status === status;
+    const matchesSearch = post.title.toLowerCase().includes(search.toLowerCase());
+    return inCategory && inStatus && matchesSearch;
+  });
 
   const sortedPosts = [...filteredPosts].sort((a, b) => {
-    if (sortBy === "title") return a.title.localeCompare(b.title)
-    if (sortBy === "status") return a.status.localeCompare(b.status)
+    if (sortBy === "title") return a.title.localeCompare(b.title);
+    if (sortBy === "status") return a.status.localeCompare(b.status);
     return (
       new Date(b.publishedAt || b.createdAt).getTime() -
       new Date(a.publishedAt || a.createdAt).getTime()
-    )
-  })
+    );
+  });
 
-  const totalPages = Math.ceil(sortedPosts.length / POSTS_PER_PAGE) || 1
+  const totalPages = Math.ceil(sortedPosts.length / POSTS_PER_PAGE) || 1;
   const paginatedPosts = sortedPosts.slice(
     (currentPage - 1) * POSTS_PER_PAGE,
-    currentPage * POSTS_PER_PAGE
-  )
+    currentPage * POSTS_PER_PAGE,
+  );
 
   useEffect(() => {
-    setCurrentPage(1)
-  }, [search, category, status, sortBy])
+    setCurrentPage(1);
+  }, [search, category, status, sortBy]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
       </div>
-    )
+    );
   }
 
-  // --- Error state ---
-  if (error) {
+  // --- Error state (from SWR or actions) ---
+  if (displayError) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
-        <p className="text-lg text-gray-800">{error}</p>
-        <Button onClick={loadData} className="mt-6" aria-label="Retry loading">
+        <p className="text-lg text-gray-800">{displayError}</p>
+        <Button onClick={refreshData} className="mt-6" aria-label="Retry loading">
           Retry
         </Button>
       </div>
-    )
+    );
   }
 
   // --- Main UI ---
@@ -346,7 +357,12 @@ export default function BlogManager() {
               aria-hidden
             >
               <rect width="56" height="56" rx="12" fill="#F3F4F6" />
-              <path d="M19 29V35C19 35.5523 19.4477 36 20 36H36C36.5523 36 37 35.5523 37 35V29" stroke="#A1A1AA" strokeWidth="2" strokeLinecap="round" />
+              <path
+                d="M19 29V35C19 35.5523 19.4477 36 20 36H36C36.5523 36 37 35.5523 37 35V29"
+                stroke="#A1A1AA"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
               <rect x="15" y="19" width="26" height="10" rx="2" stroke="#A1A1AA" strokeWidth="2" />
               <circle cx="28" cy="24" r="1.5" fill="#A1A1AA" />
             </svg>
@@ -365,11 +381,7 @@ export default function BlogManager() {
         )}
 
         {/* Pagination */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
 
         {/* Delete Confirmation Modal */}
         {deleteTargets && (
@@ -393,5 +405,5 @@ export default function BlogManager() {
         )}
       </div>
     </div>
-  )
+  );
 }

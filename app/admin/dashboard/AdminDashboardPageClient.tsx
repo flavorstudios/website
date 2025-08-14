@@ -24,7 +24,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 // Lazy sections via central registry
 const DashboardOverview = dynamic(

@@ -1,50 +1,45 @@
-import { z } from "zod";
+// lib/env.ts
 
 /**
- * Mapping of Firebase config keys to their required environment variable names.
- * These names must exist in `.env.local` (for local dev) or your hosting platform.
+ * Public Firebase config sourced from NEXT_PUBLIC_* environment variables.
+ * These must be set in `.env.local` for local dev or in your hosting platform (e.g., Vercel).
+ * Do not import any Node-only modules here.
  */
-export const FIREBASE_CLIENT_ENV_KEYS = {
-  apiKey: "NEXT_PUBLIC_FIREBASE_API_KEY",
-  authDomain: "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
-  projectId: "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
-  storageBucket: "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
-  messagingSenderId: "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
-  appId: "NEXT_PUBLIC_FIREBASE_APP_ID",
-} as const;
-
-const clientEnvSchema = z.object(
-  Object.fromEntries(
-    Object.values(FIREBASE_CLIENT_ENV_KEYS).map((key) => [key, z.string().optional()])
-  )
-);
-
-const clientEnv = clientEnvSchema.parse(process.env);
-
 export const PUBLIC_FIREBASE_CONFIG = {
-  apiKey: clientEnv[FIREBASE_CLIENT_ENV_KEYS.apiKey],
-  authDomain: clientEnv[FIREBASE_CLIENT_ENV_KEYS.authDomain],
-  projectId: clientEnv[FIREBASE_CLIENT_ENV_KEYS.projectId],
-  storageBucket: clientEnv[FIREBASE_CLIENT_ENV_KEYS.storageBucket],
-  messagingSenderId: clientEnv[FIREBASE_CLIENT_ENV_KEYS.messagingSenderId],
-  appId: clientEnv[FIREBASE_CLIENT_ENV_KEYS.appId],
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  // Optional, used by analytics
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 } as const;
 
 /**
- * Returns the list of missing Firebase environment variables (by env var name).
+ * Returns the list of missing required Firebase environment variables (by env var name).
+ * Measurement ID is optional and therefore not included in this check.
  */
 export function getMissingFirebaseEnv(): string[] {
-  return Object.entries(FIREBASE_CLIENT_ENV_KEYS)
-    .filter(
-      ([key]) =>
-        !PUBLIC_FIREBASE_CONFIG[key as keyof typeof PUBLIC_FIREBASE_CONFIG]
-    )
-    .map(([, envName]) => envName);
+  const required = {
+    NEXT_PUBLIC_FIREBASE_API_KEY: PUBLIC_FIREBASE_CONFIG.apiKey,
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: PUBLIC_FIREBASE_CONFIG.authDomain,
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID: PUBLIC_FIREBASE_CONFIG.projectId,
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: PUBLIC_FIREBASE_CONFIG.storageBucket,
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: PUBLIC_FIREBASE_CONFIG.messagingSenderId,
+    NEXT_PUBLIC_FIREBASE_APP_ID: PUBLIC_FIREBASE_CONFIG.appId,
+  } as const;
+
+  return Object.entries(required)
+    .filter(([, v]) => !v)
+    .map(([k]) => k);
 }
 
+/**
+ * Dev-only warning helper. Safe in both server and browser contexts.
+ */
 export function assertClientEnv(): void {
   const missing = getMissingFirebaseEnv();
-
   if (missing.length > 0 && process.env.NODE_ENV !== "production") {
     // eslint-disable-next-line no-console
     console.warn(

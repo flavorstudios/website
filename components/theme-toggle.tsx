@@ -5,13 +5,13 @@ import { useEffect, useState } from "react"
 import { Sun, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+export default function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => setMounted(true), [])
 
-  const isDark = mounted && theme === "dark"
+  const isDark = mounted && resolvedTheme === "dark"
 
   const toggleTheme = () => {
     setTheme(isDark ? "light" : "dark")
@@ -39,5 +39,3 @@ export function ThemeToggle() {
     </Button>
   )
 }
-
-export default ThemeToggle

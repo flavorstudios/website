@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, Menu, ExternalLink, LogOut } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
 import ThemeToggle from "@/components/theme-toggle"
-import HighContrastToggle from "@/components/high-contrast-toggle"
 import { cn } from "@/lib/utils"
 
 interface AdminHeaderProps {
@@ -142,9 +141,8 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               </div>
             </div>
 
-            {/* Theme & accessibility toggles */}
+            {/* Theme toggle (single source of truth) */}
             <ThemeToggle />
-            <HighContrastToggle />
 
             {/* Logout button */}
             <Button

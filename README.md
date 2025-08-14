@@ -13,6 +13,15 @@ This is the official website of **Flavor Studios** — your source for Anime New
 - Built with OCD-level organization and best coding practices
 
 ---
+## Theme
+
+Light and dark modes are managed with [`next-themes`](https://github.com/pacocoursey/next-themes).
+The provider lives in `components/theme-provider.tsx` and a single toggle button
+is rendered in the admin dashboard header (`components/theme-toggle.tsx`).
+The chosen theme is saved in `localStorage` and falls back to the system
+preference on first visit.
+
+---
 
 ## Getting Started
 
@@ -25,7 +34,7 @@ Set up your environment and install dependencies:
 bash
 Copy
 Edit
-cp env.example .env.local
+cp .env.example .env.local
 pnpm install  # or `npm install`
 Common development scripts:
 
@@ -42,6 +51,9 @@ Firebase powers features like authentication and Firestore. The client SDK
 requires several environment variables, all of which must be present in your
 .env.local (for local development) or your hosting platform's environment
 settings:
+In production these values are provided via Vercel, and any `.env*`
+files are git-ignored so they can't override the deployed configuration. Use
+`.env.example` as a template for local development:
 
 NEXT_PUBLIC_FIREBASE_API_KEY
 
@@ -62,7 +74,7 @@ scss
 Copy
 Edit
 [Firebase] Missing Firebase environment variable(s): NEXT_PUBLIC_FIREBASE_API_KEY, ...
-Use env.example as a reference for the correct variable names and structure.
+Use `.env.example` as a reference for the correct variable names and structure.
 
 Cookie Consent Banner (via GTM)
 The cookie consent banner is injected via Google Tag Manager and is shown only on public pages for visitors on live hostnames who have not previously granted consent. GTM is the single source of truth for injection and Consent Mode.
@@ -83,7 +95,7 @@ Consent has not been granted before (no cookie_consent=granted in cookie/localSt
 
 Environment variables
 
-Set these in .env.local (see env.example):
+Set these in .env.local (see `.env.example`):
 
 NEXT_PUBLIC_GTM_CONTAINER_ID — your GTM container ID (e.g., GTM-XXXXXXX).
 

@@ -1,54 +1,49 @@
 // lib/firebase.ts
 
-import { initializeApp, getApps, getApp, type FirebaseOptions } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
 import {
-  PUBLIC_FIREBASE_CONFIG,
-  assertClientEnv,
-  getMissingFirebaseEnv,
-} from "./env";
+  initializeApp,
+  getApps,
+  getApp,
+  type FirebaseOptions,
+  type FirebaseApp,
+} from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { PUBLIC_FIREBASE_CONFIG, getMissingFirebaseEnv } from "./env";
 
-/**
- * Firebase config for frontend (uses NEXT_PUBLIC_ variables only).
- * Now sourced from lib/env.ts with a single assertion point.
- */
-assertClientEnv();
-
-const isBrowser = typeof window !== "undefined";
-
+let app: FirebaseApp | null = null;
 export let firebaseInitError: Error | null = null;
-let app: ReturnType<typeof initializeApp> | null = null;
 
-if (isBrowser) {
-  // List any missing environment variables by their actual names for clear feedback.
-  const missingKeys = getMissingFirebaseEnv();
+function initIfNeeded(): void {
+  // Never initialize during SSR; only in the browser.
+  if (typeof window === "undefined" || app) return;
 
-  if (missingKeys.length > 0) {
-    // Record the problem without throwing; callers can read firebaseInitError.
-    firebaseInitError = new Error(
-      `[Firebase] Missing Firebase environment variable(s): ${missingKeys.join(
-        ", "
-      )}. Check your environment (e.g., .env.local or hosting dashboard).`
-    );
-  } else {
-    try {
-      const options: FirebaseOptions = {
-        apiKey: PUBLIC_FIREBASE_CONFIG.apiKey!,
-        authDomain: PUBLIC_FIREBASE_CONFIG.authDomain!,
-        projectId: PUBLIC_FIREBASE_CONFIG.projectId!,
-        storageBucket: PUBLIC_FIREBASE_CONFIG.storageBucket!,
-        messagingSenderId: PUBLIC_FIREBASE_CONFIG.messagingSenderId!,
-        appId: PUBLIC_FIREBASE_CONFIG.appId!,
-      };
-      app = getApps().length ? getApp() : initializeApp(options);
-    } catch (err) {
-      firebaseInitError = err as Error;
-      app = null;
-    }
+  const missing = getMissingFirebaseEnv();
+  if (missing.length) {
+    firebaseInitError = new Error(`[Firebase] Missing: ${missing.join(", ")}`);
+    return;
   }
+
+  const options: FirebaseOptions = {
+    apiKey: PUBLIC_FIREBASE_CONFIG.apiKey!,
+    authDomain: PUBLIC_FIREBASE_CONFIG.authDomain!,
+    projectId: PUBLIC_FIREBASE_CONFIG.projectId!,
+    storageBucket: PUBLIC_FIREBASE_CONFIG.storageBucket!,
+    messagingSenderId: PUBLIC_FIREBASE_CONFIG.messagingSenderId!,
+    appId: PUBLIC_FIREBASE_CONFIG.appId!,
+    ...(PUBLIC_FIREBASE_CONFIG.measurementId && {
+      measurementId: PUBLIC_FIREBASE_CONFIG.measurementId,
+    }),
+  };
+
+  app = getApps().length ? getApp() : initializeApp(options);
 }
 
-export default app;
-export const auth = app ? getAuth(app) : undefined;
-export const db = app ? getFirestore(app) : undefined;
+export function getFirebaseApp(): FirebaseApp {
+  initIfNeeded();
+  if (!app) throw firebaseInitError ?? new Error("Firebase not initialized");
+  return app;
+}
+
+export const getFirebaseAuth = (): Auth => getAuth(getFirebaseApp());
+export const getDb = (): Firestore => getFirestore(getFirebaseApp());

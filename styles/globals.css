@@ -83,43 +83,6 @@ body {
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-
-  /* High-contrast theme (toggled by adding `.high-contrast` to <html>) */
-  .high-contrast {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 100%;
-    --accent: 0 0% 20%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 0 0% 0%;
-    --border: 0 0% 100%;
-    --input: 0 0% 20%;
-    --ring: 0 0% 100%;
-    /* charts use solid white in HC to maximize contrast */
-    --chart-1: 0 0% 100%;
-    --chart-2: 0 0% 100%;
-    --chart-3: 0 0% 100%;
-    --chart-4: 0 0% 100%;
-    --chart-5: 0 0% 100%;
-    --sidebar-background: 0 0% 0%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 20%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 100%;
-    --sidebar-ring: 0 0% 100%;
-  }
 }
 
 @layer base {
@@ -151,23 +114,6 @@ body {
 }
 
 @supports not (-webkit-background-clip: text) {
-  .text-transparent.bg-clip-text,
-  .bg-gradient-to-r.bg-clip-text.text-transparent,
-  .bg-gradient-to-l.bg-clip-text.text-transparent,
-  .bg-gradient-to-t.bg-clip-text.text-transparent,
-  .bg-gradient-to-b.bg-clip-text.text-transparent,
-  .bg-gradient-to-tr.bg-clip-text.text-transparent,
-  .bg-gradient-to-tl.bg-clip-text.text-transparent,
-  .bg-gradient-to-br.bg-clip-text.text-transparent,
-  .bg-gradient-to-bl.bg-clip-text.text-transparent,
-  .gradient-text {
-    background: none !important;
-    color: #3c73df !important;
-    -webkit-text-fill-color: initial;
-  }
-}
-
-@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
   .text-transparent.bg-clip-text,
   .bg-gradient-to-r.bg-clip-text.text-transparent,
   .bg-gradient-to-l.bg-clip-text.text-transparent,
@@ -344,12 +290,6 @@ body {
   *:focus-visible {
     outline: 2px solid rgba(59, 130, 246, 0.5);
     outline-offset: 2px;
-  }
-
-  /* Stronger outlines when high-contrast mode is active */
-  .high-contrast *:focus-visible {
-    outline: 3px solid #fff;
-    outline-offset: 3px;
   }
 }
 

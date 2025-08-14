@@ -1,7 +1,7 @@
 "use client"
 import React, { createContext, useContext, useEffect, useState } from "react"
-import { getAuth, onAuthStateChanged, signOut, User } from "firebase/auth"
-import app, { firebaseInitError } from "@/lib/firebase"
+import { onAuthStateChanged, signOut, User } from "firebase/auth"
+import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 // ---- Define Context Shape ----
@@ -23,16 +23,27 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Guard: If Firebase config error, do not register listener
-    if (firebaseInitError || !app) {
+    if (firebaseInitError) {
       setError(
-        firebaseInitError?.message ||
-        "Firebase app failed to initialize due to misconfiguration."
+        firebaseInitError.message ||
+          "Firebase app failed to initialize due to misconfiguration."
       )
       setLoading(false)
       return
     }
 
-    const auth = getAuth(app)
+    let auth
+    try {
+      auth = getFirebaseAuth()
+    } catch {
+      setError(
+        firebaseInitError?.message ||
+          "Firebase app failed to initialize due to misconfiguration."
+      )
+      setLoading(false)
+      return
+    }
+
     const unsubscribe = onAuthStateChanged(
       auth,
       (firebaseUser) => {
@@ -56,19 +67,12 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      if (firebaseInitError || !app) {
-        setError(
-          firebaseInitError?.message ||
-          "Firebase app failed to initialize due to misconfiguration."
-        )
-        setLoading(false)
-        return
-      }
-      await signOut(getAuth(app))
+      const auth = getFirebaseAuth()
+      await signOut(auth)
       setUser(null)
       // Call backend to clear the admin-session cookie server-side
       await fetch("/api/admin/logout", { method: "POST" })
-    } catch (err: unknown) { // <--- Only this line changed
+    } catch (err: unknown) {
       setError("Failed to sign out. Please try again.")
       if (process.env.NODE_ENV !== "production") {
         console.error("[AdminAuthProvider] Sign out error:", err)

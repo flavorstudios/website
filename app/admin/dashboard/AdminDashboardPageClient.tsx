@@ -4,8 +4,8 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { getAuth, signOut } from "firebase/auth";
-import app, { firebaseInitError } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase";
 import useHotkeys from "./hooks/use-hotkeys";
 
 import AdminAuthGuard from "@/components/AdminAuthGuard";
@@ -264,14 +264,24 @@ export default function AdminDashboardPageClient({
 
   const handleLogout = useCallback(async () => {
     try {
-      if (firebaseInitError || !app) {
+      if (firebaseInitError) {
+        setError(
+          firebaseInitError.message ||
+            "Firebase not initialized. Cannot log out safely."
+        );
+        return;
+      }
+      let auth;
+      try {
+        auth = getFirebaseAuth();
+      } catch {
         setError(
           firebaseInitError?.message ||
             "Firebase not initialized. Cannot log out safely."
         );
         return;
       }
-      await signOut(getAuth(app));
+      await signOut(auth);
       await fetch("/api/admin/logout", { method: "POST" });
       window.location.href = "/admin/login";
     } catch (error) {

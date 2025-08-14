@@ -9,12 +9,11 @@ import { Shield, Loader2, Sparkles } from "lucide-react"
 import EmailLoginForm from "./EmailLoginForm"
 import useAuthError from "@/hooks/useAuthError"
 
-// --- Firebase Auth ---
-import app, { firebaseInitError } from "@/lib/firebase"
+// --- Firebase Auth (client-only getters) ---
+import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
 import {
   GoogleAuthProvider,
   signInWithPopup,
-  getAuth,
   onAuthStateChanged,
   User,
   signOut,
@@ -44,14 +43,28 @@ export default function AdminLoginForm() {
   const router = useRouter()
 
   // --- FIX: Always call hooks first, never after a conditional return ---
-
   useEffect(() => {
     setMounted(true)
-    if (!app) {
-      setError("Firebase app failed to initialize due to misconfiguration. Please contact the site administrator.")
+
+    if (firebaseInitError) {
+      setError(
+        firebaseInitError.message ||
+          "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
+      )
       return
     }
-    const auth = getAuth(app)
+
+    let auth
+    try {
+      auth = getFirebaseAuth()
+    } catch {
+      setError(
+        firebaseInitError?.message ||
+          "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
+      )
+      return
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
         if (await checkServerSession()) {
@@ -81,12 +94,27 @@ export default function AdminLoginForm() {
     setError("")
     setLoading(true)
     try {
-      if (!app) {
-        setError("Firebase app failed to initialize due to misconfiguration. Please contact the site administrator.")
+      if (firebaseInitError) {
+        setError(
+          firebaseInitError.message ||
+            "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
+        )
         setLoading(false)
         return
       }
-      const auth = getAuth(app)
+
+      let auth
+      try {
+        auth = getFirebaseAuth()
+      } catch {
+        setError(
+          firebaseInitError?.message ||
+            "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
+        )
+        setLoading(false)
+        return
+      }
+
       const provider = new GoogleAuthProvider()
       const result = await signInWithPopup(auth, provider)
       const idToken = await result.user.getIdToken()

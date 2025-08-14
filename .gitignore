@@ -27,6 +27,7 @@ yarn-error.log*
 .env.development  # dev environment
 .env.production   # production config
 .env.test         # test config
+.env*             # catch-all for any other env files
 !.env.example     # keep sample env file public
 
 # --- Vercel deployment files ---

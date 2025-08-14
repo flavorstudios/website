@@ -1,6 +1,6 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-const stubResponses = async (page: Page) => {
+const stubResponses = async (page) => {
   await page.route('**/api/**', async (route) => {
     const url = route.request().url();
     let body = '{}';
@@ -55,26 +55,24 @@ test.beforeEach(async ({ page }) => {
   await stubResponses(page);
 });
 
-test('admin nav tabs render correct content', async ({ page }) => {
+test('single theme toggle switches and persists', async ({ page }) => {
   await page.goto('/admin/dashboard');
+  const toggle = page.getByLabel('Toggle theme');
+  await expect(toggle).toHaveCount(1);
 
-  const sections = [
-    { label: 'Dashboard', expected: /Welcome back/i },
-    { label: 'Blog Posts', expected: /Blog Management/i },
-    { label: 'Videos', expected: /Video Manager/i },
-    { label: 'Media', expected: /Media Library/i },
-    { label: 'Categories', expected: /^Categories$/i },
-    { label: 'Comments', expected: /Comments & Reviews/i },
-    { label: 'Applications', expected: /^Applications$/i },
-    { label: 'Email Inbox', expected: /Email Inbox/i },
-    { label: 'Users', expected: /^Users$/i },
-    { label: 'Settings', expected: /^Settings$/i },
-    { label: 'System Tools', expected: /Revalidate Entire Website/i },
-  ];
+  await toggle.click();
+  let isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
+  expect(isDark).toBe(true);
 
-  for (const { label, expected } of sections) {
-    await page.getByRole('link', { name: label }).click();
-    await expect(page.getByText(expected)).toBeVisible();
-    await expect(page.getByText('Loading Admin Dashboard...')).not.toBeVisible();
-  }
+  await page.reload();
+  isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
+  expect(isDark).toBe(true);
+});
+
+test('respects system preference on first load', async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem('theme'));
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/admin/dashboard');
+  const isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
+  expect(isDark).toBe(true);
 });

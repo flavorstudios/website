@@ -9,6 +9,7 @@ import { Search, Menu, ExternalLink, LogOut } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
 import ThemeToggle from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
+import QuickActions from "./quick-actions"
 
 interface AdminHeaderProps {
   onLogout: () => void
@@ -51,9 +52,12 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
       </a>
 
       <header
+        role="banner"
         className={cn(
-          "flex items-center gap-2 px-4 h-14",
-          "border-b", // only bottom border to avoid double vertical lines
+          "sticky top-0 z-40",
+          "h-14 px-4 flex items-center gap-2",
+          "border-b pt-[env(safe-area-inset-top)]",
+          "backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/70",
           className
         )}
       >
@@ -74,24 +78,26 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               variant="ghost"
               size="sm"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="lg:hidden focus:outline-none focus:ring"
               aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+              aria-expanded={sidebarOpen}
+              aria-controls="admin-sidebar"
+              className="lg:hidden min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             >
               <Menu className="h-5 w-5" />
             </Button>
 
             {/* Logo/title (always visible) */}
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap forced-colors:text-current">
               Flavor Studios Admin
             </h1>
 
             {/* Desktop search input */}
-            <div className="hidden md:block flex-1 max-w-xs ml-4">
+            <div className="hidden md:block flex-1 max-w-xs ltr:ml-4 rtl:mr-4">
               <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="Search..."
-                  className="pl-10 w-full"
+                  className="w-full min-h-11 ltr:pl-10 rtl:pr-10"
                   aria-label="Search"
                 />
               </div>
@@ -103,10 +109,10 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
             {/* Mobile search input (below md) */}
             <div className="w-full md:hidden order-2 flex-1">
               <div className="relative w-full mt-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="Search..."
-                  className="pl-10 w-full"
+                  className="w-full min-h-11 ltr:pl-10 rtl:pr-10"
                   aria-label="Search"
                 />
               </div>
@@ -118,12 +124,15 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               onClick={() =>
                 window.open("https://flavorstudios.in", "_blank", "noopener,noreferrer")
               }
-              className="hidden md:flex items-center gap-2 focus:outline-none focus:ring"
               aria-label="Open live site in a new tab"
+              className="hidden md:flex items-center gap-2 min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             >
               <ExternalLink className="h-4 w-4" />
               View Site
             </Button>
+
+            {/* Quick actions (New) */}
+            <QuickActions />
 
             <NotificationBell />
 
@@ -142,15 +151,15 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
             </div>
 
             {/* Theme toggle (single source of truth) */}
-            <ThemeToggle />
+            <ThemeToggle aria-label="Toggle theme" />
 
             {/* Logout button */}
             <Button
               variant="ghost"
               size="sm"
               onClick={onLogout}
-              className="text-red-600 hover:text-red-700 focus:outline-none focus:ring"
               aria-label="Logout"
+              className="text-red-600 hover:text-red-700 min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             >
               <LogOut className="h-4 w-4" />
             </Button>

@@ -1,80 +1,37 @@
-"use client";
+'use client';
+import React from 'react';
 
-import React, { ReactNode } from "react";
-
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  resetKeys?: unknown[];
-  onRetry?: () => void;
-}
-
-interface ErrorBoundaryState {
-  hasError: boolean;
-}
-
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  state: ErrorBoundaryState = { hasError: false };
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
+export class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: Error | null }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { error: null };
   }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("ErrorBoundary caught an error:", error);
-      console.error("Component stack:", errorInfo.componentStack);
-    } else {
-      // Post to a server logger in production
-      fetch("/api/log-client-error", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: error.message,
-          name: error.name,
-          stack: error.stack ?? null,
-          componentStack: errorInfo.componentStack,
-          path: typeof window !== "undefined" ? window.location.pathname : null,
-          ua: typeof navigator !== "undefined" ? navigator.userAgent : null,
-          ts: Date.now(),
-        }),
-        keepalive: true,
-      }).catch(() => {});
-    }
-    // Optionally log errors to monitoring service like Sentry
-    // Sentry.captureException(error, { extra: errorInfo })
+  static getDerivedStateFromError(error: Error) {
+    return { error };
   }
-
-  componentDidUpdate(prevProps: ErrorBoundaryProps) {
-    if (
-      this.state.hasError &&
-      !areArraysShallowEqual(prevProps.resetKeys, this.props.resetKeys)
-    ) {
-      this.setState({ hasError: false });
-    }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('[ui-error]', error, info);
   }
-
   render() {
-    if (this.state.hasError) {
-      const handleRetry =
-        this.props.onRetry ?? (() => this.setState({ hasError: false }));
+    if (this.state.error) {
+      if (process.env.NODE_ENV === 'development') {
+        return (
+          <div className="p-4 rounded-lg border bg-red-50 text-red-900">
+            <div className="font-semibold">Render error</div>
+            <pre className="mt-2 text-sm overflow-auto">{String(this.state.error.stack || this.state.error.message)}</pre>
+          </div>
+        );
+      }
       return (
-        <div>
-          Section failed to load. <button onClick={handleRetry}>Retry</button>
+        <div className="p-4 rounded-lg border bg-amber-50">
+          <div className="font-medium">Something went wrong.</div>
+          <div className="text-sm opacity-80">Please try again.</div>
         </div>
       );
     }
     return this.props.children;
   }
-}
-
-export default ErrorBoundary;
-
-function areArraysShallowEqual(a?: unknown[], b?: unknown[]) {
-  if (a === b) return true;
-  if (!a || !b) return false;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
 }

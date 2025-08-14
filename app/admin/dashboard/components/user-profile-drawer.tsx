@@ -1,9 +1,10 @@
+// app/admin/dashboard/components/user-profile-drawer.tsx
 "use client";
 
-import { useEffect, useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { RetryableSection } from "@/components/RetryableSection";
+import { fetchJson } from "@/lib/http";
 
 interface UserProfileDrawerProps {
   uid: string;
@@ -22,19 +23,6 @@ export default function UserProfileDrawer({
   open,
   onClose,
 }: UserProfileDrawerProps) {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    setLoading(true);
-    fetch(`/api/admin/user-activity/${uid}`)
-      .then((res) => res.json())
-      .then((data) => setActivities(data.activities || []))
-      .catch(() => setActivities([]))
-      .finally(() => setLoading(false));
-  }, [uid, open]);
-
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="p-4 space-y-4 max-w-md w-full">
@@ -43,24 +31,32 @@ export default function UserProfileDrawer({
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>
+
           <TabsContent value="profile">
             <p className="text-sm text-gray-700">User ID: {uid}</p>
           </TabsContent>
+
           <TabsContent value="activity">
-            {loading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : activities.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No recent activity</p>
+            {!open ? (
+              <p className="text-sm text-muted-foreground">Closed</p>
             ) : (
-              <ul className="space-y-2">
-                {activities.map((a) => (
-                  <li key={a.id} className="text-sm text-gray-700">
-                    {new Date(a.timestamp).toLocaleString()}
-                  </li>
-                ))}
-              </ul>
+              <RetryableSection<{ activities: Activity[] }>
+                // includes credentials + timeout + structured errors
+                load={() => fetchJson(`/api/admin/user-activity/${uid}`)}
+                render={(data) =>
+                  !data?.activities?.length ? (
+                    <p className="text-sm text-muted-foreground">No recent activity</p>
+                  ) : (
+                    <ul className="space-y-2">
+                      {data.activities.map((a) => (
+                        <li key={a.id} className="text-sm text-gray-700">
+                          {new Date(a.timestamp).toLocaleString()}
+                        </li>
+                      ))}
+                    </ul>
+                  )
+                }
+              />
             )}
           </TabsContent>
         </Tabs>

@@ -1,2 +1,3 @@
-export const fetcher = (url: string) =>
-  fetch(url, { credentials: "include" }).then((r) => r.json());
+import { fetchJson } from './http';
+
+export const fetcher = (url: string) => fetchJson(url);

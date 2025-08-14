@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase";
+import { fetchJson } from "@/lib/http";
 import useHotkeys from "./hooks/use-hotkeys";
 
 import AdminAuthGuard from "@/components/AdminAuthGuard";
@@ -23,7 +24,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import ErrorBoundary from "./components/ErrorBoundary";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Lazy sections via central registry
 const DashboardOverview = dynamic(
@@ -147,8 +148,8 @@ export default function AdminDashboardPageClient({
   useEffect(() => {
     setMounted(true);
 
-    // init ping
-    fetch("/api/admin/init", { method: "POST" }).catch((err) => {
+    // init ping (with credentials)
+    fetchJson("/api/admin/init", { method: "POST" }).catch((err) => {
       if (process.env.NODE_ENV !== "production")
         console.error("Admin init failed:", err);
     });
@@ -391,10 +392,7 @@ export default function AdminDashboardPageClient({
                     </Alert>
                   )}
 
-                  <ErrorBoundary
-                    resetKeys={[activeSection, pathname]}
-                    onRetry={() => router.refresh?.()}
-                  >
+                  <ErrorBoundary>
                     <Suspense fallback={<Spinner />}>{renderContent()}</Suspense>
                   </ErrorBoundary>
 

@@ -6,6 +6,7 @@ import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { AdminAuthProvider } from "@/components/AdminAuthProvider";
 import { TooltipProvider } from "@/components/ui/tooltip"; // <-- TooltipProvider import added
+import DevTools from "./_dev-tools"; // mounts dev fetch logger in development
 
 // Centralized metadata for the entire admin layout segment.
 export const metadata = getMetadata({
@@ -52,10 +53,13 @@ export default function AdminLayout({
   // DO NOT nest <html> or <body> tags here.
   // The root layout (app/layout.tsx) already provides them.
   return (
-    <AdminAuthProvider>
-      <TooltipProvider>
-        {children}
-      </TooltipProvider>
-    </AdminAuthProvider>
+    <>
+      <DevTools />
+      <AdminAuthProvider>
+        <TooltipProvider>
+          {children}
+        </TooltipProvider>
+      </AdminAuthProvider>
+    </>
   );
 }

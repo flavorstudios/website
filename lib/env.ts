@@ -30,18 +30,27 @@ export const PUBLIC_FIREBASE_CONFIG = {
   appId: clientEnv[FIREBASE_CLIENT_ENV_KEYS.appId],
 } as const;
 
-export function assertClientEnv(): void {
-  const missing = Object.entries(FIREBASE_CLIENT_ENV_KEYS)
+/**
+ * Returns the list of missing Firebase environment variables (by env var name).
+ */
+export function getMissingFirebaseEnv(): string[] {
+  return Object.entries(FIREBASE_CLIENT_ENV_KEYS)
     .filter(
       ([key]) =>
         !PUBLIC_FIREBASE_CONFIG[key as keyof typeof PUBLIC_FIREBASE_CONFIG]
     )
     .map(([, envName]) => envName);
+}
+
+export function assertClientEnv(): void {
+  const missing = getMissingFirebaseEnv();
 
   if (missing.length > 0 && process.env.NODE_ENV !== "production") {
     // eslint-disable-next-line no-console
     console.warn(
-      `[Firebase] Missing Firebase environment variable(s): ${missing.join(", ")}.`
+      `[Firebase] Missing Firebase environment variable(s): ${missing.join(
+        ", "
+      )}. Check your environment (e.g., .env.local or hosting dashboard).`
     );
   }
 }

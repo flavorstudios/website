@@ -70,6 +70,16 @@ function derivePathFromUrlOrGuess(
   return fallbackPath;
 }
 
+// Exposed health helpers (non-throwing) so UI/routes can show warnings gracefully
+export function isStorageConfigured(): boolean {
+  return !!tryGetBucket();
+}
+
+export function storageInfo(): { configured: boolean; bucket?: string } {
+  const b = tryGetBucket();
+  return { configured: !!b, bucket: b?.name };
+}
+
 // --- Public API ------------------------------------------------------------
 
 export interface ListMediaOptions {

@@ -21,6 +21,16 @@ describe("shouldShowCookieConsent", () => {
     ).toBe(false);
   });
 
+  test("uses default admin prefixes when none provided", () => {
+    expect(
+      shouldShowCookieConsent({
+        ...baseOpts,
+        pathname: "/admin/dashboard",
+        adminPrefixes: [],
+      }),
+    ).toBe(false);
+  });
+
   test("hides for admin user", () => {
     expect(
       shouldShowCookieConsent({ ...baseOpts, isAdminUser: true })

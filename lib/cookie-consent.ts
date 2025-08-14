@@ -40,9 +40,13 @@ export function shouldShowCookieConsent({
   hasConsent,
   adminPrefixes = DEFAULT_ADMIN_ROUTE_PREFIXES,
 }: CookieConsentOptions): boolean {
+  const prefixes =
+    adminPrefixes && adminPrefixes.length
+      ? adminPrefixes
+      : DEFAULT_ADMIN_ROUTE_PREFIXES;
   const envOk = env === "production" || isAllowedDomain(host, allowedDomains);
   if (!envOk) return false;
-  if (isAdminRoute(pathname, adminPrefixes)) return false;
+  if (isAdminRoute(pathname, prefixes)) return false;
   if (isAdminUser) return false;
   if (hasConsent) return false;
   return true;

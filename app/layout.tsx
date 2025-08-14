@@ -94,34 +94,36 @@ import { shouldShowCookieConsent, isAdminRoute } from "@/lib/cookie-consent";
 import type { Category } from "@/types/category";
 import type { CategoryData } from "@/lib/dynamic-categories";
 
+// Ensure this layout is always dynamic (no static caching surprises)
+export const dynamic = "force-dynamic";
+
 // 🟩 UPDATED GUARD: All fields properly checked!
 function mapCategoryDataToCategory(
   cat: CategoryData,
   fallbackType: "blog" | "video",
 ): Category {
   return {
-    id: typeof cat.id === "string"
-      ? cat.id
-      : typeof cat.slug === "string"
-      ? `${fallbackType}-${cat.slug}`
-      : `${fallbackType}-unknown`,
+    id:
+      typeof cat.id === "string"
+        ? cat.id
+        : typeof cat.slug === "string"
+        ? `${fallbackType}-${cat.slug}`
+        : `${fallbackType}-unknown`,
     name: typeof cat.name === "string" ? cat.name : "",
     slug: typeof cat.slug === "string" ? cat.slug : "",
-    title: typeof cat.title === "string"
-      ? cat.title
-      : typeof cat.name === "string"
-      ? cat.name
-      : "",
-    type:
-      cat.type === "blog" || cat.type === "video"
-        ? cat.type
-        : fallbackType,
+    title:
+      typeof cat.title === "string"
+        ? cat.title
+        : typeof cat.name === "string"
+        ? cat.name
+        : "",
+    type: cat.type === "blog" || cat.type === "video" ? cat.type : fallbackType,
     postCount: Number(
       typeof cat.postCount !== "undefined"
         ? cat.postCount
         : typeof cat.count !== "undefined"
         ? cat.count
-        : 0
+        : 0,
     ),
     order: typeof cat.order === "number" ? cat.order : 0,
     isActive: typeof cat.isActive === "boolean" ? cat.isActive : true,
@@ -132,14 +134,24 @@ function mapCategoryDataToCategory(
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const h = headers(); // synchronous in App Router
 
-  // Derive pathname from several headers, fallback to "/"
-  const pathname =
-    [
-      h.get("x-invoke-path"),
-      h.get("next-url"),
-      h.get("x-matched-path"),
-      h.get("x-pathname"),
-    ].find(Boolean) || "/";
+  // Derive pathname from headers; prioritize x-url if middleware sets it.
+  const rawPath =
+    h.get("x-url") ||
+    h.get("x-invoke-path") ||
+    h.get("next-url") ||
+    h.get("x-matched-path") ||
+    h.get("x-pathname") ||
+    "/";
+
+  // Normalize to a pathname (handle full URLs defensively)
+  let pathname = "/";
+  try {
+    pathname = rawPath.startsWith("/")
+      ? rawPath
+      : new URL(rawPath, `http://${h.get("host") || "localhost"}`).pathname;
+  } catch {
+    pathname = "/";
+  }
 
   // Admin route prefixes from env (comma-separated)
   const adminPrefixesEnv = process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES || "";
@@ -204,10 +216,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     const categories = await getDynamicCategories();
     // Map to full Category type expected by Header
     blogCategories = (categories.blogCategories || []).map((cat: CategoryData) =>
-      mapCategoryDataToCategory(cat, "blog")
+      mapCategoryDataToCategory(cat, "blog"),
     );
-    videoCategories = (categories.videoCategories || []).map((cat: CategoryData) =>
-      mapCategoryDataToCategory(cat, "video")
+    videoCategories = (categories.videoCategories || []).map(
+      (cat: CategoryData) => mapCategoryDataToCategory(cat, "video"),
     );
   }
 
@@ -248,7 +260,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* END GTM (HEAD) */}
       </head>
       <body className="antialiased">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           {/* GTM (NOSCRIPT) */}
           <noscript>
             <iframe
@@ -283,13 +300,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               {/* ⭐️ LOAD the stealth detection script only for non-admin */}
               <Script src="/js/_support_banner.js" strategy="afterInteractive" />
               {/* CookieYes script: gated by env/host/route/role/consent */}
-              {showCookieConsent && process.env.NEXT_PUBLIC_COOKIEYES_SCRIPT_URL && (
-                <Script
-                  id="cookieyes"
-                  src={process.env.NEXT_PUBLIC_COOKIEYES_SCRIPT_URL}
-                  strategy="afterInteractive"
-                />
-              )}
+              {showCookieConsent &&
+                process.env.NEXT_PUBLIC_COOKIEYES_SCRIPT_URL && (
+                  <Script
+                    id="cookieyes"
+                    src={process.env.NEXT_PUBLIC_COOKIEYES_SCRIPT_URL}
+                    strategy="afterInteractive"
+                  />
+                )}
             </>
           )}
         </ThemeProvider>

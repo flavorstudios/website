@@ -1,4 +1,3 @@
-// ✅ Codex Suggestion Implemented: Viewport meta added
 export const viewport = {
   width: "device-width",
   initialScale: 1,
@@ -86,8 +85,10 @@ const orgSchema = getSchema({
 });
 
 import { getDynamicCategories } from "@/lib/dynamic-categories";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
 import Script from "next/script"; // ADDED for GTM
+import { verifyAdminSession } from "@/lib/admin-auth";
+import { shouldShowCookieConsent, isAdminRoute } from "@/lib/cookie-consent";
 
 // --- Type "Category" should have id, title, type, postCount, name, slug, tooltip, etc. ---
 import type { Category } from "@/types/category";
@@ -129,14 +130,72 @@ function mapCategoryDataToCategory(
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const h = headers(); // ✅ await removed, headers() is synchronous now
-  const pathname =
-    h.get("next-url") ||
-    h.get("x-invoke-path") ||
-    h.get("x-matched-path") ||
-    "";
+  const h = headers(); // synchronous in App Router
 
-  const isAdmin = pathname.startsWith("/admin");
+  // Derive pathname from several headers, fallback to "/"
+  const pathname =
+    [
+      h.get("x-invoke-path"),
+      h.get("next-url"),
+      h.get("x-matched-path"),
+      h.get("x-pathname"),
+    ].find(Boolean) || "/";
+
+  // Admin route prefixes from env (comma-separated)
+  const adminPrefixesEnv = process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES || "";
+  const adminPrefixes = adminPrefixesEnv
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  const isAdmin = isAdminRoute(
+    pathname,
+    adminPrefixes.length ? adminPrefixes : undefined,
+  );
+
+  // Determine admin user via session cookie
+  const cookieStore = cookies(); // synchronous
+  const sessionCookie = cookieStore.get("admin-session")?.value;
+  let isAdminUser = false;
+  if (sessionCookie) {
+    try {
+      await verifyAdminSession(sessionCookie);
+      isAdminUser = true;
+    } catch {
+      // ignore invalid session
+    }
+  }
+
+  // Existing consent state (CookieYes)
+  const consentCookie =
+    cookieStore.get("cookieyes-consent")?.value ||
+    cookieStore.get("cky-consent")?.value;
+
+  // Allowed domains for banner
+  const allowedDomainsEnv =
+    process.env.NEXT_PUBLIC_COOKIE_ALLOWED_DOMAINS ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    "";
+  const allowedDomains = allowedDomainsEnv
+    .split(",")
+    .map((d) => d.trim())
+    .filter(Boolean);
+
+  // Optional QA override to force-enable on non-prod
+  const forceEnable =
+    process.env.NEXT_PUBLIC_COOKIE_DEBUG?.toLowerCase() === "true" ||
+    process.env.NEXT_PUBLIC_COOKIE_DEBUG === "1";
+
+  const showCookieConsent = shouldShowCookieConsent({
+    env: process.env.NODE_ENV || "development",
+    host: h.get("host") || "",
+    pathname,
+    allowedDomains,
+    isAdminUser,
+    hasConsent: Boolean(consentCookie),
+    adminPrefixes,
+    forceEnable,
+  });
 
   let blogCategories: Category[] = [];
   let videoCategories: Category[] = [];
@@ -189,7 +248,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* END GTM (HEAD) */}
       </head>
       <body className="antialiased">
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {/* GTM (NOSCRIPT) */}
           <noscript>
             <iframe
@@ -223,6 +282,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <PwaServiceWorker />
               {/* ⭐️ LOAD the stealth detection script only for non-admin */}
               <Script src="/js/_support_banner.js" strategy="afterInteractive" />
+              {/* CookieYes script: gated by env/host/route/role/consent */}
+              {showCookieConsent && process.env.NEXT_PUBLIC_COOKIEYES_SCRIPT_URL && (
+                <Script
+                  id="cookieyes"
+                  src={process.env.NEXT_PUBLIC_COOKIEYES_SCRIPT_URL}
+                  strategy="afterInteractive"
+                />
+              )}
             </>
           )}
         </ThemeProvider>

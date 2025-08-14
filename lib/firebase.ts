@@ -1,21 +1,15 @@
 // lib/firebase.ts
 
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps, getApp, type FirebaseOptions } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { PUBLIC_FIREBASE_CONFIG, assertClientEnv } from "./env";
 
 /**
  * Firebase config for frontend (uses NEXT_PUBLIC_ variables only).
- * Reads directly from process.env, with fallback to empty string.
+ * Now sourced from lib/env.ts with a single assertion point.
  */
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
-};
+assertClientEnv();
 
 // List of required config keys for sanity check
 const requiredKeys = [
@@ -25,31 +19,37 @@ const requiredKeys = [
   "storageBucket",
   "messagingSenderId",
   "appId",
-];
+] as const;
 
 const missingKeys = requiredKeys.filter(
-  (key) => !firebaseConfig[key as keyof typeof firebaseConfig]
+  (key) => !PUBLIC_FIREBASE_CONFIG[key]
 );
 
 export let firebaseInitError: Error | null = null;
 let app: ReturnType<typeof initializeApp> | null = null;
 
-try {
-  if (missingKeys.length > 0) {
-    const err = new Error(
-      `[Firebase] Missing Firebase environment variable(s): ${missingKeys.join(", ")}. Check your environment (Vercel/Env file).`
-    );
-    if (process.env.NODE_ENV !== "production") {
-      // Show in dev only—never leak in prod
-      // eslint-disable-next-line no-console
-      console.error(err.message);
-    }
-    throw err;
+if (missingKeys.length > 0) {
+  // Record the problem without throwing; callers can read firebaseInitError.
+  firebaseInitError = new Error(
+    `[Firebase] Missing Firebase environment variable(s): ${missingKeys.join(
+      ", "
+    )}. Check your environment (Vercel/Env file).`
+  );
+} else {
+  try {
+    const options: FirebaseOptions = {
+      apiKey: PUBLIC_FIREBASE_CONFIG.apiKey!,
+      authDomain: PUBLIC_FIREBASE_CONFIG.authDomain!,
+      projectId: PUBLIC_FIREBASE_CONFIG.projectId!,
+      storageBucket: PUBLIC_FIREBASE_CONFIG.storageBucket!,
+      messagingSenderId: PUBLIC_FIREBASE_CONFIG.messagingSenderId!,
+      appId: PUBLIC_FIREBASE_CONFIG.appId!,
+    };
+    app = !getApps().length ? initializeApp(options) : getApp();
+  } catch (err) {
+    firebaseInitError = err as Error;
+    app = null;
   }
-  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-} catch (err) {
-  firebaseInitError = err as Error;
-  app = null;
 }
 
 export default app;

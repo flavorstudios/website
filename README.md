@@ -35,3 +35,25 @@ This is the official website of **Flavor Studios** — your source for Anime New
    pnpm test   # execute unit tests
    pnpm build  # create an optimized production build
    pnpm start  # run the production server
+      ```
+
+---
+
+## Cookie Consent Banner
+
+The cookie consent banner is loaded only on public pages for visitors on the
+live site who have not previously granted consent.
+
+- **Environment**: Rendered only when `NODE_ENV` is `production` or the
+  request's hostname matches one in `NEXT_PUBLIC_COOKIE_ALLOWED_DOMAINS`.
+- **Routes**: Admin surfaces such as `/admin`, `/wp-admin`, `/dashboard` and
+  `/backend` never load the banner. You can override the prefixes via
+  `NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES`.
+- **Admin Users**: Authenticated admins (detected via a valid
+  `admin-session` cookie) never see the banner, even on public routes.
+- **Consent State**: If a `cookieyes-consent`/`cky-consent` cookie is present,
+  the banner is skipped on subsequent visits.
+
+Configure the domains and prefixes in `.env.local` using the variables shown in
+`env.example`. If `NEXT_PUBLIC_COOKIEYES_SCRIPT_URL` is not set, the banner is
+disabled.

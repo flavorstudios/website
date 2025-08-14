@@ -1,3 +1,4 @@
+// app/admin/dashboard/components/admin-header.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -8,14 +9,16 @@ import { Search, Menu, ExternalLink, LogOut } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
 import ThemeToggle from "@/components/theme-toggle"
 import HighContrastToggle from "@/components/high-contrast-toggle"
+import { cn } from "@/lib/utils"
 
 interface AdminHeaderProps {
   onLogout: () => void
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
+  className?: string
 }
 
-export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHeaderProps) {
+export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }: AdminHeaderProps) {
   const [avatar, setAvatar] = useState<string>("")
 
   // Ctrl/Cmd + K to open the command palette
@@ -33,7 +36,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
   // Load avatar from user settings
   useEffect(() => {
     fetch("/api/admin/settings", { credentials: "include" })
-      .then((res) => res.ok ? res.json() : Promise.reject())
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
       .then((data) => setAvatar(data?.settings?.profile?.avatar || ""))
       .catch(() => {})
   }, [])
@@ -48,7 +51,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
         Skip to main content
       </a>
 
-      <header className="bg-background border-b border-border px-6 py-4">
+      <header className={cn("bg-background border-b px-6 py-4", className)}>
         <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
           {/* SR-only button so screen reader users can open the command palette */}
           <button
@@ -107,7 +110,9 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen }: AdminHead
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.open("https://flavorstudios.in", "_blank", "noopener,noreferrer")}
+              onClick={() =>
+                window.open("https://flavorstudios.in", "_blank", "noopener,noreferrer")
+              }
               className="hidden md:flex items-center gap-2 focus:outline-none focus:ring"
               aria-label="Open live site in a new tab"
             >

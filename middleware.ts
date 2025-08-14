@@ -50,6 +50,11 @@ function getRequestIp(request: NextRequest): string {
 }
 
 export async function middleware(request: NextRequest) {
+  // 🔓 Test/CI bypass: allow all when explicitly disabled (Codex suggestion)
+  if (process.env.ADMIN_AUTH_DISABLED === "1") {
+    return NextResponse.next();
+  }
+
   const { pathname } = request.nextUrl;
   const ip = getRequestIp(request);
 

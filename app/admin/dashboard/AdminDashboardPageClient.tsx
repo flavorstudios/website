@@ -1,3 +1,4 @@
+// app/admin/dashboard/AdminDashboardPageClient.tsx
 "use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
@@ -24,55 +25,56 @@ import {
 } from "@/components/ui/dialog";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-// Lazy sections
-const DashboardOverview = dynamic(() => import("./components/dashboard-overview"), {
-  ssr: false,
-  loading: () => <Spinner />,
-});
-const BlogManager = dynamic(() => import("./components/blog-manager"), {
-  ssr: false,
-  loading: () => <Spinner />,
-});
-const VideoManager = dynamic(() => import("./components/video-manager"), {
-  ssr: false,
-  loading: () => <Spinner />,
-});
-const CommentManager = dynamic(() => import("./components/comment-manager"), {
-  ssr: false,
-  loading: () => <Spinner />,
-});
-const SystemTools = dynamic(() => import("./components/system-tools"), {
-  ssr: false,
-  loading: () => <Spinner />,
-});
+// Lazy sections via central registry
+const DashboardOverview = dynamic(
+  () => import("./components").then((m) => m.DashboardOverview),
+  { ssr: false, loading: () => <Spinner /> }
+);
+const BlogManager = dynamic(
+  () => import("./components").then((m) => m.BlogManager),
+  { ssr: false, loading: () => <Spinner /> }
+);
+const VideoManager = dynamic(
+  () => import("./components").then((m) => m.VideoManager),
+  { ssr: false, loading: () => <Spinner /> }
+);
+const CommentManager = dynamic(
+  () => import("./components").then((m) => m.CommentManager),
+  { ssr: false, loading: () => <Spinner /> }
+);
+const SystemTools = dynamic(
+  () => import("./components").then((m) => m.SystemTools),
+  { ssr: false, loading: () => <Spinner /> }
+);
 const UserManagement = dynamic(
-  () => import("./components/user-management/UserManagement"),
+  () => import("./components").then((m) => m.UserManagement),
   { ssr: false, loading: () => <Spinner /> }
 );
 const CategoryManager = dynamic(
-  () => import("@/components/admin/category/CategoryManager"),
+  () => import("./components").then((m) => m.CategoryManager),
   { ssr: false, loading: () => <Spinner /> }
 );
-const EmailInbox = dynamic(() => import("./components/email-inbox"), {
-  ssr: false,
-  loading: () => <Spinner />,
-});
-const MediaLibrary = dynamic(() => import("./components/media/MediaLibrary"), {
-  ssr: false,
-  loading: () => <Spinner />,
-});
+const EmailInbox = dynamic(
+  () => import("./components").then((m) => m.EmailInbox),
+  { ssr: false, loading: () => <Spinner /> }
+);
+const MediaLibrary = dynamic(
+  () => import("./components").then((m) => m.MediaLibrary),
+  { ssr: false, loading: () => <Spinner /> }
+);
 const CareerApplications = dynamic(
-  () => import("./components/career-applications"),
+  () => import("./components").then((m) => m.CareerApplications),
   { ssr: false, loading: () => <Spinner /> }
 );
-// ✨ New: Settings (lazy-loaded)
-const SystemSettings = dynamic(() => import("./components/system-settings"), {
-  ssr: false,
-  loading: () => <Spinner />,
-});
-const CommandPalette = dynamic(() => import("./components/command-palette"), {
-  ssr: false,
-});
+// ✨ Settings (lazy-loaded)
+const SystemSettings = dynamic(
+  () => import("./components").then((m) => m.SystemSettings),
+  { ssr: false, loading: () => <Spinner /> }
+);
+const CommandPalette = dynamic(
+  () => import("./components").then((m) => m.CommandPalette),
+  { ssr: false }
+);
 
 // ---- Route map (reused) ----------------------------------------------------
 const NAV = [
@@ -108,7 +110,7 @@ export default function AdminDashboardPageClient({
   // Read section from query if present, else fallback to prop
   const initialFromQuery = search?.get("section");
   const initialResolved: SectionId = validSection(initialFromQuery)
-    ? initialFromQuery
+    ? (initialFromQuery as SectionId)
     : (initialSection as SectionId);
 
   const [activeSection, setActiveSection] = useState<SectionId>(initialResolved);
@@ -338,7 +340,8 @@ export default function AdminDashboardPageClient({
           {/* Command palette (listens for 'open-command-palette' event already) */}
           <CommandPalette />
 
-          <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
+          {/* Shell updated: grid with single vertical separator owned by the sidebar */}
+          <div className="admin-shell grid h-svh grid-cols-[16rem_1fr]">
             <AdminSidebar
               activeSection={activeSection}
               setActiveSection={setActiveSection}
@@ -346,16 +349,17 @@ export default function AdminDashboardPageClient({
               setSidebarOpen={setSidebarOpen}
             />
 
-            <div className="flex-1 flex flex-col">
+            <div id="admin-main" className="flex min-w-0 flex-col bg-background">
               <AdminHeader
                 onLogout={handleLogout}
                 sidebarOpen={sidebarOpen}
                 setSidebarOpen={setSidebarOpen}
+                className="sticky top-0 z-40 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
               />
 
               <main
                 id="main"
-                className="flex-1 p-6 overflow-auto"
+                className="flex-1 min-w-0 p-4 overflow-auto"
                 role="main"
                 aria-label={currentTitle}
               >
@@ -377,7 +381,10 @@ export default function AdminDashboardPageClient({
                     </Alert>
                   )}
 
-                  <ErrorBoundary>
+                  <ErrorBoundary
+                    resetKeys={[activeSection, pathname]}
+                    onRetry={() => router.refresh?.()}
+                  >
                     <Suspense fallback={<Spinner />}>{renderContent()}</Suspense>
                   </ErrorBoundary>
 

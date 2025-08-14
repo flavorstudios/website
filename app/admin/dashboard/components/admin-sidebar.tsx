@@ -1,3 +1,4 @@
+// app/admin/dashboard/components/admin-sidebar.tsx
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -87,15 +88,14 @@ export function AdminSidebar({
 
       <aside
         className={`
-          bg-background border-r border-border
+          h-full overflow-y-auto bg-muted/20 border-r
           ${isMobile
-            ? "fixed left-0 top-0 h-screen z-50 transform transition-transform duration-300 ease-in-out"
-            : "sticky top-0 h-screen"}
-          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          w-64 md:translate-x-0 ${sidebarOpen ? "md:w-64" : "md:w-20"}
+            ? "fixed left-0 top-0 z-50 transition-transform duration-300 ease-in-out"
+            : "sticky top-0"}
+          ${sidebarOpen ? "" : "-translate-x-full md:translate-x-0"}
+          w-64 ${sidebarOpen ? "md:w-64" : "md:w-20"}
           flex flex-col md:relative md:z-auto
         `}
-        style={{ height: "100vh" }}
         aria-label="Admin sidebar"
       >
         {/* Sidebar Header */}

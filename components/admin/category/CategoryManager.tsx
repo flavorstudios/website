@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import CategoryList, { CategoryType } from "./CategoryList"
 import type { Category } from "@/types/category"
 import CategoryBulkActions from "./CategoryBulkActions"
@@ -144,25 +144,29 @@ export default function CategoryManager() {
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[] | null>(null)
   const PER_PAGE = 10
 
+  // Memoize loadData to satisfy react-hooks/exhaustive-deps and avoid effect churn
+  const loadData = useCallback(
+    async (t: CategoryType) => {
+      setLoading(true)
+      try {
+        const res = await fetch(`/api/admin/categories?type=${t.toLowerCase()}`, {
+          credentials: "include",
+        })
+        if (!res.ok) throw new Error("Failed")
+        const data = await res.json()
+        setCategories(data.categories || [])
+      } catch {
+        toast("Failed to load categories")
+      } finally {
+        setLoading(false)
+      }
+    },
+    [toast]
+  )
+
   useEffect(() => {
     loadData(type)
-  }, [type])
-
-  const loadData = async (t: CategoryType) => {
-    setLoading(true)
-    try {
-      const res = await fetch(`/api/admin/categories?type=${t.toLowerCase()}`, {
-        credentials: "include",
-      })
-      if (!res.ok) throw new Error("Failed")
-      const data = await res.json()
-      setCategories(data.categories || [])
-    } catch {
-      toast("Failed to load categories")
-    } finally {
-      setLoading(false)
-    }
-  }
+  }, [type, loadData])
 
   const createCategory = async (data: Partial<Category>) => {
     try {

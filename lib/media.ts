@@ -2,6 +2,7 @@ import { getStorage } from "firebase-admin/storage";
 import { adminDb } from "@/lib/firebase-admin";
 import type { MediaDoc, MediaVariant } from "@/types/media";
 import crypto from "node:crypto";
+import type { Sharp } from "sharp";
 
 /**
  * IMPORTANT:
@@ -183,8 +184,8 @@ export async function uploadMedia(
   };
 
   // Dynamically import sharp to avoid cold-start penalties
-  const sharpMod = await import("sharp");
-  const sharp = (sharpMod as any).default ?? sharpMod;
+  type SharpFactory = (input?: Buffer | ArrayBufferView | string) => Sharp;
+  const { default: sharp } = (await import("sharp")) as { default: SharpFactory };
   const meta = await sharp(buffer).metadata();
   doc.width = meta.width || 0;
   doc.height = meta.height || 0;
@@ -252,8 +253,8 @@ export async function cropMedia(
   const origBuffer = await bucket.file(origPath).download();
 
   // Dynamically import sharp here too
-  const sharpMod = await import("sharp");
-  const sharp = (sharpMod as any).default ?? sharpMod;
+  type SharpFactory = (input?: Buffer | ArrayBufferView | string) => Sharp;
+  const { default: sharp } = (await import("sharp")) as { default: SharpFactory };
 
   const outBuffer = await sharp(origBuffer[0])
     .extract({

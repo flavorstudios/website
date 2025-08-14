@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/validate-env.js",
+    "prebuild": "tsx scripts/validate-env.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

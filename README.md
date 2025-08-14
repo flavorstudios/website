@@ -39,6 +39,31 @@ This is the official website of **Flavor Studios** — your source for Anime New
 
 ---
 
+## Firebase configuration
+
+Firebase powers features like authentication and Firestore. The client SDK
+requires several environment variables, all of which must be present in your
+`.env.local` (for local development) or your hosting platform's environment
+settings:
+
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+
+If any of these are missing at runtime, Firebase will not initialize and you'll
+see an error similar to:
+
+```
+[Firebase] Missing Firebase environment variable(s): NEXT_PUBLIC_FIREBASE_API_KEY, ...
+```
+
+Use `env.example` as a reference for the correct variable names and structure.
+
+---
+
 ## Cookie Consent Banner
 
 The cookie consent banner is loaded only on public pages for visitors on the

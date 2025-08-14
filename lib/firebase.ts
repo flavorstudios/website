@@ -3,7 +3,11 @@
 import { initializeApp, getApps, getApp, type FirebaseOptions } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { PUBLIC_FIREBASE_CONFIG, assertClientEnv } from "./env";
+import {
+  PUBLIC_FIREBASE_CONFIG,
+  assertClientEnv,
+  FIREBASE_CLIENT_ENV_KEYS,
+} from "./env";
 
 /**
  * Firebase config for frontend (uses NEXT_PUBLIC_ variables only).
@@ -11,19 +15,10 @@ import { PUBLIC_FIREBASE_CONFIG, assertClientEnv } from "./env";
  */
 assertClientEnv();
 
-// List of required config keys for sanity check
-const requiredKeys = [
-  "apiKey",
-  "authDomain",
-  "projectId",
-  "storageBucket",
-  "messagingSenderId",
-  "appId",
-] as const;
-
-const missingKeys = requiredKeys.filter(
-  (key) => !PUBLIC_FIREBASE_CONFIG[key]
-);
+// List any missing environment variables by their actual names for clear feedback.
+const missingKeys = Object.entries(FIREBASE_CLIENT_ENV_KEYS)
+  .filter(([key]) => !PUBLIC_FIREBASE_CONFIG[key as keyof typeof PUBLIC_FIREBASE_CONFIG])
+  .map(([, envName]) => envName);
 
 export let firebaseInitError: Error | null = null;
 let app: ReturnType<typeof initializeApp> | null = null;
@@ -31,9 +26,7 @@ let app: ReturnType<typeof initializeApp> | null = null;
 if (missingKeys.length > 0) {
   // Record the problem without throwing; callers can read firebaseInitError.
   firebaseInitError = new Error(
-    `[Firebase] Missing Firebase environment variable(s): ${missingKeys.join(
-      ", "
-    )}. Check your environment (Vercel/Env file).`
+    `[Firebase] Missing Firebase environment variable(s): ${missingKeys.join(", ")}. Check your environment (e.g., .env.local or hosting dashboard).`
   );
 } else {
   try {

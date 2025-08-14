@@ -1,22 +1,73 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { getNotificationsService } from "@/lib/notifications";
+import { publishToUser } from "@/lib/sse-broker";
 
-export async function PATCH(request: NextRequest) {
+export const runtime = "nodejs";
+
+/**
+ * PATCH /api/admin/notifications/[id]
+ * Body: { read?: boolean }
+ * - Marks a single notification as read (default) or toggles read=false if explicitly sent.
+ * - Delegates to NotificationsService (DB baseline; push providers optional).
+ */
+export async function PATCH(
+  request: NextRequest,
+  ctx: { params?: { id?: string } }
+) {
+  // Admin gate
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  try {
-    // Only parse JSON, no unused variable
-    await request.json();
 
-    // In a real application, this would update the notification in Firestore
-    // For now, just return success
+  try {
+    // Resolve ID from route params or URL as a fallback
+    let id = ctx?.params?.id;
+    if (!id) {
+      const pathname = new URL(request.url).pathname;
+      const parts = pathname.split("/").filter(Boolean);
+      id = parts[parts.length - 1];
+    }
+    if (!id) {
+      return NextResponse.json({ error: "Missing notification id" }, { status: 400 });
+    }
+
+    // Parse body (optional). Default to read=true if absent.
+    let body: unknown = null;
+    try {
+      body = await request.json();
+    } catch {
+      // ignore parse errors; treat as empty body
+    }
+    const read =
+      typeof (body as any)?.read === "boolean" ? (body as any).read : true;
+
+    // Get a user context. In many admin dashboards this will be the admin user.
+    // If you have a real session, replace this with your user-id lookup.
+    const userId =
+      request.headers.get("x-admin-user") ||
+      request.headers.get("x-user-id") ||
+      "admin";
+
+    const svc = getNotificationsService();
+
+    // Our service exposes markRead (no markUnread). If read=false, do a no-op.
+    if (read) {
+      await svc.markRead(userId, id);
+      // Notify live clients via SSE (badge/popover updates)
+      publishToUser(userId, "read", { id });
+    }
+
     return NextResponse.json({
       success: true,
       message: "Notification updated",
+      id,
+      read,
     });
   } catch {
-    // No unused error variable as per lint
-    return NextResponse.json({ error: "Failed to update notification" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update notification" },
+      { status: 500 }
+    );
   }
 }

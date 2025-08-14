@@ -31,6 +31,7 @@ import {
   Users,
 } from "lucide-react";
 import { fetcher } from "@/lib/fetcher";
+import { useRole } from "../contexts/role-context"; // ← added
 
 // Register Chart.js primitives once
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -68,21 +69,31 @@ interface ActivityItem {
 
 export default function DashboardOverview() {
   const { theme } = useTheme();
+  const { hasPermission } = useRole(); // ← added
+  const canViewAnalytics = hasPermission("canViewAnalytics"); // ← added
 
-  // SWR data sources
+  // SWR data sources (skip when not permitted)
   const {
     data: stats,
     error: statsError,
     isLoading: statsLoading,
     mutate: mutateStats,
-  } = useSWR<DashboardStats>("/api/admin/stats?range=12mo", fetcher, { refreshInterval: 30000 });
+  } = useSWR<DashboardStats>(
+    canViewAnalytics ? "/api/admin/stats?range=12mo" : null,
+    fetcher,
+    { refreshInterval: 30000 }
+  );
 
   const {
     data: activityData,
     error: activityError,
     isLoading: activityLoading,
     mutate: mutateActivity,
-  } = useSWR<{ activities: ActivityItem[] }>("/api/admin/activity", fetcher, { refreshInterval: 30000 });
+  } = useSWR<{ activities: ActivityItem[] }>(
+    canViewAnalytics ? "/api/admin/activity" : null,
+    fetcher,
+    { refreshInterval: 30000 }
+  );
 
   const recentActivity = activityData?.activities || [];
   const loading = statsLoading || activityLoading;
@@ -92,6 +103,17 @@ export default function DashboardOverview() {
     mutateStats();
     mutateActivity();
   };
+
+  // Permission warning (do not attempt fetching or show generic errors)
+  if (!canViewAnalytics) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-gray-600 mb-2">You don&apos;t have permission to view analytics.</p>
+        </div>
+      </div>
+    );
+  }
 
   // Chart data (theme-aware)
   const chartData = useMemo<ChartData<"bar">>(() => {

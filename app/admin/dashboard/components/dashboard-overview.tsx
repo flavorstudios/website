@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { fetcher } from "@/lib/fetcher";
 import { useRole } from "../contexts/role-context"; // ← added
+import { HttpError } from "@/lib/http"; // ← added
 
 // Register Chart.js primitives once
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -70,7 +71,7 @@ interface ActivityItem {
 export default function DashboardOverview() {
   const { theme } = useTheme();
   const { hasPermission } = useRole(); // ← added
-  const canViewAnalytics = hasPermission("canViewAnalytics"); // ← added
+  const canViewAnalytics = hasPermission?.("canViewAnalytics") ?? false; // ← updated
 
   // SWR data sources (skip when not permitted)
   const {
@@ -96,18 +97,26 @@ export default function DashboardOverview() {
   );
 
   const recentActivity = activityData?.activities || [];
+
+  // Separate unauthorized (401/403) from other failures
+  const unauthorized = [statsError, activityError].some(
+    (err) => err instanceof HttpError && (err.status === 401 || err.status === 403)
+  );
+  const hasNetworkError = [statsError, activityError].some(
+    (err) => err && !(err instanceof HttpError && (err.status === 401 || err.status === 403))
+  );
+
   const loading = statsLoading || activityLoading;
-  const hasError = Boolean(statsError || activityError);
 
   const refresh = () => {
-    mutateStats();
-    mutateActivity();
+    mutateStats?.();
+    mutateActivity?.();
   };
 
   // Permission warning (do not attempt fetching or show generic errors)
-  if (!canViewAnalytics) {
+  if (!canViewAnalytics || unauthorized) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64" data-testid="analytics-permission-block">
         <div className="text-center">
           <p className="text-gray-600 mb-2">You don&apos;t have permission to view analytics.</p>
         </div>
@@ -162,10 +171,10 @@ export default function DashboardOverview() {
     };
   }, [theme]);
 
-  // Error overlay (UI block, retry supported)
-  if (hasError && !loading) {
+  // Error overlay (UI block, retry supported) — only for non-401/403 errors
+  if (hasNetworkError && !loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64" data-testid="dashboard-error">
         <div className="text-center">
           <p className="text-red-600 mb-2">Unable to load dashboard data</p>
           <p className="text-gray-600 mb-4">Please try again.</p>
@@ -179,7 +188,7 @@ export default function DashboardOverview() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-64" data-testid="dashboard-loading">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
         <span className="ml-3 text-gray-600">Loading real-time data...</span>
       </div>

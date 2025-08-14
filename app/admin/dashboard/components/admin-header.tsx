@@ -51,8 +51,14 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
         Skip to main content
       </a>
 
-      <header className={cn("bg-background border-b px-6 py-4", className)}>
-        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
+      <header
+        className={cn(
+          "flex items-center gap-2 px-4 h-14",
+          "border-b", // only bottom border to avoid double vertical lines
+          className
+        )}
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 w-full">
           {/* SR-only button so screen reader users can open the command palette */}
           <button
             type="button"

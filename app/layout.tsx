@@ -86,9 +86,10 @@ const orgSchema = getSchema({
 
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { headers, cookies } from "next/headers";
-import Script from "next/script"; // ADDED for GTM
+import Script from "next/script"; // for GTM + bootstrap
 import { verifyAdminSession } from "@/lib/admin-auth";
-import { shouldShowCookieConsent, isAdminRoute } from "@/lib/cookie-consent";
+import { isAdminRoute } from "@/lib/cookie-consent";
+import GtmRouteChangeListener from "@/components/GtmRouteChangeListener";
 
 // --- Type "Category" should have id, title, type, postCount, name, slug, tooltip, etc. ---
 import type { Category } from "@/types/category";
@@ -154,7 +155,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   }
 
   // Admin route prefixes from env (comma-separated)
-  const adminPrefixesEnv = process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES || "";
+  const adminPrefixesEnv =
+    process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES ||
+    "/admin,/wp-admin,/dashboard,/backend";
   const adminPrefixes = adminPrefixesEnv
     .split(",")
     .map((p) => p.trim())
@@ -178,36 +181,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     }
   }
 
-  // Existing consent state (CookieYes)
-  const consentCookie =
-    cookieStore.get("cookieyes-consent")?.value ||
-    cookieStore.get("cky-consent")?.value;
-
-  // Allowed domains for banner
-  const allowedDomainsEnv =
-    process.env.NEXT_PUBLIC_COOKIE_ALLOWED_DOMAINS ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    "";
-  const allowedDomains = allowedDomainsEnv
-    .split(",")
-    .map((d) => d.trim())
-    .filter(Boolean);
-
-  // Optional QA override to force-enable on non-prod
-  const forceEnable =
-    process.env.NEXT_PUBLIC_COOKIE_DEBUG?.toLowerCase() === "true" ||
-    process.env.NEXT_PUBLIC_COOKIE_DEBUG === "1";
-
-  const showCookieConsent = shouldShowCookieConsent({
-    env: process.env.NODE_ENV || "development",
-    host: h.get("host") || "",
-    pathname,
-    allowedDomains,
-    isAdminUser,
-    hasConsent: Boolean(consentCookie),
-    adminPrefixes,
-    forceEnable,
-  });
+  // GTM env flags
+  const gtmId = process.env.NEXT_PUBLIC_GTM_CONTAINER_ID || "";
+  const enableGtmCookieBanner =
+    process.env.NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER === "true";
 
   let blogCategories: Category[] = [];
   let videoCategories: Category[] = [];
@@ -228,6 +205,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       lang="en"
       style={{ fontFamily: "var(--font-poppins)" }}
       suppressHydrationWarning
+      data-app-env={process.env.NODE_ENV}
     >
       <head>
         {/* Meta viewport fallback for bots/legacy */}
@@ -243,20 +221,58 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           suppressHydrationWarning
         />
 
-        {/* Google Tag Manager (HEAD) using next/script */}
-        <Script
-          id="gtm-head"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-              })(window,document,'script','dataLayer','GTM-WMTGR7NM');
-            `,
-          }}
-        />
+        {/* Expose flags before GTM */}
+        <Script id="dl-config" strategy="beforeInteractive">{`
+          window.__ADMIN_ROUTE_PREFIXES__=${JSON.stringify(adminPrefixesEnv)};
+          window.__ENABLE_GTM_COOKIE_BANNER__=${JSON.stringify(enableGtmCookieBanner)};
+          window.__APP_ENV__=${JSON.stringify(process.env.NODE_ENV)};
+        `}</Script>
+
+        {/* dataLayer bootstrap BEFORE GTM */}
+        <Script id="dl-bootstrap" strategy="beforeInteractive">{`
+          (function () {
+            window.dataLayer = window.dataLayer || [];
+            var host = location.hostname;
+            var path = location.pathname;
+
+            // Cheap, safe prefix check (no regex)
+            var prefixes = (window.__ADMIN_ROUTE_PREFIXES__ || "/admin,/wp-admin,/dashboard,/backend")
+              .split(",").map(function(s){return s.trim();}).filter(Boolean);
+            var isAdminRoute = prefixes.some(function(p){
+              return path === p || path.indexOf(p + "/") === 0;
+            });
+
+            var appEnv = window.__APP_ENV__ || document.documentElement.getAttribute("data-app-env") || "development";
+            var isAdminUser = !!(window.__USER__ && (window.__USER__.isAdmin || window.__USER__.role === "admin"));
+            var consentGiven = false;
+            try {
+              consentGiven = (localStorage.getItem("cookie_consent") === "granted") ||
+                             (document.cookie.indexOf("cookie_consent=granted") !== -1);
+            } catch (e) {}
+
+            window.dataLayer.push({
+              event: "app_boot",
+              appEnv: appEnv,
+              hostname: host,
+              path: path,
+              isAdminRoute: isAdminRoute,
+              isAdminUser: isAdminUser,
+              consentGiven: consentGiven,
+              enableGtmCookieBanner: (window.__ENABLE_GTM_COOKIE_BANNER__ === true)
+            });
+          })();
+        `}</Script>
+
+        {/* Google Tag Manager (HEAD) — only if container id is provided */}
+        {gtmId && (
+          <Script id="gtm-head" strategy="afterInteractive">{`
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','${gtmId}');
+          `}</Script>
+        )}
         {/* END GTM (HEAD) */}
       </head>
       <body className="antialiased">
@@ -266,19 +282,23 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          {/* GTM (NOSCRIPT) */}
-          <noscript>
-            <iframe
-              src="https://www.googletagmanager.com/ns.html?id=GTM-WMTGR7NM"
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-              title="Google Tag Manager NoScript"
-            />
-          </noscript>
+          {/* GTM (NOSCRIPT) — only if container id is provided */}
+          {gtmId && (
+            <noscript>
+              <iframe
+                src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+                height="0"
+                width="0"
+                style={{ display: "none", visibility: "hidden" }}
+                title="Google Tag Manager NoScript"
+              />
+            </noscript>
+          )}
           {/* END GTM (NOSCRIPT) */}
 
           <Toaster />
+          {/* SPA route-change → dataLayer push */}
+          <GtmRouteChangeListener />
 
           {/* ⭐️ AdBlock Support Banner (only for non-admin routes) */}
           {!isAdmin && <AdblockBanner />}
@@ -299,15 +319,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <PwaServiceWorker />
               {/* ⭐️ LOAD the stealth detection script only for non-admin */}
               <Script src="/js/_support_banner.js" strategy="afterInteractive" />
-              {/* CookieYes script: gated by env/host/route/role/consent */}
-              {showCookieConsent &&
-                process.env.NEXT_PUBLIC_COOKIEYES_SCRIPT_URL && (
-                  <Script
-                    id="cookieyes"
-                    src={process.env.NEXT_PUBLIC_COOKIEYES_SCRIPT_URL}
-                    strategy="afterInteractive"
-                  />
-                )}
+              {/* Cookie banner is injected via GTM — legacy inline CookieYes has been removed */}
             </>
           )}
         </ThemeProvider>

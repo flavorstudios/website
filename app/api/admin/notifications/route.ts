@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       "admin"
 
     const { searchParams } = new URL(request.url)
-    const cursor = searchParams.get("cursor")
+    const cursor = searchParams.get("cursor") ?? undefined
     const limit = Number(searchParams.get("limit") ?? "20")
 
     const svc = getNotificationsService()
@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
 
     // Map service items to your UI shape
     const notifications = list.items.map((n) => {
-      const metaType = (n.metadata as any)?.type
+      const meta = n.metadata as Record<string, unknown> | undefined
+      const metaType = typeof meta?.type === "string" ? (meta.type as string) : undefined
       const type =
         metaType === "comment" || metaType === "contact" || metaType === "flagged"
           ? metaType

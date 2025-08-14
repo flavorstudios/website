@@ -91,10 +91,10 @@ export function AdminSidebar({
           h-full overflow-y-auto bg-muted/20 border-r
           ${isMobile
             ? "fixed left-0 top-0 z-50 transition-transform duration-300 ease-in-out"
-            : "sticky top-0"}
+            : "sticky top-0 z-50"}
           ${sidebarOpen ? "" : "-translate-x-full md:translate-x-0"}
           w-64 ${sidebarOpen ? "md:w-64" : "md:w-20"}
-          flex flex-col md:relative md:z-auto
+          flex flex-col md:relative
         `}
         aria-label="Admin sidebar"
       >

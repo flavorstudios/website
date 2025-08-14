@@ -32,15 +32,15 @@ export async function PATCH(
       return NextResponse.json({ error: "Missing notification id" }, { status: 400 });
     }
 
-    // Parse body (optional). Default to read=true if absent.
+    // Parse body (optional). Default to read=true if absent or invalid.
     let body: unknown = null;
     try {
       body = await request.json();
     } catch {
       // ignore parse errors; treat as empty body
     }
-    const read =
-      typeof (body as any)?.read === "boolean" ? (body as any).read : true;
+    const parsed = body as { read?: boolean } | null;
+    const read = typeof parsed?.read === "boolean" ? parsed.read : true;
 
     // Get a user context. In many admin dashboards this will be the admin user.
     // If you have a real session, replace this with your user-id lookup.

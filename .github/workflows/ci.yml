@@ -1,9 +1,7 @@
 name: CI
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+  push: { branches: [ main, develop ] }
+  pull_request: { branches: [ main, develop ] }
 
 jobs:
   build-test:
@@ -11,14 +9,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Install pnpm first so setup-node cache can call it safely
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Install deps
         run: pnpm install --frozen-lockfile

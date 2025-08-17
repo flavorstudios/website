@@ -312,7 +312,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         <div className="flex flex-wrap items-start justify-between gap-2 sm:gap-4">
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <Button variant="ghost" onClick={() => router.back()} className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               Back
             </Button>
             <div>
@@ -327,7 +327,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               </span>
             )}
             <Button variant="outline" onClick={() => savePost()} disabled={saving} className="flex items-center gap-2">
-              <Save className="h-4 w-4" />
+              <Save className="h-4 w-4" aria-hidden="true" />
               {saving ? "Saving..." : "Save Draft"}
             </Button>
             {/* Preview Button */}
@@ -339,7 +339,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   className="flex items-center gap-2"
                   aria-label="Preview post"
                 >
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-4 w-4" aria-hidden="true" />
                   Preview
                 </Button>
               </TooltipTrigger>
@@ -352,7 +352,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   className="bg-gradient-to-r from-purple-600 to-blue-600 flex items-center gap-2"
                   aria-label="Publish post"
                 >
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-4 w-4" aria-hidden="true" />
                   Publish
                 </Button>
               </TooltipTrigger>
@@ -400,7 +400,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5" />
+                  <BookOpen className="h-5 w-5" aria-hidden="true" />
                   Content
                 </CardTitle>
               </CardHeader>
@@ -416,7 +416,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
+                  <Settings className="h-5 w-5" aria-hidden="true" />
                   SEO Settings
                 </CardTitle>
               </CardHeader>
@@ -500,7 +500,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                         width={600}
                         height={128}
                         className="w-full h-32 object-cover rounded mb-2"
-                        unoptimized
+                        loading="lazy"
                       />
                     )}
                     <p className="text-xs text-green-700 truncate">{`${host}/${post.slug}`}</p>
@@ -539,7 +539,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                     </Label>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 text-muted-foreground" />
+                        <Info className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                       </TooltipTrigger>
                       <TooltipContent>Toggle featured post</TooltipContent>
                     </Tooltip>
@@ -556,7 +556,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                 <Popover open={showScheduler} onOpenChange={setShowScheduler}>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full flex items-center gap-2" aria-label="Schedule Post">
-                      <CalendarIcon className="h-4 w-4" />
+                      <CalendarIcon className="h-4 w-4" aria-hidden="true" />
                       Schedule Post
                     </Button>
                   </PopoverTrigger>
@@ -591,7 +591,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Tag className="h-5 w-5" />
+                  <Tag className="h-5 w-5" aria-hidden="true" />
                   Categories & Tags
                 </CardTitle>
               </CardHeader>
@@ -624,7 +624,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                         </label>
                         {category.tooltip && (
                           <span title={category.tooltip}>
-                            <Info className="ml-1 h-4 w-4 text-blue-400" />
+                            <Info className="ml-1 h-4 w-4 text-blue-400" aria-hidden="true" />
                           </span>
                         )}
                       </div>
@@ -654,7 +654,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   )}
                   {selectedCategories[0]?.tooltip && (
                     <div className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                      <Info className="h-3 w-3" /> {selectedCategories[0]?.tooltip}
+                      <Info className="h-3 w-3" aria-hidden="true" /> {selectedCategories[0]?.tooltip}
                     </div>
                   )}
                 </div>
@@ -697,7 +697,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                       width={600}
                       height={128}
                       className="w-full h-32 object-cover rounded-lg"
-                      unoptimized
+                      loading="lazy"
                     />
                     <div className="flex gap-2">
                       <Button
@@ -720,7 +720,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   </div>
                 ) : (
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                    <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" aria-hidden="true" />
                     <p className="text-sm text-gray-600 mb-3">Upload featured image</p>
                     <input
                       type="file"
@@ -755,7 +755,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
+                  <Clock className="h-5 w-5" aria-hidden="true" />
                   Post Stats
                 </CardTitle>
               </CardHeader>

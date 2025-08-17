@@ -1,7 +1,7 @@
 // app/admin/dashboard/components/admin-header.tsx
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -20,6 +20,7 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }: AdminHeaderProps) {
   const [avatar, setAvatar] = useState<string>("")
+  const toggleRef = useRef<HTMLButtonElement | null>(null)
 
   // Ctrl/Cmd + K to open the command palette
   useEffect(() => {
@@ -40,6 +41,13 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
       .then((data) => setAvatar(data?.settings?.profile?.avatar || ""))
       .catch(() => {})
   }, [])
+
+  // Return focus to toggle button when sidebar closes (mobile)
+  useEffect(() => {
+    if (!sidebarOpen) {
+      toggleRef.current?.focus()
+    }
+  }, [sidebarOpen])
 
   return (
     <>
@@ -75,6 +83,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
           <div className="flex items-center gap-4 flex-1 min-w-0">
             {/* Sidebar button (mobile only) */}
             <Button
+              ref={toggleRef}
               variant="ghost"
               size="sm"
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -83,7 +92,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               aria-controls="admin-sidebar"
               className="lg:hidden min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-5 w-5" aria-hidden="true" />
             </Button>
 
             {/* Logo/title (always visible) */}
@@ -94,7 +103,10 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
             {/* Desktop search input */}
             <div className="hidden md:block flex-1 max-w-xs ltr:ml-4 rtl:mr-4">
               <div className="relative w-full">
-                <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Search
+                  className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4"
+                  aria-hidden="true"
+                />
                 <Input
                   placeholder="Search..."
                   className="w-full min-h-11 ltr:pl-10 rtl:pr-10"
@@ -109,7 +121,10 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
             {/* Mobile search input (below md) */}
             <div className="w-full md:hidden order-2 flex-1">
               <div className="relative w-full mt-2">
-                <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Search
+                  className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4"
+                  aria-hidden="true"
+                />
                 <Input
                   placeholder="Search..."
                   className="w-full min-h-11 ltr:pl-10 rtl:pr-10"
@@ -127,7 +142,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               aria-label="Open live site in a new tab"
               className="hidden md:flex items-center gap-2 min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             >
-              <ExternalLink className="h-4 w-4" />
+              <ExternalLink className="h-4 w-4" aria-hidden="true" />
               View Site
             </Button>
 
@@ -161,7 +176,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               aria-label="Logout"
               className="text-red-600 hover:text-red-700 min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4" aria-hidden="true" />
             </Button>
           </div>
         </div>

@@ -45,7 +45,7 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
       {/* Persistent live region so SRs announce new errors */}
       <div aria-live="assertive" className="min-h-[1.5rem]">
         {error && (
-          <p className="text-red-600 text-sm" role="alert">
+          <p id="login-error" className="text-red-600 text-sm" role="alert">
             {error}
           </p>
         )}
@@ -61,6 +61,7 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         required
+        aria-describedby={error ? "login-error" : undefined}
       />
 
       <label htmlFor="login-password" className="sr-only">
@@ -73,6 +74,7 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         required
+        aria-describedby={error ? "login-error" : undefined}
       />
 
       <label htmlFor="login-otp" className="sr-only">
@@ -84,6 +86,7 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
         placeholder="2FA code (if enabled)"
         value={otp}
         onChange={(e) => setOtp(e.target.value)}
+        aria-describedby={error ? "login-error" : undefined}
       />
 
       <Button type="submit" disabled={loading} className="w-full">

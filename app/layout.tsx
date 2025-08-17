@@ -7,6 +7,7 @@ export const viewport = {
 import type { ReactNode } from "react";
 import "./globals.css";
 import "./fonts/poppins.css";
+import { Poppins } from "next/font/google";
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -97,6 +98,15 @@ import type { CategoryData } from "@/lib/dynamic-categories";
 
 // Ensure this layout is always dynamic (no static caching surprises)
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+// next/font: load Poppins with a CSS variable that matches your stylesheet usage
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
+  display: "swap",
+});
 
 // 🟩 UPDATED GUARD: All fields properly checked!
 function mapCategoryDataToCategory(
@@ -275,7 +285,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         )}
         {/* END GTM (HEAD) */}
       </head>
-      <body className="antialiased">
+      <body className={`${poppins.variable} antialiased`}>
         {/* Skip link for keyboard users */}
         <a
           href="#main-content"

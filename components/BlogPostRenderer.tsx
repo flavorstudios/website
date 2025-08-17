@@ -62,6 +62,7 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
           )}
         </div>
       </header>
+
       {image && (
         <div className="mb-8 w-full h-64 md:h-96 relative rounded-lg shadow-lg overflow-hidden">
           <Image
@@ -74,20 +75,28 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
           />
         </div>
       )}
+
       <Card className="mb-12">
         <CardContent className="p-8">
           <div
             className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
+            // SSR-safe sanitize with a conservative profile
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(post.content || "", {
+                USE_PROFILES: { html: true },
+              }),
+            }}
           />
         </CardContent>
       </Card>
+
       <SocialShare
         title={post.title}
         excerpt={post.excerpt}
         url={`${SITE_URL}/blog/${post.slug}`}
         image={image}
       />
+
       {post.tags && Array.isArray(post.tags) && post.tags.length > 0 && (
         <div className="mb-12">
           <h3 className="text-lg font-semibold mb-4 text-gray-900">Tags</h3>
@@ -105,6 +114,7 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
           </div>
         </div>
       )}
+
       <CommentSection postId={post.id} />
     </article>
   );

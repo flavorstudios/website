@@ -2,10 +2,7 @@
 import { expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-/**
- * Run axe against the current page and fail the test on any violations.
- * Optionally scope to one or more selectors via `include`.
- */
+/** Analyze the current page with axe and fail on any violations. */
 export async function expectNoAxeViolations(
   page: Page,
   opts?: { include?: string | string[] }
@@ -13,16 +10,24 @@ export async function expectNoAxeViolations(
   let builder = new AxeBuilder({ page });
 
   if (opts?.include) {
-    const sel = Array.isArray(opts.include) ? opts.include : [opts.include];
-    for (const s of sel) builder = builder.include(s);
+    const sels = Array.isArray(opts.include) ? opts.include : [opts.include];
+    for (const s of sels) builder = builder.include(s);
   }
 
   const { violations } = await builder.analyze();
 
   if (violations.length) {
-    // Helpful output in CI logs
+    // Nice readable output in CI
     console.log("Axe violations:", JSON.stringify(violations, null, 2));
   }
 
   expect(violations).toEqual([]);
+}
+
+/** Backward-compat alias for older tests that import { runA11yScan } */
+export async function runA11yScan(
+  page: Page,
+  opts?: { include?: string | string[] }
+) {
+  await expectNoAxeViolations(page, opts);
 }

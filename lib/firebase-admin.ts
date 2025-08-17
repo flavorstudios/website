@@ -131,3 +131,9 @@ export function getAdminDb(): Firestore {
   if (!adminDb) throw new Error("Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY missing/invalid or ADMIN_BYPASS enabled.");
   return adminDb;
 }
+
+/* ------------------------------------------------------------------ */
+/* Back-compat aliases (fixes imports expecting `safeAdminDb/Auth`)   */
+/* ------------------------------------------------------------------ */
+export const safeAdminDb = adminDb;
+export const safeAdminAuth = adminAuth;

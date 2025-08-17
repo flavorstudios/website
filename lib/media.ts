@@ -2,7 +2,7 @@
 import "server-only";
 
 import { getStorage } from "firebase-admin/storage";
-import { safeAdminDb } from "@/lib/firebase-admin"; // lazy/nullable helper
+import { safeAdminDb } from "@/lib/firebase-admin"; // value (Firestore | undefined)
 import type { MediaDoc, MediaVariant } from "@/types/media";
 import crypto from "node:crypto";
 import type { Sharp } from "sharp";
@@ -15,7 +15,7 @@ import type { Sharp } from "sharp";
 
 // --- Firestore helpers (lazy) ------------------------------------------------
 function tryGetCollection() {
-  const db = safeAdminDb();
+  const db = safeAdminDb; // ✅ use value, not a function
   return db ? (db.collection("media") as FirebaseFirestore.CollectionReference<MediaDoc>) : null;
 }
 

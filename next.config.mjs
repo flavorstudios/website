@@ -23,6 +23,10 @@ const pwaConfig = withPWA({
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
 
+// Only enable Node.js runtime middleware support in local dev (NOT on CI/Vercel)
+const enableNodeMiddleware =
+  process.env.NODE_ENV === 'development' && !process.env.CI && !process.env.VERCEL;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true, // Add this for best practice, optional
@@ -30,10 +34,8 @@ const nextConfig = {
   typescript: { ignoreBuildErrors: true },
   images: { unoptimized: false },
 
-  // Enable Node.js runtime support for middleware (removes the build/runtime warning)
-  experimental: {
-    nodeMiddleware: true,
-  },
+  // Conditionally enable Node.js runtime support for middleware to avoid Vercel build errors
+  ...(enableNodeMiddleware ? { experimental: { nodeMiddleware: true } } : {}),
 
   // Add any other Next.js config here!
 };

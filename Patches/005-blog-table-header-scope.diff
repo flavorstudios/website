@@ -1,0 +1,27 @@
+diff --git a/components/admin/blog/BlogTable.tsx b/components/admin/blog/BlogTable.tsx
+index 1111111..2222222 100644
+--- a/components/admin/blog/BlogTable.tsx
++++ b/components/admin/blog/BlogTable.tsx
+@@ -1,20 +1,20 @@
+-            <th className="p-3 w-8">
++            <th scope="col" className="p-3 w-8">
+-            <th className="p-3 text-left max-w-[12rem] truncate">Title</th>
++            <th scope="col" className="p-3 text-left max-w-[12rem] truncate">Title</th>
+-            <th className="p-3 text-left hidden md:table-cell">SEO</th>
++            <th scope="col" className="p-3 text-left hidden md:table-cell">SEO</th>
+-            <th className="p-3 text-left">Author</th>
++            <th scope="col" className="p-3 text-left">Author</th>
+-            <th className="p-3 text-left hidden md:table-cell">Image</th>
++            <th scope="col" className="p-3 text-left hidden md:table-cell">Image</th>
+-            <th className="p-3 text-left">Status</th>
++            <th scope="col" className="p-3 text-left">Status</th>
+-            <th className="p-3 text-left hidden sm:table-cell">Date</th>
++            <th scope="col" className="p-3 text-left hidden sm:table-cell">Date</th>
+-            <th className="p-3 text-right hidden sm:table-cell">Views</th>
++            <th scope="col" className="p-3 text-right hidden sm:table-cell">Views</th>
+-            <th className="p-3 text-right hidden sm:table-cell">Comments</th>
++            <th scope="col" className="p-3 text-right hidden sm:table-cell">Comments</th>
+-            <th className="p-3 text-left hidden lg:table-cell">Tags</th>
++            <th scope="col" className="p-3 text-left hidden lg:table-cell">Tags</th>
+-            <th className="p-3 text-right">Actions</th>
++            <th scope="col" className="p-3 text-right">Actions</th>

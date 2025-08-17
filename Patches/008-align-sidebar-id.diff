@@ -1,0 +1,35 @@
+diff --git a/app/admin/dashboard/components/admin-sidebar.tsx b/app/admin/dashboard/components/admin-sidebar.tsx
+index 1111111..2222222 100644
+--- a/app/admin/dashboard/components/admin-sidebar.tsx
++++ b/app/admin/dashboard/components/admin-sidebar.tsx
+@@ -1,8 +1,12 @@
+-interface AdminSidebarProps {
+-  activeSection: string
+-  setActiveSection: (section: string) => void
+-  sidebarOpen: boolean
+-  setSidebarOpen: (open: boolean) => void
+-}
++interface AdminSidebarProps {
++  id?: string
++  activeSection: string
++  setActiveSection: (section: string) => void
++  sidebarOpen: boolean
++  setSidebarOpen: (open: boolean) => void
++}
+@@
+-export function AdminSidebar({
+-  setActiveSection,
+-  sidebarOpen,
+-  setSidebarOpen,
+-}: AdminSidebarProps) {
++export function AdminSidebar({
++  id,
++  setActiveSection,
++  sidebarOpen,
++  setSidebarOpen,
++}: AdminSidebarProps) {
+@@
+-      <aside
++      <aside
++        id={id}
+         className="..."

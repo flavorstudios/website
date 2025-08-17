@@ -1,0 +1,17 @@
+diff --git a/app/admin/login/EmailLoginForm.tsx b/app/admin/login/EmailLoginForm.tsx
+index 1111111..2222222 100644
+--- a/app/admin/login/EmailLoginForm.tsx
++++ b/app/admin/login/EmailLoginForm.tsx
+@@ -1,7 +1,11 @@
+-      {error && (
+-        <p className="text-red-600 text-sm" role="alert">
+-          {error}
+-        </p>
+-      )}
++      <div aria-live="assertive" className="min-h-[1.5rem]">
++        {error && (
++          <p className="text-red-600 text-sm" role="alert">
++            {error}
++          </p>
++        )}
++      </div>

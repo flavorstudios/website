@@ -1,0 +1,21 @@
+diff --git a/app/admin/dashboard/components/admin-layout.tsx b/app/admin/dashboard/components/admin-layout.tsx
+index 1111111..2222222 100644
+--- a/app/admin/dashboard/components/admin-layout.tsx
++++ b/app/admin/dashboard/components/admin-layout.tsx
+@@ -1,13 +1,12 @@
+-      {/* Provide an element for aria-controls from the header */}
+-      <div id="admin-sidebar">
+-        <AdminSidebar
+-          activeSection={activeSection}
+-          setActiveSection={setActiveSection}
+-          sidebarOpen={sidebarOpen}
+-          setSidebarOpen={setSidebarOpen}
+-        />
+-      </div>
++      <AdminSidebar
++        id="admin-sidebar"
++        activeSection={activeSection}
++        setActiveSection={setActiveSection}
++        sidebarOpen={sidebarOpen}
++        setSidebarOpen={setSidebarOpen}
++      />

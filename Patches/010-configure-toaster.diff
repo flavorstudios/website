@@ -1,0 +1,21 @@
+diff --git a/components/ui/toaster.tsx b/components/ui/toaster.tsx
+index 1111111..2222222 100644
+--- a/components/ui/toaster.tsx
++++ b/components/ui/toaster.tsx
+@@ -1,4 +1,10 @@
+-import { Toaster as SonnerToaster } from 'sonner'
+-
+-export default function Toaster() {
+-  return <SonnerToaster richColors />
+-}
++import { Toaster as SonnerToaster } from "sonner";
++
++export default function Toaster() {
++  return (
++    <SonnerToaster
++      position="bottom-center"
++      toastOptions={{ className: "text-sm", duration: 5000 }}
++      richColors
++    />
++  );
++}

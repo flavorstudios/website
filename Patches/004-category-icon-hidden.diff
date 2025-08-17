@@ -1,0 +1,21 @@
+diff --git a/components/admin/category/CategoryList.tsx b/components/admin/category/CategoryList.tsx
+index 1111111..2222222 100644
+--- a/components/admin/category/CategoryList.tsx
++++ b/components/admin/category/CategoryList.tsx
+@@ -1,11 +1,10 @@
+-        <Image
+-          src={name}
+-          alt=""
+-          width={16}
+-          height={16}
+-          className="w-4 h-4"
+-          unoptimized
+-        />
++        <Image
++          src={name}
++          alt=""
++          width={16}
++          height={16}
++          className="w-4 h-4"
++          aria-hidden="true"
++        />

@@ -1,0 +1,23 @@
+diff --git a/app/admin/dashboard/components/media/MediaList.tsx b/app/admin/dashboard/components/media/MediaList.tsx
+index 1111111..2222222 100644
+--- a/app/admin/dashboard/components/media/MediaList.tsx
++++ b/app/admin/dashboard/components/media/MediaList.tsx
+@@ -1,9 +1,11 @@
+-            <tr
+-              key={m.id}
+-              className="border-t hover:bg-gray-50 cursor-pointer focus-visible:bg-blue-50 focus-visible:outline-none"
+-              tabIndex={0}
+-              onClick={() => onRowClick(m)}
+-              onKeyDown={(e) => {
++            <tr
++              key={m.id}
++              role="button"
++              aria-label={`View details for ${m.filename || m.name}`}
++              className="border-t hover:bg-gray-50 cursor-pointer focus-visible:bg-blue-50 focus-visible:outline-none"
++              tabIndex={0}
++              onClick={() => onRowClick(m)}
++              onKeyDown={(e) => {
+                 if ((e.key === "Enter" || e.key === " ") && e.currentTarget === e.target) {
+                   e.preventDefault()
+                   onRowClick(m)
+                 }

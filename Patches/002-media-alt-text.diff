@@ -1,0 +1,18 @@
+diff --git a/app/admin/dashboard/components/media/MediaList.tsx b/app/admin/dashboard/components/media/MediaList.tsx
+index 1111111..2222222 100644
+--- a/app/admin/dashboard/components/media/MediaList.tsx
++++ b/app/admin/dashboard/components/media/MediaList.tsx
+@@ -1,7 +1,15 @@
+-              <td className="p-2">
+-                <Image src={m.url} alt="" width={40} height={40} className="object-cover rounded" />
+-              </td>
++              <td className="p-2">
++                <Image
++                  src={m.url}
++                  alt={m.alt || m.filename || m.name}
++                  width={40}
++                  height={40}
++                  className="object-cover rounded"
++                  loading="lazy"
++                />
++              </td>

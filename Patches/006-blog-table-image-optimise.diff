@@ -1,0 +1,15 @@
+diff --git a/components/admin/blog/BlogTable.tsx b/components/admin/blog/BlogTable.tsx
+index 1111111..2222222 100644
+--- a/components/admin/blog/BlogTable.tsx
++++ b/components/admin/blog/BlogTable.tsx
+@@ -1,12 +1,11 @@
+                   <Image
+                     src={post.featuredImage}
+                     alt={`Featured image for ${post.title}`}
+                     width={64}
+                     height={40}
+                     className="h-10 w-16 object-cover rounded"
+                     style={{ objectFit: "cover" }}
+-                    unoptimized
++                    loading="lazy"
+                   />

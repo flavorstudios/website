@@ -1,38 +1,43 @@
 import { getStorage } from "firebase-admin/storage";
-import { adminDb } from "@/lib/firebase-admin";
+import { safeAdminDb } from "@/lib/firebase-admin"; // lazy/nullable helper
 import type { MediaDoc, MediaVariant } from "@/types/media";
 import crypto from "node:crypto";
 import type { Sharp } from "sharp";
 
 /**
  * IMPORTANT:
- * - Do NOT throw at import time. Many routes import this module even when they
- *   don't touch Cloud Storage (e.g., listing media from Firestore).
- * - We resolve the bucket lazily in the functions that actually require it.
+ * - Nothing here should touch Firebase at import time.
+ * - Firestore/Storage are resolved inside functions only.
  */
 
-// Firestore collection (safe at import time)
-const collection = adminDb.collection("media");
+// --- Firestore helpers (lazy) ------------------------------------------------
+function tryGetCollection() {
+  const db = safeAdminDb();
+  return db ? (db.collection("media") as FirebaseFirestore.CollectionReference<MediaDoc>) : null;
+}
 
-// --- Helpers ---------------------------------------------------------------
+function requireCollection() {
+  const col = tryGetCollection();
+  if (!col) {
+    throw new Error("ADMIN_DB_UNAVAILABLE");
+  }
+  return col;
+}
 
+// --- Misc helpers -------------------------------------------------------------
 function genId() {
   return crypto.randomBytes(8).toString("hex");
 }
 
 /** Read bucket name from env (server preferred, then public). */
 function getConfiguredBucketName(): string | undefined {
-  return (
-    process.env.FIREBASE_STORAGE_BUCKET ||
-    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-  );
+  return process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
 }
 
 /** Try to get a bucket instance; return null if not configured or not available. */
 function tryGetBucket() {
   try {
     const name = getConfiguredBucketName();
-    // If app options have a default bucket, getStorage().bucket() (no args) will use it.
     return name ? getStorage().bucket(name) : getStorage().bucket();
   } catch {
     return null;
@@ -44,7 +49,7 @@ function requireBucket() {
   const bucket = tryGetBucket();
   if (!bucket) {
     throw new Error(
-      "Cloud Storage bucket not configured. Set FIREBASE_STORAGE_BUCKET (and keep NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET in sync) to your bucket, e.g. my-project.appspot.com."
+      "Cloud Storage bucket not configured. Set FIREBASE_STORAGE_BUCKET (and keep NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET in sync), e.g. my-project.appspot.com."
     );
   }
   return bucket;
@@ -52,22 +57,14 @@ function requireBucket() {
 
 /** Generate a public URL for a gs:// file path. */
 function publicUrlFor(bucketName: string, path: string) {
-  // Ensure encoded path; Storage serves via storage.googleapis.com/<bucket>/<path>
   const encoded = path.split("/").map(encodeURIComponent).join("/");
   return `https://storage.googleapis.com/${bucketName}/${encoded}`;
 }
 
 /** Derive the object path from a stored URL; fall back to a best guess. */
-function derivePathFromUrlOrGuess(
-  url: string,
-  bucketName: string,
-  fallbackPath: string
-) {
+function derivePathFromUrlOrGuess(url: string, bucketName: string, fallbackPath: string) {
   const prefix = `https://storage.googleapis.com/${bucketName}/`;
-  if (url?.startsWith(prefix)) {
-    return url.slice(prefix.length);
-  }
-  // Fallback to the known convention we use on upload
+  if (url?.startsWith(prefix)) return url.slice(prefix.length);
   return fallbackPath;
 }
 
@@ -81,7 +78,7 @@ export function storageInfo(): { configured: boolean; bucket?: string } {
   return { configured: !!b, bucket: b?.name };
 }
 
-// --- Public API ------------------------------------------------------------
+// --- Public API --------------------------------------------------------------
 
 export interface ListMediaOptions {
   limit?: number;
@@ -97,12 +94,15 @@ export interface ListMediaResult {
 }
 
 /**
- * List media from Firestore. This does NOT require a storage bucket,
- * so it remains usable even if the bucket is misconfigured.
+ * List media from Firestore. If admin is not configured, return an empty result
+ * instead of throwing (keeps builds/preview envs stable).
  */
-export async function listMedia(
-  options: ListMediaOptions | number = 50
-): Promise<ListMediaResult> {
+export async function listMedia(options: ListMediaOptions | number = 50): Promise<ListMediaResult> {
+  const collection = tryGetCollection();
+  if (!collection) {
+    return { media: [], cursor: null };
+  }
+
   // Legacy signature support: listMedia(25)
   let limit = 50;
   let search: string | undefined;
@@ -120,15 +120,13 @@ export async function listMedia(
     startAfter = options.startAfter;
   }
 
-  let query: FirebaseFirestore.Query<MediaDoc> =
-    collection.orderBy("createdAt", order);
+  let query: FirebaseFirestore.Query<MediaDoc> = collection.orderBy("createdAt", order);
 
   if (type) {
     query = query.where("mime", "==", type) as FirebaseFirestore.Query<MediaDoc>;
   }
 
   if (search) {
-    // Case-insensitive basename prefix search (Firestore-safe)
     const term = search.toLowerCase();
     query = query
       .where("basename", ">=", term)
@@ -149,14 +147,11 @@ export async function listMedia(
 
 /**
  * Upload a media file to Storage and create a Firestore doc.
- * Requires bucket configuration (enforced lazily here).
+ * Requires bucket & admin Firestore (enforced lazily here).
  */
-export async function uploadMedia(
-  buffer: Buffer,
-  name: string,
-  mimeType: string
-): Promise<MediaDoc> {
+export async function uploadMedia(buffer: Buffer, name: string, mimeType: string): Promise<MediaDoc> {
   const bucket = requireBucket();
+  const collection = requireCollection();
 
   const id = genId();
   const objectPath = `media/${id}/${name}`;
@@ -195,22 +190,19 @@ export async function uploadMedia(
 }
 
 /** Update a media document (Firestore only). */
-export async function updateMedia(
-  id: string,
-  updates: Partial<MediaDoc>
-): Promise<MediaDoc | null> {
-  await collection
-    .doc(id)
-    .set({ ...updates, updatedAt: Date.now() }, { merge: true });
+export async function updateMedia(id: string, updates: Partial<MediaDoc>): Promise<MediaDoc | null> {
+  const collection = requireCollection();
+  await collection.doc(id).set({ ...updates, updatedAt: Date.now() }, { merge: true });
   const doc = await collection.doc(id).get();
   return doc.exists ? (doc.data() as MediaDoc) : null;
 }
 
 /**
  * Delete a media object from Storage (if possible) and remove its Firestore doc.
- * If the bucket is not configured, we still remove the Firestore doc to avoid blocking.
+ * If the bucket is not configured, still remove the Firestore doc to avoid blocking.
  */
 export async function deleteMedia(id: string): Promise<boolean> {
+  const collection = requireCollection();
   const doc = await collection.doc(id).get();
   if (!doc.exists) return false;
 
@@ -242,6 +234,7 @@ export async function cropMedia(
   options: { width: number; height: number; x: number; y: number }
 ) {
   const bucket = requireBucket();
+  const collection = requireCollection();
 
   const docSnap = await collection.doc(id).get();
   if (!docSnap.exists) return null;
@@ -282,13 +275,9 @@ export async function cropMedia(
     label: variantName,
   };
 
-  const variants = Array.isArray(data.variants)
-    ? [...data.variants, variant]
-    : [variant];
+  const variants = Array.isArray(data.variants) ? [...data.variants, variant] : [variant];
 
-  await collection
-    .doc(id)
-    .set({ variants, updatedAt: Date.now() }, { merge: true });
+  await collection.doc(id).set({ variants, updatedAt: Date.now() }, { merge: true });
 
   return variant;
 }

@@ -22,23 +22,18 @@ export function QuickActions() {
           className="gap-2"
           aria-label="Quick actions"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
           <span className="hidden sm:inline">New</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => router.push("/admin/blog/create")}
-          >
+        <DropdownMenuItem onSelect={() => router.push("/admin/blog/create")}>
           New Blog Post
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onSelect={() => router.push("/admin/dashboard/media?upload=1")}
-        >
+        <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/media?upload=1")}>
           Upload Media
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onSelect={() => router.push("/admin/dashboard/users?mode=create")}
-        >
+        <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/users?mode=create")}>
           Add User
         </DropdownMenuItem>
       </DropdownMenuContent>

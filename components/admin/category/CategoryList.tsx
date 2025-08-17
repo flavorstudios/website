@@ -51,14 +51,14 @@ const renderIcon = (name?: string | null) => {
         width={16}
         height={16}
         className="w-4 h-4"
-        unoptimized
+        aria-hidden="true"
       />
     )
   }
   const Icon =
     (Icons as unknown as Record<string, React.ComponentType<LucideProps>>)[name]
   if (!Icon) return null
-  return <Icon className="w-4 h-4" />
+  return <Icon className="w-4 h-4" aria-hidden="true" />
 }
 
 export default function CategoryList({

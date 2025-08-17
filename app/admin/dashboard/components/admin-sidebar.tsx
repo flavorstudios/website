@@ -23,6 +23,8 @@ import { useRole } from "../contexts/role-context"
 import { useState, useEffect } from "react"
 
 interface AdminSidebarProps {
+  /** Optional id so aria-controls can point to the landmark directly */
+  id?: string
   activeSection: string
   setActiveSection: (section: string) => void
   sidebarOpen: boolean
@@ -30,6 +32,7 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({
+  id,
   setActiveSection,
   sidebarOpen,
   setSidebarOpen,
@@ -87,6 +90,7 @@ export function AdminSidebar({
       )}
 
       <aside
+        id={id}
         className={`
           h-full overflow-y-auto bg-muted/20 border-r
           ${isMobile
@@ -127,9 +131,9 @@ export function AdminSidebar({
               type="button"
             >
               {sidebarOpen ? (
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               ) : (
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" aria-hidden="true" />
               )}
             </Button>
           </div>
@@ -184,7 +188,7 @@ export function AdminSidebar({
                       aria-label={item.label}
                       aria-current={active ? "page" : undefined}
                     >
-                      <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />
+                      <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} aria-hidden="true" />
                       {sidebarOpen && (
                         <>
                           <span className="flex-1 text-left text-sm truncate">{item.label}</span>
@@ -203,7 +207,7 @@ export function AdminSidebar({
                     </Link>
                   ) : (
                     <>
-                      <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} />
+                      <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} aria-hidden="true" />
                       {sidebarOpen && (
                         <>
                           <span className="flex-1 text-left text-sm truncate">{item.label}</span>

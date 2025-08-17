@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import DOMPurify from "isomorphic-dompurify";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Eye, User, Clock } from "lucide-react";
@@ -77,8 +78,7 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
         <CardContent className="p-8">
           <div
             className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
-            // NOTE: content is assumed sanitized, or use a sanitizer if coming from untrusted sources
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
           />
         </CardContent>
       </Card>

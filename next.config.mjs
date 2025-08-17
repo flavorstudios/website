@@ -2,6 +2,7 @@
 
 // Import the necessary modules
 import withPWA from 'next-pwa';
+import bundleAnalyzer from '@next/bundle-analyzer';
 
 /**
  * Configure Next.js PWA settings.
@@ -20,6 +21,8 @@ const pwaConfig = withPWA({
   // Add other next-pwa options here if needed
 });
 
+const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true, // Add this for best practice, optional
@@ -33,4 +36,4 @@ const nextConfig = {
 };
 
 // Export the combined configuration, applying the PWA wrapper to the Next.js config.
-export default pwaConfig(nextConfig);
+export default withBundleAnalyzer(pwaConfig(nextConfig));

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
@@ -29,6 +29,14 @@ export default function BlogTable({
 }: BlogTableProps) {
   const allSelected = posts.length > 0 && posts.every((p) => selected.has(p.id))
   const rowRefs = useRef<HTMLTableRowElement[]>([])
+  const [width, setWidth] = useState<number>(1024)
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth)
+    handleResize()
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   if (posts.length === 0) {
     return (
@@ -53,28 +61,85 @@ export default function BlogTable({
     )
   }
 
+  /** Mobile: render card list at <640px to prevent table overflow */
+  if (width < 640) {
+    return (
+      <div className="space-y-2" data-testid="blog-card-list">
+        <div className="flex items-center gap-2 mb-2">
+          <Checkbox
+            checked={allSelected}
+            onCheckedChange={(v) => toggleSelectAll(!!v)}
+            aria-label="Select all posts"
+          />
+          <span className="text-xs">Select all</span>
+        </div>
+
+        {posts.map((post) => (
+          <div
+            key={post.id}
+            className="border rounded p-3 flex gap-2"
+            data-testid="blog-card"
+          >
+            <Checkbox
+              aria-label={`Select blog post: ${post.title}`}
+              checked={selected.has(post.id)}
+              onCheckedChange={() => toggleSelect(post.id)}
+            />
+            <a
+              href={`/admin/blog/edit?id=${post.id}`}
+              className="flex gap-2 flex-1 text-left focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-label={`Edit blog post: ${post.title}`}
+            >
+              {post.featuredImage && (
+                <Image
+                  src={post.featuredImage}
+                  alt=""
+                  aria-hidden="true"
+                  width={64}
+                  height={40}
+                  className="h-10 w-16 object-cover rounded flex-shrink-0"
+                  loading="lazy"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate text-sm">{post.title}</p>
+                <p className="text-xs text-gray-500">
+                  {formatDate(post.publishedAt || post.createdAt)}
+                </p>
+                <p className="text-xs mt-1">
+                  <BlogStatusBadge status={post.status as BlogPost["status"]} />
+                </p>
+              </div>
+            </a>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  /** Desktop/tablet: full table with scoped headers */
   return (
     <div className="overflow-x-auto border rounded-lg">
       <table className="min-w-full bg-white text-sm table-fixed">
         <thead className="bg-gray-50 text-xs uppercase text-gray-500">
           <tr>
-            <th className="p-3 w-8">
+            <th scope="col" className="p-3 w-8">
               <Checkbox
                 checked={allSelected}
                 onCheckedChange={(v) => toggleSelectAll(!!v)}
                 aria-label="Select all"
               />
             </th>
-            <th className="p-3 text-left max-w-[12rem] truncate">Title</th>
-            <th className="p-3 text-left hidden md:table-cell">SEO</th>
-            <th className="p-3 text-left">Author</th>
-            <th className="p-3 text-left hidden md:table-cell">Image</th>
-            <th className="p-3 text-left">Status</th>
-            <th className="p-3 text-left hidden sm:table-cell">Date</th>
-            <th className="p-3 text-right hidden sm:table-cell">Views</th>
-            <th className="p-3 text-right hidden sm:table-cell">Comments</th>
-            <th className="p-3 text-left hidden lg:table-cell">Tags</th>
-            <th className="p-3 text-right">Actions</th>
+            <th scope="col" className="p-3 text-left max-w-[12rem] truncate">Title</th>
+            <th scope="col" className="p-3 text-left hidden md:table-cell">SEO</th>
+            <th scope="col" className="p-3 text-left">Author</th>
+            <th scope="col" className="p-3 text-left hidden md:table-cell">Image</th>
+            <th scope="col" className="p-3 text-left">Status</th>
+            <th scope="col" className="p-3 text-left hidden sm:table-cell">Date</th>
+            <th scope="col" className="p-3 text-right hidden sm:table-cell">Views</th>
+            <th scope="col" className="p-3 text-right hidden sm:table-cell">Comments</th>
+            <th scope="col" className="p-3 text-left hidden lg:table-cell">Tags</th>
+            <th scope="col" className="p-3 text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -155,7 +220,7 @@ export default function BlogTable({
                     height={40}
                     className="h-10 w-16 object-cover rounded"
                     style={{ objectFit: "cover" }}
-                    unoptimized
+                    loading="lazy"
                   />
                 ) : (
                   <span className="text-xs text-gray-400">—</span>
@@ -186,7 +251,9 @@ export default function BlogTable({
               <td className="p-3 hidden lg:table-cell">
                 {post.tags?.length
                   ? post.tags.slice(0, 3).map((tag, i) => (
-                      <Badge key={i} variant="secondary" className="mr-1">{tag}</Badge>
+                      <Badge key={i} variant="secondary" className="mr-1">
+                        {tag}
+                      </Badge>
                     ))
                   : <span className="text-xs text-gray-400">—</span>
                 }

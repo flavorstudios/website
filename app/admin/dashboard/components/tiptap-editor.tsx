@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
-import DOMPurify from "dompurify"
+import DOMPurify from "isomorphic-dompurify"
 
 interface TiptapEditorProps {
   value: string

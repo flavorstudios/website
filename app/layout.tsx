@@ -276,6 +276,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* END GTM (HEAD) */}
       </head>
       <body className="antialiased">
+        {/* Skip link for keyboard users */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 bg-white p-2 text-sm shadow rounded"
+        >
+          Skip to main content
+        </a>
+
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -310,7 +318,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             />
           )}
 
-          <main>{children}</main>
+          <main id="main-content">{children}</main>
 
           {!isAdmin && (
             <>

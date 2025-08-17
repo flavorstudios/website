@@ -42,11 +42,14 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error && (
-        <p className="text-red-600 text-sm" role="alert">
-          {error}
-        </p>
-      )}
+      {/* Persistent live region so SRs announce new errors */}
+      <div aria-live="assertive" className="min-h-[1.5rem]">
+        {error && (
+          <p className="text-red-600 text-sm" role="alert">
+            {error}
+          </p>
+        )}
+      </div>
 
       <label htmlFor="login-email" className="sr-only">
         Email
@@ -84,7 +87,7 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
       />
 
       <Button type="submit" disabled={loading} className="w-full">
-        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
         Login
       </Button>
       <Button type="button" variant="ghost" onClick={onCancel} className="w-full">

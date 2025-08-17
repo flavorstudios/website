@@ -2,10 +2,11 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { AdminSidebar } from "./admin-sidebar"
 import { AdminHeader } from "./admin-header"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
+import BottomNav from "./bottom-nav"
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -15,18 +16,20 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-  }, [])
 
-  useEffect(() => {
     const handleResize = () => {
-      setSidebarOpen(window.innerWidth >= 1024)
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      setSidebarOpen(!mobile) // open sidebar on desktop, closed on mobile by default
     }
+
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && window.innerWidth < 1024) {
+      if (e.key === "Escape" && isMobile) {
         setSidebarOpen(false)
       }
     }
@@ -34,11 +37,12 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
     handleResize()
     window.addEventListener("resize", handleResize)
     window.addEventListener("keydown", handleKey)
+
     return () => {
       window.removeEventListener("resize", handleResize)
       window.removeEventListener("keydown", handleKey)
     }
-  }, [])
+  }, [isMobile])
 
   // --- Updated to use the new logout endpoint ---
   const handleLogout = async () => {
@@ -63,17 +67,31 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Provide an element for aria-controls from the header */}
-      <div id="admin-sidebar">
+      {/* Sidebar */}
+      {isMobile ? (
+        <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+          <SheetContent side="left" className="p-0 w-64">
+            <AdminSidebar
+              id="admin-sidebar"
+              activeSection={activeSection}
+              setActiveSection={setActiveSection}
+              sidebarOpen={true}
+              setSidebarOpen={setSidebarOpen}
+            />
+          </SheetContent>
+        </Sheet>
+      ) : (
         <AdminSidebar
+          id="admin-sidebar"
           activeSection={activeSection}
           setActiveSection={setActiveSection}
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
         />
-      </div>
+      )}
 
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-w-0 pb-12 md:pb-0">
         <AdminHeader onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <main id="main" tabIndex={-1} className="flex-1 overflow-y-auto">
@@ -81,6 +99,8 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
             {children}
           </div>
         </main>
+
+        {isMobile && <BottomNav />}
       </div>
     </div>
   )

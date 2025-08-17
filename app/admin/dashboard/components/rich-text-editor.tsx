@@ -25,7 +25,7 @@ import Underline from "@tiptap/extension-underline"
 import Link from "@tiptap/extension-link"
 import Image from "@tiptap/extension-image"
 import TextAlign from "@tiptap/extension-text-align"
-import DOMPurify from "dompurify"
+import DOMPurify from "isomorphic-dompurify"
 
 interface RichTextEditorProps {
   value: string

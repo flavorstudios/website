@@ -1,0 +1,16 @@
+{
+  "scores": {
+    "functionality": 80,
+    "responsiveness": 80,
+    "accessibility": 75,
+    "performance": 60,
+    "ux": 75,
+    "visual": 80,
+    "codeQuality": 70
+  },
+  "lighthouse": {
+    "mobile": { "performance": 0, "accessibility": 0, "bestPractices": 0, "seo": 0 },
+    "desktop": { "performance": 0, "accessibility": 0, "bestPractices": 0, "seo": 0 }
+  },
+  "bundle": { "totalKB": 0, "largestChunkKB": 0, "numChunks": 0 }
+}

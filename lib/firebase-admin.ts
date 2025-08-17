@@ -1,9 +1,13 @@
 // lib/firebase-admin.ts
+import "server-only";
 
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth, Auth } from "firebase-admin/auth";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
 import type { ServiceAccount } from "firebase-admin"; // Strict type import
+
+// Allow e2e/CI to short-circuit any admin boot (actual auth bypass is implemented in lib/admin-auth.ts)
+export const ADMIN_BYPASS = process.env.ADMIN_BYPASS === "true";
 
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
 const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
@@ -25,7 +29,11 @@ export const adminEmailsEnv = rawEmails !== "" ? rawEmails : process.env.ADMIN_E
 
 // If missing, warn and export undefined. Do NOT throw!
 let parsedCredentials: ServiceAccount | null = null;
-if (!serviceAccountKey) {
+
+// If we're in bypass mode, skip any initialization work entirely.
+if (ADMIN_BYPASS) {
+  if (debug) console.warn("[Firebase Admin] ADMIN_BYPASS=true — skipping Admin SDK initialization.");
+} else if (!serviceAccountKey) {
   if (debug) {
     console.warn("[Firebase Admin] FIREBASE_SERVICE_ACCOUNT_KEY not set. Admin features are disabled.");
   }
@@ -34,7 +42,7 @@ if (!serviceAccountKey) {
     parsedCredentials = JSON.parse(serviceAccountKey) as ServiceAccount;
     // 🛡 Initialize Firebase Admin SDK (only once)
     if (!getApps().length) {
-      // --- MAIN UPDATE: pass storageBucket from env, fallback to NEXT_PUBLIC for local/dev
+      // Pass storageBucket from env, fallback to NEXT_PUBLIC for local/dev
       initializeApp({
         credential: cert(parsedCredentials),
         storageBucket:
@@ -43,7 +51,8 @@ if (!serviceAccountKey) {
       });
       if (debug) {
         console.log("[Firebase Admin] Firebase Admin initialized successfully.");
-        console.log("[Firebase Admin] Using storage bucket:",
+        console.log(
+          "[Firebase Admin] Using storage bucket:",
           process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
         );
       }
@@ -56,7 +65,7 @@ if (!serviceAccountKey) {
 }
 
 if (debug) {
-  if (!adminEmailsEnv) {
+  if (!adminEmailsEnv && !ADMIN_BYPASS) {
     console.warn("[Firebase Admin] Warning: ADMIN_EMAIL or ADMIN_EMAILS environment variable is missing. Admin routes will deny all access!");
   }
   console.log("[Firebase Admin] STARTUP Loaded ADMIN_EMAILS/ADMIN_EMAIL:", adminEmailsEnv);
@@ -76,25 +85,41 @@ export const getAllowedAdminEmails = (): string[] => {
     console.log("[Firebase Admin] Loaded ADMIN_EMAILS:", process.env.ADMIN_EMAILS);
     console.log("[Firebase Admin] Loaded ADMIN_EMAIL:", process.env.ADMIN_EMAIL);
     console.log("[Firebase Admin] Final allowed admin emails:", allowedEmails);
-    console.log("[ENV DUMP]", JSON.stringify({
-      ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-      ADMIN_EMAILS: process.env.ADMIN_EMAILS,
-      NODE_ENV: process.env.NODE_ENV
-    }, null, 2));
+    console.log(
+      "[ENV DUMP]",
+      JSON.stringify(
+        {
+          ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+          ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+          NODE_ENV: process.env.NODE_ENV,
+          ADMIN_BYPASS,
+        },
+        null,
+        2
+      )
+    );
   }
   return allowedEmails;
 };
 
-// ✅ Export Firebase Admin Services - export undefined if not initialized!
-export const adminAuth: Auth | undefined = serviceAccountKey && parsedCredentials ? getAuth() : undefined;
-export const adminDb: Firestore | undefined = serviceAccountKey && parsedCredentials ? getFirestore() : undefined;
+// ✅ Export Firebase Admin Services - export undefined if not initialized OR if bypassing
+export const adminAuth: Auth | undefined =
+  !ADMIN_BYPASS && serviceAccountKey && parsedCredentials ? getAuth() : undefined;
+
+export const adminDb: Firestore | undefined =
+  !ADMIN_BYPASS && serviceAccountKey && parsedCredentials ? getFirestore() : undefined;
+
+/** Quick status helper (never throws) */
+export function isAdminSdkAvailable(): boolean {
+  return !!adminAuth && !!adminDb;
+}
 
 /**
  * Safe getter for adminAuth that throws with a clear error if unavailable.
  * Use for type-safety and DX.
  */
 export function getAdminAuth(): Auth {
-  if (!adminAuth) throw new Error("Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY missing or invalid.");
+  if (!adminAuth) throw new Error("Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY missing/invalid or ADMIN_BYPASS enabled.");
   return adminAuth;
 }
 
@@ -103,6 +128,6 @@ export function getAdminAuth(): Auth {
  * Use for type-safety and DX.
  */
 export function getAdminDb(): Firestore {
-  if (!adminDb) throw new Error("Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY missing or invalid.");
+  if (!adminDb) throw new Error("Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY missing/invalid or ADMIN_BYPASS enabled.");
   return adminDb;
 }

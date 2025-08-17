@@ -86,9 +86,8 @@ const orgSchema = getSchema({
 });
 
 import { getDynamicCategories } from "@/lib/dynamic-categories";
-import { headers, cookies } from "next/headers";
+import { headers } from "next/headers";
 import Script from "next/script"; // for GTM + bootstrap
-import { verifyAdminSession } from "@/lib/admin-auth";
 import { isAdminRoute } from "@/lib/cookie-consent";
 import GtmRouteChangeListener from "@/components/GtmRouteChangeListener";
 
@@ -179,16 +178,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     adminPrefixes.length ? adminPrefixes : undefined,
   );
 
-  // Determine admin user via session cookie (validate without storing a value)
-  const cookieStore = await cookies(); // ✅ await in Next 15
-  const sessionCookie = cookieStore.get("admin-session")?.value;
-  if (sessionCookie) {
-    try {
-      await verifyAdminSession(sessionCookie);
-    } catch {
-      // ignore invalid session
-    }
-  }
+  // (Intentionally no admin session verification here; handled in admin-only routes)
 
   // GTM env flags
   const gtmId = process.env.NEXT_PUBLIC_GTM_CONTAINER_ID || "";

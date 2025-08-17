@@ -1,3 +1,6 @@
+// Ensure server-only (prevents client bundling of firebase-admin & node: modules)
+import "server-only";
+
 import { getStorage } from "firebase-admin/storage";
 import { safeAdminDb } from "@/lib/firebase-admin"; // lazy/nullable helper
 import type { MediaDoc, MediaVariant } from "@/types/media";

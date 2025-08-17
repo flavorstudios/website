@@ -1,5 +1,12 @@
+import "server-only";
+
 import { NextRequest } from "next/server";
-import { adminAuth, adminDb, getAllowedAdminEmails } from "@/lib/firebase-admin";
+import {
+  adminAuth,
+  adminDb,
+  getAllowedAdminEmails,
+  ADMIN_BYPASS,
+} from "@/lib/firebase-admin";
 import { cookies } from "next/headers";
 import { logError } from "@/lib/log";
 import jwt from "jsonwebtoken";
@@ -7,7 +14,8 @@ import type { UserRole } from "@/lib/role-permissions";
 import { getUserRole } from "@/lib/user-roles";
 
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
-const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
+const debug =
+  process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
 
 // Parse allowed admin domain from env
 function getAllowedAdminDomain(): string | null {
@@ -18,6 +26,14 @@ function getAllowedAdminDomain(): string | null {
 // Fetch admin emails from Firestore's admin_users collection (lowercased, trimmed).
 async function getFirestoreAdminEmails(): Promise<string[]> {
   try {
+    if (!adminDb) {
+      if (debug) {
+        console.warn(
+          "[admin-auth] adminDb unavailable; skipping Firestore admin_users lookup."
+        );
+      }
+      return [];
+    }
     const snap = await adminDb.collection("admin_users").get();
     return snap.docs
       .map((d) => (d.data().email || "").toLowerCase().trim())
@@ -38,7 +54,10 @@ function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
 
   if (debug) {
     console.log("[admin-auth] Normalized login email:", `"${normalizedEmail}"`);
-    console.log("[admin-auth] Combined allowed emails:", combinedEmails.map(e => `"${e}"`));
+    console.log(
+      "[admin-auth] Combined allowed emails:",
+      combinedEmails.map((e) => `"${e}"`)
+    );
   }
 
   if (combinedEmails.includes(normalizedEmail)) {
@@ -46,37 +65,79 @@ function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
     return true;
   }
   if (allowedDomain && normalizedEmail.endsWith("@" + allowedDomain)) {
-    if (debug) console.log("[admin-auth] Allowed admin domain:", allowedDomain, "for email:", normalizedEmail);
+    if (debug)
+      console.log(
+        "[admin-auth] Allowed admin domain:",
+        allowedDomain,
+        "for email:",
+        normalizedEmail
+      );
     return true;
   }
   if (debug) {
-    console.warn("[admin-auth] Rejected admin email:", `"${normalizedEmail}"`, "(not in allowed list or domain)");
+    console.warn(
+      "[admin-auth] Rejected admin email:",
+      `"${normalizedEmail}"`,
+      "(not in allowed list or domain)"
+    );
   }
   return false;
 }
 
 export interface VerifiedAdmin {
-  role: UserRole
-  email?: string
-  uid: string
-  [key: string]: unknown
+  role: UserRole;
+  email?: string;
+  uid: string;
+  [key: string]: unknown;
+}
+
+// --- BYPASS SHIM (for CI / Playwright) --------------------------------------
+function bypassAdmin(): VerifiedAdmin {
+  // Choose a stable “admin” role; adjust if your union differs.
+  const role = "admin" as UserRole;
+  return {
+    uid: "bypass",
+    email: "bypass@local",
+    role,
+    bypass: true,
+  };
 }
 
 // Verifies the session cookie (Firebase or JWT) and checks admin status.
-export async function verifyAdminSession(sessionCookie: string): Promise<VerifiedAdmin> {
+export async function verifyAdminSession(
+  sessionCookie: string
+): Promise<VerifiedAdmin> {
+  if (ADMIN_BYPASS) {
+    if (debug)
+      console.warn("[admin-auth] ADMIN_BYPASS=true — skipping verification.");
+    return bypassAdmin();
+  }
+
   if (!sessionCookie) {
     logError("admin-auth: verifyAdminSession (no cookie)", "No session cookie");
     throw new Error("No session cookie");
   }
-  let decoded: jwt.JwtPayload | import("firebase-admin").auth.DecodedIdToken | null;
+
+  let decoded:
+    | jwt.JwtPayload
+    | import("firebase-admin").auth.DecodedIdToken
+    | null = null;
   let firestoreEmails: string[] = [];
-  try {
-    decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
-    if (debug) {
-      console.log("[admin-auth] Session cookie verified for:", decoded.email);
+
+  // Try Firebase session cookie if Admin SDK is available
+  if (adminAuth) {
+    try {
+      decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+      if (debug) {
+        console.log("[admin-auth] Session cookie verified for:", decoded.email);
+      }
+    } catch (e) {
+      if (debug) console.warn("[admin-auth] verifySessionCookie failed; trying JWT.", e);
     }
-  } catch {
-    // Fallback: try JWT (for email/password logins)
+  }
+
+  // Fallback: try JWT (for email/password logins)
+  if (!decoded) {
     try {
       const secret = process.env.ADMIN_JWT_SECRET || "";
       decoded = jwt.verify(sessionCookie, secret) as jwt.JwtPayload;
@@ -92,12 +153,21 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
   firestoreEmails = await getFirestoreAdminEmails();
 
   if (debug) {
-    console.log("[admin-auth] Email from session:", `"${decoded.email?.trim?.().toLowerCase?.()}"`);
-    console.log("[admin-auth] Allowed emails after merging:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
+    console.log(
+      "[admin-auth] Email from session:",
+      `"${decoded.email?.trim?.().toLowerCase?.()}"`
+    );
+    console.log(
+      "[admin-auth] Allowed emails after merging:",
+      [...getAllowedAdminEmails(), ...firestoreEmails].map((e) => `"${e}"`)
+    );
   }
 
   if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
-    logError("admin-auth: verifyAdminSession (unauthorized email)", decoded.email || "");
+    logError(
+      "admin-auth: verifyAdminSession (unauthorized email)",
+      decoded.email || ""
+    );
     throw new Error("Unauthorized admin email");
   }
 
@@ -107,13 +177,26 @@ export async function verifyAdminSession(sessionCookie: string): Promise<Verifie
 }
 
 // Returns the decoded admin session and role (or null if verification fails).
-export async function getSessionAndRole(req: NextRequest): Promise<VerifiedAdmin | null> {
+export async function getSessionAndRole(
+  req: NextRequest
+): Promise<VerifiedAdmin | null> {
+  if (ADMIN_BYPASS) {
+    if (debug)
+      console.warn("[admin-auth] ADMIN_BYPASS=true — returning bypass session.");
+    return bypassAdmin();
+  }
+
   const sessionCookie = req.cookies.get("admin-session")?.value;
   if (!sessionCookie) return null;
   try {
     const verified = await verifyAdminSession(sessionCookie);
     if (debug) {
-      console.log("[admin-auth] session uid:", verified.uid, "role:", verified.role);
+      console.log(
+        "[admin-auth] session uid:",
+        verified.uid,
+        "role:",
+        verified.role
+      );
     }
     return verified;
   } catch (err) {
@@ -124,8 +207,14 @@ export async function getSessionAndRole(req: NextRequest): Promise<VerifiedAdmin
 
 // NEW AUDIT-READY HELPER: Reads the admin-session cookie and returns verified session info or null.
 export async function getSessionInfo(
-  req: NextRequest,
+  req: NextRequest
 ): Promise<VerifiedAdmin | null> {
+  if (ADMIN_BYPASS) {
+    if (debug)
+      console.warn("[admin-auth] ADMIN_BYPASS=true — returning bypass session.");
+    return bypassAdmin();
+  }
+
   const sessionCookie = req.cookies.get("admin-session")?.value;
   if (!sessionCookie) return null;
   try {
@@ -139,8 +228,16 @@ export async function getSessionInfo(
 // Checks if the request has a valid admin session (and optional permission).
 export async function requireAdmin(
   req: NextRequest,
-  permission?: keyof import("./role-permissions").RolePermissions,
+  permission?: keyof import("./role-permissions").RolePermissions
 ): Promise<boolean> {
+  if (ADMIN_BYPASS) {
+    if (debug)
+      console.warn(
+        "[admin-auth] ADMIN_BYPASS=true — requireAdmin returns true."
+      );
+    return true;
+  }
+
   const sessionCookie = req.cookies.get("admin-session")?.value;
   if (!sessionCookie) return false;
   try {
@@ -149,7 +246,12 @@ export async function requireAdmin(
       const { hasPermission } = await import("@/lib/role-permissions");
       if (!hasPermission(decoded.role, permission)) {
         if (debug) {
-          console.warn("[admin-auth] Permission denied:", permission, "for role:", decoded.role);
+          console.warn(
+            "[admin-auth] Permission denied:",
+            permission,
+            "for role:",
+            decoded.role
+          );
         }
         return false;
       }
@@ -163,8 +265,16 @@ export async function requireAdmin(
 
 // Checks if the current server action context has a valid admin session (with optional permission).
 export async function requireAdminAction(
-  permission?: keyof import("./role-permissions").RolePermissions,
+  permission?: keyof import("./role-permissions").RolePermissions
 ): Promise<boolean> {
+  if (ADMIN_BYPASS) {
+    if (debug)
+      console.warn(
+        "[admin-auth] ADMIN_BYPASS=true — requireAdminAction returns true."
+      );
+    return true;
+  }
+
   // (1) Get the cookies instance
   const cookieStore = await cookies(); // App Router: cookies() may be Promise
   // (2) .get() is valid
@@ -176,7 +286,12 @@ export async function requireAdminAction(
       const { hasPermission } = await import("@/lib/role-permissions");
       if (!hasPermission(decoded.role, permission)) {
         if (debug) {
-          console.warn("[admin-auth] Action permission denied:", permission, "for role:", decoded.role);
+          console.warn(
+            "[admin-auth] Action permission denied:",
+            permission,
+            "for role:",
+            decoded.role
+          );
         }
         return false;
       }
@@ -189,8 +304,33 @@ export async function requireAdminAction(
 }
 
 // Helper: creates a new session cookie from an ID token (used for session refresh).
-export async function createSessionCookieFromIdToken(idToken: string, expiresIn: number): Promise<string> {
+export async function createSessionCookieFromIdToken(
+  idToken: string,
+  expiresIn: number
+): Promise<string> {
+  if (ADMIN_BYPASS) {
+    if (debug)
+      console.warn(
+        "[admin-auth] ADMIN_BYPASS=true — returning fake session cookie."
+      );
+    const cookieStore = await cookies();
+    cookieStore.set("admin-session", "bypass", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 2,
+      path: "/",
+    });
+    return "bypass";
+  }
+
   try {
+    if (!adminAuth) {
+      throw new Error(
+        "Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY missing/invalid."
+      );
+    }
+
     // Validate and decode token (throws if invalid/revoked)
     const decoded = await adminAuth.verifyIdToken(idToken, true);
 
@@ -204,11 +344,17 @@ export async function createSessionCookieFromIdToken(idToken: string, expiresIn:
         `"${decoded.email?.trim()?.toLowerCase()}"`
       );
       // -----------------------------------------------------
-      console.log("[admin-auth] Allowed emails:", [...getAllowedAdminEmails(), ...firestoreEmails].map(e => `"${e}"`));
+      console.log(
+        "[admin-auth] Allowed emails:",
+        [...getAllowedAdminEmails(), ...firestoreEmails].map((e) => `"${e}"`)
+      );
     }
 
     if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
-      logError("admin-auth: createSessionCookieFromIdToken (unauthorized email)", decoded.email || "");
+      logError(
+        "admin-auth: createSessionCookieFromIdToken (unauthorized email)",
+        decoded.email || ""
+      );
       throw new Error("Unauthorized admin email");
     }
     // Now create the session cookie
@@ -226,6 +372,13 @@ export async function logAdminAuditFailure(
   reason?: string
 ): Promise<void> {
   try {
+    if (!adminDb) {
+      if (debug)
+        console.warn(
+          "[admin-auth] adminDb unavailable; skipping audit log write."
+        );
+      return;
+    }
     await adminDb.collection("admin_audit_logs").add({
       email,
       ip,
@@ -243,10 +396,37 @@ export async function logAdminAuditFailure(
  * Creates a new admin session and refresh token for the given UID.
  * Sets the session and refresh token cookies, and returns the new refresh token.
  */
-export async function createRefreshSession(
-  uid: string,
-): Promise<string> {
+export async function createRefreshSession(uid: string): Promise<string> {
+  if (ADMIN_BYPASS) {
+    if (debug)
+      console.warn(
+        "[admin-auth] ADMIN_BYPASS=true — setting fake session/refresh cookies."
+      );
+    const cookieStore = await cookies();
+    cookieStore.set("admin-session", "bypass", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 2,
+      path: "/",
+    });
+    cookieStore.set("admin-refresh-token", "bypass-refresh", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+    });
+    return "bypass-refresh";
+  }
+
   try {
+    if (!adminAuth || !adminDb) {
+      throw new Error(
+        "Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY missing/invalid."
+      );
+    }
+
     const customToken = await adminAuth.createCustomToken(uid);
 
     // Exchange custom token for ID token and refresh token via Firebase REST API

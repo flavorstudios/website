@@ -32,8 +32,8 @@ import {
   Users,
 } from "lucide-react";
 import { fetcher } from "@/lib/fetcher";
-import { useRole } from "../contexts/role-context"; // ← added
-import { HttpError } from "@/lib/http"; // ← added
+import { useRole } from "../contexts/role-context";
+import { HttpError } from "@/lib/http";
 
 // Register Chart.js primitives once
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -71,8 +71,8 @@ interface ActivityItem {
 
 export default function DashboardOverview() {
   const { theme } = useTheme();
-  const { hasPermission } = useRole(); // ← added
-  const canViewAnalytics = hasPermission?.("canViewAnalytics") ?? false; // ← updated
+  const { hasPermission } = useRole();
+  const canViewAnalytics = hasPermission?.("canViewAnalytics") ?? false;
 
   // SWR data sources (skip when not permitted)
   const {
@@ -99,13 +99,17 @@ export default function DashboardOverview() {
 
   const recentActivity = activityData?.activities || [];
 
+  // Helper to detect 401/403 errors from any thrown value (not tied to instanceof)
+  const isUnauthorized = (err: unknown): boolean => {
+    const status =
+      (err as { status?: number } | undefined)?.status ??
+      (err instanceof HttpError ? err.status : undefined);
+    return status === 401 || status === 403;
+  };
+
   // Separate unauthorized (401/403) from other failures
-  const unauthorized = [statsError, activityError].some(
-    (err) => err instanceof HttpError && (err.status === 401 || err.status === 403)
-  );
-  const hasNetworkError = [statsError, activityError].some(
-    (err) => err && !(err instanceof HttpError && (err.status === 401 || err.status === 403))
-  );
+  const unauthorized = [statsError, activityError].some((err) => !!err && isUnauthorized(err));
+  const hasNetworkError = [statsError, activityError].some((err) => !!err && !isUnauthorized(err));
 
   const loading = statsLoading || activityLoading;
 

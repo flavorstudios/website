@@ -2,12 +2,12 @@ import { fetchJson, HttpError } from '../http';
 
 describe('fetchJson', () => {
   beforeEach(() => {
-    // @ts-ignore
+    // @ts-expect-error: reset fetch for test control
     global.fetch = undefined;
   });
 
   it('returns data on success', async () => {
-    // @ts-ignore
+    // @ts-expect-error: mock fetch response
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       headers: new Headers({ 'content-type': 'application/json' }),
@@ -18,7 +18,7 @@ describe('fetchJson', () => {
   });
 
   it('throws HttpError on 4xx', async () => {
-    // @ts-ignore
+    // @ts-expect-error: mock fetch 404 response
     global.fetch = jest.fn().mockResolvedValue({
       ok: false,
       status: 404,
@@ -46,11 +46,11 @@ describe('fetchJson', () => {
         json: async () => ({ ok: true })
       }
     ];
-    // @ts-ignore
+    // @ts-expect-error: queue mocked fetch responses for retry flow
     global.fetch = jest.fn(() => Promise.resolve(responses.shift()));
     const res = await fetchJson('/retry', {}, { retry: 2 });
     expect(res).toEqual({ ok: true });
-    // @ts-ignore
+    // @ts-expect-error: check mock call count
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 });

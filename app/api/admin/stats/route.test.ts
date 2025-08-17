@@ -3,6 +3,7 @@
  */
 import { NextRequest } from 'next/server';
 import { GET } from './route';
+import { requireAdmin } from '@/lib/admin-auth';
 
 jest.mock('@/lib/admin-auth', () => ({
   requireAdmin: jest.fn().mockResolvedValue(true),
@@ -36,8 +37,9 @@ describe('GET /api/admin/stats', () => {
   });
 
   it('denies unauthorized', async () => {
-    const { requireAdmin } = require('@/lib/admin-auth');
-    requireAdmin.mockResolvedValueOnce(false);
+    const mockedRequireAdmin = requireAdmin as jest.MockedFunction<typeof requireAdmin>;
+    mockedRequireAdmin.mockResolvedValueOnce(false);
+
     const req = new NextRequest('http://test/api/admin/stats');
     const res = await GET(req);
     expect(res.status).toBe(401);

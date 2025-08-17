@@ -63,8 +63,9 @@ export async function fetchJson<T>(
     return await attempt();
   } catch (err) {
     const status = (err as { status?: number } | undefined)?.status;
-    if (retry > 0 && (status === 429 || status === 503)) {
-      await new Promise((r) => setTimeout(r, 500));
+    if (retry > 0 && (status === 429 || status === undefined || status >= 500)) {
+      const delay = (3 - retry) * 500;
+      await new Promise((r) => setTimeout(r, delay));
       return fetchJson<T>(input, init, { retry: retry - 1 });
     }
     throw err;

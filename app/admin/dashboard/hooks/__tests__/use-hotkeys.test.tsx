@@ -5,12 +5,9 @@ import useHotkeys from '../use-hotkeys';
 let registeredCallback: ((event: KeyboardEvent, handler: unknown) => void) | undefined;
 
 jest.mock('react-hotkeys-hook', () => ({
-  useHotkeys: (
-    keys: string | string[],
-    callback: (event: KeyboardEvent, handler: unknown) => void,
-    options?: unknown,
-    deps?: unknown
-  ) => {
+  // Use rest args to avoid unused-parameter warnings
+  useHotkeys: (...args: unknown[]) => {
+    const callback = args[1] as (event: KeyboardEvent, handler: unknown) => void;
     registeredCallback = callback;
   },
 }));

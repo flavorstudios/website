@@ -3,12 +3,10 @@ import { NextResponse } from "next/server";
 import { verifyAdminSession, logAdminAuditFailure } from "@/lib/admin-auth";
 import { deleteMedia } from "@/lib/media";
 
-// Ensure Node runtime (needed for firebase-admin) and prevent prerender
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  // Read cookies from the request header; avoids next/headers() in this context
   const cookieHeader = request.headers.get("cookie") ?? "";
   const sessionCookie =
     cookieHeader
@@ -17,13 +15,11 @@ export async function POST(request: Request) {
       .find((s) => s.startsWith("admin-session="))
       ?.split("=")[1] ?? "";
 
-  // Derive client IP from proxy header (fallback to unknown)
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
   try {
     await verifyAdminSession(sessionCookie);
   } catch {
-    // Keep your audit log on auth failure
     await logAdminAuditFailure(null, ip, "media_delete_denied");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -43,10 +39,8 @@ export async function POST(request: Request) {
   try {
     const success = await deleteMedia(id);
     return NextResponse.json({ success });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err?.message ?? "delete failed" },
-      { status: 500 }
-    );
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "delete failed";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

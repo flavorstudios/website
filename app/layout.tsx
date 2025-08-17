@@ -143,7 +143,8 @@ function mapCategoryDataToCategory(
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const h = headers(); // synchronous in App Router
+  // ✅ Next 15+ requires awaiting these
+  const h = await headers();
 
   // Derive pathname from headers; prioritize x-url if middleware sets it.
   const rawPath =
@@ -178,14 +179,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     adminPrefixes.length ? adminPrefixes : undefined,
   );
 
-  // Determine admin user via session cookie
-  const cookieStore = cookies(); // synchronous
+  // Determine admin user via session cookie (validate without storing a value)
+  const cookieStore = await cookies(); // ✅ await in Next 15
   const sessionCookie = cookieStore.get("admin-session")?.value;
-  let isAdminUser = false;
   if (sessionCookie) {
     try {
       await verifyAdminSession(sessionCookie);
-      isAdminUser = true;
     } catch {
       // ignore invalid session
     }

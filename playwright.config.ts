@@ -7,9 +7,12 @@ export default defineConfig({
   webServer: {
     // Run the app in PRODUCTION for stable e2e (no dev overlay, proper metadata)
     command: 'pnpm -s build && pnpm -s start',
-    url: 'http://localhost:3000',
+    url: 'http://127.0.0.1:3000',
     reuseExistingServer: false, // always use the prod server started above
+    timeout: 120_000, // give Next.js extra time to boot
     env: {
+      PORT: '3000',
+
       // Bypass admin auth in tests (pair this with server-side check)
       ADMIN_BYPASS: 'true',
       ADMIN_AUTH_DISABLED: '1',
@@ -34,7 +37,7 @@ export default defineConfig({
     },
   },
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://127.0.0.1:3000',
     headless: true,
   },
 });

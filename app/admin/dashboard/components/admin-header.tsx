@@ -10,6 +10,7 @@ import { NotificationBell } from "./notification-bell"
 import ThemeToggle from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 import QuickActions from "./quick-actions"
+import HeaderDivider from "@/components/HeaderDivider"
 
 interface AdminHeaderProps {
   onLogout: () => void
@@ -80,7 +81,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
           </button>
 
           {/* Left Section: Sidebar toggle, Logo, Search */}
-          <div className="flex items-center gap-4 flex-1 min-w-0">
+          <div className="flex items-center flex-1 min-w-0">
             {/* Sidebar button (mobile only) */}
             <Button
               ref={toggleRef}
@@ -94,7 +95,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
             >
               <Menu className="h-5 w-5" aria-hidden="true" />
             </Button>
-
+            <HeaderDivider />
             {/* Logo/title (always visible) */}
             <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap forced-colors:text-current">
               Flavor Studios Admin

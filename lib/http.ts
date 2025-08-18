@@ -1,7 +1,8 @@
 export class HttpError extends Error {
-  status: number;
+  status: number; // 0 for client/parse errors that may be retryable
   url: string;
   bodySnippet?: string;
+
   constructor(msg: string, status: number, url: string, bodySnippet?: string) {
     super(msg);
     this.name = 'HttpError';
@@ -11,63 +12,98 @@ export class HttpError extends Error {
   }
 }
 
-function withTimeout<T>(p: Promise<T>, ms = 15000) {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), ms);
-  p.catch(() => {});
-  return {
-    signal: ctrl.signal,
-    run: (fn: (signal: AbortSignal) => Promise<T>) =>
-      Promise.race([
-        fn(ctrl.signal),
-        new Promise<never>((_, rej) => setTimeout(() => rej(new Error('Request timed out')), ms)),
-      ]).finally(() => clearTimeout(t)),
-  };
-}
-
 export async function fetchJson<T>(
   input: RequestInfo | URL,
   init: RequestInit = {},
-  { retry = 0 }: { retry?: number } = {}
+  opts: { retry?: number; timeoutMs?: number } = {}
 ): Promise<T> {
-  const attempt = async (): Promise<T> => {
-    const { signal, run } = withTimeout(Promise.resolve(), 15000);
-    const res = await run(() =>
-      fetch(input, {
+  const retry = opts.retry ?? 0;
+  const timeoutMs = opts.timeoutMs ?? 15000;
+
+  const attemptOnce = async (): Promise<T> => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+
+    try {
+      const res = await fetch(input, {
         credentials: 'include',
         headers: { Accept: 'application/json', ...(init.headers || {}) },
         ...init,
-        signal,
-      })
-    );
+        signal: ctrl.signal,
+      });
 
-    if (!res.ok) {
-      const ct = res.headers.get('content-type') || '';
-      let bodySnippet = '';
-      try {
-        if (ct.includes('application/json')) {
-          bodySnippet = JSON.stringify(await res.clone().json()).slice(0, 200);
-        } else {
-          bodySnippet = (await res.clone().text()).slice(0, 200);
+      const urlText =
+        (res as any).url || (typeof input === 'string' ? input : String(input));
+      const ct = (res.headers.get('content-type') || '').toLowerCase();
+
+      if (!res.ok) {
+        let bodySnippet = '';
+        try {
+          const clone = res.clone();
+          bodySnippet = ct.includes('application/json')
+            ? JSON.stringify(await clone.json()).slice(0, 200)
+            : (await clone.text()).slice(0, 200);
+        } catch {
+          // ignore body read errors for snippet
         }
-      } catch {}
-      throw new HttpError(`HTTP ${res.status} for ${res.url}`, res.status, res.url, bodySnippet);
-    }
+        throw new HttpError(`HTTP ${res.status} for ${urlText}`, res.status, urlText, bodySnippet);
+      }
 
-    const ct = res.headers.get('content-type') || '';
-    if (ct.includes('application/json')) return (await res.json()) as T;
-    return undefined as unknown as T;
+      // Success path
+      if (ct.includes('application/json')) {
+        try {
+          return (await res.json()) as T;
+        } catch {
+          // Invalid JSON on a 2xx response
+          throw new HttpError(`Invalid JSON for ${urlText}`, 0, urlText);
+        }
+      }
+
+      // Allow empty bodies to resolve to undefined
+      if (res.status === 204) {
+        return undefined as unknown as T;
+      }
+      const text = await res.text();
+      if (text.trim() === '') {
+        return undefined as unknown as T;
+      }
+
+      // Unexpected non-JSON content on success
+      throw new HttpError(`Expected JSON for ${urlText}`, 0, urlText, text.slice(0, 200));
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') {
+        // Normalize timeouts for consistent handling/tests
+        throw new Error('Request timed out');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timer);
+    }
   };
 
-  try {
-    return await attempt();
-  } catch (err) {
-    const status = (err as { status?: number } | undefined)?.status;
-    if (retry > 0 && (status === 429 || status === undefined || status >= 500)) {
-      const delay = (3 - retry) * 500;
-      await new Promise((r) => setTimeout(r, delay));
-      return fetchJson<T>(input, init, { retry: retry - 1 });
+  // Exponential backoff with jitter; retry on 5xx, 429, network/timeout, and parse errors (status 0/undefined)
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await attemptOnce();
+    } catch (err) {
+      const status = (err as { status?: number } | undefined)?.status;
+      const message = (err as Error).message || '';
+      const isTimeout = message.includes('timed out');
+
+      const retryable =
+        isTimeout ||
+        status === undefined || // e.g., network error from fetch
+        status === 0 ||         // client/parse error we marked as retryable
+        status === 429 ||
+        (typeof status === 'number' && status >= 500);
+
+      if (attempt < retry && retryable) {
+        const backoff = Math.min(500 * 2 ** attempt, 5000);
+        const jitter = Math.floor(Math.random() * 100);
+        await new Promise((r) => setTimeout(r, backoff + jitter));
+        continue;
+      }
+      throw err;
     }
-    throw err;
   }
 }

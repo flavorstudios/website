@@ -53,4 +53,95 @@ describe('fetchJson', () => {
     // @ts-expect-error: check mock call count
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
+
+  it('retries on 429 and succeeds', async () => {
+    const responses = [
+      {
+        ok: false,
+        status: 429,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        clone() { return this; },
+        json: async () => ({}),
+        text: async () => ''
+      },
+      {
+        ok: true,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => ({ ok: true })
+      }
+    ];
+    // @ts-expect-error
+    global.fetch = jest.fn(() => Promise.resolve(responses.shift()));
+    const res = await fetchJson('/retry429', {}, { retry: 2 });
+    expect(res).toEqual({ ok: true });
+    // @ts-expect-error
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries on timeout and succeeds', async () => {
+    const responses: Array<Promise<any>> = [
+      Promise.reject(new Error('Request timed out')),
+      Promise.resolve({
+        ok: true,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => ({ ok: true })
+      })
+    ];
+    // @ts-expect-error
+    global.fetch = jest.fn(() => responses.shift());
+    const res = await fetchJson('/timeout', {}, { retry: 1 });
+    expect(res).toEqual({ ok: true });
+    // @ts-expect-error
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries on malformed json and succeeds', async () => {
+    const responses = [
+      {
+        ok: true,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => { throw new SyntaxError('bad json'); }
+      },
+      {
+        ok: true,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => ({ ok: true })
+      }
+    ];
+    // @ts-expect-error
+    global.fetch = jest.fn(() => Promise.resolve(responses.shift()));
+    const res = await fetchJson('/badjson', {}, { retry: 1 });
+    expect(res).toEqual({ ok: true });
+    // @ts-expect-error
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('preserves HttpError status and bodySnippet', async () => {
+    // @ts-expect-error
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 503,
+      url: '/bad',
+      headers: new Headers({ 'content-type': 'text/plain' }),
+      clone() { return this; },
+      text: async () => 'upstream error detail',
+    });
+    await expect(fetchJson('/bad')).rejects.toMatchObject({
+      name: 'HttpError',
+      status: 503,
+      bodySnippet: 'upstream error detail',
+    });
+  });
+
+  it('returns undefined on 204 No Content', async () => {
+    // @ts-expect-error
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 204,
+      headers: new Headers(),
+      text: async () => '',
+    });
+    const res = await fetchJson<void>('/no-content');
+    expect(res).toBeUndefined();
+  });
 });

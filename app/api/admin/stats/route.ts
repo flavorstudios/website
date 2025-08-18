@@ -2,6 +2,7 @@ import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 import { adminDb } from "@/lib/firebase-admin"
 import { AggregateField, Timestamp } from "firebase-admin/firestore"
+import { createHash } from "crypto"
 
 // Base stats shape
 type Stats = {
@@ -67,14 +68,31 @@ export async function GET(request: NextRequest) {
 
     const range = request.nextUrl.searchParams.get("range") || "default"
     const now = Date.now()
+    const ifNoneMatch = request.headers.get("if-none-match")
 
     // Serve from cache if available (TTL: 60s)
     const cached = statsCache[range]
     if (cached && cached.expires > now) {
+      const etag = `"${createHash("md5").update(JSON.stringify(cached.data)).digest("hex")}"`
       if (process.env.DEBUG_ADMIN === "true") {
         console.log("[admin-stats] Returning cached stats (range:", range, "):", cached.data)
       }
-      return NextResponse.json(cached.data, { status: 200 })
+      if (ifNoneMatch === etag) {
+        return new NextResponse(null, {
+          status: 304,
+          headers: {
+            ETag: etag,
+            "Cache-Control": "no-cache",
+          },
+        })
+      }
+      return NextResponse.json(cached.data, {
+        status: 200,
+        headers: {
+          ETag: etag,
+          "Cache-Control": "no-cache",
+        },
+      })
     }
 
     // Fetch Firestore stats in parallel
@@ -149,7 +167,25 @@ export async function GET(request: NextRequest) {
       console.log("[admin-stats] Returning stats (range:", range, "):", response)
     }
 
-    return NextResponse.json(response, { status: 200 })
+    // Compute ETag and honor If-None-Match
+    const etag = `"${createHash("md5").update(JSON.stringify(response)).digest("hex")}"`
+    if (ifNoneMatch === etag) {
+      return new NextResponse(null, {
+        status: 304,
+        headers: {
+          ETag: etag,
+          "Cache-Control": "no-cache",
+        },
+      })
+    }
+
+    return NextResponse.json(response, {
+      status: 200,
+      headers: {
+        ETag: etag,
+        "Cache-Control": "no-cache",
+      },
+    })
   } catch (error) {
     console.error("Failed to fetch stats:", error)
     return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 })

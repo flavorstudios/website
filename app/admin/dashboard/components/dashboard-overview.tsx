@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable react-hooks/rules-of-hooks */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import useSWR from "swr";
@@ -34,6 +34,7 @@ import {
 import { fetcher } from "@/lib/fetcher";
 import { useRole } from "../contexts/role-context";
 import { HttpError } from "@/lib/http";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 // Register Chart.js primitives once
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -74,18 +75,16 @@ export default function DashboardOverview() {
   const { hasPermission } = useRole();
   const canViewAnalytics = hasPermission?.("canViewAnalytics") ?? false;
 
-  // SWR data sources (skip when not permitted)
-  const {
-    data: stats,
-    error: statsError,
-    isLoading: statsLoading,
-    mutate: mutateStats,
-  } = useSWR<DashboardStats>(
-    canViewAnalytics ? "/api/admin/stats?range=12mo" : null,
-    fetcher,
-    { refreshInterval: 30000 }
-  );
+  // Live toggle controls polling interval
+  const [live, setLive] = useState(false);
 
+  // React Query: stats are the single source of truth
+  const statsQuery = useDashboardStats(live, canViewAnalytics);
+  const stats = statsQuery.data;
+  const statsError = statsQuery.error as unknown;
+  const statsLoading = statsQuery.isLoading;
+
+  // SWR: keep activity separate for now (can migrate later)
   const {
     data: activityData,
     error: activityError,
@@ -94,9 +93,12 @@ export default function DashboardOverview() {
   } = useSWR<{ activities: ActivityItem[] }>(
     canViewAnalytics ? "/api/admin/activity" : null,
     fetcher,
-    { refreshInterval: 30000 }
+    {
+      refreshInterval: live ? 15_000 : 60_000,
+      revalidateOnFocus: false,
+      refreshWhenHidden: false,
+    }
   );
-
   const recentActivity = activityData?.activities || [];
 
   // Helper to detect 401/403 errors from any thrown value (not tied to instanceof)
@@ -111,10 +113,25 @@ export default function DashboardOverview() {
   const unauthorized = [statsError, activityError].some((err) => !!err && isUnauthorized(err));
   const hasNetworkError = [statsError, activityError].some((err) => !!err && !isUnauthorized(err));
 
+  // Derive a short diagnostic code for the overlay
+  const firstError = (statsError || activityError) as unknown;
+  const diagnosticCode = useMemo(() => {
+    if (!firstError) return "";
+    const status =
+      (firstError as { status?: number } | undefined)?.status ??
+      (firstError instanceof HttpError ? firstError.status : undefined);
+    if (status === 429) return "DASHLOAD_429";
+    if (typeof status === "number" && status >= 500) return "DASHLOAD_5XX";
+    if (firstError instanceof Error && firstError.message.includes("timed out")) {
+      return "DASHLOAD_TIMEOUT";
+    }
+    return "DASHLOAD_NETWORK";
+  }, [firstError]);
+
   const loading = statsLoading || activityLoading;
 
   const refresh = () => {
-    mutateStats?.();
+    statsQuery.refetch();
     mutateActivity?.();
   };
 
@@ -124,6 +141,51 @@ export default function DashboardOverview() {
       <div className="flex items-center justify-center h-64" data-testid="analytics-permission-block">
         <div className="text-center">
           <p className="text-gray-600 mb-2">You don&apos;t have permission to view analytics.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // First-load spinner only when no cached data yet
+  if (loading && !stats) {
+    return (
+      <div className="flex items-center justify-center h-64" data-testid="dashboard-loading">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        <span className="ml-3 text-gray-600">Loading real-time data...</span>
+      </div>
+    );
+  }
+
+  // Network error overlay (keep last good data otherwise)
+  if (hasNetworkError && !loading && !stats) {
+    return (
+      <div className="flex items-center justify-center h-64" data-testid="dashboard-error">
+        <div className="text-center">
+          <p className="text-red-600 mb-2">Unable to load dashboard data</p>
+          <p className="text-gray-600 mb-4">
+            Please try again.
+            {diagnosticCode && (
+              <span className="block text-xs mt-2" data-testid="dashboard-error-code">
+                {diagnosticCode}
+              </span>
+            )}
+          </p>
+          <Button onClick={refresh} variant="outline">
+            Retry Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
+          <Button onClick={refresh} variant="outline">
+            Refresh Dashboard
+          </Button>
         </div>
       </div>
     );
@@ -176,45 +238,47 @@ export default function DashboardOverview() {
     };
   }, [theme]);
 
-  // Error overlay (UI block, retry supported) — only for non-401/403 errors
-  if (hasNetworkError && !loading) {
-    return (
-      <div className="flex items-center justify-center h-64" data-testid="dashboard-error">
-        <div className="text-center">
-          <p className="text-red-600 mb-2">Unable to load dashboard data</p>
-          <p className="text-gray-600 mb-4">Please try again.</p>
-          <Button onClick={refresh} variant="outline">
-            Retry Dashboard
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64" data-testid="dashboard-loading">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-        <span className="ml-3 text-gray-600">Loading real-time data...</span>
-      </div>
-    );
-  }
-
-  if (!stats) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
-          <Button onClick={refresh} variant="outline">
-            Refresh Dashboard
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
+      {/* Controls */}
+      <div className="flex items-center gap-3">
+        <Button onClick={refresh} disabled={statsQuery.isFetching} size="sm">
+          Refresh
+        </Button>
+        <label className="flex items-center gap-1 text-sm">
+          <input
+            type="checkbox"
+            checked={live}
+            onChange={(e) => setLive(e.target.checked)}
+            aria-label="Live updates"
+          />
+          Live
+        </label>
+        <span aria-live="polite" className="text-sm text-gray-600">
+          Last updated:{" "}
+          {statsQuery.dataUpdatedAt
+            ? new Date(statsQuery.dataUpdatedAt).toLocaleTimeString()
+            : "—"}
+        </span>
+      </div>
+
+      {/* Inline error banner that does not blank the UI */}
+      {hasNetworkError && stats && (
+        <div
+          role="alert"
+          className="mb-4 rounded bg-red-50 p-2 text-sm text-red-700"
+          data-testid="dashboard-inline-error"
+        >
+          Failed to refresh.{" "}
+          <button onClick={refresh} className="underline">
+            Retry
+          </button>
+          {diagnosticCode && (
+            <span className="ml-2 opacity-70">({diagnosticCode})</span>
+          )}
+        </div>
+      )}
+
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-8 text-white">
         <div className="flex items-center justify-between">
@@ -235,7 +299,7 @@ export default function DashboardOverview() {
         </div>
       </div>
 
-      {/* Real-time Stats Grid - Only Real Data */}
+      {/* Real-time Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">

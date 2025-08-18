@@ -7,6 +7,7 @@ import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { AdminAuthProvider } from "@/components/AdminAuthProvider";
 import { TooltipProvider } from "@/components/ui/tooltip"; // <-- TooltipProvider import added
 import DevTools from "./_dev-tools"; // mounts dev fetch logger in development
+import ReactQueryProvider from "@/components/ReactQueryProvider"; // Added: React Query provider
 
 // Centralized metadata for the entire admin layout segment.
 export const metadata = getMetadata({
@@ -56,9 +57,11 @@ export default function AdminLayout({
     <>
       <DevTools />
       <AdminAuthProvider>
-        <TooltipProvider>
-          {children}
-        </TooltipProvider>
+        <ReactQueryProvider>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+        </ReactQueryProvider>
       </AdminAuthProvider>
     </>
   );

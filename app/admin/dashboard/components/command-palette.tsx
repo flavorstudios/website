@@ -92,9 +92,13 @@ export function CommandPalette() {
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" />
+        <Dialog.Overlay
+          data-testid="cmd-overlay"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:inset-y-0 md:left-[var(--sidebar-w)] md:right-0"
+        />
         <Dialog.Content
-          className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]"
+          data-testid="cmd-content"
+          className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh] md:inset-y-0 md:left-[var(--sidebar-w)] md:right-0"
           aria-label="Command Palette"
         >
           <Command

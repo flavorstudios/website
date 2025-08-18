@@ -2,7 +2,6 @@
  * @jest-environment node
  */
 import { NextRequest } from 'next/server';
-import { GET } from './route';
 import { requireAdmin } from '@/lib/admin-auth';
 
 jest.mock('@/lib/admin-auth', () => ({
@@ -28,7 +27,14 @@ jest.mock('@/lib/firebase-admin', () => ({
 }));
 
 describe('GET /api/admin/stats', () => {
+  beforeEach(() => {
+    // Ensure a fresh module instance for each test so header/ETag logic
+    // is evaluated without cross-test contamination.
+    jest.resetModules();
+  });
+
   it('returns stats for authorized admin', async () => {
+    const { GET } = await import('./route');
     const req = new NextRequest('http://test/api/admin/stats?range=default');
     const res = await GET(req);
     const json = await res.json();
@@ -42,6 +48,8 @@ describe('GET /api/admin/stats', () => {
   });
 
   it('returns 304 when ETag matches (conditional request)', async () => {
+    const { GET } = await import('./route');
+
     // First request to obtain ETag
     const first = await GET(new NextRequest('http://test/api/admin/stats?range=default'));
     const etag = first.headers.get('etag') || '';
@@ -61,6 +69,7 @@ describe('GET /api/admin/stats', () => {
     const mockedRequireAdmin = requireAdmin as jest.MockedFunction<typeof requireAdmin>;
     mockedRequireAdmin.mockResolvedValueOnce(false);
 
+    const { GET } = await import('./route');
     const req = new NextRequest('http://test/api/admin/stats');
     const res = await GET(req);
 

@@ -80,7 +80,7 @@ export default function DashboardOverview() {
 
   // React Query: stats are the single source of truth
   const statsQuery = useDashboardStats(live, canViewAnalytics);
-  const stats = statsQuery.data;
+  const stats = statsQuery.data as DashboardStats | undefined;
   const statsError = statsQuery.error as unknown;
   const statsLoading = statsQuery.isLoading;
 
@@ -162,14 +162,12 @@ export default function DashboardOverview() {
       <div className="flex items-center justify-center h-64" data-testid="dashboard-error">
         <div className="text-center">
           <p className="text-red-600 mb-2">Unable to load dashboard data</p>
-          <p className="text-gray-600 mb-4">
-            Please try again.
-            {diagnosticCode && (
-              <span className="block text-xs mt-2" data-testid="dashboard-error-code">
-                {diagnosticCode}
-              </span>
-            )}
-          </p>
+          <p className="text-gray-600 mb-2">Please try again.</p>
+          {diagnosticCode && (
+            <p className="text-gray-500 text-xs mb-4" data-testid="dashboard-error-code">
+              {diagnosticCode}
+            </p>
+          )}
           <Button onClick={refresh} variant="outline">
             Retry Dashboard
           </Button>

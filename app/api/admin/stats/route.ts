@@ -64,11 +64,41 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    if (!adminDb) throw new Error("Firestore not initialized")
-
     const range = request.nextUrl.searchParams.get("range") || "default"
     const now = Date.now()
     const ifNoneMatch = request.headers.get("if-none-match")
+
+    // ✅ Early fallback if Firestore is not configured
+    if (!adminDb) {
+      const empty: StatsResponse = {
+        totalPosts: 0,
+        totalVideos: 0,
+        totalComments: 0,
+        totalViews: 0,
+        pendingComments: 0,
+        publishedPosts: 0,
+        featuredVideos: 0,
+        monthlyGrowth: 0,
+        ...(range === "12mo" ? { history: [] } : {}),
+      }
+      const etag = `"${createHash("md5").update(JSON.stringify(empty)).digest("hex")}"`
+      if (ifNoneMatch === etag) {
+        return new NextResponse(null, {
+          status: 304,
+          headers: {
+            ETag: etag,
+            "Cache-Control": "no-cache",
+          },
+        })
+      }
+      return NextResponse.json(empty, {
+        status: 200,
+        headers: {
+          ETag: etag,
+          "Cache-Control": "no-cache",
+        },
+      })
+    }
 
     // Serve from cache if available (TTL: 60s)
     const cached = statsCache[range]

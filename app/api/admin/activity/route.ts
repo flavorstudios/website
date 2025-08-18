@@ -45,7 +45,13 @@ export async function GET(req: NextRequest) {
       { status: 401 }
     );
   }
+
   try {
+    // ✅ Fallback: if Firestore isn't configured, return empty list (prevents 5xx)
+    if (!adminDb) {
+      return NextResponse.json({ activities: [] }, { status: 200 });
+    }
+
     // 🔥 Real Firestore query for activity log, most recent first
     const snap = await adminDb
       .collection("activityLog")

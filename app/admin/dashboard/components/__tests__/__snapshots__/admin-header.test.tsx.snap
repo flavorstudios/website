@@ -17,6 +17,7 @@ exports[`AdminHeader matches snapshot 1`] = `
     >
       <button
         class="sr-only"
+        aria-controls="command-palette"
         type="button"
       >
         Open command palette
@@ -74,11 +75,73 @@ exports[`AdminHeader matches snapshot 1`] = `
         >
           Flavor Studios Admin
         </h1>
+        <div
+          class="ml-2 flex items-center gap-2"
+        >
+          <div
+            aria-label="Environment: test"
+            class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-secondary/80 bg-red-600 text-white capitalize"
+          >
+            test
+          </div>
+          <button
+            aria-autocomplete="none"
+            aria-controls="radix-«r0»"
+            aria-expanded="false"
+            aria-label="Switch product"
+            class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-28"
+            data-state="closed"
+            dir="ltr"
+            role="combobox"
+            type="button"
+          >
+            <span
+              style="pointer-events: none;"
+            >
+              Admin
+            </span>
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-chevron-down h-4 w-4 opacity-50"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m6 9 6 6 6-6"
+              />
+            </svg>
+          </button>
+        </div>
+        <nav
+          aria-label="Breadcrumb"
+          class="hidden md:block ml-4 max-w-full"
+        >
+          <ol
+            class="flex flex-wrap items-center text-sm text-muted-foreground"
+          >
+            <li>
+              <a
+                class="hover:text-foreground"
+                href="/admin/dashboard"
+              >
+                Home
+              </a>
+            </li>
+          </ol>
+        </nav>
       </div>
       <div
         class="flex flex-wrap items-center gap-2 sm:gap-4"
       >
         <button
+          aria-controls="command-palette"
           aria-label="Search"
           class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent h-10 w-10 text-sm font-medium transition-colors hover:text-blue-600"
         >
@@ -133,53 +196,26 @@ exports[`AdminHeader matches snapshot 1`] = `
           </svg>
           View Site
         </button>
-        <button
-          aria-expanded="false"
-          aria-haspopup="menu"
-          aria-label="Quick actions"
-          class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3 gap-2"
-          data-state="closed"
-          id="radix-«r3»"
-          type="button"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-plus h-4 w-4"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M5 12h14"
-            />
-            <path
-              d="M12 5v14"
-            />
-          </svg>
-          <span
-            class="hidden sm:inline"
-          >
-            New
-          </span>
-        </button>
         <div
-          class="relative"
+          class="flex items-center gap-2"
         >
           <button
+            aria-label="Save"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md min-h-9 px-4"
+          >
+            Save
+          </button>
+          <button
             aria-expanded="false"
-            aria-haspopup="dialog"
-            aria-label="Notifications"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground px-3 relative h-11 w-11 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-haspopup="menu"
+            aria-label="More actions"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md min-h-9 px-3"
+            data-state="closed"
+            id="radix-«r4»"
             type="button"
           >
             <svg
-              class="lucide lucide-bell h-5 w-5"
+              class="lucide lucide-ellipsis h-4 w-4"
               fill="none"
               height="24"
               stroke="currentColor"
@@ -190,11 +226,20 @@ exports[`AdminHeader matches snapshot 1`] = `
               width="24"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"
+              <circle
+                cx="12"
+                cy="12"
+                r="1"
               />
-              <path
-                d="M10.3 21a1.94 1.94 0 0 0 3.4 0"
+              <circle
+                cx="19"
+                cy="12"
+                r="1"
+              />
+              <circle
+                cx="5"
+                cy="12"
+                r="1"
               />
             </svg>
           </button>
@@ -226,6 +271,37 @@ exports[`AdminHeader matches snapshot 1`] = `
             </p>
           </div>
         </div>
+        <button
+          aria-label="Help menu"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground rounded-md h-9 w-9 p-0"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-circle-help h-5 w-5"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <path
+              d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
+            />
+            <path
+              d="M12 17h.01"
+            />
+          </svg>
+        </button>
         <button
           aria-label="Toggle theme"
           aria-pressed="false"
@@ -259,6 +335,40 @@ exports[`AdminHeader matches snapshot 1`] = `
           </span>
         </button>
         <button
+          aria-autocomplete="none"
+          aria-controls="radix-«ra»"
+          aria-expanded="false"
+          aria-label="Select language"
+          class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-20"
+          data-state="closed"
+          dir="ltr"
+          role="combobox"
+          type="button"
+        >
+          <span
+            style="pointer-events: none;"
+          >
+            EN
+          </span>
+          <svg
+            aria-hidden="true"
+            class="lucide lucide-chevron-down h-4 w-4 opacity-50"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="m6 9 6 6 6-6"
+            />
+          </svg>
+        </button>
+        <button
           aria-label="Logout"
           class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent h-9 text-red-600 hover:text-red-700 min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         >
@@ -288,6 +398,25 @@ exports[`AdminHeader matches snapshot 1`] = `
               y2="12"
             />
           </svg>
+        </button>
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-label="User menu"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-full px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          data-state="closed"
+          id="radix-«rb»"
+          type="button"
+        >
+          <span
+            class="relative flex shrink-0 overflow-hidden rounded-full h-8 w-8"
+          >
+            <span
+              class="flex h-full w-full items-center justify-center rounded-full bg-muted"
+            >
+              AD
+            </span>
+          </span>
         </button>
       </div>
     </div>

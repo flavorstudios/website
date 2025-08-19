@@ -2,15 +2,27 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import dynamic from "next/dynamic"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Menu, ExternalLink, LogOut } from "lucide-react"
-import { NotificationBell } from "./notification-bell"
 import ThemeToggle from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
-import QuickActions from "./quick-actions"
 import HeaderDivider from "@/components/HeaderDivider"
 import { AdminSearch } from "./admin-search"
+
+// New: modular header pieces
+import EnvironmentBadge from "./header/environment-badge"
+import ProductSwitcher from "./header/product-switcher"
+import AdminBreadcrumbs from "./header/admin-breadcrumbs"
+import PrimaryAction from "./header/primary-action"
+import UserMenu from "./header/user-menu"
+import HelpMenu from "./header/help-menu"
+import LocaleToggle from "./header/locale-toggle"
+
+// Non-critical pieces lazy loaded for perf
+const NotificationBell = dynamic(() => import("./notification-bell"), { ssr: false })
+const QuickActions = dynamic(() => import("./quick-actions"), { ssr: false })
 
 interface AdminHeaderProps {
   onLogout: () => void
@@ -67,6 +79,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
           "h-14 px-4 flex items-center gap-2",
           "border-b pt-[env(safe-area-inset-top)]",
           "backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/70",
+          "motion-reduce:transition-none motion-reduce:backdrop-filter-none",
           className
         )}
       >
@@ -76,11 +89,12 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
             type="button"
             onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
             className="sr-only"
+            aria-controls="command-palette"
           >
             Open command palette
           </button>
 
-          {/* Left Section: Sidebar toggle, Logo */}
+          {/* Left Section: Sidebar toggle, Logo, Env + Product, Breadcrumbs */}
           <div className="flex items-center flex-1 min-w-0">
             {/* Sidebar button (mobile only) */}
             <Button
@@ -95,17 +109,27 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
             >
               <Menu className="h-5 w-5" aria-hidden="true" />
             </Button>
+
             <HeaderDivider />
+
             {/* Logo/title (always visible) */}
             <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap forced-colors:text-current">
               Flavor Studios Admin
             </h1>
-            {/* Desktop inline search was removed in favor of AdminSearch dialog trigger */}
+
+            {/* Environment badge + Product switcher */}
+            <div className="ml-2 flex items-center gap-2">
+              <EnvironmentBadge />
+              <ProductSwitcher />
+            </div>
+
+            {/* Breadcrumbs */}
+            <AdminBreadcrumbs />
           </div>
 
-          {/* Right Section: Actions, Avatar, Logout */}
+          {/* Right Section: Search, View Site, Primary/More, Quick, Notifs, Profile, Help, Theme, Locale, Logout, User menu */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            {/* New: search dialog trigger (replaces previous static inputs) */}
+            {/* Search dialog trigger */}
             <AdminSearch />
 
             <Button
@@ -121,9 +145,22 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               View Site
             </Button>
 
-            {/* Quick actions (New) */}
+            {/* Primary action + overflow */}
+            <PrimaryAction
+              label="Save"
+              onClick={() => window.dispatchEvent(new Event("primary-action"))}
+              moreActions={[
+                {
+                  label: "Settings",
+                  onSelect: () => window.location.assign("/admin/dashboard/settings"),
+                },
+              ]}
+            />
+
+            {/* Quick actions (lazy) */}
             <QuickActions />
 
+            {/* Notifications (lazy) */}
             <NotificationBell />
 
             {/* Avatar and Admin info */}
@@ -140,10 +177,12 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               </div>
             </div>
 
-            {/* Theme toggle (single source of truth) */}
+            {/* Help, theme, locale */}
+            <HelpMenu />
             <ThemeToggle aria-label="Toggle theme" />
+            <LocaleToggle />
 
-            {/* Logout button */}
+            {/* Logout button (kept as in your work) */}
             <Button
               variant="ghost"
               size="sm"
@@ -153,6 +192,14 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
             </Button>
+
+            {/* User menu for account and sign out */}
+            <UserMenu
+              avatar={avatar}
+              name="Admin"
+              userRole="Flavor Studios"
+              onLogout={onLogout}
+            />
           </div>
         </div>
       </header>

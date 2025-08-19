@@ -50,6 +50,8 @@ class InMemoryProvider implements NotificationsProvider {
     userId: string,
     _opts?: { cursor?: string; limit?: number }
   ): Promise<NotificationListResult> {
+    void _opts; // mark as intentionally unused for ESLint
+
     const items = this.store.get(userId) ?? [];
     const unreadCount = items.filter((n) => !n.readAt).length;
 

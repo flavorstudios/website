@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { usePathname } from "next/navigation"
-import { isAdminRoute, DEFAULT_ADMIN_ROUTE_PREFIXES } from "@/lib/cookie-consent"
+import { isAdminRoute, DEFAULT_ADMIN_ROUTE_PREFIXES } from "@/lib/ccookie-consent"
 import { Search, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -155,7 +155,7 @@ export function SearchFeature() {
       } else if (e.key === "/" && !isOpen) {
         const activeElement = document.activeElement as HTMLElement | null
         const tag = activeElement?.tagName
-        if (tag !== "INPUT" && tag !== "TEXTAREA" && !(activeElement as any)?.isContentEditable) {
+        if (tag !== "INPUT" && tag !== "TEXTAREA" && !activeElement?.isContentEditable) {
           e.preventDefault()
           setIsOpen(true)
         }

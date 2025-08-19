@@ -21,7 +21,10 @@ import HelpMenu from "./header/help-menu"
 import LocaleToggle from "./header/locale-toggle"
 
 // Non-critical pieces lazy loaded for perf
-const NotificationBell = dynamic(() => import("./notification-bell"), { ssr: false })
+const NotificationBell = dynamic(
+  () => import("./notification-bell").then((m) => m.NotificationBell),
+  { ssr: false }
+)
 const QuickActions = dynamic(() => import("./quick-actions"), { ssr: false })
 
 interface AdminHeaderProps {

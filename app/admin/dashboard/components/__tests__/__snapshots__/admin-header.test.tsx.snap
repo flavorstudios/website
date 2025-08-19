@@ -9,15 +9,15 @@ exports[`AdminHeader matches snapshot 1`] = `
     Skip to main content
   </a>
   <header
-    class="sticky top-0 z-40 h-14 px-4 flex items-center gap-2 border-b pt-[env(safe-area-inset-top)] backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/70"
+    class="sticky top-0 z-40 h-14 px-4 flex items-center gap-2 border-b pt-[env(safe-area-inset-top)] backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/70 motion-reduce:transition-none motion-reduce:backdrop-filter-none"
     role="banner"
   >
     <div
       class="flex flex-wrap items-center justify-between gap-2 sm:gap-4 w-full"
     >
       <button
-        class="sr-only"
         aria-controls="command-palette"
+        class="sr-only"
         type="button"
       >
         Open command palette
@@ -141,7 +141,6 @@ exports[`AdminHeader matches snapshot 1`] = `
         class="flex flex-wrap items-center gap-2 sm:gap-4"
       >
         <button
-          aria-controls="command-palette"
           aria-label="Search"
           class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent h-10 w-10 text-sm font-medium transition-colors hover:text-blue-600"
         >
@@ -272,12 +271,15 @@ exports[`AdminHeader matches snapshot 1`] = `
           </div>
         </div>
         <button
+          aria-expanded="false"
+          aria-haspopup="menu"
           aria-label="Help menu"
           class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground rounded-md h-9 w-9 p-0"
+          data-state="closed"
+          id="radix-«r6»"
           type="button"
         >
           <svg
-            aria-hidden="true"
             class="lucide lucide-circle-help h-5 w-5"
             fill="none"
             height="24"
@@ -336,7 +338,7 @@ exports[`AdminHeader matches snapshot 1`] = `
         </button>
         <button
           aria-autocomplete="none"
-          aria-controls="radix-«ra»"
+          aria-controls="radix-«r8»"
           aria-expanded="false"
           aria-label="Select language"
           class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-20"
@@ -405,7 +407,7 @@ exports[`AdminHeader matches snapshot 1`] = `
           aria-label="User menu"
           class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-full px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           data-state="closed"
-          id="radix-«rb»"
+          id="radix-«r9»"
           type="button"
         >
           <span

@@ -28,7 +28,7 @@ describe("GET /api/admin/stats", () => {
   it("returns stats with validated range", async () => {
     const { GET } = await import("./route");
     const req = new NextRequest("http://test/api/admin/stats?range=12mo");
-    const res = await GET(req as any);
+    const res = await GET(req);
 
     expect(res.status).toBe(200);
     expect(res.headers.get("cache-control")).toBe("no-store");
@@ -44,7 +44,7 @@ describe("GET /api/admin/stats", () => {
   it("defaults invalid range to 30d", async () => {
     const { GET } = await import("./route");
     const req = new NextRequest("http://test/api/admin/stats?range=bad");
-    const res = await GET(req as any);
+    const res = await GET(req);
 
     expect(res.status).toBe(200);
 
@@ -63,7 +63,7 @@ describe("GET /api/admin/stats", () => {
 
     const { GET } = await import("./route");
     const req = new NextRequest("http://test/api/admin/stats");
-    const res = await GET(req as any);
+    const res = await GET(req);
 
     expect(res.status).toBe(401);
   });

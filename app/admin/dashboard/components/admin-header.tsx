@@ -4,10 +4,10 @@
 import { useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Menu, ExternalLink } from "lucide-react"
 import ThemeToggle from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
+import { ADMIN_HEADER_HEIGHT } from "@/lib/constants"
 import { AdminSearch } from "./admin-search"
 
 // Kept pieces
@@ -29,7 +29,12 @@ interface AdminHeaderProps {
   className?: string
 }
 
-export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }: AdminHeaderProps) {
+export function AdminHeader({
+  onLogout,
+  sidebarOpen,
+  setSidebarOpen,
+  className,
+}: AdminHeaderProps) {
   const [avatar, setAvatar] = useState<string>("")
   const toggleRef = useRef<HTMLButtonElement | null>(null)
 
@@ -45,7 +50,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [])
 
-  // Load avatar from user settings (kept)
+  // Load avatar from user settings (kept – used by UserMenu)
   useEffect(() => {
     fetch("/api/admin/settings", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
@@ -64,7 +69,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
     <>
       {/* Skip link for keyboard and screen reader users */}
       <a
-        href="#main"
+        href="#app-main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-primary focus:text-primary-foreground focus:p-2 focus:outline-none focus:ring"
       >
         Skip to main content
@@ -74,7 +79,8 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
         role="banner"
         className={cn(
           "sticky top-0 z-40",
-          "h-16 md:h-20 px-4 flex items-center", // taller header
+          ADMIN_HEADER_HEIGHT,
+          "px-4 flex items-center",
           "border-b pt-[env(safe-area-inset-top)]",
           "backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/70",
           "motion-reduce:transition-none motion-reduce:backdrop-filter-none",
@@ -107,7 +113,11 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               variant="outline"
               size="sm"
               onClick={() =>
-                window.open("https://flavorstudios.in", "_blank", "noopener,noreferrer")
+                window.open(
+                  "https://flavorstudios.in",
+                  "_blank",
+                  "noopener,noreferrer"
+                )
               }
               aria-label="Open live site in a new tab"
               className="hidden md:flex items-center gap-2 min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
@@ -120,31 +130,13 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
             <PrimaryAction
               label="Save"
               onClick={() => window.dispatchEvent(new Event("primary-action"))}
-              moreActions={[
-                {
-                  label: "Settings",
-                  onSelect: () => window.location.assign("/admin/dashboard/settings"),
-                },
-              ]}
             />
 
             {/* Optional quick actions and notifications (kept) */}
             <QuickActions />
             <NotificationBell />
 
-            {/* Avatar and Admin info (kept) */}
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={avatar || "/admin-avatar.jpg"} alt="Admin avatar" />
-                <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-white text-sm">
-                  FS
-                </AvatarFallback>
-              </Avatar>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium text-foreground">Admin</p>
-                <p className="text-xs text-muted-foreground">Flavor Studios</p>
-              </div>
-            </div>
+            {/* Identity chip removed */}
 
             {/* Help and theme toggle (kept) */}
             <HelpMenu />

@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import { useRole } from "../contexts/role-context"
 import { useState, useEffect } from "react"
+import { ADMIN_HEADER_HEIGHT } from "@/lib/constants"
 
 interface AdminSidebarProps {
   /** Optional id so aria-controls can point to the landmark directly */
@@ -103,7 +104,7 @@ export function AdminSidebar({
         aria-label="Admin sidebar"
       >
         {/* Sidebar Header: match main nav height, remove extra vertical padding */}
-        <div className={`${sidebarOpen ? "px-4" : "px-2"} border-b border-border h-14 flex items-center`}>
+        <div className={`${sidebarOpen ? "px-4" : "px-2"} border-b border-border ${ADMIN_HEADER_HEIGHT} flex items-center`}>
           <div className="flex items-center justify-between w-full">
             {sidebarOpen ? (
               <div className="flex items-center gap-3">

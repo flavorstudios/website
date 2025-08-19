@@ -1,3 +1,4 @@
+// lib/constants.ts
 /**
  * Centralized site-wide constants for Flavor Studios.
  * Update here to reflect changes everywhere across the project.
@@ -6,6 +7,9 @@
 export const SITE_NAME = "Flavor Studios";
 export const SITE_URL = "https://flavorstudios.in";
 export const SITE_BRAND = SITE_NAME;
+
+// Shared admin header/rail height
+export const ADMIN_HEADER_HEIGHT = "h-14";
 
 // ✅ Centralized site description for all SEO/meta/schema
 export const SITE_DESCRIPTION =

@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID, createHash } from "crypto";
 
 export interface Notification {
   id: string;
@@ -13,8 +13,18 @@ export interface Notification {
   metadata?: Record<string, unknown>;
 }
 
+export interface NotificationListResult {
+  items: Notification[];
+  unreadCount: number;
+  nextCursor: string | null;
+  etag: string;
+}
+
 export interface NotificationsProvider {
-  list(userId: string): Promise<Notification[]>;
+  list(
+    userId: string,
+    opts?: { cursor?: string; limit?: number }
+  ): Promise<NotificationListResult>;
   markRead(userId: string, id: string): Promise<void>;
   markAllRead(userId: string): Promise<void>;
 }
@@ -36,8 +46,26 @@ class InMemoryProvider implements NotificationsProvider {
     this.store.set("admin", [sample]);
   }
 
-  async list(userId: string): Promise<Notification[]> {
-    return this.store.get(userId) ?? [];
+  async list(
+    userId: string,
+    _opts?: { cursor?: string; limit?: number }
+  ): Promise<NotificationListResult> {
+    const items = this.store.get(userId) ?? [];
+    const unreadCount = items.filter((n) => !n.readAt).length;
+
+    // Normalize dates for a stable ETag
+    const normalized = items.map((n) => ({
+      ...n,
+      createdAt:
+        n.createdAt instanceof Date ? n.createdAt.toISOString() : n.createdAt,
+      readAt:
+        n.readAt instanceof Date ? n.readAt.toISOString() : n.readAt ?? null,
+    }));
+    const etag = `"${createHash("md5")
+      .update(JSON.stringify(normalized))
+      .digest("hex")}"`;
+
+    return { items, unreadCount, nextCursor: null, etag };
   }
 
   async markRead(userId: string, id: string): Promise<void> {

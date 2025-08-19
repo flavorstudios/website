@@ -102,8 +102,8 @@ export function AdminSidebar({
         `}
         aria-label="Admin sidebar"
       >
-        {/* Sidebar Header */}
-        <div className={`${sidebarOpen ? "p-4" : "p-2"} border-b border-border min-h-[80px] flex items-center`}>
+        {/* Sidebar Header: match main nav height, remove extra vertical padding */}
+        <div className={`${sidebarOpen ? "px-4" : "px-2"} border-b border-border h-14 flex items-center`}>
           <div className="flex items-center justify-between w-full">
             {sidebarOpen ? (
               <div className="flex items-center gap-3">

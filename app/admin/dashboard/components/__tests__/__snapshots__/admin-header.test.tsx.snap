@@ -65,7 +65,7 @@ exports[`AdminHeader matches snapshot 1`] = `
         </button>
         <div
           aria-hidden="true"
-          class="mx-4 h-10 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"
+          class="shrink-0 bg-border w-[1px] mx-4 h-10 hidden sm:block"
         />
         <h1
           class="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap forced-colors:text-current"
@@ -137,7 +137,7 @@ exports[`AdminHeader matches snapshot 1`] = `
           aria-label="Quick actions"
           class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3 gap-2"
           data-state="closed"
-          id="radix-«r0»"
+          id="radix-«r3»"
           type="button"
         >
           <svg

@@ -2,6 +2,8 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback, useRef } from "react"
+import { usePathname } from "next/navigation"
+import { isAdminRoute, DEFAULT_ADMIN_ROUTE_PREFIXES } from "@/lib/cookie-consent"
 import { Search, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -70,6 +72,14 @@ export function SearchFeature() {
 
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
 
+  // Path-based admin detection (prevents registering shortcuts on admin routes)
+  const pathname = usePathname()
+  const adminPrefixes =
+    process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES
+      ? process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES.split(",").map((p) => p.trim()).filter(Boolean)
+      : DEFAULT_ADMIN_ROUTE_PREFIXES
+  const isAdmin = isAdminRoute(pathname || "/", adminPrefixes)
+
   // Search function
   const performSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
@@ -96,9 +106,10 @@ export function SearchFeature() {
             const slug = blog.slug.toLowerCase()
             const excerpt = blog.excerpt.toLowerCase()
             // Multi or single category match
-            const categories = Array.isArray(blog.categories) && blog.categories.length
-              ? blog.categories.map((c) => c.toLowerCase())
-              : [blog.category?.toLowerCase()]
+            const categories =
+              Array.isArray(blog.categories) && blog.categories.length
+                ? blog.categories.map((c) => c.toLowerCase())
+                : [blog.category?.toLowerCase()]
             return (
               title.includes(search) ||
               slug.includes(search) ||
@@ -133,28 +144,34 @@ export function SearchFeature() {
     performSearch(debouncedSearchQuery)
   }, [debouncedSearchQuery, performSearch])
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts (disabled on admin routes)
   useEffect(() => {
+    if (isAdmin) return
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault()
         setIsOpen(true)
       } else if (e.key === "/" && !isOpen) {
-        const activeElement = document.activeElement
-        if (activeElement?.tagName !== "INPUT" && activeElement?.tagName !== "TEXTAREA") {
+        const activeElement = document.activeElement as HTMLElement | null
+        const tag = activeElement?.tagName
+        if (tag !== "INPUT" && tag !== "TEXTAREA" && !(activeElement as any)?.isContentEditable) {
           e.preventDefault()
           setIsOpen(true)
         }
       }
     }
+
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [isOpen])
+  }, [isOpen, isAdmin])
 
   // Handle modal keyboard navigation
   const handleModalKeyDown = (e: React.KeyboardEvent) => {
     if ("ontouchstart" in window) return
     const totalResults = results.blogs.length + results.videos.length
+    if (totalResults <= 0) return
+
     if (e.key === "ArrowDown") {
       e.preventDefault()
       setSelectedIndex((prev) => (prev + 1) % totalResults)
@@ -207,7 +224,7 @@ export function SearchFeature() {
         >
           <div className="fixed inset-0 sm:relative bg-background/95 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none flex flex-col">
             <div className="flex-shrink-0 border-b bg-white p-4">
-              <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="flex items-center gap-3 w/full sm:w-auto">
                 <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                 <Input
                   ref={inputRef}
@@ -299,7 +316,7 @@ export function SearchFeature() {
                           href={`/watch/${video.slug}`}
                           onClick={() => setIsOpen(false)}
                           className={`block p-3 rounded-lg hover:bg-muted transition-colors touch-manipulation ${
-                            selectedIndex === (results.blogs.length + index) ? "bg-muted" : ""
+                            selectedIndex === results.blogs.length + index ? "bg-muted" : ""
                           }`}
                         >
                           <div className="font-medium text-sm mb-1">

@@ -3,11 +3,18 @@
 import type React from "react"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { usePathname } from "next/navigation"
-import { isAdminRoute, DEFAULT_ADMIN_ROUTE_PREFIXES } from "@/lib/ccookie-consent"
+import { isAdminRoute, DEFAULT_ADMIN_ROUTE_PREFIXES } from "@/lib/cookie-consent"
 import { Search, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge" // Added for multi-category support
 import { formatDate } from "@/lib/date" // <-- Added
@@ -100,12 +107,10 @@ export function SearchFeature() {
         const blogsData = await blogsResponse.value.json()
         blogs = blogsData
           .filter((blog: BlogPost) => {
-            // Multi-category match logic
             const search = query.toLowerCase()
             const title = blog.title.toLowerCase()
             const slug = blog.slug.toLowerCase()
             const excerpt = blog.excerpt.toLowerCase()
-            // Multi or single category match
             const categories =
               Array.isArray(blog.categories) && blog.categories.length
                 ? blog.categories.map((c) => c.toLowerCase())
@@ -119,6 +124,7 @@ export function SearchFeature() {
           })
           .slice(0, 5)
       }
+
       // Process videos
       if (videosResponse.status === "fulfilled" && videosResponse.value.ok) {
         const videosData = await videosResponse.value.json()
@@ -130,6 +136,7 @@ export function SearchFeature() {
           )
           .slice(0, 5)
       }
+
       setResults({ blogs, videos })
     } catch (error) {
       console.error("Search error:", error)
@@ -153,9 +160,13 @@ export function SearchFeature() {
         e.preventDefault()
         setIsOpen(true)
       } else if (e.key === "/" && !isOpen) {
-        const activeElement = document.activeElement as HTMLElement | null
-        const tag = activeElement?.tagName
-        if (tag !== "INPUT" && tag !== "TEXTAREA" && !activeElement?.isContentEditable) {
+        const activeElement = document.activeElement
+        const tag = (activeElement as HTMLElement | null)?.tagName
+        if (
+          tag !== "INPUT" &&
+          tag !== "TEXTAREA" &&
+          !(activeElement instanceof HTMLElement && activeElement.isContentEditable)
+        ) {
           e.preventDefault()
           setIsOpen(true)
         }
@@ -222,9 +233,16 @@ export function SearchFeature() {
           className="max-w-full max-h-full sm:max-w-2xl p-0 gap-0 border-none bg-transparent sm:bg-white sm:border sm:rounded-lg"
           onKeyDown={handleModalKeyDown}
         >
+          <DialogHeader>
+            <VisuallyHidden>
+              <DialogTitle>Search</DialogTitle>
+              <DialogDescription>Search dialog</DialogDescription>
+            </VisuallyHidden>
+          </DialogHeader>
+
           <div className="fixed inset-0 sm:relative bg-background/95 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none flex flex-col">
             <div className="flex-shrink-0 border-b bg-white p-4">
-              <div className="flex items-center gap-3 w/full sm:w-auto">
+              <div className="flex items-center gap-3 w-full sm:w-auto">
                 <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                 <Input
                   ref={inputRef}

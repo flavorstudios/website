@@ -1,46 +1,55 @@
-import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
-import { NextRequest, NextResponse } from "next/server"
-import { adminDb } from "@/lib/firebase-admin"
-import { AggregateField, Timestamp } from "firebase-admin/firestore"
-import { createHash } from "crypto"
+// app/api/admin/stats/route.ts
+import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
+import { NextRequest, NextResponse } from "next/server";
+import { adminDb } from "@/lib/firebase-admin";
+import { AggregateField, Timestamp } from "firebase-admin/firestore";
+import { createHash } from "crypto";
+import { z } from "zod";
+
+export const runtime = "nodejs";
 
 // Base stats shape
 type Stats = {
-  totalPosts: number
-  totalVideos: number
-  totalComments: number
-  totalViews: number
-  pendingComments: number
-  publishedPosts: number
-  featuredVideos: number
-  monthlyGrowth: number
-}
+  totalPosts: number;
+  totalVideos: number;
+  totalComments: number;
+  totalViews: number;
+  pendingComments: number;
+  publishedPosts: number;
+  featuredVideos: number;
+  monthlyGrowth: number;
+};
 
 type MonthlyStats = {
-  month: string // e.g. "Jan"
-  posts: number
-  videos: number
-  comments: number
-}
+  month: string; // e.g. "Jan"
+  posts: number;
+  videos: number;
+  comments: number;
+};
 
 // Response can optionally include history
-type StatsResponse = Stats & { history?: MonthlyStats[] }
+type StatsResponse = Stats & { history?: MonthlyStats[] };
 
 // Short-lived cache (60s), keyed by `range`
-const statsCache: Record<string, { data: StatsResponse; expires: number }> = {}
+const statsCache: Record<string, { data: StatsResponse; expires: number }> = {};
+
+// Accept legacy "default" and canonical ranges; invalid values fall back to "30d"
+const RangeSchema = z.enum(["default", "7d", "30d", "90d", "12mo"]);
+const canonicalizeRange = (r: z.infer<typeof RangeSchema>): "7d" | "30d" | "90d" | "12mo" =>
+  r === "default" ? "30d" : r;
 
 export async function GET(request: NextRequest) {
-  const sessionInfo = await getSessionInfo(request)
+  const sessionInfo = await getSessionInfo(request);
 
   if (process.env.DEBUG_ADMIN === "true") {
-    console.log("[admin-stats] Incoming request at", new Date().toISOString())
-    console.log("[admin-stats] sessionInfo:", sessionInfo)
+    console.log("[admin-stats] Incoming request at", new Date().toISOString());
+    console.log("[admin-stats] sessionInfo:", sessionInfo);
   }
 
-  const hasAccess = await requireAdmin(request, "canViewAnalytics")
+  const hasAccess = await requireAdmin(request, "canViewAnalytics");
 
   if (process.env.DEBUG_ADMIN === "true") {
-    console.log("[admin-stats] hasAccess:", hasAccess, "| role:", sessionInfo?.role, "| email:", sessionInfo?.email)
+    console.log("[admin-stats] hasAccess:", hasAccess, "| role:", sessionInfo?.role, "| email:", sessionInfo?.email);
   }
 
   if (!hasAccess) {
@@ -50,7 +59,7 @@ export async function GET(request: NextRequest) {
         role: sessionInfo?.role,
         email: sessionInfo?.email,
         uid: sessionInfo?.uid,
-      })
+      });
     }
     return NextResponse.json(
       {
@@ -60,13 +69,17 @@ export async function GET(request: NextRequest) {
         uid: sessionInfo?.uid || "unknown",
       },
       { status: 401 }
-    )
+    );
   }
 
   try {
-    const range = request.nextUrl.searchParams.get("range") || "default"
-    const now = Date.now()
-    const ifNoneMatch = request.headers.get("if-none-match")
+    // Validate and canonicalize range
+    const rangeParam = request.nextUrl.searchParams.get("range") ?? "default";
+    const parsed = RangeSchema.safeParse(rangeParam);
+    const range = parsed.success ? canonicalizeRange(parsed.data) : "30d";
+
+    const now = Date.now();
+    const ifNoneMatch = request.headers.get("if-none-match");
 
     // ✅ Early fallback if Firestore is not configured
     if (!adminDb) {
@@ -80,8 +93,8 @@ export async function GET(request: NextRequest) {
         featuredVideos: 0,
         monthlyGrowth: 0,
         ...(range === "12mo" ? { history: [] } : {}),
-      }
-      const etag = `"${createHash("md5").update(JSON.stringify(empty)).digest("hex")}"`
+      };
+      const etag = `"${createHash("md5").update(JSON.stringify(empty)).digest("hex")}"`;
       if (ifNoneMatch === etag) {
         return new NextResponse(null, {
           status: 304,
@@ -89,7 +102,7 @@ export async function GET(request: NextRequest) {
             ETag: etag,
             "Cache-Control": "no-cache",
           },
-        })
+        });
       }
       return NextResponse.json(empty, {
         status: 200,
@@ -97,15 +110,15 @@ export async function GET(request: NextRequest) {
           ETag: etag,
           "Cache-Control": "no-cache",
         },
-      })
+      });
     }
 
     // Serve from cache if available (TTL: 60s)
-    const cached = statsCache[range]
+    const cached = statsCache[range];
     if (cached && cached.expires > now) {
-      const etag = `"${createHash("md5").update(JSON.stringify(cached.data)).digest("hex")}"`
+      const etag = `"${createHash("md5").update(JSON.stringify(cached.data)).digest("hex")}"`;
       if (process.env.DEBUG_ADMIN === "true") {
-        console.log("[admin-stats] Returning cached stats (range:", range, "):", cached.data)
+        console.log("[admin-stats] Returning cached stats (range:", range, "):", cached.data);
       }
       if (ifNoneMatch === etag) {
         return new NextResponse(null, {
@@ -114,7 +127,7 @@ export async function GET(request: NextRequest) {
             ETag: etag,
             "Cache-Control": "no-cache",
           },
-        })
+        });
       }
       return NextResponse.json(cached.data, {
         status: 200,
@@ -122,7 +135,7 @@ export async function GET(request: NextRequest) {
           ETag: etag,
           "Cache-Control": "no-cache",
         },
-      })
+      });
     }
 
     // Fetch Firestore stats in parallel
@@ -144,7 +157,7 @@ export async function GET(request: NextRequest) {
       adminDb.collection("comments").where("approved", "==", false).count().get(),
       adminDb.collection("blogs").where("status", "==", "published").count().get(),
       adminDb.collection("videos").where("featured", "==", true).count().get(),
-    ])
+    ]);
 
     const base: Stats = {
       totalPosts: totalPostsSnap.data().count,
@@ -155,21 +168,21 @@ export async function GET(request: NextRequest) {
       publishedPosts: publishedPostsSnap.data().count,
       featuredVideos: featuredVideosSnap.data().count,
       monthlyGrowth: 0, // keep as-is; compute later if needed
-    }
+    };
 
-    let history: MonthlyStats[] | undefined
+    let history: MonthlyStats[] | undefined;
 
     // Optional 12-month history for charts
     if (range === "12mo") {
-      history = []
-      const current = new Date()
+      history = [];
+      const current = new Date();
 
       for (let i = 11; i >= 0; i--) {
-        const start = new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i, 1))
-        const end = new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i + 1, 1))
+        const start = new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i, 1));
+        const end = new Date(Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i + 1, 1));
 
-        const startTs = Timestamp.fromDate(start)
-        const endTs = Timestamp.fromDate(end)
+        const startTs = Timestamp.fromDate(start);
+        const endTs = Timestamp.fromDate(end);
 
         const [postSnap, videoSnap, commentSnap] = await Promise.all([
           adminDb.collection("blogs").where("createdAt", ">=", startTs).where("createdAt", "<", endTs).count().get(),
@@ -177,28 +190,28 @@ export async function GET(request: NextRequest) {
           // Adjust this to your comments collection structure.
           // Using a collectionGroup example for nested comment entries:
           adminDb.collectionGroup("entries").where("createdAt", ">=", startTs).where("createdAt", "<", endTs).count().get(),
-        ])
+        ]);
 
         history.push({
           month: start.toLocaleString("default", { month: "short" }),
           posts: postSnap.data().count,
           videos: videoSnap.data().count,
           comments: commentSnap.data().count,
-        })
+        });
       }
     }
 
-    const response: StatsResponse = history ? { ...base, history } : base
+    const response: StatsResponse = history ? { ...base, history } : base;
 
     // Update cache for this range
-    statsCache[range] = { data: response, expires: now + 60_000 }
+    statsCache[range] = { data: response, expires: now + 60_000 };
 
     if (process.env.DEBUG_ADMIN === "true") {
-      console.log("[admin-stats] Returning stats (range:", range, "):", response)
+      console.log("[admin-stats] Returning stats (range:", range, "):", response);
     }
 
     // Compute ETag and honor If-None-Match
-    const etag = `"${createHash("md5").update(JSON.stringify(response)).digest("hex")}"`
+    const etag = `"${createHash("md5").update(JSON.stringify(response)).digest("hex")}"`;
     if (ifNoneMatch === etag) {
       return new NextResponse(null, {
         status: 304,
@@ -206,7 +219,7 @@ export async function GET(request: NextRequest) {
           ETag: etag,
           "Cache-Control": "no-cache",
         },
-      })
+      });
     }
 
     return NextResponse.json(response, {
@@ -215,9 +228,9 @@ export async function GET(request: NextRequest) {
         ETag: etag,
         "Cache-Control": "no-cache",
       },
-    })
+    });
   } catch (error) {
-    console.error("Failed to fetch stats:", error)
-    return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 })
+    console.error("[/api/admin/stats] Failed to fetch stats:", error);
+    return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
   }
 }

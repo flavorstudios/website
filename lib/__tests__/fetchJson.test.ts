@@ -2,12 +2,12 @@ import { fetchJson, HttpError } from '../http';
 
 describe('fetchJson', () => {
   beforeEach(() => {
-    // @ts-expect-error: reset fetch for test control
+    // @ts-expect-error - reset fetch for test control
     global.fetch = undefined;
   });
 
   it('returns data on success', async () => {
-    // @ts-expect-error: mock fetch response
+    // @ts-expect-error - mock fetch response
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       headers: new Headers({ 'content-type': 'application/json' }),
@@ -18,7 +18,7 @@ describe('fetchJson', () => {
   });
 
   it('throws HttpError on 4xx', async () => {
-    // @ts-expect-error: mock fetch 404 response
+    // @ts-expect-error - mock fetch 404 response
     global.fetch = jest.fn().mockResolvedValue({
       ok: false,
       status: 404,
@@ -46,11 +46,11 @@ describe('fetchJson', () => {
         json: async () => ({ ok: true })
       }
     ];
-    // @ts-expect-error: queue mocked fetch responses for retry flow
+    // @ts-expect-error - queue mocked fetch responses for retry flow
     global.fetch = jest.fn(() => Promise.resolve(responses.shift()));
     const res = await fetchJson('/retry', {}, { retry: 2 });
     expect(res).toEqual({ ok: true });
-    // @ts-expect-error: check mock call count
+    // @ts-expect-error - asserting mock call count
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 
@@ -70,28 +70,28 @@ describe('fetchJson', () => {
         json: async () => ({ ok: true })
       }
     ];
-    // @ts-expect-error
+    // @ts-expect-error - mock global fetch for retry behavior
     global.fetch = jest.fn(() => Promise.resolve(responses.shift()));
     const res = await fetchJson('/retry429', {}, { retry: 2 });
     expect(res).toEqual({ ok: true });
-    // @ts-expect-error
+    // @ts-expect-error - asserting mock call count
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 
   it('retries on timeout and succeeds', async () => {
-    const responses: Array<Promise<any>> = [
-      Promise.reject(new Error('Request timed out')),
+    const responses: Array<Promise<Response>> = [
+      Promise.reject(new Error('Request timed out')) as Promise<Response>,
       Promise.resolve({
         ok: true,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: async () => ({ ok: true })
-      })
+      } as Response)
     ];
-    // @ts-expect-error
+    // @ts-expect-error - mock global fetch for timeout test
     global.fetch = jest.fn(() => responses.shift());
     const res = await fetchJson('/timeout', {}, { retry: 1 });
     expect(res).toEqual({ ok: true });
-    // @ts-expect-error
+    // @ts-expect-error - asserting mock call count
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 
@@ -108,16 +108,16 @@ describe('fetchJson', () => {
         json: async () => ({ ok: true })
       }
     ];
-    // @ts-expect-error
+    // @ts-expect-error - mock global fetch for malformed JSON
     global.fetch = jest.fn(() => Promise.resolve(responses.shift()));
     const res = await fetchJson('/badjson', {}, { retry: 1 });
     expect(res).toEqual({ ok: true });
-    // @ts-expect-error
+    // @ts-expect-error - asserting mock call count
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 
   it('preserves HttpError status and bodySnippet', async () => {
-    // @ts-expect-error
+    // @ts-expect-error - mock global fetch for HttpError test
     global.fetch = jest.fn().mockResolvedValue({
       ok: false,
       status: 503,
@@ -134,7 +134,7 @@ describe('fetchJson', () => {
   });
 
   it('returns undefined on 204 No Content', async () => {
-    // @ts-expect-error
+    // @ts-expect-error - mock global fetch for 204 test
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 204,

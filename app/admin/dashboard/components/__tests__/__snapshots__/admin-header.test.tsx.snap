@@ -72,80 +72,36 @@ exports[`AdminHeader matches snapshot 1`] = `
         >
           Flavor Studios Admin
         </h1>
-        <div
-          class="hidden md:block flex-1 max-w-xs ltr:ml-4 rtl:mr-4"
-        >
-          <div
-            class="relative w-full"
-          >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-search absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4"
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="11"
-                cy="11"
-                r="8"
-              />
-              <path
-                d="m21 21-4.3-4.3"
-              />
-            </svg>
-            <input
-              aria-label="Search"
-              class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full min-h-11 ltr:pl-10 rtl:pr-10"
-              placeholder="Search..."
-            />
-          </div>
-        </div>
       </div>
       <div
         class="flex flex-wrap items-center gap-2 sm:gap-4"
       >
-        <div
-          class="w-full md:hidden order-2 flex-1"
+        <button
+          aria-label="Search"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent h-10 w-10 text-sm font-medium transition-colors hover:text-blue-600"
         >
-          <div
-            class="relative w-full mt-2"
+          <svg
+            class="lucide lucide-search h-5 w-5"
+            fill="none"
+            height="24"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-search absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4"
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="11"
-                cy="11"
-                r="8"
-              />
-              <path
-                d="m21 21-4.3-4.3"
-              />
-            </svg>
-            <input
-              aria-label="Search"
-              class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full min-h-11 ltr:pl-10 rtl:pr-10"
-              placeholder="Search..."
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
             />
-          </div>
-        </div>
+            <path
+              d="m21 21-4.3-4.3"
+            />
+          </svg>
+        </button>
         <button
           aria-label="Open live site in a new tab"
           class="justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 hidden md:flex items-center gap-2 min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"

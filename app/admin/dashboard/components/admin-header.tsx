@@ -3,14 +3,14 @@
 
 import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Search, Menu, ExternalLink, LogOut } from "lucide-react"
+import { Menu, ExternalLink, LogOut } from "lucide-react"
 import { NotificationBell } from "./notification-bell"
 import ThemeToggle from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 import QuickActions from "./quick-actions"
 import HeaderDivider from "@/components/HeaderDivider"
+import { AdminSearch } from "./admin-search"
 
 interface AdminHeaderProps {
   onLogout: () => void
@@ -80,7 +80,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
             Open command palette
           </button>
 
-          {/* Left Section: Sidebar toggle, Logo, Search */}
+          {/* Left Section: Sidebar toggle, Logo */}
           <div className="flex items-center flex-1 min-w-0">
             {/* Sidebar button (mobile only) */}
             <Button
@@ -100,39 +100,13 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
             <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap forced-colors:text-current">
               Flavor Studios Admin
             </h1>
-
-            {/* Desktop search input */}
-            <div className="hidden md:block flex-1 max-w-xs ltr:ml-4 rtl:mr-4">
-              <div className="relative w-full">
-                <Search
-                  className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4"
-                  aria-hidden="true"
-                />
-                <Input
-                  placeholder="Search..."
-                  className="w-full min-h-11 ltr:pl-10 rtl:pr-10"
-                  aria-label="Search"
-                />
-              </div>
-            </div>
+            {/* Desktop inline search was removed in favor of AdminSearch dialog trigger */}
           </div>
 
           {/* Right Section: Actions, Avatar, Logout */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            {/* Mobile search input (below md) */}
-            <div className="w-full md:hidden order-2 flex-1">
-              <div className="relative w-full mt-2">
-                <Search
-                  className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4"
-                  aria-hidden="true"
-                />
-                <Input
-                  placeholder="Search..."
-                  className="w-full min-h-11 ltr:pl-10 rtl:pr-10"
-                  aria-label="Search"
-                />
-              </div>
-            </div>
+            {/* New: search dialog trigger (replaces previous static inputs) */}
+            <AdminSearch />
 
             <Button
               variant="outline"

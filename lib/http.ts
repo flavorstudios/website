@@ -32,8 +32,7 @@ export async function fetchJson<T>(
         signal: ctrl.signal,
       });
 
-      const urlText =
-        (res as any).url || (typeof input === 'string' ? input : String(input));
+      const urlText = res.url || (typeof input === 'string' ? input : String(input));
       const ct = (res.headers.get('content-type') || '').toLowerCase();
 
       if (!res.ok) {

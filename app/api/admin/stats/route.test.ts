@@ -2,7 +2,10 @@
  * @jest-environment node
  */
 import { NextRequest } from 'next/server';
-import { requireAdmin } from '@/lib/admin-auth';
+
+// NOTE: Do not import requireAdmin at runtime here; we dynamically import it in the test.
+// If you need types, use a type-only import or an inline typeof import.
+type RequireAdminFn = typeof import('@/lib/admin-auth')['requireAdmin'];
 
 jest.mock('@/lib/admin-auth', () => ({
   requireAdmin: jest.fn().mockResolvedValue(true),
@@ -66,8 +69,10 @@ describe('GET /api/admin/stats', () => {
   });
 
   it('denies unauthorized', async () => {
-    const mockedRequireAdmin = requireAdmin as jest.MockedFunction<typeof requireAdmin>;
-    mockedRequireAdmin.mockResolvedValueOnce(false);
+    // Dynamically import the mocked module to avoid stale references after resetModules().
+    const adminAuth = await import('@/lib/admin-auth');
+    const mockedRequireAdmin = adminAuth.requireAdmin as jest.MockedFunction<RequireAdminFn>;
+    mockedRequireAdmin.mockResolvedValue(false);
 
     const { GET } = await import('./route');
     const req = new NextRequest('http://test/api/admin/stats');

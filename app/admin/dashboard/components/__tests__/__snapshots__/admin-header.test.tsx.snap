@@ -66,6 +66,8 @@ exports[`AdminHeader matches snapshot 1`] = `
         <div
           aria-hidden="true"
           class="shrink-0 bg-border w-[1px] mx-4 h-10 hidden sm:block"
+          data-orientation="vertical"
+          role="none"
         />
         <h1
           class="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap forced-colors:text-current"

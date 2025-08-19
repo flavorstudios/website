@@ -5,22 +5,17 @@ import { useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Menu, ExternalLink, LogOut } from "lucide-react"
+import { Menu, ExternalLink } from "lucide-react"
 import ThemeToggle from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
-import HeaderDivider from "@/components/HeaderDivider"
 import { AdminSearch } from "./admin-search"
 
-// New: modular header pieces
-import EnvironmentBadge from "./header/environment-badge"
-import ProductSwitcher from "./header/product-switcher"
-import AdminBreadcrumbs from "./header/admin-breadcrumbs"
+// Kept pieces
 import PrimaryAction from "./header/primary-action"
 import UserMenu from "./header/user-menu"
 import HelpMenu from "./header/help-menu"
-import LocaleToggle from "./header/locale-toggle"
 
-// Non-critical pieces lazy loaded for perf
+// Non-critical pieces lazy loaded for perf (kept)
 const NotificationBell = dynamic(
   () => import("./notification-bell").then((m) => m.NotificationBell),
   { ssr: false }
@@ -38,7 +33,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
   const [avatar, setAvatar] = useState<string>("")
   const toggleRef = useRef<HTMLButtonElement | null>(null)
 
-  // Ctrl/Cmd + K to open the command palette
+  // Ctrl/Cmd + K to open the command palette (kept)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -50,7 +45,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [])
 
-  // Load avatar from user settings
+  // Load avatar from user settings (kept)
   useEffect(() => {
     fetch("/api/admin/settings", { credentials: "include" })
       .then((res) => (res.ok ? res.json() : Promise.reject()))
@@ -79,62 +74,35 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
         role="banner"
         className={cn(
           "sticky top-0 z-40",
-          "h-14 px-4 flex items-center gap-2",
+          "h-16 md:h-20 px-4 flex items-center", // taller header
           "border-b pt-[env(safe-area-inset-top)]",
           "backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/70",
           "motion-reduce:transition-none motion-reduce:backdrop-filter-none",
           className
         )}
       >
-        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 w-full">
-          {/* SR-only button so screen reader users can open the command palette */}
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
-            className="sr-only"
-            aria-controls="command-palette"
+        <div className="flex items-center w-full gap-2 sm:gap-4">
+          {/* Left: Sidebar toggle (mobile only) */}
+          <Button
+            ref={toggleRef}
+            variant="ghost"
+            size="sm"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+            aria-expanded={sidebarOpen}
+            aria-controls="admin-sidebar"
+            className="lg:hidden min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
-            Open command palette
-          </button>
+            <Menu className="h-5 w-5" aria-hidden="true" />
+          </Button>
 
-          {/* Left Section: Sidebar toggle, Logo, Env + Product, Breadcrumbs */}
-          <div className="flex items-center flex-1 min-w-0">
-            {/* Sidebar button (mobile only) */}
-            <Button
-              ref={toggleRef}
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-              aria-expanded={sidebarOpen}
-              aria-controls="admin-sidebar"
-              className="lg:hidden min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-            >
-              <Menu className="h-5 w-5" aria-hidden="true" />
-            </Button>
-
-            <HeaderDivider />
-
-            {/* Logo/title (always visible) */}
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap forced-colors:text-current">
-              Flavor Studios Admin
-            </h1>
-
-            {/* Environment badge + Product switcher */}
-            <div className="ml-2 flex items-center gap-2">
-              <EnvironmentBadge />
-              <ProductSwitcher />
-            </div>
-
-            {/* Breadcrumbs */}
-            <AdminBreadcrumbs />
+          {/* Center: usable search */}
+          <div className="flex-1 flex justify-center px-2">
+            <AdminSearch />
           </div>
 
-          {/* Right Section: Search, View Site, Primary/More, Quick, Notifs, Profile, Help, Theme, Locale, Logout, User menu */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            {/* Search dialog trigger */}
-            <AdminSearch />
-
+          {/* Right: core actions only */}
+          <div className="flex items-center gap-2 sm:gap-4">
             <Button
               variant="outline"
               size="sm"
@@ -148,7 +116,7 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               View Site
             </Button>
 
-            {/* Primary action + overflow */}
+            {/* Primary action (Save) */}
             <PrimaryAction
               label="Save"
               onClick={() => window.dispatchEvent(new Event("primary-action"))}
@@ -160,13 +128,11 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               ]}
             />
 
-            {/* Quick actions (lazy) */}
+            {/* Optional quick actions and notifications (kept) */}
             <QuickActions />
-
-            {/* Notifications (lazy) */}
             <NotificationBell />
 
-            {/* Avatar and Admin info */}
+            {/* Avatar and Admin info (kept) */}
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={avatar || "/admin-avatar.jpg"} alt="Admin avatar" />
@@ -180,23 +146,11 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
               </div>
             </div>
 
-            {/* Help, theme, locale */}
+            {/* Help and theme toggle (kept) */}
             <HelpMenu />
             <ThemeToggle aria-label="Toggle theme" />
-            <LocaleToggle />
 
-            {/* Logout button (kept as in your work) */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onLogout}
-              aria-label="Logout"
-              className="text-red-600 hover:text-red-700 min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-            >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
-            </Button>
-
-            {/* User menu for account and sign out */}
+            {/* Avatar menu is the ONLY place with Sign out */}
             <UserMenu
               avatar={avatar}
               name="Admin"
@@ -209,3 +163,5 @@ export function AdminHeader({ onLogout, sidebarOpen, setSidebarOpen, className }
     </>
   )
 }
+
+export default AdminHeader

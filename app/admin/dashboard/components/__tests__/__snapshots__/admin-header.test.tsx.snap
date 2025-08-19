@@ -9,166 +9,69 @@ exports[`AdminHeader matches snapshot 1`] = `
     Skip to main content
   </a>
   <header
-    class="sticky top-0 z-40 h-14 px-4 flex items-center gap-2 border-b pt-[env(safe-area-inset-top)] backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/70 motion-reduce:transition-none motion-reduce:backdrop-filter-none"
+    class="sticky top-0 z-40 h-16 md:h-20 px-4 flex items-center border-b pt-[env(safe-area-inset-top)] backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/70 motion-reduce:transition-none motion-reduce:backdrop-filter-none"
     role="banner"
   >
     <div
-      class="flex flex-wrap items-center justify-between gap-2 sm:gap-4 w-full"
+      class="flex items-center w-full gap-2 sm:gap-4"
     >
       <button
-        aria-controls="command-palette"
-        class="sr-only"
+        aria-controls="admin-sidebar"
+        aria-expanded="false"
+        aria-label="Open sidebar"
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 lg:hidden min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         type="button"
       >
-        Open command palette
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-menu h-5 w-5"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <line
+            x1="4"
+            x2="20"
+            y1="12"
+            y2="12"
+          />
+          <line
+            x1="4"
+            x2="20"
+            y1="6"
+            y2="6"
+          />
+          <line
+            x1="4"
+            x2="20"
+            y1="18"
+            y2="18"
+          />
+        </svg>
       </button>
       <div
-        class="flex items-center flex-1 min-w-0"
+        class="flex-1 flex justify-center px-2"
       >
-        <button
-          aria-controls="admin-sidebar"
-          aria-expanded="false"
-          aria-label="Open sidebar"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 lg:hidden min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-menu h-5 w-5"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <line
-              x1="4"
-              x2="20"
-              y1="12"
-              y2="12"
-            />
-            <line
-              x1="4"
-              x2="20"
-              y1="6"
-              y2="6"
-            />
-            <line
-              x1="4"
-              x2="20"
-              y1="18"
-              y2="18"
-            />
-          </svg>
-        </button>
-        <div
-          aria-hidden="true"
-          class="shrink-0 bg-border w-[1px] mx-4 h-10 hidden sm:block"
-          data-orientation="vertical"
-          role="none"
+        <input
+          class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full max-w-md"
+          placeholder="Search..."
+          type="search"
+          value=""
         />
-        <h1
-          class="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap forced-colors:text-current"
-        >
-          Flavor Studios Admin
-        </h1>
-        <div
-          class="ml-2 flex items-center gap-2"
-        >
-          <div
-            aria-label="Environment: test"
-            class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-secondary/80 bg-red-600 text-white capitalize"
-          >
-            test
-          </div>
-          <button
-            aria-autocomplete="none"
-            aria-controls="radix-«r0»"
-            aria-expanded="false"
-            aria-label="Switch product"
-            class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-28"
-            data-state="closed"
-            dir="ltr"
-            role="combobox"
-            type="button"
-          >
-            <span
-              style="pointer-events: none;"
-            >
-              Admin
-            </span>
-            <svg
-              aria-hidden="true"
-              class="lucide lucide-chevron-down h-4 w-4 opacity-50"
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="m6 9 6 6 6-6"
-              />
-            </svg>
-          </button>
-        </div>
-        <nav
-          aria-label="Breadcrumb"
-          class="hidden md:block ml-4 max-w-full"
-        >
-          <ol
-            class="flex flex-wrap items-center text-sm text-muted-foreground"
-          >
-            <li>
-              <a
-                class="hover:text-foreground"
-                href="/admin/dashboard"
-              >
-                Home
-              </a>
-            </li>
-          </ol>
-        </nav>
       </div>
       <div
-        class="flex flex-wrap items-center gap-2 sm:gap-4"
+        class="flex items-center gap-2 sm:gap-4"
       >
-        <button
-          aria-label="Search"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent h-10 w-10 text-sm font-medium transition-colors hover:text-blue-600"
-        >
-          <svg
-            class="lucide lucide-search h-5 w-5"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="11"
-              cy="11"
-              r="8"
-            />
-            <path
-              d="m21 21-4.3-4.3"
-            />
-          </svg>
-        </button>
         <button
           aria-label="Open live site in a new tab"
           class="justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 hidden md:flex items-center gap-2 min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          type="button"
         >
           <svg
             aria-hidden="true"
@@ -195,114 +98,12 @@ exports[`AdminHeader matches snapshot 1`] = `
           </svg>
           View Site
         </button>
-        <div
-          class="flex items-center gap-2"
-        >
-          <button
-            aria-label="Save"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md min-h-9 px-4"
-          >
-            Save
-          </button>
-          <button
-            aria-expanded="false"
-            aria-haspopup="menu"
-            aria-label="More actions"
-            class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md min-h-9 px-3"
-            data-state="closed"
-            id="radix-«r4»"
-            type="button"
-          >
-            <svg
-              class="lucide lucide-ellipsis h-4 w-4"
-              fill="none"
-              height="24"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              viewBox="0 0 24 24"
-              width="24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="1"
-              />
-              <circle
-                cx="19"
-                cy="12"
-                r="1"
-              />
-              <circle
-                cx="5"
-                cy="12"
-                r="1"
-              />
-            </svg>
-          </button>
-        </div>
-        <div
-          class="flex items-center gap-3"
-        >
-          <span
-            class="relative flex shrink-0 overflow-hidden rounded-full h-8 w-8"
-          >
-            <span
-              class="flex h-full w-full items-center justify-center rounded-full bg-muted bg-gradient-to-br from-purple-600 to-blue-600 text-white text-sm"
-            >
-              FS
-            </span>
-          </span>
-          <div
-            class="hidden md:block"
-          >
-            <p
-              class="text-sm font-medium text-foreground"
-            >
-              Admin
-            </p>
-            <p
-              class="text-xs text-muted-foreground"
-            >
-              Flavor Studios
-            </p>
-          </div>
-        </div>
         <button
-          aria-expanded="false"
-          aria-haspopup="menu"
-          aria-label="Help menu"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground rounded-md h-9 w-9 p-0"
-          data-state="closed"
-          id="radix-«r6»"
+          aria-label="Save"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md min-h-9 px-4"
           type="button"
         >
-          <svg
-            class="lucide lucide-circle-help h-5 w-5"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-            />
-            <path
-              d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
-            />
-            <path
-              d="M12 17h.01"
-            />
-          </svg>
+          Save
         </button>
         <button
           aria-label="Toggle theme"
@@ -337,77 +138,12 @@ exports[`AdminHeader matches snapshot 1`] = `
           </span>
         </button>
         <button
-          aria-autocomplete="none"
-          aria-controls="radix-«r8»"
-          aria-expanded="false"
-          aria-label="Select language"
-          class="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 w-20"
-          data-state="closed"
-          dir="ltr"
-          role="combobox"
-          type="button"
-        >
-          <span
-            style="pointer-events: none;"
-          >
-            EN
-          </span>
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-chevron-down h-4 w-4 opacity-50"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="m6 9 6 6 6-6"
-            />
-          </svg>
-        </button>
-        <button
-          aria-label="Logout"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent h-9 text-red-600 hover:text-red-700 min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-        >
-          <svg
-            aria-hidden="true"
-            class="lucide lucide-log-out h-4 w-4"
-            fill="none"
-            height="24"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-            width="24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
-            />
-            <polyline
-              points="16 17 21 12 16 7"
-            />
-            <line
-              x1="21"
-              x2="9"
-              y1="12"
-              y2="12"
-            />
-          </svg>
-        </button>
-        <button
           aria-expanded="false"
           aria-haspopup="menu"
           aria-label="User menu"
-          class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-full px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-full px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           data-state="closed"
-          id="radix-«r9»"
+          id="radix-«r0»"
           type="button"
         >
           <span

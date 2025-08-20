@@ -34,6 +34,7 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({
   id = "app-sidebar",
+  activeSection, // <— added back so we can fall back when deriving active link
   setActiveSection,
   sidebarOpen,
   setSidebarOpen,
@@ -59,7 +60,7 @@ export function AdminSidebar({
     (item) => accessibleSections.includes(item.id) || item.id === "overview"
   )
 
-  // Always highlight based on current path, not state
+  // Always highlight based on current path; fall back to activeSection when no match
   const getActiveId = () => {
     const match = filteredNavItems
       .filter(
@@ -68,7 +69,7 @@ export function AdminSidebar({
           (pathname === item.href || pathname.startsWith(`${item.href}/`))
       )
       .sort((a, b) => (b.href!.length - a.href!.length))[0]
-    return match?.id
+    return match?.id || activeSection
   }
   const activeId = getActiveId()
 
@@ -186,6 +187,11 @@ export function AdminSidebar({
                       className="flex items-center w-full"
                       aria-label={item.label}
                       aria-current={active ? "page" : undefined}
+                      onClick={() => {
+                        // Immediate state update so highlight reflects the click even before route change
+                        setActiveSection(item.id)
+                        if (isMobile) setSidebarOpen(false)
+                      }}
                     >
                       <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} aria-hidden="true" />
                       {sidebarOpen && (

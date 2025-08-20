@@ -33,7 +33,7 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({
-  id,
+  id = "app-sidebar",
   setActiveSection,
   sidebarOpen,
   setSidebarOpen,
@@ -81,19 +81,10 @@ export function AdminSidebar({
 
   return (
     <>
-      {/* Mobile Overlay */}
-      {isMobile && sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
       <aside
         id={id}
         className={`
-          h-full overflow-y-auto bg-muted/20 border-r
+          h-full overflow-y-auto bg-background border-r
           ${isMobile
             ? "fixed left-0 top-0 z-50 transition-transform duration-300 ease-in-out"
             : "sticky top-0 z-50"}

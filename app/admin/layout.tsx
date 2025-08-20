@@ -8,6 +8,7 @@ import { AdminAuthProvider } from "@/components/AdminAuthProvider";
 import { TooltipProvider } from "@/components/ui/tooltip"; // <-- TooltipProvider import added
 import DevTools from "./_dev-tools"; // mounts dev fetch logger in development
 import ReactQueryProvider from "@/components/ReactQueryProvider"; // Added: React Query provider
+import { AdminSidebar } from "@/components/admin/Sidebar"; // Added: Admin sidebar
 
 // Centralized metadata for the entire admin layout segment.
 export const metadata = getMetadata({
@@ -59,7 +60,14 @@ export default function AdminLayout({
       <AdminAuthProvider>
         <ReactQueryProvider>
           <TooltipProvider>
-            {children}
+            <div className="flex min-h-screen">
+              <aside className="w-64 shrink-0">
+                <AdminSidebar />
+              </aside>
+              <main id="app-main" className="flex-1 p-4">
+                {children}
+              </main>
+            </div>
           </TooltipProvider>
         </ReactQueryProvider>
       </AdminAuthProvider>

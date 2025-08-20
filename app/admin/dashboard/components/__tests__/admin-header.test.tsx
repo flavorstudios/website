@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { AdminHeader } from "../admin-header"
 
 jest.mock("next/navigation", () => ({
@@ -27,14 +27,23 @@ describe("AdminHeader", () => {
     }) as unknown as typeof fetch
   })
 
-  it("matches snapshot", () => {
-    const { container } = render(
+  it("renders the centered search and no deprecated actions", () => {
+    render(
       <AdminHeader
         onLogout={() => {}}
         sidebarOpen={false}
         setSidebarOpen={() => {}}
       />
     )
-    expect(container).toMatchSnapshot()
+
+    // search present
+    expect(
+      screen.getByPlaceholderText("Search titles, descriptions, tags…")
+    ).toBeInTheDocument()
+
+    // legacy actions gone
+    expect(screen.queryByText(/View Site/i)).toBeNull()
+    expect(screen.queryByText(/Save/i)).toBeNull()
+    expect(screen.queryByText(/New/i)).toBeNull()
   })
 })

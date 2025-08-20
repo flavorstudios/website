@@ -55,6 +55,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Redirect only the /admin root to /admin/dashboard
+  if (request.nextUrl.pathname === "/admin") {
+    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+  }
+
   const { pathname } = request.nextUrl;
   const ip = getRequestIp(request);
 
@@ -98,7 +103,9 @@ export async function middleware(request: NextRequest) {
             try {
               const role = await getUserRole(session.uid);
               // eslint-disable-next-line no-console
-              console.log(`[Admin Middleware] Verified session for email: ${session.email} (uid: ${session.uid}), role: ${role}`);
+              console.log(
+                `[Admin Middleware] Verified session for email: ${session.email} (uid: ${session.uid}), role: ${role}`
+              );
             } catch (e) {
               // eslint-disable-next-line no-console
               console.log("[Admin Middleware] Could not fetch user role for debug log:", e);
@@ -117,7 +124,9 @@ export async function middleware(request: NextRequest) {
           await logAdminAuditFailure(email, ip, "invalid_session_login");
           if (process.env.NODE_ENV !== "production") {
             // eslint-disable-next-line no-console
-            console.log(`[Admin Middleware] Invalid session for email: ${email}. Possible allowlist mismatch. Check ADMIN_EMAILS/ADMIN_EMAIL env.`);
+            console.log(
+              `[Admin Middleware] Invalid session for email: ${email}. Possible allowlist mismatch. Check ADMIN_EMAILS/ADMIN_EMAIL env.`
+            );
           }
         }
       }
@@ -141,7 +150,9 @@ export async function middleware(request: NextRequest) {
         try {
           const role = await getUserRole(session.uid);
           // eslint-disable-next-line no-console
-          console.log(`[Admin Middleware] Verified session for email: ${session.email} (uid: ${session.uid}), role: ${role}`);
+          console.log(
+            `[Admin Middleware] Verified session for email: ${session.email} (uid: ${session.uid}), role: ${role}`
+          );
         } catch (e) {
           // eslint-disable-next-line no-console
           console.log("[Admin Middleware] Could not fetch user role for debug log:", e);
@@ -159,7 +170,9 @@ export async function middleware(request: NextRequest) {
 
       if (process.env.NODE_ENV !== "production") {
         // eslint-disable-next-line no-console
-        console.log(`[Admin Middleware] Unauthorized session for email: ${email}. Check allowlist in ADMIN_EMAILS/ADMIN_EMAIL.`);
+        console.log(
+          `[Admin Middleware] Unauthorized session for email: ${email}. Check allowlist in ADMIN_EMAILS/ADMIN_EMAIL.`
+        );
       }
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }

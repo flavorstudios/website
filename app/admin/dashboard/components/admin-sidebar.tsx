@@ -79,6 +79,11 @@ export function AdminSidebar({
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
+  // Auto-close the sidebar on route change for small screens
+  useEffect(() => {
+    if (isMobile) setSidebarOpen(false)
+  }, [pathname, isMobile, setSidebarOpen])
+
   return (
     <>
       <aside
@@ -167,11 +172,13 @@ export function AdminSidebar({
                     item.href
                       ? (isMobile ? () => setSidebarOpen(false) : undefined)
                       : () => {
+                          // keep your previous behavior for non-href items
                           setActiveSection(item.id)
                           if (isMobile) setSidebarOpen(false)
                         }
                   }
-                  type="button"
+                  // Avoid passing type to <a> when asChild is true
+                  type={item.href ? undefined : "button"}
                 >
                   {item.href ? (
                     <Link

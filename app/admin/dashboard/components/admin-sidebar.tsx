@@ -90,7 +90,7 @@ export function AdminSidebar({
       <aside
         id={id}
         className={`
-          h-full overflow-y-auto bg-background border-r
+          h-full md:h-screen overflow-y-auto bg-background border-r
           ${isMobile
             ? "fixed left-0 top-0 z-50 transition-transform duration-300 ease-in-out"
             : "sticky top-0 z-50"}
@@ -126,6 +126,7 @@ export function AdminSidebar({
               className="hidden md:flex p-1 h-8 w-8 focus:outline-none focus:ring"
               aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
               aria-expanded={sidebarOpen}
+              aria-controls={id}
               type="button"
             >
               {sidebarOpen ? (

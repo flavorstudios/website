@@ -162,7 +162,7 @@ export function PageEditor() {
           <CardContent>
             {selectedPage ? (
               <Tabs defaultValue="content" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="flex flex-wrap w-full gap-2">
                   <TabsTrigger value="content">Content</TabsTrigger>
                   <TabsTrigger value="seo">SEO</TabsTrigger>
                   <TabsTrigger value="settings">Settings</TabsTrigger>

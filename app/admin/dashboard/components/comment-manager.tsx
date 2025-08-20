@@ -252,7 +252,7 @@ export default function CommentManager() {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full">
+        <TabsList className="flex flex-wrap gap-2 w-full">
           <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
           <TabsTrigger value="pending">Pending ({statusCounts.pending})</TabsTrigger>
           <TabsTrigger value="approved">Approved ({statusCounts.approved})</TabsTrigger>

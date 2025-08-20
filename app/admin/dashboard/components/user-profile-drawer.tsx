@@ -27,7 +27,7 @@ export default function UserProfileDrawer({
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent className="p-4 space-y-4 max-w-md w-full">
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="flex flex-wrap w-full gap-2">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
           </TabsList>

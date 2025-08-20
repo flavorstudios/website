@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Menu } from "lucide-react"
+import { Menu, Search } from "lucide-react"
 import ThemeToggle from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 import { ADMIN_HEADER_HEIGHT } from "@/lib/constants"
@@ -60,15 +60,18 @@ export function AdminHeader({
       .catch(() => {})
   }, [])
 
-  // Focus search when '/' is pressed
+  // Focus search when '/' is pressed (desktop) or open palette (mobile)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null
-      const typingInField =
-        target && ["INPUT", "TEXTAREA"].includes(target.tagName)
+      const typingInField = target && ["INPUT", "TEXTAREA"].includes(target.tagName)
       if (e.key === "/" && !e.metaKey && !e.ctrlKey && !typingInField) {
         e.preventDefault()
-        inputRef.current?.focus()
+        if (window.matchMedia("(min-width: 768px)").matches) {
+          inputRef.current?.focus()
+        } else {
+          window.dispatchEvent(new Event("open-command-palette"))
+        }
       }
     }
     window.addEventListener("keydown", handler)
@@ -125,16 +128,17 @@ export function AdminHeader({
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
             aria-expanded={sidebarOpen}
-            aria-controls="admin-sidebar"
+            aria-controls="app-sidebar"
             className="lg:hidden min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             <Menu className="h-5 w-5" aria-hidden="true" />
           </Button>
 
-          {/* Center: long, centered search */}
+          {/* Center: desktop search (hidden on mobile) */}
           <form
             onSubmit={submit}
-            className="flex-1 flex justify-center px-2"
+            role="search"
+            className="hidden md:flex flex-1 justify-center px-2"
           >
             <div className="relative w-full max-w-[820px]">
               <span
@@ -169,6 +173,17 @@ export function AdminHeader({
 
           {/* Right: core actions only */}
           <div className="flex items-center gap-2 sm:gap-4">
+            {/* Mobile search trigger */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
+              onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
+              aria-label="Search"
+            >
+              <Search className="h-5 w-5" aria-hidden="true" />
+            </Button>
+
             <NotificationBell />
             <HelpMenu />
             <ThemeToggle aria-label="Toggle theme" />

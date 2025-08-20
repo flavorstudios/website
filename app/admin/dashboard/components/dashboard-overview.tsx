@@ -1,5 +1,5 @@
+// app/admin/dashboard/components/dashboard-overview.tsx
 "use client";
-/* eslint-disable react-hooks/rules-of-hooks */
 
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
@@ -135,6 +135,54 @@ export default function DashboardOverview() {
     mutateActivity?.();
   };
 
+  // ↓↓↓ PRECOMPUTE CHART HOOKS BEFORE ANY CONDITIONAL RETURNS ↓↓↓
+  const chartData = useMemo<ChartData<"bar">>(() => {
+    if (!stats?.history?.length) return { labels: [], datasets: [] };
+    return {
+      labels: stats.history.map((h) => h.month),
+      datasets: [
+        {
+          label: "Posts",
+          data: stats.history.map((h) => h.posts),
+          backgroundColor: theme === "dark" ? "#60a5fa" : "#3b82f6",
+        },
+        {
+          label: "Videos",
+          data: stats.history.map((h) => h.videos),
+          backgroundColor: theme === "dark" ? "#c084fc" : "#a855f7",
+        },
+        {
+          label: "Comments",
+          data: stats.history.map((h) => h.comments),
+          backgroundColor: theme === "dark" ? "#34d399" : "#10b981",
+        },
+      ],
+    };
+  }, [stats, theme]);
+
+  const chartOptions = useMemo<ChartOptions<"bar">>(() => {
+    const text = theme === "dark" ? "#d1d5db" : "#374151";
+    const grid = theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: text },
+        },
+        tooltip: {
+          intersect: false,
+          mode: "index",
+        },
+      },
+      scales: {
+        x: { ticks: { color: text }, grid: { color: grid } },
+        y: { ticks: { color: text }, grid: { color: grid } },
+      },
+    };
+  }, [theme]);
+  // ↑↑↑ PRECOMPUTE CHART HOOKS BEFORE ANY CONDITIONAL RETURNS ↑↑↑
+
   // Permission warning (do not attempt fetching or show generic errors)
   if (!canViewAnalytics || unauthorized) {
     return (
@@ -189,53 +237,6 @@ export default function DashboardOverview() {
     );
   }
 
-  // Chart data (theme-aware)
-  const chartData = useMemo<ChartData<"bar">>(() => {
-    if (!stats?.history?.length) return { labels: [], datasets: [] };
-    return {
-      labels: stats.history.map((h) => h.month),
-      datasets: [
-        {
-          label: "Posts",
-          data: stats.history.map((h) => h.posts),
-          backgroundColor: theme === "dark" ? "#60a5fa" : "#3b82f6",
-        },
-        {
-          label: "Videos",
-          data: stats.history.map((h) => h.videos),
-          backgroundColor: theme === "dark" ? "#c084fc" : "#a855f7",
-        },
-        {
-          label: "Comments",
-          data: stats.history.map((h) => h.comments),
-          backgroundColor: theme === "dark" ? "#34d399" : "#10b981",
-        },
-      ],
-    };
-  }, [stats, theme]);
-
-  const chartOptions = useMemo<ChartOptions<"bar">>(() => {
-    const text = theme === "dark" ? "#d1d5db" : "#374151";
-    const grid = theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          labels: { color: text },
-        },
-        tooltip: {
-          intersect: false,
-          mode: "index",
-        },
-      },
-      scales: {
-        x: { ticks: { color: text }, grid: { color: grid } },
-        y: { ticks: { color: text }, grid: { color: grid } },
-      },
-    };
-  }, [theme]);
-
   return (
     <div className="space-y-6">
       {/* Controls */}
@@ -256,7 +257,7 @@ export default function DashboardOverview() {
           Last updated:{" "}
           {statsQuery.dataUpdatedAt
             ? new Date(statsQuery.dataUpdatedAt).toLocaleTimeString()
-            : "—"}
+            : "N/A"}
         </span>
       </div>
 

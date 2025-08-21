@@ -55,7 +55,7 @@ export function AdminHeader({
       const typingInField =
         target instanceof HTMLElement &&
         (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) ||
-          target.isContentEditable)
+          Boolean(target.isContentEditable))
 
       const key = e.key?.toLowerCase()
       const isSlash = key === "/" && !e.metaKey && !e.ctrlKey

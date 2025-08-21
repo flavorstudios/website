@@ -186,7 +186,7 @@ export default function AdminDashboardPageClient({
     if (next !== activeSection) {
       setActiveSection(next);
     }
-  }, [pathname]);
+  }, [pathname, activeSection]);
 
   // --- Optional: respect ?section= if user directly visits with query -------
   useEffect(() => {
@@ -194,8 +194,7 @@ export default function AdminDashboardPageClient({
     if (validSection(qs) && qs !== activeSection) {
       setActiveSection(qs);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [search, activeSection]);
 
   // --- Responsive + keyboard detection -------------------------------------
   useEffect(() => {

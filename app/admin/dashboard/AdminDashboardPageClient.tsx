@@ -186,7 +186,7 @@ export default function AdminDashboardPageClient({
     if (next !== activeSection) {
       setActiveSection(next);
     }
-  }, [pathname, activeSection]);
+  }, [pathname]);
 
   // --- Optional: respect ?section= if user directly visits with query -------
   useEffect(() => {

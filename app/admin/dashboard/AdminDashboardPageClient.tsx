@@ -369,7 +369,7 @@ export default function AdminDashboardPageClient({
           </a>
 
           {/* Shell updated: responsive grid with dynamic sidebar width */}
-          <div className="admin-shell grid h-svh grid-cols-[var(--sidebar-w,16rem)_1fr] transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden">
+          <div className="admin-shell grid min-h-screen grid-cols-[var(--sidebar-w,16rem)_1fr] transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden">
             <AdminSidebar
               activeSection={activeSection}
               setActiveSection={setActiveSection}
@@ -387,7 +387,7 @@ export default function AdminDashboardPageClient({
 
               <main
                 id="main"
-                className="flex-1 min-w-0 p-4 overflow-y-auto overflow-x-hidden"
+                className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-4 pt-4 pb-24 md:pb-4"
                 role="main"
                 aria-label={currentTitle}
               >
@@ -428,6 +428,15 @@ export default function AdminDashboardPageClient({
               )}
             </div>
           </div>
+
+          {isMobile && sidebarOpen && (
+            <button
+              type="button"
+              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+              aria-label="Close sidebar"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
 
           <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
             <DialogContent>

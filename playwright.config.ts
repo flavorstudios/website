@@ -27,12 +27,6 @@ export default defineConfig({
       NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: 'test',
       NEXT_PUBLIC_FIREBASE_APP_ID: 'test',
 
-      // GTM/cookie banner testing flags
-      NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER: 'true',
-      NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: '/admin,/wp-admin,/dashboard,/backend',
-      NEXT_PUBLIC_GTM_CONTAINER_ID: '',
-      NEXT_PUBLIC_LIVE_HOSTNAMES: 'localhost,127.0.0.1',
-
       // Keep telemetry quiet in CI logs (optional)
       NEXT_TELEMETRY_DISABLED: '1',
       NODE_ENV: 'production',

@@ -89,7 +89,6 @@ import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { headers } from "next/headers";
 import Script from "next/script"; // for GTM + bootstrap
 import { isAdminRoute } from "@/lib/cookie-consent";
-import GtmRouteChangeListener from "@/components/GtmRouteChangeListener";
 
 // --- Type "Category" should have id, title, type, postCount, name, slug, tooltip, etc. ---
 import type { Category } from "@/types/category";
@@ -182,8 +181,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   // GTM env flags
   const gtmId = process.env.NEXT_PUBLIC_GTM_CONTAINER_ID || "";
-  const enableGtmCookieBanner =
-    process.env.NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER === "true";
 
   let blogCategories: Category[] = [];
   let videoCategories: Category[] = [];
@@ -219,48 +216,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
           suppressHydrationWarning
         />
-
-        {/* Expose flags before GTM */}
-        <Script id="dl-config" strategy="beforeInteractive">{`
-          window.__ADMIN_ROUTE_PREFIXES__=${JSON.stringify(adminPrefixesEnv)};
-          window.__ENABLE_GTM_COOKIE_BANNER__=${JSON.stringify(enableGtmCookieBanner)};
-          window.__APP_ENV__=${JSON.stringify(process.env.NODE_ENV)};
-        `}</Script>
-
-        {/* dataLayer bootstrap BEFORE GTM */}
-        <Script id="dl-bootstrap" strategy="beforeInteractive">{`
-          (function () {
-            window.dataLayer = window.dataLayer || [];
-            var host = location.hostname;
-            var path = location.pathname;
-
-            // Cheap, safe prefix check (no regex)
-            var prefixes = (window.__ADMIN_ROUTE_PREFIXES__ || "/admin,/wp-admin,/dashboard,/backend")
-              .split(",").map(function(s){return s.trim();}).filter(Boolean);
-            var isAdminRoute = prefixes.some(function(p){
-              return path === p || path.indexOf(p + "/") === 0;
-            });
-
-            var appEnv = window.__APP_ENV__ || document.documentElement.getAttribute("data-app-env") || "development";
-            var isAdminUser = !!(window.__USER__ && (window.__USER__.isAdmin || window.__USER__.role === "admin"));
-            var consentGiven = false;
-            try {
-              consentGiven = (localStorage.getItem("cookie_consent") === "granted") ||
-                             (document.cookie.indexOf("cookie_consent=granted") !== -1);
-            } catch (e) {}
-
-            window.dataLayer.push({
-              event: "app_boot",
-              appEnv: appEnv,
-              hostname: host,
-              path: path,
-              isAdminRoute: isAdminRoute,
-              isAdminUser: isAdminUser,
-              consentGiven: consentGiven,
-              enableGtmCookieBanner: (window.__ENABLE_GTM_COOKIE_BANNER__ === true)
-            });
-          })();
-        `}</Script>
 
         {/* Google Tag Manager (HEAD) — only if container id is provided */}
         {gtmId && (
@@ -304,8 +259,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           {/* END GTM (NOSCRIPT) */}
 
           <Toaster />
-          {/* SPA route-change → dataLayer push */}
-          <GtmRouteChangeListener />
 
           {/* ⭐️ AdBlock Support Banner (only for non-admin routes) */}
           {!isAdmin && <AdblockBanner />}
@@ -326,7 +279,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <PwaServiceWorker />
               {/* ⭐️ LOAD the stealth detection script only for non-admin */}
               <Script src="/js/_support_banner.js" strategy="afterInteractive" />
-              {/* Cookie banner is injected via GTM — legacy inline CookieYes has been removed */}
+              <Script
+                id="cookieyes"
+                src="https://cdn-cookieyes.com/client_data/abcdef1234567890/script.js"
+                strategy="afterInteractive"
+              />
             </>
           )}
         </ThemeProvider>

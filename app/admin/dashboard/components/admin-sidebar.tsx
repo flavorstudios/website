@@ -20,7 +20,7 @@ import {
   Users,
 } from "lucide-react"
 import { useRole } from "../contexts/role-context"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { ADMIN_HEADER_HEIGHT } from "@/lib/constants"
 
 interface AdminSidebarProps {
@@ -32,9 +32,17 @@ interface AdminSidebarProps {
   setSidebarOpen: (open: boolean) => void
 }
 
+type MenuItem = {
+  id: string
+  label: string
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  count: number | null
+  href?: string
+}
+
 export function AdminSidebar({
   id = "app-sidebar",
-  activeSection, // <— added back so we can fall back when deriving active link
+  activeSection, // kept as a fallback when deriving active link
   setActiveSection,
   sidebarOpen,
   setSidebarOpen,
@@ -43,7 +51,7 @@ export function AdminSidebar({
   const [isMobile, setIsMobile] = useState(false)
   const pathname = usePathname()
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     { id: "overview", label: "Dashboard", icon: LayoutDashboard, count: null, href: "/admin/dashboard" },
     { id: "blogs", label: "Blog Posts", icon: FileText, count: null, href: "/admin/dashboard/blog-posts" },
     { id: "videos", label: "Videos", icon: Video, count: null, href: "/admin/dashboard/videos" },
@@ -61,7 +69,7 @@ export function AdminSidebar({
   )
 
   // Always highlight based on current path; fall back to activeSection when no match
-  const getActiveId = () => {
+  const activeId = useMemo(() => {
     const match = filteredNavItems
       .filter(
         (item) =>
@@ -70,8 +78,7 @@ export function AdminSidebar({
       )
       .sort((a, b) => (b.href!.length - a.href!.length))[0]
     return match?.id || activeSection
-  }
-  const activeId = getActiveId()
+  }, [pathname, filteredNavItems, activeSection])
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768)
@@ -168,13 +175,11 @@ export function AdminSidebar({
                       ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
                       : "text-muted-foreground hover:bg-muted"
                   } focus:outline-none focus:ring`}
-                  title={!sidebarOpen ? item.label : undefined}
-                  aria-label={!sidebarOpen ? item.label : undefined}
+                  // Only handle clicks here for non-href items
                   onClick={
                     item.href
-                      ? (isMobile ? () => setSidebarOpen(false) : undefined)
+                      ? undefined
                       : () => {
-                          // keep your previous behavior for non-href items
                           setActiveSection(item.id)
                           if (isMobile) setSidebarOpen(false)
                         }
@@ -188,6 +193,7 @@ export function AdminSidebar({
                       className="flex items-center w-full"
                       aria-label={item.label}
                       aria-current={active ? "page" : undefined}
+                      title={!sidebarOpen ? item.label : undefined}
                       onClick={() => {
                         // Immediate state update so highlight reflects the click even before route change
                         setActiveSection(item.id)

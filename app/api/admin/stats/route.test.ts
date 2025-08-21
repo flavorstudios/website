@@ -11,10 +11,11 @@ jest.mock("@/lib/admin-auth", () => ({
   getSessionInfo: jest.fn().mockResolvedValue({ uid: "tester", role: "admin" }),
 }));
 
-let mockAdminDb: any;
+let mockAdminDb: unknown;
 jest.mock("@/lib/firebase-admin", () => ({
   get adminDb() {
-    return mockAdminDb;
+    // Narrow at the module boundary so production code sees what it expects.
+    return mockAdminDb as any;
   },
 }));
 
@@ -139,7 +140,7 @@ describe("GET /api/admin/stats", () => {
         throw new Error("boom");
       },
       collectionGroup: () => ({}),
-    } as any;
+    };
 
     const { GET } = await import("./route");
     const req = new NextRequest("http://test/api/admin/stats?range=30d");

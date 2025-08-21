@@ -253,6 +253,14 @@ export default function AdminDashboardPageClient({
       window.removeEventListener("admin:navigate", onNavigate as EventListener);
   }, []);
 
+  // --- Sync sidebar width globally for responsive layout -------------------
+  useEffect(() => {
+    const root = document.documentElement;
+    const width = isMobile ? "0px" : sidebarOpen ? "16rem" : "5rem";
+    root.style.setProperty("--sidebar-w", width);
+    return () => root.style.removeProperty("--sidebar-w");
+  }, [sidebarOpen, isMobile]);
+
   const handleLogout = useCallback(async () => {
     try {
       if (firebaseInitError) {
@@ -338,8 +346,8 @@ export default function AdminDashboardPageClient({
             Skip to main content
           </a>
 
-          {/* Shell updated: grid with single vertical separator owned by the sidebar */}
-          <div className="admin-shell grid h-svh grid-cols-[16rem_1fr]">
+          {/* Shell updated: responsive grid with dynamic sidebar width */}
+          <div className="admin-shell grid h-svh grid-cols-[var(--sidebar-w,16rem)_1fr] transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden">
             <AdminSidebar
               activeSection={activeSection}
               setActiveSection={setActiveSection}
@@ -357,7 +365,7 @@ export default function AdminDashboardPageClient({
 
               <main
                 id="main"
-                className="flex-1 min-w-0 p-4 overflow-auto"
+                className="flex-1 min-w-0 p-4 overflow-y-auto overflow-x-hidden"
                 role="main"
                 aria-label={currentTitle}
               >

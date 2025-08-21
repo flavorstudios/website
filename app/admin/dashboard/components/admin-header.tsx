@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Menu, Search } from "lucide-react"
+import { Menu } from "lucide-react"
 import ThemeToggle from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
 import { ADMIN_HEADER_HEIGHT } from "@/lib/constants"
@@ -69,7 +69,9 @@ export function AdminHeader({
     }
 
     window.addEventListener("keydown", handler, { capture: true })
-    return () => window.removeEventListener("keydown", handler as any, { capture: true } as any)
+    return () => {
+      window.removeEventListener("keydown", handler, { capture: true })
+    }
   }, [])
 
   // Return focus to toggle button when sidebar closes (mobile)
@@ -170,20 +172,6 @@ export function AdminHeader({
 
           {/* Right: core actions only */}
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* Mobile search trigger focuses the same input */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden"
-              onClick={() => {
-                inputRef.current?.focus()
-                inputRef.current?.select()
-              }}
-              aria-label="Search"
-            >
-              <Search className="h-5 w-5" aria-hidden="true" />
-            </Button>
-
             <NotificationBell />
             <HelpMenu />
             <ThemeToggle aria-label="Toggle theme" />

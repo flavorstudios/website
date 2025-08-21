@@ -11,7 +11,12 @@ const customJestConfig = {
     '^@/(.*)$': '<rootDir>/$1',
   },
   // 🟩 Codex update: Ignore serverless/functions code during tests!
-  testPathIgnorePatterns: ['<rootDir>/functions/', '<rootDir>/tests/', '<rootDir>/styles/tests/'],
+  // Allow a single Jest spec in the Playwright tests directory
+  testPathIgnorePatterns: [
+    '<rootDir>/functions/',
+    '<rootDir>/tests/(?!validate-session\\.spec\\.ts$).*',
+    '<rootDir>/styles/tests/',
+  ],
 }
 
 module.exports = createJestConfig(customJestConfig)

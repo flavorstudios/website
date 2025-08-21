@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -42,6 +42,19 @@ export default function AdminLoginForm() {
   const [method, setMethod] = useState<"google" | "email">("google")
   const router = useRouter()
 
+  const finalizeLogin = useCallback(() => {
+    if (typeof window !== "undefined") {
+      if (window.opener && !window.crossOriginIsolated) {
+        try {
+          window.close()
+        } catch {
+          // ignore and fallback to navigation below
+        }
+      }
+      router.push("/admin/dashboard")
+    }
+  }, [router])
+
   // --- FIX: Always call hooks first, never after a conditional return ---
   useEffect(() => {
     setMounted(true)
@@ -68,14 +81,14 @@ export default function AdminLoginForm() {
     const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
         if (await checkServerSession()) {
-          router.push("/admin/dashboard")
+          finalizeLogin()
         } else {
           await signOut(auth)
         }
       }
     })
     return () => unsubscribe()
-  }, [router, setError])
+  }, [finalizeLogin, setError])
 
   // --- Show Firebase env error, if present ---
   if (firebaseInitError) {
@@ -132,7 +145,7 @@ export default function AdminLoginForm() {
       }
       // Optionally check the server session after setting cookie
       if (await checkServerSession()) {
-        router.push("/admin/dashboard")
+        finalizeLogin()
       } else {
         await signOut(auth)
         setError("Server session invalid. Please try logging in again.")

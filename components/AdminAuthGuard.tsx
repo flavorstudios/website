@@ -1,27 +1,61 @@
 "use client";
 
-// This component is intentionally minimal, since authentication is enforced by middleware/server.
-// If you wish to use suspense/lazy loading, simply add a loading spinner as fallback in your layout or page.
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Spinner from "@/components/ui/spinner";
 
+type Status = "loading" | "authenticated" | "unauthenticated";
+
+/**
+ * Guard that validates the admin session before rendering children.
+ * - Calls /api/admin/validate-session with credentials included
+ * - Shows a spinner while validating
+ * - Shows a login prompt if validation fails
+ * - Renders children only when authenticated
+ */
 export default function AdminAuthGuard({ children }: { children: React.ReactNode }) {
-  // Uncomment and use the code below if you need a UI loading spinner for lazy/suspense transitions.
-  /*
-  import { Loader2 } from "lucide-react";
-  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<Status>("loading");
+
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 300); // Simulate brief loading
-    return () => clearTimeout(timer);
+    let cancelled = false;
+
+    fetch("/api/admin/validate-session", {
+      credentials: "include",
+      cache: "no-store",
+    })
+      .then((res) => {
+        if (!cancelled) setStatus(res.ok ? "authenticated" : "unauthenticated");
+      })
+      .catch(() => {
+        if (!cancelled) setStatus("unauthenticated");
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
-  if (loading) {
+
+  if (status === "loading") {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="animate-spin mb-4 h-8 w-8 text-purple-500" />
-        <p className="text-gray-500 text-sm">Loading…</p>
+      <div data-testid="loading" className="flex items-center justify-center min-h-[40vh]">
+        <Spinner />
       </div>
     );
   }
-  */
 
-  // By default, just render children (middleware guarantees auth)
+  if (status === "unauthenticated") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-2">
+        <p className="text-gray-500 text-sm">
+          Please log in to access the admin dashboard.
+        </p>
+        <Link href="/admin/login" className="text-purple-600 underline">
+          Go to login
+        </Link>
+      </div>
+    );
+  }
+
+  // Authenticated
   return <>{children}</>;
 }

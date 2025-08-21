@@ -75,10 +75,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const res = NextResponse.json({ ok: true, expiresAt: expiryDate.toISOString(), expiryDays });
     res.cookies.set("admin-session", sessionCookie, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: expiresIn / 1000, // in seconds
+      secure: true,
+      sameSite: "lax",          // use "none" with secure: true if you have cross-site flows
+      maxAge: Math.floor(expiresIn / 1000), // seconds
       path: "/",
+      domain: ".flavorstudios.in",
     });
 
     // --- LOGGING: Cookie issued for admin ---

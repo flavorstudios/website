@@ -43,7 +43,8 @@ Copy
 Edit
 pnpm dev    # start the local development server
 pnpm lint   # run eslint checks
-pnpm test   # execute unit tests
+pnpm test   # run unit and integration tests
+pnpm e2e    # run end-to-end Playwright tests
 pnpm build  # create an optimized production build
 pnpm start  # run the production server
 Firebase configuration

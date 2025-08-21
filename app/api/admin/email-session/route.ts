@@ -59,10 +59,11 @@ export async function POST(req: NextRequest) {
     const res = NextResponse.json({ ok: true })
     res.cookies.set("admin-session", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true,
+      sameSite: "lax",              // use "none" with secure: true if you have cross-site flows
       maxAge: 60 * 60 * 24,
       path: "/",
+      domain: ".flavorstudios.in",
     })
     return res
   } catch (err) {

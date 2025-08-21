@@ -9,7 +9,6 @@ import EmailInbox from "./email-inbox";
 import MediaLibrary from "./media/MediaLibrary";
 import CareerApplications from "./career-applications";
 import SystemSettings from "./system-settings";
-import CommandPalette from "./command-palette";
 
 export {
   DashboardOverview,
@@ -23,7 +22,6 @@ export {
   MediaLibrary,
   CareerApplications,
   SystemSettings,
-  CommandPalette,
 };
 
 if (process.env.NODE_ENV !== "production") {
@@ -39,7 +37,6 @@ if (process.env.NODE_ENV !== "production") {
     MediaLibrary,
     CareerApplications,
     SystemSettings,
-    CommandPalette,
   } as const;
 
   for (const [name, component] of Object.entries(components)) {

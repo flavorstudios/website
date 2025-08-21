@@ -40,18 +40,6 @@ export function AdminHeader({
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
-  // Ctrl/Cmd + K to open the command palette (kept)
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault()
-        window.dispatchEvent(new Event("open-command-palette"))
-      }
-    }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [])
-
   // Load avatar from user settings (kept – used by UserMenu)
   useEffect(() => {
     fetch("/api/admin/settings", { credentials: "include" })
@@ -60,22 +48,28 @@ export function AdminHeader({
       .catch(() => {})
   }, [])
 
-  // Focus search when '/' is pressed (desktop) or open palette (mobile)
+  // Focus search when '/' or Ctrl/Cmd+K is pressed (all viewports)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null
-      const typingInField = target && ["INPUT", "TEXTAREA"].includes(target.tagName)
-      if (e.key === "/" && !e.metaKey && !e.ctrlKey && !typingInField) {
+      const typingInField =
+        !!target &&
+        (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) ||
+          (target as any).isContentEditable)
+
+      const key = e.key?.toLowerCase()
+      const isSlash = key === "/" && !e.metaKey && !e.ctrlKey
+      const isCtrlK = key === "k" && (e.metaKey || e.ctrlKey)
+
+      if ((isSlash || isCtrlK) && !typingInField) {
         e.preventDefault()
-        if (window.matchMedia("(min-width: 768px)").matches) {
-          inputRef.current?.focus()
-        } else {
-          window.dispatchEvent(new Event("open-command-palette"))
-        }
+        inputRef.current?.focus()
+        inputRef.current?.select()
       }
     }
-    window.addEventListener("keydown", handler)
-    return () => window.removeEventListener("keydown", handler)
+
+    window.addEventListener("keydown", handler, { capture: true })
+    return () => window.removeEventListener("keydown", handler as any, { capture: true } as any)
   }, [])
 
   // Return focus to toggle button when sidebar closes (mobile)
@@ -134,11 +128,11 @@ export function AdminHeader({
             <Menu className="h-5 w-5" aria-hidden="true" />
           </Button>
 
-          {/* Center: desktop search (hidden on mobile) */}
+          {/* Center: search (visible on all viewports) */}
           <form
             onSubmit={submit}
             role="search"
-            className="hidden md:flex flex-1 justify-center px-2"
+            className="flex flex-1 justify-center px-2"
           >
             <div className="relative w-full max-w-[820px]">
               <span
@@ -157,9 +151,12 @@ export function AdminHeader({
               </span>
               <input
                 ref={inputRef}
+                id="admin-header-search"
                 type="search"
                 aria-label="Search titles, descriptions, and tags"
                 placeholder="Search titles, descriptions, tags…"
+                inputMode="search"
+                enterKeyHint="search"
                 className="block w-full rounded-xl border bg-background pl-10 pr-12 py-2 text-sm outline-none ring-0 focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
               />
               <kbd
@@ -173,12 +170,15 @@ export function AdminHeader({
 
           {/* Right: core actions only */}
           <div className="flex items-center gap-2 sm:gap-4">
-            {/* Mobile search trigger */}
+            {/* Mobile search trigger focuses the same input */}
             <Button
               variant="ghost"
               size="sm"
               className="md:hidden"
-              onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
+              onClick={() => {
+                inputRef.current?.focus()
+                inputRef.current?.select()
+              }}
               aria-label="Search"
             >
               <Search className="h-5 w-5" aria-hidden="true" />

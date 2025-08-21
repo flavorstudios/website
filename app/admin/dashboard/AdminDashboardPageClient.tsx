@@ -72,10 +72,6 @@ const SystemSettings = dynamic(
   () => import("./components").then((m) => m.SystemSettings),
   { ssr: false, loading: () => <Spinner /> }
 );
-const CommandPalette = dynamic(
-  () => import("./components").then((m) => m.CommandPalette),
-  { ssr: false }
-);
 
 // ---- Route map (reused) ----------------------------------------------------
 const NAV = [
@@ -130,15 +126,9 @@ export default function AdminDashboardPageClient({
   useHotkeys("shift+u", () =>
     window.dispatchEvent(new Event("admin-open-media-upload"))
   );
-  // aligned event name with AdminHeader/CommandPalette listener
-  useHotkeys(["meta+/", "ctrl+/"], () =>
-    window.dispatchEvent(new Event("open-command-palette"))
-  );
-  // ✨ Also support common ⌘/Ctrl + K for Command
-  useHotkeys(["meta+k", "ctrl+k"], (e) => {
-    e.preventDefault();
-    window.dispatchEvent(new Event("open-command-palette"));
-  });
+  // Note: search shortcuts are handled inside AdminHeader now.
+
+  // Keep the help dialog hotkey
   useHotkeys("?", (e) => {
     e.preventDefault();
     setShortcutsOpen(true);
@@ -348,9 +338,6 @@ export default function AdminDashboardPageClient({
             Skip to main content
           </a>
 
-          {/* Command palette (listens for 'open-command-palette' event already) */}
-          <CommandPalette />
-
           {/* Shell updated: grid with single vertical separator owned by the sidebar */}
           <div className="admin-shell grid h-svh grid-cols-[16rem_1fr]">
             <AdminSidebar
@@ -429,9 +416,9 @@ export default function AdminDashboardPageClient({
                   <kbd className="px-2 py-1 bg-muted rounded text-xs">shift + u</kbd>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span>Command palette</span>
+                  <span>Search</span>
                   <div className="flex items-center gap-2">
-                    <kbd className="px-2 py-1 bg-muted rounded text-xs">cmd/ctrl + /</kbd>
+                    <kbd className="px-2 py-1 bg-muted rounded text-xs">/</kbd>
                     <kbd className="px-2 py-1 bg-muted rounded text-xs">cmd/ctrl + k</kbd>
                   </div>
                 </div>

@@ -44,9 +44,13 @@ export default function AdminLoginForm() {
 
   const finalizeLogin = useCallback(() => {
     if (typeof window !== "undefined") {
-      if (window.opener && !window.crossOriginIsolated) {
+      if (
+        window.opener &&
+        window.opener.origin === window.location.origin
+      ) {
         try {
           window.close()
+          return
         } catch {
           // ignore and fallback to navigation below
         }

@@ -157,7 +157,7 @@ export default function AdminDashboardPageClient({
     setMounted(true);
 
     // init ping (with credentials)
-    fetchJson("/api/admin/init", { method: "POST" }).catch((err) => {
+    fetchJson("/api/admin/init", { method: "POST", credentials: "include" }).catch((err) => {
       if (process.env.NODE_ENV !== "production")
         console.error("Admin init failed:", err);
     });
@@ -318,6 +318,10 @@ export default function AdminDashboardPageClient({
         console.error("Logout failed:", error);
     }
   }, []);
+  const currentTitle = useMemo(
+    () => NAV.find((n) => n.id === activeSection)?.title ?? "Dashboard",
+    [activeSection]
+  );
 
   if (!mounted) {
     return (
@@ -360,11 +364,6 @@ export default function AdminDashboardPageClient({
         return <DashboardOverview key="overview-fallback" />;
     }
   };
-
-  const currentTitle = useMemo(
-    () => NAV.find((n) => n.id === activeSection)?.title ?? "Dashboard",
-    [activeSection]
-  );
 
   return (
     <AdminAuthGuard>

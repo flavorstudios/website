@@ -3,6 +3,9 @@ import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { headers } from "next/headers";
+import { NextRequest } from "next/server";
+import { redirect } from "next/navigation";
+import { requireAdmin } from "@/lib/admin-auth";
 
 // === SEO METADATA (ADMIN - NOINDEX) ===
 export const metadata = getMetadata({
@@ -36,11 +39,8 @@ export const metadata = getMetadata({
   // No schema for admin/noindex pages
 });
 
-async function prefetchDashboard(qc: QueryClient) {
+async function prefetchDashboard(qc: QueryClient, cookie: string) {
   // Forward cookies for admin-only API
-  const h = headers();
-  const cookie = h.get("cookie") ?? "";
-
   // Prefer absolute URL to ensure cookies are sent in all envs
   const url = `${SITE_URL}/api/admin/stats?range=12mo`;
 
@@ -63,11 +63,21 @@ async function prefetchDashboard(qc: QueryClient) {
 }
 
 export default async function AdminDashboardPage() {
+  const h = headers();
+  const cookie = h.get("cookie") ?? "";
+  const req = new NextRequest(`${SITE_URL}/admin/dashboard`, {
+    headers: { cookie },
+  });
+  const isAdmin = await requireAdmin(req);
+  if (!isAdmin) {
+    redirect("/admin/login");
+  }
+
   const queryClient = new QueryClient();
 
   // Don’t block rendering if SSR fetch fails—client will recover
   try {
-    await prefetchDashboard(queryClient);
+    await prefetchDashboard(queryClient, cookie);
   } catch {
     // noop: keeps page resilient when API or auth is unavailable on the server
   }

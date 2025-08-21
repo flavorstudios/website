@@ -279,6 +279,17 @@ export default function AdminDashboardPageClient({
     return () => root.style.removeProperty("--sidebar-w");
   }, [sidebarOpen, isMobile]);
 
+  // --- Lock root scroll when mobile sidebar is open ------------------------
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isMobile && sidebarOpen) {
+      root.classList.add("overflow-hidden");
+    } else {
+      root.classList.remove("overflow-hidden");
+    }
+    return () => root.classList.remove("overflow-hidden");
+  }, [isMobile, sidebarOpen]);
+
   const handleLogout = useCallback(async () => {
     try {
       if (firebaseInitError) {
@@ -367,8 +378,13 @@ export default function AdminDashboardPageClient({
             Skip to main content
           </a>
 
-          {/* Shell updated: responsive grid with dynamic sidebar width */}
-          <div className="admin-shell grid h-svh grid-cols-[var(--sidebar-w,16rem)_1fr] transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden">
+          {/* Shell: stack on mobile; sidebar column only from lg+ */}
+          <div
+            className="admin-shell grid min-h-screen supports-[height:100dvh]:min-h-[100dvh]
+                       grid-cols-1 lg:grid-cols-[var(--sidebar-w,16rem)_1fr]
+                       transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden"
+            data-sidebar-open={isMobile && sidebarOpen ? "true" : "false"}
+          >
             <AdminSidebar
               activeSection={activeSection}
               setActiveSection={setActiveSection}
@@ -386,9 +402,11 @@ export default function AdminDashboardPageClient({
 
               <main
                 id="main"
-                className="flex-1 min-w-0 p-4 overflow-y-auto overflow-x-hidden"
+                className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-4 pt-4
+                           pb-[calc(var(--mobile-nav-h,64px)+env(safe-area-inset-bottom,0px))] lg:pb-6"
                 role="main"
                 aria-label={currentTitle}
+                aria-hidden={isMobile && sidebarOpen ? true : undefined}
               >
                 <div className="max-w-7xl mx-auto">
                   {/* Online/Offline indicator */}
@@ -427,6 +445,16 @@ export default function AdminDashboardPageClient({
               )}
             </div>
           </div>
+
+          {/* Backdrop overlay to close sidebar on mobile */}
+          {isMobile && sidebarOpen && (
+            <button
+              type="button"
+              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+              aria-label="Close sidebar"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
 
           <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
             <DialogContent>

@@ -51,11 +51,11 @@ export function AdminHeader({
   // Focus search when '/' or Ctrl/Cmd+K is pressed (all viewports)
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null
+      const target = e.target
       const typingInField =
-        !!target &&
+        target instanceof HTMLElement &&
         (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) ||
-          (target as any).isContentEditable)
+          target.isContentEditable)
 
       const key = e.key?.toLowerCase()
       const isSlash = key === "/" && !e.metaKey && !e.ctrlKey

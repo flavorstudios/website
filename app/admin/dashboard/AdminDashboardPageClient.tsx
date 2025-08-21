@@ -1,7 +1,7 @@
 // app/admin/dashboard/AdminDashboardPageClient.tsx
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { signOut } from "firebase/auth";
@@ -91,6 +91,24 @@ type SectionId = (typeof NAV)[number]["id"];
 const validSection = (s: string | null): s is SectionId =>
   !!s && NAV.some((n) => n.id === s);
 
+// Normalize helper (keeps your URLs consistent for matching)
+function normalizePath(pathname: string | null | undefined) {
+  if (!pathname) return "/";
+  const p = pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+  return p;
+}
+
+// Longest route wins (fixes the "always overview" bug on nested paths)
+function resolveSectionFromPath(pathname: string | null | undefined): SectionId {
+  const normalized = normalizePath(pathname);
+  // Sort by href length descending so /admin/dashboard/blog-posts beats /admin/dashboard
+  const sorted = [...NAV].sort((a, b) => b.href.length - a.href.length);
+  const match = sorted.find(
+    (m) => normalized === m.href || normalized.startsWith(`${m.href}/`)
+  );
+  return (match?.id as SectionId) ?? "overview";
+}
+
 // ----------------------------------------------------------------------------
 
 interface AdminDashboardPageClientProps {
@@ -162,11 +180,12 @@ export default function AdminDashboardPageClient({
   }, [activeSection, mounted]);
 
   // --- Deep-link from pathname (authoritative for section) ------------------
+  // FIX: resolve using longest-match to avoid always matching "overview"
   useEffect(() => {
-    const matched = NAV.find(
-      (m) => pathname === m.href || pathname.startsWith(`${m.href}/`)
-    );
-    if (matched && matched.id !== activeSection) setActiveSection(matched.id);
+    const next = resolveSectionFromPath(pathname);
+    if (next !== activeSection) {
+      setActiveSection(next);
+    }
   }, [pathname, activeSection]);
 
   // --- Optional: respect ?section= if user directly visits with query -------
@@ -306,33 +325,36 @@ export default function AdminDashboardPageClient({
   const renderContent = () => {
     switch (activeSection) {
       case "overview":
-        return <DashboardOverview />;
+        return <DashboardOverview key="overview" />;
       case "blogs":
-        return <BlogManager />;
+        return <BlogManager key="blogs" />;
       case "videos":
-        return <VideoManager />;
+        return <VideoManager key="videos" />;
       case "media":
-        return <MediaLibrary />;
+        return <MediaLibrary key="media" />;
       case "categories":
-        return <CategoryManager />;
+        return <CategoryManager key="categories" />;
       case "comments":
-        return <CommentManager />;
+        return <CommentManager key="comments" />;
       case "applications":
-        return <CareerApplications />;
+        return <CareerApplications key="applications" />;
       case "inbox":
-        return <EmailInbox />;
+        return <EmailInbox key="inbox" />;
       case "system":
-        return <SystemTools />;
+        return <SystemTools key="system" />;
       case "users":
-        return <UserManagement />;
+        return <UserManagement key="users" />;
       case "settings":
-        return <SystemSettings />;
+        return <SystemSettings key="settings" />;
       default:
-        return <DashboardOverview />;
+        return <DashboardOverview key="overview-fallback" />;
     }
   };
 
-  const currentTitle = NAV.find((n) => n.id === activeSection)?.title ?? "Dashboard";
+  const currentTitle = useMemo(
+    () => NAV.find((n) => n.id === activeSection)?.title ?? "Dashboard",
+    [activeSection]
+  );
 
   return (
     <AdminAuthGuard>

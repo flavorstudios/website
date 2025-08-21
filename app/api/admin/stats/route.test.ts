@@ -6,6 +6,12 @@ import { NextRequest } from "next/server";
 // Type helper for mocked requireAdmin
 type RequireAdminFn = typeof import("@/lib/admin-auth")["requireAdmin"];
 
+// Minimal structural type to satisfy TS without using `any`
+type FirestoreLike = {
+  collection: (...args: unknown[]) => unknown;
+  collectionGroup: (...args: unknown[]) => unknown;
+};
+
 jest.mock("@/lib/admin-auth", () => ({
   requireAdmin: jest.fn().mockResolvedValue(true),
   getSessionInfo: jest.fn().mockResolvedValue({ uid: "tester", role: "admin" }),
@@ -15,7 +21,7 @@ let mockAdminDb: unknown;
 jest.mock("@/lib/firebase-admin", () => ({
   get adminDb() {
     // Narrow at the module boundary so production code sees what it expects.
-    return mockAdminDb as any;
+    return mockAdminDb as unknown as FirestoreLike;
   },
 }));
 

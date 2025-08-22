@@ -25,7 +25,7 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      - name: Unit tests
+      - name: Jest tests
         run: pnpm test
 
       - name: Build
@@ -41,5 +41,5 @@ jobs:
       - name: Install Playwright
         run: pnpm dlx playwright install --with-deps
 
-      - name: E2E tests
+      - name: Playwright tests
         run: pnpm e2e

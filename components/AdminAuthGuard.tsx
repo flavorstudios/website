@@ -19,16 +19,22 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
   useEffect(() => {
     let cancelled = false;
 
-    fetch("/api/admin/validate-session", {
-      credentials: "include",
-      cache: "no-store",
-    })
-      .then((res) => {
-        if (!cancelled) setStatus(res.ok ? "authenticated" : "unauthenticated");
-      })
-      .catch(() => {
+    async function validate() {
+      try {
+        const res = await fetch("/api/admin/validate-session", {
+          credentials: "include",
+          cache: "no-store",
+        });
+        if (!cancelled) {
+          setStatus(res.ok ? "authenticated" : "unauthenticated");
+        }
+      } catch {
         if (!cancelled) setStatus("unauthenticated");
-      });
+        
+        }
+    }
+
+    validate();
 
     return () => {
       cancelled = true;

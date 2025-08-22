@@ -56,14 +56,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Server error." }, { status: 500 })
     }
     const token = jwt.sign({ email }, secret, { expiresIn: "1d" })
-    const res = NextResponse.json({ ok: true })
-    res.cookies.set("admin-session", token, {
+    const cookieOptions = {
       httpOnly: true,
       secure: true,
-      sameSite: "lax",              // use "none" with secure: true if you have cross-site flows
-      maxAge: 60 * 60 * 24,
+      sameSite: "lax" as const, // use "none" with secure: true if you have cross-site flows
       path: "/",
       domain: ".flavorstudios.in",
+      }
+
+    const res = NextResponse.json({ ok: true })
+    res.cookies.set("admin-session", token, {
+      ...cookieOptions,
+      maxAge: 60 * 60 * 24,
     })
     return res
   } catch (err) {

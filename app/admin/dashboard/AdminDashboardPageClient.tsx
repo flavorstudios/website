@@ -9,7 +9,6 @@ import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase";
 import { fetchJson } from "@/lib/http";
 import useHotkeys from "./hooks/use-hotkeys";
 
-import AdminAuthGuard from "@/components/AdminAuthGuard";
 import { AdminSidebar } from "./components/admin-sidebar";
 import { AdminHeader } from "./components/admin-header";
 import { RoleProvider } from "./contexts/role-context";
@@ -366,9 +365,8 @@ export default function AdminDashboardPageClient({
   };
 
   return (
-    <AdminAuthGuard>
-      <ToastProvider>
-        <RoleProvider>
+    <ToastProvider>
+      <RoleProvider>
           {/* Accessible skip link */}
           <a
             href="#main"
@@ -487,6 +485,5 @@ export default function AdminDashboardPageClient({
           </Dialog>
         </RoleProvider>
       </ToastProvider>
-    </AdminAuthGuard>
   );
 }

@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { categoryStore } from "@/lib/category-store";
 import { adminDb } from "@/lib/firebase-admin";
+import { publishToUser } from "@/lib/sse-broker";
 
 export async function POST(
   request: NextRequest,
@@ -38,6 +39,9 @@ export async function POST(
     await batch.commit();
 
     await categoryStore.delete(oldCategory.id);
+
+    publishToUser("blog", "categories", {});
+    publishToUser("blog", "posts", {});
 
     return NextResponse.json({ success: true });
   } catch (error) {

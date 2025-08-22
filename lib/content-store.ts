@@ -27,6 +27,13 @@ export interface BlogPost {
   openGraphImage?: string;    // <--- ADDED for SEO & preview
 }
 
+export interface BlogRevision {
+  id: string;
+  timestamp: string;
+  author: string;
+  diff: Record<string, { before: unknown; after: unknown }>;
+}
+
 export interface Video {
   id: string;
   slug: string; // <--- ADDED
@@ -174,19 +181,93 @@ export const blogStore = {
     return newPost;
   },
 
-  async update(id: string, updates: Partial<BlogPost>): Promise<BlogPost | null> {
+  async update(
+    id: string,
+    updates: Partial<BlogPost>,
+    editor = "unknown"
+  ): Promise<BlogPost | null> {
     // Validate input (partial allows patching)
     const data = BlogPostSchema.partial().parse(updates);
     const ref = adminDb.collection("blogs").doc(id);
-    await ref.set({ ...data, updatedAt: new Date().toISOString() }, { merge: true });
-    const doc = await ref.get();
-    if (!doc.exists) return null;
-    const updated = doc.data() as BlogPost;
+
+    const beforeSnap = await ref.get();
+    if (!beforeSnap.exists) return null;
+    const before = beforeSnap.data() as BlogPost;
+
+    const serverUpdate = { ...data, updatedAt: new Date().toISOString() };
+    await ref.set(serverUpdate, { merge: true });
+
+    const afterSnap = await ref.get();
+    if (!afterSnap.exists) return null;
+    const updated = afterSnap.data() as BlogPost;
+
+    // Field-level diff only for keys we attempted to change
+    const diff: Record<string, { before: unknown; after: unknown }> = {};
+    for (const key of Object.keys(data)) {
+      const k = key as keyof BlogPost;
+      if ((before as any)[k] !== (updated as any)[k]) {
+        diff[key] = { before: (before as any)[k], after: (updated as any)[k] };
+      }
+    }
+
+    if (Object.keys(diff).length > 0) {
+      await ref.collection("revisions").add({
+        timestamp: new Date().toISOString(),
+        author: editor,
+        diff,
+      });
+    }
+
     return {
       ...updated,
       categories: Array.isArray(updated.categories) && updated.categories.length > 0 ? updated.categories : [updated.category],
       commentCount: typeof updated.commentCount === "number" ? updated.commentCount : 0,
     };
+  },
+
+  async getRevisions(id: string): Promise<BlogRevision[]> {
+    const snap = await adminDb
+      .collection("blogs")
+      .doc(id)
+      .collection("revisions")
+      .orderBy("timestamp", "desc")
+      .get();
+    return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<BlogRevision, "id">) }));
+  },
+
+  async restoreRevision(
+    id: string,
+    revisionId: string,
+    editor = "unknown"
+  ): Promise<BlogPost | null> {
+    const ref = adminDb.collection("blogs").doc(id);
+    const revDoc = await ref.collection("revisions").doc(revisionId).get();
+    if (!revDoc.exists) return null;
+
+    const revision = revDoc.data() as BlogRevision;
+
+    // Build updates by reverting each changed field back to its "before" value
+    const updates: Partial<BlogPost> = {};
+    for (const [key, value] of Object.entries(revision.diff)) {
+      (updates as any)[key] = value.before;
+    }
+
+    // Apply update (this will also write a new revision entry via blogStore.update)
+    const post = await blogStore.update(id, updates, editor);
+    if (!post) return null;
+
+    // Optional: also log a restore action entry for extra audit clarity
+    await ref.collection("revisions").add({
+      timestamp: new Date().toISOString(),
+      author: editor,
+      diff: Object.fromEntries(
+        Object.entries(revision.diff).map(([k, v]) => [k, { before: v.after, after: v.before }])
+      ),
+      action: "restore",
+      fromRevisionId: revisionId,
+    } as any);
+
+    return post;
   },
 
   async incrementViews(id: string): Promise<void> {

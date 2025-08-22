@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 import { blogStore } from "@/lib/content-store" // <-- Updated as per Codex
+import { publishToUser } from "@/lib/sse-broker"  // <-- Added for SSE broadcast
 
 // GET: Fetch all blogs for admin dashboard (with filtering, sorting, pagination)
 export async function GET(request: NextRequest) {
@@ -136,6 +137,9 @@ export async function POST(request: NextRequest) {
       readTime: blogData.readTime || "5 min read",
       // commentCount and shareCount default to 0 by the store model
     })
+
+    // Notify connected admin clients via SSE
+    publishToUser("blog", "posts", {})
 
     return NextResponse.json({
       blog: {

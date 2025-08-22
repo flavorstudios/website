@@ -5,6 +5,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto"; // For generating unique IDs
+import { publishToUser } from "@/lib/sse-broker";
 
 // Unified Category type import
 import type { Category } from "@/types/category";
@@ -93,6 +94,7 @@ export async function POST(request: NextRequest) {
 
     arr.push(categoryRecord);
     await writeJSON(json);
+    publishToUser("blog", "categories", {});
 
     // Always include name for dashboard compatibility
     return NextResponse.json({ category: { ...categoryRecord, name: categoryRecord.title } });

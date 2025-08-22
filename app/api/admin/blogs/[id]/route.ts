@@ -1,7 +1,8 @@
-import { requireAdmin } from "@/lib/admin-auth"
+import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import { blogStore } from "@/lib/content-store" // Use the correct store
 import { logError } from "@/lib/log"
+import { publishToUser } from "@/lib/sse-broker"
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
@@ -9,10 +10,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
   try {
     const data = await request.json()
-    const blog = await blogStore.update(params.id, data)
+    const session = await getSessionAndRole(request)
+    const blog = await blogStore.update(params.id, data, session?.email || "unknown")
     if (!blog) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 })
     }
+    publishToUser("blog", "posts", {})
     return NextResponse.json(blog)
   } catch (error) {
     logError("admin/blogs:id:PUT", error)
@@ -29,6 +32,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     if (!success) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 })
     }
+    publishToUser("blog", "posts", {})
     return NextResponse.json({ success: true })
   } catch (error) {
     logError("admin/blogs:id:DELETE", error)

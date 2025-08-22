@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/admin-auth"
+import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import type { BlogPost } from "@/lib/content-store"
 import { blogStore } from "@/lib/content-store"
@@ -9,26 +9,52 @@ export async function POST(request: NextRequest) {
   }
   try {
     const blogData = await request.json()
+    const session = await getSessionAndRole(request)
+    const editor = session?.email || "unknown"
 
     let post: BlogPost | null = null
-    // If blogData has an id, update the post. Otherwise, create a new post.
+
+    // Normalize date fields on the server
+    const nowIso = new Date().toISOString()
+    const status: BlogPost["status"] | undefined = blogData?.status
+    const normalizedPublishedAt =
+      status === "published" ? nowIso : undefined
+    const normalizedScheduledFor =
+      status === "scheduled" && blogData?.scheduledFor
+        ? new Date(blogData.scheduledFor).toISOString()
+        : undefined
+
     if (blogData.id) {
+      // Update existing post
       const { id, ...updates } = blogData
-      post = await blogStore.update(id, {
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      })
+      post = await blogStore.update(
+        id,
+        {
+          ...updates,
+          // Server-authoritative timestamps
+          updatedAt: nowIso,
+          // Ensure dates are strings
+          ...(normalizedPublishedAt ? { publishedAt: normalizedPublishedAt } : {}),
+          ...(normalizedScheduledFor ? { scheduledFor: normalizedScheduledFor } : {}),
+        },
+        editor
+      )
       if (!post) {
         return NextResponse.json({ error: "Blog not found" }, { status: 404 })
       }
     } else {
+      // Create new post
       const newId = `blog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       post = await blogStore.create({
         ...blogData,
         id: newId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        // Server-authoritative timestamps
+        createdAt: nowIso,
+        updatedAt: nowIso,
         views: 0,
+        // Ensure dates are strings at creation as well
+        ...(normalizedPublishedAt ? { publishedAt: normalizedPublishedAt } : {}),
+        ...(normalizedScheduledFor ? { scheduledFor: normalizedScheduledFor } : {}),
       })
     }
 

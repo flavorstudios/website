@@ -40,6 +40,23 @@ export function NotificationBell() {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
+  // Persist category filter across sessions
+  useEffect(() => {
+    try {
+      const saved = typeof window !== "undefined" ? localStorage.getItem("admin-notifications-category") : null;
+      if (saved) setCategoryFilter(saved);
+    } catch {
+      // ignore
+    }
+  }, []);
+  useEffect(() => {
+    try {
+      localStorage.setItem("admin-notifications-category", categoryFilter);
+    } catch {
+      // ignore
+    }
+  }, [categoryFilter]);
+
   // Keep your existing endpoint and polling. We add SSE for near-real-time updates.
   const { data, error, isLoading, mutate } = useSWR<{ notifications: Notification[] }>(
     "/api/admin/notifications",
@@ -70,9 +87,7 @@ export function NotificationBell() {
 
   const filtered = useMemo(
     () =>
-      notifications.filter(
-        (n) => categoryFilter === "all" || n.category === categoryFilter
-      ),
+      notifications.filter((n) => categoryFilter === "all" || n.category === categoryFilter),
     [notifications, categoryFilter]
   );
 
@@ -176,6 +191,30 @@ export function NotificationBell() {
     setSelectionMode(false);
   };
 
+  // NEW: Bulk mark unread
+  const bulkMarkUnread = async () => {
+    const ids = Array.from(selected);
+    optimisticUpdate((prev) => prev.map((n) => (ids.includes(n.id) ? { ...n, read: false } : n)));
+    try {
+      await Promise.all(
+        ids.map((id) =>
+          fetch(`/api/admin/notifications/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ read: false }),
+          })
+        )
+      );
+      await mutate();
+    } catch (err) {
+      console.error("Failed to mark notifications as unread:", err);
+      await mutate();
+    }
+    clearSelection();
+    setSelectionMode(false);
+  };
+
   const bulkDelete = async () => {
     const ids = Array.from(selected);
     // Optimistic remove
@@ -192,6 +231,28 @@ export function NotificationBell() {
       await mutate();
     } catch (err) {
       console.error("Failed to delete notifications:", err);
+      await mutate();
+    }
+    clearSelection();
+    setSelectionMode(false);
+  };
+
+  // NEW: Clear all notifications
+  const clearAll = async () => {
+    const ids = notifications.map((n) => n.id);
+    optimisticUpdate(() => []);
+    try {
+      await Promise.all(
+        ids.map((id) =>
+          fetch(`/api/admin/notifications/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+          })
+        )
+      );
+      await mutate();
+    } catch (err) {
+      console.error("Failed to clear all notifications:", err);
       await mutate();
     }
     clearSelection();
@@ -263,14 +324,32 @@ export function NotificationBell() {
     // Close on Escape
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsOpen(false);
+      // Keyboard triage shortcuts (non-invasive)
+      if (e.key.toLowerCase() === "r" && selected.size > 0) {
+        e.preventDefault();
+        void bulkMarkRead();
+      }
+      if (e.key.toLowerCase() === "u" && selected.size > 0) {
+        e.preventDefault();
+        void bulkMarkUnread();
+      }
+      if (e.key === "Delete" && selected.size > 0) {
+        e.preventDefault();
+        void bulkDelete();
+      }
+      if ((e.ctrlKey || (e as any).metaKey) && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        selectAll();
+        setSelectionMode(true);
+      }
     };
-    document.addEventListener("keydown", onKey);
+    document.addEventListener("keydown", onKey as any);
 
     return () => {
       window.clearTimeout(t);
-      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("keydown", onKey as any);
     };
-  }, [isOpen]);
+  }, [isOpen, selected.size]);
 
   // --- SSE live updates (graceful fallback if endpoint not available) ---
   useEffect(() => {
@@ -281,7 +360,7 @@ export function NotificationBell() {
       es.addEventListener("new", refresh);
       es.addEventListener("read", refresh);
       es.addEventListener("mark-all-read", refresh);
-      es.addEventListener("deleted", refresh); // NEW: reflect deletions
+      es.addEventListener("deleted", refresh); // reflect deletions
       es.addEventListener("ready", () => {}); // no-op
       es.onerror = () => {
         // If server doesn't support SSE, just rely on SWR polling
@@ -353,7 +432,7 @@ export function NotificationBell() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40"
+              className="fixed inset-0 z-40 bg-black/20 dark:bg-black/40"
               onClick={() => setIsOpen(false)}
               aria-hidden="true"
             />
@@ -363,7 +442,7 @@ export function NotificationBell() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.98 }}
               transition={{ duration: 0.18 }}
-              className="absolute right-0 top-full z-50 mt-2 w-[22rem] max-w-[95vw] outline-none"
+              className="absolute right-0 top-full z-50 mt-2 w[22rem] max-w-[95vw] outline-none sm:w-[22rem]"
               role="dialog"
               aria-modal="true"
               aria-labelledby={titleId}
@@ -418,6 +497,19 @@ export function NotificationBell() {
                             Mark all read
                           </Button>
                         )}
+                        {notifications.length > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            type="button"
+                            onClick={clearAll}
+                            className="h-8 px-2 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            aria-label="Delete all notifications"
+                          >
+                            <Trash2 className="mr-1 h-4 w-4" />
+                            Clear all
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -442,6 +534,9 @@ export function NotificationBell() {
                       <div className="flex gap-1">
                         <Button size="sm" variant="ghost" type="button" onClick={selectAll} className="h-7 px-2">
                           Select all
+                        </Button>
+                        <Button size="sm" type="button" onClick={bulkMarkUnread} className="h-7 px-2">
+                          Mark unread
                         </Button>
                         <Button size="sm" type="button" onClick={bulkMarkRead} className="h-7 px-2">
                           Mark read

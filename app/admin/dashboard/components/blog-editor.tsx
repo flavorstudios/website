@@ -14,6 +14,13 @@ import { Switch } from "@/components/ui/switch"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import BlogPostRenderer from "@/components/BlogPostRenderer"
 import { RichTextEditor } from "./rich-text-editor"
 import Image from "next/image"
@@ -25,7 +32,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { authors } from "@/lib/authors"
 
-import type { BlogPost } from "@/lib/content-store"
+import type { BlogPost, BlogRevision } from "@/lib/content-store"
 
 const titleMin = 50
 const titleMax = 60
@@ -95,6 +102,10 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const [tagInput, setTagInput] = useState("")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [showPreview, setShowPreview] = useState(false)
+
+  // New: revision history + ws state
+  const [revisions, setRevisions] = useState<BlogRevision[]>([])
+  const [ws, setWs] = useState<WebSocket | null>(null)
 
   // Helper to combine scheduled date + time
   const getScheduledDateTime = () => {
@@ -166,6 +177,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post.content])
 
+  // Autosave
   useEffect(() => {
     const autoSave = async () => {
       if (post.title || post.content) {
@@ -177,6 +189,73 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post])
 
+  // Load revisions for current post
+  const loadRevisions = async () => {
+    if (!post.id) return
+    try {
+      const res = await fetch(`/api/admin/blogs/${post.id}/revisions`, { credentials: "include" })
+      if (res.ok) {
+        const data = await res.json()
+        setRevisions(data.revisions || [])
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to load revisions:", err)
+    }
+  }
+
+  useEffect(() => {
+    if (!post.id) return
+    loadRevisions()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post.id])
+
+  const restoreRevision = async (id: string) => {
+    if (!post.id) return
+    try {
+      const res = await fetch(`/api/admin/blogs/${post.id}/revisions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ revisionId: id }),
+        credentials: "include",
+      })
+      if (res.ok) {
+        const restored = await res.json()
+        setPost(restored)
+        toast.success("Revision restored")
+        loadRevisions()
+      } else {
+        toast.error("Failed to restore revision")
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to restore revision:", err)
+      toast.error("Failed to restore revision")
+    }
+  }
+
+  // WebSocket connect for cursor sync
+  useEffect(() => {
+    if (!post.id) return
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws"
+    const socket = new WebSocket(`${protocol}://${window.location.host}/api/admin/blogs/${post.id}/sync`)
+    setWs(socket)
+    return () => {
+      try { socket.close() } catch {}
+    }
+  }, [post.id])
+
+  // Simple heartbeat to keep connection alive
+  useEffect(() => {
+    if (!ws) return
+    const h = setInterval(() => {
+      if (ws.readyState === 1) {
+        try { ws.send(JSON.stringify({ type: "pong" })) } catch {}
+      }
+    }, 25000)
+    return () => clearInterval(h)
+  }, [ws])
+
   const savePost = async (isAutoSave = false) => {
     if (!isAutoSave) setSaving(true)
     try {
@@ -186,8 +265,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         body: JSON.stringify({
           ...post,
           category: post.categories[0] || post.category || "",
-          publishedAt: post.status === "published" ? new Date() : undefined,
-          scheduledFor: post.status === "scheduled" ? getScheduledDateTime() : undefined,
+          // send ISO strings to the server
+          publishedAt: post.status === "published" ? new Date().toISOString() : undefined,
+          scheduledFor: post.status === "scheduled" ? getScheduledDateTime()?.toISOString() : undefined,
         }),
         credentials: "include",
       })
@@ -330,6 +410,36 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               <Save className="h-4 w-4" aria-hidden="true" />
               {saving ? "Saving..." : "Save Draft"}
             </Button>
+
+            {/* History Sidebar */}
+            <Sheet onOpenChange={(open) => open && loadRevisions()}>
+              <SheetTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  History
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 sm:w-96">
+                <SheetHeader>
+                  <SheetTitle>Revision History</SheetTitle>
+                </SheetHeader>
+                <div className="mt-4 space-y-4">
+                  {revisions.map((rev) => (
+                    <div key={rev.id} className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm">{new Date(rev.timestamp).toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">{rev.author}</p>
+                      </div>
+                      <Button size="sm" onClick={() => restoreRevision(rev.id)}>Restore</Button>
+                    </div>
+                  ))}
+                  {revisions.length === 0 && (
+                    <p className="text-sm text-gray-500">No revisions</p>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+
             {/* Preview Button */}
             <Tooltip>
               <TooltipTrigger asChild>
@@ -409,6 +519,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   value={post.content}
                   onChange={(content) => setPost((prev) => ({ ...prev, content }))}
                   placeholder="Start writing your blog post..."
+                  socket={ws}
                 />
               </CardContent>
             </Card>

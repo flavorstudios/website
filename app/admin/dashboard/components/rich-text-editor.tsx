@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import {
   Bold,
@@ -32,12 +32,16 @@ interface RichTextEditorProps {
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+  socket?: WebSocket | null
 }
 
-export function RichTextEditor({ value, onChange, placeholder, className }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, placeholder, className, socket }: RichTextEditorProps) {
   const [showLinkDialog, setShowLinkDialog] = useState(false)
   const [linkUrl, setLinkUrl] = useState("")
   const [linkText, setLinkText] = useState("")
+  const clientId = useRef<string>(Math.random().toString(36).slice(2))
+  const [remoteCursors, setRemoteCursors] = useState<Record<string, number>>({})
+  const containerRef = useRef<HTMLDivElement | null>(null)
 
   // TipTap Editor Instance
   const editor = useEditor({
@@ -59,6 +63,44 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
   if (editor && value !== editor.getHTML()) {
     editor.commands.setContent(value, false)
   }
+
+  // Send local selection to WebSocket
+  useEffect(() => {
+    if (!editor || !socket) return
+
+    const handleSelection = ({ editor }: { editor: any }) => {
+      const { from, to } = editor.state.selection
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: "cursor", from, to, id: clientId.current }))
+      }
+    }
+
+    editor.on("selectionUpdate", handleSelection)
+    return () => {
+      editor.off("selectionUpdate", handleSelection)
+    }
+  }, [editor, socket])
+
+  // Receive remote cursor messages
+  useEffect(() => {
+    if (!socket) return
+
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(String(event.data))
+        if (data?.type === "cursor" && data.id !== clientId.current) {
+          setRemoteCursors(prev => ({ ...prev, [data.id]: Number(data.from) || 1 }))
+        }
+      } catch {
+        // ignore malformed payloads
+      }
+    }
+
+    socket.addEventListener("message", handleMessage)
+    return () => {
+      socket.removeEventListener("message", handleMessage)
+    }
+  }, [socket])
 
   // Insert Link Handler
   const insertLink = () => {
@@ -269,16 +311,40 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
         </div>
       </div>
 
-      {/* Editor */}
-      <EditorContent
-        editor={editor}
-        data-placeholder={placeholder}
-        className="min-h-[400px] p-4 focus:outline-none prose prose-lg max-w-none"
-        style={{
-          lineHeight: "1.6",
-          fontSize: "16px",
-        }}
-      />
+      {/* Editor + remote cursor overlay */}
+      <div ref={containerRef} className="relative">
+        <EditorContent
+          editor={editor}
+          data-placeholder={placeholder}
+          className="min-h-[400px] p-4 focus:outline-none prose prose-lg max-w-none"
+          style={{
+            lineHeight: "1.6",
+            fontSize: "16px",
+          }}
+        />
+
+        {editor && containerRef.current &&
+          Object.entries(remoteCursors).map(([id, pos]) => {
+            try {
+              const maxPos = editor.state.doc.content.size
+              const clamped = Math.max(1, Math.min(pos, maxPos))
+              const coords = editor.view.coordsAtPos(clamped)
+              const box = containerRef.current.getBoundingClientRect()
+              const left = coords.left - box.left + containerRef.current.scrollLeft
+              const top = coords.top - box.top + containerRef.current.scrollTop
+
+              return (
+                <span
+                  key={id}
+                  className="pointer-events-none absolute w-0.5 h-4 bg-red-500"
+                  style={{ left, top }}
+                />
+              )
+            } catch {
+              return null
+            }
+          })}
+      </div>
 
       {/* Link Dialog */}
       {showLinkDialog && (

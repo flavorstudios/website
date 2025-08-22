@@ -4,6 +4,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { type NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
+import { publishToUser } from "@/lib/sse-broker";
 
 // Path to your main categories file
 const CATEGORIES_PATH = path.join(process.cwd(), "content-data", "categories.json");
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
     }
     // (Optional) You can call updatePostCounts here if you implement it
     // For now, we just confirm the file is there and valid
+    publishToUser("blog", "categories", {});
 
     return NextResponse.json({
       success: true,

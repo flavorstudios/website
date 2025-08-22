@@ -5,6 +5,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import type { Category } from "@/types/category";
+import { publishToUser } from "@/lib/sse-broker";
 
 const CATEGORIES_PATH = path.join(process.cwd(), "content-data", "categories.json");
 
@@ -30,7 +31,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  if (!(await requireAdmin(request))) {
+  if (!(await requireAdmin(request, "canManageCategories"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
@@ -61,7 +62,7 @@ export async function PUT(
             return {
               ...cat,
               ...rest,
-              tooltip: rest.tooltip ?? cat.tooltip,
+              tooltip: rest.tooltip ?? (cat as { tooltip?: unknown }).tooltip,
               id: (cat as { id: string }).id,
               title: rest.title ?? (cat as { title?: string }).title,
             };
@@ -76,6 +77,7 @@ export async function PUT(
     }
 
     await writeJSON(json);
+    publishToUser("blog", "categories", {});
 
     // Return updated category with `name` for dashboard compatibility
     const updated = [
@@ -101,7 +103,7 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  if (!(await requireAdmin(request))) {
+  if (!(await requireAdmin(request, "canManageCategories"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   try {
@@ -124,6 +126,7 @@ export async function DELETE(
     }
 
     await writeJSON(json);
+    publishToUser("blog", "categories", {});
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

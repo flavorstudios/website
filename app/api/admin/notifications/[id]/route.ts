@@ -17,7 +17,10 @@ export async function PATCH(
 ) {
   // Admin gate
   if (!(await requireAdmin(request))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized", code: "UNAUTHORIZED" },
+      { status: 401, headers: { "Cache-Control": "no-store" } }
+    );
   }
 
   try {
@@ -29,7 +32,10 @@ export async function PATCH(
       id = parts[parts.length - 1];
     }
     if (!id) {
-      return NextResponse.json({ error: "Missing notification id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing notification id", code: "MISSING_ID" },
+        { status: 400, headers: { "Cache-Control": "no-store" } }
+      );
     }
 
     // Parse body (optional). Default to read=true if absent or invalid.
@@ -39,7 +45,7 @@ export async function PATCH(
     } catch {
       // ignore parse errors; treat as empty body
     }
-    const parsed = body as { read?: boolean } | null;
+    const parsed = (body && typeof body === "object" ? (body as { read?: boolean }) : null) || null;
     const read = typeof parsed?.read === "boolean" ? parsed.read : true;
 
     // Get a user context. In many admin dashboards this will be the admin user.
@@ -58,16 +64,19 @@ export async function PATCH(
       publishToUser(userId, "read", { id });
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Notification updated",
-      id,
-      read,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Notification updated",
+        id,
+        read,
+      },
+      { status: 200, headers: { "Cache-Control": "no-store" } }
+    );
   } catch {
     return NextResponse.json(
-      { error: "Failed to update notification" },
-      { status: 500 }
+      { error: "Failed to update notification", code: "SERVER_ERROR" },
+      { status: 500, headers: { "Cache-Control": "no-store" } }
     );
   }
 }

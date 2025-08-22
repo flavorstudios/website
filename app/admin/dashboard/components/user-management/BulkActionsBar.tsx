@@ -17,8 +17,14 @@ export default function BulkActionsBar({
 }: BulkActionsBarProps) {
   if (count === 0) return null;
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 border-t bg-white p-2 shadow sm:static sm:justify-start sm:border-0 sm:p-0 sm:shadow-none">
-      <span className="mr-2 text-sm text-muted-foreground">{count} selected</span>
+    <div
+      role="region"
+      aria-label="Bulk actions"
+      className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 border-t bg-white p-2 shadow sm:static sm:justify-start sm:border-0 sm:p-0 sm:shadow-none"
+    >
+      <span aria-live="polite" className="mr-2 text-sm text-muted-foreground">
+        {count} selected
+      </span>
       <Button variant="outline" size="sm" onClick={onEnable}>
         <UserCheck className="mr-1 h-4 w-4" /> Enable
       </Button>

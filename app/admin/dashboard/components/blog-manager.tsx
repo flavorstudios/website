@@ -49,6 +49,9 @@ export default function BlogManager() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
 
+  // New: track a pending bulk publish/unpublish action for confirmation
+  const [bulkAction, setBulkAction] = useState<null | "publish" | "unpublish">(null);
+
   // ---- Read filters/pagination from URL ----
   const search = searchParams.get("search") ?? "";
   const category = searchParams.get("category") ?? "all";
@@ -192,6 +195,7 @@ export default function BlogManager() {
     await refreshData();
   };
 
+  // Updated: open confirm dialog for publish/unpublish, and refresh once after batch
   const handleBulk = async (action: "publish" | "unpublish" | "delete") => {
     const ids = Array.from(selected);
     if (ids.length === 0) return;
@@ -199,13 +203,10 @@ export default function BlogManager() {
       setDeleteTargets(ids);
       return; // confirmation handled by modal
     }
-    for (const id of ids) {
-      await togglePublish(id, action === "publish");
-    }
-    setSelected(new Set());
-    await refreshData();
+    setBulkAction(action);
   };
 
+  // Updated: remove per-item refresh; do one refresh after batch
   const togglePublish = async (id: string, publish: boolean) => {
     try {
       const res = await fetch(`/api/admin/blogs/${id}`, {
@@ -216,7 +217,6 @@ export default function BlogManager() {
       });
       if (res.ok) {
         toast(publish ? "Post published" : "Post unpublished");
-        await refreshData();
       } else {
         const data = await res.json();
         toast(data.error || "Update failed");
@@ -224,6 +224,20 @@ export default function BlogManager() {
     } catch (err) {
       console.error("Publish toggle failed", err);
       toast("Update failed");
+    }
+  };
+
+  // New: confirm handler for bulk publish/unpublish
+  const confirmBulkToggle = async () => {
+    if (!bulkAction) return;
+    const publish = bulkAction === "publish";
+    const ids = Array.from(selected);
+    try {
+      await Promise.all(ids.map((id) => togglePublish(id, publish)));
+    } finally {
+      setSelected(new Set());
+      await refreshData();
+      setBulkAction(null);
     }
   };
 
@@ -411,6 +425,28 @@ export default function BlogManager() {
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+
+        {/* Publish/Unpublish Confirmation Modal */}
+        {bulkAction && (
+          <AlertDialog open onOpenChange={(open) => !open && setBulkAction(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {bulkAction === "publish" ? "Publish selected posts?" : "Unpublish selected posts?"}
+                </AlertDialogTitle>
+              </AlertDialogHeader>
+              <p>
+                This will {bulkAction === "publish" ? "make the selected posts public." : "remove the selected posts from public view."}
+              </p>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmBulkToggle}>
+                  {bulkAction === "publish" ? "Publish" : "Unpublish"}
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

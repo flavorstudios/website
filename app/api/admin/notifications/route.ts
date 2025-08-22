@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+
   try {
     // Resolve the user whose notifications we’re fetching.
     // Replace this with your real session/user resolution.
@@ -33,14 +34,27 @@ export async function GET(request: NextRequest) {
     const notifications = list.items.map((n) => {
       const meta = n.metadata as Record<string, unknown> | undefined
       const metaType = typeof meta?.type === "string" ? (meta.type as string) : undefined
+
+      // Keep the legacy "type" for compatibility with your UI
       const type =
         metaType === "comment" || metaType === "contact" || metaType === "flagged"
           ? metaType
-          : "comment" // fallback for unknown types to keep icons/colors stable
+          : "comment" // fallback to keep icons/colors stable
+
+      // New fields used by the enhanced UI
+      const category =
+        typeof meta?.category === "string" ? (meta.category as string) : type
+      const priority =
+        typeof meta?.priority === "string" ? (meta.priority as string) : "normal"
+      const href =
+        typeof meta?.href === "string" ? (meta.href as string) : undefined
 
       return {
         id: n.id,
-        type,
+        type,        // legacy/compat
+        category,    // new
+        priority,    // new
+        href,        // new
         title: n.title,
         message: n.body ?? "",
         timestamp: n.createdAt,

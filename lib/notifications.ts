@@ -27,6 +27,7 @@ export interface NotificationsProvider {
   ): Promise<NotificationListResult>;
   markRead(userId: string, id: string): Promise<void>;
   markAllRead(userId: string): Promise<void>;
+  delete(userId: string, id: string): Promise<void>; // added
 }
 
 class InMemoryProvider implements NotificationsProvider {
@@ -41,7 +42,11 @@ class InMemoryProvider implements NotificationsProvider {
       createdAt: new Date(),
       readAt: null,
       provider: this.provider,
-      metadata: {},
+      metadata: {
+        type: "comment",
+        category: "general",
+        priority: "low",
+      },
     };
     this.store.set("admin", [sample]);
   }
@@ -86,6 +91,15 @@ class InMemoryProvider implements NotificationsProvider {
     items.forEach((n) => {
       if (!n.readAt) n.readAt = now;
     });
+  }
+
+  async delete(userId: string, id: string): Promise<void> {
+    const items = this.store.get(userId);
+    if (!items) return;
+    const idx = items.findIndex((n) => n.id === id);
+    if (idx !== -1) {
+      items.splice(idx, 1);
+    }
   }
 }
 

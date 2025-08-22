@@ -124,8 +124,14 @@ function VideoBulkActions({
 }) {
   if (count === 0) return null;
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 border-t bg-white p-2 shadow sm:static sm:justify-start sm:border-0 sm:p-0 sm:shadow-none">
-      <span className="mr-2 text-sm text-muted-foreground">{count} selected</span>
+    <div
+      role="region"
+      aria-label="Bulk actions"
+      className="fixed bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 border-t bg-white p-2 shadow sm:static sm:justify-start sm:border-0 sm:p-0 sm:shadow-none"
+    >
+      <span aria-live="polite" className="mr-2 text-sm text-muted-foreground">
+        {count} selected
+      </span>
       <Button variant="outline" size="sm" onClick={onPublish}>
         <Upload className="mr-1 h-4 w-4" /> Publish
       </Button>
@@ -320,6 +326,7 @@ export default function VideoManager() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [bulkAction, setBulkAction] = useState<null | "publish" | "unpublish">(null);
 
   useEffect(() => {
     loadData();
@@ -439,7 +446,7 @@ export default function VideoManager() {
     await loadData();
   };
 
-  const togglePublish = async (id: string, publish: boolean) => {
+  const togglePublish = async (id: string, publish: boolean, opts?: { skipReload?: boolean }) => {
     try {
       const res = await fetch(`/api/admin/videos/${id}`, {
         method: "PUT",
@@ -449,7 +456,9 @@ export default function VideoManager() {
       });
       if (res.ok) {
         toast(publish ? "Video published." : "Video unpublished.");
-        await loadData();
+        if (!opts?.skipReload) {
+          await loadData();
+        }
       }
     } catch {
       toast("Failed to update video status.");
@@ -484,11 +493,21 @@ export default function VideoManager() {
       setDeleteTargets(ids);
       return;
     }
-    for (const id of ids) {
-      await togglePublish(id, action === "publish");
+    // Open confirmation dialog for publish/unpublish
+    setBulkAction(action);
+  };
+
+  const confirmBulkToggle = async () => {
+    if (!bulkAction) return;
+    const ids = Array.from(selected);
+    const publish = bulkAction === "publish";
+    try {
+      await Promise.all(ids.map((id) => togglePublish(id, publish, { skipReload: true })));
+    } finally {
+      setSelected(new Set());
+      await loadData(); // single refresh after the batch
+      setBulkAction(null);
     }
-    setSelected(new Set());
-    await loadData();
   };
 
   const sortedVideos = [...filteredVideos].sort((a, b) => {
@@ -660,6 +679,28 @@ export default function VideoManager() {
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+
+      {/* Confirm dialog for bulk publish/unpublish */}
+      {bulkAction && (
+        <AlertDialog open onOpenChange={(open) => !open && setBulkAction(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {bulkAction === "publish" ? "Publish selected videos?" : "Unpublish selected videos?"}
+              </AlertDialogTitle>
+            </AlertDialogHeader>
+            <p>
+              This will {bulkAction === "publish" ? "make the selected videos public." : "remove the selected videos from public view."}
+            </p>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmBulkToggle}>
+                {bulkAction === "publish" ? "Publish" : "Unpublish"}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

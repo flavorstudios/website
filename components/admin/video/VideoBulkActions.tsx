@@ -12,8 +12,14 @@ export interface VideoBulkActionsProps {
 export default function VideoBulkActions({ count, onPublish, onUnpublish, onDelete }: VideoBulkActionsProps) {
   if (count === 0) return null
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm text-muted-foreground mr-2">{count} selected</span>
+    <div
+      role="region"
+      aria-label="Bulk actions"
+      className="flex items-center gap-2"
+    >
+      <span aria-live="polite" className="text-sm text-muted-foreground mr-2">
+        {count} selected
+      </span>
       <Button variant="outline" size="sm" onClick={onPublish}>
         <Upload className="h-4 w-4 mr-1" /> Publish
       </Button>

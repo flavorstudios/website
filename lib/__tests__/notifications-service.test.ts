@@ -1,9 +1,21 @@
+import { randomUUID } from "crypto";
 import { getNotificationsService } from "@/lib/notifications";
 
 describe("NotificationsService", () => {
   it("marks notifications as read", async () => {
     const service = getNotificationsService();
     const userId = "admin";
+
+    // Seed a notification using the optional add helper
+    await service.add?.(userId, {
+      id: randomUUID(),
+      userId,
+      title: "Test",
+      body: "Body",
+      createdAt: new Date(),
+      readAt: null,
+      provider: "db",
+    });
 
     const firstList = await service.list(userId);
     expect(Array.isArray(firstList.items)).toBe(true);

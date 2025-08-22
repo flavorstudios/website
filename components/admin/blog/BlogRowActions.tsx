@@ -4,17 +4,24 @@ import { Button } from '@/components/ui/button'
 import { Pencil, Eye, Archive, Upload, Trash2 } from 'lucide-react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { BlogPost } from '@/lib/content-store'
+import { cn } from '@/lib/utils'
 
 export interface BlogRowActionsProps {
   post: BlogPost
   onDelete: (id: string) => void
   onTogglePublish: (id: string, publish: boolean) => void
+  className?: string
 }
 
-export default function BlogRowActions({ post, onDelete, onTogglePublish }: BlogRowActionsProps) {
+export default function BlogRowActions({
+  post,
+  onDelete,
+  onTogglePublish,
+  className,
+}: BlogRowActionsProps) {
   const isPublished = post.status === 'published'
   return (
-    <div className="flex gap-2">
+    <div className={cn('flex gap-2', className)}>
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -25,12 +32,13 @@ export default function BlogRowActions({ post, onDelete, onTogglePublish }: Blog
             title="Edit"
           >
             <Link href={`/admin/blog/edit?id=${post.id}`}>
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>
         </TooltipTrigger>
         <TooltipContent>Edit</TooltipContent>
       </Tooltip>
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -41,12 +49,13 @@ export default function BlogRowActions({ post, onDelete, onTogglePublish }: Blog
             title="Preview"
           >
             <Link href={`/admin/preview/${post.id}`} target="_blank">
-              <Eye className="h-4 w-4" />
+              <Eye className="h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>
         </TooltipTrigger>
         <TooltipContent>Preview</TooltipContent>
       </Tooltip>
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -57,14 +66,15 @@ export default function BlogRowActions({ post, onDelete, onTogglePublish }: Blog
             onClick={() => onTogglePublish(post.id, !isPublished)}
           >
             {isPublished ? (
-              <Archive className="h-4 w-4" />
+              <Archive className="h-4 w-4" aria-hidden="true" />
             ) : (
-              <Upload className="h-4 w-4" />
+              <Upload className="h-4 w-4" aria-hidden="true" />
             )}
           </Button>
         </TooltipTrigger>
         <TooltipContent>{isPublished ? 'Unpublish' : 'Publish'}</TooltipContent>
       </Tooltip>
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -75,7 +85,7 @@ export default function BlogRowActions({ post, onDelete, onTogglePublish }: Blog
             title="Delete"
             onClick={() => onDelete(post.id)}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
           </Button>
         </TooltipTrigger>
         <TooltipContent>Delete</TooltipContent>

@@ -1,4 +1,4 @@
-import { randomUUID, createHash } from "crypto";
+import { createHash } from "crypto";
 
 export interface Notification {
   id: string;
@@ -28,27 +28,18 @@ export interface NotificationsProvider {
   markRead(userId: string, id: string): Promise<void>;
   markAllRead(userId: string): Promise<void>;
   delete(userId: string, id: string): Promise<void>; // added
+  add?(userId: string, notification: Notification): Promise<void>; // optional seeding helper
 }
 
 class InMemoryProvider implements NotificationsProvider {
   private store = new Map<string, Notification[]>();
 
-  constructor(private provider: Notification["provider"]) {
-    const sample: Notification = {
-      id: randomUUID(),
-      userId: "admin",
-      title: "Welcome",
-      body: "This is a sample notification.",
-      createdAt: new Date(),
-      readAt: null,
-      provider: this.provider,
-      metadata: {
-        type: "comment",
-        category: "general",
-        priority: "low",
-      },
-    };
-    this.store.set("admin", [sample]);
+  constructor(private provider: Notification["provider"]) {}
+
+  async add(userId: string, notification: Notification): Promise<void> {
+    const items = this.store.get(userId) ?? [];
+    items.push(notification);
+    this.store.set(userId, items);
   }
 
   async list(

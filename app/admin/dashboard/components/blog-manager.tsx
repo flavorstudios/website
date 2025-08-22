@@ -92,7 +92,12 @@ export default function BlogManager() {
       sortBy,
     )}&page=${encodeURIComponent(String(currentPage))}`,
     fetcher,
-    { refreshInterval: 30000 },
+    {
+      // remove polling; rely on SSE
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 5000,
+    },
   );
 
   const {
@@ -103,7 +108,12 @@ export default function BlogManager() {
   } = useSWR<{ categories: Partial<CategoryData>[] }>(
     "/api/admin/categories?type=blog",
     fetcher,
-    { refreshInterval: 30000 },
+    {
+      // remove polling; rely on SSE
+      revalidateOnFocus: false,
+      revalidateOnReconnect: true,
+      dedupingInterval: 5000,
+    },
   );
 
   // Reflect categories into local state
@@ -119,6 +129,36 @@ export default function BlogManager() {
       );
     }
   }, [categoriesData]);
+
+  // --- SSE live updates (no manual close on error; let browser auto-reconnect) ---
+  useEffect(() => {
+    let es: EventSource | null = null;
+    try {
+      es = new EventSource("/api/admin/blogs/stream");
+
+      const refreshPosts = () => mutatePosts();
+      const refreshCategories = () => mutateCategories();
+
+      es.addEventListener("posts", refreshPosts as EventListener);
+      es.addEventListener("categories", refreshCategories as EventListener);
+
+      es.addEventListener("ready", () => {
+        // server signaled readiness (optional no-op)
+      });
+
+      // Important: don't close here; allow automatic retries
+      es.onerror = () => {
+        // optionally log with a lightweight console.info
+        // console.info("SSE error; browser will attempt to reconnect");
+      };
+    } catch {
+      // ignore if EventSource not supported
+    }
+
+    return () => {
+      es?.close();
+    };
+  }, [mutatePosts, mutateCategories]);
 
   const loading = postsLoading || categoriesLoading;
   const displayError = postsError || categoriesError ? "Failed to load blog posts." : null;
@@ -440,7 +480,10 @@ export default function BlogManager() {
                 </AlertDialogTitle>
               </AlertDialogHeader>
               <p>
-                This will {bulkAction === "publish" ? "make the selected posts public." : "remove the selected posts from public view."}
+                This will{" "}
+                {bulkAction === "publish"
+                  ? "make the selected posts public."
+                  : "remove the selected posts from public view."}
               </p>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>

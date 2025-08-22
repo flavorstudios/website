@@ -26,6 +26,7 @@ import {
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import type { Category } from "@/types/category"
+import useMediaQuery from "@/hooks/use-media-query"
 
 export type CategoryType = "BLOG" | "VIDEO"
 
@@ -72,20 +73,13 @@ export default function CategoryList({
   toggleSelectAll,
 }: CategoryListProps) {
   const [items, setItems] = useState<Category[]>([])
-  const [width, setWidth] = useState<number>(1024)
   const rowRefs = useRef<HTMLTableRowElement[]>([])
   const { toast } = useToast()
+  const isMobile = useMediaQuery("(max-width: 639px)")
 
   useEffect(() => {
     setItems([...categories].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)))
   }, [categories])
-
-  useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth)
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
 
   const sensors = useSensors(useSensor(PointerSensor))
 
@@ -123,7 +117,7 @@ export default function CategoryList({
   const allSelected = items.length > 0 && items.every((c) => selected.has(c.id))
 
   // --- Responsive: Card view for mobile (sm breakpoint < 640px)
-  if (width < 640) {
+  if (isMobile) {
     if (items.length === 0) {
       return (
         <div className="p-6 text-center text-gray-400">No categories found.</div>
@@ -138,7 +132,7 @@ export default function CategoryList({
             onCheckedChange={(v) => toggleSelectAll(!!v)}
             aria-label="Select all categories"
           />
-          <span className="text-xs">Select all</span>
+        <span className="text-xs">Select all</span>
         </div>
         {items.map((cat) => (
           <CategoryCard

@@ -1,14 +1,25 @@
-"use client"
+'use client'
 
-import { useRef, useState, useEffect } from "react"
+import { useRef } from "react"
+import Link from "next/link"
 import { motion } from "framer-motion"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
+import { MoreVertical, Pencil, Eye, Archive, Upload, Trash2 } from "lucide-react"
 import BlogStatusBadge from "./BlogStatusBadge"
 import BlogRowActions from "./BlogRowActions"
 import type { BlogPost } from "@/lib/content-store"
 import Image from "next/image"
 import { formatDate } from "@/lib/date"
+import useMediaQuery from "@/hooks/use-media-query"
 
 export interface BlogTableProps {
   posts: BlogPost[]
@@ -29,14 +40,7 @@ export default function BlogTable({
 }: BlogTableProps) {
   const allSelected = posts.length > 0 && posts.every((p) => selected.has(p.id))
   const rowRefs = useRef<HTMLTableRowElement[]>([])
-  const [width, setWidth] = useState<number>(1024)
-
-  useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth)
-    handleResize()
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+  const isMobile = useMediaQuery("(max-width: 639px)")
 
   if (posts.length === 0) {
     return (
@@ -62,7 +66,7 @@ export default function BlogTable({
   }
 
   /** Mobile: render card list at <640px to prevent table overflow */
-  if (width < 640) {
+  if (isMobile) {
     return (
       <div className="space-y-2" data-testid="blog-card-list">
         <div className="flex items-center gap-2 mb-2">
@@ -74,45 +78,107 @@ export default function BlogTable({
           <span className="text-xs">Select all</span>
         </div>
 
-        {posts.map((post) => (
-          <div
-            key={post.id}
-            className="border rounded p-3 flex gap-2"
-            data-testid="blog-card"
-          >
-            <Checkbox
-              aria-label={`Select blog post: ${post.title}`}
-              checked={selected.has(post.id)}
-              onCheckedChange={() => toggleSelect(post.id)}
-            />
-            <a
-              href={`/admin/blog/edit?id=${post.id}`}
-              className="flex gap-2 flex-1 text-left focus:outline-none focus:ring-2 focus:ring-primary"
-              aria-label={`Edit blog post: ${post.title}`}
+        {posts.map((post) => {
+          const isPublished = post.status === "published"
+          return (
+            <div
+              key={post.id}
+              className="border rounded p-3 flex gap-2"
+              data-testid="blog-card"
             >
-              {post.featuredImage && (
-                <Image
-                  src={post.featuredImage}
-                  alt=""
-                  aria-hidden="true"
-                  width={64}
-                  height={40}
-                  className="h-10 w-16 object-cover rounded flex-shrink-0"
-                  loading="lazy"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate text-sm">{post.title}</p>
-                <p className="text-xs text-gray-500">
-                  {formatDate(post.publishedAt || post.createdAt)}
-                </p>
-                <p className="text-xs mt-1">
-                  <BlogStatusBadge status={post.status as BlogPost["status"]} />
-                </p>
-              </div>
-            </a>
-          </div>
-        ))}
+              <Checkbox
+                aria-label={`Select blog post: ${post.title}`}
+                checked={selected.has(post.id)}
+                onCheckedChange={() => toggleSelect(post.id)}
+              />
+
+              <a
+                href={`/admin/blog/edit?id=${post.id}`}
+                className="flex gap-2 flex-1 text-left focus:outline-none focus:ring-2 focus:ring-primary"
+                aria-label={`Edit blog post: ${post.title}`}
+              >
+                {post.featuredImage && (
+                  <Image
+                    src={post.featuredImage}
+                    alt=""
+                    aria-hidden="true"
+                    width={64}
+                    height={40}
+                    className="h-10 w-16 object-cover rounded flex-shrink-0"
+                    loading="lazy"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate text-sm">{post.title}</p>
+                  <p className="text-xs text-gray-500">
+                    {formatDate(post.publishedAt || post.createdAt)}
+                  </p>
+                  <p className="text-xs mt-1">
+                    <BlogStatusBadge status={post.status as BlogPost["status"]} />
+                  </p>
+                </div>
+              </a>
+
+              {/* Kebab menu with accessible menu items (touch + keyboard) */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-11 w-11"
+                    aria-label={`Open actions for ${post.title}`}
+                    aria-haspopup="menu"
+                    data-testid="blog-card-actions"
+                  >
+                    <MoreVertical className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" sideOffset={4}>
+                  <DropdownMenuItem asChild>
+                    <Link href={`/admin/blog/edit?id=${post.id}`}>
+                      <Pencil className="h-4 w-4 mr-2" aria-hidden="true" />
+                      <span>Edit</span>
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild>
+                    <Link href={`/admin/preview/${post.id}`} target="_blank" rel="noreferrer">
+                      <Eye className="h-4 w-4 mr-2" aria-hidden="true" />
+                      <span>Preview</span>
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault()
+                      onTogglePublish(post.id, !isPublished)
+                    }}
+                  >
+                    {isPublished ? (
+                      <Archive className="h-4 w-4 mr-2" aria-hidden="true" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" aria-hidden="true" />
+                    )}
+                    <span>{isPublished ? "Unpublish" : "Publish"}</span>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault()
+                      onDelete(post.id)
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
+                    <span>Delete</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )
+        })}
       </div>
     )
   }

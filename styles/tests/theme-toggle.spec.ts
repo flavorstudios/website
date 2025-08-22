@@ -19,7 +19,7 @@ const stubResponses = async (page) => {
     } else if (url.includes('/api/admin/activity')) {
       body = JSON.stringify({ activities: [] });
     } else if (url.includes('/api/admin/blogs')) {
-      body = JSON.stringify({ posts: [] });
+      body = JSON.stringify({ posts: [], total: 0 });
     } else if (url.includes('/api/admin/videos')) {
       body = JSON.stringify({ videos: [] });
     } else if (url.includes('/api/admin/categories')) {

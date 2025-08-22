@@ -396,29 +396,46 @@ export default function VideoManager() {
 
   const confirmDelete = async () => {
     if (!deleteTargets) return;
-    for (const id of deleteTargets) {
-      try {
-        const response = await fetch(`/api/admin/videos/${id}`, {
-          method: "DELETE",
-          credentials: "include",
-        });
-        if (response.ok) {
-          toast("Video deleted.");
-          setSelected((prev) => {
-            const s = new Set(prev);
-            s.delete(id);
-            return s;
+
+    const targets = [...deleteTargets];
+
+    const results = await Promise.all(
+      targets.map(async (id) => {
+        try {
+          const response = await fetch(`/api/admin/videos/${id}`, {
+            method: "DELETE",
+            credentials: "include",
           });
-        } else {
-          const data = await response.json();
-          toast(data.error || "Failed to delete video.");
+          if (response.ok) {
+            return { id, ok: true as const };
+          }
+          const data = await response.json().catch(() => ({}));
+          return { id, ok: false as const, error: data.error || "Failed to delete video." };
+        } catch {
+          return { id, ok: false as const, error: "Failed to delete video." };
         }
-      } catch {
-        toast("Failed to delete video.");
-      }
+      }),
+    );
+
+    const successCount = results.filter((r) => r.ok).length;
+    const errors = results.filter((r) => !r.ok).map((r) => r.error || "Failed to delete video.");
+
+    if (successCount > 0) {
+      toast(successCount === 1 ? "Video deleted." : `${successCount} videos deleted.`);
     }
+    if (errors.length > 0) {
+      toast(errors[0]);
+    }
+
+    setSelected((prev) => {
+      const next = new Set(prev);
+      results.forEach((r) => {
+        if (r.ok) next.delete(r.id);
+      });
+      return next;
+    });
+
     setDeleteTargets(null);
-    setSelected(new Set());
     await loadData();
   };
 

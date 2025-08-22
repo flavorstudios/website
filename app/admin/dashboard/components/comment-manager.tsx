@@ -108,27 +108,40 @@ export default function CommentManager() {
 
   const confirmDelete = async () => {
     if (!deleteTargets) return
-    for (const { id, postId } of deleteTargets) {
-      try {
-        const res = await fetch(`/api/admin/comments/${postId}/${id}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ postId, commentId: id }),
-          credentials: "include",
-        })
-        if (res.ok) {
-          toast("Comment deleted.")
-        } else {
-          const data = await res.json()
-          toast(data.error || "Failed to delete comment")
+
+    const targets = [...deleteTargets]
+    const results = await Promise.all(
+      targets.map(async ({ id, postId }) => {
+        try {
+          const res = await fetch(`/api/admin/comments/${postId}/${id}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ postId, commentId: id }),
+            credentials: "include",
+          })
+          if (res.ok) {
+            return { id, ok: true as const }
+          }
+          const data = await res.json().catch(() => ({}))
+          return { id, ok: false as const, error: data.error || "Failed to delete comment" }
+        } catch {
+          return { id, ok: false as const, error: "Failed to delete comment" }
         }
-      } catch {
-        toast("Failed to delete comment")
-      }
-    }
-    setSelectedIds((ids) =>
-      ids.filter((id) => !deleteTargets.some((t) => t.id === id))
+      })
     )
+
+    // Summarized toasts
+    const successCount = results.filter((r) => r.ok).length
+    const firstError = results.find((r) => !r.ok)?.error
+    if (successCount > 0) {
+      toast(successCount === 1 ? "Comment deleted." : `${successCount} comments deleted.`)
+    }
+    if (firstError) {
+      toast(firstError)
+    }
+
+    // Remove only successfully deleted ids from selection
+    setSelectedIds((ids) => ids.filter((id) => !results.some((r) => r.ok && r.id === id)))
     setDeleteTargets(null)
     await loadComments()
   }

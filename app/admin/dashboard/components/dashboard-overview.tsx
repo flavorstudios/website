@@ -216,7 +216,10 @@ export default function DashboardOverview() {
               {diagnosticCode}
             </p>
           )}
-          <Button onClick={refresh} variant="outline">
+          <Button
+            onClick={refresh}
+            className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+          >
             Retry Dashboard
           </Button>
         </div>
@@ -229,7 +232,10 @@ export default function DashboardOverview() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
-          <Button onClick={refresh} variant="outline">
+          <Button
+            onClick={refresh}
+            className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+          >
             Refresh Dashboard
           </Button>
         </div>
@@ -241,7 +247,12 @@ export default function DashboardOverview() {
     <div className="space-y-6">
       {/* Controls */}
       <div className="flex items-center gap-3">
-        <Button onClick={refresh} disabled={statsQuery.isFetching} size="sm">
+        <Button
+          onClick={refresh}
+          disabled={statsQuery.isFetching}
+          size="sm"
+          className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+        >
           Refresh
         </Button>
         <label className="flex items-center gap-1 text-sm">
@@ -268,7 +279,7 @@ export default function DashboardOverview() {
           className="mb-4 rounded bg-red-50 p-2 text-sm text-red-700"
           data-testid="dashboard-inline-error"
         >
-          Failed to refresh.{" "}
+          Failed to refresh{" "}
           <button onClick={refresh} className="underline">
             Retry
           </button>

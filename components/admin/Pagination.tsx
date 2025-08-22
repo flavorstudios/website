@@ -5,18 +5,27 @@ import { Button } from "@/components/ui/button"
 export function Pagination({
   currentPage,
   totalPages,
+  totalCount,
+  perPage = 10,
   onPageChange,
 }: {
   currentPage: number
-  totalPages: number
+  totalPages?: number
+  totalCount?: number
+  perPage?: number
   onPageChange: (page: number) => void
 }) {
-  if (totalPages <= 1) return null
+  // Prefer a computed page count from totalCount/perPage; fall back to provided totalPages
+  const computedTotalPages =
+    typeof totalPages === "number" ? totalPages : Math.max(1, Math.ceil((totalCount ?? 0) / perPage))
 
-  const pages = Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-    if (totalPages <= 5) return i + 1
+  if (computedTotalPages <= 1) return null
+
+  // Sliding window of up to 5 pages
+  const pages = Array.from({ length: Math.min(computedTotalPages, 5) }, (_, i) => {
+    if (computedTotalPages <= 5) return i + 1
     if (currentPage <= 3) return i + 1
-    if (currentPage >= totalPages - 2) return totalPages - 4 + i
+    if (currentPage >= computedTotalPages - 2) return computedTotalPages - 4 + i
     return currentPage - 2 + i
   })
 
@@ -32,6 +41,7 @@ export function Pagination({
       >
         Previous
       </Button>
+
       {pages.map((p) => (
         <Button
           key={p}
@@ -43,10 +53,11 @@ export function Pagination({
           {p}
         </Button>
       ))}
+
       <Button
         variant="outline"
         size="sm"
-        disabled={currentPage === totalPages}
+        disabled={currentPage === computedTotalPages}
         onClick={() => onPageChange(currentPage + 1)}
         aria-label="Go to next page"
         title="Next"

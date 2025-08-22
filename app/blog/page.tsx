@@ -25,6 +25,8 @@ import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import type { BlogPost } from "@/lib/types";
 import { formatDate } from "@/lib/date"; // <-- Added import
+import { authors } from "@/lib/authors"; // <-- NEW
+import { DateRangePicker } from "@/components/ui/date-range-picker"; // <-- NEW
 
 // --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
@@ -77,14 +79,32 @@ const schema = getSchema({
   organizationUrl: SITE_URL,
 });
 
-// --- DATA FETCHING (Updated: now uses /api/blogs) ---
-async function getBlogData() {
+// --- DATA FETCHING (Updated: now supports author & date range) ---
+async function getBlogData({
+  author,
+  startDate,
+  endDate,
+}: {
+  author?: string;
+  startDate?: string;
+  endDate?: string;
+}) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+    const params = new URLSearchParams();
+    if (author && author !== "all") params.set("author", author);
+    if (startDate) params.set("startDate", startDate);
+    if (endDate) params.set("endDate", endDate);
+
+    const query = params.toString();
+
     const [postsRes, { blogCategories }] = await Promise.all([
-      fetch(`${baseUrl}/api/blogs`, { next: { revalidate: 300 } }),
+      fetch(`${baseUrl}/api/blogs${query ? `?${query}` : ""}`, {
+        next: { revalidate: 300 },
+      }),
       getDynamicCategories("blog"),
     ]);
+
     let posts: BlogPost[] = [];
     if (postsRes.ok) {
       const data = await postsRes.json();
@@ -101,10 +121,27 @@ async function getBlogData() {
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: { category?: string; page?: string; search?: string; sort?: string };
+  searchParams: {
+    category?: string;
+    page?: string;
+    search?: string;
+    sort?: string;
+    author?: string;      // <-- NEW
+    startDate?: string;   // <-- NEW
+    endDate?: string;     // <-- NEW
+  };
 }) {
-  const { posts, categories } = await getBlogData();
   const selectedCategory = searchParams.category || "all";
+  const selectedAuthor = searchParams.author || "all"; // <-- NEW
+  const startDate = searchParams.startDate || "";      // <-- NEW
+  const endDate = searchParams.endDate || "";          // <-- NEW
+
+  const { posts, categories } = await getBlogData({
+    author: selectedAuthor,
+    startDate,
+    endDate,
+  });
+
   const currentPage = Number.parseInt(searchParams.page || "1");
   const searchQuery = (searchParams.search || "").toLowerCase();
   const sortOption = searchParams.sort || "date";
@@ -258,7 +295,7 @@ export default async function BlogPage({
             )}
           </div>
 
-          {/* --- Search and Sort UI --- */}
+          {/* --- Search + Author + Date Range + Sort --- */}
           <form
             className="mb-6 flex flex-col sm:flex-row items-center gap-4"
             method="get"
@@ -267,12 +304,29 @@ export default async function BlogPage({
             {selectedCategory !== "all" && (
               <input type="hidden" name="category" value={selectedCategory} />
             )}
+
             <Input
               name="search"
               placeholder="Search posts..."
               defaultValue={searchParams.search || ""}
               className="w-full sm:w-64"
             />
+
+            <select
+              name="author"
+              defaultValue={selectedAuthor}
+              className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              <option value="all">All authors</option>
+              {authors.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
+
+            <DateRangePicker initialStartDate={startDate} initialEndDate={endDate} />
+
             <select
               name="sort"
               defaultValue={sortOption}
@@ -300,6 +354,9 @@ export default async function BlogPage({
                   selectedCategory={selectedCategory}
                   search={searchParams.search}
                   sort={sortOption}
+                  author={selectedAuthor}     // <-- NEW
+                  startDate={startDate}       // <-- NEW
+                  endDate={endDate}           // <-- NEW
                 />
               )}
             </>
@@ -504,12 +561,18 @@ function Pagination({
   selectedCategory,
   search,
   sort,
+  author,     // <-- NEW
+  startDate,  // <-- NEW
+  endDate,    // <-- NEW
 }: {
   currentPage: number;
   totalPages: number;
   selectedCategory: string;
   search?: string;
   sort?: string;
+  author?: string;     // <-- NEW
+  startDate?: string;  // <-- NEW
+  endDate?: string;    // <-- NEW
 }) {
   const getPageUrl = (page: number) => {
     const params = new URLSearchParams();
@@ -517,6 +580,9 @@ function Pagination({
     if (page > 1) params.set("page", page.toString());
     if (search) params.set("search", search);
     if (sort) params.set("sort", sort);
+    if (author && author !== "all") params.set("author", author); // <-- NEW
+    if (startDate) params.set("startDate", startDate);            // <-- NEW
+    if (endDate) params.set("endDate", endDate);                  // <-- NEW
     return `/blog${params.toString() ? `?${params.toString()}` : ""}`;
   };
 

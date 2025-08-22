@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { RefreshCw, PlusCircle, AlertCircle } from "lucide-react";
 import useSWR from "swr";
 
@@ -41,29 +41,56 @@ export default function BlogManager() {
   const { toast } = useToast();
   const [isRevalidating, setIsRevalidating] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<CategoryData[]>([]);
-
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
-  const [status, setStatus] = useState("all");
-  const [sortBy, setSortBy] = useState("date");
-  const [currentPage, setCurrentPage] = useState(1);
   const POSTS_PER_PAGE = 10;
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
 
-  // SWR data sources
+  // ---- Read filters/pagination from URL ----
+  const search = searchParams.get("search") ?? "";
+  const category = searchParams.get("category") ?? "all";
+  const status = searchParams.get("status") ?? "all";
+  const sortBy = searchParams.get("sort") ?? "date";
+  const currentPage = parseInt(searchParams.get("page") ?? "1", 10) || 1;
+
+  // Helper to push updated query params
+  const setParams = (overrides: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    // current values as baseline
+    params.set("search", search);
+    params.set("category", category);
+    params.set("status", status);
+    params.set("sort", sortBy);
+    params.set("page", String(currentPage));
+    // apply overrides
+    Object.entries(overrides).forEach(([k, v]) => params.set(k, v));
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleSearchChange = (value: string) => setParams({ search: value, page: "1" });
+  const handleCategoryChange = (value: string) => setParams({ category: value, page: "1" });
+  const handleStatusChange = (value: string) => setParams({ status: value, page: "1" });
+  const handleSortChange = (value: string) => setParams({ sort: value, page: "1" });
+  const handlePageChange = (page: number) => setParams({ page: page.toString() });
+
+  // SWR data sources (server-driven filtering/sorting/pagination)
   const {
     data: postsData,
     error: postsError,
     isLoading: postsLoading,
     mutate: mutatePosts,
-  } = useSWR<{ posts: BlogPost[] }>("/api/admin/blogs", fetcher, {
-    refreshInterval: 30000,
-  });
+  } = useSWR<{ posts: BlogPost[]; total: number }>(
+    `/api/admin/blogs?search=${encodeURIComponent(search)}&category=${encodeURIComponent(
+      category,
+    )}&status=${encodeURIComponent(status)}&sort=${encodeURIComponent(
+      sortBy,
+    )}&page=${encodeURIComponent(String(currentPage))}`,
+    fetcher,
+    { refreshInterval: 30000 },
+  );
 
   const {
     data: categoriesData,
@@ -76,11 +103,7 @@ export default function BlogManager() {
     { refreshInterval: 30000 },
   );
 
-  // Reflect SWR data into local state used by filters/pagination
-  useEffect(() => {
-    if (postsData?.posts) setPosts(postsData.posts);
-  }, [postsData]);
-
+  // Reflect categories into local state
   useEffect(() => {
     if (categoriesData?.categories) {
       setCategories(
@@ -126,34 +149,46 @@ export default function BlogManager() {
 
   const confirmDelete = async () => {
     if (!deleteTargets) return;
-    for (const id of deleteTargets) {
-      try {
-        const res = await fetch(`/api/admin/blogs/${id}`, {
-          method: "DELETE",
-          credentials: "include",
-        });
-        if (res.ok) {
-          toast("Post deleted");
-          setSelected((prev) => {
-            const s = new Set(prev);
-            s.delete(id);
-            return s;
+
+    const targets = [...deleteTargets];
+    const results = await Promise.all(
+      targets.map(async (id) => {
+        try {
+          const res = await fetch(`/api/admin/blogs/${id}`, {
+            method: "DELETE",
+            credentials: "include",
           });
-        } else {
-          const data = await res.json();
-          toast(data.error || "Failed to delete");
+          if (res.ok) {
+            return { id, ok: true as const };
+          }
+          const data = await res.json().catch(() => ({}));
+          return { id, ok: false as const, error: data.error || "Failed to delete" };
+        } catch (err) {
+          console.error("Delete failed", err);
+          return { id, ok: false as const, error: "Failed to delete" };
         }
-      } catch (err) {
-        console.error("Delete failed", err);
-        toast("Failed to delete");
-      }
+      }),
+    );
+
+    const successCount = results.filter((r) => r.ok).length;
+    const firstError = results.find((r) => !r.ok)?.error;
+
+    if (successCount > 0) {
+      toast(successCount === 1 ? "Post deleted" : `${successCount} posts deleted`);
     }
-    setDeleteTargets(null);
+    if (firstError) {
+      toast(firstError);
+    }
+
     setSelected((prev) => {
       const next = new Set(prev);
-      deleteTargets.forEach((id) => next.delete(id));
+      results.forEach((r) => {
+        if (r.ok) next.delete(r.id);
+      });
       return next;
     });
+
+    setDeleteTargets(null);
     await refreshData();
   };
 
@@ -201,43 +236,15 @@ export default function BlogManager() {
     });
   };
 
+  const currentPosts = postsData?.posts ?? [];
+
   const toggleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelected(new Set(filteredPosts.map((p) => p.id)));
+      setSelected(new Set(currentPosts.map((p) => p.id)));
     } else {
       setSelected(new Set());
     }
   };
-
-  // Filters, sorting, pagination
-  const filteredPosts = posts.filter((post) => {
-    const inCategory =
-      category === "all" ||
-      post.category === category ||
-      (Array.isArray(post.categories) && post.categories.includes(category));
-    const inStatus = status === "all" || post.status === status;
-    const matchesSearch = post.title.toLowerCase().includes(search.toLowerCase());
-    return inCategory && inStatus && matchesSearch;
-  });
-
-  const sortedPosts = [...filteredPosts].sort((a, b) => {
-    if (sortBy === "title") return a.title.localeCompare(b.title);
-    if (sortBy === "status") return a.status.localeCompare(b.status);
-    return (
-      new Date(b.publishedAt || b.createdAt).getTime() -
-      new Date(a.publishedAt || a.createdAt).getTime()
-    );
-  });
-
-  const totalPages = Math.ceil(sortedPosts.length / POSTS_PER_PAGE) || 1;
-  const paginatedPosts = sortedPosts.slice(
-    (currentPage - 1) * POSTS_PER_PAGE,
-    currentPage * POSTS_PER_PAGE,
-  );
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, category, status, sortBy]);
 
   if (loading) {
     return (
@@ -301,19 +308,19 @@ export default function BlogManager() {
           <Input
             placeholder="Search title..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full sm:w-60"
             aria-label="Search by title"
           />
           <CategoryDropdown
             categories={categories}
             selectedCategory={category}
-            onCategoryChange={setCategory}
+            onCategoryChange={handleCategoryChange}
             placeholder="All categories"
             className="w-full sm:w-48"
             aria-label="Category"
           />
-          <Select value={status} onValueChange={setStatus}>
+          <Select value={status} onValueChange={handleStatusChange}>
             <SelectTrigger className="w-full sm:w-40" aria-label="Status">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -324,7 +331,7 @@ export default function BlogManager() {
               <SelectItem value="scheduled">Scheduled</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={sortBy} onValueChange={setSortBy}>
+          <Select value={sortBy} onValueChange={handleSortChange}>
             <SelectTrigger className="w-full sm:w-40" aria-label="Sort By">
               <SelectValue placeholder="Sort By" />
             </SelectTrigger>
@@ -345,7 +352,7 @@ export default function BlogManager() {
         />
 
         {/* Table or Empty State */}
-        {paginatedPosts.length === 0 ? (
+        {currentPosts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <svg
               width="56"
@@ -371,7 +378,7 @@ export default function BlogManager() {
           </div>
         ) : (
           <BlogTable
-            posts={paginatedPosts}
+            posts={currentPosts}
             selected={selected}
             toggleSelect={toggleSelect}
             toggleSelectAll={toggleSelectAll}
@@ -380,8 +387,13 @@ export default function BlogManager() {
           />
         )}
 
-        {/* Pagination */}
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        {/* Pagination (server-driven) */}
+        <Pagination
+          currentPage={currentPage}
+          totalCount={postsData?.total ?? 0}
+          perPage={POSTS_PER_PAGE}
+          onPageChange={handlePageChange}
+        />
 
         {/* Delete Confirmation Modal */}
         {deleteTargets && (

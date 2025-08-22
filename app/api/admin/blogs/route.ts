@@ -2,17 +2,51 @@ import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 import { blogStore } from "@/lib/content-store" // <-- Updated as per Codex
 
-// GET: Fetch all blogs for admin dashboard
+// GET: Fetch all blogs for admin dashboard (with filtering, sorting, pagination)
 export async function GET(request: NextRequest) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   try {
+    const { searchParams } = request.nextUrl
+    const search = (searchParams.get("search") || "").toLowerCase()
+    const category = searchParams.get("category") || "all"
+    const status = searchParams.get("status") || "all"
+    const sort = searchParams.get("sort") || "date"
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1)
+    const PER_PAGE = 10
+
     const blogs = await blogStore.getAll()
 
+    // Apply filters
+    let filtered = blogs.filter((blog: any) => {
+      const inCategory =
+        category === "all" ||
+        blog.category === category ||
+        (Array.isArray(blog.categories) && blog.categories.includes(category))
+      const inStatus = status === "all" || blog.status === status
+      const matchesSearch = String(blog.title || "").toLowerCase().includes(search)
+      return inCategory && inStatus && matchesSearch
+    })
+
+    // Sort
+    filtered.sort((a: any, b: any) => {
+      if (sort === "title") return String(a.title).localeCompare(String(b.title))
+      if (sort === "status") return String(a.status).localeCompare(String(b.status))
+      const aDate = new Date(a.publishedAt || a.createdAt).getTime()
+      const bDate = new Date(b.publishedAt || b.createdAt).getTime()
+      return bDate - aDate // newest first
+    })
+
+    const total = filtered.length
+
+    // Paginate
+    const start = (page - 1) * PER_PAGE
+    const paginated = filtered.slice(start, start + PER_PAGE)
+
     // Return all relevant fields for admin UI
-    const formattedBlogs = blogs.map((blog) => ({
+    const formattedBlogs = paginated.map((blog: any) => ({
       id: blog.id,
       title: blog.title,
       slug: blog.slug,
@@ -20,6 +54,7 @@ export async function GET(request: NextRequest) {
       excerpt: blog.excerpt,
       status: blog.status,
       category: blog.category,
+      categories: blog.categories, // include if present
       tags: blog.tags,
       featuredImage: blog.featuredImage,
       seoTitle: blog.seoTitle,
@@ -34,13 +69,14 @@ export async function GET(request: NextRequest) {
       shareCount: blog.shareCount ?? 0,     // Always return a number
     }))
 
-    return NextResponse.json({ posts: formattedBlogs }, { status: 200 })
+    return NextResponse.json({ posts: formattedBlogs, total }, { status: 200 })
   } catch (error) {
     console.error("Error fetching blogs:", error)
     return NextResponse.json(
       {
         error: "Failed to fetch blogs",
         posts: [],
+        total: 0,
       },
       { status: 500 }
     )

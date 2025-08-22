@@ -169,15 +169,6 @@ export default function AdminDashboardPageClient({
     }
   }, [router]);
 
-  // --- Title update (small polish) -----------------------------------------
-  useEffect(() => {
-    if (!mounted) return;
-    const found = NAV.find((n) => n.id === activeSection);
-    if (found) {
-      document.title = `Admin • ${found.title}`;
-    }
-  }, [activeSection, mounted]);
-
   // --- Deep-link from pathname (authoritative for section) ------------------
   // FIX: resolve using longest-match to avoid always matching "overview"
   useEffect(() => {

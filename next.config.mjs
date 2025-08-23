@@ -32,7 +32,10 @@ const nextConfig = {
   reactStrictMode: true, // Add this for best practice, optional
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
-  images: { unoptimized: false },
+  images: {
+    unoptimized: false,
+    domains: ['storage.googleapis.com', 'firebasestorage.googleapis.com'],
+  },
 
   // Conditionally enable Node.js runtime support for middleware to avoid Vercel build errors
   ...(enableNodeMiddleware ? { experimental: { nodeMiddleware: true } } : {}),

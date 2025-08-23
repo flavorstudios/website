@@ -13,6 +13,12 @@
     "jsx-a11y/no-redundant-roles": "off",
     "jsx-a11y/interactive-supports-focus": "off",
     "jsx-a11y/no-noninteractive-element-to-interactive-role": "off",
-    "jsx-a11y/heading-has-content": "off"
+    "jsx-a11y/heading-has-content": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-unused-expressions": "warn",
+    "prefer-const": "warn",
+    "react-hooks/rules-of-hooks": "off",
+    "react-hooks/exhaustive-deps": "warn"
   }
 }

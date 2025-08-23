@@ -2,9 +2,11 @@ export const runtime = "edge"
 
 const rooms = new Map<string, Set<WebSocket>>()
 
-export function GET(request: Request, { params }: { params: { id: string } }) {
+type RouteContext = { params: { id: string } }
+
+export function GET(request: Request, context: RouteContext) {
   const { 0: client, 1: server } = Object.values(new WebSocketPair()) as [WebSocket, WebSocket]
-  const postId = params.id
+  const postId = context.params.id
   let set = rooms.get(postId)
   if (!set) {
     set = new Set()

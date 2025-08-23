@@ -14,9 +14,11 @@ const g = globalThis as GlobalWithPrisma;
 
 async function createPrisma(): Promise<PrismaClientLike> {
   try {
-    const mod = await import("@prisma/client");
-    const PrismaClient = mod.PrismaClient;
-    return new PrismaClient() as unknown as PrismaClientLike;
+    // Use a dynamic string to avoid bundling @prisma/client when it's absent
+    const mod = (await import("@".concat("prisma/client"))) as {
+      PrismaClient: new () => unknown;
+    };
+    return new mod.PrismaClient() as unknown as PrismaClientLike;
   } catch {
     // Fallback mock to avoid runtime crashes when Prisma client is missing
     return {

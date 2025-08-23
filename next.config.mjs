@@ -31,9 +31,11 @@ const enableNodeMiddleware =
 const nextConfig = {
   reactStrictMode: true, // Add this for best practice, optional
   eslint: { ignoreDuringBuilds: true },
-  typescript: { ignoreBuildErrors: true },
   images: {
-    unoptimized: false,
+    // Disable Next.js image optimization so remote URLs are loaded directly.
+    // This avoids 4xx/5xx errors when the optimizer endpoint isn't available
+    // on the hosting platform (e.g., static deployments behind Cloudflare).
+    unoptimized: true,
     domains: ['storage.googleapis.com', 'firebasestorage.googleapis.com'],
   },
 

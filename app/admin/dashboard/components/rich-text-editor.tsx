@@ -11,7 +11,7 @@ import {
   Quote,
   Code,
   Link as LinkIcon,
-  ImageIcon,
+  Image as ImageIcon,
   Type,
   AlignLeft,
   AlignCenter,
@@ -19,12 +19,13 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useEditor, EditorContent } from "@tiptap/react"
+import { useEditor, EditorContent, Editor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Underline from "@tiptap/extension-underline"
 import Link from "@tiptap/extension-link"
 import Image from "@tiptap/extension-image"
 import TextAlign from "@tiptap/extension-text-align"
+import Placeholder from "@tiptap/extension-placeholder"
 import DOMPurify from "isomorphic-dompurify"
 
 interface RichTextEditorProps {
@@ -43,6 +44,8 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
   const [remoteCursors, setRemoteCursors] = useState<Record<string, number>>({})
   const containerRef = useRef<HTMLDivElement | null>(null)
 
+  const activeClass = (active: boolean) => (active ? "bg-gray-200 text-gray-900" : "")
+
   // TipTap Editor Instance
   const editor = useEditor({
     extensions: [
@@ -51,6 +54,7 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
       Link.configure({ openOnClick: false }),
       Image,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Placeholder.configure({ placeholder: placeholder ?? "Start writing…" }),
     ],
     content: value,
     onUpdate({ editor }) {
@@ -60,15 +64,18 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
   })
 
   // Keep TipTap in sync with prop changes
-  if (editor && value !== editor.getHTML()) {
-    editor.commands.setContent(value, false)
-  }
+  useEffect(() => {
+    if (!editor) return
+    if (value !== editor.getHTML()) {
+      editor.commands.setContent(value, false)
+    }
+  }, [editor, value])
 
   // Send local selection to WebSocket
   useEffect(() => {
     if (!editor || !socket) return
 
-    const handleSelection = ({ editor }: { editor: any }) => {
+    const handleSelection = ({ editor }: { editor: Editor }) => {
       const { from, to } = editor.state.selection
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ type: "cursor", from, to, id: clientId.current }))
@@ -89,7 +96,7 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
       try {
         const data = JSON.parse(String(event.data))
         if (data?.type === "cursor" && data.id !== clientId.current) {
-          setRemoteCursors(prev => ({ ...prev, [data.id]: Number(data.from) || 1 }))
+          setRemoteCursors((prev) => ({ ...prev, [data.id]: Number(data.from) || 1 }))
         }
       } catch {
         // ignore malformed payloads
@@ -135,13 +142,13 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
 
   return (
     <motion.div
-      className={`border border-gray-300 rounded-lg overflow-hidden bg-white ${className || ""}`}
+      className={`relative border border-gray-300 rounded-lg overflow-hidden bg-white w-full ${className || ""}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
       {/* Toolbar */}
-      <div className="border-b border-gray-200 p-3 bg-gray-50">
+      <div className="border-b border-gray-200 p-3 bg-gray-50 sticky top-0 z-10">
         <div className="flex flex-wrap gap-2">
           {/* Headings */}
           <div className="flex gap-1 border-r border-gray-300 pr-2">
@@ -150,8 +157,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive("heading", { level: 1 }))}`}
               title="Heading 1"
+              aria-label="Heading 1"
+              aria-pressed={editor.isActive("heading", { level: 1 })}
             >
               <Type className="h-4 w-4" />
             </Button>
@@ -160,8 +169,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-              className="h-8 w-8 p-0 text-sm font-bold"
+              className={`h-8 w-8 p-0 text-sm font-bold ${activeClass(editor.isActive("heading", { level: 2 }))}`}
               title="Heading 2"
+              aria-label="Heading 2"
+              aria-pressed={editor.isActive("heading", { level: 2 })}
             >
               H2
             </Button>
@@ -170,8 +181,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-              className="h-8 w-8 p-0 text-sm font-bold"
+              className={`h-8 w-8 p-0 text-sm font-bold ${activeClass(editor.isActive("heading", { level: 3 }))}`}
               title="Heading 3"
+              aria-label="Heading 3"
+              aria-pressed={editor.isActive("heading", { level: 3 })}
             >
               H3
             </Button>
@@ -183,8 +196,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleBold().run()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive("bold"))}`}
               title="Bold"
+              aria-label="Bold"
+              aria-pressed={editor.isActive("bold")}
             >
               <Bold className="h-4 w-4" />
             </Button>
@@ -193,8 +208,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleItalic().run()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive("italic"))}`}
               title="Italic"
+              aria-label="Italic"
+              aria-pressed={editor.isActive("italic")}
             >
               <Italic className="h-4 w-4" />
             </Button>
@@ -203,8 +220,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive("underline"))}`}
               title="Underline"
+              aria-label="Underline"
+              aria-pressed={editor.isActive("underline")}
             >
               <UnderlineIcon className="h-4 w-4" />
             </Button>
@@ -216,8 +235,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive("bulletList"))}`}
               title="Bullet List"
+              aria-label="Bullet List"
+              aria-pressed={editor.isActive("bulletList")}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -226,8 +247,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive("orderedList"))}`}
               title="Numbered List"
+              aria-label="Numbered List"
+              aria-pressed={editor.isActive("orderedList")}
             >
               <ListOrdered className="h-4 w-4" />
             </Button>
@@ -239,8 +262,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign("left").run()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive({ textAlign: "left" }))}`}
               title="Align Left"
+              aria-label="Align Left"
+              aria-pressed={editor.isActive({ textAlign: "left" })}
             >
               <AlignLeft className="h-4 w-4" />
             </Button>
@@ -249,8 +274,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign("center").run()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive({ textAlign: "center" }))}`}
               title="Align Center"
+              aria-label="Align Center"
+              aria-pressed={editor.isActive({ textAlign: "center" })}
             >
               <AlignCenter className="h-4 w-4" />
             </Button>
@@ -259,8 +286,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign("right").run()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive({ textAlign: "right" }))}`}
               title="Align Right"
+              aria-label="Align Right"
+              aria-pressed={editor.isActive({ textAlign: "right" })}
             >
               <AlignRight className="h-4 w-4" />
             </Button>
@@ -272,8 +301,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleBlockquote().run()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive("blockquote"))}`}
               title="Quote"
+              aria-label="Quote"
+              aria-pressed={editor.isActive("blockquote")}
             >
               <Quote className="h-4 w-4" />
             </Button>
@@ -282,8 +313,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive("codeBlock"))}`}
               title="Code Block"
+              aria-label="Code Block"
+              aria-pressed={editor.isActive("codeBlock")}
             >
               <Code className="h-4 w-4" />
             </Button>
@@ -292,8 +325,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => setShowLinkDialog(true)}
-              className="h-8 w-8 p-0"
+              className={`h-8 w-8 p-0 ${activeClass(editor.isActive("link"))}`}
               title="Insert Link"
+              aria-label="Insert Link"
+              aria-pressed={editor.isActive("link")}
             >
               <LinkIcon className="h-4 w-4" />
             </Button>
@@ -304,6 +339,7 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               onClick={insertImage}
               className="h-8 w-8 p-0"
               title="Insert Image"
+              aria-label="Insert Image"
             >
               <ImageIcon className="h-4 w-4" />
             </Button>
@@ -316,10 +352,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
         <EditorContent
           editor={editor}
           data-placeholder={placeholder}
-          className="min-h-[400px] p-4 focus:outline-none prose prose-lg max-w-none"
+          className="min-h-[60vh] p-6 focus:outline-none prose prose-lg max-w-none"
           style={{
-            lineHeight: "1.6",
-            fontSize: "16px",
+            lineHeight: "1.7",
+            fontSize: "18px",
           }}
         />
 

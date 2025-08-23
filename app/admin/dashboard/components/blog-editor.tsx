@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
@@ -58,6 +58,37 @@ export interface BlogCategory {
   tooltip?: string
 }
 
+/** safe localStorage helpers */
+const safeLocal = {
+  get<T>(key: string, fallback: T): T {
+    try {
+      const raw = localStorage.getItem(key)
+      return raw ? (JSON.parse(raw) as T) : fallback
+    } catch {
+      return fallback
+    }
+  },
+  set<T>(key: string, value: T) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+    } catch {}
+  },
+  remove(key: string) {
+    try {
+      localStorage.removeItem(key)
+    } catch {}
+  },
+}
+
+/** better slugging with diacritics stripping */
+const slugify = (title: string) =>
+  title
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+
 export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> }) {
   const { toast } = useToast()
   const router = useRouter()
@@ -107,6 +138,16 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const [revisions, setRevisions] = useState<BlogRevision[]>([])
   const [ws, setWs] = useState<WebSocket | null>(null)
 
+  // Draft persistence + dirty tracking + online awareness
+  const draftKey = initialPost?.id ? `blog-editor-${initialPost.id}` : "blog-editor-new"
+  const [isDirty, setIsDirty] = useState(false)
+  const initialRender = useRef(true)
+  const skipDraftRef = useRef(false)
+  const [online, setOnline] = useState(true)
+
+  // NEW: concurrency guard for saves
+  const saveInFlight = useRef(false)
+
   // Helper to combine scheduled date + time
   const getScheduledDateTime = () => {
     if (!scheduledDate || !scheduledTime) return undefined
@@ -144,50 +185,115 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       }
     }
     loadCategories()
+
+    // restore draft from localStorage
+    if (typeof window !== "undefined") {
+      const restored = safeLocal.get<typeof post | null>(draftKey, null)
+      if (restored) setPost((p) => ({ ...p, ...restored }))
+      const updateOnline = () => setOnline(navigator.onLine)
+      updateOnline()
+      window.addEventListener("online", updateOnline)
+      window.addEventListener("offline", updateOnline)
+      return () => {
+        window.removeEventListener("online", updateOnline)
+        window.removeEventListener("offline", updateOnline)
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Slug generation (improved)
   useEffect(() => {
     if (post.title && (!post.slug || post.slug === "")) {
-      const slug = post.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")
-      setPost((prev) => ({ ...prev, slug }))
+      const s = slugify(post.title)
+      if (s !== post.slug) setPost((prev) => ({ ...prev, slug: s }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post.title])
 
-  // Patch: auto-generate excerpt if empty (HTML stripped)
+  // Auto-generate excerpt + derived fields (idempotent)
   useEffect(() => {
     const text = post.content.replace(/<[^>]*>/g, "")
-    const words = text
-      .trim()
-      .split(/\s+/)
-      .filter((word) => word.length > 0)
-    const wordCount = words.length
-    const readTime = Math.max(1, Math.ceil(wordCount / 200))
+    const words = text.trim().split(/\s+/).filter((w) => w.length > 0)
+    const wc = words.length
+    const rt = `${Math.max(1, Math.ceil(wc / 200))} min read`
     const suggestedExcerpt = text.length > 160 ? text.substring(0, 160) + "..." : text
-    setPost((prev) => ({
-      ...prev,
-      wordCount,
-      readTime: `${readTime} min read`,
-      excerpt: prev.excerpt.trim() === "" ? suggestedExcerpt : prev.excerpt,
-    }))
+
+    setPost((prev) => {
+      let changed = false
+      const next = { ...prev }
+      if (prev.wordCount !== wc) { next.wordCount = wc; changed = true }
+      if (prev.readTime !== rt) { next.readTime = rt; changed = true }
+      if (prev.excerpt.trim() === "" && prev.excerpt !== suggestedExcerpt) {
+        next.excerpt = suggestedExcerpt; changed = true
+      }
+      return changed ? (next as BlogPost) : prev
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post.content])
 
-  // Autosave
+  // Track unsaved changes & persist drafts
   useEffect(() => {
-    const autoSave = async () => {
-      if (post.title || post.content) {
-        await savePost(true)
+    if (initialRender.current) {
+      initialRender.current = false
+      return
+    }
+    if (skipDraftRef.current) {
+      skipDraftRef.current = false
+      return
+    }
+    setIsDirty(true)
+    if (typeof window !== "undefined") {
+      safeLocal.set(draftKey, post)
+    }
+  }, [post, draftKey])
+
+  // Warn before unload if dirty
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault()
+        e.returnValue = ""
       }
     }
-    const interval = setInterval(autoSave, 30000)
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+  }, [isDirty])
+
+  // Keyboard shortcuts: Cmd/Ctrl+S to save, Cmd/Ctrl+P to preview
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase()
+      if ((e.metaKey || e.ctrlKey) && k === "s") {
+        e.preventDefault()
+        void savePost()
+      }
+      if ((e.metaKey || e.ctrlKey) && k === "p") {
+        e.preventDefault()
+        setShowPreview(true)
+      }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, []) // savePost is stable enough for our usage here
+
+  // Autosave (idle debounce + 30s heartbeat; only when dirty and there is content)
+  useEffect(() => {
+    if (!(post.title || post.content) || !isDirty) return
+    const t = setTimeout(() => { void savePost(true) }, 5000)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDirty, post.title, post.content])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if ((post.title || post.content) && isDirty) {
+        void savePost(true)
+      }
+    }, 30000)
     return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [post])
+  }, [isDirty, post.title, post.content])
 
   // Load revisions for current post
   const loadRevisions = async () => {
@@ -257,38 +363,62 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   }, [ws])
 
   const savePost = async (isAutoSave = false) => {
+    // Offline-aware autosave: persist locally and bail
+    if (isAutoSave && !online) {
+      safeLocal.set(draftKey, post)
+      return
+    }
+
+    // Prevent overlapping saves
+    if (saveInFlight.current) return
     if (!isAutoSave) setSaving(true)
+    saveInFlight.current = true
+
     try {
       const response = await fetch("/api/admin/blog", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...post,
-          category: post.categories[0] || post.category || "",
+          category: post.categories?.[0] || post.category || "",
           // send ISO strings to the server
           publishedAt: post.status === "published" ? new Date().toISOString() : undefined,
           scheduledFor: post.status === "scheduled" ? getScheduledDateTime()?.toISOString() : undefined,
         }),
         credentials: "include",
       })
-      if (response.ok) {
-        const savedPost = await response.json()
-        setPost((prev) => ({ ...prev, id: savedPost.id }))
-        setLastSaved(new Date())
-        toast.success(isAutoSave ? "Auto-saved" : "Post saved successfully!")
-      } else {
-        throw new Error("Save failed")
+
+      if (!response.ok) throw new Error(`Save failed: ${response.status}`)
+
+      const savedPost = await response.json()
+      // prevent the next post state write from marking dirty
+      skipDraftRef.current = true
+      setPost((prev) => ({ ...prev, id: savedPost.id }))
+      setLastSaved(new Date())
+      setIsDirty(false)
+      safeLocal.remove(draftKey)
+
+      // Quiet autosave; keep toast for manual saves only
+      if (!isAutoSave) {
+        toast.success("Post saved successfully!")
       }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Failed to save post:", error)
-      toast.error(isAutoSave ? "Auto-save failed" : "Failed to save post")
+      // Keep user safe: persist locally so work isn't lost
+      safeLocal.set(draftKey, post)
+      toast.error(isAutoSave ? "Auto-save failed. Changes stored locally." : "Failed to save post")
     } finally {
+      saveInFlight.current = false
       if (!isAutoSave) setSaving(false)
     }
   }
 
   const publishPost = async () => {
+    if (!post.title?.trim() || !post.content?.trim()) {
+      toast.error("Add a title and content before publishing")
+      return
+    }
     setPost((prev) => ({ ...prev, status: "published" }))
     await savePost()
     router.push("/admin/dashboard?tab=blogs")
@@ -383,7 +513,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   return (
     <>
       <motion.div
-        className="max-w-7xl mx-auto space-y-6"
+        className="max-w-7xl mx-auto space-y-6 pb-24 lg:pb-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -401,10 +531,17 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {lastSaved && (
-              <span className="text-sm text-gray-500">
-                Last saved: {formatDateTime(lastSaved)}
-              </span>
+            {!online && (
+              <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700">Offline</span>
+            )}
+            {isDirty ? (
+              <span className="text-sm text-yellow-700">Unsaved changes</span>
+            ) : (
+              lastSaved && (
+                <span className="text-sm text-gray-500">
+                  Last saved: {formatDateTime(lastSaved)}
+                </span>
+              )
             )}
             <Button variant="outline" onClick={() => savePost()} disabled={saving} className="flex items-center gap-2">
               <Save className="h-4 w-4" aria-hidden="true" />
@@ -461,6 +598,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   onClick={publishPost}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 flex items-center gap-2"
                   aria-label="Publish post"
+                  disabled={!online}
                 >
                   <Eye className="h-4 w-4" aria-hidden="true" />
                   Publish
@@ -557,7 +695,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                     placeholder="Brief description for search engines..."
                     rows={3}
                   />
-                  <p className={`text-xs mt-1 ${getLengthClass(post.seoDescription.length, descMin, descMax)}`}>
+                <p className={`text-xs mt-1 ${getLengthClass(post.seoDescription.length, descMin, descMax)}`}>
                     {post.seoDescription.length}/{descMax} characters
                   </p>
                   <p className={`text-xs ${getLengthClass(post.seoDescription.length, descMin, descMax)}`}>{getLengthMessage(post.seoDescription.length, descMin, descMax)}</p>
@@ -917,6 +1055,35 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
           </div>
         </div>
       </motion.div>
+
+      {/* Mobile action bar (safe-area) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex justify-end gap-2">
+        <Button
+          variant="outline"
+          onClick={() => savePost()}
+          disabled={saving}
+          className="flex-1 flex items-center gap-2"
+        >
+          <Save className="h-4 w-4" aria-hidden="true" />
+          Save
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => setShowPreview(true)}
+          className="flex-1 flex items-center gap-2"
+        >
+          <Eye className="h-4 w-4" aria-hidden="true" />
+          Preview
+        </Button>
+        <Button
+          onClick={publishPost}
+          disabled={!online}
+          className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 flex items-center gap-2"
+        >
+          <Upload className="h-4 w-4" aria-hidden="true" />
+          Publish
+        </Button>
+      </div>
 
       {/* Preview Modal */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>

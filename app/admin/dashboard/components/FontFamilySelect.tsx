@@ -23,12 +23,15 @@ interface FontFamilySelectProps {
 
 export function FontFamilySelect({ value, onChange }: FontFamilySelectProps) {
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select
+      value={value || "default"}
+      onValueChange={(v) => onChange(v === "default" ? "" : v)}
+    >
       <SelectTrigger className="w-32">
         <SelectValue placeholder="Font" />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">Default</SelectItem>
+        <SelectItem value="default">Default</SelectItem>
         {fonts.map((f) => (
           <SelectItem key={f.value} value={f.value}>
             <span style={{ fontFamily: f.value }}>{f.label}</span>

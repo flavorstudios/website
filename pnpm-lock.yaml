@@ -108,7 +108,7 @@ importers:
         specifier: ^5.85.3
         version: 5.85.3(react@19.1.0)
       '@tiptap/extension-font-family':
-        specifier: ^3.0.7
+        specifier: ^3.2.2
         version: 3.2.2(@tiptap/extension-text-style@3.2.2(@tiptap/core@3.0.7(@tiptap/pm@3.0.7)))
       '@tiptap/extension-image':
         specifier: ^3.0.7
@@ -123,7 +123,7 @@ importers:
         specifier: ^3.0.7
         version: 3.0.7(@tiptap/core@3.0.7(@tiptap/pm@3.0.7))
       '@tiptap/extension-text-style':
-        specifier: ^3.0.7
+        specifier: ^3.2.2
         version: 3.2.2(@tiptap/core@3.0.7(@tiptap/pm@3.0.7))
       '@tiptap/extension-underline':
         specifier: ^3.0.7

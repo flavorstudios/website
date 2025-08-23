@@ -7,7 +7,14 @@ export const viewport = {
 import type { ReactNode } from "react";
 import "./globals.css";
 import "./fonts/poppins.css";
-import { Poppins } from "next/font/google";
+import {
+  Poppins,
+  Inter,
+  Lora,
+  JetBrains_Mono,
+  Roboto,
+  Noto_Serif,
+} from "next/font/google";
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -98,11 +105,24 @@ import type { CategoryData } from "@/lib/dynamic-categories";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-// next/font: load Poppins with a CSS variable that matches your stylesheet usage
+// next/font: load fonts with CSS variables exposed to globals.css
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-poppins",
+  display: "swap",
+});
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const lora = Lora({ subsets: ["latin"], variable: "--font-lora", display: "swap" });
+const roboto = Roboto({ subsets: ["latin"], variable: "--font-roboto", display: "swap" });
+const notoSerif = Noto_Serif({
+  subsets: ["latin"],
+  variable: "--font-noto-serif",
+  display: "swap",
+});
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
   display: "swap",
 });
 
@@ -191,8 +211,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     blogCategories = (categories.blogCategories || []).map((cat: CategoryData) =>
       mapCategoryDataToCategory(cat, "blog"),
     );
-    videoCategories = (categories.videoCategories || []).map(
-      (cat: CategoryData) => mapCategoryDataToCategory(cat, "video"),
+    videoCategories = (categories.videoCategories || []).map((cat: CategoryData) =>
+      mapCategoryDataToCategory(cat, "video"),
     );
   }
 
@@ -229,7 +249,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         )}
         {/* END GTM (HEAD) */}
       </head>
-      <body className={`${poppins.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${lora.variable} ${roboto.variable} ${notoSerif.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
+      >
         {/* Skip link for keyboard users */}
         <a
           href="#main-content"

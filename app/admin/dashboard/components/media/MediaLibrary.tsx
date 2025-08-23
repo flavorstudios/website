@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MediaToolbar from "./MediaToolbar";
 import MediaGrid from "./MediaGrid";
 import MediaList from "./MediaList";
@@ -9,6 +9,9 @@ import MediaDetailsDrawer from "./MediaDetailsDrawer";
 import type { MediaDoc } from "@/types/media";
 import { useToast } from "@/hooks/use-toast";
 
+type TypeFilter = "all" | "image" | "video" | "audio" | "application";
+type SortBy = "date" | "name";
+
 export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) => void }) {
   const { toast } = useToast();
   const [items, setItems] = useState<MediaDoc[]>([]);
@@ -17,31 +20,47 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("date");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [sortBy, setSortBy] = useState<SortBy>("date");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Infinite-scroll sentinel & request guard
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const activeRequestRef = useRef<AbortController | null>(null);
 
   // Initial load
   useEffect(() => {
-    loadMedia();
+    void loadMedia();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load media with pagination support
-  const loadMedia = async (nextCursor?: number) => {
+  // Load media with pagination support and abort safety
+  const loadMedia = async (nextCursor?: number | null) => {
+    if (loading) return;
+    setLoading(true);
+
+    // cancel any in-flight request
+    activeRequestRef.current?.abort();
+    const controller = new AbortController();
+    activeRequestRef.current = controller;
+
     try {
-      setLoading(true);
       const params = new URLSearchParams();
-      if (nextCursor) params.set("cursor", String(nextCursor));
-      const res = await fetch(`/api/media/list?${params.toString()}`);
+      if (typeof nextCursor === "number") params.set("cursor", String(nextCursor));
+      const res = await fetch(`/api/media/list?${params.toString()}`, {
+        signal: controller.signal,
+      });
       const data = await res.json();
-      if (nextCursor) {
-        setItems((prev) => [...prev, ...(data.media || [])]);
+
+      if (typeof nextCursor === "number") {
+        setItems((prev) => [...prev, ...((data.media as MediaDoc[]) || [])]);
       } else {
-        setItems(data.media || []);
+        setItems((data.media as MediaDoc[]) || []);
       }
-      setCursor(data.cursor || null);
+      setCursor((data.cursor as number | null) ?? null);
     } catch {
+      // keep your existing toast API
+      // (changing this to object syntax can be done later if your hook supports it)
       toast.error("Failed to load media");
     } finally {
       setLoading(false);
@@ -49,19 +68,49 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   };
 
   // Handler for Load More
-  const loadMore = () => {
-    if (cursor && !loading) loadMedia(cursor);
+  const loadMore = async () => {
+    if (cursor !== null && !loading) {
+      await loadMedia(cursor);
+    }
   };
 
-  // Filter, search, and sort logic
+  // Infinite scroll using IntersectionObserver with duplicate-fire guard
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node || cursor === null) return;
+
+    let pending = false;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !pending && !loading) {
+          pending = true;
+          void loadMore().finally(() => {
+            pending = false;
+          });
+        }
+      },
+      { root: null, rootMargin: "400px 0px", threshold: 0 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cursor, loading]);
+
+  // Filter, search, and sort logic (null-safe)
   const filtered = items
-    .filter((m) => (typeFilter === "all" ? true : m.mime?.startsWith(typeFilter)))
-    .filter((m) =>
-      (m.filename || m.name || "").toLowerCase().includes(search.toLowerCase())
-    )
+    .filter((m) => (typeFilter === "all" ? true : (m.mime?.startsWith(typeFilter) ?? false)))
+    .filter((m) => (m.filename || m.name || "").toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
-      if (sortBy === "name") return (a.filename || a.name).localeCompare(b.filename || b.name);
-      return (b.createdAt || 0) - (a.createdAt || 0);
+      if (sortBy === "name") {
+        const an = (a.filename || a.name || "").toString();
+        const bn = (b.filename || b.name || "").toString();
+        return an.localeCompare(bn);
+      }
+      const aDate = (a.createdAt as number | undefined) ?? 0;
+      const bDate = (b.createdAt as number | undefined) ?? 0;
+      return bDate - aDate;
     });
 
   // Bulk selection logic
@@ -79,7 +128,7 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
     else setSelectedIds(new Set());
   };
 
-  // Bulk actions
+  // Bulk actions (kept as-is; can be upgraded to optimistic + rollback later)
   const handleBulkDelete = async () => {
     for (const id of selectedIds) {
       await fetch("/api/media/delete", {
@@ -89,7 +138,7 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
       });
     }
     setSelectedIds(new Set());
-    loadMedia();
+    void loadMedia();
   };
 
   const handleBulkTag = async () => {
@@ -114,7 +163,7 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4" aria-busy={loading}>
       <MediaToolbar
         search={search}
         onSearchChange={setSearch}
@@ -123,8 +172,9 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
         sortBy={sortBy}
         onSortBy={setSortBy}
         view={view}
-        onToggleView={() => setView(view === "grid" ? "list" : "grid")}
+        onToggleView={() => setView((v) => (v === "grid" ? "list" : "grid"))}
       />
+
       {view === "grid" ? (
         <MediaGrid
           items={filtered}
@@ -142,16 +192,22 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
           toggleSelectAll={toggleSelectAll}
         />
       )}
-      {cursor && (
+
+      {/* Infinite-scroll sentinel for tests and observer */}
+      <div ref={loadMoreRef} data-testid="media-load-trigger" aria-hidden="true" />
+
+      {/* Accessible fallback button */}
+      {cursor !== null && (
         <button
           type="button"
-          className="text-sm underline"
-          onClick={loadMore}
+          className="text-sm underline self-center disabled:opacity-50"
+          onClick={() => void loadMore()}
           disabled={loading}
         >
           {loading ? "Loading..." : "Load More"}
         </button>
       )}
+
       <MediaUpload onUploaded={(item) => setItems((i) => [item, ...i])} />
       <MediaBulkActions
         count={selectedIds.size}

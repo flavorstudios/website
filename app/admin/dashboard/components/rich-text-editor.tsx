@@ -1,5 +1,13 @@
 "use client"
 
+/**
+ * RichTextEditor
+ * Google Fonts via next/font/google are free and self-hosted at build time.
+ * No runtime requests to fonts.googleapis.com or gstatic.
+ * Render saved content with the same fonts using:
+ *   <div className="tiptap" dangerouslySetInnerHTML={{ __html: html }} />
+ */
+
 import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 import {
@@ -26,7 +34,10 @@ import Link from "@tiptap/extension-link"
 import Image from "@tiptap/extension-image"
 import TextAlign from "@tiptap/extension-text-align"
 import Placeholder from "@tiptap/extension-placeholder"
+import TextStyle from "@tiptap/extension-text-style"
+import FontFamily from "@tiptap/extension-font-family"
 import DOMPurify from "isomorphic-dompurify"
+import { FontFamilySelect } from "./FontFamilySelect"
 
 interface RichTextEditorProps {
   value: string
@@ -36,7 +47,13 @@ interface RichTextEditorProps {
   socket?: WebSocket | null
 }
 
-export function RichTextEditor({ value, onChange, placeholder, className, socket }: RichTextEditorProps) {
+export function RichTextEditor({
+  value,
+  onChange,
+  placeholder,
+  className,
+  socket,
+}: RichTextEditorProps) {
   const [showLinkDialog, setShowLinkDialog] = useState(false)
   const [linkUrl, setLinkUrl] = useState("")
   const [linkText, setLinkText] = useState("")
@@ -44,12 +61,14 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
   const [remoteCursors, setRemoteCursors] = useState<Record<string, number>>({})
   const containerRef = useRef<HTMLDivElement | null>(null)
 
-  const activeClass = (active: boolean) => (active ? "bg-gray-200 text-gray-900" : "")
+  const activeClass = (active: boolean) =>
+    active ? "bg-gray-200 text-gray-900" : ""
 
-  // TipTap Editor Instance
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+      TextStyle,
+      FontFamily,
       Underline,
       Link.configure({ openOnClick: false }),
       Image,
@@ -62,6 +81,16 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
       onChange(html)
     },
   })
+
+  const handleFontChange = (font: string) => {
+    if (!editor) return
+    const chain = editor.chain().focus()
+    if (font) {
+      chain.setFontFamily(font).run()
+    } else {
+      chain.unsetFontFamily().run()
+    }
+  }
 
   // Keep TipTap in sync with prop changes
   useEffect(() => {
@@ -78,7 +107,9 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
     const handleSelection = ({ editor }: { editor: Editor }) => {
       const { from, to } = editor.state.selection
       if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ type: "cursor", from, to, id: clientId.current }))
+        socket.send(
+          JSON.stringify({ type: "cursor", from, to, id: clientId.current }),
+        )
       }
     }
 
@@ -96,7 +127,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
       try {
         const data = JSON.parse(String(event.data))
         if (data?.type === "cursor" && data.id !== clientId.current) {
-          setRemoteCursors((prev) => ({ ...prev, [data.id]: Number(data.from) || 1 }))
+          setRemoteCursors((prev) => ({
+            ...prev,
+            [data.id]: Number(data.from) || 1,
+          }))
         }
       } catch {
         // ignore malformed payloads
@@ -142,14 +176,24 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
 
   return (
     <motion.div
-      className={`relative border border-gray-300 rounded-lg overflow-hidden bg-white w-full ${className || ""}`}
+      className={`relative border border-gray-300 rounded-lg overflow-hidden bg-white w-full ${
+        className || ""
+      }`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
       {/* Toolbar */}
       <div className="border-b border-gray-200 p-3 bg-gray-50 sticky top-0 z-10">
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
+          {/* Font family selector */}
+          {editor && (
+            <FontFamilySelect
+              value={(editor.getAttributes("textStyle")?.fontFamily as string) || ""}
+              onChange={handleFontChange}
+            />
+          )}
+
           {/* Headings */}
           <div className="flex gap-1 border-r border-gray-300 pr-2">
             <Button
@@ -157,7 +201,9 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-              className={`h-8 w-8 p-0 ${activeClass(editor.isActive("heading", { level: 1 }))}`}
+              className={`h-8 w-8 p-0 ${activeClass(
+                editor.isActive("heading", { level: 1 }),
+              )}`}
               title="Heading 1"
               aria-label="Heading 1"
               aria-pressed={editor.isActive("heading", { level: 1 })}
@@ -169,7 +215,9 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-              className={`h-8 w-8 p-0 text-sm font-bold ${activeClass(editor.isActive("heading", { level: 2 }))}`}
+              className={`h-8 w-8 p-0 text-sm font-bold ${activeClass(
+                editor.isActive("heading", { level: 2 }),
+              )}`}
               title="Heading 2"
               aria-label="Heading 2"
               aria-pressed={editor.isActive("heading", { level: 2 })}
@@ -181,7 +229,9 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-              className={`h-8 w-8 p-0 text-sm font-bold ${activeClass(editor.isActive("heading", { level: 3 }))}`}
+              className={`h-8 w-8 p-0 text-sm font-bold ${activeClass(
+                editor.isActive("heading", { level: 3 }),
+              )}`}
               title="Heading 3"
               aria-label="Heading 3"
               aria-pressed={editor.isActive("heading", { level: 3 })}
@@ -189,6 +239,7 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               H3
             </Button>
           </div>
+
           {/* Style Formatting */}
           <div className="flex gap-1 border-r border-gray-300 pr-2">
             <Button
@@ -228,6 +279,7 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               <UnderlineIcon className="h-4 w-4" />
             </Button>
           </div>
+
           {/* Lists */}
           <div className="flex gap-1 border-r border-gray-300 pr-2">
             <Button
@@ -255,6 +307,7 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               <ListOrdered className="h-4 w-4" />
             </Button>
           </div>
+
           {/* Alignment */}
           <div className="flex gap-1 border-r border-gray-300 pr-2">
             <Button
@@ -262,7 +315,9 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign("left").run()}
-              className={`h-8 w-8 p-0 ${activeClass(editor.isActive({ textAlign: "left" }))}`}
+              className={`h-8 w-8 p-0 ${activeClass(
+                editor.isActive({ textAlign: "left" }),
+              )}`}
               title="Align Left"
               aria-label="Align Left"
               aria-pressed={editor.isActive({ textAlign: "left" })}
@@ -274,7 +329,9 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign("center").run()}
-              className={`h-8 w-8 p-0 ${activeClass(editor.isActive({ textAlign: "center" }))}`}
+              className={`h-8 w-8 p-0 ${activeClass(
+                editor.isActive({ textAlign: "center" }),
+              )}`}
               title="Align Center"
               aria-label="Align Center"
               aria-pressed={editor.isActive({ textAlign: "center" })}
@@ -286,7 +343,9 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               variant="ghost"
               size="sm"
               onClick={() => editor.chain().focus().setTextAlign("right").run()}
-              className={`h-8 w-8 p-0 ${activeClass(editor.isActive({ textAlign: "right" }))}`}
+              className={`h-8 w-8 p-0 ${activeClass(
+                editor.isActive({ textAlign: "right" }),
+              )}`}
               title="Align Right"
               aria-label="Align Right"
               aria-pressed={editor.isActive({ textAlign: "right" })}
@@ -294,6 +353,7 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
               <AlignRight className="h-4 w-4" />
             </Button>
           </div>
+
           {/* Special Elements */}
           <div className="flex gap-1">
             <Button
@@ -352,22 +412,25 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
         <EditorContent
           editor={editor}
           data-placeholder={placeholder}
-          className="min-h-[60vh] p-6 focus:outline-none prose prose-lg max-w-none"
+          className="tiptap min-h-[60vh] p-6 focus:outline-none prose-lg max-w-none"
           style={{
             lineHeight: "1.7",
             fontSize: "18px",
           }}
         />
 
-        {editor && containerRef.current &&
+        {editor &&
+          containerRef.current &&
           Object.entries(remoteCursors).map(([id, pos]) => {
             try {
               const maxPos = editor.state.doc.content.size
               const clamped = Math.max(1, Math.min(pos, maxPos))
               const coords = editor.view.coordsAtPos(clamped)
               const box = containerRef.current.getBoundingClientRect()
-              const left = coords.left - box.left + containerRef.current.scrollLeft
-              const top = coords.top - box.top + containerRef.current.scrollTop
+              const left =
+                coords.left - box.left + containerRef.current.scrollLeft
+              const top =
+                coords.top - box.top + containerRef.current.scrollTop
 
               return (
                 <span
@@ -399,18 +462,36 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
             <h3 className="text-lg font-semibold mb-4">Insert Link</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Link Text</label>
-                <Input value={linkText} onChange={(e) => setLinkText(e.target.value)} placeholder="Enter link text" />
+                <label className="block text-sm font-medium mb-2">
+                  Link Text
+                </label>
+                <Input
+                  value={linkText}
+                  onChange={(e) => setLinkText(e.target.value)}
+                  placeholder="Enter link text"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">URL</label>
-                <Input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} placeholder="https://example.com" />
+                <Input
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  placeholder="https://example.com"
+                />
               </div>
               <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setShowLinkDialog(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowLinkDialog(false)}
+                >
                   Cancel
                 </Button>
-                <Button type="button" onClick={insertLink} className="bg-gradient-to-r from-purple-600 to-blue-600">
+                <Button
+                  type="button"
+                  onClick={insertLink}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600"
+                >
                   Insert Link
                 </Button>
               </div>
@@ -425,47 +506,65 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
           color: #9ca3af;
           pointer-events: none;
         }
-        
-        .prose h1 {
+
+        /* Editor font roles using CSS variables from globals.css */
+        .tiptap {
+          font-family: var(--fs-body);
+        }
+        .tiptap h1,
+        .tiptap h2,
+        .tiptap h3,
+        .tiptap h4,
+        .tiptap h5,
+        .tiptap h6 {
+          font-family: var(--fs-heading);
+        }
+        .tiptap code,
+        .tiptap pre,
+        .tiptap kbd,
+        .tiptap samp {
+          font-family: var(--fs-code);
+        }
+
+        /* Typography scale for headings (kept like your previous styles) */
+        .tiptap h1 {
           font-size: 2rem;
           font-weight: bold;
           margin: 1rem 0;
         }
-        
-        .prose h2 {
+        .tiptap h2 {
           font-size: 1.5rem;
           font-weight: bold;
           margin: 0.75rem 0;
         }
-        
-        .prose h3 {
+        .tiptap h3 {
           font-size: 1.25rem;
           font-weight: bold;
           margin: 0.5rem 0;
         }
-        
-        .prose blockquote {
+
+        .tiptap blockquote {
           border-left: 4px solid #e5e7eb;
           padding-left: 1rem;
           margin: 1rem 0;
           font-style: italic;
           color: #6b7280;
         }
-        
-        .prose pre {
+
+        .tiptap pre {
           background: #f3f4f6;
           padding: 1rem;
           border-radius: 0.5rem;
           overflow-x: auto;
-          font-family: monospace;
         }
-        
-        .prose ul, .prose ol {
+
+        .tiptap ul,
+        .tiptap ol {
           margin: 1rem 0;
           padding-left: 2rem;
         }
-        
-        .prose a {
+
+        .tiptap a {
           color: #3b82f6;
           text-decoration: underline;
         }

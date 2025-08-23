@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, useMemo } from "react";
 import useSWR from "swr";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import Link from "next/link";
 import {
   Bell,
   X,
@@ -63,6 +64,9 @@ export function NotificationBell() {
   // Added: category mute/subscribe (persisted)
   const [mutedCategories, setMutedCategories] = useState<string[]>([]);
 
+  // Prefer reduced motion (Codex suggestion)
+  const prefersReducedMotion = useReducedMotion();
+
   // Persist category filter across sessions (kept)
   useEffect(() => {
     try {
@@ -97,7 +101,10 @@ export function NotificationBell() {
   }, []);
   useEffect(() => {
     try {
-      localStorage.setItem("admin-notifications-unread-only", unreadOnly ? "1" : "0");
+      localStorage.setItem(
+        "admin-notifications-unread-only",
+        unreadOnly ? "1" : "0"
+      );
     } catch {
       // ignore
     }
@@ -117,18 +124,22 @@ export function NotificationBell() {
   }, []);
   useEffect(() => {
     try {
-      localStorage.setItem("admin-notifications-muted", JSON.stringify(mutedCategories));
+      localStorage.setItem(
+        "admin-notifications-muted",
+        JSON.stringify(mutedCategories)
+      );
     } catch {
       // ignore
     }
   }, [mutedCategories]);
 
   // Keep your existing endpoint and polling. We add SSE for near-real-time updates.
-  const { data, error, isLoading, mutate } = useSWR<{ notifications: Notification[] }>(
-    "/api/admin/notifications",
-    fetcher,
-    { refreshInterval: 30000, revalidateOnFocus: true }
-  );
+  const { data, error, isLoading, mutate } = useSWR<{
+    notifications: Notification[];
+  }>("/api/admin/notifications", fetcher, {
+    refreshInterval: 30000,
+    revalidateOnFocus: true,
+  });
 
   const raw = data?.notifications || [];
 
@@ -178,7 +189,7 @@ export function NotificationBell() {
     });
   }, [notifications, categoryFilter, unreadOnly, mutedCategories, query]);
 
-  // Priority sorting (high → low) then by time (newest first) — your original behavior
+  // Priority sorting (high → low) then by time (newest first)
   const priorityValue = (p?: string) => {
     switch (p) {
       case "high":
@@ -199,23 +210,29 @@ export function NotificationBell() {
         arr.sort((a, b) => {
           const pv = priorityValue(b.priority) - priorityValue(a.priority);
           if (pv !== 0) return pv;
-          return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+          return (
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          );
         });
         break;
       case "newest":
         arr.sort(
-          (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          (a, b) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
         break;
       case "oldest":
         arr.sort(
-          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          (a, b) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         );
         break;
       case "unread":
         arr.sort((a, b) => {
           if (a.read !== b.read) return a.read ? 1 : -1;
-          return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+          return (
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          );
         });
         break;
       default:
@@ -243,7 +260,10 @@ export function NotificationBell() {
       if (!map.has(label)) map.set(label, []);
       map.get(label)!.push(n);
     });
-    return Array.from(map.entries()).map(([label, items]) => ({ label, items })) as Group[];
+    return Array.from(map.entries()).map(([label, items]) => ({
+      label,
+      items,
+    })) as Group[];
   }, [sortedNotifications]);
 
   // --- Optimistic helpers (kept) ---
@@ -255,7 +275,9 @@ export function NotificationBell() {
 
   const markAsRead = async (id: string) => {
     // Optimistic: flip read true locally
-    optimisticUpdate((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    optimisticUpdate((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
     try {
       await fetch(`/api/admin/notifications/${id}`, {
         method: "PATCH",
@@ -267,7 +289,9 @@ export function NotificationBell() {
       await mutate();
     } catch (err) {
       // Rollback if failed
-      optimisticUpdate((prev) => prev.map((n) => (n.id === id ? { ...n, read: false } : n)));
+      optimisticUpdate((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: false } : n))
+      );
       console.error("Failed to mark notification as read:", err);
     }
   };
@@ -302,7 +326,9 @@ export function NotificationBell() {
 
   const bulkMarkRead = async () => {
     const ids = Array.from(selected);
-    optimisticUpdate((prev) => prev.map((n) => (ids.includes(n.id) ? { ...n, read: true } : n)));
+    optimisticUpdate((prev) =>
+      prev.map((n) => (ids.includes(n.id) ? { ...n, read: true } : n))
+    );
     try {
       await Promise.all(
         ids.map((id) =>
@@ -326,7 +352,9 @@ export function NotificationBell() {
   // NEW: Bulk mark unread (kept from your file)
   const bulkMarkUnread = async () => {
     const ids = Array.from(selected);
-    optimisticUpdate((prev) => prev.map((n) => (ids.includes(n.id) ? { ...n, read: false } : n)));
+    optimisticUpdate((prev) =>
+      prev.map((n) => (ids.includes(n.id) ? { ...n, read: false } : n))
+    );
     try {
       await Promise.all(
         ids.map((id) =>
@@ -444,6 +472,7 @@ export function NotificationBell() {
   // --- a11y & interactions (kept) ---
   const titleId = "notifications-title";
   const descId = "notifications-desc";
+  const panelId = "notifications-panel";
 
   useEffect(() => {
     if (!isOpen) return;
@@ -526,24 +555,30 @@ export function NotificationBell() {
     return rtf.format(weeks, "week");
   };
 
+  const toISO = (ts: Date | string) => {
+    const d = typeof ts === "string" ? new Date(ts) : ts;
+    return isNaN(d.getTime()) ? "" : d.toISOString();
+  };
+
   return (
     <div className="relative">
       <Button
         variant="ghost"
         size="sm"
         type="button"
-        className="relative h-11 w-11 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="relative h-10 w-10 rounded-full sm:h-11 sm:w-11 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         onClick={() => setIsOpen((p) => !p)}
         aria-label="Notifications"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
+        aria-controls={isOpen ? panelId : undefined}
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
           <>
             <motion.span
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
+              initial={prefersReducedMotion ? false : { scale: 0 }}
+              animate={prefersReducedMotion ? {} : { scale: 1 }}
               className="absolute -top-1 -right-1 rounded-full bg-red-500 px-1.5 text-center text-[11px] font-medium leading-5 text-white"
               aria-hidden="true"
               style={{ minWidth: "1.25rem", height: "1.25rem" }}
@@ -574,15 +609,18 @@ export function NotificationBell() {
             />
             {/* Popover dialog */}
             <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              initial={
+                prefersReducedMotion ? false : { opacity: 0, y: -10, scale: 0.98 }
+              }
+              animate={prefersReducedMotion ? {} : { opacity: 1, y: 0, scale: 1 }}
+              exit={prefersReducedMotion ? {} : { opacity: 0, y: -10, scale: 0.98 }}
               transition={{ duration: 0.18 }}
-              className="absolute right-0 top-full z-50 mt-2 w-[95vw] sm:w-[22rem] outline-none"
+              className="absolute left-1/2 top-full z-50 mt-2 w-[90vw] -translate-x-1/2 sm:left-auto sm:right-0 sm:w-[22rem] sm:translate-x-0 outline-none"
               role="dialog"
               aria-modal="true"
               aria-labelledby={titleId}
               aria-describedby={descId}
+              id={panelId}
               ref={dialogRef}
               tabIndex={-1}
             >
@@ -791,7 +829,11 @@ export function NotificationBell() {
                     </div>
                   )}
 
-                  <div className="max-h-[60vh] overflow-y-auto" role="list" aria-busy={isLoading}>
+                  <div
+                    className="max-h-[70vh] sm:max-h-[60vh] overflow-y-auto"
+                    role="list"
+                    aria-busy={isLoading}
+                  >
                     {isLoading ? (
                       <div className="p-8 text-center">
                         <div className="mx-auto h-6 w-6 animate-spin rounded-full border-b-2 border-purple-600" />
@@ -819,12 +861,13 @@ export function NotificationBell() {
                         <Bell className="h-8 w-8 opacity-50" aria-hidden={true} />
                         <p className="text-sm font-semibold">You’re all caught up</p>
                         <p className="text-xs text-gray-500">We’ll let you know when there’s something new.</p>
-                        <a
-                          href="/notifications"
+                        <Link
+                          href="/admin/notifications"
                           className="mt-3 inline-flex items-center justify-center rounded-md border px-3 py-1.5 text-xs hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          onClick={() => setIsOpen(false)}
                         >
                           View all notifications <ChevronRight className="ml-1 h-3.5 w-3.5" />
-                        </a>
+                        </Link>
                       </div>
                     ) : (
                       // Grouped list rendering
@@ -897,9 +940,12 @@ export function NotificationBell() {
                                         <span className="mt-1 block truncate text-sm text-gray-600 dark:text-gray-300">
                                           {notification.message}
                                         </span>
-                                        <span className="mt-1 block text-xs text-gray-400">
+                                        <time
+                                          className="mt-1 block text-xs text-gray-400"
+                                          dateTime={toISO(notification.timestamp)}
+                                        >
                                           {formatTime(notification.timestamp)}
-                                        </span>
+                                        </time>
                                       </span>
 
                                       {!selectionMode && (

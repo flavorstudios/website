@@ -24,6 +24,11 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.75rem;
+
+    /* Font role variables (paired with next/font variables) */
+    --fs-body: var(--font-inter);
+    --fs-heading: var(--font-lora);
+    --fs-code: var(--font-jetbrains);
   }
 
   .dark {
@@ -58,6 +63,29 @@
   }
 }
 
+/* Global font application */
+html,
+body {
+  font-family: var(--fs-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--fs-heading);
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--fs-code);
+}
+
+/* Utility clamps */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -142,4 +170,42 @@
     color: #3c73df !important;
     -webkit-text-fill-color: initial;
   }
+}
+
+/* ---- Optional: shared styles for editor and rendered posts ---- */
+.tiptap {
+  font-family: var(--fs-body);
+}
+.tiptap h1,
+.tiptap h2,
+.tiptap h3,
+.tiptap h4,
+.tiptap h5,
+.tiptap h6 {
+  font-family: var(--fs-heading);
+}
+.tiptap code,
+.tiptap pre,
+.tiptap kbd,
+.tiptap samp {
+  font-family: var(--fs-code);
+}
+
+/* Rendered posts outside the editor */
+.post-body {
+  font-family: var(--fs-body);
+}
+.post-body h1,
+.post-body h2,
+.post-body h3,
+.post-body h4,
+.post-body h5,
+.post-body h6 {
+  font-family: var(--fs-heading);
+}
+.post-body code,
+.post-body pre,
+.post-body kbd,
+.post-body samp {
+  font-family: var(--fs-code);
 }

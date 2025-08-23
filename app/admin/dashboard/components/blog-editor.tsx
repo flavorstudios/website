@@ -31,6 +31,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import { authors } from "@/lib/authors"
+import MediaPickerDialog from "./media/MediaPickerDialog"
 
 import type { BlogPost, BlogRevision } from "@/lib/content-store"
 
@@ -92,7 +93,6 @@ const slugify = (title: string) =>
 export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> }) {
   const { toast } = useToast()
   const router = useRouter()
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [post, setPost] = useState<BlogPost>(() => ({
     id: initialPost?.id ?? "",
@@ -129,10 +129,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const [showScheduler, setShowScheduler] = useState(false)
   const [scheduledDate, setScheduledDate] = useState<Date>()
   const [scheduledTime, setScheduledTime] = useState("")
-  const [imageUploading, setImageUploading] = useState(false)
   const [tagInput, setTagInput] = useState("")
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [showPreview, setShowPreview] = useState(false)
+  const [showMediaPicker, setShowMediaPicker] = useState(false)
 
   // New: revision history + ws state
   const [revisions, setRevisions] = useState<BlogRevision[]>([])
@@ -277,9 +276,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     return () => window.removeEventListener("keydown", onKey)
   }, []) // savePost is stable enough for our usage here
 
-  // Autosave (idle debounce + 30s heartbeat; only when dirty and there is content)
+  // Autosave (idle debounce + 30s heartbeat; ONLY when dirty AND BOTH title & content exist)
   useEffect(() => {
-    if (!(post.title || post.content) || !isDirty) return
+    if (!isDirty || !post.title || !post.content) return
     const t = setTimeout(() => { void savePost(true) }, 5000)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -287,7 +286,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if ((post.title || post.content) && isDirty) {
+      if (isDirty && post.title && post.content) {
         void savePost(true)
       }
     }, 30000)
@@ -375,8 +374,10 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     saveInFlight.current = true
 
     try {
-      const response = await fetch("/api/admin/blog", {
-        method: "POST",
+      const method = post.id ? "PUT" : "POST"
+      const url = post.id ? `/api/admin/blogs/${post.id}` : "/api/admin/blogs"
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...post,
@@ -429,35 +430,6 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       setPost((prev) => ({ ...prev, status: "scheduled" }))
       await savePost()
       setShowScheduler(false)
-    }
-  }
-
-  const handleImageSelect = (file: File) => {
-    setSelectedFile(file)
-  }
-
-  const handleImageUpload = async (file: File) => {
-    setImageUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append("image", file)
-      const response = await fetch("/api/admin/blog/upload-image", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      })
-      if (response.ok) {
-        const { url } = await response.json()
-        setPost((prev) => ({ ...prev, featuredImage: url }))
-        setSelectedFile(null)
-        toast.success("Image uploaded successfully!")
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to upload image:", error)
-      toast.error("Failed to upload image")
-    } finally {
-      setImageUploading(false)
     }
   }
 
@@ -932,7 +904,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                 </div>
               </CardContent>
             </Card>
-            {/* Featured Image Section */}
+            {/* Featured Image Section (Media Library only) */}
             <Card>
               <CardHeader>
                 <CardTitle>Featured Image</CardTitle>
@@ -956,46 +928,22 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                       >
                         Remove Image
                       </Button>
-                      <label htmlFor="image-upload" className="w-full">
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          disabled={imageUploading}
-                        >
-                          {imageUploading ? "Uploading..." : "Change Image"}
-                        </Button>
-                      </label>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setShowMediaPicker(true)}
+                      >
+                        Change Image
+                      </Button>
                     </div>
                   </div>
                 ) : (
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" aria-hidden="true" />
-                    <p className="text-sm text-gray-600 mb-3">Upload featured image</p>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={fileInputRef}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (file) {
-                          handleImageSelect(file)
-                          handleImageUpload(file)
-                        }
-                      }}
-                      className="hidden"
-                      id="image-upload"
-                    />
-                    <label htmlFor="image-upload">
-                      <Button
-                        variant="outline"
-                        disabled={imageUploading}
-                      >
-                        <span>{imageUploading ? "Uploading..." : "Choose Image"}</span>
-                      </Button>
-                    </label>
-                    {selectedFile && (
-                      <div className="text-xs text-gray-500 mt-2">{selectedFile.name}</div>
-                    )}
+                    <p className="text-sm text-gray-600 mb-3">Choose a featured image</p>
+                    <Button variant="outline" onClick={() => setShowMediaPicker(true)}>
+                      Choose from Media Library
+                    </Button>
                   </div>
                 )}
               </CardContent>
@@ -1091,6 +1039,16 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
           <BlogPostRenderer post={previewPost} />
         </DialogContent>
       </Dialog>
+
+      {/* Media Library Picker */}
+      <MediaPickerDialog
+        open={showMediaPicker}
+        onOpenChange={setShowMediaPicker}
+        onSelect={(url) => {
+          setPost((prev) => ({ ...prev, featuredImage: url }))
+          setShowMediaPicker(false)
+        }}
+      />
     </>
   )
 }

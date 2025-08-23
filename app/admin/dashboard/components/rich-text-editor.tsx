@@ -458,7 +458,7 @@ export function RichTextEditor({
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="bg-white rounded-lg p-6 w-96 max-w-[90vw]"
+            className="bg-white rounded-lg p-6 w-96 max-w=[90vw]"
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}

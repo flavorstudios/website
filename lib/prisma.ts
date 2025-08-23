@@ -1,26 +1,31 @@
-import type { PrismaClient } from "@prisma/client";
+// lib/prisma.ts
+
+// Minimal local type so builds don’t require @prisma/client
+export type PrismaClientLike = {
+  post: { count: () => Promise<number> };
+  $disconnect?: () => Promise<void>;
+};
 
 type GlobalWithPrisma = typeof globalThis & {
-  __prisma?: PrismaClient;
+  __prisma?: PrismaClientLike;
 };
 
 const g = globalThis as GlobalWithPrisma;
 
-async function createPrisma(): Promise<PrismaClient> {
+async function createPrisma(): Promise<PrismaClientLike> {
   try {
-    const { PrismaClient } = await import("@prisma/client");
-    return new PrismaClient();
+    const mod = await import("@prisma/client");
+    const PrismaClient = mod.PrismaClient;
+    return new PrismaClient() as unknown as PrismaClientLike;
   } catch {
     // Fallback mock to avoid runtime crashes when Prisma client is missing
     return {
       post: { count: async () => 0 },
-    } as unknown as PrismaClient;
+    };
   }
 }
 
-const prisma: PrismaClient =
-  g.__prisma ??
-  (await createPrisma());
+const prisma: PrismaClientLike = g.__prisma ?? (await createPrisma());
 
 // Cache the instance in dev to prevent multiple connections
 if (process.env.NODE_ENV !== "production") {

@@ -32,7 +32,7 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
       form.append("file", file);
       const xhr = new XMLHttpRequest();
       xhr.upload.addEventListener("progress", (e) => {
-        if (e.lengthComputable) {
+        if (e.length computable) {
           const pct = (e.loaded / e.total) * 100;
           setUploads((u) =>
             u.map((it) => (it.id === id ? { ...it, progress: pct } : it))
@@ -74,6 +74,7 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
         multiple
         hidden
         ref={inputRef}
+        accept="image/*,video/*,application/pdf"
         onChange={(e) => handleFiles(e.target.files)}
         aria-label="Select media files"
       />

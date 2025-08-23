@@ -20,6 +20,18 @@ interface MediaDetailsDrawerProps {
   onUpdate?: (media: MediaDoc) => void;
 }
 
+const formatBytes = (b?: number) => {
+  if (b === undefined || b === null) return "—";
+  const units = ["B", "KB", "MB", "GB"];
+  let i = 0;
+  let n = b;
+  while (n >= 1024 && i < units.length - 1) {
+    n /= 1024;
+    i++;
+  }
+  return `${n.toFixed(n < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
+};
+
 export default function MediaDetailsDrawer({
   media,
   open,
@@ -31,23 +43,26 @@ export default function MediaDetailsDrawer({
   if (!media) return null;
 
   const [alt, setAlt] = useState(media.alt || "");
-  const [saving, setSaving] = useState(false);
+  const [name, setName] = useState(media.name || media.filename || "");
+  const [savingAlt, setSavingAlt] = useState(false);
+  const [savingName, setSavingName] = useState(false);
 
-  // Keep local alt in sync when the selected media changes
+  // Keep local fields in sync when the selected media changes
   useEffect(() => {
     setAlt(media.alt || "");
-  }, [media.id, media.alt]);
+    setName(media.name || media.filename || "");
+  }, [media.id, media.alt, media.name, media.filename]);
 
   const saveAlt = async () => {
-    // no-op if nothing changed
-    if (alt === (media.alt || "")) return;
+    const next = alt.trim();
+    if (next === (media.alt || "")) return;
 
-    setSaving(true);
+    setSavingAlt(true);
     try {
       const res = await fetch("/api/media/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: media.id, alt }),
+        body: JSON.stringify({ id: media.id, alt: next }),
       });
       if (!res.ok) throw new Error("Failed to save alt text");
       const data = await res.json();
@@ -55,13 +70,44 @@ export default function MediaDetailsDrawer({
     } catch (err) {
       console.error(err);
     } finally {
-      setSaving(false);
+      setSavingAlt(false);
     }
   };
 
+  const saveName = async () => {
+    const next = name.trim();
+    if (next === (media.name || media.filename || "")) return;
+
+    setSavingName(true);
+    try {
+      const res = await fetch("/api/media/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: media.id, name: next }),
+      });
+      if (!res.ok) throw new Error("Failed to save name");
+      const data = await res.json();
+      onUpdate?.(data.media as MediaDoc);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingName(false);
+    }
+  };
+
+  const mime = media.mime || media.mimeType || "";
+  const isImage = mime.startsWith("image/");
+
+  const createdAtMs =
+    typeof media.createdAt === "number"
+      ? media.createdAt
+      : media.createdAt
+      ? new Date(media.createdAt).getTime()
+      : undefined;
+
   return (
-    <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="p-4 space-y-4 max-w-md w-full">
+    <Sheet open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <SheetContent className="p-4 space-y-4 max-w-md w-full" aria-label="Media details">
         {(onPrev || onNext) && (
           <div className="flex justify-between">
             {onPrev ? (
@@ -79,34 +125,77 @@ export default function MediaDetailsDrawer({
           </div>
         )}
 
-        <Image
-          src={media.url}
-          alt={media.alt || media.filename || media.name || "media"}
-          width={400}
-          height={400}
-          className="object-cover w-full h-auto rounded"
-        />
+        <div className="rounded overflow-hidden">
+          {isImage ? (
+            <Image
+              src={media.url}
+              alt={media.alt || media.filename || media.name || "media"}
+              width={400}
+              height={400}
+              sizes="(max-width: 640px) 100vw, 520px"
+              className="object-cover w-full h-auto rounded"
+            />
+          ) : (
+            <div className="aspect-video w-full grid place-items-center bg-muted text-muted-foreground rounded">
+              {mime || "File"}
+            </div>
+          )}
+        </div>
 
         <div>
-          <p className="font-semibold">{media.filename || media.name}</p>
-          <p className="text-sm text-gray-500">{media.mime || media.mimeType}</p>
-          <p className="text-xs text-gray-400">
-            Size: {typeof media.size === "number" ? (media.size / 1024).toFixed(1) : "—"} KB
-          </p>
+          <p className="font-semibold break-all">{media.filename || media.name}</p>
+          <p className="text-sm text-gray-500">{mime || "Unknown type"}</p>
+          <p className="text-xs text-gray-400">Size: {formatBytes(media.size)}</p>
           <p className="text-xs text-gray-400">
             Dimensions: {media.width ?? "?"} × {media.height ?? "?"}
           </p>
           <p className="text-xs text-gray-400">
-            Uploaded: {media.createdAt ? new Date(media.createdAt).toLocaleString() : "—"}
+            Uploaded: {createdAtMs ? new Date(createdAtMs).toLocaleString() : "—"}
           </p>
+          <div className="flex gap-2 mt-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => navigator.clipboard.writeText(media.url)}
+            >
+              Copy URL
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <a href={media.url} download>
+                Download
+              </a>
+            </Button>
+          </div>
         </div>
 
         {!!media.alt && (
           <div>
-            <label className="block text-xs font-semibold mb-1 text-gray-700">ALT Text (current)</label>
-            <p className="text-xs bg-gray-50 px-2 py-1 rounded">{media.alt}</p>
+            <label className="block text-xs font-semibold mb-1 text-gray-700">
+              ALT Text (current)
+            </label>
+            <p className="text-xs bg-gray-50 px-2 py-1 rounded break-all">{media.alt}</p>
           </div>
         )}
+
+        <div>
+          <label className="block text-xs font-semibold mb-1 text-gray-700">Name</label>
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !savingName) saveName();
+            }}
+            aria-label="Media name"
+          />
+          <Button
+            size="sm"
+            className="mt-2"
+            onClick={saveName}
+            disabled={savingName || name.trim() === (media.name || media.filename || "")}
+          >
+            {savingName ? "Saving…" : "Save"}
+          </Button>
+        </div>
 
         <div>
           <label className="block text-xs font-semibold mb-1 text-gray-700">ALT Text</label>
@@ -114,16 +203,17 @@ export default function MediaDetailsDrawer({
             value={alt}
             onChange={(e) => setAlt(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !saving) saveAlt();
+              if (e.key === "Enter" && !savingAlt) saveAlt();
             }}
+            aria-label="Alternative text"
           />
           <Button
             size="sm"
             className="mt-2"
             onClick={saveAlt}
-            disabled={saving || alt === (media.alt || "")}
+            disabled={savingAlt || alt.trim() === (media.alt || "")}
           >
-            {saving ? "Saving…" : "Save"}
+            {savingAlt ? "Saving…" : "Save"}
           </Button>
         </div>
       </SheetContent>

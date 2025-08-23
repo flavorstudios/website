@@ -5,6 +5,7 @@ import { blogStore } from "@/lib/content-store"; // Firestore-backed store
 import { formatPublicBlog } from "@/lib/formatters"; // Your existing formatter
 import { commentStore } from "@/lib/comment-store"; // <-- add this import
 import { logError } from "@/lib/log"; // Add error logging
+import { BlogPost } from "@/lib/content-store";
 
 function parseDate(value: string | null): Date | null {
   if (!value) return null;
@@ -30,12 +31,14 @@ export async function GET(request: NextRequest) {
     const blogs = await blogStore.getAll();
 
     // Only published blogs (same as before)
-    let published = blogs.filter((b: any) => b.status === "published");
+    let published: BlogPost[] = blogs.filter(
+      (b: BlogPost) => b.status === "published",
+    );
 
     // Author filter (supports id or name; also handles author object)
     if (authorParam && authorParam !== "all") {
       const a = authorParam.toLowerCase();
-      published = published.filter((b: any) => {
+      published = published.filter((b: BlogPost) => {
         const byId = b.authorId && String(b.authorId).toLowerCase() === a;
         const byName = typeof b.author === "string" && b.author.toLowerCase() === a;
         const byObjId = b.author?.id && String(b.author.id).toLowerCase() === a;
@@ -48,18 +51,18 @@ export async function GET(request: NextRequest) {
     // Date range filters (inclusive)
     if (startDate) {
       published = published.filter(
-        (b: any) => b.publishedAt && new Date(b.publishedAt) >= startDate,
+        (b: BlogPost) => b.publishedAt && new Date(b.publishedAt) >= startDate,
       );
     }
     if (endDate) {
       published = published.filter(
-        (b: any) => b.publishedAt && new Date(b.publishedAt) <= endDate,
+        (b: BlogPost) => b.publishedAt && new Date(b.publishedAt) <= endDate,
       );
     }
 
     // Attach comment counts for each post (async)
     const withCounts = await Promise.all(
-      published.map(async (post: any) => {
+      published.map(async (post: BlogPost) => {
         try {
           const comments = await commentStore.getByPost(post.id, "blog");
           return { ...post, commentCount: comments.length };

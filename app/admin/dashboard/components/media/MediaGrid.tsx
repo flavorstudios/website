@@ -23,7 +23,7 @@ export default function MediaGrid({
   onToggleFavorite,
 }: Props) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
       {items.map((item) => {
         const isSelected = selected?.has(item.id);
         const mime = item.mime || item.mimeType || "";
@@ -39,8 +39,22 @@ export default function MediaGrid({
               onSelect(item);
               onPick?.(item.url);
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                onSelect(item);
+                onPick?.(item.url);
+              }
+              if (e.key === " ") {
+                // Space toggles bulk selection when available
+                if (toggleSelect) {
+                  e.preventDefault();
+                  toggleSelect(item.id);
+                }
+              }
+            }}
             tabIndex={0}
             aria-pressed={isSelected}
+            aria-label={item.filename || item.name || "media item"}
           >
             {/* Bulk selection checkbox, if enabled */}
             {toggleSelect && (
@@ -83,6 +97,7 @@ export default function MediaGrid({
                 alt={item.alt || item.filename || item.name || "media"}
                 width={160}
                 height={160}
+                sizes="(max-width: 640px) 50vw, 200px"
                 className="object-cover w-full h-32"
                 loading="lazy"
               />

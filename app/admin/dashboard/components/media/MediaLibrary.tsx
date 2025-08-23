@@ -10,7 +10,8 @@ import type { MediaDoc } from "@/types/media";
 import { useToast } from "@/hooks/use-toast";
 
 type TypeFilter = "all" | "image" | "video" | "audio" | "application";
-type SortBy = "date" | "name";
+type SortBy = "date" | "name" | "size";
+type DateFilter = "all" | "7d" | "30d";
 
 export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) => void }) {
   const { toast } = useToast();
@@ -23,6 +24,8 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [sortBy, setSortBy] = useState<SortBy>("date");
+  const [dateFilter, setDateFilter] = useState<DateFilter>("all");
+  const [unusedOnly, setUnusedOnly] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [favoritesOnly, setFavoritesOnly] = useState(false);
 
@@ -62,7 +65,8 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
       setCursor((data.cursor as number | null) ?? null);
     } catch {
       // keep your existing toast API
-      toast.error("Failed to load media");
+      // @ts-expect-error: depending on your toast implementation
+      toast.error?.("Failed to load media");
     } finally {
       setLoading(false);
     }
@@ -100,18 +104,51 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   }, [cursor, loading]);
 
   // Filter, search, and sort logic (null-safe)
+  const q = search.trim().toLowerCase();
   const filtered = items
+    // Type filter
     .filter((m) => (typeFilter === "all" ? true : (m.mime?.startsWith(typeFilter) ?? false)))
-    .filter((m) => (m.filename || m.name || "").toLowerCase().includes(search.toLowerCase()))
+    // Text search across filename, name, alt, and tags
+    .filter((m) => {
+      if (!q) return true;
+      const fields = [m.filename, m.name, m.alt, ...(m.tags ?? [])]
+        .map((v) => (v || "").toLowerCase());
+      return fields.some((f) => f.includes(q));
+    })
+    // Favorites filter
     .filter((m) => (favoritesOnly ? !!m.favorite : true))
+    // Unused filter
+    .filter((m) => (unusedOnly ? !m.attachedTo || m.attachedTo.length === 0 : true))
+    // Date filter
+    .filter((m) => {
+      if (dateFilter === "all") return true;
+      const created =
+        typeof m.createdAt === "number"
+          ? m.createdAt
+          : new Date(m.createdAt).getTime();
+      const days = dateFilter === "7d" ? 7 : 30;
+      return created >= Date.now() - days * 24 * 60 * 60 * 1000;
+    })
+    // Sorting
     .sort((a, b) => {
       if (sortBy === "name") {
         const an = (a.filename || a.name || "").toString();
         const bn = (b.filename || b.name || "").toString();
         return an.localeCompare(bn);
       }
-      const aDate = (a.createdAt as number | undefined) ?? 0;
-      const bDate = (b.createdAt as number | undefined) ?? 0;
+      if (sortBy === "size") {
+        const as = a.size ?? 0;
+        const bs = b.size ?? 0;
+        return bs - as;
+      }
+      const aDate =
+        typeof a.createdAt === "number"
+          ? a.createdAt
+          : new Date(a.createdAt).getTime();
+      const bDate =
+        typeof b.createdAt === "number"
+          ? b.createdAt
+          : new Date(b.createdAt).getTime();
       return bDate - aDate;
     });
 
@@ -216,6 +253,10 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
         onTypeFilter={setTypeFilter}
         sortBy={sortBy}
         onSortBy={setSortBy}
+        dateFilter={dateFilter}
+        onDateFilter={setDateFilter}
+        unusedOnly={unusedOnly}
+        onUnusedToggle={() => setUnusedOnly((u) => !u)}
         view={view}
         onToggleView={() => setView((v) => (v === "grid" ? "list" : "grid"))}
         favoritesOnly={favoritesOnly}

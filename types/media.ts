@@ -41,6 +41,10 @@ export interface MediaDoc {
   tags?: string[];
   createdBy?: string;
   favorite?: boolean;    // ⭐ favorites filter/toggle
+
+  /** IDs of posts or documents that use this media. Empty/undefined means unused. */
+  attachedTo?: string[];
+
   variants?: MediaVariant[];
 
   // Timestamps (accept both Firestore number and string ISO)

@@ -179,14 +179,19 @@ export async function uploadMedia(buffer: Buffer, name: string, mimeType: string
     tags: [],
     createdBy: "",
     variants: [],
+    favorite: false, // ✅ default favorite flag
   };
 
-  // Dynamically import sharp to avoid cold-start penalties
-  type SharpFactory = (input?: Buffer | ArrayBufferView | string) => Sharp;
-  const { default: sharp } = (await import("sharp")) as { default: SharpFactory };
-  const meta = await sharp(buffer).metadata();
-  doc.width = meta.width || 0;
-  doc.height = meta.height || 0;
+  // Dynamically import sharp to avoid cold-start penalties and guard for non-images
+  try {
+    type SharpFactory = (input?: Buffer | ArrayBufferView | string) => Sharp;
+    const { default: sharp } = (await import("sharp")) as { default: SharpFactory };
+    const meta = await sharp(buffer).metadata();
+    doc.width = meta.width || 0;
+    doc.height = meta.height || 0;
+  } catch {
+    // If sharp is unavailable or the file isn't an image, leave 0×0
+  }
 
   await collection.doc(id).set(doc);
   return doc;
@@ -265,8 +270,13 @@ export async function cropMedia(
   const variantFile = bucket.file(variantObjectPath);
   await variantFile.save(outBuffer, { contentType: data.mime });
 
+  const variantUrl = publicUrlFor(bucket.name, variantObjectPath);
+
   const variant: MediaVariant = {
     id: genId(),
+    // include url for consumers that expect it
+    // @ts-expect-error - if MediaVariant doesn't require url, this is harmless extra data
+    url: variantUrl,
     path: variantObjectPath,
     width: options.width,
     height: options.height,

@@ -9,6 +9,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Star } from "lucide-react";
 
 interface Props {
   search: string;
@@ -19,6 +20,8 @@ interface Props {
   onSortBy: (val: string) => void;
   view: "grid" | "list";
   onToggleView: () => void;
+  favoritesOnly: boolean;
+  onFavoritesToggle: () => void;
 }
 
 export default function MediaToolbar({
@@ -30,6 +33,8 @@ export default function MediaToolbar({
   onSortBy,
   view,
   onToggleView,
+  favoritesOnly,
+  onFavoritesToggle,
 }: Props) {
   return (
     <div className="space-y-4 mb-4">
@@ -44,6 +49,7 @@ export default function MediaToolbar({
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-48"
         />
+
         <Select value={typeFilter} onValueChange={onTypeFilter}>
           <SelectTrigger className="w-36" aria-label="Type">
             <SelectValue placeholder="Type" />
@@ -54,6 +60,7 @@ export default function MediaToolbar({
             <SelectItem value="video">Videos</SelectItem>
           </SelectContent>
         </Select>
+
         <Select value={sortBy} onValueChange={onSortBy}>
           <SelectTrigger className="w-36" aria-label="Sort">
             <SelectValue placeholder="Sort" />
@@ -63,6 +70,18 @@ export default function MediaToolbar({
             <SelectItem value="name">Name</SelectItem>
           </SelectContent>
         </Select>
+
+        <Button
+          variant={favoritesOnly ? "default" : "outline"}
+          size="sm"
+          onClick={onFavoritesToggle}
+          aria-pressed={favoritesOnly}
+          className="flex items-center gap-1"
+        >
+          <Star className={favoritesOnly ? "w-4 h-4 fill-current" : "w-4 h-4"} />
+          Favorites
+        </Button>
+
         <Button variant="outline" size="sm" onClick={onToggleView}>
           {view === "grid" ? "List View" : "Grid View"}
         </Button>

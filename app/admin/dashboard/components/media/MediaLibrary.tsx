@@ -17,12 +17,14 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   const [items, setItems] = useState<MediaDoc[]>([]);
   const [cursor, setCursor] = useState<number | null>(null); // Pagination cursor
   const [selectedItem, setSelectedItem] = useState<MediaDoc | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [sortBy, setSortBy] = useState<SortBy>("date");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
 
   // Infinite-scroll sentinel & request guard
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -60,7 +62,6 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
       setCursor((data.cursor as number | null) ?? null);
     } catch {
       // keep your existing toast API
-      // (changing this to object syntax can be done later if your hook supports it)
       toast.error("Failed to load media");
     } finally {
       setLoading(false);
@@ -102,6 +103,7 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   const filtered = items
     .filter((m) => (typeFilter === "all" ? true : (m.mime?.startsWith(typeFilter) ?? false)))
     .filter((m) => (m.filename || m.name || "").toLowerCase().includes(search.toLowerCase()))
+    .filter((m) => (favoritesOnly ? !!m.favorite : true))
     .sort((a, b) => {
       if (sortBy === "name") {
         const an = (a.filename || a.name || "").toString();
@@ -162,6 +164,49 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
     setSelectedIds(new Set());
   };
 
+  // Favorite toggle (optimistic)
+  const handleToggleFavorite = async (item: MediaDoc) => {
+    const updated = { ...item, favorite: !item.favorite };
+    setItems((prev) => prev.map((i) => (i.id === item.id ? updated : i)));
+    await fetch("/api/media/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: item.id, favorite: updated.favorite }),
+    }).catch(() => {
+      // revert on failure
+      setItems((prev) => prev.map((i) => (i.id === item.id ? item : i)));
+    });
+  };
+
+  // Selecting an item also stores its index within the filtered set for prev/next
+  const handleSelectItem = (item: MediaDoc) => {
+    const idx = filtered.findIndex((m) => m.id === item.id);
+    setSelectedIndex(idx >= 0 ? idx : null);
+    setSelectedItem(item);
+  };
+
+  const handleUpdateItem = (updated: MediaDoc) => {
+    setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+    setSelectedItem(updated);
+  };
+
+  const showPrev = selectedIndex !== null && selectedIndex > 0;
+  const showNext = selectedIndex !== null && selectedIndex < filtered.length - 1;
+
+  const goPrev = () => {
+    if (!showPrev || selectedIndex === null) return;
+    const idx = selectedIndex - 1;
+    setSelectedIndex(idx);
+    setSelectedItem(filtered[idx]);
+  };
+
+  const goNext = () => {
+    if (!showNext || selectedIndex === null) return;
+    const idx = selectedIndex + 1;
+    setSelectedIndex(idx);
+    setSelectedItem(filtered[idx]);
+  };
+
   return (
     <div className="flex flex-col gap-4" aria-busy={loading}>
       <MediaToolbar
@@ -173,23 +218,27 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
         onSortBy={setSortBy}
         view={view}
         onToggleView={() => setView((v) => (v === "grid" ? "list" : "grid"))}
+        favoritesOnly={favoritesOnly}
+        onFavoritesToggle={() => setFavoritesOnly((f) => !f)}
       />
 
       {view === "grid" ? (
         <MediaGrid
           items={filtered}
-          onSelect={setSelectedItem}
+          onSelect={handleSelectItem}
           onPick={onSelect}
           selected={selectedIds}
           toggleSelect={toggleSelect}
+          onToggleFavorite={handleToggleFavorite}
         />
       ) : (
         <MediaList
           items={filtered}
-          onRowClick={setSelectedItem}
+          onRowClick={handleSelectItem}
           selected={selectedIds}
           toggleSelect={toggleSelect}
           toggleSelectAll={toggleSelectAll}
+          onToggleFavorite={handleToggleFavorite}
         />
       )}
 
@@ -215,8 +264,16 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
         onTag={handleBulkTag}
         onDownload={handleBulkDownload}
       />
+
       {selectedItem && (
-        <MediaDetailsDrawer media={selectedItem} onClose={() => setSelectedItem(null)} />
+        <MediaDetailsDrawer
+          media={selectedItem}
+          open={true}
+          onClose={() => setSelectedItem(null)}
+          onPrev={showPrev ? goPrev : undefined}
+          onNext={showNext ? goNext : undefined}
+          onUpdate={handleUpdateItem}
+        />
       )}
     </div>
   );

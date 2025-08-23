@@ -447,16 +447,16 @@ export default function VideoManager() {
     setError(null);
     try {
       const [videosRes, categoriesRes] = await Promise.all([
-        fetch("/api/videos", { credentials: "include" }),
-        fetch("/api/categories", { credentials: "include" }),
+        fetch("/api/admin/videos", { credentials: "include" }),
+        fetch("/api/categories?type=video", { credentials: "include" }),
       ]);
       if (!videosRes.ok || !categoriesRes.ok) throw new Error("Failed to load");
       const [videosJson, categoriesJson] = await Promise.all([
         videosRes.json(),
         categoriesRes.json(),
       ]);
-      setVideos(videosJson ?? []);
-      setCategories(categoriesJson ?? []);
+      setVideos(videosJson.videos ?? []);
+      setCategories(categoriesJson.categories ?? []);
     } catch (e: any) {
       setError(e?.message || "Failed to load data.");
     } finally {
@@ -466,7 +466,7 @@ export default function VideoManager() {
 
   async function createVideo(data: Partial<Video>) {
     try {
-      const res = await fetch("/api/videos", {
+      const res = await fetch("/api/admin/videos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -484,7 +484,7 @@ export default function VideoManager() {
 
   async function updateVideo(id: string, data: Partial<Video>) {
     try {
-      const res = await fetch(`/api/videos/${id}`, {
+      const res = await fetch(`/api/admin/videos/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -502,7 +502,7 @@ export default function VideoManager() {
 
   async function deleteVideo(id: string) {
     try {
-      const res = await fetch(`/api/videos/${id}`, { method: "DELETE", credentials: "include" });
+      const res = await fetch(`/api/admin/videos/${id}`, { method: "DELETE", credentials: "include" });
       if (res.ok) {
         toast("Video deleted.");
         await loadData();
@@ -519,7 +519,7 @@ export default function VideoManager() {
 
   async function togglePublish(id: string, publish: boolean, opts?: { skipReload?: boolean }) {
     try {
-      const res = await fetch(`/api/videos/${id}/publish`, {
+      const res = await fetch(`/api/admin/videos/${id}/publish`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -644,14 +644,18 @@ export default function VideoManager() {
         />
 
         <CategoryDropdown
-          categories={categories.map((cat) => ({
-            name: cat.name,
-            slug: cat.slug,
-            count: cat.postCount,
-            tooltip: cat.tooltip ?? undefined,
-            order: cat.order ?? 0,
-            isActive: true,
-          }))}
+          categories={
+            Array.isArray(categories)
+              ? categories.map((cat) => ({
+                  name: cat.name,
+                  slug: cat.slug,
+                  count: cat.postCount,
+                  tooltip: cat.tooltip ?? undefined,
+                  order: cat.order ?? 0,
+                  isActive: true,
+                }))
+              : []
+          }
           selectedCategory={filterCategory}
           onCategoryChange={setFilterCategory}
           type="video"

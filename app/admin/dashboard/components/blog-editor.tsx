@@ -193,11 +193,13 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
           credentials: "include",
         });
         const data = await response.json();
-        const blogCategories: BlogCategory[] = data.categories?.map((cat: BlogCategory) => ({
-          name: cat.name,
-          slug: cat.slug,
-          tooltip: cat.tooltip ?? "",
-        })) || [];
+        const blogCategories: BlogCategory[] = Array.isArray(data.categories)
+          ? data.categories.map((cat: BlogCategory) => ({
+              name: cat.name,
+              slug: cat.slug,
+              tooltip: cat.tooltip ?? "",
+            }))
+          : [];
         setCategories(blogCategories);
         if (post.categories.length === 0 && blogCategories.length > 0) {
           setPost((prev) => ({

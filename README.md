@@ -85,3 +85,9 @@ Use `.env.example` as a reference for the correct variable names and structure.
 Cookie Consent Banner
 
 The CookieYes banner loads on all pages by default.
+
+---
+
+### Autosave pipeline
+
+The admin blog editor now uses a dedicated autosave pipeline. Drafts are saved through `/api/admin/blog/drafts` with optimistic concurrency and persisted in IndexedDB while offline. A small status chip near the save button reflects states such as "Saving…", "Saved", "Offline" or "Sync failed" and banners clear once a sync succeeds.

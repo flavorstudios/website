@@ -628,7 +628,7 @@ export function NotificationBell() {
               <Card className="border bg-white shadow-xl rounded-2xl overflow-hidden dark:border-gray-800 dark:bg-gray-900">
                 <CardContent className="p-0">
                   {/* Solid header (no gradient) */}
-                  <div className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+                  <div className="p-3 sm:p-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
                     <div className="flex items-center justify-between gap-2">
                       <h3 id={titleId} className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                         Notifications
@@ -675,47 +675,6 @@ export function NotificationBell() {
                           </Button>
                         )}
 
-                        {/* Filters dropdown: category + muted categories */}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="h-8 px-2 text-xs">
-                              <Filter className="mr-1 h-3.5 w-3.5" />
-                              Filters
-                              <ChevronDown className="ml-1 h-3.5 w-3.5" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56">
-                            <DropdownMenuLabel>Category</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            {["all", ...categories].map((c) => (
-                              <DropdownMenuItem
-                                key={`cat-${c}`}
-                                onClick={() => setCategoryFilter(c)}
-                                className={c === categoryFilter ? "font-semibold" : ""}
-                              >
-                                {c.charAt(0).toUpperCase() + c.slice(1)}
-                              </DropdownMenuItem>
-                            ))}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuLabel>Muted categories</DropdownMenuLabel>
-                            {categories.map((c) => (
-                              <DropdownMenuCheckboxItem
-                                key={`mute-${c}`}
-                                checked={mutedCategories.includes(c)}
-                                onCheckedChange={(checked) => {
-                                  setMutedCategories((prev) => {
-                                    const set = new Set(prev);
-                                    checked ? set.add(c) : set.delete(c);
-                                    return Array.from(set);
-                                  });
-                                }}
-                              >
-                                {c}
-                              </DropdownMenuCheckboxItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
                         {/* Bulk actions (kept) */}
                         {unreadCount > 0 && (
                           <Button
@@ -759,18 +718,62 @@ export function NotificationBell() {
                       View your latest notifications. Use the mark all read button to dismiss unread items.
                     </p>
 
-                    {/* Search + Sort row */}
-                    <div className="mt-3 flex items-center gap-2 px-4">
+                    {/* Search, filters & sort */}
+                    <div className="mt-3 flex flex-wrap items-center gap-2 px-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 shrink-0 px-2 text-xs"
+                          >
+                            <Filter className="mr-1 h-3.5 w-3.5" />
+                            Filters
+                            <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-56">
+                          <DropdownMenuLabel>Category</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {["all", ...categories].map((c) => (
+                            <DropdownMenuItem
+                              key={`cat-${c}`}
+                              onClick={() => setCategoryFilter(c)}
+                              className={c === categoryFilter ? "font-semibold" : ""}
+                            >
+                              {c.charAt(0).toUpperCase() + c.slice(1)}
+                            </DropdownMenuItem>
+                          ))}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel>Muted categories</DropdownMenuLabel>
+                          {categories.map((c) => (
+                            <DropdownMenuCheckboxItem
+                              key={`mute-${c}`}
+                              checked={mutedCategories.includes(c)}
+                              onCheckedChange={(checked) => {
+                                setMutedCategories((prev) => {
+                                  const set = new Set(prev);
+                                  checked ? set.add(c) : set.delete(c);
+                                  return Array.from(set);
+                                });
+                              }}
+                            >
+                              {c}
+                            </DropdownMenuCheckboxItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+
                       <Input
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Search notifications"
-                        className="h-8"
+                        className="h-8 flex-1 min-w-0"
                         aria-label="Search notifications"
                       />
                       <select
                         aria-label="Sort notifications"
-                        className="h-8 rounded-md border bg-background px-2 text-xs"
+                        className="h-8 shrink-0 rounded-md border bg-background px-2 text-xs"
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as SortBy)}
                       >
@@ -784,7 +787,7 @@ export function NotificationBell() {
 
                   {/* Selection action bar (kept) */}
                   {selectionMode && selected.size > 0 && (
-                    <div className="flex items-center justify-between gap-2 border-b bg-gray-50 px-4 py-2 text-xs dark:bg-gray-800">
+                    <div className="flex items-center justify-between gap-2 border-b bg-white px-4 py-2 text-xs dark:bg-gray-900">
                       <span>{selected.size} selected</span>
                       <div className="flex gap-1">
                         <Button size="sm" variant="ghost" type="button" onClick={selectAll} className="h-7 px-2">
@@ -863,6 +866,7 @@ export function NotificationBell() {
                         <p className="text-xs text-gray-500">We’ll let you know when there’s something new.</p>
                         <Link
                           href="/admin/notifications"
+                          prefetch={false}
                           className="mt-3 inline-flex items-center justify-center rounded-md border px-3 py-1.5 text-xs hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                           onClick={() => setIsOpen(false)}
                         >

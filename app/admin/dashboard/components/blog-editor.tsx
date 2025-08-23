@@ -1,85 +1,89 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react"
-import { motion } from "framer-motion"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Badge } from "@/components/ui/badge"
-import { Switch } from "@/components/ui/switch"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { useState, useEffect, useRef, useMemo } from "react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet"
-import BlogPostRenderer from "@/components/BlogPostRenderer"
-import { RichTextEditor } from "./rich-text-editor"
-import Image from "next/image"
+} from "@/components/ui/sheet";
+import BlogPostRenderer from "@/components/BlogPostRenderer";
+import { RichTextEditor } from "./rich-text-editor";
+import Image from "next/image";
 import {
   Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info
-} from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
-import { authors } from "@/lib/authors"
-import MediaPickerDialog from "./media/MediaPickerDialog"
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { authors } from "@/lib/authors";
+import MediaPickerDialog from "./media/MediaPickerDialog";
+import type { BlogPost, BlogRevision } from "@/lib/content-store";
 
-import type { BlogPost, BlogRevision } from "@/lib/content-store"
+// NEW: autosave hook
+import { useAutosave } from "@/hooks/useAutosave";
+// Optional: get user id for per-user draft keys
+import { useSession } from "next-auth/react";
 
-const titleMin = 50
-const titleMax = 60
-const descMin = 120
-const descMax = 160
+const titleMin = 50;
+const titleMax = 60;
+const descMin = 120;
+const descMax = 160;
 
 function getLengthClass(length: number, min: number, max: number) {
-  if (length === 0) return "text-gray-500"
-  if (length < min) return "text-yellow-600"
-  if (length > max) return "text-red-600"
-  return "text-green-600"
+  if (length === 0) return "text-gray-500";
+  if (length < min) return "text-yellow-600";
+  if (length > max) return "text-red-600";
+  return "text-green-600";
 }
 function getLengthMessage(length: number, min: number, max: number) {
-  if (length === 0) return `Recommended ${min}-${max} characters`
-  if (length < min) return `Too short – aim for ${min}-${max}`
-  if (length > max) return `Too long – aim for ${min}-${max}`
-  return "Perfect length"
+  if (length === 0) return `Recommended ${min}-${max} characters`;
+  if (length < min) return `Too short – aim for ${min}-${max}`;
+  if (length > max) return `Too long – aim for ${min}-${max}`;
+  return "Perfect length";
 }
 
 export interface BlogCategory {
-  name: string
-  slug: string
-  tooltip?: string
+  name: string;
+  slug: string;
+  tooltip?: string;
 }
 
-/** safe localStorage helpers */
+/** safe localStorage helpers (kept as-is; no longer used for autosave persistence) */
 const safeLocal = {
   get<T>(key: string, fallback: T): T {
     try {
-      const raw = localStorage.getItem(key)
-      return raw ? (JSON.parse(raw) as T) : fallback
+      const raw = localStorage.getItem(key);
+      return raw ? (JSON.parse(raw) as T) : fallback;
     } catch {
-      return fallback
+      return fallback;
     }
   },
   set<T>(key: string, value: T) {
     try {
-      localStorage.setItem(key, JSON.stringify(value))
+      localStorage.setItem(key, JSON.stringify(value));
     } catch {}
   },
   remove(key: string) {
     try {
-      localStorage.removeItem(key)
+      localStorage.removeItem(key);
     } catch {}
   },
-}
+};
 
 /** better slugging with diacritics stripping */
 const slugify = (title: string) =>
@@ -88,11 +92,13 @@ const slugify = (title: string) =>
     .replace(/\p{Diacritic}/gu, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
+    .replace(/(^-|-$)/g, "");
 
 export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> }) {
-  const { toast } = useToast()
-  const router = useRouter()
+  const { toast } = useToast();
+  const router = useRouter();
+  const { data: session } = useSession(); // may be undefined if not using NextAuth
+  const userId = (session?.user as any)?.id ?? "anon";
 
   const [post, setPost] = useState<BlogPost>(() => ({
     id: initialPost?.id ?? "",
@@ -108,7 +114,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     seoDescription: initialPost?.seoDescription ?? "",
     seoKeywords: initialPost?.seoKeywords ?? "",
     openGraphImage: initialPost?.openGraphImage ?? "",
-    schemaType: initialPost?.schemaType ?? "Article",
+    schemaType: (initialPost?.schemaType as any) ?? "Article",
     status: (initialPost?.status as BlogPost["status"]) ?? "draft",
     featured: initialPost?.featured ?? false,
     author: initialPost?.author ?? "Admin",
@@ -121,261 +127,265 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     views: initialPost?.views ?? 0,
     commentCount: initialPost?.commentCount ?? 0,
     shareCount: initialPost?.shareCount ?? 0,
-  }))
+  }));
 
-  const [categories, setCategories] = useState<BlogCategory[]>([])
-  const [saving, setSaving] = useState(false)
-  const [lastSaved, setLastSaved] = useState<Date | null>(null)
-  const [showScheduler, setShowScheduler] = useState(false)
-  const [scheduledDate, setScheduledDate] = useState<Date>()
-  const [scheduledTime, setScheduledTime] = useState("")
-  const [tagInput, setTagInput] = useState("")
-  const [showPreview, setShowPreview] = useState(false)
-  const [showMediaPicker, setShowMediaPicker] = useState(false)
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [showScheduler, setShowScheduler] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState<Date>();
+  const [scheduledTime, setScheduledTime] = useState("");
+  const [tagInput, setTagInput] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
 
   // New: revision history + ws state
-  const [revisions, setRevisions] = useState<BlogRevision[]>([])
-  const [ws, setWs] = useState<WebSocket | null>(null)
+  const [revisions, setRevisions] = useState<BlogRevision[]>([]);
+  const [ws, setWs] = useState<WebSocket | null>(null);
 
   // Draft persistence + dirty tracking + online awareness
-  const draftKey = initialPost?.id ? `blog-editor-${initialPost.id}` : "blog-editor-new"
-  const [isDirty, setIsDirty] = useState(false)
-  const initialRender = useRef(true)
-  const skipDraftRef = useRef(false)
-  const [online, setOnline] = useState(true)
+  const draftKey = initialPost?.id ? `blog-editor-${initialPost.id}` : "blog-editor-new";
+  const [isDirty, setIsDirty] = useState(false);
+  const initialRender = useRef(true);
+  const skipDraftRef = useRef(false);
+  const [online, setOnline] = useState(true);
 
   // NEW: concurrency guard for saves
-  const saveInFlight = useRef(false)
+  const saveInFlight = useRef(false);
+
+  // NEW: stable draft id for autosave route
+  const draftIdRef = useRef(post.id || `draft-${Date.now()}`);
+
+  // NEW: stable autosave payload to avoid unnecessary debounce cycles
+  const autosaveData = useMemo(
+    () => ({
+      title: post.title,
+      content: post.content,
+      tags: post.tags,
+      slug: post.slug,
+    }),
+    [post.title, post.content, post.tags, post.slug]
+  );
+
+  // NEW: wire autosave (IndexedDB offline, backoff, conflict-ready)
+  const { status: autosaveStatus, savedAt: autosaveSavedAt } = useAutosave({
+    userId,
+    draftId: draftIdRef.current,
+    data: autosaveData,
+    // Optionally surface a conflict modal here by capturing the server copy:
+    // onConflict: (server) => setConflict({ server }),
+  });
 
   // Helper to combine scheduled date + time
   const getScheduledDateTime = () => {
-    if (!scheduledDate || !scheduledTime) return undefined
-    const [hours, minutes] = scheduledTime.split(":").map(Number)
-    const dt = new Date(scheduledDate)
-    if (!isNaN(hours)) dt.setHours(hours)
-    if (!isNaN(minutes)) dt.setMinutes(minutes)
-    dt.setSeconds(0, 0)
-    return dt
-  }
+    if (!scheduledDate || !scheduledTime) return undefined;
+    const [hours, minutes] = scheduledTime.split(":").map(Number);
+    const dt = new Date(scheduledDate);
+    if (!isNaN(hours)) dt.setHours(hours);
+    if (!isNaN(minutes)) dt.setMinutes(minutes);
+    dt.setSeconds(0, 0);
+    return dt;
+  };
 
   useEffect(() => {
     const loadCategories = async () => {
       try {
         const response = await fetch("/api/admin/categories?type=blog", {
           credentials: "include",
-        })
-        const data = await response.json()
+        });
+        const data = await response.json();
         const blogCategories: BlogCategory[] = data.categories?.map((cat: BlogCategory) => ({
           name: cat.name,
           slug: cat.slug,
           tooltip: cat.tooltip ?? "",
-        })) || []
-        setCategories(blogCategories)
+        })) || [];
+        setCategories(blogCategories);
         if (post.categories.length === 0 && blogCategories.length > 0) {
           setPost((prev) => ({
             ...prev,
             category: blogCategories[0].slug,
             categories: [blogCategories[0].slug],
-          }))
+          }));
         }
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error("Failed to load categories:", error)
+        console.error("Failed to load categories:", error);
       }
-    }
-    loadCategories()
+    };
+    loadCategories();
 
-    // restore draft from localStorage
+    // Online/offline awareness only (removed localStorage draft restore: handled by autosave hook via IndexedDB)
     if (typeof window !== "undefined") {
-      const restored = safeLocal.get<typeof post | null>(draftKey, null)
-      if (restored) setPost((p) => ({ ...p, ...restored }))
-      const updateOnline = () => setOnline(navigator.onLine)
-      updateOnline()
-      window.addEventListener("online", updateOnline)
-      window.addEventListener("offline", updateOnline)
+      const updateOnline = () => setOnline(navigator.onLine);
+      updateOnline();
+      window.addEventListener("online", updateOnline);
+      window.addEventListener("offline", updateOnline);
       return () => {
-        window.removeEventListener("online", updateOnline)
-        window.removeEventListener("offline", updateOnline)
-      }
+        window.removeEventListener("online", updateOnline);
+        window.removeEventListener("offline", updateOnline);
+      };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
 
   // Slug generation (improved)
   useEffect(() => {
     if (post.title && (!post.slug || post.slug === "")) {
-      const s = slugify(post.title)
-      if (s !== post.slug) setPost((prev) => ({ ...prev, slug: s }))
+      const s = slugify(post.title);
+      if (s !== post.slug) setPost((prev) => ({ ...prev, slug: s }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [post.title])
+  }, [post.title]);
 
   // Auto-generate excerpt + derived fields (idempotent)
   useEffect(() => {
-    const text = post.content.replace(/<[^>]*>/g, "")
-    const words = text.trim().split(/\s+/).filter((w) => w.length > 0)
-    const wc = words.length
-    const rt = `${Math.max(1, Math.ceil(wc / 200))} min read`
-    const suggestedExcerpt = text.length > 160 ? text.substring(0, 160) + "..." : text
+    const text = post.content.replace(/<[^>]*>/g, "");
+    const words = text.trim().split(/\s+/).filter((w) => w.length > 0);
+    const wc = words.length;
+    const rt = `${Math.max(1, Math.ceil(wc / 200))} min read`;
+    const suggestedExcerpt = text.length > 160 ? text.substring(0, 160) + "..." : text;
 
     setPost((prev) => {
-      let changed = false
-      const next = { ...prev }
-      if (prev.wordCount !== wc) { next.wordCount = wc; changed = true }
-      if (prev.readTime !== rt) { next.readTime = rt; changed = true }
+      let changed = false;
+      const next = { ...prev };
+      if (prev.wordCount !== wc) { next.wordCount = wc; changed = true; }
+      if (prev.readTime !== rt) { next.readTime = rt; changed = true; }
       if (prev.excerpt.trim() === "" && prev.excerpt !== suggestedExcerpt) {
-        next.excerpt = suggestedExcerpt; changed = true
+        next.excerpt = suggestedExcerpt; changed = true;
       }
-      return changed ? (next as BlogPost) : prev
-    })
+      return changed ? (next as BlogPost) : prev;
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [post.content])
+  }, [post.content]);
 
-  // Track unsaved changes & persist drafts
+  // Track unsaved changes (removed localStorage persistence; autosave handles local via IndexedDB)
   useEffect(() => {
     if (initialRender.current) {
-      initialRender.current = false
-      return
+      initialRender.current = false;
+      return;
     }
     if (skipDraftRef.current) {
-      skipDraftRef.current = false
-      return
+      skipDraftRef.current = false;
+      return;
     }
-    setIsDirty(true)
-    if (typeof window !== "undefined") {
-      safeLocal.set(draftKey, post)
+    setIsDirty(true);
+  }, [post, draftKey]);
+
+  // When autosave finishes, reflect saved time and clear "unsaved" flag
+  useEffect(() => {
+    if (autosaveStatus === "saved" && autosaveSavedAt) {
+      setLastSaved(autosaveSavedAt);
+      setIsDirty(false);
     }
-  }, [post, draftKey])
+  }, [autosaveStatus, autosaveSavedAt]);
 
   // Warn before unload if dirty
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
-        e.preventDefault()
-        e.returnValue = ""
+        e.preventDefault();
+        e.returnValue = "";
       }
-    }
-    window.addEventListener("beforeunload", handleBeforeUnload)
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
-  }, [isDirty])
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
 
   // Keyboard shortcuts: Cmd/Ctrl+S to save, Cmd/Ctrl+P to preview
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const k = e.key.toLowerCase()
+      const k = e.key.toLowerCase();
       if ((e.metaKey || e.ctrlKey) && k === "s") {
-        e.preventDefault()
-        void savePost()
+        e.preventDefault();
+        void savePost();
       }
       if ((e.metaKey || e.ctrlKey) && k === "p") {
-        e.preventDefault()
-        setShowPreview(true)
+        e.preventDefault();
+        setShowPreview(true);
       }
-    }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, []) // savePost is stable enough for our usage here
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []); // savePost is stable enough for our usage here
 
-  // Autosave (idle debounce + 30s heartbeat; ONLY when dirty AND BOTH title & content exist)
-  useEffect(() => {
-    if (!isDirty || !post.title || !post.content) return
-    const t = setTimeout(() => { void savePost(true) }, 5000)
-    return () => clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDirty, post.title, post.content])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (isDirty && post.title && post.content) {
-        void savePost(true)
-      }
-    }, 30000)
-    return () => clearInterval(interval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDirty, post.title, post.content])
+  // REMOVED: legacy autosave timers (debounce + heartbeat). Autosave now handled by useAutosave hook.
 
   // Load revisions for current post
   const loadRevisions = async () => {
-    if (!post.id) return
+    if (!post.id) return;
     try {
-      const res = await fetch(`/api/admin/blogs/${post.id}/revisions`, { credentials: "include" })
+      const res = await fetch(`/api/admin/blogs/${post.id}/revisions`, { credentials: "include" });
       if (res.ok) {
-        const data = await res.json()
-        setRevisions(data.revisions || [])
+        const data = await res.json();
+        setRevisions(data.revisions || []);
       }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("Failed to load revisions:", err)
+      console.error("Failed to load revisions:", err);
     }
-  }
+  };
 
   useEffect(() => {
-    if (!post.id) return
-    loadRevisions()
+    if (!post.id) return;
+    loadRevisions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [post.id])
+  }, [post.id]);
 
   const restoreRevision = async (id: string) => {
-    if (!post.id) return
+    if (!post.id) return;
     try {
       const res = await fetch(`/api/admin/blogs/${post.id}/revisions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ revisionId: id }),
         credentials: "include",
-      })
+      });
       if (res.ok) {
-        const restored = await res.json()
-        setPost(restored)
-        toast.success("Revision restored")
-        loadRevisions()
+        const restored = await res.json();
+        setPost(restored);
+        toast.success("Revision restored");
+        loadRevisions();
       } else {
-        toast.error("Failed to restore revision")
+        toast.error("Failed to restore revision");
       }
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("Failed to restore revision:", err)
-      toast.error("Failed to restore revision")
+      console.error("Failed to restore revision:", err);
+      toast.error("Failed to restore revision");
     }
-  }
+  };
 
   // WebSocket connect for cursor sync
   useEffect(() => {
-    if (!post.id) return
-    const protocol = window.location.protocol === "https:" ? "wss" : "ws"
-    const socket = new WebSocket(`${protocol}://${window.location.host}/api/admin/blogs/${post.id}/sync`)
-    setWs(socket)
+    if (!post.id) return;
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const socket = new WebSocket(`${protocol}://${window.location.host}/api/admin/blogs/${post.id}/sync`);
+    setWs(socket);
     return () => {
-      try { socket.close() } catch {}
-    }
-  }, [post.id])
+      try { socket.close(); } catch {}
+    };
+  }, [post.id]);
 
   // Simple heartbeat to keep connection alive
   useEffect(() => {
-    if (!ws) return
+    if (!ws) return;
     const h = setInterval(() => {
       if (ws.readyState === 1) {
-        try { ws.send(JSON.stringify({ type: "pong" })) } catch {}
+        try { ws.send(JSON.stringify({ type: "pong" })); } catch {}
       }
-    }, 25000)
-    return () => clearInterval(h)
-  }, [ws])
+    }, 25000);
+    return () => clearInterval(h);
+  }, [ws]);
 
   const savePost = async (isAutoSave = false) => {
-    // Offline-aware autosave: persist locally and bail
-    if (isAutoSave && !online) {
-      safeLocal.set(draftKey, post)
-      return
-    }
-
     // Prevent overlapping saves
-    if (saveInFlight.current) return
-    if (!isAutoSave) setSaving(true)
-    saveInFlight.current = true
+    if (saveInFlight.current) return;
+    if (!isAutoSave) setSaving(true);
+    saveInFlight.current = true;
 
     try {
-      const method = post.id ? "PUT" : "POST"
-      const url = post.id ? `/api/admin/blogs/${post.id}` : "/api/admin/blogs"
+      const method = post.id ? "PUT" : "POST";
+      const url = post.id ? `/api/admin/blogs/${post.id}` : "/api/admin/blogs";
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -387,76 +397,74 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
           scheduledFor: post.status === "scheduled" ? getScheduledDateTime()?.toISOString() : undefined,
         }),
         credentials: "include",
-      })
+      });
 
-      if (!response.ok) throw new Error(`Save failed: ${response.status}`)
+      if (!response.ok) throw new Error(`Save failed: ${response.status}`);
 
-      const savedPost = await response.json()
+      const savedPost = await response.json();
       // prevent the next post state write from marking dirty
-      skipDraftRef.current = true
-      setPost((prev) => ({ ...prev, id: savedPost.id }))
-      setLastSaved(new Date())
-      setIsDirty(false)
-      safeLocal.remove(draftKey)
+      skipDraftRef.current = true;
+      setPost((prev) => ({ ...prev, id: savedPost.id }));
+      setLastSaved(new Date());
+      setIsDirty(false);
 
       // Quiet autosave; keep toast for manual saves only
       if (!isAutoSave) {
-        toast.success("Post saved successfully!")
+        toast.success("Post saved successfully!");
       }
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("Failed to save post:", error)
-      // Keep user safe: persist locally so work isn't lost
-      safeLocal.set(draftKey, post)
-      toast.error(isAutoSave ? "Auto-save failed. Changes stored locally." : "Failed to save post")
+      console.error("Failed to save post:", error);
+      // No autosave toast noise; manual saves show a toast
+      if (!isAutoSave) toast.error("Failed to save post");
     } finally {
-      saveInFlight.current = false
-      if (!isAutoSave) setSaving(false)
+      saveInFlight.current = false;
+      if (!isAutoSave) setSaving(false);
     }
-  }
+  };
 
   const publishPost = async () => {
     if (!post.title?.trim() || !post.content?.trim()) {
-      toast.error("Add a title and content before publishing")
-      return
+      toast.error("Add a title and content before publishing");
+      return;
     }
-    setPost((prev) => ({ ...prev, status: "published" }))
-    await savePost()
-    router.push("/admin/dashboard?tab=blogs")
-  }
+    setPost((prev) => ({ ...prev, status: "published" }));
+    await savePost();
+    router.push("/admin/dashboard?tab=blogs");
+  };
 
   const schedulePost = async () => {
     if (scheduledDate && scheduledTime) {
-      setPost((prev) => ({ ...prev, status: "scheduled" }))
-      await savePost()
-      setShowScheduler(false)
+      setPost((prev) => ({ ...prev, status: "scheduled" }));
+      await savePost();
+      setShowScheduler(false);
     }
-  }
+  };
 
   const addTag = () => {
-    const newTag = tagInput.trim()
-    if (!newTag) return
+    const newTag = tagInput.trim();
+    if (!newTag) return;
     if (post.tags.includes(newTag)) {
-      toast.warning("Tag already added!")
-      return
+      toast.warning("Tag already added!");
+      return;
     }
     setPost((prev) => ({
       ...prev,
       tags: [...prev.tags, newTag],
-    }))
-    setTagInput("")
-  }
+    }));
+    setTagInput("");
+  };
 
   const removeTag = (tagToRemove: string) => {
     setPost((prev) => ({
       ...prev,
       tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }))
-  }
+    }));
+  };
 
   const selectedCategories = categories.filter((cat) =>
     post.categories.includes(cat.slug)
-  )
+  );
 
   function formatDateTime(dt: Date) {
     return dt.toLocaleString(undefined, {
@@ -466,10 +474,10 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-    })
+    });
   }
 
-  const host = typeof window !== "undefined" ? window.location.host : "example.com"
+  const host = typeof window !== "undefined" ? window.location.host : "example.com";
 
   // Ensure publishedAt stays Date | undefined (never string)
   const previewPost: BlogPost = {
@@ -480,7 +488,20 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     views: post.views ?? 0,
     commentCount: post.commentCount ?? 0,
     shareCount: post.shareCount ?? 0,
-  }
+  };
+
+  // NEW: derive a compact autosave status label
+  const autosaveLabel = (() => {
+    if (autosaveStatus === "saving") return "Saving…";
+    if (autosaveStatus === "saved" && autosaveSavedAt) {
+      const hhmm = autosaveSavedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      return `Saved at ${hhmm}`;
+    }
+    if (autosaveStatus === "offline") return "Offline, saving locally";
+    if (autosaveStatus === "error") return "Sync failed";
+    if (autosaveStatus === "conflict") return "Version changed on server";
+    return "";
+  })();
 
   return (
     <>
@@ -505,6 +526,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {!online && (
               <span className="text-xs px-2 py-1 rounded-full bg-orange-100 text-orange-700">Offline</span>
+            )}
+            {autosaveLabel && (
+              <span className="text-sm text-gray-600">{autosaveLabel}</span>
             )}
             {isDirty ? (
               <span className="text-sm text-yellow-700">Unsaved changes</span>
@@ -830,13 +854,13 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                             setPost((prev) => {
                               const categories = !!checked
                                 ? [...prev.categories, category.slug]
-                                : prev.categories.filter((c) => c !== category.slug)
+                                : prev.categories.filter((c) => c !== category.slug);
                               return {
                                 ...prev,
                                 categories,
                                 category: categories[0] || "",
-                              }
-                            })
+                              };
+                            });
                           }}
                           className="capitalize"
                         />
@@ -860,12 +884,12 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                             className="h-3 w-3 cursor-pointer"
                             onClick={() =>
                               setPost((prev) => {
-                                const categories = prev.categories.filter((c) => c !== cat.slug)
+                                const categories = prev.categories.filter((c) => c !== cat.slug);
                                 return {
                                   ...prev,
                                   categories,
                                   category: categories[0] || "",
-                                }
+                                };
                               })
                             }
                           />
@@ -1045,10 +1069,10 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         open={showMediaPicker}
         onOpenChange={setShowMediaPicker}
         onSelect={(url) => {
-          setPost((prev) => ({ ...prev, featuredImage: url }))
-          setShowMediaPicker(false)
+          setPost((prev) => ({ ...prev, featuredImage: url }));
+          setShowMediaPicker(false);
         }}
       />
     </>
-  )
+  );
 }

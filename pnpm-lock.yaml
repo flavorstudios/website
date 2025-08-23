@@ -107,6 +107,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.85.3
         version: 5.85.3(react@19.1.0)
+      '@tiptap/extension-font-family':
+        specifier: ^3.0.7
+        version: 3.2.2(@tiptap/extension-text-style@3.2.2(@tiptap/core@3.0.7(@tiptap/pm@3.0.7)))
       '@tiptap/extension-image':
         specifier: ^3.0.7
         version: 3.0.7(@tiptap/core@3.0.7(@tiptap/pm@3.0.7))
@@ -119,6 +122,9 @@ importers:
       '@tiptap/extension-text-align':
         specifier: ^3.0.7
         version: 3.0.7(@tiptap/core@3.0.7(@tiptap/pm@3.0.7))
+      '@tiptap/extension-text-style':
+        specifier: ^3.0.7
+        version: 3.2.2(@tiptap/core@3.0.7(@tiptap/pm@3.0.7))
       '@tiptap/extension-underline':
         specifier: ^3.0.7
         version: 3.0.7(@tiptap/core@3.0.7(@tiptap/pm@3.0.7))
@@ -3406,6 +3412,11 @@ packages:
       '@tiptap/core': ^3.0.7
       '@tiptap/pm': ^3.0.7
 
+  '@tiptap/extension-font-family@3.2.2':
+    resolution: {integrity: sha512-75FihbQsGBHehrNZOdIp2YWnTChCFms5aRXD5DnYZkybHmWQeGg1CKUEgE2X3hx3o0Yi4txbA4N6BhcSHJKQcQ==}
+    peerDependencies:
+      '@tiptap/extension-text-style': ^3.2.2
+
   '@tiptap/extension-gapcursor@3.0.7':
     resolution: {integrity: sha512-F4ERd5r59WHbY0ALBbrJ/2z9dl+7VSmsMV/ZkzTgq0TZV9KKz3SsCFcCdIZEYzRCEp69/yYtkTofN10xIa+J6A==}
     peerDependencies:
@@ -3483,6 +3494,11 @@ packages:
     resolution: {integrity: sha512-3XywI2+dvb5IIO5NnZqyoXrRnikGyCIN7wWymTI7eqD213Ovs19/sfbW5kXLPsBYiNBb12nbG6pmPhr21mPvoA==}
     peerDependencies:
       '@tiptap/core': ^3.0.7
+
+  '@tiptap/extension-text-style@3.2.2':
+    resolution: {integrity: sha512-jmU7PPmE/XQUmq5jiJMKsHEZSloQ6QcUTnK5NCrK2UOfY3AFBlTA22NYgbmTmRcYgaWlmvkaaWo9pZiLAjRiXg==}
+    peerDependencies:
+      '@tiptap/core': ^3.2.2
 
   '@tiptap/extension-text@3.0.7':
     resolution: {integrity: sha512-yf5dNcPLB5SbQ0cQq8qyjiMj9khx4Y4EJoyrDSAok/9zYM3ULqwTPkTSZ2eW6VX/grJeyBVleeBHk1PjJ7NiVw==}
@@ -12641,6 +12657,10 @@ snapshots:
       '@tiptap/pm': 3.0.7
     optional: true
 
+  '@tiptap/extension-font-family@3.2.2(@tiptap/extension-text-style@3.2.2(@tiptap/core@3.0.7(@tiptap/pm@3.0.7)))':
+    dependencies:
+      '@tiptap/extension-text-style': 3.2.2(@tiptap/core@3.0.7(@tiptap/pm@3.0.7))
+
   '@tiptap/extension-gapcursor@3.0.7(@tiptap/extensions@3.0.7(@tiptap/core@3.0.7(@tiptap/pm@3.0.7))(@tiptap/pm@3.0.7))':
     dependencies:
       '@tiptap/extensions': 3.0.7(@tiptap/core@3.0.7(@tiptap/pm@3.0.7))(@tiptap/pm@3.0.7)
@@ -12702,6 +12722,10 @@ snapshots:
       '@tiptap/core': 3.0.7(@tiptap/pm@3.0.7)
 
   '@tiptap/extension-text-align@3.0.7(@tiptap/core@3.0.7(@tiptap/pm@3.0.7))':
+    dependencies:
+      '@tiptap/core': 3.0.7(@tiptap/pm@3.0.7)
+
+  '@tiptap/extension-text-style@3.2.2(@tiptap/core@3.0.7(@tiptap/pm@3.0.7))':
     dependencies:
       '@tiptap/core': 3.0.7(@tiptap/pm@3.0.7)
 

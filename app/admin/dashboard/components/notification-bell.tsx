@@ -568,7 +568,7 @@ export function NotificationBell() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/40 dark:bg-black/60 sm:bg-black/20 sm:dark:bg-black/40"
+              className="fixed inset-0 z-40 bg-black/20 dark:bg-black/40"
               onClick={() => setIsOpen(false)}
               aria-hidden="true"
             />
@@ -791,11 +791,7 @@ export function NotificationBell() {
                     </div>
                   )}
 
-                  <div
-                    className="overflow-y-auto max-h-[60vh] supports-[height:100dvh]:max-h-[65dvh] sm:max-h-[70vh]"
-                    role="list"
-                    aria-busy={isLoading}
-                  >
+                  <div className="max-h-[60vh] overflow-y-auto" role="list" aria-busy={isLoading}>
                     {isLoading ? (
                       <div className="p-8 text-center">
                         <div className="mx-auto h-6 w-6 animate-spin rounded-full border-b-2 border-purple-600" />

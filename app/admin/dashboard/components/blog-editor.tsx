@@ -36,8 +36,7 @@ import type { BlogPost, BlogRevision } from "@/lib/content-store";
 
 // NEW: autosave hook
 import { useAutosave } from "@/hooks/useAutosave";
-// Optional: get user id for per-user draft keys
-import { useSession } from "next-auth/react";
+// User ID for per-user draft keys
 
 const titleMin = 50;
 const titleMax = 60;
@@ -97,8 +96,8 @@ const slugify = (title: string) =>
 export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> }) {
   const { toast } = useToast();
   const router = useRouter();
-  const { data: session } = useSession(); // may be undefined if not using NextAuth
-  const userId = (session?.user as any)?.id ?? "anon";
+  // Using a fixed user ID since NextAuth is not in use
+  const userId = "anon";
 
   const [post, setPost] = useState<BlogPost>(() => ({
     id: initialPost?.id ?? "",

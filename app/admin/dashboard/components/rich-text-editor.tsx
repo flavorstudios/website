@@ -54,7 +54,7 @@ export function RichTextEditor({ value, onChange, placeholder, className, socket
       Link.configure({ openOnClick: false }),
       Image,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
-      Placeholder.configure({ placeholder: placeholder ?? "Start writing…" }),
+      Placeholder.configure({ placeholder: placeholder ?? "Start typing…" }),
     ],
     content: value,
     onUpdate({ editor }) {

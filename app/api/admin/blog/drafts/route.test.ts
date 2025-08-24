@@ -13,7 +13,7 @@ jest.mock("@/lib/admin-auth", () => ({
 const store: Record<string, any> = {};
 jest.mock("@/lib/prisma", () => ({
   __esModule: true,
-  default: async () => ({
+  getPrisma: async () => ({
     $transaction: async (fn: any) =>
       fn({
         draft: {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import getPrisma from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
@@ -34,8 +34,8 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json({ ok: false, code: "UNAUTHORIZED" }, { status: 401 });
     }
-    const prisma = await getPrisma();
-    const saved = await prisma.$transaction(async (tx) => {
+    const prismaClient = await getPrisma();
+    const saved = await prismaClient.$transaction(async (tx) => {
       const existing = await (tx as any).draft.findUnique({ where: { id: draftId } });
       if (existing && version && existing.version !== version) {
         return { conflict: true, server: existing };

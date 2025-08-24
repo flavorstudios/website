@@ -3,6 +3,7 @@
 // Minimal local type so builds don’t require @prisma/client
 export type PrismaClientLike = {
   post: { count: () => Promise<number> };
+  $transaction: <T>(fn: (tx: unknown) => Promise<T>) => Promise<T>;
   $disconnect?: () => Promise<void>;
 };
 
@@ -23,6 +24,7 @@ async function createPrisma(): Promise<PrismaClientLike> {
     // Fallback mock to avoid runtime crashes when Prisma client is missing
     return {
       post: { count: async () => 0 },
+      $transaction: async (fn: any) => fn({} as unknown),
     };
   }
 }

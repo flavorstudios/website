@@ -12,16 +12,20 @@ jest.mock("@/lib/admin-auth", () => ({
 // simple in-memory prisma mock
 const store: Record<string, any> = {};
 jest.mock("@/lib/prisma", () => ({
-  $transaction: async (fn: any) => fn({
-    draft: {
-      findUnique: async ({ where: { id } }: any) => store[id] || null,
-      upsert: async ({ where: { id }, update, create }: any) => {
-        const existing = store[id];
-        const val = existing ? { ...existing, ...update } : create;
-        store[id] = val;
-        return val;
-      },
-    },
+  __esModule: true,
+  default: async () => ({
+    $transaction: async (fn: any) =>
+      fn({
+        draft: {
+          findUnique: async ({ where: { id } }: any) => store[id] || null,
+          upsert: async ({ where: { id }, update, create }: any) => {
+            const existing = store[id];
+            const val = existing ? { ...existing, ...update } : create;
+            store[id] = val;
+            return val;
+          },
+        },
+      }),
   }),
 }));
 

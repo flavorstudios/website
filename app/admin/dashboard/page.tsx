@@ -63,7 +63,7 @@ async function prefetchDashboard(qc: QueryClient, cookie: string) {
 }
 
 export default async function AdminDashboardPage() {
-  const h = headers();
+  const h = await headers();
   const cookie = h.get("cookie") ?? "";
   const req = new NextRequest(`${SITE_URL}/admin/dashboard`, {
     headers: { cookie },

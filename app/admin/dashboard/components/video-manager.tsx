@@ -649,7 +649,8 @@ export default function VideoManager() {
               ? categories.map((cat) => ({
                   name: cat.name,
                   slug: cat.slug,
-                  count: cat.postCount,
+                  // Ensure a numeric count is always provided for CategoryData
+                  count: cat.postCount ?? 0,
                   tooltip: cat.tooltip ?? undefined,
                   order: cat.order ?? 0,
                   isActive: true,
@@ -657,7 +658,6 @@ export default function VideoManager() {
               : []
           }
           selectedCategory={filterCategory}
-          onCategoryChange={setFilterCategory}
           type="video"
           className="w-full sm:w-48"
         />

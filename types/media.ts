@@ -2,6 +2,8 @@
 // - Keeps your existing fields but avoids type drift between client and server.
 // - Timestamps allow number | string to support Firestore and legacy shapes.
 
+export type TypeFilter = "all" | "image" | "video" | "audio" | "application";
+
 export interface MediaVariant {
   id?: string;
   url?: string;          // public URL (if available)

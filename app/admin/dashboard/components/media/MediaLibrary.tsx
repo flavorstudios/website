@@ -6,10 +6,9 @@ import MediaList from "./MediaList";
 import MediaUpload from "./MediaUpload";
 import MediaBulkActions from "./MediaBulkActions";
 import MediaDetailsDrawer from "./MediaDetailsDrawer";
-import type { MediaDoc } from "@/types/media";
+import type { MediaDoc, TypeFilter } from "@/types/media";
 import { useToast } from "@/hooks/use-toast";
 
-type TypeFilter = "all" | "image" | "video" | "audio" | "application";
 type SortBy = "date" | "name" | "size";
 type DateFilter = "all" | "7d" | "30d";
 

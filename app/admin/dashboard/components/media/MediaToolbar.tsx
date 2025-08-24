@@ -11,11 +11,13 @@ import {
 } from "@/components/ui/select";
 import { Star } from "lucide-react";
 
+import type { TypeFilter } from "@/types/media";
+
 interface Props {
   search: string;
   onSearchChange: (val: string) => void;
-  typeFilter: string;
-  onTypeFilter: (val: string) => void;
+  typeFilter: TypeFilter;
+  onTypeFilter: (val: TypeFilter) => void;
   sortBy: string;
   onSortBy: (val: string) => void;
   view: "grid" | "list";
@@ -50,7 +52,10 @@ export default function MediaToolbar({
           className="w-48"
         />
 
-        <Select value={typeFilter} onValueChange={onTypeFilter}>
+        <Select
+          value={typeFilter}
+          onValueChange={(val) => onTypeFilter(val as TypeFilter)}
+        >
           <SelectTrigger className="w-36" aria-label="Type">
             <SelectValue placeholder="Type" />
           </SelectTrigger>

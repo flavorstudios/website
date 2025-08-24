@@ -82,6 +82,18 @@ Edit
 [Firebase] Missing Firebase environment variable(s): NEXT_PUBLIC_FIREBASE_API_KEY, ...
 Use `.env.example` as a reference for the correct variable names and structure.
 
+### Firebase Admin configuration (server only)
+
+To use admin-only features (e.g., the dashboard or preview pages) in production,
+you must also supply Firebase Admin credentials:
+
+- `FIREBASE_SERVICE_ACCOUNT_KEY` – service account JSON as a single-line string.
+- `FIREBASE_STORAGE_BUCKET` – must match the client `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`.
+- `ADMIN_EMAIL` or `ADMIN_EMAILS` – comma-separated list of allowed admin logins.
+
+Without these variables the Firebase Admin SDK remains disabled, and preview pages
+will show a friendly message instead of crashing.
+
 Cookie Consent Banner
 
 The CookieYes banner loads on all pages by default.

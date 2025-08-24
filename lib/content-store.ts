@@ -1,6 +1,23 @@
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
+import type { Firestore } from "firebase-admin/firestore";
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
+
+/**
+ * Retrieve the Firebase Admin Firestore instance or return `null` if the
+ * admin client has not been initialised. This lets callers gracefully handle
+ * preview environments where `FIREBASE_SERVICE_ACCOUNT_KEY` is not provided.
+ */
+function getDbOrNull(): Firestore | null {
+  try {
+    return getAdminDb();
+  } catch (err) {
+    console.error("Firebase Admin Firestore unavailable:", err);
+    return null;
+  }
+}
+
+const ADMIN_DB_UNAVAILABLE = "Admin Firestore unavailable. Set FIREBASE_SERVICE_ACCOUNT_KEY.";
 
 // --- Interfaces (with commentCount, multi-category, etc.) ---
 export interface BlogPost {
@@ -117,7 +134,9 @@ export const VideoSchema = z.object({
 // --- Blog Store ---
 export const blogStore = {
   async getAll(): Promise<BlogPost[]> {
-    const snap = await adminDb.collection("blogs").orderBy("createdAt", "desc").get();
+    const db = getDbOrNull();
+    if (!db) return [];
+    const snap = await db.collection("blogs").orderBy("createdAt", "desc").get();
     return snap.docs.map((d) => {
       const doc = d.data() as BlogPost;
       return {
@@ -129,7 +148,9 @@ export const blogStore = {
   },
 
   async getById(id: string): Promise<BlogPost | null> {
-    const doc = await adminDb.collection("blogs").doc(id).get();
+    const db = getDbOrNull();
+    if (!db) return null;
+    const doc = await db.collection("blogs").doc(id).get();
     if (!doc.exists) return null;
     const data = doc.data() as BlogPost;
     return {
@@ -141,7 +162,9 @@ export const blogStore = {
 
   // Fetch a post by slug for edit/preview workflows
   async getBySlug(slug: string): Promise<BlogPost | null> {
-    const snap = await adminDb
+    const db = getDbOrNull();
+    if (!db) return null;
+    const snap = await db
       .collection("blogs")
       .where("slug", "==", slug)
       .limit(1)
@@ -177,7 +200,9 @@ export const blogStore = {
       views: 0,
       commentCount: 0,
     };
-    await adminDb.collection("blogs").doc(id).set(newPost);
+    const db = getDbOrNull();
+    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    await db.collection("blogs").doc(id).set(newPost);
     return newPost;
   },
 
@@ -188,7 +213,9 @@ export const blogStore = {
   ): Promise<BlogPost | null> {
     // Validate input (partial allows patching)
     const data = BlogPostSchema.partial().parse(updates);
-    const ref = adminDb.collection("blogs").doc(id);
+    const db = getDbOrNull();
+    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    const ref = db.collection("blogs").doc(id);
 
     const beforeSnap = await ref.get();
     if (!beforeSnap.exists) return null;
@@ -226,7 +253,9 @@ export const blogStore = {
   },
 
   async getRevisions(id: string): Promise<BlogRevision[]> {
-    const snap = await adminDb
+    const db = getDbOrNull();
+    if (!db) return [];
+    const snap = await db
       .collection("blogs")
       .doc(id)
       .collection("revisions")
@@ -240,7 +269,9 @@ export const blogStore = {
     revisionId: string,
     editor = "unknown"
   ): Promise<BlogPost | null> {
-    const ref = adminDb.collection("blogs").doc(id);
+    const db = getDbOrNull();
+    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    const ref = db.collection("blogs").doc(id);
     const revDoc = await ref.collection("revisions").doc(revisionId).get();
     if (!revDoc.exists) return null;
 
@@ -271,21 +302,27 @@ export const blogStore = {
   },
 
   async incrementViews(id: string): Promise<void> {
-    await adminDb
+    const db = getDbOrNull();
+    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    await db
       .collection("blogs")
       .doc(id)
       .update({ views: FieldValue.increment(1) });
   },
 
   async setCommentCount(id: string, count: number): Promise<void> {
-    await adminDb
+    const db = getDbOrNull();
+    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    await db
       .collection("blogs")
       .doc(id)
       .update({ commentCount: count });
   },
 
   async delete(id: string): Promise<boolean> {
-    const ref = adminDb.collection("blogs").doc(id);
+    const db = getDbOrNull();
+    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    const ref = db.collection("blogs").doc(id);
     const doc = await ref.get();
     if (!doc.exists) return false;
     await ref.delete();
@@ -296,17 +333,23 @@ export const blogStore = {
 // --- Video Store ---
 export const videoStore = {
   async getAll(): Promise<Video[]> {
-    const snap = await adminDb.collection("videos").orderBy("createdAt", "desc").get();
+    const db = getDbOrNull();
+    if (!db) return [];
+    const snap = await db.collection("videos").orderBy("createdAt", "desc").get();
     return snap.docs.map((d) => d.data() as Video);
   },
 
   async getById(id: string): Promise<Video | null> {
-    const doc = await adminDb.collection("videos").doc(id).get();
+    const db = getDbOrNull();
+    if (!db) return null;
+    const doc = await db.collection("videos").doc(id).get();
     return doc.exists ? (doc.data() as Video) : null;
   },
 
   async getBySlug(slug: string): Promise<Video | null> {
-    const snap = await adminDb
+    const db = getDbOrNull();
+    if (!db) return null;
+    const snap = await db
       .collection("videos")
       .where("slug", "==", slug)
       .limit(1)
@@ -333,27 +376,35 @@ export const videoStore = {
       updatedAt: new Date().toISOString(),
       views: 0,
     };
-    await adminDb.collection("videos").doc(id).set(newVideo);
+    const db = getDbOrNull();
+    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    await db.collection("videos").doc(id).set(newVideo);
     return newVideo;
   },
 
   async update(id: string, updates: Partial<Video>): Promise<Video | null> {
+    const db = getDbOrNull();
+    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
     const data = VideoSchema.partial().parse(updates);
-    const ref = adminDb.collection("videos").doc(id);
+    const ref = db.collection("videos").doc(id);
     await ref.set({ ...data, updatedAt: new Date().toISOString() }, { merge: true });
     const doc = await ref.get();
     return doc.exists ? (doc.data() as Video) : null;
   },
 
   async incrementViews(id: string): Promise<void> {
-    await adminDb
+    const db = getDbOrNull();
+    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    await db
       .collection("videos")
       .doc(id)
       .update({ views: FieldValue.increment(1) });
   },
 
   async delete(id: string): Promise<boolean> {
-    const ref = adminDb.collection("videos").doc(id);
+    const db = getDbOrNull();
+    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    const ref = db.collection("videos").doc(id);
     const doc = await ref.get();
     if (!doc.exists) return false;
     await ref.delete();
@@ -364,7 +415,9 @@ export const videoStore = {
 // --- Page Store (unchanged) ---
 export const pageStore = {
   async getAll(): Promise<PageContent[]> {
-    const snap = await adminDb.collection("pages").get();
+    const db = getDbOrNull();
+    if (!db) return [];
+    const snap = await db.collection("pages").get();
     return snap.docs.map((d) => d.data() as PageContent);
   },
 
@@ -383,7 +436,9 @@ export const pageStore = {
       updatedAt: new Date().toISOString(),
       updatedBy,
     };
-    await adminDb.collection("pages").doc(id).set(entry);
+    const db = getDbOrNull();
+    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    await db.collection("pages").doc(id).set(entry);
     return entry;
   },
 };

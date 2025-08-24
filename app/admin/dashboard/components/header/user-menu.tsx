@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -17,6 +18,7 @@ import {
   History,
   ArrowLeftRight,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface UserMenuProps {
   avatar?: string
@@ -26,6 +28,8 @@ interface UserMenuProps {
 }
 
 export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
+  const router = useRouter()
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -49,20 +53,25 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => window.location.assign("/admin/account")}>
-          <User className="h-4 w-4 mr-2" /> Profile Settings
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => window.location.assign("/admin/roles")}>
-          <Shield className="h-4 w-4 mr-2" /> User Roles
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => window.location.assign("/admin/activity")}>
-          <History className="h-4 w-4 mr-2" /> Activity Log
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuItem onSelect={() => router.push("/admin/account")}> 
+            <User className="h-4 w-4 mr-2" /> Profile Settings
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => router.push("/admin/roles")}> 
+            <Shield className="h-4 w-4 mr-2" /> User Roles
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => router.push("/admin/activity")}> 
+            <History className="h-4 w-4 mr-2" /> Activity Log
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => window.location.assign("/admin/accounts")}>
+        <DropdownMenuItem onSelect={() => router.push("/admin/accounts")}>
           <ArrowLeftRight className="h-4 w-4 mr-2" /> Switch Account
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={onLogout}>
+        <DropdownMenuItem
+          onSelect={onLogout}
+          className="text-destructive focus:text-destructive"
+        >
           <LogOut className="h-4 w-4 mr-2" /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>

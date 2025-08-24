@@ -2,6 +2,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { UserMenu } from "../header/user-menu";
 
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
+}))
+
 describe("UserMenu", () => {
   it("shows essential menu options", async () => {
     const user = userEvent.setup();

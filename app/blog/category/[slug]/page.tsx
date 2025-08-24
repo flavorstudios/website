@@ -5,6 +5,7 @@
 import siteData from "@/content-data/categories.json";
 import BlogPage from "../../page";
 import Link from "next/link";
+import type { PageProps } from "next";
 
 /**
  * Blog Category Route
@@ -14,11 +15,9 @@ import Link from "next/link";
 export default async function BlogCategoryPage({
   params,
   searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: { page?: string };
-}) {
+}: PageProps<{ slug: string }, { page?: string }>) {
   const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
   const categorySlug = slug;
 
   // --- Robustly find the category (case-insensitive, defensive fallback) ---
@@ -56,7 +55,5 @@ export default async function BlogCategoryPage({
 
   // BlogPage currently only accepts `searchParams`.
   // To pass `category` or `blogPosts`, extend BlogPage’s props in app/blog/page.tsx.
-  return (
-    <BlogPage searchParams={{ ...searchParams, category: categorySlug }} />
-  );
+  return <BlogPage searchParams={{ ...resolvedSearch, category: categorySlug }} />;
 }

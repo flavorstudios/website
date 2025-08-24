@@ -16,6 +16,7 @@ import { ToastProvider } from "./components/ui/toast-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Spinner from "@/components/ui/spinner";
 import MobileNav from "./components/mobile-nav";
+import { SectionId } from "./sections";
 import {
   Dialog,
   DialogContent,
@@ -73,7 +74,7 @@ const SystemSettings = dynamic(
 );
 
 // ---- Route map (reused) ----------------------------------------------------
-const NAV = [
+const NAV: { id: SectionId; href: string; title: string }[] = [
   { id: "overview", href: "/admin/dashboard", title: "Overview" },
   { id: "blogs", href: "/admin/dashboard/blog-posts", title: "Blog Posts" },
   { id: "videos", href: "/admin/dashboard/videos", title: "Videos" },
@@ -86,7 +87,6 @@ const NAV = [
   { id: "settings", href: "/admin/dashboard/settings", title: "Settings" },
   { id: "system", href: "/admin/dashboard/system", title: "System Tools" },
 ] as const;
-type SectionId = (typeof NAV)[number]["id"];
 const validSection = (s: string | null): s is SectionId =>
   !!s && NAV.some((n) => n.id === s);
 

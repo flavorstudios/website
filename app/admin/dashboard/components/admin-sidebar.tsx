@@ -20,20 +20,22 @@ import {
   Users,
 } from "lucide-react"
 import { useRole } from "../contexts/role-context"
-import { useState, useEffect, useMemo } from "react"
+import type React from "react"
+import { useState, useEffect, useMemo, Dispatch, SetStateAction } from "react"
 import { ADMIN_HEADER_HEIGHT } from "@/lib/constants"
+import { SectionId } from "../sections"
 
 interface AdminSidebarProps {
   /** Optional id so aria-controls can point to the landmark directly */
   id?: string
-  activeSection: string
-  setActiveSection: (section: string) => void
+  activeSection: SectionId
+  setActiveSection: Dispatch<SetStateAction<SectionId>>
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
 }
 
 type MenuItem = {
-  id: string
+  id: SectionId
   label: string
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   count: number | null

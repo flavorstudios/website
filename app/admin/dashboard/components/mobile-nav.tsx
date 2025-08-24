@@ -2,16 +2,19 @@
 
 import { LayoutDashboard, FileText, Image, Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
+import type React from "react"
+import type { Dispatch, SetStateAction } from "react"
+import type { SectionId } from "../sections"
 
 interface MobileNavProps {
-  activeSection: string
-  setActiveSection: (section: string) => void
+  activeSection: SectionId
+  setActiveSection: Dispatch<SetStateAction<SectionId>>
 }
 
 export default function MobileNav({ activeSection, setActiveSection }: MobileNavProps) {
   const router = useRouter()
 
-  const items = [
+  const items: { id: SectionId; label: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; href: string }[] = [
     { id: "overview", label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
     { id: "blogs", label: "Posts", icon: FileText, href: "/admin/dashboard/blog-posts" },
     { id: "media", label: "Media", icon: Image, href: "/admin/dashboard/media" },

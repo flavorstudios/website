@@ -7,11 +7,12 @@ import { AdminSidebar } from "./admin-sidebar"
 import { AdminHeader } from "./admin-header"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import BottomNav from "./bottom-nav"
+import { SectionId } from "../sections"
 
 interface AdminLayoutProps {
   children: React.ReactNode
-  activeSection: string
-  setActiveSection: (section: string) => void
+  activeSection: SectionId
+  setActiveSection: React.Dispatch<React.SetStateAction<SectionId>>
 }
 
 const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutProps) => {

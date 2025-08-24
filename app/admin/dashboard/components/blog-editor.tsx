@@ -32,7 +32,27 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { authors } from "@/lib/authors";
 import MediaPickerDialog from "./media/MediaPickerDialog";
-import type { BlogPost, BlogRevision } from "@/lib/content-store";
+import type {
+  BlogPost as StoreBlogPost,
+  BlogRevision,
+} from "@/lib/content-store";
+
+export type BlogPost = Omit<
+  StoreBlogPost,
+  "publishedAt" | "createdAt" | "updatedAt" | "views" | "commentCount"
+> & {
+  publishedAt?: Date;
+  createdAt?: string;
+  updatedAt?: string;
+  views?: number;
+  commentCount?: number;
+  seoKeywords: string;
+  featured: boolean;
+  wordCount: number;
+  readTime: string;
+  scheduledFor?: Date;
+  shareCount?: number;
+};
 
 // NEW: autosave hook
 import { useAutosave } from "@/hooks/useAutosave";

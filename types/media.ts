@@ -4,6 +4,9 @@
 
 export type TypeFilter = "all" | "image" | "video" | "audio" | "application";
 
+// Sorting options for the media library
+export type SortBy = "date" | "name" | "size";
+
 export interface MediaVariant {
   id?: string;
   url?: string;          // public URL (if available)

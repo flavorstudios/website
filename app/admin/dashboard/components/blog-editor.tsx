@@ -484,15 +484,14 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
 
   const host = typeof window !== "undefined" ? window.location.host : "example.com";
 
-  // Ensure publishedAt stays Date | undefined (never string)
-  const previewPost: BlogPost = {
+  // Prepare a blog post for preview using the store shape
+  const previewPost: StoreBlogPost = {
     ...post,
-    publishedAt: post.publishedAt ?? undefined,
+    publishedAt: (post.publishedAt ?? new Date()).toISOString(),
     createdAt: post.createdAt ?? new Date().toISOString(),
     updatedAt: post.updatedAt ?? new Date().toISOString(),
     views: post.views ?? 0,
     commentCount: post.commentCount ?? 0,
-    shareCount: post.shareCount ?? 0,
   };
 
   // NEW: derive a compact autosave status label

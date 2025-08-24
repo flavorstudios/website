@@ -23,8 +23,7 @@ const pwaConfig = withPWA({
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
 
-// Enable Node.js middleware via experimental flag.
-
+// Next.js configuration
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true, // Add this for best practice, optional
@@ -37,7 +36,11 @@ const nextConfig = {
     domains: ['storage.googleapis.com', 'firebasestorage.googleapis.com'],
   },
 
-  experimental: { nodeMiddleware: true },
+  // The `experimental.nodeMiddleware` flag was removed to ensure
+  // compatibility with the stable Next.js release. Node.js middleware
+  // currently requires the latest canary builds, so removing the flag
+  // prevents build failures on stable versions. If Node.js middleware is
+  // needed in the future, upgrade to a canary release and restore this flag.
 
   // Add any other Next.js config here!
 };

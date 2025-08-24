@@ -41,6 +41,7 @@ export type BlogPost = Omit<
   StoreBlogPost,
   "publishedAt" | "createdAt" | "updatedAt" | "views" | "commentCount"
 > & {
+  categories: string[];
   publishedAt?: Date;
   createdAt?: string;
   updatedAt?: string;

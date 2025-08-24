@@ -123,8 +123,8 @@ export default function BlogManager() {
         categoriesData.categories.map((c: Partial<CategoryData>) => ({
           name: c.name ?? (c as { title?: string }).title ?? "",
           slug: c.slug ?? "",
-          count: c.count ?? (c as { postCount?: number }).postCount ?? 0,
-          tooltip: c.tooltip,
+          order: typeof c.order === "number" ? c.order : 0,
+          isActive: c.isActive ?? true,
         })),
       );
     }

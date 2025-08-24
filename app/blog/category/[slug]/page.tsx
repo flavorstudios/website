@@ -15,10 +15,11 @@ export default async function BlogCategoryPage({
   params,
   searchParams,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
   searchParams: { page?: string };
 }) {
-  const categorySlug = params.slug;
+  const { slug } = await params;
+  const categorySlug = slug;
 
   // --- Robustly find the category (case-insensitive, defensive fallback) ---
   const category =

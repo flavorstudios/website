@@ -73,8 +73,9 @@ async function getVideo(slug: string): Promise<Video | null> {
 }
 
 // === DYNAMIC METADATA ===
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const video = await getVideo(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const video = await getVideo(slug);
 
   if (!video) {
     const fallbackTitle = `Video Not Found – ${SITE_NAME}`;
@@ -84,7 +85,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     return getMetadata({
       title: fallbackTitle,
       description: fallbackDescription,
-      path: `/watch/${params.slug}`,
+      path: `/watch/${slug}`,
       robots: "noindex, follow",
       openGraph: {
         title: fallbackTitle,
@@ -105,7 +106,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
         images: [fallbackImage],
       },
       // alternates: {
-      //   canonical: getCanonicalUrl(`/watch/${params.slug}`),
+      //   canonical: getCanonicalUrl(`/watch/${slug}`),
       // },
     });
   }
@@ -146,8 +147,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 // === PAGE COMPONENT ===
-export default async function VideoPage({ params }: { params: { slug: string } }) {
-  const video = await getVideo(params.slug);
+export default async function VideoPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const video = await getVideo(slug);
 
   if (!video) {
     notFound();

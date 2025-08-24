@@ -23,9 +23,9 @@ const pwaConfig = withPWA({
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
 
-// Only enable Node.js runtime middleware support in local dev (NOT on CI/Vercel)
-const enableNodeMiddleware =
-  process.env.NODE_ENV === 'development' && !process.env.CI && !process.env.VERCEL;
+// Enable Node.js runtime middleware support to remove build warnings
+// Node.js middleware is now applied in all environments including production/CI.
+// If needed, adjust environment checks here for specific deployment targets.
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -39,8 +39,8 @@ const nextConfig = {
     domains: ['storage.googleapis.com', 'firebasestorage.googleapis.com'],
   },
 
-  // Conditionally enable Node.js runtime support for middleware to avoid Vercel build errors
-  ...(enableNodeMiddleware ? { experimental: { nodeMiddleware: true } } : {}),
+  // Enable Node.js runtime support for middleware in all environments
+  experimental: { nodeMiddleware: true },
 
   // Add any other Next.js config here!
 };

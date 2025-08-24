@@ -30,12 +30,13 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
 }
 
 interface BlogPostPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 // SEO metadata (dynamic per post, using Next.js generateMetadata API)
 export async function generateMetadata({ params }: BlogPostPageProps) {
-  const post = await getBlogPost(params.slug);
+  const { slug } = await params;
+  const post = await getBlogPost(slug);
 
   // Fallback metadata for posts not found or not published (noindex, follow)
   if (!post) {
@@ -46,12 +47,12 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     return getMetadata({
       title: fallbackTitle,
       description: fallbackDescription,
-      path: `/blog/${params.slug}`,
+      path: `/blog/${slug}`,
       robots: "noindex, follow",
       openGraph: {
         title: fallbackTitle,
         description: fallbackDescription,
-        url: getCanonicalUrl(`/blog/${params.slug}`),
+        url: getCanonicalUrl(`/blog/${slug}`),
         type: "article",
         images: [{ url: fallbackImage, width: 1200, height: 630 }],
       },
@@ -100,7 +101,8 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
 
 // Main BlogPost page (server component)
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = await getBlogPost(params.slug);
+  const { slug } = await params;
+  const post = await getBlogPost(slug);
 
   // If post is not found or not published, trigger Next.js not-found page.
   if (!post) notFound();

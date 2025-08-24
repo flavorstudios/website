@@ -62,27 +62,9 @@ export interface BlogCategory {
   tooltip?: string;
 }
 
-/** safe localStorage helpers (kept as-is; no longer used for autosave persistence) */
-const safeLocal = {
-  get<T>(key: string, fallback: T): T {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? (JSON.parse(raw) as T) : fallback;
-    } catch {
-      return fallback;
-    }
-  },
-  set<T>(key: string, value: T) {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch {}
-  },
-  remove(key: string) {
-    try {
-      localStorage.removeItem(key);
-    } catch {}
-  },
-};
+// safe localStorage helpers were previously used for autosave persistence
+// but are no longer needed. They have been removed to keep the bundle lean
+// and to satisfy linting rules about unused variables.
 
 /** better slugging with diacritics stripping */
 const slugify = (title: string) =>
@@ -293,6 +275,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   }, [isDirty]);
 
   // Keyboard shortcuts: Cmd/Ctrl+S to save, Cmd/Ctrl+P to preview
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();

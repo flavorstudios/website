@@ -6,14 +6,15 @@ import { logError } from "@/lib/log";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { uid: string } }
+  { params }: { params: Promise<{ uid: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const { uid } = await params;
   try {
-    const userRecord = await adminAuth.getUser(params.uid);
-    const role = await getUserRole(params.uid, userRecord.email || undefined);
+    const userRecord = await adminAuth.getUser(uid);
+    const role = await getUserRole(uid, userRecord.email || undefined);
     return NextResponse.json({
       user: {
         uid: userRecord.uid,
@@ -34,25 +35,26 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { uid: string } }
+  { params }: { params: Promise<{ uid: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const { uid } = await params;
   try {
     const { role, disabled } = await request.json();
     if (typeof role !== "undefined") {
-      await setUserRole(params.uid, role);
+      await setUserRole(uid, role);
     }
     if (typeof disabled !== "undefined") {
-      await adminAuth.updateUser(params.uid, { disabled: !!disabled });
+      await adminAuth.updateUser(uid, { disabled: !!disabled });
     }
     const actor = await getSessionInfo(request);
     try {
       await adminDb.collection("admin_audit_logs").add({
         actor: actor?.email || actor?.uid || "unknown",
         action: "update_user",
-        target: params.uid,
+        target: uid,
         changes: { role, disabled },
         timestamp: new Date().toISOString(),
       });

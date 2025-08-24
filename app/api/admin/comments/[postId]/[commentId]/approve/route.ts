@@ -5,11 +5,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 
 // PATCH /api/admin/comments/[slug]/[id]/approve
-export async function PATCH(req: NextRequest, { params }: { params: { slug: string, id: string } }) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ slug: string; id: string }> }
+) {
   if (!(await requireAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { slug, id } = params;
+  const { slug, id } = await params;
   try {
     const entryRef = adminDb
       .collection("comments")

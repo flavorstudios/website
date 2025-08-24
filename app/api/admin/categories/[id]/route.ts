@@ -29,11 +29,12 @@ function isValidCategoryUpdate(data: unknown): data is Partial<Category> {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageCategories"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const { id } = await params;
   try {
     const data = await request.json();
 
@@ -55,7 +56,7 @@ export async function PUT(
     ["blog", "watch"].forEach((type) => {
       json.CATEGORIES[type] = json.CATEGORIES[type].map(
         (cat: Record<string, unknown>) => {
-          if ((cat as { id: string }).id === params.id) {
+          if ((cat as { id: string }).id === id) {
             found = true;
             const rest = { ...data };
             delete rest.name;
@@ -85,7 +86,7 @@ export async function PUT(
       ...json.CATEGORIES.watch,
     ].find(
       (cat: Record<string, unknown>) =>
-        (cat as { id: string }).id === params.id
+        (cat as { id: string }).id === id
     );
     return NextResponse.json({
       category: { ...updated, name: (updated as { title?: string }).title },
@@ -101,11 +102,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageCategories"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const { id } = await params;
   try {
     const json = await readJSON();
 
@@ -114,7 +116,7 @@ export async function DELETE(
       const origLength = json.CATEGORIES[type].length;
       json.CATEGORIES[type] = json.CATEGORIES[type].filter(
         (cat: Record<string, unknown>) =>
-          (cat as { id: string }).id !== params.id
+          (cat as { id: string }).id !== id
       );
       if (json.CATEGORIES[type].length !== origLength) {
         removed = true;

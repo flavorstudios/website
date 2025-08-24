@@ -6,11 +6,13 @@ import { publishToUser } from "@/lib/sse-broker";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const { id } = await params;
 
   try {
     const { newCategoryId } = await request.json();
@@ -18,7 +20,7 @@ export async function POST(
       return NextResponse.json({ error: "Missing target category" }, { status: 400 });
     }
 
-    const oldCategory = await categoryStore.getById(params.id);
+    const oldCategory = await categoryStore.getById(id);
     const newCategory = await categoryStore.getById(newCategoryId);
     if (!oldCategory || !newCategory) {
       return NextResponse.json({ error: "Category not found" }, { status: 404 });

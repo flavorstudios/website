@@ -6,16 +6,17 @@ import { commentStore } from "@/lib/comment-store";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { postId: string; commentId: string } }
+  { params }: { params: Promise<{ postId: string; commentId: string }> }
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const { postId, commentId } = await params;
   try {
     const body = await request.json();
     const comment = await commentStore.updateStatus(
-      params.postId,
-      params.commentId,
+      postId,
+      commentId,
       body.status
     );
     if (!comment) {
@@ -29,13 +30,14 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { postId: string; commentId: string } }
+  { params }: { params: Promise<{ postId: string; commentId: string }> }
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  const { postId, commentId } = await params;
   try {
-    const success = await commentStore.delete(params.postId, params.commentId);
+    const success = await commentStore.delete(postId, commentId);
     if (!success) {
       return NextResponse.json({ error: "Comment not found" }, { status: 404 });
     }

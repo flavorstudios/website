@@ -4,14 +4,18 @@ import { blogStore } from "@/lib/content-store" // Use the correct store
 import { logError } from "@/lib/log"
 import { publishToUser } from "@/lib/sse-broker"
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+  const { id } = await params
   try {
     const data = await request.json()
     const session = await getSessionAndRole(request)
-    const blog = await blogStore.update(params.id, data, session?.email || "unknown")
+    const blog = await blogStore.update(id, data, session?.email || "unknown")
     if (!blog) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 })
     }
@@ -23,12 +27,16 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+  const { id } = await params
   try {
-    const success = await blogStore.delete(params.id)
+    const success = await blogStore.delete(id)
     if (!success) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 })
     }

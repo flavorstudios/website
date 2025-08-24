@@ -13,7 +13,7 @@ export const runtime = "nodejs";
  */
 export async function PATCH(
   request: NextRequest,
-  ctx: { params?: { id?: string } }
+  { params }: { params: Promise<{ id?: string }> }
 ) {
   // Admin gate
   if (!(await requireAdmin(request))) {
@@ -25,7 +25,7 @@ export async function PATCH(
 
   try {
     // Resolve ID from route params or URL as a fallback
-    let id = ctx?.params?.id;
+    let id = (await params)?.id;
     if (!id) {
       const pathname = new URL(request.url).pathname;
       const parts = pathname.split("/").filter(Boolean);

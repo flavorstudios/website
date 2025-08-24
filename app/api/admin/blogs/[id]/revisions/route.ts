@@ -4,26 +4,28 @@ import { blogStore } from "@/lib/content-store"
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } },
+  { params }: { params: { id: string } },
 ) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const revisions = await blogStore.getRevisions(context.params.id)
+  const { id } = await context.params
+  const revisions = await blogStore.getRevisions(id)
   return NextResponse.json({ revisions })
 }
 
 export async function POST(
   request: NextRequest,
-  context: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   const { revisionId } = await request.json()
   const session = await getSessionAndRole(request)
+  const { id } = await context.params
   const post = await blogStore.restoreRevision(
-    context.params.id,
+    id,
     revisionId,
     session?.email || "unknown",
   )

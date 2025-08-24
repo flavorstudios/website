@@ -296,8 +296,9 @@ export default function AdminDashboardPageClient({
         auth = getFirebaseAuth();
       } catch {
         setError(
-          firebaseInitError?.message ||
-            "Firebase not initialized. Cannot log out safely."
+          firebaseInitError
+            ? firebaseInitError.message
+            : "Firebase not initialized. Cannot log out safely."
         );
         return;
       }

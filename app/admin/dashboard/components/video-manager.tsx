@@ -29,15 +29,7 @@ import { cn } from "@/lib/utils";
 import AdminPageHeader from "@/components/AdminPageHeader";
 import { VideoForm } from "@/components/ui/video-form";
 import { Info, Eye, Pencil, Trash2, Upload, Archive, Copy } from "lucide-react";
-
-// Types ----------------------------------------------------------------------
-export interface Category {
-  name: string;
-  slug: string;
-  postCount?: number;
-  tooltip?: string | null;
-  order?: number | null;
-}
+import type { Category } from "@/types/category";
 
 interface Video {
   id: string;

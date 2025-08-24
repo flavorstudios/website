@@ -2,9 +2,10 @@ import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server"
 import { blogStore } from "@/lib/content-store"
 
-type RouteContext = { params: { id: string } }
-
-export async function GET(request: NextRequest, context: RouteContext) {
+export async function GET(
+  request: NextRequest,
+  context: { params: { id: string } },
+) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
@@ -12,7 +13,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
   return NextResponse.json({ revisions })
 }
 
-export async function POST(request: NextRequest, context: RouteContext) {
+export async function POST(
+  request: NextRequest,
+  context: { params: { id: string } },
+) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }

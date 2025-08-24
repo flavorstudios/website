@@ -27,11 +27,24 @@ async function createPrisma(): Promise<PrismaClientLike> {
   }
 }
 
-const prisma: PrismaClientLike = g.__prisma ?? (await createPrisma());
+let prismaPromise: Promise<PrismaClientLike> | undefined;
 
-// Cache the instance in dev to prevent multiple connections
-if (process.env.NODE_ENV !== "production") {
-  g.__prisma = prisma;
+/**
+ * Lazily get a Prisma client (or a safe mock if @prisma/client is not installed).
+ * Caches the instance in dev to prevent multiple connections during HMR.
+ */
+export async function getPrisma(): Promise<PrismaClientLike> {
+  if (g.__prisma) return g.__prisma;
+  if (!prismaPromise) {
+    prismaPromise = (async () => {
+      const client = await createPrisma();
+      if (process.env.NODE_ENV !== "production") {
+        g.__prisma = client;
+      }
+      return client;
+    })();
+  }
+  return prismaPromise;
 }
 
-export default prisma;
+export default getPrisma;

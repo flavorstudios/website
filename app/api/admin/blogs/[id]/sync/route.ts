@@ -14,13 +14,29 @@ export function GET(request: Request, context: RouteContext) {
   }
   server.accept()
   set.add(server)
+
+  // Keepalive to reduce idle disconnects on some hosts
+  const ping = setInterval(() => {
+    try {
+      server.send("ping")
+    } catch {
+      // ignore transient send errors
+    }
+  }, 30_000)
+
   server.addEventListener("message", (event) => {
     for (const ws of set!) {
       if (ws !== server) ws.send(event.data)
     }
   })
+
   server.addEventListener("close", () => {
+    clearInterval(ping)
     set!.delete(server)
+    if (set!.size === 0) {
+      rooms.delete(postId)
+    }
   })
+
   return new Response(null, { status: 101, webSocket: client })
 }

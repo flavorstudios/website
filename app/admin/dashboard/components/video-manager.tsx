@@ -410,7 +410,7 @@ function Pagination({
 
 // Main component --------------------------------------------------------------
 export default function VideoManager() {
-  const toast = useToast();
+  const { toast } = useToast();
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

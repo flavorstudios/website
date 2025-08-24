@@ -120,12 +120,23 @@ export default function BlogManager() {
   useEffect(() => {
     if (categoriesData?.categories) {
       setCategories(
-        categoriesData.categories.map((c: Partial<CategoryData>) => ({
-          name: c.name ?? (c as { title?: string }).title ?? "",
-          slug: c.slug ?? "",
-          order: typeof c.order === "number" ? c.order : 0,
-          isActive: c.isActive ?? true,
-        })),
+        categoriesData.categories.map(
+          (
+            c: Partial<CategoryData> & { postCount?: number; title?: string },
+          ) => ({
+            name: c.name ?? c.title ?? "",
+            slug: c.slug ?? "",
+            order: typeof c.order === "number" ? c.order : 0,
+            isActive: c.isActive ?? true,
+            count:
+              typeof c.count === "number"
+                ? c.count
+                : typeof c.postCount === "number"
+                ? c.postCount
+                : 0,
+            tooltip: c.tooltip,
+          }),
+        ),
       );
     }
   }, [categoriesData]);

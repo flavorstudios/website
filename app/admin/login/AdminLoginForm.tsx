@@ -41,6 +41,7 @@ export default function AdminLoginForm() {
   const [mounted, setMounted] = useState(false)
   const [method, setMethod] = useState<"google" | "email">("google")
   const router = useRouter()
+  const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
 
   const finalizeLogin = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -65,7 +66,7 @@ export default function AdminLoginForm() {
 
     if (firebaseInitError) {
       setError(
-        firebaseInitError.message ||
+        firebaseErrorMessage ||
           "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
       )
       return
@@ -92,16 +93,14 @@ export default function AdminLoginForm() {
       }
     })
     return () => unsubscribe()
-  }, [finalizeLogin, setError])
+  }, [finalizeLogin, setError, firebaseErrorMessage])
 
   // --- Show Firebase env error, if present ---
   if (firebaseInitError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f5f8fd]">
         <Alert variant="destructive" className="max-w-md mx-auto">
-          <AlertDescription>
-            {firebaseInitError.message}
-          </AlertDescription>
+          <AlertDescription>{firebaseErrorMessage}</AlertDescription>
         </Alert>
       </div>
     )
@@ -113,7 +112,7 @@ export default function AdminLoginForm() {
     try {
       if (firebaseInitError) {
         setError(
-          firebaseInitError.message ||
+          firebaseErrorMessage ||
             "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
         )
         setLoading(false)
@@ -125,7 +124,7 @@ export default function AdminLoginForm() {
         auth = getFirebaseAuth()
       } catch {
         setError(
-          firebaseInitError?.message ||
+          firebaseErrorMessage ||
             "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
         )
         setLoading(false)

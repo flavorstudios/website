@@ -34,8 +34,8 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json({ ok: false, code: "UNAUTHORIZED" }, { status: 401 });
     }
-    const prismaClient = await getPrisma();
-    const saved = await prismaClient.$transaction(async (tx) => {
+    const prisma = await getPrisma();
+    const saved = await prisma.$transaction(async (tx) => {
       const existing = await (tx as any).draft.findUnique({ where: { id: draftId } });
       if (existing && version && existing.version !== version) {
         return { conflict: true, server: existing };

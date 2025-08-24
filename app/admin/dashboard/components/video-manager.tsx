@@ -658,7 +658,7 @@ export default function VideoManager() {
               : []
           }
           selectedCategory={filterCategory}
-          type="video"
+          onCategoryChange={setFilterCategory}
           className="w-full sm:w-48"
         />
 

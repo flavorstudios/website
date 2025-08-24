@@ -23,7 +23,7 @@ const pwaConfig = withPWA({
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
 
-// Node.js middleware runs without additional flags in current Next.js versions.
+// Enable Node.js middleware via experimental flag.
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -36,6 +36,8 @@ const nextConfig = {
     unoptimized: true,
     domains: ['storage.googleapis.com', 'firebasestorage.googleapis.com'],
   },
+
+  experimental: { nodeMiddleware: true },
 
   // Add any other Next.js config here!
 };

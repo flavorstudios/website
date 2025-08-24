@@ -1,5 +1,5 @@
+'use client';
 // lib/firebase.ts
-
 import {
   initializeApp,
   getApps,

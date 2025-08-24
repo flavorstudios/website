@@ -8,7 +8,7 @@ import BlogPostRenderer from "@/components/BlogPostRenderer";
 import type { PageProps } from "next";
 
 interface PreviewPageProps extends PageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 async function getPost(id: string): Promise<BlogPost | null> {
@@ -21,14 +21,13 @@ async function getPost(id: string): Promise<BlogPost | null> {
 }
 
 export async function generateMetadata({ params }: PreviewPageProps) {
-  const { id } = await params;
-  const post = await getPost(id);
+  const post = await getPost(params.id);
   if (!post) {
     const title = `Post Not Found – ${SITE_NAME}`;
     return getMetadata({
       title,
       description: "Post not found",
-      path: `/admin/preview/${id}`,
+      path: `/admin/preview/${params.id}`,
       robots: "noindex, nofollow",
     });
   }
@@ -58,8 +57,7 @@ export async function generateMetadata({ params }: PreviewPageProps) {
 }
 
 export default async function PreviewPage({ params }: PreviewPageProps) {
-  const { id } = await params;
-  const post = await getPost(id);
+  const post = await getPost(params.id);
   if (!post) notFound();
 
   const articleSchema = getSchema({

@@ -77,7 +77,7 @@ export default function AdminLoginForm() {
       auth = getFirebaseAuth()
     } catch {
       setError(
-        firebaseInitError?.message ||
+        firebaseErrorMessage ||
           "Firebase app failed to initialize due to misconfiguration. Please contact the site administrator."
       )
       return

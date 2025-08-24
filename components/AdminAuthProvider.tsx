@@ -20,12 +20,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
 
   useEffect(() => {
     // Guard: If Firebase config error, do not register listener
     if (firebaseInitError) {
       setError(
-        firebaseInitError.message ||
+        firebaseErrorMessage ||
           "Firebase app failed to initialize due to misconfiguration."
       )
       setLoading(false)
@@ -37,7 +38,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       auth = getFirebaseAuth()
     } catch {
       setError(
-        firebaseInitError?.message ||
+        firebaseErrorMessage ||
           "Firebase app failed to initialize due to misconfiguration."
       )
       setLoading(false)
@@ -60,7 +61,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }
     )
     return () => unsubscribe()
-  }, [])
+  }, [firebaseErrorMessage])
 
   // --- Codex Update: Also call /api/admin/logout after Firebase signOut
   const signOutAdmin = async () => {

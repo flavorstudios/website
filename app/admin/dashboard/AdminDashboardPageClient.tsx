@@ -266,7 +266,9 @@ export default function AdminDashboardPageClient({
     const root = document.documentElement;
     const width = isMobile ? "0px" : sidebarOpen ? "16rem" : "5rem";
     root.style.setProperty("--sidebar-w", width);
-    return () => root.style.removeProperty("--sidebar-w");
+    return () => {
+      root.style.removeProperty("--sidebar-w");
+    };
   }, [sidebarOpen, isMobile]);
 
   // --- Lock root scroll when mobile sidebar is open ------------------------

@@ -430,11 +430,13 @@ export function RichTextEditor({
               const maxPos = editor.state.doc.content.size
               const clamped = Math.max(1, Math.min(pos, maxPos))
               const coords = editor.view.coordsAtPos(clamped)
-              const box = containerRef.current.getBoundingClientRect()
+              const container = containerRef.current
+              if (!container) return null
+              const box = container.getBoundingClientRect()
               const left =
-                coords.left - box.left + containerRef.current.scrollLeft
+                coords.left - box.left + container.scrollLeft
               const top =
-                coords.top - box.top + containerRef.current.scrollTop
+                coords.top - box.top + container.scrollTop
 
               return (
                 <span

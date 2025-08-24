@@ -284,22 +284,18 @@ export default function AdminDashboardPageClient({
 
   const handleLogout = useCallback(async () => {
     try {
+      const firebaseErrorMessage =
+        (firebaseInitError as Error | null)?.message ??
+        "Firebase not initialized. Cannot log out safely.";
       if (firebaseInitError) {
-        setError(
-          firebaseInitError.message ||
-            "Firebase not initialized. Cannot log out safely."
-        );
+        setError(firebaseErrorMessage);
         return;
       }
       let auth;
       try {
         auth = getFirebaseAuth();
       } catch {
-        setError(
-          firebaseInitError
-            ? firebaseInitError.message
-            : "Firebase not initialized. Cannot log out safely."
-        );
+        setError(firebaseErrorMessage);
         return;
       }
       await signOut(auth);

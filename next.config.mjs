@@ -23,9 +23,7 @@ const pwaConfig = withPWA({
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
 
-// Enable Node.js runtime middleware support to remove build warnings
-// Node.js middleware is now applied in all environments including production/CI.
-// If needed, adjust environment checks here for specific deployment targets.
+// Node.js middleware runs without additional flags in current Next.js versions.
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -38,9 +36,6 @@ const nextConfig = {
     unoptimized: true,
     domains: ['storage.googleapis.com', 'firebasestorage.googleapis.com'],
   },
-
-  // Enable Node.js runtime support for middleware in all environments
-  experimental: { nodeMiddleware: true },
 
   // Add any other Next.js config here!
 };

@@ -4,12 +4,12 @@ import { blogStore } from "@/lib/content-store"
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = await context.params
+  const { id } = await params
   const revisions = await blogStore.getRevisions(id)
   return NextResponse.json({ revisions })
 }

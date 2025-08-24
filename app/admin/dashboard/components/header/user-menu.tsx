@@ -10,7 +10,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { LogOut, Settings } from "lucide-react"
+import {
+  LogOut,
+  User,
+  Shield,
+  History,
+  ArrowLeftRight,
+} from "lucide-react"
 
 interface UserMenuProps {
   avatar?: string
@@ -35,7 +41,7 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col">
             <span className="font-medium">{name}</span>
@@ -43,8 +49,18 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => window.location.assign("/admin/account")}> 
-          <Settings className="h-4 w-4 mr-2" /> Account Settings
+        <DropdownMenuItem onSelect={() => window.location.assign("/admin/account")}>
+          <User className="h-4 w-4 mr-2" /> Profile Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => window.location.assign("/admin/roles")}>
+          <Shield className="h-4 w-4 mr-2" /> User Roles
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => window.location.assign("/admin/activity")}>
+          <History className="h-4 w-4 mr-2" /> Activity Log
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={() => window.location.assign("/admin/accounts")}>
+          <ArrowLeftRight className="h-4 w-4 mr-2" /> Switch Account
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={onLogout}>
           <LogOut className="h-4 w-4 mr-2" /> Sign out

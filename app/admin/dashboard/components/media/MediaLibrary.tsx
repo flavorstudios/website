@@ -6,10 +6,8 @@ import MediaList from "./MediaList";
 import MediaUpload from "./MediaUpload";
 import MediaBulkActions from "./MediaBulkActions";
 import MediaDetailsDrawer from "./MediaDetailsDrawer";
-import type { MediaDoc, TypeFilter, SortBy } from "@/types/media";
+import type { MediaDoc, TypeFilter, SortBy, DateFilter } from "@/types/media";
 import { useToast } from "@/hooks/use-toast";
-
-type DateFilter = "all" | "7d" | "30d";
 
 export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) => void }) {
   const { toast } = useToast();

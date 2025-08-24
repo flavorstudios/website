@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Star } from "lucide-react";
 
-import type { TypeFilter, SortBy } from "@/types/media";
+import type { TypeFilter, SortBy, DateFilter } from "@/types/media";
 
 interface Props {
   search: string;
@@ -20,8 +20,12 @@ interface Props {
   onTypeFilter: (val: TypeFilter) => void;
   sortBy: SortBy;
   onSortBy: (val: SortBy) => void;
+  dateFilter: DateFilter;
+  onDateFilter: (val: DateFilter) => void;
   view: "grid" | "list";
   onToggleView: () => void;
+  unusedOnly: boolean;
+  onUnusedToggle: () => void;
   favoritesOnly: boolean;
   onFavoritesToggle: () => void;
 }
@@ -33,10 +37,14 @@ export default function MediaToolbar({
   onTypeFilter,
   sortBy,
   onSortBy,
+  dateFilter,
+  onDateFilter,
   view,
   onToggleView,
   favoritesOnly,
   onFavoritesToggle,
+  unusedOnly,
+  onUnusedToggle,
 }: Props) {
   return (
     <div className="space-y-4 mb-4">
@@ -75,6 +83,29 @@ export default function MediaToolbar({
             <SelectItem value="name">Name</SelectItem>
           </SelectContent>
         </Select>
+        
+        <Select
+          value={dateFilter}
+          onValueChange={(val) => onDateFilter(val as DateFilter)}
+        >
+          <SelectTrigger className="w-36" aria-label="Date">
+            <SelectValue placeholder="Date" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Dates</SelectItem>
+            <SelectItem value="7d">Last 7 days</SelectItem>
+            <SelectItem value="30d">Last 30 days</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Button
+          variant={unusedOnly ? "default" : "outline"}
+          size="sm"
+          onClick={onUnusedToggle}
+          aria-pressed={unusedOnly}
+        >
+          Unused
+        </Button>
 
         <Button
           variant={favoritesOnly ? "default" : "outline"}

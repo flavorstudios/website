@@ -4,6 +4,9 @@
 
 export type TypeFilter = "all" | "image" | "video" | "audio" | "application";
 
+// Date range filter for media library
+export type DateFilter = "all" | "7d" | "30d";
+
 // Sorting options for the media library
 export type SortBy = "date" | "name" | "size";
 

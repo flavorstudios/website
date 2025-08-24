@@ -5,9 +5,10 @@ import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
+import type { PageProps } from "next";
 
-interface PreviewPageProps {
-  params: { id: string };
+interface PreviewPageProps extends PageProps {
+  params: Promise<{ id: string }>;
 }
 
 async function getPost(id: string): Promise<BlogPost | null> {
@@ -20,13 +21,14 @@ async function getPost(id: string): Promise<BlogPost | null> {
 }
 
 export async function generateMetadata({ params }: PreviewPageProps) {
-  const post = await getPost(params.id);
+  const { id } = await params;
+  const post = await getPost(id);
   if (!post) {
     const title = `Post Not Found – ${SITE_NAME}`;
     return getMetadata({
       title,
       description: "Post not found",
-      path: `/admin/preview/${params.id}`,
+      path: `/admin/preview/${id}`,
       robots: "noindex, nofollow",
     });
   }
@@ -56,7 +58,8 @@ export async function generateMetadata({ params }: PreviewPageProps) {
 }
 
 export default async function PreviewPage({ params }: PreviewPageProps) {
-  const post = await getPost(params.id);
+  const { id } = await params;
+  const post = await getPost(id);
   if (!post) notFound();
 
   const articleSchema = getSchema({

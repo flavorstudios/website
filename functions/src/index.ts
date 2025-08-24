@@ -6,6 +6,7 @@ setGlobalOptions({ maxInstances: 10 });
 // Export public API endpoints
 export * from "./public/contact";
 export * from "./public/blogs";      // ✅ Enable blogs endpoint! (now plural)
+export * from "./public/categories"; // ✅ New categories endpoint
 
 // Export test endpoint (for health check or debugging)
 export * from "./test";

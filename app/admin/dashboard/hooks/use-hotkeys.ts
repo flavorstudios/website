@@ -1,7 +1,7 @@
 "use client";
 
 import { useHotkeys as useHotkeysLib } from "react-hotkeys-hook";
-import type { UseHotkeysOptions } from "react-hotkeys-hook";
+import type { Options } from "react-hotkeys-hook";
 import type { DependencyList } from "react";
 
 function isInputLike(target: EventTarget | null) {
@@ -16,7 +16,7 @@ function isInputLike(target: EventTarget | null) {
   );
 }
 
-export type Options = UseHotkeysOptions;
+export type { Options };
 export type HotkeyCallback = (event: KeyboardEvent, handler: unknown) => void;
 
 export default function useHotkeys(

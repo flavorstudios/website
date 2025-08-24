@@ -10,6 +10,7 @@ export type AutosaveStatus =
   | "conflict";
 
 interface AutosaveOptions<T> {
+  userId?: string;
   draftId: string;
   data: T;
 }
@@ -34,7 +35,7 @@ async function idbDel(key: string) {
   return db.delete("drafts", key);
 }
 
-export function useAutosave<T>({ draftId, data }: AutosaveOptions<T>) {
+export function useAutosave<T>({ userId = "anon", draftId, data }: AutosaveOptions<T>) {
   const [status, setStatus] = useState<AutosaveStatus>("idle");
   const [version, setVersion] = useState<number | undefined>();
   const [savedAt, setSavedAt] = useState<Date | null>(null);
@@ -43,7 +44,7 @@ export function useAutosave<T>({ draftId, data }: AutosaveOptions<T>) {
   const retryRef = useRef(0);
   const debounceRef = useRef<NodeJS.Timeout>();
 
-  const key = `draft:${draftId}`;
+  const key = `draft:${userId}:${draftId}`;
 
   const save = useCallback(
     async (payload: T = data, v: number | undefined = version) => {
@@ -60,7 +61,7 @@ export function useAutosave<T>({ draftId, data }: AutosaveOptions<T>) {
         const res = await fetch("/api/admin/blog/drafts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...payload, draftId, version: v }),
+          body: JSON.stringify({ ...payload, draftId, userId, version: v }),
         });
         if (tokenRef.current !== token) return;
         if (res.ok) {

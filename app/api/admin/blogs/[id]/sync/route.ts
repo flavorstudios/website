@@ -4,8 +4,15 @@ const rooms = new Map<string, Set<WebSocket>>()
 
 type RouteContext = { params: Promise<{ id: string }> }
 
+interface ServerWebSocket extends WebSocket {
+  accept: () => void
+}
+
 export async function GET(request: Request, context: RouteContext) {
-  const { 0: client, 1: server } = Object.values(new WebSocketPair()) as [WebSocket, WebSocket]
+  const [client, server] = Object.values(new WebSocketPair()) as [
+    WebSocket,
+    ServerWebSocket,
+  ]
   const { id: postId } = await context.params
   let set = rooms.get(postId)
   if (!set) {

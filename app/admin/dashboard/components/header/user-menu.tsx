@@ -45,7 +45,7 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-48 sm:w-56">
         <DropdownMenuLabel>
           <div className="flex flex-col">
             <span className="font-medium">{name}</span>
@@ -68,6 +68,7 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
         <DropdownMenuItem onSelect={() => router.push("/admin/accounts")}>
           <ArrowLeftRight className="h-4 w-4 mr-2" /> Switch Account
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={onLogout}
           className="text-destructive focus:text-destructive"

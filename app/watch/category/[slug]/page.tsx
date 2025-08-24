@@ -25,10 +25,10 @@ export default async function WatchCategoryPage({
   params,
   searchParams,
 }: {
-  params: { slug: string };
-  searchParams: { page?: string };
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const { slug } = params;
+  const { slug } = await params;
   const resolvedSearchParams = await searchParams;
   const categorySlug = slug;
 

@@ -65,7 +65,6 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
       setCursor((data.cursor as number | null) ?? null);
     } catch {
       // keep your existing toast API
-      // @ts-expect-error: depending on your toast implementation
       toast.error?.("Failed to load media");
     } finally {
       setLoading(false);

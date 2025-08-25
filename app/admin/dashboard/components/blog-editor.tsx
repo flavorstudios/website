@@ -31,6 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { authors } from "@/lib/authors";
+import { slugify } from "@/lib/slugify";
 import MediaPickerDialog from "./media/MediaPickerDialog";
 import type {
   BlogPost as StoreBlogPost,
@@ -86,15 +87,6 @@ export interface BlogCategory {
 // safe localStorage helpers were previously used for autosave persistence
 // but are no longer needed. They have been removed to keep the bundle lean
 // and to satisfy linting rules about unused variables.
-
-/** better slugging with diacritics stripping */
-const slugify = (title: string) =>
-  title
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
 
 export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> }) {
   const { toast } = useToast();
@@ -189,6 +181,11 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     return dt;
   };
 
+  const timeZone = useMemo(
+    () => Intl.DateTimeFormat().resolvedOptions().timeZone,
+    []
+  );
+
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -214,6 +211,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error("Failed to load categories:", error);
+        toast.error("Failed to load categories");
       }
     };
     loadCategories();
@@ -439,11 +437,14 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   };
 
   const schedulePost = async () => {
-    if (scheduledDate && scheduledTime) {
-      setPost((prev) => ({ ...prev, status: "scheduled" }));
-      await savePost();
-      setShowScheduler(false);
+    const dt = getScheduledDateTime();
+    if (!dt || dt <= new Date()) {
+      toast.error("Scheduled time must be in the future");
+      return;
     }
+    setPost((prev) => ({ ...prev, status: "scheduled", scheduledFor: dt }));
+    await savePost();
+    setShowScheduler(false);
   };
 
   const addTag = () => {

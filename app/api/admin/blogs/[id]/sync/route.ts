@@ -10,7 +10,7 @@ interface ServerWebSocket extends WebSocket {
 
 export async function GET(request: Request, context: RouteContext) {
   const pair = new WebSocketPair()
-  const [client, server]: [WebSocket, ServerWebSocket] = Object.values(pair)
+  const [client, server] = Object.values(pair) as [WebSocket, ServerWebSocket]
   const { id: postId } = await context.params
   let set = rooms.get(postId)
   if (!set) {

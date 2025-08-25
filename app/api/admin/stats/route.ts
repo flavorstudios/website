@@ -2,7 +2,7 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
-import { AggregateField, Timestamp } from "firebase-admin/firestore";
+import { AggregateField, Timestamp, Query, AggregateQuery } from "firebase-admin/firestore";
 import { createHash, randomUUID } from "crypto";
 import { z } from "zod";
 
@@ -205,44 +205,91 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Helper functions to guard against Firestore query errors
+    const safeCount = async (query: Query, label: string): Promise<number> => {
+      try {
+        const snap = await query.count().get();
+        return snap.data().count ?? 0;
+      } catch (e) {
+        console.error(
+          JSON.stringify({
+            requestId,
+            step: `count:${label}`,
+            error: e instanceof Error ? e.message : String(e),
+          })
+        );
+        return 0;
+      }
+    };
+
+    const safeAggregate = async (
+      query: AggregateQuery<{ views: number }>,
+      label: string
+    ): Promise<number> => {
+      try {
+        const snap = await query.get();
+        return snap.data().views ?? 0;
+      } catch (e) {
+        console.error(
+          JSON.stringify({
+            requestId,
+            step: `aggregate:${label}`,
+            error: e instanceof Error ? e.message : String(e),
+          })
+        );
+        return 0;
+      }
+    };
+
     // Fetch Firestore stats in parallel (guarded)
     const baseFetch = async (): Promise<Stats> => {
       const [
-        totalPostsSnap,
-        totalVideosSnap,
-        totalCommentsSnap,
-        blogViewsSnap,
-        videoViewsSnap,
-        pendingCommentsSnap,
-        publishedPostsSnap,
-        featuredVideosSnap,
+        totalPosts,
+        totalVideos,
+        totalComments,
+        blogViews,
+        videoViews,
+        pendingComments,
+        publishedPosts,
+        featuredVideos,
       ] = await Promise.all([
-        adminDb.collection("blogs").count().get(),
-        adminDb.collection("videos").count().get(),
-        adminDb.collection("comments").count().get(),
-        adminDb
-          .collection("blogs")
-          .aggregate({ views: AggregateField.sum("views") })
-          .get(),
-        adminDb
-          .collection("videos")
-          .aggregate({ views: AggregateField.sum("views") })
-          .get(),
-        adminDb.collection("comments").where("approved", "==", false).count().get(),
-        adminDb.collection("blogs").where("status", "==", "published").count().get(),
-        adminDb.collection("videos").where("featured", "==", true).count().get(),
+        safeCount(adminDb.collection("blogs"), "totalPosts"),
+        safeCount(adminDb.collection("videos"), "totalVideos"),
+        safeCount(adminDb.collection("comments"), "totalComments"),
+        safeAggregate(
+          adminDb
+            .collection("blogs")
+            .aggregate({ views: AggregateField.sum("views") }),
+          "blogViews"
+        ),
+        safeAggregate(
+          adminDb
+            .collection("videos")
+            .aggregate({ views: AggregateField.sum("views") }),
+          "videoViews"
+        ),
+        safeCount(
+          adminDb.collection("comments").where("approved", "==", false),
+          "pendingComments"
+        ),
+        safeCount(
+          adminDb.collection("blogs").where("status", "==", "published"),
+          "publishedPosts"
+        ),
+        safeCount(
+          adminDb.collection("videos").where("featured", "==", true),
+          "featuredVideos"
+        ),
       ]);
 
       return {
-        totalPosts: totalPostsSnap.data().count ?? 0,
-        totalVideos: totalVideosSnap.data().count ?? 0,
-        totalComments: totalCommentsSnap.data().count ?? 0,
-        totalViews:
-          (blogViewsSnap.data().views ?? 0) +
-          (videoViewsSnap.data().views ?? 0),
-        pendingComments: pendingCommentsSnap.data().count ?? 0,
-        publishedPosts: publishedPostsSnap.data().count ?? 0,
-        featuredVideos: featuredVideosSnap.data().count ?? 0,
+        totalPosts,
+        totalVideos,
+        totalComments,
+        totalViews: blogViews + videoViews,
+        pendingComments,
+        publishedPosts,
+        featuredVideos,
         monthlyGrowth: 0,
       };
     };

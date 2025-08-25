@@ -313,8 +313,14 @@ export default function BlogManager() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
+      <div>
+        <AdminPageHeader
+          title="Blog Management"
+          subtitle="Manage all blog posts and editorial actions"
+        />
+        <div className="mt-4">
+          <BlogTableSkeleton />
+        </div>
       </div>
     );
   }

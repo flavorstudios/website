@@ -28,6 +28,7 @@ import {
 
 import BlogTable from "@/components/admin/blog/BlogTable";
 import BlogBulkActions from "@/components/admin/blog/BlogBulkActions";
+import BlogTableSkeleton from "@/components/admin/blog/BlogTableSkeleton";
 
 import type { BlogPost } from "@/lib/content-store";
 import type { CategoryData } from "@/lib/dynamic-categories";

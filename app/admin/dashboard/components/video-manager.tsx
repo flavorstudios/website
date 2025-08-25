@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useDeferredValue } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -153,17 +153,17 @@ function VideoTable({
       <table className="min-w-full bg-white text-sm">
         <thead className="bg-gray-50 text-xs uppercase text-gray-500">
           <tr>
-            <th className="w-8 p-3">
+            <th scope="col" className="w-8 p-3">
               <input type="checkbox" checked={allSelected} onChange={(e) => toggleSelectAll(e.target.checked)} aria-label="Select all" />
             </th>
-            <th className="p-3 text-left">Thumbnail</th>
-            <th className="p-3 text-left">Title</th>
-            <th className="hidden p-3 text-left md:table-cell">Category</th>
-            <th className="p-3 text-left">Status</th>
-            <th className="hidden p-3 text-left sm:table-cell">Date</th>
-            <th className="hidden p-3 text-right sm:table-cell">Views</th>
-            <th className="hidden p-3 text-left md:table-cell">Duration</th>
-            <th className="p-3 text-right">Actions</th>
+            <th scope="col" className="p-3 text-left">Thumbnail</th>
+            <th scope="col" className="p-3 text-left">Title</th>
+            <th scope="col" className="hidden p-3 text-left md:table-cell">Category</th>
+            <th scope="col" className="p-3 text-left">Status</th>
+            <th scope="col" className="hidden p-3 text-left sm:table-cell">Date</th>
+            <th scope="col" className="hidden p-3 text-right sm:table-cell">Views</th>
+            <th scope="col" className="hidden p-3 text-left md:table-cell">Duration</th>
+            <th scope="col" className="p-3 text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -177,7 +177,13 @@ function VideoTable({
                 </td>
                 <td className="p-3">
                   {video.thumbnail && (
-                    <Image src={video.thumbnail} alt="Thumbnail" width={96} height={60} className="h-16 w-28 rounded object-cover" />
+                    <Image
+                      src={video.thumbnail}
+                      alt={`Thumbnail for ${video.title}`}
+                      width={96}
+                      height={60}
+                      className="h-16 w-28 rounded object-cover"
+                    />
                   )}
                 </td>
                 <td className="p-3">
@@ -295,7 +301,13 @@ function VideoCardList({
             <div className="flex items-start gap-3">
               <input type="checkbox" checked={selected.has(video.id)} onChange={() => toggleSelect(video.id)} aria-label={`Select ${video.title}`} className="mt-1" />
               {video.thumbnail && (
-                <Image src={video.thumbnail} alt="Thumbnail" width={128} height={72} className="h-20 w-32 rounded object-cover" />
+                <Image
+                  src={video.thumbnail}
+                  alt={`Thumbnail for ${video.title}`}
+                  width={128}
+                  height={72}
+                  className="h-20 w-32 rounded object-cover"
+                />
               )}
               <div className="flex-1">
                 <a href={`/admin/video/edit?id=${video.id}`} className="font-medium text-blue-600 hover:underline">
@@ -414,6 +426,7 @@ export default function VideoManager() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [filterStatus, setFilterStatus] = useState<"all" | Video["status"]>("all");
   const [filterFeatured, setFilterFeatured] = useState<"all" | "featured" | "regular">("all");
+  const [filterTag, setFilterTag] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "title" | "status" | "views">("date");
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -422,6 +435,19 @@ export default function VideoManager() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
   const [bulkAction, setBulkAction] = useState<null | "publish" | "unpublish">(null);
+
+  const deferredSearch = useDeferredValue(searchTerm);
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setFilterCategory("");
+    setFilterStatus("all");
+    setFilterFeatured("all");
+    setFilterTag("");
+    setSortBy("date");
+    setSelected(new Set());
+    setCurrentPage(1);
+  };
 
   // Data loading --------------------------------------------------------------
   useEffect(() => {
@@ -548,7 +574,8 @@ export default function VideoManager() {
 
   // Filtering & sorting -------------------------------------------------------
   const filteredVideos = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
+    const term = deferredSearch.trim().toLowerCase();
+    const tag = filterTag.trim().toLowerCase();
     return videos.filter((video) => {
       const matchesSearch = !term || video.title.toLowerCase().includes(term);
       const matchesCategory = !filterCategory || video.category === filterCategory;
@@ -557,9 +584,17 @@ export default function VideoManager() {
         filterFeatured === "all" ||
         (filterFeatured === "featured" && video.featured) ||
         (filterFeatured === "regular" && !video.featured);
-      return matchesSearch && matchesCategory && matchesStatus && matchesFeatured;
+      const matchesTag =
+        !tag || video.tags.some((t) => t.toLowerCase().includes(tag));
+      return (
+        matchesSearch &&
+        matchesCategory &&
+        matchesStatus &&
+        matchesFeatured &&
+        matchesTag
+      );
     });
-  }, [videos, searchTerm, filterCategory, filterStatus, filterFeatured]);
+  }, [videos, deferredSearch, filterCategory, filterStatus, filterFeatured, filterTag]);
 
   const sortedVideos = useMemo(() => {
     const arr = [...filteredVideos];
@@ -582,7 +617,7 @@ export default function VideoManager() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterCategory, filterStatus, filterFeatured, sortBy]);
+  }, [searchTerm, filterCategory, filterStatus, filterFeatured, sortBy, filterTag]);
 
   // Bulk actions --------------------------------------------------------------
   const handleBulk = async (action: "publish" | "unpublish" | "delete") => {
@@ -628,6 +663,7 @@ export default function VideoManager() {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-4">
         <Input
+          type="search"
           placeholder="Search videos..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -652,6 +688,14 @@ export default function VideoManager() {
           selectedCategory={filterCategory}
           onCategoryChange={setFilterCategory}
           className="w-full sm:w-48"
+        />
+
+        <Input
+          placeholder="Filter by tag..."
+          value={filterTag}
+          onChange={(e) => setFilterTag(e.target.value)}
+          className="w-full sm:w-40"
+          aria-label="Filter by tag"
         />
 
         <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val as any)}>
@@ -688,6 +732,10 @@ export default function VideoManager() {
             <SelectItem value="views">Views</SelectItem>
           </SelectContent>
         </Select>
+
+        <Button variant="outline" className="w-full sm:w-auto" onClick={resetFilters} aria-label="Clear filters">
+          Clear Filters
+        </Button>
       </div>
 
       {/* Bulk actions (sticky) */}

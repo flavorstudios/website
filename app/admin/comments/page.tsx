@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
 import CommentStatsChart from "@/components/admin/comment/CommentStatsChart"; // <-- NEW IMPORT
 

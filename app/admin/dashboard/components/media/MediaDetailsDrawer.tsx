@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import type { MediaDoc } from "@/types/media";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -44,14 +45,17 @@ export default function MediaDetailsDrawer({
 
   const [alt, setAlt] = useState(media.alt || "");
   const [name, setName] = useState(media.name || media.filename || "");
+  const [tagsInput, setTagsInput] = useState((media.tags ?? []).join(", "));
   const [savingAlt, setSavingAlt] = useState(false);
   const [savingName, setSavingName] = useState(false);
+  const [savingTags, setSavingTags] = useState(false);
 
   // Keep local fields in sync when the selected media changes
   useEffect(() => {
     setAlt(media.alt || "");
     setName(media.name || media.filename || "");
-  }, [media.id, media.alt, media.name, media.filename]);
+    setTagsInput((media.tags ?? []).join(", "));
+  }, [media.id, media.alt, media.name, media.filename, media.tags]);
 
   const saveAlt = async () => {
     const next = alt.trim();
@@ -92,6 +96,30 @@ export default function MediaDetailsDrawer({
       console.error(err);
     } finally {
       setSavingName(false);
+    }
+  };
+
+  const saveTags = async () => {
+    const next = tagsInput
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    if (JSON.stringify(next) === JSON.stringify(media.tags ?? [])) return;
+
+    setSavingTags(true);
+    try {
+      const res = await fetch("/api/media/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: media.id, tags: next }),
+      });
+      if (!res.ok) throw new Error("Failed to save tags");
+      const data = await res.json();
+      onUpdate?.(data.media as MediaDoc);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingTags(false);
     }
   };
 
@@ -195,6 +223,36 @@ export default function MediaDetailsDrawer({
           >
             {savingName ? "Saving…" : "Save"}
           </Button>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold mb-1 text-gray-700">Tags</label>
+          <Input
+            value={tagsInput}
+            placeholder="tag1, tag2"
+            onChange={(e) => setTagsInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !savingTags) saveTags();
+            }}
+            aria-label="Tags"
+          />
+          <Button
+            size="sm"
+            className="mt-2"
+            onClick={saveTags}
+            disabled={savingTags || tagsInput.trim() === (media.tags ?? []).join(", ")}
+          >
+            {savingTags ? "Saving…" : "Save"}
+          </Button>
+          {media.tags?.length ? (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {media.tags.map((t) => (
+                <Badge key={t} variant="secondary" className="text-xs">
+                  {t}
+                </Badge>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <div>

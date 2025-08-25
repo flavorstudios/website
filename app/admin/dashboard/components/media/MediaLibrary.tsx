@@ -24,6 +24,7 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   const [unusedOnly, setUnusedOnly] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [tagFilter, setTagFilter] = useState("");
 
   // Infinite-scroll sentinel & request guard
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -110,6 +111,8 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
         .map((v) => (v || "").toLowerCase());
       return fields.some((f) => f.includes(q));
     })
+    // Tag filter
+    .filter((m) => (tagFilter ? (m.tags ?? []).includes(tagFilter) : true))
     // Favorites filter
     .filter((m) => (favoritesOnly ? !!m.favorite : true))
     // Unused filter
@@ -146,6 +149,8 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
           : new Date(b.createdAt).getTime();
       return bDate - aDate;
     });
+
+    const allTags = Array.from(new Set(items.flatMap((m) => m.tags ?? []))).sort();
 
   // Bulk selection logic
   const toggleSelect = (id: string) => {
@@ -256,6 +261,9 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
         onToggleView={() => setView((v) => (v === "grid" ? "list" : "grid"))}
         favoritesOnly={favoritesOnly}
         onFavoritesToggle={() => setFavoritesOnly((f) => !f)}
+        tagFilter={tagFilter}
+        onTagFilter={setTagFilter}
+        availableTags={allTags}
       />
 
       {view === "grid" ? (

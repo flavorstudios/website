@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import CategoryList, { CategoryType } from "./CategoryList"
 import type { Category } from "@/types/category"
 import CategoryBulkActions from "./CategoryBulkActions"
@@ -30,6 +30,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Pagination } from "@/components/admin/Pagination"
 import { cn } from "@/lib/utils"
 import AdminPageHeader from "@/components/AdminPageHeader"
+import { slugify } from "@/lib/slugify"
 
 interface CategoryFormProps {
   category?: Partial<Category>
@@ -45,14 +46,31 @@ function CategoryForm({ category, onSave, onCancel }: CategoryFormProps) {
     color: category?.color ?? "#6366f1",
     description: category?.description ?? "",
     icon: category?.icon ?? "",
+    tooltip: category?.tooltip ?? "",
   })
+  const [slugEdited, setSlugEdited] = useState(false)
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    if (name === "slug") {
+      setSlugEdited(true)
+      setFormData((prev) => ({ ...prev, slug: slugify(value) }))
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }))
+    }
   }
+
+  useEffect(() => {
+    if (!slugEdited) {
+      setFormData((prev) => {
+        const newSlug = slugify(prev.name ?? "")
+        if (prev.slug === newSlug) return prev
+        return { ...prev, slug: newSlug }
+      })
+    }
+  }, [formData.name, slugEdited])
 
   const handleIconChange = (icon: string) => {
     setFormData((prev) => ({ ...prev, icon }))
@@ -60,6 +78,10 @@ function CategoryForm({ category, onSave, onCancel }: CategoryFormProps) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (!formData.slug) {
+      toast("Slug is required")
+      return
+    }
     if (formData.color && !/^#[0-9A-Fa-f]{6}$/.test(formData.color.trim())) {
       toast("Please select a valid hex color.")
       return
@@ -116,6 +138,15 @@ function CategoryForm({ category, onSave, onCancel }: CategoryFormProps) {
               onChange={handleChange}
             />
           </div>
+          <div>
+            <Label htmlFor="cat-tooltip">Tooltip</Label>
+            <Input
+              id="cat-tooltip"
+              name="tooltip"
+              value={formData.tooltip ?? ""}
+              onChange={handleChange}
+            />
+          </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
@@ -142,7 +173,8 @@ export default function CategoryManager() {
   const [deleting, setDeleting] = useState<Category | null>(null)
   const [replacement, setReplacement] = useState<string>("")
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[] | null>(null)
-  const PER_PAGE = 10
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all")
+  const [perPage, setPerPage] = useState(10)
 
   // Memoize loadData to satisfy react-hooks/exhaustive-deps and avoid effect churn
   const loadData = useCallback(
@@ -328,25 +360,49 @@ export default function CategoryManager() {
     setBulkDeleteIds(ids)
   }
 
-  const filtered = categories.filter((c) =>
-    c.name.toLowerCase().includes(search.toLowerCase())
-  )
+  const exportCategories = () => {
+    const data = sorted.map((c) => ({ ...c }))
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `${type.toLowerCase()}-categories.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
-  const sorted = [...filtered].sort((a, b) => {
-    if (sortBy === "name") return a.name.localeCompare(b.name)
-    if (sortBy === "status") return Number(b.isActive) - Number(a.isActive)
-    return (a.order ?? 0) - (b.order ?? 0)
-  })
+  const filtered = useMemo(() => {
+    return categories.filter((c) => {
+      const matchesSearch = c.name
+        .toLowerCase()
+        .includes(search.toLowerCase())
+      const matchesStatus =
+        statusFilter === "all"
+          ? true
+          : statusFilter === "active"
+            ? c.isActive
+            : !c.isActive
+      return matchesSearch && matchesStatus
+    })
+  }, [categories, search, statusFilter])
 
-  const totalPages = Math.ceil(sorted.length / PER_PAGE) || 1
-  const paginated = sorted.slice(
-    (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
-  )
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "name") return a.name.localeCompare(b.name)
+      if (sortBy === "status") return Number(b.isActive) - Number(a.isActive)
+      return (a.order ?? 0) - (b.order ?? 0)
+    })
+  }, [filtered, sortBy])
+
+  const paginated = useMemo(() => {
+    return sorted.slice((currentPage - 1) * perPage, currentPage * perPage)
+  }, [sorted, currentPage, perPage])
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [search, sortBy, type])
+  }, [search, sortBy, type, statusFilter, perPage])
 
   if (loading) {
     return (
@@ -389,10 +445,41 @@ export default function CategoryManager() {
               <SelectItem value="status">Status</SelectItem>
             </SelectContent>
           </Select>
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => setStatusFilter(v as "all" | "active" | "inactive")}
+          >
+            <SelectTrigger className="w-full sm:w-32" aria-label="Status">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={String(perPage)}
+            onValueChange={(v) => setPerPage(Number(v))}
+          >
+            <SelectTrigger className="w-full sm:w-28" aria-label="Per Page">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="25">25 / page</SelectItem>
+              <SelectItem value="50">50 / page</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Button size="sm" onClick={() => setShowCreate(true)}>
-          New Category
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto justify-end">
+          <Button variant="outline" size="sm" onClick={exportCategories}>
+            Export JSON
+          </Button>
+          <Button size="sm" onClick={() => setShowCreate(true)}>
+            New Category
+          </Button>
+        </div>
       </div>
       <CategoryBulkActions
         count={selected.size}
@@ -412,7 +499,8 @@ export default function CategoryManager() {
       />
       <Pagination
         currentPage={currentPage}
-        totalPages={totalPages}
+        totalCount={filtered.length}
+        perPage={perPage}
         onPageChange={setCurrentPage}
       />
       {showCreate && (

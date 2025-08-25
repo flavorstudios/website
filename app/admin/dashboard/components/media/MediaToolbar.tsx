@@ -28,6 +28,9 @@ interface Props {
   onUnusedToggle: () => void;
   favoritesOnly: boolean;
   onFavoritesToggle: () => void;
+  tagFilter: string;
+  onTagFilter: (val: string) => void;
+  availableTags: string[];
 }
 
 export default function MediaToolbar({
@@ -45,6 +48,9 @@ export default function MediaToolbar({
   onFavoritesToggle,
   unusedOnly,
   onUnusedToggle,
+  tagFilter,
+  onTagFilter,
+  availableTags,
 }: Props) {
   return (
     <div className="space-y-4 mb-4">
@@ -97,6 +103,22 @@ export default function MediaToolbar({
             <SelectItem value="30d">Last 30 days</SelectItem>
           </SelectContent>
         </Select>
+
+        {availableTags.length > 0 && (
+          <Select value={tagFilter} onValueChange={onTagFilter}>
+            <SelectTrigger className="w-36" aria-label="Tag">
+              <SelectValue placeholder="Tag" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Tags</SelectItem>
+              {availableTags.map((tag) => (
+                <SelectItem key={tag} value={tag}>
+                  {tag}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
 
         <Button
           variant={unusedOnly ? "default" : "outline"}

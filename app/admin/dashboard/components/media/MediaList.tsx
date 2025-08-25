@@ -90,6 +90,11 @@ export default function MediaList({
             >
               <p className="font-medium truncate text-sm">{m.filename || m.name}</p>
               <p className="text-xs text-gray-500">{formatDate(m.createdAt)}</p>
+              {m.tags?.length ? (
+                <p className="text-xs text-gray-400 truncate">
+                  {m.tags.join(", ")}
+                </p>
+              ) : null}
             </button>
           </div>
         ))}
@@ -109,6 +114,7 @@ export default function MediaList({
               </th>
               <th scope="col" className="p-2 text-left">Preview</th>
               <th scope="col" className="p-2 text-left">Name</th>
+              <th scope="col" className="p-2 text-left">Tags</th>
               <th scope="col" className="p-2 text-left">Type</th>
               <th scope="col" className="p-2 text-left">Date</th>
               <th scope="col" className="p-2 text-left">Size</th>
@@ -150,6 +156,9 @@ export default function MediaList({
                   >
                     {m.filename || m.name}
                   </button>
+                </td>
+                <td className="p-2">
+                  {(m.tags ?? []).join(", ")}
                 </td>
                 <td className="p-2">{m.mime || m.mimeType}</td>
                 <td className="p-2">{formatDate(m.createdAt)}</td>

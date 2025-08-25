@@ -389,11 +389,13 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     try {
       const method = post.id ? "PUT" : "POST";
       const url = post.id ? `/api/admin/blogs/${post.id}` : "/api/admin/blogs";
+      const normalizedSlug = slugify(post.slug || post.title);
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...post,
+          slug: normalizedSlug,
           category: post.categories?.[0] || post.category || "",
           // send ISO strings to the server
           publishedAt: post.status === "published" ? new Date().toISOString() : undefined,
@@ -407,7 +409,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       const savedPost = await response.json();
       // prevent the next post state write from marking dirty
       skipDraftRef.current = true;
-      setPost((prev) => ({ ...prev, id: savedPost.id }));
+      setPost((prev) => ({ ...prev, id: savedPost.id, slug: normalizedSlug }));
       setLastSaved(new Date());
       setIsDirty(false);
 
@@ -630,6 +632,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   <Input
                     value={post.slug}
                     onChange={(e) => setPost((prev) => ({ ...prev, slug: e.target.value }))}
+                    onBlur={() => setPost((prev) => ({ ...prev, slug: slugify(prev.slug) }))}
                     placeholder="url-friendly-slug"
                   />
                 </div>

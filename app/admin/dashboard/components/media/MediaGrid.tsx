@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import type { MediaDoc } from "@/types/media";
 import { File, Video, Star } from "lucide-react";
 
@@ -106,6 +107,20 @@ export default function MediaGrid({
                 {isVideo ? <Video className="w-8 h-8" /> : <File className="w-8 h-8" />}
               </div>
             )}
+
+            {item.tags?.length ? (
+              <div className="absolute bottom-1 left-1 z-10 flex flex-wrap gap-1 max-w-full">
+                {item.tags.slice(0, 2).map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className="text-[10px] px-1 py-0"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            ) : null}
           </button>
         );
       })}

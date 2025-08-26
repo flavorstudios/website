@@ -14,7 +14,13 @@ import {
 } from "@/components/ui/select";
 import { CategoryDropdown } from "@/components/ui/category-dropdown";
 import { useToast } from "@/hooks/use-toast";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +34,7 @@ import {
 import { cn } from "@/lib/utils";
 import AdminPageHeader from "@/components/AdminPageHeader";
 import { VideoForm } from "@/components/ui/video-form";
-import { Info, Eye, Pencil, Trash2, Upload, Archive, Copy, CopyPlus } from "lucide-react";
+import { Info, Eye, Pencil, Trash2, Upload, Archive, Copy, CopyPlus, MoreVertical } from "lucide-react";
 import type { Category } from "@/types/category";
 
 interface Video {
@@ -209,77 +215,69 @@ function VideoTable({
                 <td className="hidden p-3 text-right sm:table-cell">{(video.views ?? 0).toLocaleString()}</td>
                 <td className="hidden p-3 md:table-cell">{video.duration || "—"}</td>
                 <td className="p-3 text-right">
-                  <div className="flex justify-end gap-1">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button asChild variant="ghost" size="icon" aria-label="Edit" title="Edit">
-                          <a href={`/admin/video/edit?id=${video.id}`}>
-                            <Pencil className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Edit</TooltipContent>
-                    </Tooltip>
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button asChild variant="ghost" size="icon" aria-label="View" title="View on site">
-                          <a href={`/watch/${video.slug}`} target="_blank" rel="noopener noreferrer">
-                            <Eye className="h-4 w-4" />
-                          </a>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>View</TooltipContent>
-                    </Tooltip>
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" aria-label="Copy link" title="Copy link" onClick={() => onCopyLink(video.slug)}>
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Copy Link</TooltipContent>
-                    </Tooltip>
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label="Duplicate video"
-                          title="Duplicate"
-                          onClick={() => onDuplicate(video.id)}
-                        >
-                          <CopyPlus className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Duplicate</TooltipContent>
-                    </Tooltip>
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label={isPublished ? "Unpublish video" : "Publish video"}
-                          title={isPublished ? "Unpublish" : "Publish"}
-                          onClick={() => onTogglePublish(video.id, !isPublished)}
-                        >
-                          {isPublished ? <Archive className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>{isPublished ? "Unpublish" : "Publish"}</TooltipContent>
-                    </Tooltip>
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-red-600" aria-label="Delete video" title="Delete" onClick={() => onDelete(video.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Delete</TooltipContent>
-                    </Tooltip>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" aria-label="Open actions menu">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" sideOffset={4}>
+                      <DropdownMenuItem asChild>
+                        <a href={`/admin/video/edit?id=${video.id}`}>
+                          <Pencil className="h-4 w-4 mr-2" />
+                          <span>Edit</span>
+                        </a>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <a href={`/watch/${video.slug}`} target="_blank" rel="noopener noreferrer">
+                          <Eye className="h-4 w-4 mr-2" />
+                          <span>View</span>
+                        </a>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          onCopyLink(video.slug);
+                        }}
+                      >
+                        <Copy className="h-4 w-4 mr-2" />
+                        <span>Copy Link</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          onDuplicate(video.id);
+                        }}
+                      >
+                        <CopyPlus className="h-4 w-4 mr-2" />
+                        <span>Duplicate</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          onTogglePublish(video.id, !isPublished);
+                        }}
+                      >
+                        {isPublished ? (
+                          <Archive className="h-4 w-4 mr-2" />
+                        ) : (
+                          <Upload className="h-4 w-4 mr-2" />
+                        )}
+                        <span>{isPublished ? "Unpublish" : "Publish"}</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          onDelete(video.id);
+                        }}
+                        className="text-red-600 focus:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </td>
               </tr>
             );
@@ -343,76 +341,78 @@ function VideoCardList({
                 </div>
               </div>
             </div>
-            <div className="mt-2 flex flex-wrap justify-end gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button asChild variant="ghost" size="icon" aria-label="Edit video" title="Edit">
+            <div className="mt-2 flex justify-end">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Open actions for ${video.title}`}
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" sideOffset={4}>
+                  <DropdownMenuItem asChild>
                     <a href={`/admin/video/edit?id=${video.id}`}>
-                      <Pencil className="h-4 w-4" />
+                      <Pencil className="h-4 w-4 mr-2" />
+                      <span>Edit</span>
                     </a>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Edit</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button asChild variant="ghost" size="icon" aria-label="View on site" title="View">
-                    <a href={`/watch/${video.slug}`} target="_blank" rel="noopener noreferrer">
-                      <Eye className="h-4 w-4" />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <a
+                      href={`/watch/${video.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      <span>View</span>
                     </a>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>View</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" aria-label="Copy link" title="Copy link" onClick={() => onCopyLink(video.slug)}>
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Copy Link</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Duplicate video"
-                    title="Duplicate"
-                    onClick={() => onDuplicate(video.id)}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      onCopyLink(video.slug);
+                    }}
                   >
-                    <CopyPlus className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Duplicate</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={isPublished ? "Unpublish video" : "Publish video"}
-                    title={isPublished ? "Unpublish" : "Publish"}
-                    onClick={() => onTogglePublish(video.id, !isPublished)}
+                    <Copy className="h-4 w-4 mr-2" />
+                    <span>Copy Link</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      onDuplicate(video.id);
+                    }}
                   >
-                    {isPublished ? <Archive className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>{isPublished ? "Unpublish" : "Publish"}</TooltipContent>
-              </Tooltip>
-
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-red-600" aria-label="Delete video" title="Delete" onClick={() => onDelete(video.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Delete</TooltipContent>
-              </Tooltip>
+                    <CopyPlus className="h-4 w-4 mr-2" />
+                    <span>Duplicate</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      onTogglePublish(video.id, !isPublished);
+                    }}
+                  >
+                    {isPublished ? (
+                      <Archive className="h-4 w-4 mr-2" />
+                    ) : (
+                      <Upload className="h-4 w-4 mr-2" />
+                    )}
+                    <span>{isPublished ? "Unpublish" : "Publish"}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      onDelete(video.id);
+                    }}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    <span>Delete</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         );
@@ -717,6 +717,10 @@ export default function VideoManager() {
     }
   };
 
+  const totalVideos = sortedVideos.length;
+  const startIndex = (currentPage - 1) * videosPerPage + 1;
+  const endIndex = Math.min(startIndex + paginatedVideos.length - 1, totalVideos);
+
   return (
     <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}> 
       {/* Header */}
@@ -821,6 +825,10 @@ export default function VideoManager() {
         <Button variant="outline" className="w-full sm:w-auto" onClick={resetFilters} aria-label="Clear filters">
           Clear Filters
         </Button>
+      </div>
+
+      <div className="text-sm text-gray-500">
+        Showing {startIndex}-{endIndex} of {totalVideos} video{totalVideos === 1 ? "" : "s"}
       </div>
 
       {/* Bulk actions (sticky) */}

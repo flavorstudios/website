@@ -32,6 +32,26 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [tagFilter, setTagFilter] = useState("");
 
+  // Reset all filters back to defaults
+  const handleResetFilters = () => {
+    setSearch("");
+    setTypeFilter("all");
+    setSortBy("date");
+    setDateFilter("all");
+    setUsageFilter("all");
+    setFavoritesOnly(false);
+    setTagFilter("");
+  };
+
+  const filtersActive =
+    search !== "" ||
+    typeFilter !== "all" ||
+    sortBy !== "date" ||
+    dateFilter !== "all" ||
+    usageFilter !== "all" ||
+    favoritesOnly ||
+    tagFilter !== "";
+
   // Infinite-scroll sentinel & request guard
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const activeRequestRef = useRef<AbortController | null>(null);
@@ -276,6 +296,8 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
         tagFilter={tagFilter}
         onTagFilter={setTagFilter}
         availableTags={allTags}
+        onResetFilters={handleResetFilters}
+        canReset={filtersActive}
       />
 
       {view === "grid" ? (

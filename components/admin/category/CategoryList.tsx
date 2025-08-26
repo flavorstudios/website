@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
-import { GripVertical, Edit, Trash2 } from "lucide-react"
+import { GripVertical, Edit, Trash2, Copy } from "lucide-react"
 import * as Icons from "lucide-react"
 import type { LucideProps } from "lucide-react"
 import {
@@ -36,6 +36,7 @@ export interface CategoryListProps {
   onEdit: (category: Category) => void
   onDelete: (category: Category) => void
   onToggleStatus: (id: string, isActive: boolean) => void
+  onDuplicate: (category: Category) => void
   selected: Set<string>
   toggleSelect: (id: string) => void
   toggleSelectAll: (checked: boolean) => void
@@ -68,6 +69,7 @@ export default function CategoryList({
   onEdit,
   onDelete,
   onToggleStatus,
+  onDuplicate,
   selected,
   toggleSelect,
   toggleSelectAll,
@@ -135,18 +137,19 @@ export default function CategoryList({
         <span className="text-xs">Select all</span>
         </div>
         {items.map((cat) => (
-          <CategoryCard
-            key={cat.id}
-            category={cat}
-            selected={selected.has(cat.id)}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            onToggleStatus={onToggleStatus}
-            toggleSelect={toggleSelect}
-          />
-        ))}
-      </div>
-    )
+            <CategoryCard
+              key={cat.id}
+              category={cat}
+              selected={selected.has(cat.id)}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onToggleStatus={onToggleStatus}
+              onDuplicate={onDuplicate}
+              toggleSelect={toggleSelect}
+            />
+          ))}
+        </div>
+      )
   }
 
   // --- Table view for desktop/tablet
@@ -181,19 +184,20 @@ export default function CategoryList({
             </thead>
             <tbody>
               {items.map((cat, idx) => (
-                <SortableRow
-                  key={cat.id}
-                  category={cat}
-                  selected={selected.has(cat.id)}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onToggleStatus={onToggleStatus}
-                  toggleSelect={toggleSelect}
-                  rowRef={(el) => (rowRefs.current[idx] = el!)}
-                  rowRefs={rowRefs}
-                  index={idx}
-                />
-              ))}
+                  <SortableRow
+                    key={cat.id}
+                    category={cat}
+                    selected={selected.has(cat.id)}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onToggleStatus={onToggleStatus}
+                    onDuplicate={onDuplicate}
+                    toggleSelect={toggleSelect}
+                    rowRef={(el) => (rowRefs.current[idx] = el!)}
+                    rowRefs={rowRefs}
+                    index={idx}
+                  />
+                ))}
             </tbody>
           </table>
         </div>
@@ -208,6 +212,7 @@ interface SortableRowProps {
   onEdit: (category: Category) => void
   onDelete: (category: Category) => void
   onToggleStatus: (id: string, isActive: boolean) => void
+  onDuplicate: (category: Category) => void
   toggleSelect: (id: string) => void
   rowRef: (el: HTMLTableRowElement | null) => void
   rowRefs: React.MutableRefObject<HTMLTableRowElement[]>
@@ -215,13 +220,14 @@ interface SortableRowProps {
 }
 
 function CategoryCard({
-  category,
-  selected,
-  onEdit,
-  onDelete,
-  onToggleStatus,
-  toggleSelect,
-}: Omit<SortableRowProps, "rowRef" | "rowRefs" | "index">) {
+    category,
+    selected,
+    onEdit,
+    onDelete,
+    onToggleStatus,
+    onDuplicate,
+    toggleSelect,
+  }: Omit<SortableRowProps, "rowRef" | "rowRefs" | "index">) {
   return (
     <div className="sm:hidden bg-white border-b last:border-b-0 p-3 flex flex-col gap-2 rounded-lg shadow-sm mt-2">
       <div className="flex items-center gap-2 justify-between">
@@ -244,6 +250,9 @@ function CategoryCard({
         <div className="flex gap-2">
           <Button variant="ghost" size="icon" aria-label="Edit" onClick={() => onEdit(category)}>
             <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" aria-label="Duplicate" onClick={() => onDuplicate(category)}>
+            <Copy className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
@@ -287,16 +296,17 @@ function CategoryCard({
 }
 
 function SortableRow({
-  category,
-  selected,
-  onEdit,
-  onDelete,
-  onToggleStatus,
-  toggleSelect,
-  rowRef,
-  rowRefs,
-  index,
-}: SortableRowProps) {
+    category,
+    selected,
+    onEdit,
+    onDelete,
+    onToggleStatus,
+    onDuplicate,
+    toggleSelect,
+    rowRef,
+    rowRefs,
+    index,
+  }: SortableRowProps) {
   const {
     attributes,
     listeners,
@@ -371,19 +381,27 @@ function SortableRow({
       </td>
       <td className="p-3 text-right">{category.postCount ?? 0}</td>
       <td className="p-3 text-right flex gap-2 justify-end">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Edit category" title="Edit" onClick={() => onEdit(category)}>
-              <Edit className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Edit</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Edit category" title="Edit" onClick={() => onEdit(category)}>
+                <Edit className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Edit</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Duplicate category" title="Duplicate" onClick={() => onDuplicate(category)}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Duplicate</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
               className="text-red-600"
               aria-label="Delete category"
               title="Delete"

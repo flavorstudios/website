@@ -485,6 +485,7 @@ export default function EmailInbox() {
                               }`}
                             >
                               {`${message.firstName} ${message.lastName}`}
+                            </p>
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={(e) => {
@@ -504,7 +505,7 @@ export default function EmailInbox() {
                                 <Badge className={`text-xs ${getPriorityColor(message.priority)}`}>
                                   {message.priority}
                                 </Badge>
-                              {message.flagged && (
+                                {message.flagged && (
                                   <Badge variant="destructive" className="ml-1" aria-label="Flagged message">
                                     Flagged
                                   </Badge>

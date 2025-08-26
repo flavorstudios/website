@@ -1,12 +1,13 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Upload, Archive, Trash2 } from "lucide-react"
+import { Upload, Archive, Trash2, XCircle } from "lucide-react"
 
 export interface CategoryBulkActionsProps {
   count: number
   onPublish: () => void
   onUnpublish: () => void
   onDelete: () => void
+  onClear: () => void
 }
 
 export default function CategoryBulkActions({
@@ -14,6 +15,7 @@ export default function CategoryBulkActions({
   onPublish,
   onUnpublish,
   onDelete,
+  onClear,
 }: CategoryBulkActionsProps) {
   if (count === 0) return null
   return (
@@ -25,6 +27,9 @@ export default function CategoryBulkActions({
       <span aria-live="polite" className="mr-2 text-sm text-muted-foreground">
         {count} selected
       </span>
+      <Button variant="ghost" size="sm" onClick={onClear}>
+        <XCircle className="mr-1 h-4 w-4" /> Clear
+      </Button>
       <Button variant="outline" size="sm" onClick={onPublish}>
         <Upload className="mr-1 h-4 w-4" /> Publish
       </Button>

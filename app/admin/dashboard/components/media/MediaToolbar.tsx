@@ -31,6 +31,10 @@ interface Props {
   tagFilter: string;
   onTagFilter: (val: string) => void;
   availableTags: string[];
+  /** Reset all search + filters to defaults */
+  onResetFilters: () => void;
+  /** Whether any filter is active (controls Reset button) */
+  canReset: boolean;
 }
 
 export default function MediaToolbar({
@@ -51,6 +55,8 @@ export default function MediaToolbar({
   tagFilter,
   onTagFilter,
   availableTags,
+  onResetFilters,
+  canReset,
 }: Props) {
   return (
     <div className="space-y-4 mb-4">
@@ -61,6 +67,7 @@ export default function MediaToolbar({
       <div className="flex items-center flex-wrap gap-2">
         <Input
           placeholder="Search"
+          aria-label="Search media"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-48"
@@ -145,6 +152,12 @@ export default function MediaToolbar({
         <Button variant="outline" size="sm" onClick={onToggleView}>
           {view === "grid" ? "List View" : "Grid View"}
         </Button>
+
+        {canReset && (
+          <Button variant="ghost" size="sm" onClick={onResetFilters}>
+            Reset
+          </Button>
+        )}
       </div>
     </div>
   );

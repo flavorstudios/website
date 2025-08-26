@@ -4,11 +4,20 @@ import { useState } from "react";
 import useSWR from "swr";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import AdminPageHeader from "@/components/AdminPageHeader";
 import { fetcher } from "@/lib/fetcher";
+import { useToast } from "@/hooks/use-toast";
 
 interface Submission {
   id: string;
@@ -18,13 +27,33 @@ interface Submission {
   skills?: string;
   portfolio?: string;
   message?: string;
+  resumeUrl?: string;
+  status?: string;
+  tags?: string[];
+  notes?: string;
+  interviewAt?: string;
   reviewed?: boolean;
   createdAt?: string;
 }
 
+const STATUS_OPTIONS = [
+  { value: "new", label: "New", class: "bg-yellow-100 text-yellow-700" },
+  { value: "reviewed", label: "Reviewed", class: "bg-blue-100 text-blue-700" },
+  { value: "interview", label: "Interview", class: "bg-purple-100 text-purple-700" },
+  { value: "hired", label: "Hired", class: "bg-green-100 text-green-700" },
+  { value: "rejected", label: "Rejected", class: "bg-red-100 text-red-700" },
+];
+
+const getStatusInfo = (value?: string, reviewed?: boolean) => {
+  const status = value || (reviewed ? "reviewed" : "new");
+  return STATUS_OPTIONS.find((s) => s.value === status) || STATUS_OPTIONS[0];
+};
+
 export default function Applications() {
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [selected, setSelected] = useState<Submission | null>(null);
+  const { toast } = useToast();
 
   const {
     data,
@@ -37,14 +66,21 @@ export default function Applications() {
 
   const submissions = data?.submissions || [];
 
-  const markReviewed = async (id: string) => {
+  const updateSubmission = async (
+    id: string,
+    updates: Partial<Submission>
+  ) => {
     await fetch(`/api/admin/career-submissions/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ reviewed: true }),
+      body: JSON.stringify(updates),
     });
     mutate();
+  };
+
+  const markReviewed = async (id: string) => {
+    await updateSubmission(id, { status: "reviewed", reviewed: true });
   };
 
   const filtered = submissions.filter((s) => {
@@ -52,8 +88,9 @@ export default function Applications() {
       s.firstName?.toLowerCase().includes(search.toLowerCase()) ||
       s.lastName?.toLowerCase().includes(search.toLowerCase()) ||
       s.email?.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "all" || (filter === "reviewed" ? s.reviewed : !s.reviewed);
-    return matchSearch && matchFilter;
+    const status = getStatusInfo(s.status, s.reviewed).value;
+    const matchStatus = statusFilter === "all" || status === statusFilter;
+    return matchSearch && matchStatus;
   });
 
   if (isLoading) {
@@ -90,70 +127,255 @@ export default function Applications() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full sm:w-64"
           />
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Filter" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="reviewed">Reviewed</SelectItem>
+              {STATUS_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      <Card>
-        <CardContent className="p-0 overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-500">
-              <tr>
-                <th className="p-3 text-left">Name</th>
-                <th className="p-3 text-left">Email</th>
-                <th className="p-3 text-left">Skills</th>
-                <th className="p-3 text-left">Submitted</th>
-                <th className="p-3 text-left">Status</th>
-                <th className="p-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((s) => (
-                <tr key={s.id} className="border-b last:border-b-0">
-                  <td className="p-3 whitespace-nowrap">
-                    {s.firstName} {s.lastName}
-                  </td>
-                  <td className="p-3 whitespace-nowrap">{s.email}</td>
-                  <td className="p-3 whitespace-nowrap">{s.skills}</td>
-                  <td className="p-3 whitespace-nowrap">
-                    {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : ""}
-                  </td>
-                  <td className="p-3 whitespace-nowrap">
-                    {s.reviewed ? (
-                      <Badge className="bg-green-100 text-green-700">Reviewed</Badge>
-                    ) : (
-                      <Badge className="bg-yellow-100 text-yellow-700">Pending</Badge>
-                    )}
-                  </td>
-                  <td className="p-3 text-right">
-                    {!s.reviewed && (
-                      <Button size="sm" onClick={() => markReviewed(s.id)}>
-                        Mark as Reviewed
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {filtered.length === 0 && (
+      {/* Desktop table */}
+      <div className="hidden sm:block">
+        <Card>
+          <CardContent className="p-0 overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50 text-xs uppercase text-gray-500">
                 <tr>
-                  <td className="p-6 text-center text-gray-500" colSpan={6}>
-                    No submissions found
-                  </td>
+                  <th className="p-3 text-left">Name</th>
+                  <th className="p-3 text-left">Email</th>
+                  <th className="p-3 text-left">Skills</th>
+                  <th className="p-3 text-left">Submitted</th>
+                  <th className="p-3 text-left">Status</th>
+                  <th className="p-3" />
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </CardContent>
-      </Card>
+              </thead>
+              <tbody>
+                {filtered.map((s) => {
+                  const info = getStatusInfo(s.status, s.reviewed);
+                  return (
+                    <tr key={s.id} className="border-b last:border-b-0">
+                      <td className="p-3 whitespace-nowrap">
+                        {s.firstName} {s.lastName}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">{s.email}</td>
+                      <td className="p-3 whitespace-nowrap">{s.skills}</td>
+                      <td className="p-3 whitespace-nowrap">
+                        {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : ""}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        <Badge className={info.class}>{info.label}</Badge>
+                      </td>
+                      <td className="p-3 text-right space-x-2">
+                        <Button size="sm" variant="outline" onClick={() => setSelected(s)}>
+                          View
+                        </Button>
+                        {info.value === "new" && (
+                          <Button size="sm" onClick={() => markReviewed(s.id)}>
+                            Mark Reviewed
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <tr>
+                    <td className="p-6 text-center text-gray-500" colSpan={6}>
+                      No submissions found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="space-y-4 sm:hidden">
+        {filtered.map((s) => {
+          const info = getStatusInfo(s.status, s.reviewed);
+          return (
+            <Card key={s.id}>
+              <CardContent className="p-4 space-y-2">
+                <div className="flex justify-between">
+                  <div>
+                    <p className="font-medium">
+                      {s.firstName} {s.lastName}
+                    </p>
+                    <p className="text-xs text-gray-500">{s.email}</p>
+                  </div>
+                  <Badge className={info.class}>{info.label}</Badge>
+                </div>
+                {s.skills && <p className="text-sm">{s.skills}</p>}
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button size="sm" variant="outline" onClick={() => setSelected(s)}>
+                    View
+                  </Button>
+                  {info.value === "new" && (
+                    <Button size="sm" onClick={() => markReviewed(s.id)}>
+                      Mark Reviewed
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+        {filtered.length === 0 && (
+          <p className="text-center text-gray-500">No submissions found</p>
+        )}
+      </div>
+
+      {selected && (
+        <ApplicationDialog
+          submission={selected}
+          onOpenChange={(open) => {
+            if (!open) setSelected(null);
+          }}
+          onSave={async (updates) => {
+            await updateSubmission(selected.id, updates);
+            toast.success("Application updated");
+            setSelected(null);
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+interface ApplicationDialogProps {
+  submission: Submission;
+  onOpenChange: (open: boolean) => void;
+  onSave: (updates: Partial<Submission>) => Promise<void>;
+}
+
+function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDialogProps) {
+  const [status, setStatus] = useState(
+    getStatusInfo(submission.status, submission.reviewed).value
+  );
+  const [notes, setNotes] = useState(submission.notes || "");
+  const [tags, setTags] = useState(submission.tags?.join(", ") || "");
+  const [interviewAt, setInterviewAt] = useState(submission.interviewAt || "");
+
+  const handleSave = async () => {
+    const updates: Partial<Submission> = {
+      status,
+      reviewed: status !== "new",
+      notes,
+      interviewAt,
+      tags: tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean),
+    };
+    await onSave(updates);
+  };
+
+  return (
+    <Dialog open onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-xl space-y-4">
+        <h3 className="text-lg font-medium">Application Details</h3>
+        <div className="space-y-2 text-sm">
+          <p>
+            <span className="font-medium">Name:</span> {submission.firstName}{" "}
+            {submission.lastName}
+          </p>
+          <p>
+            <span className="font-medium">Email:</span> {submission.email}
+          </p>
+          {submission.skills && (
+            <p>
+              <span className="font-medium">Skills:</span> {submission.skills}
+            </p>
+          )}
+          {submission.portfolio && (
+            <p>
+              <span className="font-medium">Portfolio:</span>{" "}
+              <a
+                href={submission.portfolio}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 underline"
+              >
+                View
+              </a>
+            </p>
+          )}
+          {submission.resumeUrl && (
+            <iframe
+              src={submission.resumeUrl}
+              title="Resume preview"
+              className="w-full h-48 rounded border"
+            />
+          )}
+          {submission.message && (
+            <p className="whitespace-pre-wrap">
+              <span className="font-medium">Message:</span> {submission.message}
+            </p>
+          )}
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-medium">Status</label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUS_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm font-medium">Tags</label>
+            <Input
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="tag1, tag2"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Interview</label>
+            <Input
+              type="datetime-local"
+              value={interviewAt ? interviewAt.slice(0, 16) : ""}
+              onChange={(e) => setInterviewAt(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Notes</label>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Notes"
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
+            Close
+          </Button>
+          <Button onClick={handleSave}>Save</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -875,11 +875,6 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                         <label htmlFor={`cat-${category.slug}`} className="capitalize text-sm">
                           {category.name}
                         </label>
-                        {category.tooltip && (
-                          <span title={category.tooltip}>
-                            <Info className="ml-1 h-4 w-4 text-blue-400" aria-hidden="true" />
-                          </span>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -905,11 +900,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                       ))}
                     </div>
                   )}
-                  {selectedCategories[0]?.tooltip && (
-                    <div className="text-xs text-gray-500 mt-2 flex items-center gap-1">
-                      <Info className="h-3 w-3" aria-hidden="true" /> {selectedCategories[0]?.tooltip}
-                    </div>
-                  )}
+                  {/* Category descriptions removed in admin view */}
                 </div>
                 {/* Tags */}
                 <div>

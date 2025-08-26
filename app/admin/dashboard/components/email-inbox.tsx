@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
-import { Mail, Reply, Archive, Star, Search, Filter, Send } from "lucide-react"
+import { Mail, MailOpen, Reply, Archive, Star, Search, Filter, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Switch } from "@/components/ui/switch"
 import AdminPageHeader from "@/components/AdminPageHeader"
 
 interface ContactMessage {
@@ -39,8 +41,12 @@ export default function EmailInbox() {
   const [adminEmails, setAdminEmails] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
+  const [priorityFilter, setPriorityFilter] = useState("all")
+  const [flaggedOnly, setFlaggedOnly] = useState(false)
+  const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set())
   const [emailError, setEmailError] = useState<string | null>(null)
   const [loadingState, setLoadingState] = useState(true)
+  const replyRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     fetch("/api/admin/from-addresses")
@@ -77,15 +83,36 @@ export default function EmailInbox() {
 
   const filteredMessages = messages.filter((message) => {
     const fullName = `${message.firstName} ${message.lastName}`.toLowerCase()
+    const search = searchTerm.toLowerCase()
     const matchesSearch =
-      fullName.includes(searchTerm.toLowerCase()) ||
-      message.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      message.subject.toLowerCase().includes(searchTerm.toLowerCase())
+      fullName.includes(search) ||
+      message.email.toLowerCase().includes(search) ||
+      message.subject.toLowerCase().includes(search) ||
+      message.message.toLowerCase().includes(search)
 
-    const matchesFilter = filterStatus === "all" || message.status === filterStatus
+    const matchesStatus = filterStatus === "all" || message.status === filterStatus
+    const matchesPriority = priorityFilter === "all" || message.priority === priorityFilter
+    const matchesFlagged = !flaggedOnly || message.flagged
 
-    return matchesSearch && matchesFilter
+    return matchesSearch && matchesStatus && matchesPriority && matchesFlagged
   })
+
+  const toggleMessageSelection = (id: string, checked: boolean) => {
+    setSelectedMessages((prev) => {
+      const newSet = new Set(prev)
+      if (checked) newSet.add(id)
+      else newSet.delete(id)
+      return newSet
+    })
+  }
+
+  const allSelected =
+    selectedMessages.size > 0 && filteredMessages.every((m) => selectedMessages.has(m.id))
+
+  const toggleSelectAll = (checked: boolean) => {
+    if (checked) setSelectedMessages(new Set(filteredMessages.map((m) => m.id)))
+    else setSelectedMessages(new Set())
+  }
 
   const updateMessageStatus = async (id: string, status: ContactMessage["status"]) => {
     setMessages((prev) => prev.map((msg) => (msg.id === id ? { ...msg, status } : msg)))
@@ -97,6 +124,27 @@ export default function EmailInbox() {
       })
     } catch (err) {
       console.error("Failed to update message status", err)
+    }
+  }
+
+  const bulkUpdateStatus = async (ids: string[], status: ContactMessage["status"]) => {
+    setMessages((prev) =>
+      prev.map((msg) => (ids.includes(msg.id) ? { ...msg, status } : msg))
+    )
+    try {
+      await Promise.all(
+        ids.map((id) =>
+          fetch("/api/admin/contact-messages", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, status }),
+          })
+        )
+      )
+    } catch (err) {
+      console.error("Failed to bulk update messages", err)
+    } finally {
+      setSelectedMessages(new Set())
     }
   }
 
@@ -124,6 +172,38 @@ export default function EmailInbox() {
       console.error("Failed to send reply:", error)
     }
   }
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName
+      if (tag === "INPUT" || tag === "TEXTAREA") return
+      if (e.key === "ArrowDown") {
+        e.preventDefault()
+        if (!filteredMessages.length) return
+        if (!selectedMessage) {
+          setSelectedMessage(filteredMessages[0])
+          return
+        }
+        const idx = filteredMessages.findIndex((m) => m.id === selectedMessage.id)
+        if (idx < filteredMessages.length - 1) setSelectedMessage(filteredMessages[idx + 1])
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault()
+        if (!selectedMessage) return
+        const idx = filteredMessages.findIndex((m) => m.id === selectedMessage.id)
+        if (idx > 0) setSelectedMessage(filteredMessages[idx - 1])
+      } else if (e.key === "a" && selectedMessage) {
+        e.preventDefault()
+        updateMessageStatus(selectedMessage.id, "archived")
+      } else if (e.key === "r" && selectedMessage) {
+        e.preventDefault()
+        replyRef.current?.focus()
+      } else if (e.key === "Escape") {
+        setSelectedMessage(null)
+      }
+    }
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [selectedMessage, filteredMessages])
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -158,6 +238,16 @@ export default function EmailInbox() {
     return withTime ? dateObj.toLocaleString() : dateObj.toLocaleDateString()
   }
 
+  const threadMessages =
+    selectedMessage
+      ? messages
+          .filter((m) => m.email === selectedMessage.email && m.id !== selectedMessage.id)
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          )
+      : []
+
   return (
     <div className="space-y-6">
       {/* --- Standardized Admin Section Header --- */}
@@ -178,9 +268,14 @@ export default function EmailInbox() {
         {/* Message List */}
         <div className="lg:col-span-1">
           <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1">
+            <CardHeader className="pb-3 space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={(v) => toggleSelectAll(!!v)}
+                  aria-label="Select all messages"
+                />
+                <div className="relative flex-1 min-w-[120px]">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
                     placeholder="Search messages..."
@@ -202,7 +297,53 @@ export default function EmailInbox() {
                     <SelectItem value="archived">Archived</SelectItem>
                   </SelectContent>
                 </Select>
+                <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All priorities</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center gap-1">
+                  <Switch
+                    id="flagged-switch"
+                    checked={flaggedOnly}
+                    onCheckedChange={setFlaggedOnly}
+                  />
+                  <label htmlFor="flagged-switch" className="text-xs text-gray-600">
+                    Flagged
+                  </label>
+                </div>
               </div>
+              {selectedMessages.size > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bulkUpdateStatus(Array.from(selectedMessages), "archived")}
+                  >
+                    <Archive className="h-4 w-4 mr-2" /> Archive
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bulkUpdateStatus(Array.from(selectedMessages), "read")}
+                  >
+                    <MailOpen className="h-4 w-4 mr-2" /> Mark Read
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bulkUpdateStatus(Array.from(selectedMessages), "unread")}
+                  >
+                    <Mail className="h-4 w-4 mr-2" /> Mark Unread
+                  </Button>
+                </div>
+              )}
             </CardHeader>
             <CardContent className="p-0">
               <div className="max-h-96 overflow-y-auto">
@@ -227,6 +368,12 @@ export default function EmailInbox() {
                       }}
                     >
                       <div className="flex items-start gap-3">
+                        <Checkbox
+                          checked={selectedMessages.has(message.id)}
+                          onCheckedChange={(v) => toggleMessageSelection(message.id, !!v)}
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label={`Select message from ${message.email}`}
+                        />
                         <Avatar className="h-8 w-8">
                           <AvatarFallback className="bg-gradient-to-br from-purple-400 to-blue-400 text-white text-xs">
                             {`${message.firstName?.[0] ?? ""}${message.lastName?.[0] ?? ""}`}
@@ -321,6 +468,20 @@ export default function EmailInbox() {
                   <p className="text-gray-800 whitespace-pre-wrap">{selectedMessage.message}</p>
                 </div>
 
+                {threadMessages.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-gray-900">Previous messages</h3>
+                    <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
+                      {threadMessages.map((msg) => (
+                        <div key={msg.id} className="p-2 rounded border">
+                          <p className="text-xs text-gray-500">{formatDate(msg.createdAt, true)}</p>
+                          <p className="text-sm text-gray-700 truncate">{msg.subject}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-4">
                   <h3 className="font-semibold text-gray-900 flex items-center gap-2">
                     <Reply className="h-4 w-4" />
@@ -357,6 +518,7 @@ export default function EmailInbox() {
                       onChange={(e) => setReplyText(e.target.value)}
                       rows={6}
                       className="resize-none"
+                      ref={replyRef}
                       disabled={!!emailError}
                     />
                   </div>

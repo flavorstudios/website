@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { ChevronDown, Filter } from "lucide-react"
@@ -22,6 +23,8 @@ export function CategoryDropdown({
   className,
 }: CategoryDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname()
+  const isAdmin = pathname?.startsWith("/admin")
 
   const selectedCategoryData = categories.find((cat) => cat.slug === selectedCategory)
   const displayText = selectedCategoryData?.name || placeholder
@@ -54,17 +57,26 @@ export function CategoryDropdown({
             }}
             className={`cursor-pointer ${selectedCategory === category.slug ? "bg-blue-50 text-blue-700" : ""}`}
           >
-            <div className="flex flex-col w-full">
-              <div className="flex items-center justify-between">
-                <span>{category.name}</span>
+            {isAdmin ? (
+              <div className="flex items-center justify-between w-full">
+                <span className="truncate">{category.name}</span>
                 {category.count > 0 && (
                   <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">{category.count}</span>
                 )}
               </div>
-              {category.tooltip && (
-                <span className="text-xs text-gray-500 mt-0.5">{category.tooltip}</span>
-              )}
-            </div>
+              ) : (
+              <div className="flex flex-col w-full">
+                <div className="flex items-center justify-between">
+                  <span>{category.name}</span>
+                  {category.count > 0 && (
+                    <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">{category.count}</span>
+                  )}
+                </div>
+                {category.tooltip && (
+                  <span className="text-xs text-gray-500 mt-0.5">{category.tooltip}</span>
+                )}
+              </div>
+            )}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

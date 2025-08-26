@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import AdminPageHeader from "@/components/AdminPageHeader";
 import { fetcher } from "@/lib/fetcher";
 import { useToast } from "@/hooks/use-toast";
-import { Download } from "lucide-react";
+import { Download, Star } from "lucide-react";
 
 interface Submission {
   id: string;
@@ -36,6 +36,7 @@ interface Submission {
   interviewAt?: string;
   reviewed?: boolean;
   createdAt?: string;
+  rating?: number;
 }
 
 const STATUS_OPTIONS = [
@@ -55,6 +56,9 @@ export default function Applications() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [tagFilter, setTagFilter] = useState("");
+  const [ratingFilter, setRatingFilter] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [selected, setSelected] = useState<Submission | null>(null);
   const { toast } = useToast();
@@ -69,6 +73,14 @@ export default function Applications() {
   });
 
   const submissions = data?.submissions || [];
+  const prevCount = useRef(0);
+
+  useEffect(() => {
+    if (submissions.length > prevCount.current && prevCount.current !== 0) {
+      toast.success("New applications received");
+    }
+    prevCount.current = submissions.length;
+  }, [submissions.length, toast]);
 
   const statusCounts = STATUS_OPTIONS.map((opt) => ({
     ...opt,
@@ -92,6 +104,7 @@ export default function Applications() {
 
   const markReviewed = async (id: string) => {
     await updateSubmission(id, { status: "reviewed", reviewed: true });
+    toast.success("Application marked as reviewed");
   };
 
   const filtered = submissions.filter((s) => {
@@ -110,7 +123,19 @@ export default function Applications() {
       tags.some((t) =>
         s.tags?.map((tag) => tag.toLowerCase()).includes(t)
       );
-    return matchSearch && matchStatus && matchTags;
+    const matchRating =
+      ratingFilter === "all" || (s.rating || 0) >= Number(ratingFilter);
+    const created = s.createdAt ? new Date(s.createdAt) : null;
+    const matchStart = !startDate || (created && created >= new Date(startDate));
+    const matchEnd = !endDate || (created && created <= new Date(endDate));
+    return (
+      matchSearch &&
+      matchStatus &&
+      matchTags &&
+      matchRating &&
+      matchStart &&
+      matchEnd
+    );
   });
 
   const sorted = [...filtered].sort((a, b) => {
@@ -130,6 +155,8 @@ export default function Applications() {
         return getStatusInfo(a.status, a.reviewed).value.localeCompare(
           getStatusInfo(b.status, b.reviewed).value
         );
+      case "rating":
+        return (b.rating || 0) - (a.rating || 0);  
       default:
         return (
           new Date(b.createdAt || 0).getTime() -
@@ -148,6 +175,7 @@ export default function Applications() {
       "Status",
       "Interview",
       "Submitted",
+      "Rating",
     ];
     const rows = sorted.map((s) => [
       s.firstName || "",
@@ -158,6 +186,7 @@ export default function Applications() {
       getStatusInfo(s.status, s.reviewed).label,
       s.interviewAt ? format(new Date(s.interviewAt), "yyyy-MM-dd HH:mm") : "",
       s.createdAt ? format(new Date(s.createdAt), "yyyy-MM-dd HH:mm") : "",
+      s.rating || "",
     ]);
     const csv = [headers, ...rows]
       .map((row) =>
@@ -243,6 +272,31 @@ export default function Applications() {
             onChange={(e) => setTagFilter(e.target.value)}
             className="w-full sm:w-40"
           />
+          <Select value={ratingFilter} onValueChange={setRatingFilter}>
+            <SelectTrigger className="w-28">
+              <SelectValue placeholder="Rating" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All ratings</SelectItem>
+              <SelectItem value="1">1+ stars</SelectItem>
+              <SelectItem value="2">2+ stars</SelectItem>
+              <SelectItem value="3">3+ stars</SelectItem>
+              <SelectItem value="4">4+ stars</SelectItem>
+              <SelectItem value="5">5 stars</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-full sm:w-40"
+          />
+          <Input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-full sm:w-40"
+          />
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-32">
               <SelectValue placeholder="Sort" />
@@ -252,6 +306,7 @@ export default function Applications() {
               <SelectItem value="oldest">Oldest</SelectItem>
               <SelectItem value="name">Name</SelectItem>
               <SelectItem value="status">Status</SelectItem>
+              <SelectItem value="rating">Rating</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -279,6 +334,7 @@ export default function Applications() {
                   <th className="p-3 text-left">Tags</th>
                   <th className="p-3 text-left">Submitted</th>
                   <th className="p-3 text-left">Interview</th>
+                  <th className="p-3 text-left">Rating</th>
                   <th className="p-3 text-left">Status</th>
                   <th className="p-3" />
                 </tr>
@@ -308,6 +364,20 @@ export default function Applications() {
                       <td className="p-3 whitespace-nowrap">
                         {s.interviewAt ? format(new Date(s.interviewAt), "Pp") : "-"}
                       </td>
+                      <td className="p-3">
+                        <div className="flex gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < (s.rating || 0)
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </td>
                       <td className="p-3 whitespace-nowrap">
                         <Badge className={info.class}>{info.label}</Badge>
                       </td>
@@ -326,7 +396,7 @@ export default function Applications() {
                 })}
                 {sorted.length === 0 && (
                   <tr>
-                    <td className="p-6 text-center text-gray-500" colSpan={8}>
+                    <td className="p-6 text-center text-gray-500" colSpan={9}>
                       No submissions found
                     </td>
                   </tr>
@@ -368,6 +438,18 @@ export default function Applications() {
                     Interview: {format(new Date(s.interviewAt), "Pp")}
                   </p>
                 )}
+                <div className="flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${
+                        i < (s.rating || 0)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
                 <div className="flex justify-end gap-2 pt-2">
                   <Button size="sm" variant="outline" onClick={() => setSelected(s)}>
                     View
@@ -417,6 +499,7 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
   const [notes, setNotes] = useState(submission.notes || "");
   const [tags, setTags] = useState(submission.tags?.join(", ") || "");
   const [interviewAt, setInterviewAt] = useState(submission.interviewAt || "");
+  const [rating, setRating] = useState(String(submission.rating || 0));
 
   const handleSave = async () => {
     const updates: Partial<Submission> = {
@@ -424,6 +507,7 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
       reviewed: status !== "new",
       notes,
       interviewAt,
+      rating: Number(rating) || undefined,
       tags: tags
         .split(",")
         .map((t) => t.trim())
@@ -516,6 +600,22 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
               onChange={(e) => setTags(e.target.value)}
               placeholder="tag1, tag2"
             />
+          </div>
+          <div>
+            <label className="text-sm font-medium">Rating</label>
+            <Select value={rating} onValueChange={setRating}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">None</SelectItem>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="4">4</SelectItem>
+                <SelectItem value="5">5</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <label className="text-sm font-medium">Interview</label>

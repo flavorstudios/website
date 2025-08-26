@@ -67,3 +67,31 @@ export async function PATCH(
     return NextResponse.json({ error: "Failed to update user" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ uid: string }> }
+) {
+  if (!(await requireAdmin(request, "canManageUsers"))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const { uid } = await params;
+  try {
+    await adminAuth.deleteUser(uid);
+    const actor = await getSessionInfo(request);
+    try {
+      await adminDb.collection("admin_audit_logs").add({
+        actor: actor?.email || actor?.uid || "unknown",
+        action: "delete_user",
+        target: uid,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (e) {
+      logError("admin-users:audit", e);
+    }
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    logError("admin-users:delete", err);
+    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
+  }
+}

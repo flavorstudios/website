@@ -16,7 +16,10 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status") || "all"
     const sort = searchParams.get("sort") || "date"
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1)
-    const PER_PAGE = 10
+    const PER_PAGE = Math.max(
+      1,
+      parseInt(searchParams.get("perPage") || "10", 10) || 10,
+    )
 
     const blogs = await blogStore.getAll()
 

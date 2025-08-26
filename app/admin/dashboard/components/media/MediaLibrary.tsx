@@ -12,6 +12,7 @@ import type {
   SortBy,
   DateFilter,
   UsageFilter,
+  SortOrder,
 } from "@/types/media";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,17 +27,63 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [sortBy, setSortBy] = useState<SortBy>("date");
+  const [sortDir, setSortDir] = useState<SortOrder>("desc");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
   const [usageFilter, setUsageFilter] = useState<UsageFilter>("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [tagFilter, setTagFilter] = useState("");
 
+  // Load persisted preferences
+  useEffect(() => {
+    const raw = typeof window !== "undefined" ? localStorage.getItem("mediaLibraryPrefs") : null;
+    if (!raw) return;
+    try {
+      const prefs = JSON.parse(raw) as Partial<{
+        view: "grid" | "list";
+        typeFilter: TypeFilter;
+        sortBy: SortBy;
+        sortDir: SortOrder;
+        dateFilter: DateFilter;
+        usageFilter: UsageFilter;
+        favoritesOnly: boolean;
+        tagFilter: string;
+      }>;
+      if (prefs.view) setView(prefs.view);
+      if (prefs.typeFilter) setTypeFilter(prefs.typeFilter);
+      if (prefs.sortBy) setSortBy(prefs.sortBy);
+      if (prefs.sortDir) setSortDir(prefs.sortDir);
+      if (prefs.dateFilter) setDateFilter(prefs.dateFilter);
+      if (prefs.usageFilter) setUsageFilter(prefs.usageFilter);
+      if (typeof prefs.favoritesOnly === "boolean") setFavoritesOnly(prefs.favoritesOnly);
+      if (prefs.tagFilter) setTagFilter(prefs.tagFilter);
+    } catch {
+      // ignore parsing errors
+    }
+  }, []);
+
+  // Persist preferences
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const prefs = {
+      view,
+      typeFilter,
+      sortBy,
+      sortDir,
+      dateFilter,
+      usageFilter,
+      favoritesOnly,
+      tagFilter,
+    };
+    localStorage.setItem("mediaLibraryPrefs", JSON.stringify(prefs));
+  }, [view, typeFilter, sortBy, sortDir, dateFilter, usageFilter, favoritesOnly, tagFilter]);
+
   // Reset all filters back to defaults
   const handleResetFilters = () => {
     setSearch("");
     setTypeFilter("all");
     setSortBy("date");
+    setSortDir("desc");
     setDateFilter("all");
     setUsageFilter("all");
     setFavoritesOnly(false);
@@ -47,6 +94,7 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
     search !== "" ||
     typeFilter !== "all" ||
     sortBy !== "date" ||
+    sortDir !== "desc" ||
     dateFilter !== "all" ||
     usageFilter !== "all" ||
     favoritesOnly ||
@@ -161,25 +209,27 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
     })
     // Sorting
     .sort((a, b) => {
+      let result = 0;
       if (sortBy === "name") {
         const an = (a.filename || a.name || "").toString();
         const bn = (b.filename || b.name || "").toString();
-        return an.localeCompare(bn);
-      }
-      if (sortBy === "size") {
+        result = an.localeCompare(bn);
+      } else if (sortBy === "size") {
         const as = a.size ?? 0;
         const bs = b.size ?? 0;
-        return bs - as;
+        result = as - bs;
+      } else {
+        const aDate =
+          typeof a.createdAt === "number"
+            ? a.createdAt
+            : new Date(a.createdAt).getTime();
+        const bDate =
+          typeof b.createdAt === "number"
+            ? b.createdAt
+            : new Date(b.createdAt).getTime();
+        result = aDate - bDate;
       }
-      const aDate =
-        typeof a.createdAt === "number"
-          ? a.createdAt
-          : new Date(a.createdAt).getTime();
-      const bDate =
-        typeof b.createdAt === "number"
-          ? b.createdAt
-          : new Date(b.createdAt).getTime();
-      return bDate - aDate;
+      return sortDir === "asc" ? result : -result;
     });
 
     const allTags = Array.from(new Set(items.flatMap((m) => m.tags ?? []))).sort();
@@ -285,6 +335,8 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
         onTypeFilter={setTypeFilter}
         sortBy={sortBy}
         onSortBy={setSortBy}
+        sortDir={sortDir}
+        onSortDirToggle={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
         dateFilter={dateFilter}
         onDateFilter={setDateFilter}
         usageFilter={usageFilter}

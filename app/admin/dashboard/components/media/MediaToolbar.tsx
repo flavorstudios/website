@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Star } from "lucide-react";
 
-import type { TypeFilter, SortBy, DateFilter, UsageFilter } from "@/types/media";
+import type { TypeFilter, SortBy, DateFilter, UsageFilter, SortOrder } from "@/types/media";
 
 interface Props {
   search: string;
@@ -20,6 +20,8 @@ interface Props {
   onTypeFilter: (val: TypeFilter) => void;
   sortBy: SortBy;
   onSortBy: (val: SortBy) => void;
+  sortDir: SortOrder;
+  onSortDirToggle: () => void;
   dateFilter: DateFilter;
   onDateFilter: (val: DateFilter) => void;
   view: "grid" | "list";
@@ -44,6 +46,8 @@ export default function MediaToolbar({
   onTypeFilter,
   sortBy,
   onSortBy,
+  sortDir,
+  onSortDirToggle,
   dateFilter,
   onDateFilter,
   view,
@@ -70,14 +74,14 @@ export default function MediaToolbar({
           aria-label="Search media"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-48"
+          className="w-full sm:w-48"
         />
 
         <Select
           value={typeFilter}
           onValueChange={(val) => onTypeFilter(val as TypeFilter)}
         >
-          <SelectTrigger className="w-36" aria-label="Type">
+          <SelectTrigger className="w-full sm:w-36" aria-label="Type">
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>
@@ -88,20 +92,31 @@ export default function MediaToolbar({
         </Select>
 
         <Select value={sortBy} onValueChange={(val) => onSortBy(val as SortBy)}>
-          <SelectTrigger className="w-36" aria-label="Sort">
+          <SelectTrigger className="w-full sm:w-36" aria-label="Sort">
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="date">Date</SelectItem>
             <SelectItem value="name">Name</SelectItem>
+            <SelectItem value="size">Size</SelectItem>
           </SelectContent>
         </Select>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onSortDirToggle}
+          aria-label="Toggle sort direction"
+          className="w-full sm:w-auto"
+        >
+          {sortDir === "asc" ? "Asc" : "Desc"}
+        </Button>
         
         <Select
           value={dateFilter}
           onValueChange={(val) => onDateFilter(val as DateFilter)}
         >
-          <SelectTrigger className="w-36" aria-label="Date">
+          <SelectTrigger className="w-full sm:w-36" aria-label="Date">
             <SelectValue placeholder="Date" />
           </SelectTrigger>
           <SelectContent>
@@ -113,7 +128,7 @@ export default function MediaToolbar({
 
         {availableTags.length > 0 && (
           <Select value={tagFilter} onValueChange={onTagFilter}>
-            <SelectTrigger className="w-36" aria-label="Tag">
+            <SelectTrigger className="w-full sm:w-36" aria-label="Tag">
               <SelectValue placeholder="Tag" />
             </SelectTrigger>
             <SelectContent>
@@ -128,7 +143,7 @@ export default function MediaToolbar({
         )}
 
         <Select value={usageFilter} onValueChange={(val) => onUsageFilter(val as UsageFilter)}>
-          <SelectTrigger className="w-36" aria-label="Usage">
+          <SelectTrigger className="w-full sm:w-36" aria-label="Usage">
             <SelectValue placeholder="Usage" />
           </SelectTrigger>
           <SelectContent>
@@ -143,18 +158,28 @@ export default function MediaToolbar({
           size="sm"
           onClick={onFavoritesToggle}
           aria-pressed={favoritesOnly}
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 w-full sm:w-auto"
         >
           <Star className={favoritesOnly ? "w-4 h-4 fill-current" : "w-4 h-4"} />
           Favorites
         </Button>
 
-        <Button variant="outline" size="sm" onClick={onToggleView}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onToggleView}
+          className="w-full sm:w-auto"
+        >
           {view === "grid" ? "List View" : "Grid View"}
         </Button>
 
         {canReset && (
-          <Button variant="ghost" size="sm" onClick={onResetFilters}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onResetFilters}
+            className="w-full sm:w-auto"
+          >
             Reset
           </Button>
         )}

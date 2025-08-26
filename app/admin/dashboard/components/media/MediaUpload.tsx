@@ -2,6 +2,7 @@
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 import type { MediaDoc } from "@/types/media";
 
 interface UploadItem {
@@ -13,6 +14,7 @@ interface UploadItem {
 export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDoc) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploads, setUploads] = useState<UploadItem[]>([]);
+  const [dragging, setDragging] = useState(false);
 
   // Open file dialog when global hotkey fires
   useEffect(() => {
@@ -56,14 +58,26 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
   // Drag and drop handler
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    setDragging(false);
     handleFiles(e.dataTransfer.files);
   };
 
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (!dragging) setDragging(true);
+  };
+
+  const onDragLeave = () => setDragging(false);
+
   return (
     <div
-      className="mt-4 border border-dashed rounded p-4 text-center cursor-pointer"
+      className={cn(
+        "mt-4 border border-dashed rounded p-4 text-center cursor-pointer",
+        dragging && "bg-muted"
+      )}
       onDrop={onDrop}
-      onDragOver={(e) => e.preventDefault()}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
       onClick={() => inputRef.current?.click()}
       tabIndex={0}
       role="button"
@@ -79,12 +93,14 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
         aria-label="Select media files"
       />
       <p className="text-sm mb-2">Drag and drop files here or click to select</p>
-      {uploads.map((u) => (
-        <div key={u.id} className="mt-2 text-left">
-          <span className="text-xs">{u.file.name}</span>
-          <Progress value={u.progress} className="mt-1" />
-        </div>
-      ))}
+      <div aria-live="polite">
+        {uploads.map((u) => (
+          <div key={u.id} className="mt-2 text-left">
+            <span className="text-xs">{u.file.name}</span>
+            <Progress value={u.progress} className="mt-1" />
+          </div>
+        ))}
+      </div>
       <Button
         onClick={() => inputRef.current?.click()}
         size="sm"

@@ -14,15 +14,13 @@ export async function PUT(
   const { postId, commentId } = await params;
   try {
     const body = await request.json();
-    const comment = await commentStore.updateStatus(
-      postId,
-      commentId,
-      body.status
-    );
-    if (!comment) {
-      return NextResponse.json({ error: "Comment not found" }, { status: 404 });
+    if (body.status) {
+      await commentStore.updateStatus(postId, commentId, body.status);
     }
-    return NextResponse.json({ comment });
+    if (typeof body.flagged === "boolean") {
+      await commentStore.updateFlag(postId, commentId, body.flagged);
+    }
+    return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to update comment" }, { status: 500 });
   }

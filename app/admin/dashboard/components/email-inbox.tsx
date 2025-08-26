@@ -12,6 +12,7 @@ import {
   Filter,
   Send,
   Tag,
+  ArrowUpDown,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -78,8 +79,10 @@ export default function EmailInbox() {
   const [emailError, setEmailError] = useState<string | null>(null)
   const [loadingState, setLoadingState] = useState(true)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc")
   const replyRef = useRef<HTMLTextAreaElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const detailRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch("/api/admin/from-addresses")
@@ -114,14 +117,21 @@ export default function EmailInbox() {
     loadMessages()
   }, [])
 
-  const filteredMessages = messages.filter((message) => {
-    const fullName = `${message.firstName} ${message.lastName}`.toLowerCase()
-    const search = searchTerm.toLowerCase()
-    const matchesSearch =
-      fullName.includes(search) ||
-      message.email.toLowerCase().includes(search) ||
-      message.subject.toLowerCase().includes(search) ||
-      message.message.toLowerCase().includes(search)
+  useEffect(() => {
+    if (selectedMessage && detailRef.current) {
+      detailRef.current.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [selectedMessage])
+
+  const filteredMessages = messages
+    .filter((message) => {
+      const fullName = `${message.firstName} ${message.lastName}`.toLowerCase()
+      const search = searchTerm.toLowerCase()
+      const matchesSearch =
+        fullName.includes(search) ||
+        message.email.toLowerCase().includes(search) ||
+        message.subject.toLowerCase().includes(search) ||
+        message.message.toLowerCase().includes(search)
 
     const matchesStatus = filterStatus === "all" || message.status === filterStatus
     const matchesPriority = priorityFilter === "all" || message.priority === priorityFilter
@@ -131,14 +141,19 @@ export default function EmailInbox() {
     const matchesStarred = !starredOnly || message.starred  
 
     return (
-      matchesSearch &&
-      matchesStatus &&
-      matchesPriority &&
-      matchesFlagged &&
-      matchesLabel &&
-      matchesStarred
-    )
-  })
+        matchesSearch &&
+        matchesStatus &&
+        matchesPriority &&
+        matchesFlagged &&
+        matchesLabel &&
+        matchesStarred
+      )
+    })
+    .sort((a, b) => {
+      const aTime = new Date(a.createdAt).getTime()
+      const bTime = new Date(b.createdAt).getTime()
+      return sortOrder === "desc" ? bTime - aTime : aTime - bTime
+    })
 
   const toggleMessageSelection = (id: string, checked: boolean) => {
     setSelectedMessages((prev) => {
@@ -280,9 +295,14 @@ export default function EmailInbox() {
       } else if (e.key === "r" && selectedMessage) {
         e.preventDefault()
         replyRef.current?.focus()
-        } else if (e.key === "s" && selectedMessage) {
+      } else if (e.key === "s" && selectedMessage) {
         e.preventDefault()
         toggleStar(selectedMessage.id, !selectedMessage.starred)
+      } else if (e.key === "m" && selectedMessage) {
+        e.preventDefault()
+        const nextStatus =
+          selectedMessage.status === "read" ? "unread" : "read"
+        updateMessageStatus(selectedMessage.id, nextStatus)  
       } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f") {
         e.preventDefault()
         searchInputRef.current?.focus()
@@ -471,6 +491,19 @@ export default function EmailInbox() {
                     <SelectItem value="low">Low</SelectItem>
                   </SelectContent>
                 </Select>
+                <Select
+                  value={sortOrder}
+                  onValueChange={(v) => setSortOrder(v as "desc" | "asc")}
+                >
+                  <SelectTrigger className="w-32">
+                    <ArrowUpDown className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Sort" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="desc">Newest first</SelectItem>
+                    <SelectItem value="asc">Oldest first</SelectItem>
+                  </SelectContent>
+                </Select>
                 <div className="flex items-center gap-1">
                   <Switch
                     id="flagged-switch"
@@ -616,126 +649,135 @@ export default function EmailInbox() {
         {/* Message Detail & Reply */}
         <div className="lg:col-span-2">
           {selectedMessage ? (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{selectedMessage.subject}</CardTitle>
-                    {selectedMessage.flagged && (
-                      <Badge variant="destructive" className="ml-2" aria-label="Flagged message">
-                        Flagged
-                      </Badge>
-                    )}
-                    <p className="text-sm text-gray-600 mt-1">
-                      From: {selectedMessage.firstName} {selectedMessage.lastName} &lt;{selectedMessage.email}&gt;
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">{formatDate(selectedMessage.createdAt, true)}</p>
-                    {selectedMessage.scores && (
-                      <div className="mt-2 text-xs text-gray-600">
-                        <p className="font-semibold mb-1">Moderation scores:</p>
-                        <ul className="list-disc ml-4 space-y-0.5">
-                          {typeof selectedMessage.scores.toxicity === "number" && (
-                            <li>Toxicity: {selectedMessage.scores.toxicity.toFixed(2)}</li>
-                          )}
-                          {typeof selectedMessage.scores.insult === "number" && (
-                            <li>Insult: {selectedMessage.scores.insult.toFixed(2)}</li>
-                          )}
-                          {typeof selectedMessage.scores.threat === "number" && (
-                            <li>Threat: {selectedMessage.scores.threat.toFixed(2)}</li>
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                    {selectedMessage.labels && selectedMessage.labels.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {selectedMessage.labels.map((lbl) => (
-                          <Badge key={lbl} variant="outline" className="text-xs">
-                            {lbl}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
+            <div ref={detailRef}>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      onClick={() => updateMessageStatus(selectedMessage.id, "archived")}
+                      className="lg:hidden mr-2"
+                      onClick={() => setSelectedMessage(null)}
                     >
-                      <Archive className="h-4 w-4 mr-2" />
-                      Archive
+                      Back
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        toggleStar(selectedMessage.id, !selectedMessage.starred)
-                      }
-                      aria-label={
-                        selectedMessage.starred ? "Unstar message" : "Star message"
-                      }
-                    >
-                      <Star
-                        className={`h-4 w-4 ${
-                          selectedMessage.starred
-                            ? "fill-yellow-400 text-yellow-400"
-                            : ""
-                        }`}
-                      />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                          <Tag className="h-4 w-4 mr-2" /> Labels
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Labels</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {AVAILABLE_LABELS.map((lbl) => (
-                          <DropdownMenuCheckboxItem
-                            key={lbl}
-                            checked={selectedMessage.labels?.includes(lbl)}
-                            onCheckedChange={(v) =>
-                              handleLabelChange(selectedMessage.id, lbl, !!v)
-                            }
-                          >
-                            {lbl}
-                          </DropdownMenuCheckboxItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-gray-900">Conversation</h3>
-                  <div className="max-h-64 overflow-y-auto space-y-3 pr-2">
-                    {conversation.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className={`p-3 rounded border cursor-pointer ${
-                          msg.id === selectedMessage.id
-                            ? "bg-blue-50"
-                            : "bg-gray-50"
-                        }`}
-                        onClick={() => setSelectedMessage(msg)}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium text-gray-700">
-                            {msg.firstName} {msg.lastName}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {formatDate(msg.createdAt, true)}
-                          </span>
+                    <div>
+                      <CardTitle className="text-lg">{selectedMessage.subject}</CardTitle>
+                      {selectedMessage.flagged && (
+                        <Badge variant="destructive" className="ml-2" aria-label="Flagged message">
+                          Flagged
+                        </Badge>
+                      )}
+                      <p className="text-sm text-gray-600 mt-1">
+                        From: {selectedMessage.firstName} {selectedMessage.lastName} &lt;{selectedMessage.email}&gt;
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">{formatDate(selectedMessage.createdAt, true)}</p>
+                      {selectedMessage.scores && (
+                        <div className="mt-2 text-xs text-gray-600">
+                          <p className="font-semibold mb-1">Moderation scores:</p>
+                          <ul className="list-disc ml-4 space-y-0.5">
+                            {typeof selectedMessage.scores.toxicity === "number" && (
+                              <li>Toxicity: {selectedMessage.scores.toxicity.toFixed(2)}</li>
+                            )}
+                            {typeof selectedMessage.scores.insult === "number" && (
+                              <li>Insult: {selectedMessage.scores.insult.toFixed(2)}</li>
+                            )}
+                            {typeof selectedMessage.scores.threat === "number" && (
+                              <li>Threat: {selectedMessage.scores.threat.toFixed(2)}</li>
+                            )}
+                          </ul>
                         </div>
-                        <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                          {msg.message}
-                        </p>
-                      </div>
-                    ))}
+                        )}
+                      {selectedMessage.labels && selectedMessage.labels.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {selectedMessage.labels.map((lbl) => (
+                            <Badge key={lbl} variant="outline" className="text-xs">
+                              {lbl}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => updateMessageStatus(selectedMessage.id, "archived")}
+                      >
+                        <Archive className="h-4 w-4 mr-2" />
+                        Archive
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          toggleStar(selectedMessage.id, !selectedMessage.starred)
+                        }
+                        aria-label={
+                          selectedMessage.starred ? "Unstar message" : "Star message"
+                        }
+                      >
+                        <Star
+                          className={`h-4 w-4 ${
+                            selectedMessage.starred
+                              ? "fill-yellow-400 text-yellow-400"
+                              : ""
+                          }`}
+                        />
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm">
+                            <Tag className="h-4 w-4 mr-2" /> Labels
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Labels</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {AVAILABLE_LABELS.map((lbl) => (
+                            <DropdownMenuCheckboxItem
+                              key={lbl}
+                              checked={selectedMessage.labels?.includes(lbl)}
+                              onCheckedChange={(v) =>
+                                handleLabelChange(selectedMessage.id, lbl, !!v)
+                              }
+                            >
+                              {lbl}
+                            </DropdownMenuCheckboxItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
+                  </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-gray-900">Conversation</h3>
+                    <div className="max-h-64 overflow-y-auto space-y-3 pr-2">
+                      {conversation.map((msg) => (
+                        <div
+                          key={msg.id}
+                          className={`p-3 rounded border cursor-pointer ${
+                            msg.id === selectedMessage.id
+                              ? "bg-blue-50"
+                              : "bg-gray-50"
+                          }`}
+                          onClick={() => setSelectedMessage(msg)}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium text-gray-700">
+                              {msg.firstName} {msg.lastName}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {formatDate(msg.createdAt, true)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                            {msg.message}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
 
                   <div className="space-y-4">
                   <h3 className="font-semibold text-gray-900 flex items-center gap-2">
@@ -791,7 +833,8 @@ export default function EmailInbox() {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+              </Card>
+            </div>
           ) : (
             <Card>
               <CardContent className="flex items-center justify-center h-96">

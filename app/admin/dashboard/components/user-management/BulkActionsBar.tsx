@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Shield, Ban, UserCheck } from "lucide-react";
+import { Shield, Ban, UserCheck, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +18,7 @@ interface BulkActionsBarProps {
   onEnable: () => void;
   onDisable: () => void;
   onMakeAdmin: () => void;
+  onDelete: () => void;
 }
 
 export default function BulkActionsBar({
@@ -25,12 +26,16 @@ export default function BulkActionsBar({
   onEnable,
   onDisable,
   onMakeAdmin,
+  onDelete,
 }: BulkActionsBarProps) {
-  const [pending, setPending] = useState<null | "enable" | "disable" | "admin">(null);
+  const [pending, setPending] = useState<
+    null | "enable" | "disable" | "admin" | "delete"
+  >(null);
   const confirm = () => {
     if (pending === "enable") onEnable();
     else if (pending === "disable") onDisable();
     else if (pending === "admin") onMakeAdmin();
+    else if (pending === "delete") onDelete();
     setPending(null);
   };
   if (count === 0) return null;
@@ -39,7 +44,9 @@ export default function BulkActionsBar({
       ? "enable"
       : pending === "disable"
         ? "disable"
-        : "make admin";
+        : pending === "admin"
+          ? "make admin"
+          : "delete";
   return (
     <div
       role="region"
@@ -57,6 +64,9 @@ export default function BulkActionsBar({
       </Button>
       <Button variant="outline" size="sm" onClick={() => setPending("admin")}> 
         <Shield className="mr-1 h-4 w-4" /> Make Admin
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => setPending("delete")}>
+        <Trash2 className="mr-1 h-4 w-4" /> Delete
       </Button>
       <AlertDialog open={!!pending} onOpenChange={(o) => !o && setPending(null)}>
         <AlertDialogContent>

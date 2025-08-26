@@ -466,6 +466,7 @@ export default function VideoManager() {
   const [filterFeatured, setFilterFeatured] = useState<"all" | "featured" | "regular">("all");
   const [filterTag, setFilterTag] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "title" | "status" | "views">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [videosPerPage, setVideosPerPage] = useState(10);
@@ -483,6 +484,7 @@ export default function VideoManager() {
     setFilterFeatured("all");
     setFilterTag("");
     setSortBy("date");
+    setSortOrder("desc");
     setSelected(new Set());
     setVideosPerPage(10);
     setCurrentPage(1);
@@ -641,6 +643,29 @@ export default function VideoManager() {
     }
   };
 
+  const exportCSV = () => {
+    const headers = ["Title", "Slug", "Category", "Status", "Published", "Views", "Duration"];
+    const rows = sortedVideos.map((v) => [
+      v.title,
+      v.slug,
+      v.category,
+      v.status,
+      v.publishedAt,
+      String(v.views ?? 0),
+      v.duration || "",
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "videos.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   // Filtering & sorting -------------------------------------------------------
   const filteredVideos = useMemo(() => {
     const term = deferredSearch.trim().toLowerCase();
@@ -673,14 +698,15 @@ export default function VideoManager() {
   const sortedVideos = useMemo(() => {
     const arr = [...filteredVideos];
     arr.sort((a, b) => {
-      if (sortBy === "title") return a.title.localeCompare(b.title);
-      if (sortBy === "status") return a.status.localeCompare(b.status);
-      if (sortBy === "views") return (b.views || 0) - (a.views || 0);
-      // date (default)
-      return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      let cmp = 0;
+      if (sortBy === "title") cmp = a.title.localeCompare(b.title);
+      else if (sortBy === "status") cmp = a.status.localeCompare(b.status);
+      else if (sortBy === "views") cmp = (a.views || 0) - (b.views || 0);
+      else cmp = new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime();
+      return sortOrder === "asc" ? cmp : -cmp;
     });
     return arr;
-  }, [filteredVideos, sortBy]);
+  }, [filteredVideos, sortBy, sortOrder]);
 
   const totalPages = Math.ceil(sortedVideos.length / videosPerPage) || 1;
   const paginatedVideos = useMemo(
@@ -691,7 +717,7 @@ export default function VideoManager() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterCategory, filterStatus, filterFeatured, sortBy, filterTag, videosPerPage]);
+  }, [searchTerm, filterCategory, filterStatus, filterFeatured, sortBy, sortOrder, filterTag, videosPerPage]);
 
   // Bulk actions --------------------------------------------------------------
   const handleBulk = async (action: "publish" | "unpublish" | "delete") => {
@@ -721,12 +747,27 @@ export default function VideoManager() {
   const startIndex = (currentPage - 1) * videosPerPage + 1;
   const endIndex = Math.min(startIndex + paginatedVideos.length - 1, totalVideos);
 
+  const stats = useMemo(() => {
+    const published = videos.filter((v) => v.status === "published").length;
+    const draft = videos.filter((v) => v.status === "draft").length;
+    const unlisted = videos.filter((v) => v.status === "unlisted").length;
+    return { total: videos.length, published, draft, unlisted };
+  }, [videos]);
+
   return (
     <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}> 
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <AdminPageHeader title="Video Manager" subtitle="Manage your YouTube content and episodes" />
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={exportCSV}
+            aria-label="Export videos to CSV"
+            title="Export videos to CSV"
+          >
+            Export CSV
+          </Button>
           <Button
             onClick={() => setShowCreateForm(true)}
             className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
@@ -735,6 +776,26 @@ export default function VideoManager() {
           >
             Add New Video
           </Button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="rounded-lg border bg-white p-4 text-center shadow-sm">
+          <div className="text-xl font-semibold">{stats.total}</div>
+          <div className="text-xs text-gray-500">Total</div>
+        </div>
+        <div className="rounded-lg border bg-white p-4 text-center shadow-sm">
+          <div className="text-xl font-semibold">{stats.published}</div>
+          <div className="text-xs text-gray-500">Published</div>
+        </div>
+        <div className="rounded-lg border bg-white p-4 text-center shadow-sm">
+          <div className="text-xl font-semibold">{stats.draft}</div>
+          <div className="text-xs text-gray-500">Drafts</div>
+        </div>
+        <div className="rounded-lg border bg-white p-4 text-center shadow-sm">
+          <div className="text-xl font-semibold">{stats.unlisted}</div>
+          <div className="text-xs text-gray-500">Unlisted</div>
         </div>
       </div>
 
@@ -808,6 +869,16 @@ export default function VideoManager() {
             <SelectItem value="title">Title</SelectItem>
             <SelectItem value="status">Status</SelectItem>
             <SelectItem value="views">Views</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={sortOrder} onValueChange={(val) => setSortOrder(val as any)}>
+          <SelectTrigger className="w-full sm:w-32" aria-label="Sort order">
+            <SelectValue placeholder="Order" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="desc">Desc</SelectItem>
+            <SelectItem value="asc">Asc</SelectItem>
           </SelectContent>
         </Select>
 

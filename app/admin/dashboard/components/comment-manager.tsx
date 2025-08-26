@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { Textarea } from "@/components/ui/textarea"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +28,25 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Check, X, Trash2, MessageSquare, Search, AlertTriangle, Shield, Info } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
+  Check,
+  X,
+  Trash2,
+  MessageSquare,
+  Search,
+  AlertTriangle,
+  Shield,
+  Info,
+  Flag,
+} from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { formatDate } from "@/lib/date"
@@ -68,7 +88,12 @@ export default function CommentManager() {
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [page, setPage] = useState(1)
-  const pageSize = 10
+  const [pageSize, setPageSize] = useState(10)
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [refreshInterval, setRefreshInterval] = useState(60000)
+  const [replyTarget, setReplyTarget] = useState<Comment | null>(null)
+  const [replyContent, setReplyContent] = useState("")
+  const [replyLoading, setReplyLoading] = useState(false)
   const { toast } = useToast()
 
   const loadComments = useCallback(async () => {
@@ -86,9 +111,14 @@ export default function CommentManager() {
 
   useEffect(() => {
     loadComments()
-    const interval = setInterval(loadComments, 60000)
-    return () => clearInterval(interval)
+
   }, [loadComments])
+
+  useEffect(() => {
+    if (!autoRefresh) return
+    const interval = setInterval(loadComments, refreshInterval)
+    return () => clearInterval(interval)
+  }, [autoRefresh, refreshInterval, loadComments])
 
   const updateCommentStatus = async (
     id: string,
@@ -193,6 +223,62 @@ export default function CommentManager() {
     setDeleteTargets(targets)
   }
 
+  const toggleFlagged = async (comment: Comment) => {
+    try {
+      const res = await fetch(`/api/admin/comments/${comment.postId}/${comment.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          flagged: !comment.flagged,
+          postId: comment.postId,
+          commentId: comment.id,
+        }),
+        credentials: "include",
+      })
+      if (res.ok) {
+        await loadComments()
+        toast(!comment.flagged ? "Comment flagged." : "Flag removed.")
+      } else {
+        const data = await res.json()
+        toast(data.error || "Failed to update flag")
+      }
+    } catch {
+      toast("Failed to update flag")
+    }
+  }
+
+  const submitReply = async () => {
+    if (!replyTarget) return
+    setReplyLoading(true)
+    try {
+      const res = await fetch(
+        `/api/admin/comments/${replyTarget.postId}/${replyTarget.id}/reply`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content: replyContent,
+            postType: replyTarget.postType,
+          }),
+          credentials: "include",
+        }
+      )
+      if (res.ok) {
+        toast("Reply posted.")
+        setReplyTarget(null)
+        setReplyContent("")
+        await loadComments()
+      } else {
+        const data = await res.json()
+        toast(data.error || "Failed to post reply")
+      }
+    } catch {
+      toast("Failed to post reply")
+    } finally {
+      setReplyLoading(false)
+    }
+  }
+
   const filteredComments = comments.filter((comment) => {
     const matchesSearch =
       comment.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -227,7 +313,15 @@ export default function CommentManager() {
 
   useEffect(() => {
     setPage(1)
-  }, [searchTerm, activeTab, showFlaggedOnly, postTypeFilter, startDate, endDate])
+  }, [
+    searchTerm,
+    activeTab,
+    showFlaggedOnly,
+    postTypeFilter,
+    startDate,
+    endDate,
+    pageSize,
+  ])
 
   const getStatusCounts = () => ({
     all: comments.length,
@@ -321,6 +415,19 @@ export default function CommentManager() {
             className="w-[150px]"
             aria-label="End date"
           />
+          <Select
+            value={String(pageSize)}
+            onValueChange={(v) => setPageSize(Number(v))}
+          >
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder="Page size" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="25">25 / page</SelectItem>
+              <SelectItem value="50">50 / page</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="flex items-center space-x-2 pl-2">
             <Checkbox
               id="flagged-only"
@@ -330,6 +437,31 @@ export default function CommentManager() {
             <Label htmlFor="flagged-only" className="text-sm">
               Flagged
             </Label>
+            <div className="flex items-center space-x-2 pl-2">
+            <Switch
+              id="auto-refresh"
+              checked={autoRefresh}
+              onCheckedChange={(v) => setAutoRefresh(Boolean(v))}
+            />
+            <Label htmlFor="auto-refresh" className="text-sm">
+              Auto
+            </Label>
+          </div>
+          {autoRefresh && (
+            <Select
+              value={String(refreshInterval)}
+              onValueChange={(v) => setRefreshInterval(Number(v))}
+            >
+              <SelectTrigger className="w-[110px]">
+                <SelectValue placeholder="Interval" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="30000">30s</SelectItem>
+                <SelectItem value="60000">1m</SelectItem>
+                <SelectItem value="300000">5m</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
           </div>
         </div>
       </div>
@@ -431,6 +563,8 @@ export default function CommentManager() {
                     updateCommentStatus(id, postId, status)
                   }
                   onDelete={() => deleteComment(comment.id, comment.postId)}
+                  onToggleFlag={() => toggleFlagged(comment)}
+                  onReply={() => setReplyTarget(comment)}
                   selected={selectedIds.includes(comment.id)}
                   onSelect={() =>
                     setSelectedIds((ids) =>
@@ -490,21 +624,55 @@ export default function CommentManager() {
           </AlertDialogContent>
         </AlertDialog>
       )}
+      {replyTarget && (
+        <Dialog open onOpenChange={(open) => !open && setReplyTarget(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Reply to {replyTarget.author}</DialogTitle>
+              <DialogDescription>Send a public response.</DialogDescription>
+            </DialogHeader>
+            <Textarea
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="Write your reply..."
+              className="min-h-[120px]"
+            />
+            <DialogFooter className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setReplyTarget(null)}
+                disabled={replyLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={submitReply}
+                disabled={replyLoading || !replyContent.trim()}
+              >
+                {replyLoading ? "Sending..." : "Send Reply"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
 
-// ...CommentCard and EmptyState remain unchanged (as in your provided code)...
 function CommentCard({
   comment,
   onUpdateStatus,
   onDelete,
+  onToggleFlag,
+  onReply,
   selected,
   onSelect,
 }: {
   comment: Comment
   onUpdateStatus: (id: string, postId: string, status: Comment["status"]) => void
   onDelete: () => void
+  onToggleFlag?: () => void
+  onReply?: () => void
   selected?: boolean
   onSelect?: () => void
 }) {
@@ -617,6 +785,23 @@ function CommentCard({
               </div>
 
               <div className="flex items-center gap-2">
+                {onReply && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={onReply}
+                        aria-label="Reply to comment"
+                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                      >
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        Reply
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Reply to this comment</TooltipContent>
+                  </Tooltip>
+                )}
                 {comment.status !== "approved" && (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -649,6 +834,29 @@ function CommentCard({
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>Mark as spam</TooltipContent>
+                  </Tooltip>
+                )}
+                {onToggleFlag && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={onToggleFlag}
+                        aria-label={comment.flagged ? "Unflag comment" : "Flag comment"}
+                        className={cn(
+                          "border-gray-200",
+                          comment.flagged
+                            ? "text-red-600 hover:bg-red-50 border-red-200"
+                            : "text-gray-600 hover:bg-gray-50"
+                        )}
+                      >
+                        <Flag className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {comment.flagged ? "Remove flag" : "Flag for review"}
+                    </TooltipContent>
                   </Tooltip>
                 )}
                 <Tooltip>

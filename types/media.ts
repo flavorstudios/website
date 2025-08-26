@@ -10,6 +10,9 @@ export type DateFilter = "all" | "7d" | "30d";
 // Sorting options for the media library
 export type SortBy = "date" | "name" | "size";
 
+// Sort direction for media library
+export type SortOrder = "asc" | "desc";
+
 // Usage filter for media library (all files, only used, or only unused)
 export type UsageFilter = "all" | "used" | "unused";
 

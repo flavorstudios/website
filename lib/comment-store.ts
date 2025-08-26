@@ -166,6 +166,29 @@ export const commentStore = {
     }
   },
 
+  // Toggle flagged state on a comment
+  async updateFlag(
+    postId: string,
+    commentId: string,
+    flagged: boolean
+  ): Promise<Comment | null> {
+    try {
+      const ref = adminDb
+        .collection("comments")
+        .doc(String(postId))
+        .collection("entries")
+        .doc(commentId)
+
+      await ref.update({ flagged })
+      const doc = await ref.get()
+      if (!doc.exists) return null
+      return { id: doc.id, ...(doc.data() as FirestoreCommentDoc) }
+    } catch (error) {
+      console.error(`Failed to update flag for comment ${commentId}:`, error)
+      throw new Error("Failed to update comment flag")
+    }
+  },
+
   // Delete a comment
   async delete(postId: string, commentId: string): Promise<boolean> {
     try {

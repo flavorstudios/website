@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
   }
   try {
     const body = await request.json();
-    const { ids, role, disabled } = body || {};
+    const { ids, role, disabled, delete: del } = body || {};
     if (!Array.isArray(ids) || ids.some((id) => typeof id !== "string")) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
@@ -88,26 +88,44 @@ export async function POST(request: NextRequest) {
     if (typeof disabled !== "undefined" && typeof disabled !== "boolean") {
       return NextResponse.json({ error: "Invalid disabled value" }, { status: 400 });
     }
-    if (typeof role === "undefined" && typeof disabled === "undefined") {
+    if (del) {
+      if (typeof role !== "undefined" || typeof disabled !== "undefined") {
+        return NextResponse.json(
+          { error: "Cannot combine delete with other updates" },
+          { status: 400 },
+        );
+      }
+    } else if (typeof role === "undefined" && typeof disabled === "undefined") {
       return NextResponse.json({ error: "No updates specified" }, { status: 400 });
     }
     const actor = await getSessionInfo(request);
     const results: Record<string, { ok: boolean; error?: string }> = {};
     for (const uid of ids) {
       try {
-        if (typeof role !== "undefined") {
-          await setUserRole(uid, role);
+        if (del) {
+          await adminAuth.deleteUser(uid);
+          await adminDb.collection("admin_audit_logs").add({
+            actor: actor?.email || actor?.uid || "unknown",
+            action: "delete_user",
+            target: uid,
+            timestamp: new Date().toISOString(),
+          });
+        } else {
+          if (typeof role !== "undefined") {
+            await setUserRole(uid, role);
+          }
+          if (typeof disabled !== "undefined") {
+            await adminAuth.updateUser(uid, { disabled });
+          }
+          await adminDb.collection("admin_audit_logs").add({
+            actor: actor?.email || actor?.uid || "unknown",
+            action: "update_user",
+            target: uid,
+            changes: { role, disabled },
+            timestamp: new Date().toISOString(),
+          });
         }
-        if (typeof disabled !== "undefined") {
-          await adminAuth.updateUser(uid, { disabled });
-        }
-        await adminDb.collection("admin_audit_logs").add({
-          actor: actor?.email || actor?.uid || "unknown",
-          action: "update_user",
-          target: uid,
-          changes: { role, disabled },
-          timestamp: new Date().toISOString(),
-        });
+        
         results[uid] = { ok: true };
       } catch (e) {
         logError("admin-users:bulk", e);

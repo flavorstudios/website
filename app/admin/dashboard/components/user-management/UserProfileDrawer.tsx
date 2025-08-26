@@ -12,11 +12,23 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
 
 interface UserProfileDrawerProps {
   uid: string | null;
   open: boolean;
   onClose: () => void;
+  onDeleted?: () => void;
 }
 
 interface UserData {
@@ -37,7 +49,7 @@ interface AuditLog {
   timestamp: string;
 }
 
-export default function UserProfileDrawer({ uid, open, onClose }: UserProfileDrawerProps) {
+export default function UserProfileDrawer({ uid, open, onClose, onDeleted }: UserProfileDrawerProps) {
   const { toast } = useToast();
   const [user, setUser] = useState<UserData | null>(null);
   const [role, setRole] = useState("support");
@@ -45,6 +57,8 @@ export default function UserProfileDrawer({ uid, open, onClose }: UserProfileDra
   const [saving, setSaving] = useState(false);
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
 
   useEffect(() => {
     if (!uid || !open) return;
@@ -84,6 +98,28 @@ export default function UserProfileDrawer({ uid, open, onClose }: UserProfileDra
       // eslint-disable-next-line no-console
       console.error("Failed to update user", err);
       toast.error("Update failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!uid) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/users/${uid}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        toast.success("User deleted");
+        setConfirmDelete(false);
+        onDeleted?.();
+      } else {
+        toast.error(data.error || "Delete failed");
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to delete user", err);
+      toast.error("Delete failed");
     } finally {
       setSaving(false);
     }
@@ -160,9 +196,37 @@ export default function UserProfileDrawer({ uid, open, onClose }: UserProfileDra
                 </ul>
               )}
             </div>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Saving..." : "Save"}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? "Saving..." : "Save"}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => setConfirmDelete(true)}
+                disabled={saving}
+              >
+                <Trash2 className="mr-1 h-4 w-4" /> Delete
+              </Button>
+            </div>
+            <AlertDialog
+              open={confirmDelete}
+              onOpenChange={(o) => !o && setConfirmDelete(false)}
+            >
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete user?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>
+                    Confirm
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         ) : (
           <div className="flex items-center justify-center p-4">Loading...</div>

@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { Pagination } from "@/components/admin/Pagination";
 import AdminPageHeader from "@/components/AdminPageHeader";
 import { fetcher } from "@/lib/fetcher";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export default function BlogManager() {
   const { toast } = useToast();
@@ -45,7 +46,6 @@ export default function BlogManager() {
   const searchParams = useSearchParams();
 
   const [categories, setCategories] = useState<CategoryData[]>([]);
-  const POSTS_PER_PAGE = 10;
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
@@ -59,6 +59,21 @@ export default function BlogManager() {
   const status = searchParams.get("status") ?? "all";
   const sortBy = searchParams.get("sort") ?? "date";
   const currentPage = parseInt(searchParams.get("page") ?? "1", 10) || 1;
+  const perPage = parseInt(searchParams.get("perPage") ?? "10", 10) || 10;
+
+  const [searchInput, setSearchInput] = useState(search);
+  const debouncedSearch = useDebounce(searchInput, 500);
+
+  useEffect(() => {
+    if (debouncedSearch !== search) {
+      setParams({ search: debouncedSearch, page: "1" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
 
   // Helper to push updated query params
   const setParams = (overrides: Record<string, string>) => {
@@ -69,15 +84,16 @@ export default function BlogManager() {
     params.set("status", status);
     params.set("sort", sortBy);
     params.set("page", String(currentPage));
+    params.set("perPage", String(perPage));
     // apply overrides
     Object.entries(overrides).forEach(([k, v]) => params.set(k, v));
     router.push(`?${params.toString()}`);
   };
 
-  const handleSearchChange = (value: string) => setParams({ search: value, page: "1" });
+  const handleSearchChange = (value: string) => setSearchInput(value);
   const handleCategoryChange = (value: string) => setParams({ category: value, page: "1" });
   const handleStatusChange = (value: string) => setParams({ status: value, page: "1" });
-  const handleSortChange = (value: string) => setParams({ sort: value, page: "1" });
+  const handlePerPageChange = (value: string) => setParams({ perPage: value, page: "1" });
   const handlePageChange = (page: number) => setParams({ page: page.toString() });
 
   // SWR data sources (server-driven filtering/sorting/pagination)
@@ -91,7 +107,9 @@ export default function BlogManager() {
       category,
     )}&status=${encodeURIComponent(status)}&sort=${encodeURIComponent(
       sortBy,
-    )}&page=${encodeURIComponent(String(currentPage))}`,
+    )}&page=${encodeURIComponent(String(currentPage))}&perPage=${encodeURIComponent(
+      String(perPage),
+    )}`,
     fetcher,
     {
       // remove polling; rely on SSE
@@ -379,7 +397,7 @@ export default function BlogManager() {
         <div className="flex flex-wrap items-center gap-4">
           <Input
             placeholder="Search title..."
-            value={search}
+            value={searchInput}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="w-full sm:w-60"
             aria-label="Search by title"
@@ -411,6 +429,16 @@ export default function BlogManager() {
               <SelectItem value="date">Date</SelectItem>
               <SelectItem value="title">Title</SelectItem>
               <SelectItem value="status">Status</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={String(perPage)} onValueChange={handlePerPageChange}>
+            <SelectTrigger className="w-full sm:w-40" aria-label="Posts per page">
+              <SelectValue placeholder="Per page" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10 / page</SelectItem>
+              <SelectItem value="20">20 / page</SelectItem>
+              <SelectItem value="50">50 / page</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -463,7 +491,7 @@ export default function BlogManager() {
         <Pagination
           currentPage={currentPage}
           totalCount={postsData?.total ?? 0}
-          perPage={POSTS_PER_PAGE}
+          perPage={perPage}
           onPageChange={handlePageChange}
         />
 

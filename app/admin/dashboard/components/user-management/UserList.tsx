@@ -92,6 +92,15 @@ export default function UserList() {
     setPageToken(null);
   };
 
+  const handleResetFilters = () => {
+    setSearch("");
+    setRoleFilter("all");
+    setStatusFilter("all");
+    setSortBy("created");
+    setPageToken(null);
+    loadUsers(null);
+  };
+
   const bulkDisable = async (disable: boolean) => {
     try {
       const res = await fetch("/api/admin/users/bulk", {
@@ -138,6 +147,29 @@ export default function UserList() {
     }
   };
 
+  const bulkDelete = async () => {
+    try {
+      const res = await fetch("/api/admin/users/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selected, delete: true }),
+      });
+      const d = await res.json();
+      if (res.ok) {
+        toast.success("Users deleted");
+      } else {
+        toast.error(d.error || "Delete failed");
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Bulk delete failed", err);
+      toast.error("Delete failed");
+    } finally {
+      setSelected([]);
+      loadUsers(pageToken);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 flex-wrap">
@@ -145,7 +177,7 @@ export default function UserList() {
           placeholder="Search users"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-64"
+          className="w-full sm:w-64"
           aria-label="Search users"
           onKeyDown={(e) => {
             if (e.key === "Enter") handleSearch();
@@ -154,8 +186,15 @@ export default function UserList() {
         <Button onClick={handleSearch} aria-label="Search">
           Search
         </Button>
+        <Button
+          variant="outline"
+          onClick={handleResetFilters}
+          aria-label="Reset filters"
+        >
+          Reset
+        </Button>
         <Select value={roleFilter} onValueChange={handleRoleChange}>
-          <SelectTrigger className="w-40" aria-label="Role">
+          <SelectTrigger className="w-full sm:w-40" aria-label="Role">
             <SelectValue placeholder="Role" />
           </SelectTrigger>
           <SelectContent>
@@ -166,7 +205,7 @@ export default function UserList() {
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={handleStatusChange}>
-          <SelectTrigger className="w-40" aria-label="Status">
+          <SelectTrigger className="w-full sm:w-40" aria-label="Status">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -176,7 +215,7 @@ export default function UserList() {
           </SelectContent>
         </Select>
         <Select value={sortBy} onValueChange={handleSortChange}>
-          <SelectTrigger className="w-40" aria-label="Sort">
+          <SelectTrigger className="w-full sm:w-40" aria-label="Sort">
             <SelectValue placeholder="Sort" />
           </SelectTrigger>
           <SelectContent>
@@ -281,9 +320,18 @@ export default function UserList() {
         onEnable={() => bulkDisable(false)}
         onDisable={() => bulkDisable(true)}
         onMakeAdmin={bulkMakeAdmin}
+        onDelete={bulkDelete}
       />
 
-      <UserProfileDrawer uid={activeUid} open={!!activeUid} onClose={() => setActiveUid(null)} />
+      <UserProfileDrawer
+        uid={activeUid}
+        open={!!activeUid}
+        onClose={() => setActiveUid(null)}
+        onDeleted={() => {
+          setActiveUid(null);
+          loadUsers(pageToken);
+        }}
+      />
     </div>
   );
 }

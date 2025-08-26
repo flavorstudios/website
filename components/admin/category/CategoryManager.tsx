@@ -7,6 +7,7 @@ import CategoryBulkActions from "./CategoryBulkActions"
 import IconSelector from "./IconSelector"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { X } from "lucide-react"
 import {
   Select,
   SelectTrigger,
@@ -31,6 +32,7 @@ import { Pagination } from "@/components/admin/Pagination"
 import { cn } from "@/lib/utils"
 import AdminPageHeader from "@/components/AdminPageHeader"
 import { slugify } from "@/lib/slugify"
+import useHotkeys from "@/app/admin/dashboard/hooks/use-hotkeys"
 
 interface CategoryFormProps {
   category?: Partial<Category>
@@ -177,6 +179,7 @@ export default function CategoryManager() {
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all")
   const [perPage, setPerPage] = useState(10)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const searchRef = useRef<HTMLInputElement | null>(null)
   const [importing, setImporting] = useState(false)
 
   // Memoize loadData to satisfy react-hooks/exhaustive-deps and avoid effect churn
@@ -203,16 +206,20 @@ export default function CategoryManager() {
     loadData(type)
   }, [type, loadData])
 
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key.toLowerCase() === "n") {
-        e.preventDefault()
-        setShowCreate(true)
-      }
-    }
-    window.addEventListener("keydown", handleKey)
-    return () => window.removeEventListener("keydown", handleKey)
-  }, [])
+  useHotkeys("shift+n", (e) => {
+    e.preventDefault()
+    setShowCreate(true)
+  })
+
+  useHotkeys("/", (e) => {
+    e.preventDefault()
+    searchRef.current?.focus()
+  })
+
+  useHotkeys("shift+i", (e) => {
+    e.preventDefault()
+    fileInputRef.current?.click()
+  })
 
   const createCategory = async (data: Partial<Category>) => {
     try {
@@ -415,6 +422,16 @@ export default function CategoryManager() {
     URL.revokeObjectURL(url)
   }
 
+  useHotkeys(
+    "shift+e",
+    (e) => {
+      e.preventDefault()
+      exportCategories()
+    },
+    {},
+    [sorted]
+  )
+
   const handleImport = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -526,12 +543,31 @@ export default function CategoryManager() {
               <SelectItem value="VIDEO">Video</SelectItem>
             </SelectContent>
           </Select>
-          <Input
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-40"
-          />
+          <div className="relative w-full sm:w-40">
+            <Input
+              ref={searchRef}
+              aria-label="Search categories"
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setSearch("")
+              }}
+              className="pr-8"
+            />
+            {search && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full"
+                onClick={() => setSearch("")}
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
           <Select value={sortBy} onValueChange={(v) => setSortBy(v)}>
               <SelectTrigger className="w-full sm:w-32" aria-label="Sort By">
                 <SelectValue />

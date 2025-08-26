@@ -124,14 +124,6 @@ export default function CommentManager() {
     return () => clearInterval(interval)
   }, [autoRefresh, refreshInterval, loadComments])
 
-  useEffect(() => {
-    if (!autoApprove) return
-    const pending = comments.filter(
-      (c) => c.status === "pending" && (c.scores?.toxicity ?? 1) <= autoApproveThreshold
-    )
-    pending.forEach((c) => updateCommentStatus(c.id, c.postId, "approved"))
-  }, [comments, autoApprove, autoApproveThreshold, updateCommentStatus])
-
   const updateCommentStatus = useCallback(
     async (id: string, postId: string, status: Comment["status"]) => {
       try {
@@ -161,6 +153,14 @@ export default function CommentManager() {
     },
     [loadComments, toast]
   )
+
+  useEffect(() => {
+    if (!autoApprove) return
+    const pending = comments.filter(
+      (c) => c.status === "pending" && (c.scores?.toxicity ?? 1) <= autoApproveThreshold
+    )
+    pending.forEach((c) => updateCommentStatus(c.id, c.postId, "approved"))
+  }, [comments, autoApprove, autoApproveThreshold, updateCommentStatus])
 
   const deleteComment = async (id: string, postId: string) => {
     setDeleteTargets([{ id, postId }])

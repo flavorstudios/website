@@ -1,6 +1,6 @@
 "use client";
 import UserList from "./UserList";
-import { useRole } from "../contexts/role-context";
+import { useRole } from "../../contexts/role-context";
 
 export default function UserManagement() {
   const { hasPermission } = useRole();

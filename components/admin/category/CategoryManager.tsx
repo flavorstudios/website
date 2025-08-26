@@ -194,7 +194,6 @@ export default function CategoryManager() {
   const [perPage, setPerPage] = useState<number>(
     typeof prefs.perPage === "number" ? prefs.perPage : 10,
   )
-  const [perPage, setPerPage] = useState(10)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const searchRef = useRef<HTMLInputElement | null>(null)
   const [importing, setImporting] = useState(false)

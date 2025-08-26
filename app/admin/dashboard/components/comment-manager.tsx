@@ -65,6 +65,8 @@ export default function CommentManager() {
   const [postTypeFilter, setPostTypeFilter] = useState<"all" | "blog" | "video">("all")
   const [sortBy, setSortBy] = useState<"date" | "toxicity">("date")
   const [sortDirection, setSortDirection] = useState<"desc" | "asc">("desc")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
   const [page, setPage] = useState(1)
   const pageSize = 10
   const { toast } = useToast()
@@ -199,7 +201,10 @@ export default function CommentManager() {
     const matchesTab = activeTab === "all" || comment.status === activeTab
     const matchesFlagged = showFlaggedOnly ? comment.flagged : true
     const matchesType = postTypeFilter === "all" || comment.postType === postTypeFilter
-    return matchesSearch && matchesTab && matchesFlagged && matchesType
+    const matchesDate =
+      (!startDate || new Date(comment.createdAt) >= new Date(startDate)) &&
+      (!endDate || new Date(comment.createdAt) <= new Date(endDate))
+    return matchesSearch && matchesTab && matchesFlagged && matchesType && matchesDate
   })
 
   const sortedComments = [...filteredComments].sort((a, b) => {
@@ -222,7 +227,7 @@ export default function CommentManager() {
 
   useEffect(() => {
     setPage(1)
-  }, [searchTerm, activeTab, showFlaggedOnly, postTypeFilter])
+  }, [searchTerm, activeTab, showFlaggedOnly, postTypeFilter, startDate, endDate])
 
   const getStatusCounts = () => ({
     all: comments.length,
@@ -302,6 +307,20 @@ export default function CommentManager() {
               <SelectItem value="asc">Asc</SelectItem>
             </SelectContent>
           </Select>
+          <Input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-[150px]"
+            aria-label="Start date"
+          />
+          <Input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-[150px]"
+            aria-label="End date"
+          />
           <div className="flex items-center space-x-2 pl-2">
             <Checkbox
               id="flagged-only"
@@ -387,6 +406,23 @@ export default function CommentManager() {
 
           {filteredComments.length > 0 ? (
             <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="select-all"
+                  checked={paginatedComments.every((c) => selectedIds.includes(c.id)) && paginatedComments.length > 0}
+                  onCheckedChange={(v) => {
+                    const checked = Boolean(v)
+                    setSelectedIds((ids) =>
+                      checked
+                        ? Array.from(new Set([...ids, ...paginatedComments.map((c) => c.id)]))
+                        : ids.filter((id) => !paginatedComments.some((c) => c.id === id))
+                    )
+                  }}
+                />
+                <Label htmlFor="select-all" className="text-sm">
+                  Select all
+                </Label>
+              </div>
               {paginatedComments.map((comment) => (
                 <CommentCard
                   key={comment.id}

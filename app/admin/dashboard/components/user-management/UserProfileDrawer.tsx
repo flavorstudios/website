@@ -30,15 +30,26 @@ interface UserData {
   emailVerified?: boolean;
 }
 
+interface AuditLog {
+  id: string;
+  action: string;
+  actor?: string;
+  timestamp: string;
+}
+
 export default function UserProfileDrawer({ uid, open, onClose }: UserProfileDrawerProps) {
   const { toast } = useToast();
   const [user, setUser] = useState<UserData | null>(null);
   const [role, setRole] = useState("support");
   const [disabled, setDisabled] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
 
   useEffect(() => {
     if (!uid || !open) return;
+    setLogs([]);
+    setLogsLoading(true);
     fetch(`/api/admin/users/${uid}`)
       .then((res) => res.json())
       .then((data) => {
@@ -46,6 +57,11 @@ export default function UserProfileDrawer({ uid, open, onClose }: UserProfileDra
         setRole(data.user.role);
         setDisabled(data.user.disabled);
       });
+      fetch(`/api/admin/audit-logs/${uid}`)
+      .then((res) => res.json())
+      .then((data) => setLogs(data.logs || []))
+      .catch(() => setLogs([]))
+      .finally(() => setLogsLoading(false));
   }, [uid, open]);
 
   const handleSave = async () => {
@@ -124,6 +140,25 @@ export default function UserProfileDrawer({ uid, open, onClose }: UserProfileDra
                   {disabled ? "Disabled" : "Active"}
                 </label>
               </div>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-sm font-medium">Recent Activity</h2>
+              {logsLoading ? (
+                <p className="text-sm text-muted-foreground">Loading...</p>
+              ) : logs.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No recent activity.</p>
+              ) : (
+                <ul className="max-h-40 overflow-y-auto text-sm divide-y">
+                  {logs.map((log) => (
+                    <li key={log.id} className="py-1">
+                      <p>
+                        {new Date(log.timestamp).toLocaleString()} – {log.action}
+                        {log.actor ? ` by ${log.actor}` : ""}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? "Saving..." : "Save"}

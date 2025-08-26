@@ -1,6 +1,17 @@
 "use client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Shield, Ban, UserCheck } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface BulkActionsBarProps {
   count: number;
@@ -15,7 +26,20 @@ export default function BulkActionsBar({
   onDisable,
   onMakeAdmin,
 }: BulkActionsBarProps) {
+  const [pending, setPending] = useState<null | "enable" | "disable" | "admin">(null);
+  const confirm = () => {
+    if (pending === "enable") onEnable();
+    else if (pending === "disable") onDisable();
+    else if (pending === "admin") onMakeAdmin();
+    setPending(null);
+  };
   if (count === 0) return null;
+  const actionLabel =
+    pending === "enable"
+      ? "enable"
+      : pending === "disable"
+        ? "disable"
+        : "make admin";
   return (
     <div
       role="region"
@@ -25,15 +49,29 @@ export default function BulkActionsBar({
       <span aria-live="polite" className="mr-2 text-sm text-muted-foreground">
         {count} selected
       </span>
-      <Button variant="outline" size="sm" onClick={onEnable}>
+      <Button variant="outline" size="sm" onClick={() => setPending("enable")}> 
         <UserCheck className="mr-1 h-4 w-4" /> Enable
       </Button>
-      <Button variant="outline" size="sm" onClick={onDisable}>
+      <Button variant="outline" size="sm" onClick={() => setPending("disable")}>
         <Ban className="mr-1 h-4 w-4" /> Disable
       </Button>
-      <Button variant="outline" size="sm" onClick={onMakeAdmin}>
+      <Button variant="outline" size="sm" onClick={() => setPending("admin")}> 
         <Shield className="mr-1 h-4 w-4" /> Make Admin
       </Button>
+      <AlertDialog open={!!pending} onOpenChange={(o) => !o && setPending(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm {actionLabel}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to {actionLabel} {count} user{count > 1 ? "s" : ""}?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirm}>Confirm</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

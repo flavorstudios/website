@@ -146,8 +146,14 @@ export default function UserList() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-64"
+          aria-label="Search users"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSearch();
+          }}
         />
-        <Button onClick={handleSearch}>Search</Button>
+        <Button onClick={handleSearch} aria-label="Search">
+          Search
+        </Button>
         <Select value={roleFilter} onValueChange={handleRoleChange}>
           <SelectTrigger className="w-40" aria-label="Role">
             <SelectValue placeholder="Role" />

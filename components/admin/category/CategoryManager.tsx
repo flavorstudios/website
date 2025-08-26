@@ -166,6 +166,7 @@ export default function CategoryManager() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [sortBy, setSortBy] = useState("order")
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
   const [currentPage, setCurrentPage] = useState(1)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [showCreate, setShowCreate] = useState(false)
@@ -252,6 +253,34 @@ export default function CategoryManager() {
       }
     } catch {
       toast("Update failed")
+    }
+  }
+
+  const duplicateCategory = async (cat: Category) => {
+    try {
+      const { id, postCount, ...rest } = cat
+      void id
+      void postCount
+      const res = await fetch("/api/admin/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          ...rest,
+          name: `${cat.name} Copy`,
+          slug: `${cat.slug}-copy`,
+          type: type.toLowerCase(),
+        }),
+      })
+      if (res.ok) {
+        toast("Category duplicated")
+        await loadData(type)
+      } else {
+        const d = await res.json()
+        toast(d.error || "Failed to duplicate")
+      }
+    } catch {
+      toast("Failed to duplicate")
     }
   }
 
@@ -419,6 +448,7 @@ export default function CategoryManager() {
   const resetFilters = () => {
     setSearch("")
     setSortBy("order")
+    setSortDir("asc")
     setStatusFilter("all")
     setPerPage(10)
   }
@@ -440,11 +470,19 @@ export default function CategoryManager() {
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
-      if (sortBy === "name") return a.name.localeCompare(b.name)
-      if (sortBy === "status") return Number(b.isActive) - Number(a.isActive)
-      return (a.order ?? 0) - (b.order ?? 0)
+      if (sortBy === "name")
+        return sortDir === "asc"
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name)
+      if (sortBy === "status")
+        return sortDir === "asc"
+          ? Number(a.isActive) - Number(b.isActive)
+          : Number(b.isActive) - Number(a.isActive)
+      return sortDir === "asc"
+        ? (a.order ?? 0) - (b.order ?? 0)
+        : (b.order ?? 0) - (a.order ?? 0)
     })
-  }, [filtered, sortBy])
+  }, [filtered, sortBy, sortDir])
 
   const paginated = useMemo(() => {
     return sorted.slice((currentPage - 1) * perPage, currentPage * perPage)
@@ -452,7 +490,7 @@ export default function CategoryManager() {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [search, sortBy, type, statusFilter, perPage])
+  }, [search, sortBy, sortDir, type, statusFilter, perPage])
 
   const activeCount = useMemo(
     () => categories.filter((c) => c.isActive).length,
@@ -495,19 +533,28 @@ export default function CategoryManager() {
             className="w-full sm:w-40"
           />
           <Select value={sortBy} onValueChange={(v) => setSortBy(v)}>
-            <SelectTrigger className="w-full sm:w-32" aria-label="Sort By">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="order">Order</SelectItem>
-              <SelectItem value="name">Name</SelectItem>
-              <SelectItem value="status">Status</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={statusFilter}
-            onValueChange={(v) => setStatusFilter(v as "all" | "active" | "inactive")}
-          >
+              <SelectTrigger className="w-full sm:w-32" aria-label="Sort By">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="order">Order</SelectItem>
+                <SelectItem value="name">Name</SelectItem>
+                <SelectItem value="status">Status</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortDir} onValueChange={(v) => setSortDir(v as "asc" | "desc")}>
+              <SelectTrigger className="w-full sm:w-28" aria-label="Sort Direction">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="asc">Asc</SelectItem>
+                <SelectItem value="desc">Desc</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => setStatusFilter(v as "all" | "active" | "inactive")}
+            >
             <SelectTrigger className="w-full sm:w-32" aria-label="Status">
               <SelectValue />
             </SelectTrigger>
@@ -559,21 +606,23 @@ export default function CategoryManager() {
         </div>
       </div>
       <CategoryBulkActions
-        count={selected.size}
-        onPublish={() => bulkEnable(Array.from(selected))}
-        onUnpublish={() => bulkDisable(Array.from(selected))}
-        onDelete={() => bulkDelete(Array.from(selected))}
-      />
-      <CategoryList
-        categories={paginated}
-        type={type}
-        onEdit={(cat) => setEditing(cat)}
-        onDelete={openDeleteDialog}
-        onToggleStatus={toggleStatus}
-        selected={selected}
-        toggleSelect={toggleSelect}
-        toggleSelectAll={toggleSelectAll}
-      />
+          count={selected.size}
+          onPublish={() => bulkEnable(Array.from(selected))}
+          onUnpublish={() => bulkDisable(Array.from(selected))}
+          onDelete={() => bulkDelete(Array.from(selected))}
+          onClear={() => setSelected(new Set())}
+        />
+        <CategoryList
+          categories={paginated}
+          type={type}
+          onEdit={(cat) => setEditing(cat)}
+          onDelete={openDeleteDialog}
+          onToggleStatus={toggleStatus}
+          onDuplicate={duplicateCategory}
+          selected={selected}
+          toggleSelect={toggleSelect}
+          toggleSelectAll={toggleSelectAll}
+        />
       <Pagination
         currentPage={currentPage}
         totalCount={filtered.length}

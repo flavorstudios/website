@@ -30,6 +30,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import AdminPageHeader from "@/components/AdminPageHeader"
 
 interface ContactMessage {
@@ -66,9 +73,11 @@ export default function EmailInbox() {
   const [priorityFilter, setPriorityFilter] = useState("all")
   const [labelFilter, setLabelFilter] = useState("all")
   const [flaggedOnly, setFlaggedOnly] = useState(false)
+  const [starredOnly, setStarredOnly] = useState(false)
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set())
   const [emailError, setEmailError] = useState<string | null>(null)
   const [loadingState, setLoadingState] = useState(true)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const replyRef = useRef<HTMLTextAreaElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -119,13 +128,15 @@ export default function EmailInbox() {
     const matchesFlagged = !flaggedOnly || message.flagged
     const matchesLabel =
       labelFilter === "all" || (message.labels || []).includes(labelFilter)
+    const matchesStarred = !starredOnly || message.starred  
 
     return (
       matchesSearch &&
       matchesStatus &&
       matchesPriority &&
       matchesFlagged &&
-      matchesLabel
+      matchesLabel &&
+      matchesStarred
     )
   })
 
@@ -281,13 +292,17 @@ export default function EmailInbox() {
           selectedMessages.size > 0 &&
           filteredMessages.every((m) => selectedMessages.has(m.id))
         toggleSelectAll(!currentlyAllSelected)
+      } else if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+        e.preventDefault()
+        setShortcutsOpen(true)  
       } else if (e.key === "Escape") {
-        setSelectedMessage(null)
+        if (shortcutsOpen) setShortcutsOpen(false)
+        else setSelectedMessage(null)
       }
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [selectedMessage, filteredMessages, selectedMessages])
+  }, [selectedMessage, filteredMessages, selectedMessages, shortcutsOpen])
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -322,18 +337,68 @@ export default function EmailInbox() {
     return withTime ? dateObj.toLocaleString() : dateObj.toLocaleDateString()
   }
 
-  const threadMessages =
+  const conversation =
     selectedMessage
       ? messages
-          .filter((m) => m.email === selectedMessage.email && m.id !== selectedMessage.id)
+          .filter((m) => m.email === selectedMessage.email)
           .sort(
             (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
           )
       : []
 
   return (
     <div className="space-y-6">
+      <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Keyboard Shortcuts</DialogTitle>
+            <DialogDescription>
+              Navigate and manage messages quickly.
+            </DialogDescription>
+          </DialogHeader>
+          <ul className="space-y-2 text-sm">
+            <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">?</kbd>
+              <span>Show this help</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">Arrow ↑/↓</kbd>
+              <span>Navigate messages</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <span className="flex gap-1">
+                <kbd className="px-2 py-1 bg-gray-100 rounded">Ctrl</kbd>
+                <kbd className="px-2 py-1 bg-gray-100 rounded">F</kbd>
+              </span>
+              <span>Focus search</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">A</kbd>
+              <span>Archive message</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">S</kbd>
+              <span>Star message</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">R</kbd>
+              <span>Reply</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <span className="flex gap-1">
+                <kbd className="px-2 py-1 bg-gray-100 rounded">Ctrl</kbd>
+                <kbd className="px-2 py-1 bg-gray-100 rounded">A</kbd>
+              </span>
+              <span>Select all</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">Esc</kbd>
+              <span>Close message/help</span>
+            </li>
+          </ul>
+        </DialogContent>
+      </Dialog>
       {/* --- Standardized Admin Section Header --- */}
       <AdminPageHeader title="Email Inbox" subtitle="View and respond to contact messages" />
       <div className="flex items-center justify-between">
@@ -414,6 +479,16 @@ export default function EmailInbox() {
                   />
                   <label htmlFor="flagged-switch" className="text-xs text-gray-600">
                     Flagged
+                  </label>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Switch
+                    id="starred-switch"
+                    checked={starredOnly}
+                    onCheckedChange={setStarredOnly}
+                  />
+                  <label htmlFor="starred-switch" className="text-xs text-gray-600">
+                    Starred
                   </label>
                 </div>
               </div>
@@ -634,25 +709,35 @@ export default function EmailInbox() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-gray-800 whitespace-pre-wrap">{selectedMessage.message}</p>
-                </div>
-
-                {threadMessages.length > 0 && (
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-gray-900">Previous messages</h3>
-                    <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
-                      {threadMessages.map((msg) => (
-                        <div key={msg.id} className="p-2 rounded border">
-                          <p className="text-xs text-gray-500">{formatDate(msg.createdAt, true)}</p>
-                          <p className="text-sm text-gray-700 truncate">{msg.subject}</p>
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-gray-900">Conversation</h3>
+                  <div className="max-h-64 overflow-y-auto space-y-3 pr-2">
+                    {conversation.map((msg) => (
+                      <div
+                        key={msg.id}
+                        className={`p-3 rounded border cursor-pointer ${
+                          msg.id === selectedMessage.id
+                            ? "bg-blue-50"
+                            : "bg-gray-50"
+                        }`}
+                        onClick={() => setSelectedMessage(msg)}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-700">
+                            {msg.firstName} {msg.lastName}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {formatDate(msg.createdAt, true)}
+                          </span>
                         </div>
-                      ))}
-                    </div>
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                          {msg.message}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                )}
 
-                <div className="space-y-4">
+                  <div className="space-y-4">
                   <h3 className="font-semibold text-gray-900 flex items-center gap-2">
                     <Reply className="h-4 w-4" />
                     Reply

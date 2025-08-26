@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import useSWR from "swr";
+import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import AdminPageHeader from "@/components/AdminPageHeader";
 import { fetcher } from "@/lib/fetcher";
 import { useToast } from "@/hooks/use-toast";
+import { Download } from "lucide-react";
 
 interface Submission {
   id: string;
@@ -67,6 +69,13 @@ export default function Applications() {
   });
 
   const submissions = data?.submissions || [];
+
+  const statusCounts = STATUS_OPTIONS.map((opt) => ({
+    ...opt,
+    count: submissions.filter(
+      (s) => getStatusInfo(s.status, s.reviewed).value === opt.value
+    ).length,
+  }));
 
   const updateSubmission = async (
     id: string,
@@ -129,6 +138,45 @@ export default function Applications() {
     }
   });
 
+  const handleExport = () => {
+    const headers = [
+      "First Name",
+      "Last Name",
+      "Email",
+      "Skills",
+      "Tags",
+      "Status",
+      "Interview",
+      "Submitted",
+    ];
+    const rows = sorted.map((s) => [
+      s.firstName || "",
+      s.lastName || "",
+      s.email || "",
+      s.skills || "",
+      (s.tags || []).join(";"),
+      getStatusInfo(s.status, s.reviewed).label,
+      s.interviewAt ? format(new Date(s.interviewAt), "yyyy-MM-dd HH:mm") : "",
+      s.createdAt ? format(new Date(s.createdAt), "yyyy-MM-dd HH:mm") : "",
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((field) => `"${String(field).replace(/"/g, '""')}"`)
+          .join(",")
+      )
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "applications.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -155,6 +203,32 @@ export default function Applications() {
         title="Applications"
         subtitle="Manage all user submissions and job applications"
       />
+      <div className="flex flex-wrap gap-2">
+        <Button
+          key="all"
+          variant={statusFilter === "all" ? "default" : "outline"}
+          className="h-8"
+          onClick={() => setStatusFilter("all")}
+        >
+          All
+          <Badge variant="secondary" className="ml-2">
+            {submissions.length}
+          </Badge>
+        </Button>
+        {statusCounts.map((opt) => (
+          <Button
+            key={opt.value}
+            variant={statusFilter === opt.value ? "default" : "outline"}
+            className="h-8"
+            onClick={() => setStatusFilter(opt.value)}
+          >
+            {opt.label}
+            <Badge variant="secondary" className="ml-2">
+              {opt.count}
+            </Badge>
+          </Button>
+        ))}
+      </div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div className="flex flex-wrap items-center gap-2 w-full">
           <Input
@@ -169,19 +243,6 @@ export default function Applications() {
             onChange={(e) => setTagFilter(e.target.value)}
             className="w-full sm:w-40"
           />
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {STATUS_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-32">
               <SelectValue placeholder="Sort" />
@@ -194,6 +255,15 @@ export default function Applications() {
             </SelectContent>
           </Select>
         </div>
+        <Button
+          onClick={handleExport}
+          variant="outline"
+          size="sm"
+          className="w-full sm:w-auto"
+        >
+          <Download className="mr-2 h-4 w-4" />
+          Export CSV
+        </Button>
       </div>
 
       {/* Desktop table */}
@@ -208,6 +278,7 @@ export default function Applications() {
                   <th className="p-3 text-left">Skills</th>
                   <th className="p-3 text-left">Tags</th>
                   <th className="p-3 text-left">Submitted</th>
+                  <th className="p-3 text-left">Interview</th>
                   <th className="p-3 text-left">Status</th>
                   <th className="p-3" />
                 </tr>
@@ -222,11 +293,20 @@ export default function Applications() {
                       </td>
                       <td className="p-3 whitespace-nowrap">{s.email}</td>
                       <td className="p-3 whitespace-nowrap">{s.skills}</td>
-                      <td className="p-3 whitespace-nowrap">
-                        {s.tags?.join(", ")}
+                      <td className="p-3">
+                        <div className="flex flex-wrap gap-1">
+                          {s.tags?.map((tag) => (
+                            <Badge key={tag} variant="secondary">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
                       </td>
                       <td className="p-3 whitespace-nowrap">
-                        {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : ""}
+                        {s.createdAt ? format(new Date(s.createdAt), "P") : ""}
+                      </td>
+                      <td className="p-3 whitespace-nowrap">
+                        {s.interviewAt ? format(new Date(s.interviewAt), "Pp") : "-"}
                       </td>
                       <td className="p-3 whitespace-nowrap">
                         <Badge className={info.class}>{info.label}</Badge>
@@ -246,7 +326,7 @@ export default function Applications() {
                 })}
                 {sorted.length === 0 && (
                   <tr>
-                    <td className="p-6 text-center text-gray-500" colSpan={7}>
+                    <td className="p-6 text-center text-gray-500" colSpan={8}>
                       No submissions found
                     </td>
                   </tr>
@@ -275,7 +355,18 @@ export default function Applications() {
                 </div>
                 {s.skills && <p className="text-sm">{s.skills}</p>}
                 {s.tags && (
-                  <p className="text-sm text-gray-600">Tags: {s.tags.join(", ")}</p>
+                  <div className="flex flex-wrap gap-1">
+                    {s.tags.map((tag) => (
+                      <Badge key={tag} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                {s.interviewAt && (
+                  <p className="text-sm text-gray-600">
+                    Interview: {format(new Date(s.interviewAt), "Pp")}
+                  </p>
                 )}
                 <div className="flex justify-end gap-2 pt-2">
                   <Button size="sm" variant="outline" onClick={() => setSelected(s)}>

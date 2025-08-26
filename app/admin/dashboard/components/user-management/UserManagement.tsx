@@ -1,7 +1,16 @@
 "use client";
 import UserList from "./UserList";
+import { useRole } from "../contexts/role-context";
 
 export default function UserManagement() {
+  const { hasPermission } = useRole();
+  if (!hasPermission("canManageUsers")) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        You do not have permission to manage users.
+      </p>
+    );
+  }
   return (
     <div className="space-y-4">
       <div>

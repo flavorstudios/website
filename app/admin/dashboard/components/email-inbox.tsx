@@ -2,7 +2,17 @@
 
 import { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
-import { Mail, MailOpen, Reply, Archive, Star, Search, Filter, Send } from "lucide-react"
+import {
+  Mail,
+  MailOpen,
+  Reply,
+  Archive,
+  Star,
+  Search,
+  Filter,
+  Send,
+  Tag,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,6 +22,14 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Switch } from "@/components/ui/switch"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import AdminPageHeader from "@/components/AdminPageHeader"
 
 interface ContactMessage {
@@ -25,6 +43,8 @@ interface ContactMessage {
   status: "unread" | "read" | "replied" | "archived"
   priority: "low" | "medium" | "high"
   flagged?: boolean
+  labels?: string[]
+  starred?: boolean
   scores?: {
     toxicity?: number
     insult?: number
@@ -32,6 +52,8 @@ interface ContactMessage {
     [key: string]: unknown
   } | null
 }
+
+const AVAILABLE_LABELS = ["general", "support", "billing", "spam"]
 
 export default function EmailInbox() {
   const [messages, setMessages] = useState<ContactMessage[]>([])
@@ -42,11 +64,13 @@ export default function EmailInbox() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
   const [priorityFilter, setPriorityFilter] = useState("all")
+  const [labelFilter, setLabelFilter] = useState("all")
   const [flaggedOnly, setFlaggedOnly] = useState(false)
   const [selectedMessages, setSelectedMessages] = useState<Set<string>>(new Set())
   const [emailError, setEmailError] = useState<string | null>(null)
   const [loadingState, setLoadingState] = useState(true)
   const replyRef = useRef<HTMLTextAreaElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch("/api/admin/from-addresses")
@@ -93,8 +117,16 @@ export default function EmailInbox() {
     const matchesStatus = filterStatus === "all" || message.status === filterStatus
     const matchesPriority = priorityFilter === "all" || message.priority === priorityFilter
     const matchesFlagged = !flaggedOnly || message.flagged
+    const matchesLabel =
+      labelFilter === "all" || (message.labels || []).includes(labelFilter)
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesFlagged
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesPriority &&
+      matchesFlagged &&
+      matchesLabel
+    )
   })
 
   const toggleMessageSelection = (id: string, checked: boolean) => {
@@ -148,6 +180,46 @@ export default function EmailInbox() {
     }
   }
 
+  const toggleStar = async (id: string, starred: boolean) => {
+    setMessages((prev) =>
+      prev.map((msg) => (msg.id === id ? { ...msg, starred } : msg))
+    )
+    try {
+      await fetch("/api/admin/contact-messages", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, starred }),
+      })
+    } catch (err) {
+      console.error("Failed to update star", err)
+    }
+  }
+
+  const handleLabelChange = async (
+    id: string,
+    label: string,
+    checked: boolean
+  ) => {
+    const msg = messages.find((m) => m.id === id)
+    const labels = new Set(msg?.labels || [])
+    if (checked) labels.add(label)
+    else labels.delete(label)
+    const updatedLabels = Array.from(labels)
+
+    setMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, labels: updatedLabels } : m))
+    )
+    try {
+      await fetch("/api/admin/contact-messages", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, labels: updatedLabels }),
+      })
+    } catch (err) {
+      console.error("Failed to update labels", err)
+    }
+  }
+
   const handleReply = async () => {
     if (!selectedMessage || !replyText.trim() || !fromEmail) return
 
@@ -197,13 +269,25 @@ export default function EmailInbox() {
       } else if (e.key === "r" && selectedMessage) {
         e.preventDefault()
         replyRef.current?.focus()
+        } else if (e.key === "s" && selectedMessage) {
+        e.preventDefault()
+        toggleStar(selectedMessage.id, !selectedMessage.starred)
+      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f") {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "a") {
+        e.preventDefault()
+        const currentlyAllSelected =
+          selectedMessages.size > 0 &&
+          filteredMessages.every((m) => selectedMessages.has(m.id))
+        toggleSelectAll(!currentlyAllSelected)
       } else if (e.key === "Escape") {
         setSelectedMessage(null)
       }
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [selectedMessage, filteredMessages])
+  }, [selectedMessage, filteredMessages, selectedMessages])
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -282,6 +366,7 @@ export default function EmailInbox() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10"
+                    ref={searchInputRef}
                   />
                 </div>
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -295,6 +380,19 @@ export default function EmailInbox() {
                     <SelectItem value="read">Read</SelectItem>
                     <SelectItem value="replied">Replied</SelectItem>
                     <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={labelFilter} onValueChange={setLabelFilter}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Label" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All labels</SelectItem>
+                    {AVAILABLE_LABELS.map((lbl) => (
+                      <SelectItem key={lbl} value={lbl}>
+                        {lbl}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select value={priorityFilter} onValueChange={setPriorityFilter}>
@@ -387,21 +485,46 @@ export default function EmailInbox() {
                               }`}
                             >
                               {`${message.firstName} ${message.lastName}`}
-                            </p>
-                            <div className="flex items-center gap-1">
-                              <Badge className={`text-xs ${getPriorityColor(message.priority)}`}>
-                                {message.priority}
-                              </Badge>
-                              {message.flagged && (
-                                <Badge variant="destructive" className="ml-1" aria-label="Flagged message">
-                                  Flagged
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toggleStar(message.id, !message.starred)
+                                }}
+                                aria-label={message.starred ? "Unstar message" : "Star message"}
+                                className="text-gray-400 hover:text-yellow-500"
+                              >
+                                <Star
+                                  className={`h-4 w-4 ${
+                                    message.starred ? "fill-yellow-400 text-yellow-400" : ""
+                                  }`}
+                                />
+                              </button>
+                              <div className="flex items-center gap-1">
+                                <Badge className={`text-xs ${getPriorityColor(message.priority)}`}>
+                                  {message.priority}
                                 </Badge>
-                              )}
+                              {message.flagged && (
+                                  <Badge variant="destructive" className="ml-1" aria-label="Flagged message">
+                                    Flagged
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </div>
                           <p className="text-sm text-gray-600 truncate mt-1">{message.subject}</p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {message.message.slice(0, 80)}
+                          </p>
                           <div className="flex items-center justify-between mt-2">
-                            <Badge className={`text-xs ${getStatusColor(message.status)}`}>{message.status}</Badge>
+                            <div className="flex items-center gap-1 flex-wrap">
+                              <Badge className={`text-xs ${getStatusColor(message.status)}`}>{message.status}</Badge>
+                              {message.labels?.map((lbl) => (
+                                <Badge key={lbl} variant="outline" className="text-xs">
+                                  {lbl}
+                                </Badge>
+                              ))}
+                            </div>
                             <p className="text-xs text-gray-400">{formatDate(message.createdAt)}</p>
                           </div>
                         </div>
@@ -447,6 +570,15 @@ export default function EmailInbox() {
                         </ul>
                       </div>
                     )}
+                    {selectedMessage.labels && selectedMessage.labels.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {selectedMessage.labels.map((lbl) => (
+                          <Badge key={lbl} variant="outline" className="text-xs">
+                            {lbl}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -457,9 +589,46 @@ export default function EmailInbox() {
                       <Archive className="h-4 w-4 mr-2" />
                       Archive
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <Star className="h-4 w-4" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        toggleStar(selectedMessage.id, !selectedMessage.starred)
+                      }
+                      aria-label={
+                        selectedMessage.starred ? "Unstar message" : "Star message"
+                      }
+                    >
+                      <Star
+                        className={`h-4 w-4 ${
+                          selectedMessage.starred
+                            ? "fill-yellow-400 text-yellow-400"
+                            : ""
+                        }`}
+                      />
                     </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Tag className="h-4 w-4 mr-2" /> Labels
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Labels</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {AVAILABLE_LABELS.map((lbl) => (
+                          <DropdownMenuCheckboxItem
+                            key={lbl}
+                            checked={selectedMessage.labels?.includes(lbl)}
+                            onCheckedChange={(v) =>
+                              handleLabelChange(selectedMessage.id, lbl, !!v)
+                            }
+                          >
+                            {lbl}
+                          </DropdownMenuCheckboxItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </CardHeader>

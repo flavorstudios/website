@@ -16,6 +16,7 @@ export interface BlogPost {
   featured: boolean
   imageUrl?: string
   commentCount?: number    // <-- Codex: enable comment badge support!
+  shareCount?: number      // <-- Track how often a post is shared
 }
 
 export interface Video {
@@ -74,6 +75,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
           ? post.categories
           : [post.category],
         commentCount: typeof post.commentCount === "number" ? post.commentCount : 0, // <--- Codex!
+        shareCount: typeof post.shareCount === "number" ? post.shareCount : 0,
       }));
     }
   } catch (error) {

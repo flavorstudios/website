@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Star } from "lucide-react";
 
-import type { TypeFilter, SortBy, DateFilter } from "@/types/media";
+import type { TypeFilter, SortBy, DateFilter, UsageFilter } from "@/types/media";
 
 interface Props {
   search: string;
@@ -24,8 +24,8 @@ interface Props {
   onDateFilter: (val: DateFilter) => void;
   view: "grid" | "list";
   onToggleView: () => void;
-  unusedOnly: boolean;
-  onUnusedToggle: () => void;
+  usageFilter: UsageFilter;
+  onUsageFilter: (val: UsageFilter) => void;
   favoritesOnly: boolean;
   onFavoritesToggle: () => void;
   tagFilter: string;
@@ -46,8 +46,8 @@ export default function MediaToolbar({
   onToggleView,
   favoritesOnly,
   onFavoritesToggle,
-  unusedOnly,
-  onUnusedToggle,
+  usageFilter,
+  onUsageFilter,
   tagFilter,
   onTagFilter,
   availableTags,
@@ -120,14 +120,16 @@ export default function MediaToolbar({
           </Select>
         )}
 
-        <Button
-          variant={unusedOnly ? "default" : "outline"}
-          size="sm"
-          onClick={onUnusedToggle}
-          aria-pressed={unusedOnly}
-        >
-          Unused
-        </Button>
+        <Select value={usageFilter} onValueChange={(val) => onUsageFilter(val as UsageFilter)}>
+          <SelectTrigger className="w-36" aria-label="Usage">
+            <SelectValue placeholder="Usage" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Files</SelectItem>
+            <SelectItem value="used">Used</SelectItem>
+            <SelectItem value="unused">Unused</SelectItem>
+          </SelectContent>
+        </Select>
 
         <Button
           variant={favoritesOnly ? "default" : "outline"}

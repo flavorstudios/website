@@ -40,6 +40,7 @@ export interface BlogPost {
   views: number;
   readTime?: string;
   commentCount?: number;      // <--- Codex: comment count for API/UI
+  shareCount?: number;        // <--- Track how often a post is shared
   schemaType?: string;        // <--- ADDED for SEO & preview
   openGraphImage?: string;    // <--- ADDED for SEO & preview
 }
@@ -109,6 +110,7 @@ export const BlogPostSchema = z.object({
   views: z.number(),
   readTime: z.string().optional(),
   commentCount: z.number().optional(),           // <--- Codex: optional
+  shareCount: z.number().optional(),             // <--- Track shares
   schemaType: z.string().optional(),             // <--- ADDED for SEO & preview
   openGraphImage: z.string().optional(),         // <--- ADDED for SEO & preview
 });
@@ -143,6 +145,7 @@ export const blogStore = {
         ...doc,
         categories: Array.isArray(doc.categories) && doc.categories.length > 0 ? doc.categories : [doc.category],
         commentCount: typeof doc.commentCount === "number" ? doc.commentCount : 0, // always present
+        shareCount: typeof doc.shareCount === "number" ? doc.shareCount : 0,       // always present
       };
     });
   },
@@ -157,6 +160,7 @@ export const blogStore = {
       ...data,
       categories: Array.isArray(data.categories) && data.categories.length > 0 ? data.categories : [data.category],
       commentCount: typeof data.commentCount === "number" ? data.commentCount : 0,
+      shareCount: typeof data.shareCount === "number" ? data.shareCount : 0,
     };
   },
 
@@ -175,11 +179,12 @@ export const blogStore = {
       ...data,
       categories: Array.isArray(data.categories) && data.categories.length > 0 ? data.categories : [data.category],
       commentCount: typeof data.commentCount === "number" ? data.commentCount : 0,
+      shareCount: typeof data.shareCount === "number" ? data.shareCount : 0,
     };
   },
 
   async create(
-    post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "views" | "commentCount">
+    post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "views" | "commentCount" | "shareCount">
   ): Promise<BlogPost> {
     // Validate input (omitting auto fields)
     const data = BlogPostSchema.omit({
@@ -188,6 +193,7 @@ export const blogStore = {
       updatedAt: true,
       views: true,
       commentCount: true,
+      shareCount: true,
     }).parse(post);
 
     const id = `post_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
@@ -199,6 +205,7 @@ export const blogStore = {
       updatedAt: new Date().toISOString(),
       views: 0,
       commentCount: 0,
+      shareCount: 0,
     };
     const db = getDbOrNull();
     if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
@@ -249,6 +256,7 @@ export const blogStore = {
       ...updated,
       categories: Array.isArray(updated.categories) && updated.categories.length > 0 ? updated.categories : [updated.category],
       commentCount: typeof updated.commentCount === "number" ? updated.commentCount : 0,
+      shareCount: typeof updated.shareCount === "number" ? updated.shareCount : 0,
     };
   },
 

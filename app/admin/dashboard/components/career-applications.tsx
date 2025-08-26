@@ -52,6 +52,8 @@ const getStatusInfo = (value?: string, reviewed?: boolean) => {
 export default function Applications() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [tagFilter, setTagFilter] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const [selected, setSelected] = useState<Submission | null>(null);
   const { toast } = useToast();
 
@@ -90,7 +92,41 @@ export default function Applications() {
       s.email?.toLowerCase().includes(search.toLowerCase());
     const status = getStatusInfo(s.status, s.reviewed).value;
     const matchStatus = statusFilter === "all" || status === statusFilter;
-    return matchSearch && matchStatus;
+    const tags = tagFilter
+      .split(",")
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+    const matchTags =
+      tags.length === 0 ||
+      tags.some((t) =>
+        s.tags?.map((tag) => tag.toLowerCase()).includes(t)
+      );
+    return matchSearch && matchStatus && matchTags;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    switch (sortBy) {
+      case "oldest":
+        return (
+          new Date(a.createdAt || 0).getTime() -
+          new Date(b.createdAt || 0).getTime()
+        );
+      case "name":
+        return (
+          `${a.firstName || ""} ${a.lastName || ""}`.localeCompare(
+            `${b.firstName || ""} ${b.lastName || ""}`
+          )
+        );
+      case "status":
+        return getStatusInfo(a.status, a.reviewed).value.localeCompare(
+          getStatusInfo(b.status, b.reviewed).value
+        );
+      default:
+        return (
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime()
+        );
+    }
   });
 
   if (isLoading) {
@@ -120,16 +156,22 @@ export default function Applications() {
         subtitle="Manage all user submissions and job applications"
       />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full">
           <Input
             placeholder="Search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-64"
+            className="w-full sm:w-48"
+          />
+          <Input
+            placeholder="Tags"
+            value={tagFilter}
+            onChange={(e) => setTagFilter(e.target.value)}
+            className="w-full sm:w-40"
           />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Filter" />
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
@@ -138,6 +180,17 @@ export default function Applications() {
                   {opt.label}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+              <SelectItem value="name">Name</SelectItem>
+              <SelectItem value="status">Status</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -153,13 +206,14 @@ export default function Applications() {
                   <th className="p-3 text-left">Name</th>
                   <th className="p-3 text-left">Email</th>
                   <th className="p-3 text-left">Skills</th>
+                  <th className="p-3 text-left">Tags</th>
                   <th className="p-3 text-left">Submitted</th>
                   <th className="p-3 text-left">Status</th>
                   <th className="p-3" />
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((s) => {
+                {sorted.map((s) => {
                   const info = getStatusInfo(s.status, s.reviewed);
                   return (
                     <tr key={s.id} className="border-b last:border-b-0">
@@ -168,6 +222,9 @@ export default function Applications() {
                       </td>
                       <td className="p-3 whitespace-nowrap">{s.email}</td>
                       <td className="p-3 whitespace-nowrap">{s.skills}</td>
+                      <td className="p-3 whitespace-nowrap">
+                        {s.tags?.join(", ")}
+                      </td>
                       <td className="p-3 whitespace-nowrap">
                         {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : ""}
                       </td>
@@ -187,9 +244,9 @@ export default function Applications() {
                     </tr>
                   );
                 })}
-                {filtered.length === 0 && (
+                {sorted.length === 0 && (
                   <tr>
-                    <td className="p-6 text-center text-gray-500" colSpan={6}>
+                    <td className="p-6 text-center text-gray-500" colSpan={7}>
                       No submissions found
                     </td>
                   </tr>
@@ -202,7 +259,7 @@ export default function Applications() {
 
       {/* Mobile cards */}
       <div className="space-y-4 sm:hidden">
-        {filtered.map((s) => {
+        {sorted.map((s) => {
           const info = getStatusInfo(s.status, s.reviewed);
           return (
             <Card key={s.id}>
@@ -217,6 +274,9 @@ export default function Applications() {
                   <Badge className={info.class}>{info.label}</Badge>
                 </div>
                 {s.skills && <p className="text-sm">{s.skills}</p>}
+                {s.tags && (
+                  <p className="text-sm text-gray-600">Tags: {s.tags.join(", ")}</p>
+                )}
                 <div className="flex justify-end gap-2 pt-2">
                   <Button size="sm" variant="outline" onClick={() => setSelected(s)}>
                     View
@@ -231,7 +291,7 @@ export default function Applications() {
             </Card>
           );
         })}
-        {filtered.length === 0 && (
+        {sorted.length === 0 && (
           <p className="text-center text-gray-500">No submissions found</p>
         )}
       </div>
@@ -291,7 +351,13 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
             {submission.lastName}
           </p>
           <p>
-            <span className="font-medium">Email:</span> {submission.email}
+            <span className="font-medium">Email:</span>{" "}
+            <a
+              href={`mailto:${submission.email}`}
+              className="text-blue-600 underline"
+            >
+              {submission.email}
+            </a>
           </p>
           {submission.skills && (
             <p>
@@ -312,11 +378,23 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
             </p>
           )}
           {submission.resumeUrl && (
-            <iframe
-              src={submission.resumeUrl}
-              title="Resume preview"
-              className="w-full h-48 rounded border"
-            />
+            <div className="space-y-2">
+              <iframe
+                src={submission.resumeUrl}
+                title="Resume preview"
+                className="w-full h-48 rounded border"
+              />
+              <div className="text-right">
+                <a
+                  href={submission.resumeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm text-blue-600 underline"
+                >
+                  Download Resume
+                </a>
+              </div>
+            </div>
           )}
           {submission.message && (
             <p className="whitespace-pre-wrap">

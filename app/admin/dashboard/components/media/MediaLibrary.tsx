@@ -6,7 +6,13 @@ import MediaList from "./MediaList";
 import MediaUpload from "./MediaUpload";
 import MediaBulkActions from "./MediaBulkActions";
 import MediaDetailsDrawer from "./MediaDetailsDrawer";
-import type { MediaDoc, TypeFilter, SortBy, DateFilter } from "@/types/media";
+import type {
+  MediaDoc,
+  TypeFilter,
+  SortBy,
+  DateFilter,
+  UsageFilter,
+} from "@/types/media";
 import { useToast } from "@/hooks/use-toast";
 
 export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) => void }) {
@@ -21,7 +27,7 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [sortBy, setSortBy] = useState<SortBy>("date");
   const [dateFilter, setDateFilter] = useState<DateFilter>("all");
-  const [unusedOnly, setUnusedOnly] = useState(false);
+  const [usageFilter, setUsageFilter] = useState<UsageFilter>("all");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [tagFilter, setTagFilter] = useState("");
@@ -115,8 +121,14 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
     .filter((m) => (tagFilter ? (m.tags ?? []).includes(tagFilter) : true))
     // Favorites filter
     .filter((m) => (favoritesOnly ? !!m.favorite : true))
-    // Unused filter
-    .filter((m) => (unusedOnly ? !m.attachedTo || m.attachedTo.length === 0 : true))
+    // Usage filter
+    .filter((m) =>
+      usageFilter === "unused"
+        ? !m.attachedTo || m.attachedTo.length === 0
+        : usageFilter === "used"
+        ? !!m.attachedTo && m.attachedTo.length > 0
+        : true
+    )
     // Date filter
     .filter((m) => {
       if (dateFilter === "all") return true;
@@ -255,8 +267,8 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
         onSortBy={setSortBy}
         dateFilter={dateFilter}
         onDateFilter={setDateFilter}
-        unusedOnly={unusedOnly}
-        onUnusedToggle={() => setUnusedOnly((u) => !u)}
+        usageFilter={usageFilter}
+        onUsageFilter={setUsageFilter}
         view={view}
         onToggleView={() => setView((v) => (v === "grid" ? "list" : "grid"))}
         favoritesOnly={favoritesOnly}

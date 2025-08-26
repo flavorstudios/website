@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import CategoryList, { CategoryType } from "./CategoryList"
 import type { Category } from "@/types/category"
 import CategoryBulkActions from "./CategoryBulkActions"
@@ -175,6 +175,8 @@ export default function CategoryManager() {
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[] | null>(null)
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all")
   const [perPage, setPerPage] = useState(10)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [importing, setImporting] = useState(false)
 
   // Memoize loadData to satisfy react-hooks/exhaustive-deps and avoid effect churn
   const loadData = useCallback(
@@ -199,6 +201,17 @@ export default function CategoryManager() {
   useEffect(() => {
     loadData(type)
   }, [type, loadData])
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key.toLowerCase() === "n") {
+        e.preventDefault()
+        setShowCreate(true)
+      }
+    }
+    window.addEventListener("keydown", handleKey)
+    return () => window.removeEventListener("keydown", handleKey)
+  }, [])
 
   const createCategory = async (data: Partial<Category>) => {
     try {
@@ -373,6 +386,43 @@ export default function CategoryManager() {
     URL.revokeObjectURL(url)
   }
 
+  const handleImport = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      setImporting(true)
+      const text = await file.text()
+      const data = JSON.parse(text)
+      if (!Array.isArray(data)) throw new Error("Invalid format")
+      await Promise.all(
+        data.map((cat: Partial<Category>) =>
+          fetch("/api/admin/categories", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ ...cat, type: type.toLowerCase() }),
+          })
+        )
+      )
+      toast("Categories imported")
+      await loadData(type)
+    } catch {
+      toast("Import failed")
+    } finally {
+      setImporting(false)
+      if (fileInputRef.current) fileInputRef.current.value = ""
+    }
+  }
+
+  const resetFilters = () => {
+    setSearch("")
+    setSortBy("order")
+    setStatusFilter("all")
+    setPerPage(10)
+  }
+
   const filtered = useMemo(() => {
     return categories.filter((c) => {
       const matchesSearch = c.name
@@ -404,6 +454,12 @@ export default function CategoryManager() {
     setCurrentPage(1)
   }, [search, sortBy, type, statusFilter, perPage])
 
+  const activeCount = useMemo(
+    () => categories.filter((c) => c.isActive).length,
+    [categories]
+  )
+  const inactiveCount = categories.length - activeCount
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -418,6 +474,9 @@ export default function CategoryManager() {
         title="Categories"
         subtitle="Manage your blog and video categories"
       />
+      <p className="text-sm text-gray-500">
+        {categories.length} total / {activeCount} active / {inactiveCount} inactive
+      </p>
       <div className="flex flex-wrap justify-between gap-2">
         <div className="flex gap-2 flex-wrap w-full sm:w-auto">
           <Select value={type} onValueChange={(v) => setType(v as CategoryType)}>
@@ -471,8 +530,26 @@ export default function CategoryManager() {
               <SelectItem value="50">50 / page</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="ghost" size="sm" onClick={resetFilters}>
+            Reset
+          </Button>
         </div>
         <div className="flex gap-2 w-full sm:w-auto justify-end">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={handleImport}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+          >
+            Import JSON
+          </Button>
           <Button variant="outline" size="sm" onClick={exportCategories}>
             Export JSON
           </Button>

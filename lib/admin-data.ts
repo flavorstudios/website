@@ -15,6 +15,7 @@ export interface BlogPost {
   createdAt: string
   updatedAt: string
   commentCount?: number        // <-- ADDED
+  shareCount?: number          // <-- Track how often a post is shared
 }
 
 export interface Video {
@@ -93,11 +94,12 @@ export const blogData = {
       // If categories missing, fallback to [category]
       categories: post.categories && post.categories.length > 0 ? post.categories : [post.category],
       commentCount: commentCounts[post.id] ?? 0, // <-- Always attach commentCount
+      shareCount: typeof post.shareCount === "number" ? post.shareCount : 0,
     }))
   },
 
   // Accepts either `category` (string) or `categories` (string[])
-  async create(post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "commentCount">): Promise<BlogPost> {
+  async create(post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "commentCount" | "shareCount">): Promise<BlogPost> {
     const posts = await this.getAll()
     const mainCategory =
       Array.isArray(post.categories) && post.categories.length > 0
@@ -118,6 +120,7 @@ export const blogData = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       commentCount: 0,
+      shareCount: 0,
     }
     posts.push(newPost)
     await writeJsonFile("blogs.json", posts)

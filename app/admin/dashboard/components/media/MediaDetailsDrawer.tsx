@@ -196,6 +196,21 @@ export default function MediaDetailsDrawer({
           </div>
         </div>
 
+        <div>
+          <label className="block text-xs font-semibold mb-1 text-gray-700">
+            Used in
+          </label>
+          {media.attachedTo?.length ? (
+            <ul className="text-xs list-disc list-inside">
+              {media.attachedTo.map((id) => (
+                <li key={id}>{id}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-gray-500">Not used</p>
+          )}
+        </div>
+
         {!!media.alt && (
           <div>
             <label className="block text-xs font-semibold mb-1 text-gray-700">

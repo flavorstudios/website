@@ -121,6 +121,15 @@ export default function MediaGrid({
                 ))}
               </div>
             ) : null}
+
+            {item.attachedTo?.length ? (
+              <Badge
+                variant="secondary"
+                className="absolute bottom-1 right-1 z-10 text-[10px] px-1 py-0"
+              >
+                {item.attachedTo.length}
+              </Badge>
+            ) : null}
           </button>
         );
       })}

@@ -95,6 +95,9 @@ export default function MediaList({
                   {m.tags.join(", ")}
                 </p>
               ) : null}
+              <p className="text-xs text-gray-400">
+                Used in {m.attachedTo?.length ?? 0} item(s)
+              </p>
             </button>
           </div>
         ))}
@@ -115,6 +118,7 @@ export default function MediaList({
               <th scope="col" className="p-2 text-left">Preview</th>
               <th scope="col" className="p-2 text-left">Name</th>
               <th scope="col" className="p-2 text-left">Tags</th>
+              <th scope="col" className="p-2 text-left">Used</th>
               <th scope="col" className="p-2 text-left">Type</th>
               <th scope="col" className="p-2 text-left">Date</th>
               <th scope="col" className="p-2 text-left">Size</th>
@@ -157,9 +161,8 @@ export default function MediaList({
                     {m.filename || m.name}
                   </button>
                 </td>
-                <td className="p-2">
-                  {(m.tags ?? []).join(", ")}
-                </td>
+                <td className="p-2">{(m.tags ?? []).join(", ")}</td>
+                <td className="p-2">{m.attachedTo?.length ?? 0}</td>
                 <td className="p-2">{m.mime || m.mimeType}</td>
                 <td className="p-2">{formatDate(m.createdAt)}</td>
                 <td className="p-2">{formatSizeKb(m.size)} KB</td>

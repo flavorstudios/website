@@ -8,6 +8,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +61,12 @@ export default function CommentManager() {
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState("pending")
   const [deleteTargets, setDeleteTargets] = useState<{ id: string; postId: string }[] | null>(null)
+  const [showFlaggedOnly, setShowFlaggedOnly] = useState(false)
+  const [postTypeFilter, setPostTypeFilter] = useState<"all" | "blog" | "video">("all")
+  const [sortBy, setSortBy] = useState<"date" | "toxicity">("date")
+  const [sortDirection, setSortDirection] = useState<"desc" | "asc">("desc")
+  const [page, setPage] = useState(1)
+  const pageSize = 10
   const { toast } = useToast()
 
   const loadComments = useCallback(async () => {
@@ -69,6 +84,8 @@ export default function CommentManager() {
 
   useEffect(() => {
     loadComments()
+    const interval = setInterval(loadComments, 60000)
+    return () => clearInterval(interval)
   }, [loadComments])
 
   const updateCommentStatus = async (
@@ -180,8 +197,32 @@ export default function CommentManager() {
       comment.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
       comment.postTitle.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesTab = activeTab === "all" || comment.status === activeTab
-    return matchesSearch && matchesTab
+    const matchesFlagged = showFlaggedOnly ? comment.flagged : true
+    const matchesType = postTypeFilter === "all" || comment.postType === postTypeFilter
+    return matchesSearch && matchesTab && matchesFlagged && matchesType
   })
+
+  const sortedComments = [...filteredComments].sort((a, b) => {
+    const aVal =
+      sortBy === "date"
+        ? new Date(a.createdAt).getTime()
+        : a.scores?.toxicity ?? 0
+    const bVal =
+      sortBy === "date"
+        ? new Date(b.createdAt).getTime()
+        : b.scores?.toxicity ?? 0
+    return sortDirection === "desc" ? bVal - aVal : aVal - bVal
+  })
+
+  const totalPages = Math.max(1, Math.ceil(sortedComments.length / pageSize))
+  const paginatedComments = sortedComments.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  )
+
+  useEffect(() => {
+    setPage(1)
+  }, [searchTerm, activeTab, showFlaggedOnly, postTypeFilter])
 
   const getStatusCounts = () => ({
     all: comments.length,
@@ -189,6 +230,7 @@ export default function CommentManager() {
     approved: comments.filter((c) => c.status === "approved").length,
     spam: comments.filter((c) => c.status === "spam").length,
     trash: comments.filter((c) => c.status === "trash").length,
+    flagged: comments.filter((c) => c.flagged).length,
   })
 
   const statusCounts = getStatusCounts()
@@ -220,11 +262,62 @@ export default function CommentManager() {
             aria-label="Search comments"
           />
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={postTypeFilter}
+            onValueChange={(v) =>
+              setPostTypeFilter(v as "all" | "blog" | "video")
+            }
+          >
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All types</SelectItem>
+              <SelectItem value="blog">Blog</SelectItem>
+              <SelectItem value="video">Video</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={sortBy}
+            onValueChange={(v) => setSortBy(v as "date" | "toxicity")}
+          >
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date">Date</SelectItem>
+              <SelectItem value="toxicity">Toxicity</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select
+            value={sortDirection}
+            onValueChange={(v) => setSortDirection(v as "desc" | "asc")}
+          >
+            <SelectTrigger className="w-[110px]">
+              <SelectValue placeholder="Order" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="desc">Desc</SelectItem>
+              <SelectItem value="asc">Asc</SelectItem>
+            </SelectContent>
+          </Select>
+          <div className="flex items-center space-x-2 pl-2">
+            <Checkbox
+              id="flagged-only"
+              checked={showFlaggedOnly}
+              onCheckedChange={(v) => setShowFlaggedOnly(Boolean(v))}
+            />
+            <Label htmlFor="flagged-only" className="text-sm">
+              Flagged
+            </Label>
+          </div>
+        </div>
       </div>
 
       <CommentStatsChart />
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-gray-900">{statusCounts.all}</div>
@@ -253,6 +346,12 @@ export default function CommentManager() {
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-gray-600">{statusCounts.trash}</div>
             <div className="text-sm text-gray-600">Trash</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-red-600">{statusCounts.flagged}</div>
+            <div className="text-sm text-gray-600">Flagged</div>
           </CardContent>
         </Card>
       </div>
@@ -288,7 +387,7 @@ export default function CommentManager() {
 
           {filteredComments.length > 0 ? (
             <div className="space-y-4">
-              {filteredComments.map((comment) => (
+              {paginatedComments.map((comment) => (
                 <CommentCard
                   key={comment.id}
                   comment={comment}
@@ -306,6 +405,29 @@ export default function CommentManager() {
                   }
                 />
               ))}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between pt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page === 1}
+                    onClick={() => setPage(page - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm">
+                    Page {page} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={page === totalPages}
+                    onClick={() => setPage(page + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
             </div>
           ) : (
             <EmptyState activeTab={activeTab} />

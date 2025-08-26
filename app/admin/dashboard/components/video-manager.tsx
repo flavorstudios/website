@@ -28,7 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import AdminPageHeader from "@/components/AdminPageHeader";
 import { VideoForm } from "@/components/ui/video-form";
-import { Info, Eye, Pencil, Trash2, Upload, Archive, Copy } from "lucide-react";
+import { Info, Eye, Pencil, Trash2, Upload, Archive, Copy, CopyPlus } from "lucide-react";
 import type { Category } from "@/types/category";
 
 interface Video {
@@ -135,6 +135,7 @@ function VideoTable({
   toggleSelectAll,
   onDelete,
   onTogglePublish,
+  onDuplicate,
   categories,
   onCopyLink,
 }: {
@@ -144,6 +145,7 @@ function VideoTable({
   toggleSelectAll: (checked: boolean) => void;
   onDelete: (id: string) => void;
   onTogglePublish: (id: string, publish: boolean) => void;
+  onDuplicate: (id: string) => void;
   categories: Category[];
   onCopyLink: (slug: string) => void;
 }) {
@@ -244,6 +246,21 @@ function VideoTable({
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label="Duplicate video"
+                          title="Duplicate"
+                          onClick={() => onDuplicate(video.id)}
+                        >
+                          <CopyPlus className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Duplicate</TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           aria-label={isPublished ? "Unpublish video" : "Publish video"}
                           title={isPublished ? "Unpublish" : "Publish"}
                           onClick={() => onTogglePublish(video.id, !isPublished)}
@@ -282,6 +299,7 @@ function VideoCardList({
   onTogglePublish,
   categories,
   onCopyLink,
+  onDuplicate,
 }: {
   videos: Video[];
   selected: Set<string>;
@@ -290,6 +308,7 @@ function VideoCardList({
   onTogglePublish: (id: string, publish: boolean) => void;
   categories: Category[];
   onCopyLink: (slug: string) => void;
+  onDuplicate: (id: string) => void;
 }) {
   return (
     <div className="space-y-4 md:hidden">
@@ -317,6 +336,10 @@ function VideoCardList({
                 <div className="mt-1 flex items-center gap-2">
                   <VideoStatusBadge status={video.status} />
                   <span className="text-xs text-gray-400">{formatDate(video.publishedAt)}</span>
+                </div>
+                <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+                  <span>{(video.views ?? 0).toLocaleString()} views</span>
+                  {video.duration && <span>• {video.duration}</span>}
                 </div>
               </div>
             </div>
@@ -350,6 +373,21 @@ function VideoCardList({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Copy Link</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Duplicate video"
+                    title="Duplicate"
+                    onClick={() => onDuplicate(video.id)}
+                  >
+                    <CopyPlus className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Duplicate</TooltipContent>
               </Tooltip>
 
               <Tooltip>
@@ -430,7 +468,7 @@ export default function VideoManager() {
   const [sortBy, setSortBy] = useState<"date" | "title" | "status" | "views">("date");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const VIDEOS_PER_PAGE = 10;
+  const [videosPerPage, setVideosPerPage] = useState(10);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
@@ -446,6 +484,7 @@ export default function VideoManager() {
     setFilterTag("");
     setSortBy("date");
     setSelected(new Set());
+    setVideosPerPage(10);
     setCurrentPage(1);
   };
 
@@ -572,12 +611,47 @@ export default function VideoManager() {
     toast(ok ? "Link copied to clipboard" : "Unable to copy link");
   };
 
+  const duplicateVideo = async (id: string) => {
+    const original = videos.find((v) => v.id === id);
+    if (!original) return;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _id, views: _views, ...rest } = original;
+      const data = {
+        ...rest,
+        title: `${original.title} (Copy)`,
+        slug: `${original.slug}-copy-${Date.now()}`,
+        status: "draft" as const,
+        publishedAt: new Date().toISOString(),
+      };
+      const res = await fetch("/api/admin/videos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        toast("Video duplicated.");
+        await loadData();
+      } else {
+        toast("Failed to duplicate video.");
+      }
+    } catch {
+      toast("Failed to duplicate video.");
+    }
+  };
+
   // Filtering & sorting -------------------------------------------------------
   const filteredVideos = useMemo(() => {
     const term = deferredSearch.trim().toLowerCase();
     const tag = filterTag.trim().toLowerCase();
     return videos.filter((video) => {
-      const matchesSearch = !term || video.title.toLowerCase().includes(term);
+      const matchesSearch =
+        !term ||
+        video.title.toLowerCase().includes(term) ||
+        video.slug.toLowerCase().includes(term) ||
+        video.description.toLowerCase().includes(term) ||
+        video.tags.some((t) => t.toLowerCase().includes(term));
       const matchesCategory = !filterCategory || video.category === filterCategory;
       const matchesStatus = filterStatus === "all" || video.status === filterStatus;
       const matchesFeatured =
@@ -608,16 +682,16 @@ export default function VideoManager() {
     return arr;
   }, [filteredVideos, sortBy]);
 
-  const totalPages = Math.ceil(sortedVideos.length / VIDEOS_PER_PAGE) || 1;
+  const totalPages = Math.ceil(sortedVideos.length / videosPerPage) || 1;
   const paginatedVideos = useMemo(
-    () => sortedVideos.slice((currentPage - 1) * VIDEOS_PER_PAGE, currentPage * VIDEOS_PER_PAGE),
-    [sortedVideos, currentPage]
+    () => sortedVideos.slice((currentPage - 1) * videosPerPage, currentPage * videosPerPage),
+    [sortedVideos, currentPage, videosPerPage]
   );
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterCategory, filterStatus, filterFeatured, sortBy, filterTag]);
+  }, [searchTerm, filterCategory, filterStatus, filterFeatured, sortBy, filterTag, videosPerPage]);
 
   // Bulk actions --------------------------------------------------------------
   const handleBulk = async (action: "publish" | "unpublish" | "delete") => {
@@ -668,7 +742,7 @@ export default function VideoManager() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full sm:w-60"
-          aria-label="Search by title"
+          aria-label="Search videos"
         />
 
         <CategoryDropdown
@@ -733,6 +807,17 @@ export default function VideoManager() {
           </SelectContent>
         </Select>
 
+        <Select value={String(videosPerPage)} onValueChange={(val) => setVideosPerPage(Number(val))}>
+          <SelectTrigger className="w-full sm:w-40" aria-label="Items per page">
+            <SelectValue placeholder="Items per page" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10 / page</SelectItem>
+            <SelectItem value="20">20 / page</SelectItem>
+            <SelectItem value="50">50 / page</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Button variant="outline" className="w-full sm:w-auto" onClick={resetFilters} aria-label="Clear filters">
           Clear Filters
         </Button>
@@ -778,6 +863,7 @@ export default function VideoManager() {
               onTogglePublish={togglePublish}
               categories={categories}
               onCopyLink={copyLink}
+              onDuplicate={duplicateVideo}
             />
           </div>
           {/* Mobile list */}
@@ -789,6 +875,7 @@ export default function VideoManager() {
             onTogglePublish={togglePublish}
             categories={categories}
             onCopyLink={copyLink}
+            onDuplicate={duplicateVideo}
           />
         </>
       )}

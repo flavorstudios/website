@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { motion } from "framer-motion"
 import {
   Mail,
@@ -13,6 +13,8 @@ import {
   Send,
   Tag,
   ArrowUpDown,
+  Trash,
+  RefreshCw,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -84,6 +86,19 @@ export default function EmailInbox() {
   const searchInputRef = useRef<HTMLInputElement>(null)
   const detailRef = useRef<HTMLDivElement>(null)
 
+  const loadMessages = useCallback(async () => {
+    setLoadingState(true)
+    try {
+      const response = await fetch("/api/admin/contact-messages")
+      const data = await response.json()
+      setMessages(data.messages || [])
+    } catch (error) {
+      console.error("Failed to load messages:", error)
+    } finally {
+      setLoadingState(false)
+    }
+  }, [])
+
   useEffect(() => {
     fetch("/api/admin/from-addresses")
       .then((res) => res.json())
@@ -103,44 +118,30 @@ export default function EmailInbox() {
   }, [])
 
   useEffect(() => {
-    const loadMessages = async () => {
-      try {
-        const response = await fetch("/api/admin/contact-messages")
-        const data = await response.json()
-        setMessages(data.messages || [])
-      } catch (error) {
-        console.error("Failed to load messages:", error)
-      } finally {
-        setLoadingState(false)
-      }
-    }
     loadMessages()
-  }, [])
+  }, [loadMessages])
+
 
   useEffect(() => {
     if (selectedMessage && detailRef.current) {
       detailRef.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [selectedMessage])
+  const searchTokens = searchTerm.toLowerCase().split(/\s+/).filter(Boolean)
 
   const filteredMessages = messages
     .filter((message) => {
-      const fullName = `${message.firstName} ${message.lastName}`.toLowerCase()
-      const search = searchTerm.toLowerCase()
-      const matchesSearch =
-        fullName.includes(search) ||
-        message.email.toLowerCase().includes(search) ||
-        message.subject.toLowerCase().includes(search) ||
-        message.message.toLowerCase().includes(search)
+      const haystack = `${message.firstName} ${message.lastName} ${message.email} ${message.subject} ${message.message}`.toLowerCase()
+      const matchesSearch = searchTokens.every((t) => haystack.includes(t))
+      const matchesStatus = filterStatus === "all" || message.status === filterStatus
+      const matchesPriority =
+        priorityFilter === "all" || message.priority === priorityFilter
+      const matchesFlagged = !flaggedOnly || message.flagged
+      const matchesLabel =
+        labelFilter === "all" || (message.labels || []).includes(labelFilter)
+      const matchesStarred = !starredOnly || message.starred
 
-    const matchesStatus = filterStatus === "all" || message.status === filterStatus
-    const matchesPriority = priorityFilter === "all" || message.priority === priorityFilter
-    const matchesFlagged = !flaggedOnly || message.flagged
-    const matchesLabel =
-      labelFilter === "all" || (message.labels || []).includes(labelFilter)
-    const matchesStarred = !starredOnly || message.starred  
-
-    return (
+      return (
         matchesSearch &&
         matchesStatus &&
         matchesPriority &&
@@ -201,6 +202,24 @@ export default function EmailInbox() {
       )
     } catch (err) {
       console.error("Failed to bulk update messages", err)
+    } finally {
+      setSelectedMessages(new Set())
+    }
+  }
+
+  const bulkDelete = async (ids: string[]) => {
+    setMessages((prev) => prev.filter((msg) => !ids.includes(msg.id)))
+    if (selectedMessage && ids.includes(selectedMessage.id)) {
+      setSelectedMessage(null)
+    }
+    try {
+      await fetch("/api/admin/contact-messages", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      })
+    } catch (err) {
+      console.error("Failed to delete messages", err)
     } finally {
       setSelectedMessages(new Set())
     }
@@ -408,6 +427,13 @@ export default function EmailInbox() {
             <li className="flex items-center justify-between">
               <span className="flex gap-1">
                 <kbd className="px-2 py-1 bg-gray-100 rounded">Ctrl</kbd>
+                <kbd className="px-2 py-1 bg-gray-100 rounded">Enter</kbd>
+              </span>
+              <span>Send reply</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <span className="flex gap-1">
+                <kbd className="px-2 py-1 bg-gray-100 rounded">Ctrl</kbd>
                 <kbd className="px-2 py-1 bg-gray-100 rounded">A</kbd>
               </span>
               <span>Select all</span>
@@ -454,6 +480,14 @@ export default function EmailInbox() {
                     ref={searchInputRef}
                   />
                 </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={loadMessages}
+                  aria-label="Refresh messages"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
                   <SelectTrigger className="w-32">
                     <Filter className="h-4 w-4 mr-2" />
@@ -547,6 +581,13 @@ export default function EmailInbox() {
                     onClick={() => bulkUpdateStatus(Array.from(selectedMessages), "unread")}
                   >
                     <Mail className="h-4 w-4 mr-2" /> Mark Unread
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => bulkDelete(Array.from(selectedMessages))}
+                  >
+                    <Trash className="h-4 w-4 mr-2" /> Delete
                   </Button>
                 </div>
               )}
@@ -708,6 +749,14 @@ export default function EmailInbox() {
                         Archive
                       </Button>
                       <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => bulkDelete([selectedMessage.id])}
+                      >
+                        <Trash className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                      <Button
                         variant="outline"
                         size="sm"
                         onClick={() =>
@@ -778,6 +827,7 @@ export default function EmailInbox() {
                         </div>
                       ))}
                     </div>
+                  </div>
 
                   <div className="space-y-4">
                   <h3 className="font-semibold text-gray-900 flex items-center gap-2">
@@ -813,6 +863,12 @@ export default function EmailInbox() {
                       placeholder="Type your reply..."
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                          e.preventDefault()
+                          handleReply()
+                        }
+                      }}
                       rows={6}
                       className="resize-none"
                       ref={replyRef}

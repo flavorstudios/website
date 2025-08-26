@@ -34,7 +34,19 @@ import {
 import { cn } from "@/lib/utils";
 import AdminPageHeader from "@/components/AdminPageHeader";
 import { VideoForm } from "@/components/ui/video-form";
-import { Info, Eye, Pencil, Trash2, Upload, Archive, Copy, CopyPlus, MoreVertical } from "lucide-react";
+import {
+  Info,
+  Eye,
+  Pencil,
+  Trash2,
+  Upload,
+  Archive,
+  Copy,
+  CopyPlus,
+  MoreVertical,
+  LayoutGrid,
+  List,
+} from "lucide-react";
 import type { Category } from "@/types/category";
 
 interface Video {
@@ -54,6 +66,8 @@ interface Video {
   episodeNumber?: number;
   season?: string;
 }
+
+const STORAGE_KEY = "video-manager-settings";
 
 // Utilities ------------------------------------------------------------------
 function formatDate(d: string) {
@@ -288,6 +302,144 @@ function VideoTable({
   );
 }
 
+// Video card reusable component ----------------------------------------------
+function VideoCard({
+  video,
+  selected,
+  toggleSelect,
+  onDelete,
+  onTogglePublish,
+  categories,
+  onCopyLink,
+  onDuplicate,
+  className,
+}: {
+  video: Video;
+  selected: Set<string>;
+  toggleSelect: (id: string) => void;
+  onDelete: (id: string) => void;
+  onTogglePublish: (id: string, publish: boolean) => void;
+  categories: Category[];
+  onCopyLink: (slug: string) => void;
+  onDuplicate: (id: string) => void;
+  className?: string;
+}) {
+  const catObj = categories.find((cat) => cat.slug === video.category);
+  const isPublished = video.status === "published";
+  return (
+    <div className={cn("rounded-lg border p-3 shadow-sm", className)}>
+      <div className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          checked={selected.has(video.id)}
+          onChange={() => toggleSelect(video.id)}
+          aria-label={`Select ${video.title}`}
+          className="mt-1"
+        />
+        {video.thumbnail && (
+          <Image
+            src={video.thumbnail}
+            alt={`Thumbnail for ${video.title}`}
+            width={128}
+            height={72}
+            className="h-20 w-32 rounded object-cover"
+          />
+        )}
+        <div className="flex-1">
+          <a
+            href={`/admin/video/edit?id=${video.id}`}
+            className="font-medium text-blue-600 hover:underline"
+          >
+            {video.title}
+          </a>
+          <div className="text-xs text-gray-500">{catObj?.name || video.category}</div>
+          <div className="mt-1 flex items-center gap-2">
+            <VideoStatusBadge status={video.status} />
+            <span className="text-xs text-gray-400">{formatDate(video.publishedAt)}</span>
+          </div>
+          <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+            <span>{(video.views ?? 0).toLocaleString()} views</span>
+            {video.duration && <span>• {video.duration}</span>}
+          </div>
+        </div>
+      </div>
+      <div className="mt-2 flex justify-end">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={`Open actions for ${video.title}`}
+            >
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" sideOffset={4}>
+            <DropdownMenuItem asChild>
+              <a href={`/admin/video/edit?id=${video.id}`}>
+                <Pencil className="h-4 w-4 mr-2" />
+                <span>Edit</span>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <a
+                href={`/watch/${video.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                <span>View</span>
+              </a>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                onCopyLink(video.slug);
+              }}
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              <span>Copy Link</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                onDuplicate(video.id);
+              }}
+            >
+              <CopyPlus className="h-4 w-4 mr-2" />
+              <span>Duplicate</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                onTogglePublish(video.id, !isPublished);
+              }}
+            >
+              {isPublished ? (
+                <Archive className="h-4 w-4 mr-2" />
+              ) : (
+                <Upload className="h-4 w-4 mr-2" />
+              )}
+              <span>{isPublished ? "Unpublish" : "Publish"}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                onDelete(video.id);
+              }}
+              className="text-red-600 focus:text-red-600"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              <span>Delete</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  );
+}
+
 // Mobile card list ------------------------------------------------------------
 function VideoCardList({
   videos,
@@ -310,113 +462,59 @@ function VideoCardList({
 }) {
   return (
     <div className="space-y-4 md:hidden">
-      {videos.map((video) => {
-        const catObj = categories.find((cat) => cat.slug === video.category);
-        const isPublished = video.status === "published";
-        return (
-          <div key={video.id} className="rounded-lg border p-3 shadow-sm">
-            <div className="flex items-start gap-3">
-              <input type="checkbox" checked={selected.has(video.id)} onChange={() => toggleSelect(video.id)} aria-label={`Select ${video.title}`} className="mt-1" />
-              {video.thumbnail && (
-                <Image
-                  src={video.thumbnail}
-                  alt={`Thumbnail for ${video.title}`}
-                  width={128}
-                  height={72}
-                  className="h-20 w-32 rounded object-cover"
-                />
-              )}
-              <div className="flex-1">
-                <a href={`/admin/video/edit?id=${video.id}`} className="font-medium text-blue-600 hover:underline">
-                  {video.title}
-                </a>
-                <div className="text-xs text-gray-500">{catObj?.name || video.category}</div>
-                <div className="mt-1 flex items-center gap-2">
-                  <VideoStatusBadge status={video.status} />
-                  <span className="text-xs text-gray-400">{formatDate(video.publishedAt)}</span>
-                </div>
-                <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
-                  <span>{(video.views ?? 0).toLocaleString()} views</span>
-                  {video.duration && <span>• {video.duration}</span>}
-                </div>
-              </div>
-            </div>
-            <div className="mt-2 flex justify-end">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={`Open actions for ${video.title}`}
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={4}>
-                  <DropdownMenuItem asChild>
-                    <a href={`/admin/video/edit?id=${video.id}`}>
-                      <Pencil className="h-4 w-4 mr-2" />
-                      <span>Edit</span>
-                    </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <a
-                      href={`/watch/${video.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      <span>View</span>
-                    </a>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      onCopyLink(video.slug);
-                    }}
-                  >
-                    <Copy className="h-4 w-4 mr-2" />
-                    <span>Copy Link</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      onDuplicate(video.id);
-                    }}
-                  >
-                    <CopyPlus className="h-4 w-4 mr-2" />
-                    <span>Duplicate</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      onTogglePublish(video.id, !isPublished);
-                    }}
-                  >
-                    {isPublished ? (
-                      <Archive className="h-4 w-4 mr-2" />
-                    ) : (
-                      <Upload className="h-4 w-4 mr-2" />
-                    )}
-                    <span>{isPublished ? "Unpublish" : "Publish"}</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      onDelete(video.id);
-                    }}
-                    className="text-red-600 focus:text-red-600"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    <span>Delete</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        );
-      })}
+      {videos.map((video) => (
+        <VideoCard
+          key={video.id}
+          video={video}
+          selected={selected}
+          toggleSelect={toggleSelect}
+          onDelete={onDelete}
+          onTogglePublish={onTogglePublish}
+          categories={categories}
+          onCopyLink={onCopyLink}
+          onDuplicate={onDuplicate}
+        />
+      ))}
+    </div>
+  );
+}
+
+// Desktop grid view -----------------------------------------------------------
+function VideoGrid({
+  videos,
+  selected,
+  toggleSelect,
+  onDelete,
+  onTogglePublish,
+  categories,
+  onCopyLink,
+  onDuplicate,
+}: {
+  videos: Video[];
+  selected: Set<string>;
+  toggleSelect: (id: string) => void;
+  onDelete: (id: string) => void;
+  onTogglePublish: (id: string, publish: boolean) => void;
+  categories: Category[];
+  onCopyLink: (slug: string) => void;
+  onDuplicate: (id: string) => void;
+}) {
+  return (
+    <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {videos.map((video) => (
+        <VideoCard
+          key={video.id}
+          video={video}
+          selected={selected}
+          toggleSelect={toggleSelect}
+          onDelete={onDelete}
+          onTogglePublish={onTogglePublish}
+          categories={categories}
+          onCopyLink={onCopyLink}
+          onDuplicate={onDuplicate}
+          className="h-full"
+        />
+      ))}
     </div>
   );
 }
@@ -467,6 +565,7 @@ export default function VideoManager() {
   const [filterTag, setFilterTag] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "title" | "status" | "views">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [videosPerPage, setVideosPerPage] = useState(10);
@@ -476,6 +575,49 @@ export default function VideoManager() {
   const [bulkAction, setBulkAction] = useState<null | "publish" | "unpublish">(null);
 
   const deferredSearch = useDeferredValue(searchTerm);
+
+  // Persist settings ---------------------------------------------------------
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+      if (saved.searchTerm) setSearchTerm(saved.searchTerm);
+      if (saved.filterCategory) setFilterCategory(saved.filterCategory);
+      if (saved.filterStatus) setFilterStatus(saved.filterStatus);
+      if (saved.filterFeatured) setFilterFeatured(saved.filterFeatured);
+      if (saved.filterTag) setFilterTag(saved.filterTag);
+      if (saved.sortBy) setSortBy(saved.sortBy);
+      if (saved.sortOrder) setSortOrder(saved.sortOrder);
+      if (saved.videosPerPage) setVideosPerPage(saved.videosPerPage);
+      if (saved.viewMode) setViewMode(saved.viewMode);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const data = {
+      searchTerm,
+      filterCategory,
+      filterStatus,
+      filterFeatured,
+      filterTag,
+      sortBy,
+      sortOrder,
+      videosPerPage,
+      viewMode,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }, [
+    searchTerm,
+    filterCategory,
+    filterStatus,
+    filterFeatured,
+    filterTag,
+    sortBy,
+    sortOrder,
+    videosPerPage,
+    viewMode,
+  ]);
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -488,6 +630,8 @@ export default function VideoManager() {
     setSelected(new Set());
     setVideosPerPage(10);
     setCurrentPage(1);
+    setViewMode("table");
+    if (typeof window !== "undefined") localStorage.removeItem(STORAGE_KEY);
   };
 
   // Data loading --------------------------------------------------------------
@@ -761,6 +905,24 @@ export default function VideoManager() {
         <AdminPageHeader title="Video Manager" subtitle="Manage your YouTube content and episodes" />
         <div className="flex gap-2">
           <Button
+            variant={viewMode === "table" ? "default" : "outline"}
+            size="icon"
+            onClick={() => setViewMode("table")}
+            aria-label="Table view"
+            title="Table view"
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === "grid" ? "default" : "outline"}
+            size="icon"
+            onClick={() => setViewMode("grid")}
+            aria-label="Grid view"
+            title="Grid view"
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button
             variant="outline"
             onClick={exportCSV}
             aria-label="Export videos to CSV"
@@ -931,20 +1093,32 @@ export default function VideoManager() {
         </div>
       ) : (
         <>
-          {/* Desktop table */}
-          <div className="hidden md:block">
-            <VideoTable
+          {viewMode === "table" ? (
+            <div className="hidden md:block">
+              <VideoTable
+                videos={paginatedVideos}
+                selected={selected}
+                toggleSelect={toggleSelect}
+                toggleSelectAll={toggleSelectAll}
+                onDelete={deleteVideo}
+                onTogglePublish={togglePublish}
+                categories={categories}
+                onCopyLink={copyLink}
+                onDuplicate={duplicateVideo}
+              />
+            </div>
+          ) : (
+            <VideoGrid
               videos={paginatedVideos}
               selected={selected}
               toggleSelect={toggleSelect}
-              toggleSelectAll={toggleSelectAll}
               onDelete={deleteVideo}
               onTogglePublish={togglePublish}
               categories={categories}
               onCopyLink={copyLink}
               onDuplicate={duplicateVideo}
             />
-          </div>
+          )}
           {/* Mobile list */}
           <VideoCardList
             videos={paginatedVideos}

@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
     );
     const roleFilter = url.searchParams.get("role") || "";
     const statusFilter = url.searchParams.get("status") || "";
+    const verifiedFilter = url.searchParams.get("verified") || "";
     const sort = url.searchParams.get("sort") || "created";
 
     const result = await adminAuth.listUsers(limit, pageToken);
@@ -38,6 +39,8 @@ export async function GET(request: NextRequest) {
         disabled: u.disabled,
         role: await getUserRole(u.uid, u.email || undefined),
         createdAt: u.metadata.creationTime,
+        emailVerified: u.emailVerified,
+        lastLogin: u.metadata.lastSignInTime,
       })),
     );
 
@@ -50,6 +53,12 @@ export async function GET(request: NextRequest) {
       withRole = withRole.filter((u) => u.disabled);
     }
 
+    if (verifiedFilter === "verified") {
+      withRole = withRole.filter((u) => u.emailVerified);
+    } else if (verifiedFilter === "unverified") {
+      withRole = withRole.filter((u) => !u.emailVerified);
+    }
+
     withRole.sort((a, b) => {
       switch (sort) {
         case "email":
@@ -58,6 +67,11 @@ export async function GET(request: NextRequest) {
           return a.role.localeCompare(b.role);
         case "status":
           return Number(a.disabled) - Number(b.disabled);
+          case "lastLogin":
+          return (
+            new Date(b.lastLogin || 0).getTime() -
+            new Date(a.lastLogin || 0).getTime()
+          );
         case "created":
         default:
           return (

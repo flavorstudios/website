@@ -1,12 +1,13 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { Upload, Archive, Trash2 } from 'lucide-react'
+import { Upload, Archive, Trash2, Download } from 'lucide-react'
 
 export interface BlogBulkActionsProps {
   count: number
   onPublish: () => void
   onUnpublish: () => void
   onDelete: () => void
+  onExport: () => void
 }
 
 export default function BlogBulkActions({
@@ -14,6 +15,7 @@ export default function BlogBulkActions({
   onPublish,
   onUnpublish,
   onDelete,
+  onExport,
 }: BlogBulkActionsProps) {
   if (count === 0) return null
   return (
@@ -30,6 +32,9 @@ export default function BlogBulkActions({
       </Button>
       <Button variant="outline" size="sm" onClick={onUnpublish}>
         <Archive className="mr-1 h-4 w-4" /> Unpublish
+      </Button>
+      <Button variant="outline" size="sm" onClick={onExport}>
+        <Download className="mr-1 h-4 w-4" /> Export
       </Button>
       <Button
         variant="outline"

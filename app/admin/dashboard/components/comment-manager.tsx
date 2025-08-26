@@ -19,6 +19,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { Slider } from "@/components/ui/slider"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -94,6 +95,9 @@ export default function CommentManager() {
   const [replyTarget, setReplyTarget] = useState<Comment | null>(null)
   const [replyContent, setReplyContent] = useState("")
   const [replyLoading, setReplyLoading] = useState(false)
+  const [toxicityRange, setToxicityRange] = useState<[number, number]>([0, 1])
+  const [autoApprove, setAutoApprove] = useState(false)
+  const [autoApproveThreshold, setAutoApproveThreshold] = useState(0.2)
   const { toast } = useToast()
 
   const loadComments = useCallback(async () => {
@@ -120,36 +124,43 @@ export default function CommentManager() {
     return () => clearInterval(interval)
   }, [autoRefresh, refreshInterval, loadComments])
 
-  const updateCommentStatus = async (
-    id: string,
-    postId: string,
-    status: Comment["status"]
-  ) => {
-    try {
-      const response = await fetch(`/api/admin/comments/${postId}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status, postId, commentId: id }),
-        credentials: "include",
-      })
-      if (response.ok) {
-        await loadComments()
-        toast(
-          status === "approved"
-            ? "Comment approved."
-            : status === "spam"
-            ? "Comment marked as spam."
-            : "Comment updated."
-        )
-      } else {
-        const data = await response.json()
-        toast(data.error || "Failed to update comment")
+  useEffect(() => {
+    if (!autoApprove) return
+    const pending = comments.filter(
+      (c) => c.status === "pending" && (c.scores?.toxicity ?? 1) <= autoApproveThreshold
+    )
+    pending.forEach((c) => updateCommentStatus(c.id, c.postId, "approved"))
+  }, [comments, autoApprove, autoApproveThreshold, updateCommentStatus])
+
+  const updateCommentStatus = useCallback(
+    async (id: string, postId: string, status: Comment["status"]) => {
+      try {
+        const response = await fetch(`/api/admin/comments/${postId}/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status, postId, commentId: id }),
+          credentials: "include",
+        })
+        if (response.ok) {
+          await loadComments()
+          toast(
+            status === "approved"
+              ? "Comment approved."
+              : status === "spam"
+              ? "Comment marked as spam."
+              : "Comment updated."
+          )
+        } else {
+          const data = await response.json()
+          toast(data.error || "Failed to update comment")
+        }
+      } catch {
+        console.error("Failed to update comment")
+        toast("Failed to update comment")
       }
-    } catch {
-      console.error("Failed to update comment")
-      toast("Failed to update comment")
-    }
-  }
+    },
+    [loadComments, toast]
+  )
 
   const deleteComment = async (id: string, postId: string) => {
     setDeleteTargets([{ id, postId }])
@@ -223,6 +234,57 @@ export default function CommentManager() {
     setDeleteTargets(targets)
   }
 
+  const handleBulkExport = () => {
+    const rows = comments.filter((c) => selectedIds.includes(c.id))
+    const header = [
+      "id",
+      "postId",
+      "postType",
+      "postTitle",
+      "author",
+      "email",
+      "website",
+      "content",
+      "status",
+      "createdAt",
+      "ip",
+      "flagged",
+      "toxicity",
+      "insult",
+      "threat",
+    ]
+    const csv = [
+      header.join(","),
+      ...rows.map((c) =>
+        [
+          c.id,
+          c.postId,
+          c.postType,
+          JSON.stringify(c.postTitle),
+          JSON.stringify(c.author),
+          c.email,
+          c.website ?? "",
+          JSON.stringify(c.content),
+          c.status,
+          c.createdAt,
+          c.ip,
+          String(c.flagged ?? false),
+          c.scores?.toxicity ?? "",
+          c.scores?.insult ?? "",
+          c.scores?.threat ?? "",
+        ].join(",")
+      ),
+    ].join("\n")
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.setAttribute("download", "comments.csv")
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   const toggleFlagged = async (comment: Comment) => {
     try {
       const res = await fetch(`/api/admin/comments/${comment.postId}/${comment.id}`, {
@@ -290,7 +352,19 @@ export default function CommentManager() {
     const matchesDate =
       (!startDate || new Date(comment.createdAt) >= new Date(startDate)) &&
       (!endDate || new Date(comment.createdAt) <= new Date(endDate))
-    return matchesSearch && matchesTab && matchesFlagged && matchesType && matchesDate
+    const matchesToxicity =
+      comment.scores
+        ? comment.scores.toxicity >= toxicityRange[0] &&
+          comment.scores.toxicity <= toxicityRange[1]
+        : true
+    return (
+      matchesSearch &&
+      matchesTab &&
+      matchesFlagged &&
+      matchesType &&
+      matchesDate &&
+      matchesToxicity
+    )
   })
 
   const sortedComments = [...filteredComments].sort((a, b) => {
@@ -320,6 +394,7 @@ export default function CommentManager() {
     postTypeFilter,
     startDate,
     endDate,
+    toxicityRange,
     pageSize,
   ])
 
@@ -437,7 +512,8 @@ export default function CommentManager() {
             <Label htmlFor="flagged-only" className="text-sm">
               Flagged
             </Label>
-            <div className="flex items-center space-x-2 pl-2">
+          </div>
+          <div className="flex items-center space-x-2 pl-2">
             <Switch
               id="auto-refresh"
               checked={autoRefresh}
@@ -462,7 +538,47 @@ export default function CommentManager() {
               </SelectContent>
             </Select>
           )}
+          <div className="flex items-center space-x-2 pl-2">
+            <Label htmlFor="toxicity-range" className="text-sm">
+              Toxicity
+            </Label>
+            <div className="w-32">
+              <Slider
+                id="toxicity-range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={toxicityRange}
+                onValueChange={(v) => setToxicityRange(v as [number, number])}
+              />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>{toxicityRange[0].toFixed(2)}</span>
+                <span>{toxicityRange[1].toFixed(2)}</span>
+              </div>
+            </div>
           </div>
+          <div className="flex items-center space-x-2 pl-2">
+            <Switch
+              id="auto-approve"
+              checked={autoApprove}
+              onCheckedChange={(v) => setAutoApprove(Boolean(v))}
+            />
+            <Label htmlFor="auto-approve" className="text-sm">
+              Auto approve
+            </Label>
+          </div>
+          {autoApprove && (
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              max="1"
+              value={autoApproveThreshold}
+              onChange={(e) => setAutoApproveThreshold(parseFloat(e.target.value))}
+              className="w-[90px]"
+              aria-label="Auto-approve toxicity threshold"
+            />
+          )}
         </div>
       </div>
 
@@ -512,6 +628,7 @@ export default function CommentManager() {
         onApprove={handleBulkApprove}
         onSpam={handleBulkSpam}
         onDelete={handleBulkDelete}
+        onExport={handleBulkExport}
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>

@@ -188,3 +188,52 @@ export async function PUT(req: NextRequest) {
     );
   }
 }
+
+// DELETE /api/admin/contact-messages
+// Body: { ids: string[] }
+export async function DELETE(req: NextRequest) {
+  if (!(await requireAdminAction("canHandleContacts"))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const body = (await req.json()) as unknown;
+    const ids =
+      body && typeof body === "object" && Array.isArray((body as any).ids)
+        ? ((body as any).ids as unknown[]).filter(
+            (id): id is string => typeof id === "string"
+          )
+        : [];
+
+    if (ids.length === 0) {
+      return NextResponse.json({ error: "Missing ids" }, { status: 400 });
+    }
+
+    await Promise.all(
+      ids.map(async (id) => {
+        await Promise.all([
+          adminDb.collection("contactMessages").doc(id).delete().catch((e) => {
+            console.warn(
+              "[ADMIN_CONTACT_MESSAGES_DELETE] Failed to delete contactMessages",
+              e
+            );
+          }),
+          adminDb.collection("contact_messages").doc(id).delete().catch((e) => {
+            console.warn(
+              "[ADMIN_CONTACT_MESSAGES_DELETE] Failed to delete contact_messages (legacy)",
+              e
+            );
+          }),
+        ]);
+      })
+    );
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[ADMIN_CONTACT_MESSAGES_DELETE]", err);
+    return NextResponse.json(
+      { error: "Failed to delete messages" },
+      { status: 500 }
+    );
+  }
+}

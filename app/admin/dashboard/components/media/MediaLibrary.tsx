@@ -33,6 +33,7 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [tagFilter, setTagFilter] = useState("");
+  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
 
   // Load persisted preferences
   useEffect(() => {
@@ -235,13 +236,30 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
     const allTags = Array.from(new Set(items.flatMap((m) => m.tags ?? []))).sort();
 
   // Bulk selection logic
-  const toggleSelect = (id: string) => {
+  const toggleSelect = (id: string, shiftKey = false) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
+
+      if (shiftKey && lastSelectedId) {
+        const ids = filtered.map((m) => m.id);
+        const start = ids.indexOf(lastSelectedId);
+        const end = ids.indexOf(id);
+        if (start !== -1 && end !== -1) {
+          const [min, max] = start < end ? [start, end] : [end, start];
+          const shouldSelect = !next.has(id);
+          ids.slice(min, max + 1).forEach((rangeId) => {
+            if (shouldSelect) next.add(rangeId);
+            else next.delete(rangeId);
+          });
+          return next;
+        }
+      }
+
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
+    setLastSelectedId(id);
   };
 
   const toggleSelectAll = (checked: boolean) => {

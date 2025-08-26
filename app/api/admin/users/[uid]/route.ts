@@ -25,6 +25,7 @@ export async function GET(
         disabled: userRecord.disabled,
         role,
         createdAt: userRecord.metadata.creationTime,
+        lastLogin: userRecord.metadata.lastSignInTime,
       },
     });
   } catch (err) {

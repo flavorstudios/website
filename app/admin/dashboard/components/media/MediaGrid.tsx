@@ -10,7 +10,7 @@ interface Props {
   onSelect: (item: MediaDoc) => void;
   onPick?: (url: string) => void;
   selected?: Set<string>;
-  toggleSelect?: (id: string) => void;
+  toggleSelect?: (id: string, shiftKey?: boolean) => void;
   /** Optional: pass to show a star button that toggles favorites */
   onToggleFavorite?: (item: MediaDoc) => void;
 }
@@ -49,7 +49,7 @@ export default function MediaGrid({
                 // Space toggles bulk selection when available
                 if (toggleSelect) {
                   e.preventDefault();
-                  toggleSelect(item.id);
+                  toggleSelect(item.id, e.shiftKey);
                 }
               }
             }}
@@ -63,8 +63,10 @@ export default function MediaGrid({
                 <Checkbox
                   aria-label={`Select ${item.filename || item.name}`}
                   checked={isSelected}
-                  onCheckedChange={() => toggleSelect(item.id)}
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleSelect(item.id, e.shiftKey);
+                  }}
                 />
               </div>
             )}

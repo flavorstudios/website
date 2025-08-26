@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { CheckCircle, XCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,8 @@ interface UserRow {
   disabled: boolean;
   role: string;
   createdAt?: string;
+  emailVerified?: boolean;
+  lastLogin?: string;
 }
 
 export default function UserList() {
@@ -36,6 +39,7 @@ export default function UserList() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("created");
+  const [verifiedFilter, setVerifiedFilter] = useState("all");
 
   const loadUsers = async (token?: string | null) => {
     setLoading(true);
@@ -46,6 +50,7 @@ export default function UserList() {
         search,
         role: roleFilter,
         status: statusFilter,
+        verified: verifiedFilter,
         sort: sortBy,
       });
       const res = await fetch(`/api/admin/users?${params.toString()}`);
@@ -70,7 +75,7 @@ export default function UserList() {
   useEffect(() => {
     loadUsers(pageToken);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageToken, roleFilter, statusFilter, sortBy]);
+  }, [pageToken, roleFilter, statusFilter, verifiedFilter, sortBy]);
 
   const handleSearch = () => {
     setPageToken(null);
@@ -87,6 +92,11 @@ export default function UserList() {
     setPageToken(null);
   };
 
+  const handleVerifiedChange = (val: string) => {
+    setVerifiedFilter(val);
+    setPageToken(null);
+  };
+
   const handleSortChange = (val: string) => {
     setSortBy(val);
     setPageToken(null);
@@ -96,6 +106,7 @@ export default function UserList() {
     setSearch("");
     setRoleFilter("all");
     setStatusFilter("all");
+    setVerifiedFilter("all");
     setSortBy("created");
     setPageToken(null);
     loadUsers(null);
@@ -214,6 +225,16 @@ export default function UserList() {
             <SelectItem value="disabled">Disabled</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={verifiedFilter} onValueChange={handleVerifiedChange}>
+          <SelectTrigger className="w-full sm:w-40" aria-label="Verified">
+            <SelectValue placeholder="Verified" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Email States</SelectItem>
+            <SelectItem value="verified">Verified</SelectItem>
+            <SelectItem value="unverified">Unverified</SelectItem>
+          </SelectContent>
+        </Select>
         <Select value={sortBy} onValueChange={handleSortChange}>
           <SelectTrigger className="w-full sm:w-40" aria-label="Sort">
             <SelectValue placeholder="Sort" />
@@ -223,6 +244,7 @@ export default function UserList() {
             <SelectItem value="email">Email</SelectItem>
             <SelectItem value="role">Role</SelectItem>
             <SelectItem value="status">Status</SelectItem>
+            <SelectItem value="lastLogin">Last Login</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -251,6 +273,8 @@ export default function UserList() {
                 <th className="p-2 text-left">Email</th>
                 <th className="p-2 text-left">Role</th>
                 <th className="p-2 text-left">Status</th>
+                <th className="p-2 text-left">Verified</th>
+                <th className="p-2 text-left">Last Login</th>
                 <th className="p-2 text-left">Created</th>
               </tr>
             </thead>
@@ -288,6 +312,14 @@ export default function UserList() {
                   <td className="p-2">{u.email}</td>
                   <td className="p-2">{u.role}</td>
                   <td className="p-2">{u.disabled ? "Disabled" : "Active"}</td>
+                  <td className="p-2">
+                    {u.emailVerified ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" aria-label="Email verified" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-red-600" aria-label="Email not verified" />
+                    )}
+                  </td>
+                  <td className="p-2">{u.lastLogin}</td>
                   <td className="p-2">{u.createdAt}</td>
                 </tr>
               ))}

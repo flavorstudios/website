@@ -88,7 +88,7 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
         multiple
         hidden
         ref={inputRef}
-        accept="image/*,video/*,application/pdf"
+        accept="image/*,video/*,audio/*,application/*"
         onChange={(e) => handleFiles(e.target.files)}
         aria-label="Select media files"
       />

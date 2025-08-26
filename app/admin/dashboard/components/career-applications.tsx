@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import AdminPageHeader from "@/components/AdminPageHeader";
 import { fetcher } from "@/lib/fetcher";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Star } from "lucide-react";
+import { Download, Star, Mail } from "lucide-react";
 
 interface Submission {
   id: string;
@@ -81,6 +81,16 @@ export default function Applications() {
     }
     prevCount.current = submissions.length;
   }, [submissions.length, toast]);
+
+  const clearFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+    setTagFilter("");
+    setRatingFilter("all");
+    setStartDate("");
+    setEndDate("");
+    setSortBy("newest");
+  };
 
   const statusCounts = STATUS_OPTIONS.map((opt) => ({
     ...opt,
@@ -310,16 +320,27 @@ export default function Applications() {
             </SelectContent>
           </Select>
         </div>
-        <Button
-          onClick={handleExport}
-          variant="outline"
-          size="sm"
-          className="w-full sm:w-auto"
-        >
-          <Download className="mr-2 h-4 w-4" />
-          Export CSV
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto justify-end">
+          <Button
+            onClick={clearFilters}
+            variant="ghost"
+            size="sm"
+            className="w-full sm:w-auto"
+          >
+            Clear Filters
+          </Button>
+          <Button
+            onClick={handleExport}
+            variant="outline"
+            size="sm"
+            className="w-full sm:w-auto"
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Export CSV
+          </Button>
+        </div>
       </div>
+      <p className="text-sm text-gray-500">Showing {sorted.length} of {submissions.length} applications</p>
 
       {/* Desktop table */}
       <div className="hidden sm:block">
@@ -384,6 +405,9 @@ export default function Applications() {
                       <td className="p-3 text-right space-x-2">
                         <Button size="sm" variant="outline" onClick={() => setSelected(s)}>
                           View
+                        </Button>
+                        <Button size="sm" variant="outline" asChild>
+                          <a href={`mailto:${s.email}`}>Email</a>
                         </Button>
                         {info.value === "new" && (
                           <Button size="sm" onClick={() => markReviewed(s.id)}>
@@ -453,6 +477,9 @@ export default function Applications() {
                 <div className="flex justify-end gap-2 pt-2">
                   <Button size="sm" variant="outline" onClick={() => setSelected(s)}>
                     View
+                  </Button>
+                  <Button size="sm" variant="outline" asChild>
+                    <a href={`mailto:${s.email}`}>Email</a>
                   </Button>
                   {info.value === "new" && (
                     <Button size="sm" onClick={() => markReviewed(s.id)}>
@@ -533,6 +560,11 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
             >
               {submission.email}
             </a>
+            <Button size="sm" variant="outline" className="ml-2" asChild>
+              <a href={`mailto:${submission.email}`} className="flex items-center">
+                <Mail className="mr-1 h-4 w-4" /> Email
+              </a>
+            </Button>
           </p>
           {submission.skills && (
             <p>

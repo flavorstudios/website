@@ -88,6 +88,8 @@ export default function MediaToolbar({
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="image">Images</SelectItem>
             <SelectItem value="video">Videos</SelectItem>
+            <SelectItem value="audio">Audio</SelectItem>
+            <SelectItem value="application">Documents</SelectItem>
           </SelectContent>
         </Select>
 

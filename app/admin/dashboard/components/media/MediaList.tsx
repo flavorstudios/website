@@ -7,7 +7,7 @@ import { File as FileIcon, Video as VideoIcon, Star } from "lucide-react"
 interface Props {
   items: MediaDoc[]
   selected: Set<string>
-  toggleSelect: (id: string) => void
+  toggleSelect: (id: string, shiftKey?: boolean) => void
   toggleSelectAll: (checked: boolean) => void
   onRowClick: (item: MediaDoc) => void
   onToggleFavorite?: (item: MediaDoc) => void
@@ -68,7 +68,7 @@ export default function MediaList({
             <Checkbox
               aria-label={`Select ${m.filename || m.name}`}
               checked={selected.has(m.id)}
-              onCheckedChange={() => toggleSelect(m.id)}
+              onClick={(e) => toggleSelect(m.id, e.shiftKey)}
             />
             <Preview m={m} />
             {onToggleFavorite && (
@@ -131,7 +131,7 @@ export default function MediaList({
                   <Checkbox
                     aria-label={`Select ${m.filename || m.name}`}
                     checked={selected.has(m.id)}
-                    onCheckedChange={() => toggleSelect(m.id)}
+                    onClick={(e) => toggleSelect(m.id, e.shiftKey)}
                   />
                 </td>
                 <td className="p-2">

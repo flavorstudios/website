@@ -40,6 +40,7 @@ interface UserData {
   role: string;
   createdAt?: string;
   emailVerified?: boolean;
+  lastLogin?: string;
 }
 
 interface AuditLog {
@@ -146,6 +147,9 @@ export default function UserProfileDrawer({ uid, open, onClose, onDeleted }: Use
                   </p>
                 )}
                 <p className="text-sm text-gray-500">Created: {user.createdAt}</p>
+                {user.lastLogin && (
+                  <p className="text-sm text-gray-500">Last login: {user.lastLogin}</p>
+                )}
               </div>
             </div>
             <div className="space-y-2">

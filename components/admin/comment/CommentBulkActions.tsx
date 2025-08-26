@@ -1,12 +1,13 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { Check, X, Trash2 } from 'lucide-react'
+import { Check, X, Trash2, Download } from 'lucide-react'
 
 export interface CommentBulkActionsProps {
   count: number
   onApprove: () => void
   onSpam: () => void
   onDelete: () => void
+  onExport?: () => void
 }
 
 export default function CommentBulkActions({
@@ -14,6 +15,7 @@ export default function CommentBulkActions({
   onApprove,
   onSpam,
   onDelete,
+  onExport,
 }: CommentBulkActionsProps) {
   if (count === 0) return null
   return (
@@ -31,6 +33,11 @@ export default function CommentBulkActions({
       <Button variant="outline" size="sm" onClick={onSpam}>
         <X className="mr-1 h-4 w-4" /> Spam
       </Button>
+      {onExport && (
+        <Button variant="outline" size="sm" onClick={onExport}>
+          <Download className="mr-1 h-4 w-4" /> Export
+        </Button>
+      )}
       <Button variant="outline" size="sm" className="text-red-600" onClick={onDelete}>
         <Trash2 className="mr-1 h-4 w-4" /> Delete
       </Button>

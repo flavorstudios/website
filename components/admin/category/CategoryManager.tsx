@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils"
 import AdminPageHeader from "@/components/AdminPageHeader"
 import { slugify } from "@/lib/slugify"
 import useHotkeys from "@/app/admin/dashboard/hooks/use-hotkeys"
+import useDebounce from "@/hooks/use-debounce"
 
 interface CategoryFormProps {
   category?: Partial<Category>
@@ -163,24 +164,53 @@ function CategoryForm({ category, onSave, onCancel }: CategoryFormProps) {
 
 export default function CategoryManager() {
   const { toast } = useToast()
-  const [type, setType] = useState<CategoryType>("BLOG")
+
+  const getInitialPrefs = () => {
+    if (typeof window === "undefined") return {}
+    try {
+      return JSON.parse(localStorage.getItem("cm_prefs") || "{}")
+    } catch {
+      return {}
+    }
+  }
+  const prefsRef = useRef(getInitialPrefs())
+  const prefs = prefsRef.current
+
+  const [type, setType] = useState<CategoryType>(prefs.type ?? "BLOG")
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState("")
-  const [sortBy, setSortBy] = useState("order")
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc")
+  const [search, setSearch] = useState(prefs.search ?? "")
+  const [sortBy, setSortBy] = useState(prefs.sortBy ?? "order")
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(prefs.sortDir ?? "asc")
   const [currentPage, setCurrentPage] = useState(1)
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [showCreate, setShowCreate] = useState(false)
   const [editing, setEditing] = useState<Category | null>(null)
   const [deleting, setDeleting] = useState<Category | null>(null)
   const [replacement, setReplacement] = useState<string>("")
-  const [bulkDeleteIds, setBulkDeleteIds] = useState<string[] | null>(null)
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all")
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">(
+    prefs.statusFilter ?? "all",
+  )
+  const [perPage, setPerPage] = useState<number>(
+    typeof prefs.perPage === "number" ? prefs.perPage : 10,
+  )
   const [perPage, setPerPage] = useState(10)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const searchRef = useRef<HTMLInputElement | null>(null)
   const [importing, setImporting] = useState(false)
+  const debouncedSearch = useDebounce(search, 300)
+
+  useEffect(() => {
+    const nextPrefs = {
+      type,
+      search,
+      sortBy,
+      sortDir,
+      statusFilter,
+      perPage,
+    }
+    localStorage.setItem("cm_prefs", JSON.stringify(nextPrefs))
+  }, [type, search, sortBy, sortDir, statusFilter, perPage])
 
   // Memoize loadData to satisfy react-hooks/exhaustive-deps and avoid effect churn
   const loadData = useCallback(
@@ -422,6 +452,44 @@ export default function CategoryManager() {
     URL.revokeObjectURL(url)
   }
 
+  const exportCategoriesCSV = () => {
+    const headers = [
+      "Name",
+      "Slug",
+      "Description",
+      "Color",
+      "Icon",
+      "Status",
+      "Posts",
+    ]
+    const rows = sorted.map((c) => [
+      c.name,
+      c.slug,
+      c.description ?? "",
+      c.color ?? "",
+      c.icon ?? "",
+      c.isActive ? "active" : "inactive",
+      String(c.postCount ?? 0),
+    ])
+    const csv =
+      headers.join(",") +
+      "\n" +
+      rows
+        .map((r) =>
+          r
+            .map((v) => `"${(v ?? "").replace(/"/g, '""')}"`)
+            .join(","),
+        )
+        .join("\n")
+    const blob = new Blob([csv], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `${type.toLowerCase()}-categories.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   useHotkeys(
     "shift+e",
     (e) => {
@@ -474,7 +542,7 @@ export default function CategoryManager() {
     return categories.filter((c) => {
       const matchesSearch = c.name
         .toLowerCase()
-        .includes(search.toLowerCase())
+        .includes(debouncedSearch.toLowerCase())
       const matchesStatus =
         statusFilter === "all"
           ? true
@@ -483,7 +551,7 @@ export default function CategoryManager() {
             : !c.isActive
       return matchesSearch && matchesStatus
     })
-  }, [categories, search, statusFilter])
+  }, [categories, debouncedSearch, statusFilter])
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -507,7 +575,7 @@ export default function CategoryManager() {
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [search, sortBy, sortDir, type, statusFilter, perPage])
+  }, [debouncedSearch, sortBy, sortDir, type, statusFilter, perPage])
 
   const activeCount = useMemo(
     () => categories.filter((c) => c.isActive).length,
@@ -611,6 +679,7 @@ export default function CategoryManager() {
               <SelectItem value="10">10 / page</SelectItem>
               <SelectItem value="25">25 / page</SelectItem>
               <SelectItem value="50">50 / page</SelectItem>
+              <SelectItem value="100">100 / page</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="ghost" size="sm" onClick={resetFilters}>
@@ -632,6 +701,9 @@ export default function CategoryManager() {
             disabled={importing}
           >
             Import JSON
+          </Button>
+          <Button variant="outline" size="sm" onClick={exportCategoriesCSV}>
+            Export CSV
           </Button>
           <Button variant="outline" size="sm" onClick={exportCategories}>
             Export JSON

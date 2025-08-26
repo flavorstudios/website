@@ -93,6 +93,7 @@ export default function BlogManager() {
   const handleSearchChange = (value: string) => setSearchInput(value);
   const handleCategoryChange = (value: string) => setParams({ category: value, page: "1" });
   const handleStatusChange = (value: string) => setParams({ status: value, page: "1" });
+  const handleSortChange = (value: string) => setParams({ sort: value, page: "1" });
   const handlePerPageChange = (value: string) => setParams({ perPage: value, page: "1" });
   const handlePageChange = (page: number) => setParams({ page: page.toString() });
 
@@ -330,6 +331,55 @@ export default function BlogManager() {
     }
   };
 
+  const exportSelected = () => {
+    const rows = currentPosts.filter((p) => selected.has(p.id));
+    if (rows.length === 0) return;
+    const header = ["Title", "Slug", "Status", "Author", "PublishedAt"];
+    const csv = [
+      header.join(","),
+      ...rows.map((p) =>
+        [p.title, p.slug, p.status, p.author, p.publishedAt || ""].map((v) =>
+          `"${String(v).replace(/"/g, '""')}"`,
+        ).join(","),
+      ),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `blog-posts-${new Date().toISOString().slice(0, 10)}.csv`,
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "r") {
+        e.preventDefault();
+        handleRevalidateBlog();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "n") {
+        e.preventDefault();
+        handleCreatePost();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [handleRevalidateBlog, handleCreatePost]);
+
   if (loading) {
     return (
       <div>
@@ -449,6 +499,7 @@ export default function BlogManager() {
           onPublish={() => handleBulk("publish")}
           onUnpublish={() => handleBulk("unpublish")}
           onDelete={() => handleBulk("delete")}
+          onExport={exportSelected}
         />
 
         {/* Table or Empty State */}

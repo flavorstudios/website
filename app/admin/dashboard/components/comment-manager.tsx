@@ -55,6 +55,18 @@ import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
 import CommentStatsChart from "@/components/admin/comment/CommentStatsChart"
 import AdminPageHeader from "@/components/AdminPageHeader"
 
+const QUICK_REPLIES = [
+  { label: "Thanks for your feedback!", value: "Thanks for your feedback!" },
+  {
+    label: "We'll look into this.",
+    value: "We'll look into this and get back to you.",
+  },
+  {
+    label: "Please keep comments respectful.",
+    value: "Please keep comments respectful.",
+  },
+]
+
 interface Comment {
   id: string
   postId: string
@@ -227,6 +239,16 @@ export default function CommentManager() {
     setSelectedIds([])
   }
 
+  const handleBulkFlag = async () => {
+    for (const id of selectedIds) {
+      const comment = comments.find((c) => c.id === id)
+      if (comment) {
+        await toggleFlagged(comment)
+      }
+    }
+    setSelectedIds([])
+  }
+
   const handleBulkDelete = async () => {
     const targets = comments
       .filter((c) => selectedIds.includes(c.id))
@@ -342,12 +364,25 @@ export default function CommentManager() {
   }
 
   const filteredComments = comments.filter((comment) => {
+    const lower = searchTerm.toLowerCase()
     const matchesSearch =
-      comment.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      comment.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      comment.postTitle.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesTab = activeTab === "all" || comment.status === activeTab
-    const matchesFlagged = showFlaggedOnly ? comment.flagged : true
+      comment.content.toLowerCase().includes(lower) ||
+      comment.author.toLowerCase().includes(lower) ||
+      comment.postTitle.toLowerCase().includes(lower) ||
+      comment.email.toLowerCase().includes(lower) ||
+      comment.ip.toLowerCase().includes(lower)
+    const matchesTab =
+      activeTab === "all"
+        ? true
+        : activeTab === "flagged"
+        ? Boolean(comment.flagged)
+        : comment.status === activeTab
+    const matchesFlagged =
+      activeTab === "flagged"
+        ? true
+        : showFlaggedOnly
+        ? Boolean(comment.flagged)
+        : true
     const matchesType = postTypeFilter === "all" || comment.postType === postTypeFilter
     const matchesDate =
       (!startDate || new Date(comment.createdAt) >= new Date(startDate)) &&
@@ -627,6 +662,7 @@ export default function CommentManager() {
         count={selectedIds.length}
         onApprove={handleBulkApprove}
         onSpam={handleBulkSpam}
+        onFlag={handleBulkFlag}
         onDelete={handleBulkDelete}
         onExport={handleBulkExport}
       />
@@ -637,6 +673,7 @@ export default function CommentManager() {
           <TabsTrigger value="pending">Pending ({statusCounts.pending})</TabsTrigger>
           <TabsTrigger value="approved">Approved ({statusCounts.approved})</TabsTrigger>
           <TabsTrigger value="spam">Spam ({statusCounts.spam})</TabsTrigger>
+          <TabsTrigger value="flagged">Flagged ({statusCounts.flagged})</TabsTrigger>
           <TabsTrigger value="trash">Trash ({statusCounts.trash})</TabsTrigger>
         </TabsList>
 
@@ -748,6 +785,18 @@ export default function CommentManager() {
               <DialogTitle>Reply to {replyTarget.author}</DialogTitle>
               <DialogDescription>Send a public response.</DialogDescription>
             </DialogHeader>
+            <Select onValueChange={(v) => setReplyContent(v)}>
+              <SelectTrigger className="w-full mb-2">
+                <SelectValue placeholder="Quick reply" />
+              </SelectTrigger>
+              <SelectContent>
+                {QUICK_REPLIES.map((qr) => (
+                  <SelectItem key={qr.value} value={qr.value}>
+                    {qr.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Textarea
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
@@ -1006,6 +1055,7 @@ function EmptyState({ activeTab }: { activeTab: string }) {
     approved: "No approved comments yet.",
     spam: "No spam comments. Your site is clean!",
     trash: "Trash is empty.",
+    flagged: "No flagged comments.",
   }
 
   const icons = {
@@ -1014,6 +1064,7 @@ function EmptyState({ activeTab }: { activeTab: string }) {
     approved: Check,
     spam: AlertTriangle,
     trash: Trash2,
+    flagged: Flag,
   }
 
   const Icon = icons[activeTab as keyof typeof icons] || MessageSquare

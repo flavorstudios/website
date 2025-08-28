@@ -16,10 +16,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import AdminPageHeader from "@/components/AdminPageHeader";
 import { fetcher } from "@/lib/fetcher";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Star, Mail } from "lucide-react";
+import { Download, Star, Mail, Heart } from "lucide-react";
 
 interface Submission {
   id: string;
@@ -37,6 +38,7 @@ interface Submission {
   reviewed?: boolean;
   createdAt?: string;
   rating?: number;
+  favorite?: boolean;
 }
 
 const STATUS_OPTIONS = [
@@ -61,6 +63,7 @@ export default function Applications() {
   const [endDate, setEndDate] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [selected, setSelected] = useState<Submission | null>(null);
+  const [favoriteOnly, setFavoriteOnly] = useState(false);
   const { toast } = useToast();
 
   const {
@@ -90,6 +93,7 @@ export default function Applications() {
     setStartDate("");
     setEndDate("");
     setSortBy("newest");
+    setFavoriteOnly(false);
   };
 
   const statusCounts = STATUS_OPTIONS.map((opt) => ({
@@ -98,6 +102,7 @@ export default function Applications() {
       (s) => getStatusInfo(s.status, s.reviewed).value === opt.value
     ).length,
   }));
+  const favoriteCount = submissions.filter((s) => s.favorite).length;
 
   const updateSubmission = async (
     id: string,
@@ -138,13 +143,15 @@ export default function Applications() {
     const created = s.createdAt ? new Date(s.createdAt) : null;
     const matchStart = !startDate || (created && created >= new Date(startDate));
     const matchEnd = !endDate || (created && created <= new Date(endDate));
+    const matchFavorite = !favoriteOnly || s.favorite;
     return (
       matchSearch &&
       matchStatus &&
       matchTags &&
       matchRating &&
       matchStart &&
-      matchEnd
+      matchEnd &&
+      matchFavorite
     );
   });
 
@@ -186,6 +193,7 @@ export default function Applications() {
       "Interview",
       "Submitted",
       "Rating",
+      "Favorite",
     ];
     const rows = sorted.map((s) => [
       s.firstName || "",
@@ -197,6 +205,7 @@ export default function Applications() {
       s.interviewAt ? format(new Date(s.interviewAt), "yyyy-MM-dd HH:mm") : "",
       s.createdAt ? format(new Date(s.createdAt), "yyyy-MM-dd HH:mm") : "",
       s.rating || "",
+      s.favorite ? "Yes" : "No",
     ]);
     const csv = [headers, ...rows]
       .map((row) =>
@@ -252,6 +261,17 @@ export default function Applications() {
           All
           <Badge variant="secondary" className="ml-2">
             {submissions.length}
+          </Badge>
+        </Button>
+        <Button
+          key="favorites"
+          variant={favoriteOnly ? "default" : "outline"}
+          className="h-8"
+          onClick={() => setFavoriteOnly((v) => !v)}
+        >
+          Favorites
+          <Badge variant="secondary" className="ml-2">
+            {favoriteCount}
           </Badge>
         </Button>
         {statusCounts.map((opt) => (
@@ -366,7 +386,12 @@ export default function Applications() {
                   return (
                     <tr key={s.id} className="border-b last:border-b-0">
                       <td className="p-3 whitespace-nowrap">
-                        {s.firstName} {s.lastName}
+                        <div className="flex items-center gap-1">
+                          {s.favorite && (
+                            <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                          )}
+                          {s.firstName} {s.lastName}
+                        </div>
                       </td>
                       <td className="p-3 whitespace-nowrap">{s.email}</td>
                       <td className="p-3 whitespace-nowrap">{s.skills}</td>
@@ -403,6 +428,21 @@ export default function Applications() {
                         <Badge className={info.class}>{info.label}</Badge>
                       </td>
                       <td className="p-3 text-right space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            updateSubmission(s.id, { favorite: !s.favorite })
+                          }
+                        >
+                          <Heart
+                            className={`h-4 w-4 ${
+                              s.favorite
+                                ? "fill-red-500 text-red-500"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        </Button>
                         <Button size="sm" variant="outline" onClick={() => setSelected(s)}>
                           View
                         </Button>
@@ -440,7 +480,10 @@ export default function Applications() {
               <CardContent className="p-4 space-y-2">
                 <div className="flex justify-between">
                   <div>
-                    <p className="font-medium">
+                    <p className="font-medium flex items-center gap-1">
+                      {s.favorite && (
+                        <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                      )}
                       {s.firstName} {s.lastName}
                     </p>
                     <p className="text-xs text-gray-500">{s.email}</p>
@@ -475,6 +518,17 @@ export default function Applications() {
                   ))}
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => updateSubmission(s.id, { favorite: !s.favorite })}
+                  >
+                    <Heart
+                      className={`h-4 w-4 ${
+                        s.favorite ? "fill-red-500 text-red-500" : "text-gray-300"
+                      }`}
+                    />
+                  </Button>
                   <Button size="sm" variant="outline" onClick={() => setSelected(s)}>
                     View
                   </Button>
@@ -527,6 +581,7 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
   const [tags, setTags] = useState(submission.tags?.join(", ") || "");
   const [interviewAt, setInterviewAt] = useState(submission.interviewAt || "");
   const [rating, setRating] = useState(String(submission.rating || 0));
+  const [favorite, setFavorite] = useState(submission.favorite || false);
 
   const handleSave = async () => {
     const updates: Partial<Submission> = {
@@ -539,6 +594,7 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean),
+      favorite,
     };
     await onSave(updates);
   };
@@ -648,6 +704,16 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
                 <SelectItem value="5">5</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="favorite"
+              checked={favorite}
+              onCheckedChange={(v) => setFavorite(Boolean(v))}
+            />
+            <label htmlFor="favorite" className="text-sm font-medium leading-none">
+              Favorite
+            </label>
           </div>
           <div>
             <label className="text-sm font-medium">Interview</label>

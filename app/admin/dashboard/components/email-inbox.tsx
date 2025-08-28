@@ -8,6 +8,7 @@ import {
   Reply,
   Archive,
   Star,
+  StarOff,
   Search,
   Filter,
   Send,
@@ -29,6 +30,7 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuCheckboxItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -128,11 +130,43 @@ export default function EmailInbox() {
     }
   }, [selectedMessage])
   const searchTokens = searchTerm.toLowerCase().split(/\s+/).filter(Boolean)
+  const searchQuery = searchTokens.reduce(
+    (
+      acc,
+      token
+    ) => {
+      const [key, ...rest] = token.split(":")
+      if (rest.length && ["from", "label", "status", "priority", "subject"].includes(key)) {
+        acc[key as keyof typeof acc] = rest.join(":")
+      } else {
+        acc.text.push(token)
+      }
+      return acc
+    },
+    {
+      text: [] as string[],
+      from: "",
+      label: "",
+      status: "",
+      priority: "",
+      subject: "",
+    }
+  )
 
   const filteredMessages = messages
     .filter((message) => {
       const haystack = `${message.firstName} ${message.lastName} ${message.email} ${message.subject} ${message.message}`.toLowerCase()
-      const matchesSearch = searchTokens.every((t) => haystack.includes(t))
+      const matchesText = searchQuery.text.every((t) => haystack.includes(t))
+      const matchesFrom =
+        !searchQuery.from || message.email.toLowerCase().includes(searchQuery.from)
+      const matchesSubject =
+        !searchQuery.subject || message.subject.toLowerCase().includes(searchQuery.subject)
+      const matchesQueryStatus =
+        !searchQuery.status || message.status === searchQuery.status
+      const matchesQueryPriority =
+        !searchQuery.priority || message.priority === searchQuery.priority
+      const matchesQueryLabel =
+        !searchQuery.label || (message.labels || []).includes(searchQuery.label)
       const matchesStatus = filterStatus === "all" || message.status === filterStatus
       const matchesPriority =
         priorityFilter === "all" || message.priority === priorityFilter
@@ -142,7 +176,12 @@ export default function EmailInbox() {
       const matchesStarred = !starredOnly || message.starred
 
       return (
-        matchesSearch &&
+        matchesText &&
+        matchesFrom &&
+        matchesSubject &&
+        matchesQueryStatus &&
+        matchesQueryPriority &&
+        matchesQueryLabel &&
         matchesStatus &&
         matchesPriority &&
         matchesFlagged &&
@@ -168,10 +207,13 @@ export default function EmailInbox() {
   const allSelected =
     selectedMessages.size > 0 && filteredMessages.every((m) => selectedMessages.has(m.id))
 
-  const toggleSelectAll = (checked: boolean) => {
-    if (checked) setSelectedMessages(new Set(filteredMessages.map((m) => m.id)))
-    else setSelectedMessages(new Set())
-  }
+  const toggleSelectAll = useCallback(
+    (checked: boolean) => {
+      if (checked) setSelectedMessages(new Set(filteredMessages.map((m) => m.id)))
+      else setSelectedMessages(new Set())
+    },
+    [filteredMessages]
+  )
 
   const updateMessageStatus = async (id: string, status: ContactMessage["status"]) => {
     setMessages((prev) => prev.map((msg) => (msg.id === id ? { ...msg, status } : msg)))
@@ -225,6 +267,27 @@ export default function EmailInbox() {
     }
   }
 
+  const bulkToggleStar = async (ids: string[], starred: boolean) => {
+    setMessages((prev) =>
+      prev.map((msg) => (ids.includes(msg.id) ? { ...msg, starred } : msg))
+    )
+    try {
+      await Promise.all(
+        ids.map((id) =>
+          fetch("/api/admin/contact-messages", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, starred }),
+          })
+        )
+      )
+    } catch (err) {
+      console.error("Failed to update stars", err)
+    } finally {
+      setSelectedMessages(new Set())
+    }
+  }
+
   const toggleStar = async (id: string, starred: boolean) => {
     setMessages((prev) =>
       prev.map((msg) => (msg.id === id ? { ...msg, starred } : msg))
@@ -263,6 +326,11 @@ export default function EmailInbox() {
     } catch (err) {
       console.error("Failed to update labels", err)
     }
+  }
+
+  const bulkApplyLabel = async (ids: string[], label: string) => {
+    await Promise.all(ids.map((id) => handleLabelChange(id, label, true)))
+    setSelectedMessages(new Set())
   }
 
   const handleReply = async () => {
@@ -341,7 +409,7 @@ export default function EmailInbox() {
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [selectedMessage, filteredMessages, selectedMessages, shortcutsOpen])
+  }, [selectedMessage, filteredMessages, selectedMessages, shortcutsOpen, toggleSelectAll])
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -461,7 +529,7 @@ export default function EmailInbox() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Message List */}
-        <div className="lg:col-span-1">
+        <div className={`lg:col-span-1 ${selectedMessage ? "hidden lg:block" : ""}`}>
           <Card>
             <CardHeader className="pb-3 space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
@@ -583,6 +651,39 @@ export default function EmailInbox() {
                     <Mail className="h-4 w-4 mr-2" /> Mark Unread
                   </Button>
                   <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bulkToggleStar(Array.from(selectedMessages), true)}
+                  >
+                    <Star className="h-4 w-4 mr-2" /> Star
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bulkToggleStar(Array.from(selectedMessages), false)}
+                  >
+                    <StarOff className="h-4 w-4 mr-2" /> Unstar
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Tag className="h-4 w-4 mr-2" /> Label
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {AVAILABLE_LABELS.map((lbl) => (
+                        <DropdownMenuItem
+                          key={lbl}
+                          onSelect={() =>
+                            bulkApplyLabel(Array.from(selectedMessages), lbl)
+                          }
+                        >
+                          {lbl}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button
                     variant="destructive"
                     size="sm"
                     onClick={() => bulkDelete(Array.from(selectedMessages))}
@@ -688,7 +789,7 @@ export default function EmailInbox() {
         </div>
 
         {/* Message Detail & Reply */}
-        <div className="lg:col-span-2">
+        <div className={`lg:col-span-2 ${selectedMessage ? "" : "hidden lg:block"}`}>
           {selectedMessage ? (
             <div ref={detailRef}>
               <Card>

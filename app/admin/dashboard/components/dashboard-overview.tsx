@@ -217,7 +217,6 @@ export default function DashboardOverview() {
             </p>
           )}
           <Button onClick={refresh} variant="adminPrimary">
-          >
             Retry Dashboard
           </Button>
         </div>

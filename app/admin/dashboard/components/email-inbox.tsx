@@ -140,6 +140,8 @@ export default function EmailInbox() {
           case "status":
           case "priority":
           case "subject":
+          case "before":
+          case "after":
             acc[key] = rest.join(":")
             return acc
         }
@@ -154,6 +156,8 @@ export default function EmailInbox() {
       status: "",
       priority: "",
       subject: "",
+      before: "",
+      after: "",
     }
   )
 
@@ -171,6 +175,11 @@ export default function EmailInbox() {
         !searchQuery.priority || message.priority === searchQuery.priority
       const matchesQueryLabel =
         !searchQuery.label || (message.labels || []).includes(searchQuery.label)
+      const messageDate = new Date(message.createdAt).getTime()
+      const matchesBefore =
+        !searchQuery.before || messageDate <= new Date(searchQuery.before).getTime()
+      const matchesAfter =
+        !searchQuery.after || messageDate >= new Date(searchQuery.after).getTime()
       const matchesStatus = filterStatus === "all" || message.status === filterStatus
       const matchesPriority =
         priorityFilter === "all" || message.priority === priorityFilter
@@ -186,6 +195,8 @@ export default function EmailInbox() {
         matchesQueryStatus &&
         matchesQueryPriority &&
         matchesQueryLabel &&
+        matchesBefore &&
+        matchesAfter &&
         matchesStatus &&
         matchesPriority &&
         matchesFlagged &&
@@ -199,14 +210,17 @@ export default function EmailInbox() {
       return sortOrder === "desc" ? bTime - aTime : aTime - bTime
     })
 
-  const toggleMessageSelection = (id: string, checked: boolean) => {
-    setSelectedMessages((prev) => {
-      const newSet = new Set(prev)
-      if (checked) newSet.add(id)
-      else newSet.delete(id)
-      return newSet
-    })
-  }
+  const toggleMessageSelection = useCallback(
+    (id: string, checked: boolean) => {
+      setSelectedMessages((prev) => {
+        const newSet = new Set(prev)
+        if (checked) newSet.add(id)
+        else newSet.delete(id)
+        return newSet
+      })
+    },
+    []
+  )
 
   const allSelected =
     selectedMessages.size > 0 && filteredMessages.every((m) => selectedMessages.has(m.id))
@@ -366,7 +380,8 @@ export default function EmailInbox() {
     const handler = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName
       if (tag === "INPUT" || tag === "TEXTAREA") return
-      if (e.key === "ArrowDown") {
+      const key = e.key.toLowerCase()
+      if (key === "arrowdown" || key === "j") {
         e.preventDefault()
         if (!filteredMessages.length) return
         if (!selectedMessage) {
@@ -375,45 +390,65 @@ export default function EmailInbox() {
         }
         const idx = filteredMessages.findIndex((m) => m.id === selectedMessage.id)
         if (idx < filteredMessages.length - 1) setSelectedMessage(filteredMessages[idx + 1])
-      } else if (e.key === "ArrowUp") {
+      } else if (key === "arrowup" || key === "k") {
         e.preventDefault()
         if (!selectedMessage) return
         const idx = filteredMessages.findIndex((m) => m.id === selectedMessage.id)
         if (idx > 0) setSelectedMessage(filteredMessages[idx - 1])
-      } else if (e.key === "a" && selectedMessage) {
+      } else if (key === "o") {
+        e.preventDefault()
+        if (selectedMessage) setSelectedMessage(null)
+        else if (filteredMessages.length) setSelectedMessage(filteredMessages[0])
+      } else if (key === "/") {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      } else if (key === "x" && selectedMessage) {
+        e.preventDefault()
+        toggleMessageSelection(
+          selectedMessage.id,
+          !selectedMessages.has(selectedMessage.id)
+        )
+      } else if (key === "a" && selectedMessage) {
         e.preventDefault()
         updateMessageStatus(selectedMessage.id, "archived")
-      } else if (e.key === "r" && selectedMessage) {
+      } else if (key === "r" && selectedMessage) {
         e.preventDefault()
         replyRef.current?.focus()
-      } else if (e.key === "s" && selectedMessage) {
+      } else if (key === "s" && selectedMessage) {
         e.preventDefault()
         toggleStar(selectedMessage.id, !selectedMessage.starred)
-      } else if (e.key === "m" && selectedMessage) {
+      } else if (key === "m" && selectedMessage) {
         e.preventDefault()
         const nextStatus =
           selectedMessage.status === "read" ? "unread" : "read"
-        updateMessageStatus(selectedMessage.id, nextStatus)  
-      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "f") {
+        updateMessageStatus(selectedMessage.id, nextStatus)
+      } else if ((e.metaKey || e.ctrlKey) && key === "f") {
         e.preventDefault()
         searchInputRef.current?.focus()
-      } else if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "a") {
+      } else if ((e.metaKey || e.ctrlKey) && key === "a") {
         e.preventDefault()
         const currentlyAllSelected =
           selectedMessages.size > 0 &&
           filteredMessages.every((m) => selectedMessages.has(m.id))
         toggleSelectAll(!currentlyAllSelected)
-      } else if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+      } else if (e.key === "?" || (e.shiftKey && key === "/")) {
         e.preventDefault()
-        setShortcutsOpen(true)  
-      } else if (e.key === "Escape") {
+        setShortcutsOpen(true)
+      } else if (key === "escape") {
         if (shortcutsOpen) setShortcutsOpen(false)
         else setSelectedMessage(null)
       }
     }
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
-  }, [selectedMessage, filteredMessages, selectedMessages, shortcutsOpen, toggleSelectAll])
+  }, [
+    selectedMessage,
+    filteredMessages,
+    selectedMessages,
+    shortcutsOpen,
+    toggleSelectAll,
+    toggleMessageSelection,
+  ])
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -474,8 +509,18 @@ export default function EmailInbox() {
               <span>Show this help</span>
             </li>
             <li className="flex items-center justify-between">
-              <kbd className="px-2 py-1 bg-gray-100 rounded">Arrow ↑/↓</kbd>
+              <span className="flex gap-1">
+                <kbd className="px-2 py-1 bg-gray-100 rounded">Arrow ↑/↓</kbd>
+                <span>/</span>
+                <kbd className="px-2 py-1 bg-gray-100 rounded">J</kbd>
+                <span>/</span>
+                <kbd className="px-2 py-1 bg-gray-100 rounded">K</kbd>
+              </span>
               <span>Navigate messages</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">/</kbd>
+              <span>Focus search</span>
             </li>
             <li className="flex items-center justify-between">
               <span className="flex gap-1">
@@ -485,12 +530,20 @@ export default function EmailInbox() {
               <span>Focus search</span>
             </li>
             <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">O</kbd>
+              <span>Open/close message</span>
+            </li>
+            <li className="flex items-center justify-between">
               <kbd className="px-2 py-1 bg-gray-100 rounded">A</kbd>
               <span>Archive message</span>
             </li>
             <li className="flex items-center justify-between">
               <kbd className="px-2 py-1 bg-gray-100 rounded">S</kbd>
               <span>Star message</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">X</kbd>
+              <span>Select message</span>
             </li>
             <li className="flex items-center justify-between">
               <kbd className="px-2 py-1 bg-gray-100 rounded">R</kbd>
@@ -536,7 +589,7 @@ export default function EmailInbox() {
         <div className={`lg:col-span-1 ${selectedMessage ? "hidden lg:block" : ""}`}>
           <Card>
             <CardHeader className="pb-3 space-y-2">
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-nowrap overflow-x-auto md:flex-wrap w-full">
                 <Checkbox
                   checked={allSelected}
                   onCheckedChange={(v) => toggleSelectAll(!!v)}

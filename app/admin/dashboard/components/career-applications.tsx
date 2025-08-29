@@ -81,6 +81,13 @@ export default function Applications() {
   useEffect(() => {
     if (submissions.length > prevCount.current && prevCount.current !== 0) {
       toast.success("New applications received");
+      if (typeof window !== "undefined" && "Notification" in window) {
+        if (Notification.permission === "granted") {
+          new Notification("New job application received");
+        } else if (Notification.permission === "default") {
+          Notification.requestPermission();
+        }
+      }
     }
     prevCount.current = submissions.length;
   }, [submissions.length, toast]);
@@ -413,14 +420,24 @@ export default function Applications() {
                       <td className="p-3">
                         <div className="flex gap-0.5">
                           {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
+                            <button
                               key={i}
-                              className={`h-4 w-4 ${
-                                i < (s.rating || 0)
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : "text-gray-300"
-                              }`}
-                            />
+                              onClick={() =>
+                                updateSubmission(s.id, {
+                                  rating: s.rating === i + 1 ? 0 : i + 1,
+                                })
+                              }
+                              className="text-left"
+                              aria-label={`Rate ${i + 1} star${i === 0 ? "" : "s"}`}
+                            >
+                              <Star
+                                className={`h-4 w-4 ${
+                                  i < (s.rating || 0)
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            </button>
                           ))}
                         </div>
                       </td>
@@ -507,14 +524,23 @@ export default function Applications() {
                 )}
                 <div className="flex gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
+                    <button
                       key={i}
-                      className={`h-4 w-4 ${
-                        i < (s.rating || 0)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300"
-                      }`}
-                    />
+                      onClick={() =>
+                        updateSubmission(s.id, {
+                          rating: s.rating === i + 1 ? 0 : i + 1,
+                        })
+                      }
+                      aria-label={`Rate ${i + 1} star${i === 0 ? "" : "s"}`}
+                    >
+                      <Star
+                        className={`h-4 w-4 ${
+                          i < (s.rating || 0)
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    </button>
                   ))}
                 </div>
                 <div className="flex justify-end gap-2 pt-2">
@@ -597,6 +623,33 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
       favorite,
     };
     await onSave(updates);
+  };
+
+  const downloadICS = () => {
+    if (!interviewAt) return;
+    const start = new Date(interviewAt);
+    const end = new Date(start.getTime() + 30 * 60 * 1000);
+    const ics = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "BEGIN:VEVENT",
+      `DTSTART:${format(start, "yyyyMMdd'T'HHmmss'Z'")}`,
+      `DTEND:${format(end, "yyyyMMdd'T'HHmmss'Z'")}`,
+      `SUMMARY:Interview with ${submission.firstName || ""} ${
+        submission.lastName || ""
+      }`,
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\n");
+    const blob = new Blob([ics], { type: "text/calendar" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "interview.ics";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -722,6 +775,16 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
               value={interviewAt ? interviewAt.slice(0, 16) : ""}
               onChange={(e) => setInterviewAt(e.target.value)}
             />
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="mt-2"
+              disabled={!interviewAt}
+              onClick={downloadICS}
+            >
+              Add to Calendar
+            </Button>
           </div>
           <div>
             <label className="text-sm font-medium">Notes</label>

@@ -15,12 +15,24 @@ export async function PUT(
   }
   const { id } = await params
   try {
-    const { reviewed } = await request.json()
+    const body = await request.json()
+    const allowed = [
+      "reviewed",
+      "status",
+      "tags",
+      "notes",
+      "interviewAt",
+      "rating",
+      "favorite",
+    ]
+    const updates: Record<string, unknown> = {}
+    for (const key of allowed) {
+      if (key in body) {
+        updates[key] = body[key]
+      }
+    }
     const db = getAdminDb()
-    await db
-      .collection("careerSubmissions")
-      .doc(id)
-      .update({ reviewed: !!reviewed })
+    await db.collection("careerSubmissions").doc(id).update(updates)
     const doc = await db.collection("careerSubmissions").doc(id).get()
     return NextResponse.json({
       submission: { id: doc.id, ...(doc.data() as Submission) },

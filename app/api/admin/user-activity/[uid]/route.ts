@@ -17,6 +17,8 @@ export async function GET(
   }
 
   try {
+    const adminAuth = getAdminAuth();
+    const db = getAdminDb();
     const user = await adminAuth.getUser(uid);
     const email = user.email || "";
     const snap = await db

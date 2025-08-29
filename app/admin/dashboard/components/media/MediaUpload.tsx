@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -23,19 +23,8 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
     return () => window.removeEventListener("admin-open-media-upload", openPicker);
   }, []);
 
-  // Paste support – allow uploading files via clipboard (e.g. screenshots)
-  useEffect(() => {
-    const onPaste = (e: ClipboardEvent) => {
-      if (e.clipboardData?.files?.length) {
-        handleFiles(e.clipboardData.files);
-      }
-    };
-    window.addEventListener("paste", onPaste);
-    return () => window.removeEventListener("paste", onPaste);
-  }, []);
-
   // Handle file(s) from input or drop
-  const handleFiles = (files: FileList | null) => {
+  const handleFiles = useCallback((files: FileList | null) => {
     if (!files) return;
     Array.from(files).forEach((file) => {
       const id = Math.random().toString(36).slice(2);
@@ -64,7 +53,18 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
       xhr.send(form);
     });
     if (inputRef.current) inputRef.current.value = "";
-  };
+  }, [onUploaded]);
+
+  // Paste support – allow uploading files via clipboard (e.g. screenshots)
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      if (e.clipboardData?.files?.length) {
+        handleFiles(e.clipboardData.files);
+      }
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, [handleFiles]);
 
   // Drag and drop handler
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {

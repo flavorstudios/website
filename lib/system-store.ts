@@ -13,6 +13,7 @@ export interface SystemStats {
 export const systemStore = {
   async getStats(): Promise<SystemStats> {
     try {
+      const db = getAdminDb();
       const [postsSnap, videosSnap, commentsSnap, pendingSnap] = await Promise.all([
         db.collection("blogs").get(),
         db.collection("videos").get(),

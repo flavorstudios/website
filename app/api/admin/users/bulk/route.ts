@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
           if (typeof disabled !== "undefined") {
             await auth.updateUser(uid, { disabled });
           }
-          await auth.updateUser(uid, { disabled });
+          await db.collection("admin_audit_logs").add({
             actor: actor?.email || actor?.uid || "unknown",
             action: "update_user",
             target: uid,

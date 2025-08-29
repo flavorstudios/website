@@ -223,7 +223,7 @@ export async function GET(request: NextRequest) {
     };
 
     const safeAggregate = async (
-      query: AggregateQuery<{ views: number }>,
+      query: AggregateQuery<{ views: AggregateField<number> }>,
       label: string
     ): Promise<number> => {
       try {

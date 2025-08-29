@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { categoryStore } from "@/lib/category-store";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 import { publishToUser } from "@/lib/sse-broker";
 
 export async function POST(
@@ -26,18 +26,23 @@ export async function POST(
       return NextResponse.json({ error: "Category not found" }, { status: 404 });
     }
 
-    const batch = adminDb.batch();
-    const blogs = await adminDb
+    const db = getAdminDb();
+    const batch = db.batch();
+    const blogs = await db
       .collection("blogs")
       .where("category", "==", oldCategory.slug)
       .get();
-    blogs.forEach((doc) => batch.set(doc.ref, { category: newCategory.slug }, { merge: true }));
-    const videos = await adminDb
+    blogs.forEach((doc) =>
+      batch.set(doc.ref, { category: newCategory.slug }, { merge: true })
+    );
+    const videos = await db
       .collection("videos")
       .where("category", "==", oldCategory.slug)
       .get();
-    videos.forEach((doc) => batch.set(doc.ref, { category: newCategory.slug }, { merge: true }));
-    batch.delete(adminDb.collection("categories").doc(oldCategory.id));
+    videos.forEach((doc) =>
+      batch.set(doc.ref, { category: newCategory.slug }, { merge: true })
+    );
+    batch.delete(db.collection("categories").doc(oldCategory.id));
     await batch.commit();
 
     await categoryStore.delete(oldCategory.id);

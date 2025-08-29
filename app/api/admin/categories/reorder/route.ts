@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { categoryStore } from "@/lib/category-store";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 
 export async function PUT(request: NextRequest) {
   if (!(await requireAdmin(request))) {
@@ -16,9 +16,10 @@ export async function PUT(request: NextRequest) {
 
     await categoryStore.reorder(ids, type);
 
-    const batch = adminDb.batch();
+    const db = getAdminDb();
+    const batch = db.batch();
     ids.forEach((id: string, index: number) => {
-      const ref = adminDb.collection("categories").doc(id);
+      const ref = db.collection("categories").doc(id);
       batch.set(ref, { order: index }, { merge: true });
     });
     await batch.commit();

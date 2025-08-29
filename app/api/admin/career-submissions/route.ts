@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
-import { adminDb } from "@/lib/firebase-admin"
+import { getAdminDb } from "@/lib/firebase-admin"
 
 interface Submission {
   [key: string]: unknown
@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
-    const snap = await adminDb
+    const db = getAdminDb()
+    const snap = await db
       .collection("careerSubmissions")
       .orderBy("createdAt", "desc")
       .get()

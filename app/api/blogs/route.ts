@@ -39,11 +39,24 @@ export async function GET(request: NextRequest) {
     if (authorParam && authorParam !== "all") {
       const a = authorParam.toLowerCase();
       published = published.filter((b: BlogPost) => {
-        const byId = b.authorId && String(b.authorId).toLowerCase() === a;
-        const byName = typeof b.author === "string" && b.author.toLowerCase() === a;
-        const byObjId = b.author?.id && String(b.author.id).toLowerCase() === a;
+        const post = b as unknown as {
+          authorId?: string;
+          author?: string | { id?: string; name?: string };
+        };
+        const byId =
+          typeof post.authorId === "string" &&
+          post.authorId.toLowerCase() === a;
+        const byName =
+          typeof post.author === "string" &&
+          post.author.toLowerCase() === a;
+        const byObjId =
+          typeof post.author === "object" &&
+          typeof post.author?.id === "string" &&
+          post.author.id.toLowerCase() === a;
         const byObjName =
-          b.author?.name && String(b.author.name).toLowerCase() === a;
+          typeof post.author === "object" &&
+          typeof post.author?.name === "string" &&
+          post.author.name.toLowerCase() === a;
         return byId || byName || byObjId || byObjName;
       });
     }

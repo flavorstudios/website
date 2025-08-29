@@ -2,7 +2,7 @@
 
 import { requireAdmin } from "@/lib/admin-auth"
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 
 // PATCH /api/admin/comments/[slug]/[id]/approve
 export async function PATCH(
@@ -14,7 +14,8 @@ export async function PATCH(
   }
   const { slug, id } = await params;
   try {
-    const entryRef = adminDb
+    const db = getAdminDb();
+    const entryRef = db
       .collection("comments")
       .doc(slug)
       .collection("entries")

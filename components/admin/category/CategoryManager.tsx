@@ -199,6 +199,32 @@ export default function CategoryManager() {
   const [importing, setImporting] = useState(false)
   const debouncedSearch = useDebounce(search, 300)
 
+  const parseCSV = (text: string): Partial<Category>[] => {
+    const [headerLine, ...lines] = text.trim().split(/\r?\n/)
+    const headers = headerLine
+      .split(",")
+      .map((h) => h.trim().replace(/^"|"$/g, ""))
+    return lines
+      .filter(Boolean)
+      .map((line) => {
+        const values = line
+          .split(",")
+          .map((v) => v.trim().replace(/^"|"$/g, "").replace(/""/g, '"'))
+        const obj: Record<string, string> = {}
+        headers.forEach((h, i) => (obj[h] = values[i] ?? ""))
+        return {
+          name: obj.Name,
+          slug: obj.Slug,
+          description: obj.Description || undefined,
+          color: obj.Color || undefined,
+          icon: obj.Icon || undefined,
+          isActive: obj.Status
+            ? obj.Status.toLowerCase() === "active"
+            : true,
+        }
+      })
+  }
+
   const handleSort = useCallback(
     (field: string) => {
       if (sortBy === field) {
@@ -451,7 +477,11 @@ export default function CategoryManager() {
   }
 
   const exportCategories = () => {
-    const data = sorted.map((c) => ({ ...c }))
+    const source =
+      selected.size > 0
+        ? categories.filter((c) => selected.has(c.id))
+        : sorted
+    const data = source.map((c) => ({ ...c }))
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     })
@@ -464,6 +494,10 @@ export default function CategoryManager() {
   }
 
   const exportCategoriesCSV = () => {
+    const source =
+      selected.size > 0
+        ? categories.filter((c) => selected.has(c.id))
+        : sorted
     const headers = [
       "Name",
       "Slug",
@@ -473,7 +507,7 @@ export default function CategoryManager() {
       "Status",
       "Posts",
     ]
-    const rows = sorted.map((c) => [
+    const rows = source.map((c) => [
       c.name,
       c.slug,
       c.description ?? "",
@@ -508,7 +542,7 @@ export default function CategoryManager() {
       exportCategories()
     },
     {},
-    [sorted]
+    [sorted, selected, categories]
   )
 
   const handleImport = async (
@@ -519,7 +553,9 @@ export default function CategoryManager() {
     try {
       setImporting(true)
       const text = await file.text()
-      const data = JSON.parse(text)
+      const data = file.name.toLowerCase().endsWith(".csv")
+        ? parseCSV(text)
+        : JSON.parse(text)
       if (!Array.isArray(data)) throw new Error("Invalid format")
       await Promise.all(
         data.map((cat: Partial<Category>) =>
@@ -618,9 +654,20 @@ export default function CategoryManager() {
         title="Categories"
         subtitle="Manage your blog and video categories"
       />
-      <p className="text-sm text-gray-500">
-        {categories.length} total / {activeCount} active / {inactiveCount} inactive
-      </p>
+      <div className="grid w-full max-w-xs grid-cols-3 gap-2 text-center sm:max-w-none sm:w-auto">
+        <div className="rounded-md bg-gray-50 p-2">
+          <div className="text-lg font-bold">{categories.length}</div>
+          <div className="text-xs text-gray-500">Total</div>
+        </div>
+        <div className="rounded-md bg-gray-50 p-2">
+          <div className="text-lg font-bold">{activeCount}</div>
+          <div className="text-xs text-gray-500">Active</div>
+        </div>
+        <div className="rounded-md bg-gray-50 p-2">
+          <div className="text-lg font-bold">{inactiveCount}</div>
+          <div className="text-xs text-gray-500">Inactive</div>
+        </div>
+      </div>
       <div className="flex flex-wrap justify-between gap-2">
         <div className="flex gap-2 flex-wrap w-full sm:w-auto">
           <Select value={type} onValueChange={(v) => setType(v as CategoryType)}>
@@ -713,7 +760,7 @@ export default function CategoryManager() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="application/json"
+            accept=".json,.csv"
             className="hidden"
             onChange={handleImport}
           />
@@ -723,7 +770,7 @@ export default function CategoryManager() {
             onClick={() => fileInputRef.current?.click()}
             disabled={importing}
           >
-            Import JSON
+            Import
           </Button>
           <Button variant="outline" size="sm" onClick={exportCategoriesCSV}>
             Export CSV

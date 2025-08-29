@@ -565,6 +565,8 @@ export default function VideoManager() {
   const [filterTag, setFilterTag] = useState("");
   const [filterDateFrom, setFilterDateFrom] = useState("");
   const [filterDateTo, setFilterDateTo] = useState("");
+  const [filterViewsMin, setFilterViewsMin] = useState("");
+  const [filterViewsMax, setFilterViewsMax] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "title" | "status" | "views">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
@@ -590,6 +592,8 @@ export default function VideoManager() {
       if (saved.filterTag) setFilterTag(saved.filterTag);
       if (saved.filterDateFrom) setFilterDateFrom(saved.filterDateFrom);
       if (saved.filterDateTo) setFilterDateTo(saved.filterDateTo);
+      if (saved.filterViewsMin) setFilterViewsMin(saved.filterViewsMin);
+      if (saved.filterViewsMax) setFilterViewsMax(saved.filterViewsMax);
       if (saved.sortBy) setSortBy(saved.sortBy);
       if (saved.sortOrder) setSortOrder(saved.sortOrder);
       if (saved.videosPerPage) setVideosPerPage(saved.videosPerPage);
@@ -607,6 +611,8 @@ export default function VideoManager() {
       filterTag,
       filterDateFrom,
       filterDateTo,
+      filterViewsMin,
+      filterViewsMax,
       sortBy,
       sortOrder,
       videosPerPage,
@@ -621,6 +627,8 @@ export default function VideoManager() {
     filterTag,
     filterDateFrom,
     filterDateTo,
+    filterViewsMin,
+    filterViewsMax,
     sortBy,
     sortOrder,
     videosPerPage,
@@ -636,6 +644,8 @@ export default function VideoManager() {
     setSortBy("date");
     setFilterDateFrom("");
     setFilterDateTo("");
+    setFilterViewsMin("");
+    setFilterViewsMax("");
     setSortOrder("desc");
     setSelected(new Set());
     setVideosPerPage(10);
@@ -649,11 +659,6 @@ export default function VideoManager() {
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (categories.length > 0 && !filterCategory) setFilterCategory(categories[0].slug);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categories]);
 
   async function loadData() {
     setLoading(true);
@@ -826,6 +831,8 @@ export default function VideoManager() {
     const tag = filterTag.trim().toLowerCase();
     const fromDate = filterDateFrom ? new Date(filterDateFrom) : null;
     const toDate = filterDateTo ? new Date(filterDateTo) : null;
+    const minViews = filterViewsMin ? parseInt(filterViewsMin) : null;
+    const maxViews = filterViewsMax ? parseInt(filterViewsMax) : null;
     return videos.filter((video) => {
       const matchesSearch =
         !term ||
@@ -844,6 +851,8 @@ export default function VideoManager() {
       const published = new Date(video.publishedAt);
       const matchesFrom = !fromDate || published >= fromDate;
       const matchesTo = !toDate || published <= toDate;
+      const views = video.views ?? 0;
+      const matchesViews = (!minViews || views >= minViews) && (!maxViews || views <= maxViews);
       return (
         matchesSearch &&
         matchesCategory &&
@@ -851,7 +860,8 @@ export default function VideoManager() {
         matchesFeatured &&
         matchesTag &&
         matchesFrom &&
-        matchesTo
+        matchesTo &&
+        matchesViews
       );
     });
   }, [
@@ -863,6 +873,8 @@ export default function VideoManager() {
     filterTag,
     filterDateFrom,
     filterDateTo,
+    filterViewsMin,
+    filterViewsMax,
   ]);
 
   const sortedVideos = useMemo(() => {
@@ -898,6 +910,8 @@ export default function VideoManager() {
     filterDateFrom,
     filterDateTo,
     videosPerPage,
+    filterViewsMin,
+    filterViewsMax,
   ]);
 
   // Bulk actions --------------------------------------------------------------
@@ -1025,6 +1039,8 @@ export default function VideoManager() {
           }
           selectedCategory={filterCategory}
           onCategoryChange={setFilterCategory}
+          placeholder="All categories"
+          includeAll
           className="w-full sm:w-48"
         />
 
@@ -1050,6 +1066,24 @@ export default function VideoManager() {
           onChange={(e) => setFilterDateTo(e.target.value)}
           className="w-full sm:w-44"
           aria-label="Published before"
+        />
+
+        <Input
+          type="number"
+          placeholder="Min views"
+          value={filterViewsMin}
+          onChange={(e) => setFilterViewsMin(e.target.value)}
+          className="w-full sm:w-32"
+          aria-label="Minimum views"
+        />
+
+        <Input
+          type="number"
+          placeholder="Max views"
+          value={filterViewsMax}
+          onChange={(e) => setFilterViewsMax(e.target.value)}
+          className="w-full sm:w-32"
+          aria-label="Maximum views"
         />
 
         <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val as any)}>

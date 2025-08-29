@@ -97,7 +97,7 @@ export function AdminHeader({
     <>
       {/* Skip link for keyboard and screen reader users */}
       <a
-        href="#app-main"
+        href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-primary focus:text-primary-foreground focus:p-2 focus:outline-none focus:ring"
       >
         Skip to main content

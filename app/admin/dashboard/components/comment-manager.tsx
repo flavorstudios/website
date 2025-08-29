@@ -54,6 +54,7 @@ import { formatDate } from "@/lib/date"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
 import CommentStatsChart from "@/components/admin/comment/CommentStatsChart"
 import AdminPageHeader from "@/components/AdminPageHeader"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
 const QUICK_REPLIES = [
   { label: "Thanks for your feedback!", value: "Thanks for your feedback!" },
@@ -110,6 +111,8 @@ export default function CommentManager() {
   const [toxicityRange, setToxicityRange] = useState<[number, number]>([0, 1])
   const [autoApprove, setAutoApprove] = useState(false)
   const [autoApproveThreshold, setAutoApproveThreshold] = useState(0.2)
+  const [autoSpam, setAutoSpam] = useState(false)
+  const [autoSpamThreshold, setAutoSpamThreshold] = useState(0.8)
   const { toast } = useToast()
 
   const loadComments = useCallback(async () => {
@@ -173,6 +176,14 @@ export default function CommentManager() {
     )
     pending.forEach((c) => updateCommentStatus(c.id, c.postId, "approved"))
   }, [comments, autoApprove, autoApproveThreshold, updateCommentStatus])
+
+  useEffect(() => {
+    if (!autoSpam) return
+    const pending = comments.filter(
+      (c) => c.status === "pending" && (c.scores?.toxicity ?? 0) >= autoSpamThreshold
+    )
+    pending.forEach((c) => updateCommentStatus(c.id, c.postId, "spam"))
+  }, [comments, autoSpam, autoSpamThreshold, updateCommentStatus])
 
   const deleteComment = async (id: string, postId: string) => {
     setDeleteTargets([{ id, postId }])
@@ -444,6 +455,171 @@ export default function CommentManager() {
 
   const statusCounts = getStatusCounts()
 
+  const FilterControls = () => (
+    <div className="flex flex-wrap items-center gap-2">
+      <Select
+        value={postTypeFilter}
+        onValueChange={(v) => setPostTypeFilter(v as "all" | "blog" | "video")}
+      >
+        <SelectTrigger className="w-[120px]">
+          <SelectValue placeholder="Type" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All types</SelectItem>
+          <SelectItem value="blog">Blog</SelectItem>
+          <SelectItem value="video">Video</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select value={sortBy} onValueChange={(v) => setSortBy(v as "date" | "toxicity")}>
+        <SelectTrigger className="w-[130px]">
+          <SelectValue placeholder="Sort by" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="date">Date</SelectItem>
+          <SelectItem value="toxicity">Toxicity</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select
+        value={sortDirection}
+        onValueChange={(v) => setSortDirection(v as "desc" | "asc")}
+      >
+        <SelectTrigger className="w-[110px]">
+          <SelectValue placeholder="Order" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="desc">Desc</SelectItem>
+          <SelectItem value="asc">Asc</SelectItem>
+        </SelectContent>
+      </Select>
+      <Input
+        type="date"
+        value={startDate}
+        onChange={(e) => setStartDate(e.target.value)}
+        className="w-[150px]"
+        aria-label="Start date"
+      />
+      <Input
+        type="date"
+        value={endDate}
+        onChange={(e) => setEndDate(e.target.value)}
+        className="w-[150px]"
+        aria-label="End date"
+      />
+      <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+        <SelectTrigger className="w-[130px]">
+          <SelectValue placeholder="Page size" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="10">10 / page</SelectItem>
+          <SelectItem value="25">25 / page</SelectItem>
+          <SelectItem value="50">50 / page</SelectItem>
+        </SelectContent>
+      </Select>
+      <div className="flex items-center space-x-2 pl-2">
+        <Checkbox
+          id="flagged-only"
+          checked={showFlaggedOnly}
+          onCheckedChange={(v) => setShowFlaggedOnly(Boolean(v))}
+        />
+        <Label htmlFor="flagged-only" className="text-sm">
+          Flagged
+        </Label>
+      </div>
+      <div className="flex items-center space-x-2 pl-2">
+        <Switch
+          id="auto-refresh"
+          checked={autoRefresh}
+          onCheckedChange={(v) => setAutoRefresh(Boolean(v))}
+        />
+        <Label htmlFor="auto-refresh" className="text-sm">
+          Auto
+        </Label>
+      </div>
+      {autoRefresh && (
+        <Select
+          value={String(refreshInterval)}
+          onValueChange={(v) => setRefreshInterval(Number(v))}
+        >
+          <SelectTrigger className="w-[110px]">
+            <SelectValue placeholder="Interval" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="30000">30s</SelectItem>
+            <SelectItem value="60000">1m</SelectItem>
+            <SelectItem value="300000">5m</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
+      <div className="flex items-center space-x-2 pl-2">
+        <Label htmlFor="toxicity-range" className="text-sm">
+          Toxicity
+        </Label>
+        <div className="w-32">
+          <Slider
+            id="toxicity-range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={toxicityRange}
+            onValueChange={(v) => setToxicityRange(v as [number, number])}
+          />
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>{toxicityRange[0].toFixed(2)}</span>
+            <span>{toxicityRange[1].toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center space-x-2 pl-2">
+        <Switch
+          id="auto-approve"
+          checked={autoApprove}
+          onCheckedChange={(v) => setAutoApprove(Boolean(v))}
+        />
+        <Label htmlFor="auto-approve" className="text-sm">
+          Auto approve
+        </Label>
+      </div>
+      {autoApprove && (
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          max="1"
+          value={autoApproveThreshold}
+          onChange={(e) =>
+            setAutoApproveThreshold(parseFloat(e.target.value))
+          }
+          className="w-[90px]"
+          aria-label="Auto-approve toxicity threshold"
+        />
+      )}
+      <div className="flex items-center space-x-2 pl-2">
+        <Switch
+          id="auto-spam"
+          checked={autoSpam}
+          onCheckedChange={(v) => setAutoSpam(Boolean(v))}
+        />
+        <Label htmlFor="auto-spam" className="text-sm">
+          Auto spam
+        </Label>
+      </div>
+      {autoSpam && (
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          max="1"
+          value={autoSpamThreshold}
+          onChange={(e) =>
+            setAutoSpamThreshold(parseFloat(e.target.value))
+          }
+          className="w-[90px]"
+          aria-label="Auto-spam toxicity threshold"
+        />
+      )}
+    </div>
+  )
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -471,149 +647,20 @@ export default function CommentManager() {
             aria-label="Search comments"
           />
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Select
-            value={postTypeFilter}
-            onValueChange={(v) =>
-              setPostTypeFilter(v as "all" | "blog" | "video")
-            }
-          >
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All types</SelectItem>
-              <SelectItem value="blog">Blog</SelectItem>
-              <SelectItem value="video">Video</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={sortBy}
-            onValueChange={(v) => setSortBy(v as "date" | "toxicity")}
-          >
-            <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="date">Date</SelectItem>
-              <SelectItem value="toxicity">Toxicity</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={sortDirection}
-            onValueChange={(v) => setSortDirection(v as "desc" | "asc")}
-          >
-            <SelectTrigger className="w-[110px]">
-              <SelectValue placeholder="Order" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="desc">Desc</SelectItem>
-              <SelectItem value="asc">Asc</SelectItem>
-            </SelectContent>
-          </Select>
-          <Input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="w-[150px]"
-            aria-label="Start date"
-          />
-          <Input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="w-[150px]"
-            aria-label="End date"
-          />
-          <Select
-            value={String(pageSize)}
-            onValueChange={(v) => setPageSize(Number(v))}
-          >
-            <SelectTrigger className="w-[130px]">
-              <SelectValue placeholder="Page size" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10 / page</SelectItem>
-              <SelectItem value="25">25 / page</SelectItem>
-              <SelectItem value="50">50 / page</SelectItem>
-            </SelectContent>
-          </Select>
-          <div className="flex items-center space-x-2 pl-2">
-            <Checkbox
-              id="flagged-only"
-              checked={showFlaggedOnly}
-              onCheckedChange={(v) => setShowFlaggedOnly(Boolean(v))}
-            />
-            <Label htmlFor="flagged-only" className="text-sm">
-              Flagged
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2 pl-2">
-            <Switch
-              id="auto-refresh"
-              checked={autoRefresh}
-              onCheckedChange={(v) => setAutoRefresh(Boolean(v))}
-            />
-            <Label htmlFor="auto-refresh" className="text-sm">
-              Auto
-            </Label>
-          </div>
-          {autoRefresh && (
-            <Select
-              value={String(refreshInterval)}
-              onValueChange={(v) => setRefreshInterval(Number(v))}
-            >
-              <SelectTrigger className="w-[110px]">
-                <SelectValue placeholder="Interval" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="30000">30s</SelectItem>
-                <SelectItem value="60000">1m</SelectItem>
-                <SelectItem value="300000">5m</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-          <div className="flex items-center space-x-2 pl-2">
-            <Label htmlFor="toxicity-range" className="text-sm">
-              Toxicity
-            </Label>
-            <div className="w-32">
-              <Slider
-                id="toxicity-range"
-                min={0}
-                max={1}
-                step={0.01}
-                value={toxicityRange}
-                onValueChange={(v) => setToxicityRange(v as [number, number])}
-              />
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>{toxicityRange[0].toFixed(2)}</span>
-                <span>{toxicityRange[1].toFixed(2)}</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2 pl-2">
-            <Switch
-              id="auto-approve"
-              checked={autoApprove}
-              onCheckedChange={(v) => setAutoApprove(Boolean(v))}
-            />
-            <Label htmlFor="auto-approve" className="text-sm">
-              Auto approve
-            </Label>
-          </div>
-          {autoApprove && (
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              max="1"
-              value={autoApproveThreshold}
-              onChange={(e) => setAutoApproveThreshold(parseFloat(e.target.value))}
-              className="w-[90px]"
-              aria-label="Auto-approve toxicity threshold"
-            />
-          )}
+        <div className="hidden sm:block">
+          <FilterControls />
+        </div>
+        <div className="sm:hidden">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm">
+                Filters
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="p-4 space-y-4">
+              <FilterControls />
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 

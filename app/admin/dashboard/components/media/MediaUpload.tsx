@@ -23,6 +23,17 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
     return () => window.removeEventListener("admin-open-media-upload", openPicker);
   }, []);
 
+  // Paste support – allow uploading files via clipboard (e.g. screenshots)
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      if (e.clipboardData?.files?.length) {
+        handleFiles(e.clipboardData.files);
+      }
+    };
+    window.addEventListener("paste", onPaste);
+    return () => window.removeEventListener("paste", onPaste);
+  }, []);
+
   // Handle file(s) from input or drop
   const handleFiles = (files: FileList | null) => {
     if (!files) return;
@@ -73,7 +84,7 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
     <div
       className={cn(
         "mt-4 border border-dashed rounded p-4 text-center cursor-pointer",
-        dragging && "bg-muted"
+        dragging && "bg-muted border-solid"
       )}
       onDrop={onDrop}
       onDragOver={onDragOver}
@@ -82,6 +93,7 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
       tabIndex={0}
       role="button"
       aria-label="Upload media"
+      onPaste={(e) => handleFiles(e.clipboardData?.files || null)}
     >
       <input
         type="file"
@@ -92,7 +104,9 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
         onChange={(e) => handleFiles(e.target.files)}
         aria-label="Select media files"
       />
-      <p className="text-sm mb-2">Drag and drop files here or click to select</p>
+      <p className="text-sm mb-2">
+        Drag & drop, click or paste files to upload
+      </p>
       <div aria-live="polite">
         {uploads.map((u) => (
           <div key={u.id} className="mt-2 text-left">

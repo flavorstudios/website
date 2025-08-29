@@ -98,6 +98,8 @@ export function AdminSidebar({
     <>
       <aside
         id={id}
+        role="navigation"
+        aria-hidden={isMobile && !sidebarOpen}
         className={`
           h-full md:h-screen overflow-y-auto bg-background border-r
           ${isMobile

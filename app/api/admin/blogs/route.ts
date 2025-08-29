@@ -15,12 +15,18 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get("category") || "all"
     const status = searchParams.get("status") || "all"
     const sort = searchParams.get("sort") || "date"
+    const sortDir = (searchParams.get("sortDir") || "desc").toLowerCase()
+    const fromParam = searchParams.get("from")
+    const toParam = searchParams.get("to")
     const authorParam = (searchParams.get("author") || "").toLowerCase()
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1)
     const PER_PAGE = Math.max(
       1,
       parseInt(searchParams.get("perPage") || "10", 10) || 10,
     )
+
+    const fromDate = fromParam ? new Date(fromParam).getTime() : null
+    const toDate = toParam ? new Date(toParam).getTime() : null
 
     const blogs = await blogStore.getAll()
 
@@ -37,18 +43,26 @@ export async function GET(request: NextRequest) {
         !search ||
         String(blog.title || "").toLowerCase().includes(search) ||
         String(blog.content || "").toLowerCase().includes(search)
-      return inCategory && inStatus && matchesSearch && matchesAuthor
+      const date = new Date(blog.publishedAt || blog.createdAt).getTime()
+      const inRange =
+        (fromDate === null || date >= fromDate) &&
+        (toDate === null || date <= toDate)
+      return inCategory && inStatus && matchesSearch && matchesAuthor && inRange
     })
 
     // Sort
     filtered.sort((a: any, b: any) => {
-      if (sort === "title") return String(a.title).localeCompare(String(b.title))
-      if (sort === "status") return String(a.status).localeCompare(String(b.status))
-      if (sort === "views") return (b.views || 0) - (a.views || 0)
-      if (sort === "comments") return (b.commentCount || 0) - (a.commentCount || 0)
-      const aDate = new Date(a.publishedAt || a.createdAt).getTime()
-      const bDate = new Date(b.publishedAt || b.createdAt).getTime()
-      return bDate - aDate // newest first
+      let comp = 0
+      if (sort === "title") comp = String(a.title).localeCompare(String(b.title))
+      else if (sort === "status") comp = String(a.status).localeCompare(String(b.status))
+      else if (sort === "views") comp = (a.views || 0) - (b.views || 0)
+      else if (sort === "comments") comp = (a.commentCount || 0) - (b.commentCount || 0)
+      else {
+        const aDate = new Date(a.publishedAt || a.createdAt).getTime()
+        const bDate = new Date(b.publishedAt || b.createdAt).getTime()
+        comp = aDate - bDate
+      }
+      return sortDir === "asc" ? comp : -comp
     })
 
     const total = filtered.length

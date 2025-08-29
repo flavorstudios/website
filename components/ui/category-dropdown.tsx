@@ -13,6 +13,8 @@ interface CategoryDropdownProps {
   onCategoryChange: (category: string) => void
   placeholder?: string
   className?: string
+  includeAll?: boolean
+  allLabel?: string
 }
 
 export function CategoryDropdown({
@@ -21,6 +23,8 @@ export function CategoryDropdown({
   onCategoryChange,
   placeholder = "Select category",
   className,
+  includeAll = false,
+  allLabel = "All categories",
 }: CategoryDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
@@ -48,6 +52,17 @@ export function CategoryDropdown({
         align="start"
         className="min-w-[180px] max-h-64 overflow-y-auto"
       >
+        {includeAll && (
+          <DropdownMenuItem
+            onClick={() => {
+              onCategoryChange("")
+              setIsOpen(false)
+            }}
+            className={`cursor-pointer ${selectedCategory === "" ? "bg-blue-50 text-blue-700" : ""}`}
+          >
+            {allLabel}
+          </DropdownMenuItem>
+        )}
         {categories.map((category) => (
           <DropdownMenuItem
             key={category.slug}

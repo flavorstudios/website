@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import useDebounce from "@/hooks/use-debounce";
 import BulkActionsBar from "./BulkActionsBar";
 import UserProfileDrawer from "./UserProfileDrawer";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,7 @@ export default function UserList() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
   const [pageToken, setPageToken] = useState<string | null>(null);
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,6 +43,7 @@ export default function UserList() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("created");
   const [verifiedFilter, setVerifiedFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   const loadUsers = async (token?: string | null) => {
     setLoading(true);
@@ -48,11 +51,12 @@ export default function UserList() {
     try {
       const params = new URLSearchParams({
         pageToken: token || "",
-        search,
+        search: debouncedSearch,
         role: roleFilter,
         status: statusFilter,
         verified: verifiedFilter,
         sort: sortBy,
+        order: sortOrder,
       });
       const res = await fetch(`/api/admin/users?${params.toString()}`);
       const data = await res.json().catch(() => ({}));
@@ -76,12 +80,7 @@ export default function UserList() {
   useEffect(() => {
     loadUsers(pageToken);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageToken, roleFilter, statusFilter, verifiedFilter, sortBy]);
-
-  const handleSearch = () => {
-    setPageToken(null);
-    loadUsers(null);
-  };
+  }, [pageToken, roleFilter, statusFilter, verifiedFilter, sortBy, sortOrder, debouncedSearch]);
 
   const handleRoleChange = (val: string) => {
     setRoleFilter(val);
@@ -109,8 +108,38 @@ export default function UserList() {
     setStatusFilter("all");
     setVerifiedFilter("all");
     setSortBy("created");
+    setSortOrder("desc");
     setPageToken(null);
-    loadUsers(null);
+    };
+
+  const exportCsv = () => {
+    const headers = [
+      "uid",
+      "email",
+      "role",
+      "status",
+      "emailVerified",
+      "lastLogin",
+      "createdAt",
+    ];
+    const rows = users.map((u) => [
+      u.uid,
+      u.email || "",
+      u.role,
+      u.disabled ? "disabled" : "active",
+      u.emailVerified ? "verified" : "unverified",
+      u.lastLogin || "",
+      u.createdAt || "",
+    ]);
+    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "users.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const bulkDisable = async (disable: boolean) => {
@@ -188,16 +217,13 @@ export default function UserList() {
         <Input
           placeholder="Search users"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPageToken(null);
+          }}
           className="w-full sm:w-64"
           aria-label="Search users"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSearch();
-          }}
         />
-        <Button onClick={handleSearch} aria-label="Search">
-          Search
-        </Button>
         <Button
           variant="outline"
           onClick={handleResetFilters}
@@ -248,6 +274,23 @@ export default function UserList() {
             <SelectItem value="lastLogin">Last Login</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={sortOrder} onValueChange={setSortOrder}>
+          <SelectTrigger className="w-full sm:w-32" aria-label="Order">
+            <SelectValue placeholder="Order" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="asc">Asc</SelectItem>
+            <SelectItem value="desc">Desc</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          onClick={exportCsv}
+          className="ml-auto"
+          aria-label="Export CSV"
+        >
+          Export CSV
+        </Button>
       </div>
 
       {/* State Handling: Loading, Error, Empty, Success */}
@@ -258,87 +301,134 @@ export default function UserList() {
       ) : users.length === 0 ? (
         <div className="p-4 text-sm text-muted-foreground">No users found.</div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border text-sm">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="p-2 text-left">
-                  <Checkbox
-                    aria-label="Select all users"
-                    checked={selected.length === users.length && users.length > 0}
-                    onCheckedChange={(checked) =>
-                      setSelected(checked ? users.map((u) => u.uid) : [])
-                    }
-                  />
-                </th>
-                <th className="p-2 text-left">Email</th>
-                <th className="p-2 text-left">Role</th>
-                <th className="p-2 text-left">Status</th>
-                <th className="p-2 text-left">Verified</th>
-                <th className="p-2 text-left">Last Login</th>
-                <th className="p-2 text-left">Created</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr
-                  key={u.uid}
-                  className="border-t hover:bg-gray-50 cursor-pointer focus-visible:bg-blue-50 focus-visible:outline-none"
-                  tabIndex={0}
-                  onClick={() => setActiveUid(u.uid)}
-                  onKeyDown={(e) => {
-                    if (
-                      (e.key === "Enter" || e.key === " ") &&
-                      e.target === e.currentTarget
-                    ) {
-                      e.preventDefault();
-                      setActiveUid(u.uid);
-                    }
-                  }}
-                >
-                  <td className="p-2">
+        <>
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="min-w-full border text-sm">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="p-2 text-left">
                     <Checkbox
-                      aria-label={`Select user ${u.email ?? u.uid}`}
-                      checked={selected.includes(u.uid)}
-                      onCheckedChange={(checked) => {
-                        setSelected((ids) =>
-                          checked
-                            ? [...ids, u.uid]
-                            : ids.filter((i) => i !== u.uid)
-                        );
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </td>
-                  <td className="p-2">{u.email}</td>
-                  <td className="p-2">
-                    <Badge
-                      variant={
-                        u.role === "admin"
-                          ? "destructive"
-                          : u.role === "editor"
-                            ? "secondary"
-                            : "outline"
+                      aria-label="Select all users"
+                      checked={selected.length === users.length && users.length > 0}
+                      onCheckedChange={(checked) =>
+                        setSelected(checked ? users.map((u) => u.uid) : [])
                       }
-                    >
-                      {u.role}
-                    </Badge>
-                  </td>
-                  <td className="p-2">{u.disabled ? "Disabled" : "Active"}</td>
-                  <td className="p-2">
-                    {u.emailVerified ? (
-                      <CheckCircle className="h-4 w-4 text-green-600" aria-label="Email verified" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-red-600" aria-label="Email not verified" />
-                    )}
-                  </td>
-                  <td className="p-2">{u.lastLogin}</td>
-                  <td className="p-2">{u.createdAt}</td>
+                    />
+                  </th>
+                  <th className="p-2 text-left">Email</th>
+                  <th className="p-2 text-left">Role</th>
+                  <th className="p-2 text-left">Status</th>
+                  <th className="p-2 text-left">Verified</th>
+                  <th className="p-2 text-left">Last Login</th>
+                  <th className="p-2 text-left">Created</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+                  <tr
+                    key={u.uid}
+                    className="border-t hover:bg-gray-50 cursor-pointer focus-visible:bg-blue-50 focus-visible:outline-none"
+                    tabIndex={0}
+                    onClick={() => setActiveUid(u.uid)}
+                    onKeyDown={(e) => {
+                      if (
+                        (e.key === "Enter" || e.key === " ") &&
+                        e.target === e.currentTarget
+                      ) {
+                        e.preventDefault();
+                        setActiveUid(u.uid);
+                      }
+                    }}
+                  >
+                    <td className="p-2">
+                      <Checkbox
+                        aria-label={`Select user ${u.email ?? u.uid}`}
+                        checked={selected.includes(u.uid)}
+                        onCheckedChange={(checked) => {
+                          setSelected((ids) =>
+                            checked
+                              ? [...ids, u.uid]
+                              : ids.filter((i) => i !== u.uid)
+                          );
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </td>
+                    <td className="p-2">{u.email}</td>
+                    <td className="p-2">
+                      <Badge
+                        variant={
+                          u.role === "admin"
+                            ? "destructive"
+                            : u.role === "editor"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
+                        {u.role}
+                      </Badge>
+                    </td>
+                    <td className="p-2">{u.disabled ? "Disabled" : "Active"}</td>
+                    <td className="p-2">
+                      {u.emailVerified ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" aria-label="Email verified" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-600" aria-label="Email not verified" />
+                      )}
+                    </td>
+                    <td className="p-2">{u.lastLogin}</td>
+                    <td className="p-2">{u.createdAt}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="sm:hidden space-y-2">
+            {users.map((u) => (
+              <div
+                key={u.uid}
+                className="border rounded p-2 space-y-1 cursor-pointer"
+                // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+                tabIndex={0}
+                onClick={() => setActiveUid(u.uid)}
+                onKeyDown={(e) => {
+                  if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) {
+                    e.preventDefault();
+                    setActiveUid(u.uid);
+                  }
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{u.email}</span>
+                  <Checkbox
+                    aria-label={`Select user ${u.email ?? u.uid}`}
+                    checked={selected.includes(u.uid)}
+                    onCheckedChange={(checked) => {
+                      setSelected((ids) =>
+                        checked ? [...ids, u.uid] : ids.filter((i) => i !== u.uid)
+                      );
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+                <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2">
+                  <span>Role: {u.role}</span>
+                  <span>{u.disabled ? "Disabled" : "Active"}</span>
+                  <span>
+                    {u.emailVerified ? (
+                      <CheckCircle className="inline h-3 w-3 text-green-600" aria-label="Email verified" />
+                    ) : (
+                      <XCircle className="inline h-3 w-3 text-red-600" aria-label="Email not verified" />
+                    )}
+                  </span>
+                  {u.lastLogin && <span>Last: {u.lastLogin}</span>}
+                  {u.createdAt && <span>Created: {u.createdAt}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       <div className="flex gap-2">

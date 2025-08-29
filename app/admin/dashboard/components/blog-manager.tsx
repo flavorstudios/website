@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { RefreshCw, PlusCircle, AlertCircle } from "lucide-react";
+import { RefreshCw, PlusCircle, AlertCircle, SortAsc, SortDesc } from "lucide-react";
 import useSWR from "swr";
 
 import { Button } from "@/components/ui/button";
@@ -65,7 +65,10 @@ export default function BlogManager() {
   const category = searchParams.get("category") ?? "all";
   const status = searchParams.get("status") ?? "all";
   const sortBy = searchParams.get("sort") ?? "date";
+  const sortDir = searchParams.get("sortDir") ?? "desc";
   const author = searchParams.get("author") ?? "";
+  const from = searchParams.get("from") ?? "";
+  const to = searchParams.get("to") ?? "";
   const currentPage = parseInt(searchParams.get("page") ?? "1", 10) || 1;
   const perPage = parseInt(searchParams.get("perPage") ?? "10", 10) || 10;
 
@@ -73,6 +76,8 @@ export default function BlogManager() {
   const debouncedSearch = useDebounce(searchInput, 500);
   const [authorInput, setAuthorInput] = useState(author);
   const debouncedAuthor = useDebounce(authorInput, 500);
+  const [fromInput, setFromInput] = useState(from);
+  const [toInput, setToInput] = useState(to);
 
   useEffect(() => {
     if (debouncedSearch !== search) {
@@ -96,6 +101,14 @@ export default function BlogManager() {
     setAuthorInput(author);
   }, [author]);
 
+  useEffect(() => {
+    setFromInput(from);
+  }, [from]);
+
+  useEffect(() => {
+    setToInput(to);
+  }, [to]);
+
   // Helper to push updated query params
   const setParams = (overrides: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -104,7 +117,10 @@ export default function BlogManager() {
     params.set("category", category);
     params.set("status", status);
     params.set("sort", sortBy);
+    params.set("sortDir", sortDir);
     params.set("author", author);
+    params.set("from", from);
+    params.set("to", to);
     params.set("page", String(currentPage));
     params.set("perPage", String(perPage));
     // apply overrides
@@ -116,19 +132,34 @@ export default function BlogManager() {
   const handleCategoryChange = (value: string) => setParams({ category: value, page: "1" });
   const handleStatusChange = (value: string) => setParams({ status: value, page: "1" });
   const handleSortChange = (value: string) => setParams({ sort: value, page: "1" });
+  const handleSortDirToggle = () =>
+    setParams({ sortDir: sortDir === "asc" ? "desc" : "asc", page: "1" });
   const handlePerPageChange = (value: string) => setParams({ perPage: value, page: "1" });
   const handlePageChange = (page: number) => setParams({ page: page.toString() });
   const handleAuthorChange = (value: string) => setAuthorInput(value);
+  const handleFromDateChange = (value: string) => {
+    setFromInput(value);
+    setParams({ from: value, page: "1" });
+  };
+  const handleToDateChange = (value: string) => {
+    setToInput(value);
+    setParams({ to: value, page: "1" });
+  };
 
   const clearFilters = () => {
     setSearchInput("");
     setAuthorInput("");
+    setFromInput("");
+    setToInput("");
     setParams({
       search: "",
       category: "all",
       status: "all",
       sort: "date",
+      sortDir: "desc",
       author: "",
+      from: "",
+      to: "",
       page: "1",
       perPage: String(perPage),
     });
@@ -145,9 +176,13 @@ export default function BlogManager() {
       author,
     )}&category=${encodeURIComponent(category)}&status=${encodeURIComponent(
       status,
-    )}&sort=${encodeURIComponent(sortBy)}&page=${encodeURIComponent(
-      String(currentPage),
-    )}&perPage=${encodeURIComponent(String(perPage))}`,
+    )}&sort=${encodeURIComponent(sortBy)}&sortDir=${encodeURIComponent(
+      sortDir,
+    )}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(
+      to,
+    )}&page=${encodeURIComponent(String(currentPage))}&perPage=${encodeURIComponent(
+      String(perPage),
+    )}`,
     fetcher,
     {
       // remove polling; rely on SSE
@@ -509,6 +544,20 @@ export default function BlogManager() {
               className="w-full sm:w-40"
               aria-label="Filter by author"
             />
+            <Input
+              type="date"
+              value={fromInput}
+              onChange={(e) => handleFromDateChange(e.target.value)}
+              className="w-full sm:w-40"
+              aria-label="From date"
+            />
+            <Input
+              type="date"
+              value={toInput}
+              onChange={(e) => handleToDateChange(e.target.value)}
+              className="w-full sm:w-40"
+              aria-label="To date"
+            />
             <CategoryDropdown
               categories={categories}
               selectedCategory={category}
@@ -540,6 +589,18 @@ export default function BlogManager() {
                 <SelectItem value="comments">Comments</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleSortDirToggle}
+              aria-label={`Toggle sort direction (currently ${sortDir === "asc" ? "ascending" : "descending"})`}
+            >
+              {sortDir === "asc" ? (
+                <SortAsc className="h-4 w-4" />
+              ) : (
+                <SortDesc className="h-4 w-4" />
+              )}
+            </Button>
             <Select value={String(perPage)} onValueChange={handlePerPageChange}>
               <SelectTrigger className="w-full sm:w-40" aria-label="Posts per page">
                 <SelectValue placeholder="Per page" />

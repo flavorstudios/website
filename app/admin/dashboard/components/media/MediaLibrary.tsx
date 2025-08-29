@@ -411,6 +411,7 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
         onDelete={handleBulkDelete}
         onTag={handleBulkTag}
         onDownload={handleBulkDownload}
+        onClear={() => setSelectedIds(new Set())}
       />
 
       {selectedItem && (

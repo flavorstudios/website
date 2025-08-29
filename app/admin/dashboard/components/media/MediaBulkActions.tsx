@@ -7,9 +7,10 @@ interface Props {
   onDelete: () => void
   onTag: () => void
   onDownload: () => void
+  onClear: () => void
 }
 
-export default function MediaBulkActions({ count, onDelete, onTag, onDownload }: Props) {
+export default function MediaBulkActions({ count, onDelete, onTag, onDownload, onClear }: Props) {
   if (count === 0) return null
   return (
     <div
@@ -28,6 +29,9 @@ export default function MediaBulkActions({ count, onDelete, onTag, onDownload }:
       </Button>
       <Button variant="outline" size="sm" className="text-red-600" onClick={onDelete}>
         <Trash2 className="mr-1 h-4 w-4" /> Delete
+      </Button>
+      <Button variant="ghost" size="sm" onClick={onClear}>
+        Clear
       </Button>
     </div>
   )

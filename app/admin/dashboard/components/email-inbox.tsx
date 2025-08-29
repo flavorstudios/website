@@ -16,6 +16,8 @@ import {
   ArrowUpDown,
   Trash,
   RefreshCw,
+  Flag,
+  FlagOff,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -88,6 +90,45 @@ export default function EmailInbox() {
   const searchInputRef = useRef<HTMLInputElement>(null)
   const detailRef = useRef<HTMLDivElement>(null)
 
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem("admin.inbox.preferences") || "{}"
+      )
+      if (saved.filterStatus) setFilterStatus(saved.filterStatus)
+      if (saved.priorityFilter) setPriorityFilter(saved.priorityFilter)
+      if (saved.labelFilter) setLabelFilter(saved.labelFilter)
+      if (typeof saved.flaggedOnly === "boolean") setFlaggedOnly(saved.flaggedOnly)
+      if (typeof saved.starredOnly === "boolean") setStarredOnly(saved.starredOnly)
+      if (saved.sortOrder) setSortOrder(saved.sortOrder)
+    } catch {
+      /* ignore */
+    }
+  }, [])
+
+  useEffect(() => {
+    const prefs = {
+      filterStatus,
+      priorityFilter,
+      labelFilter,
+      flaggedOnly,
+      starredOnly,
+      sortOrder,
+    }
+    try {
+      localStorage.setItem("admin.inbox.preferences", JSON.stringify(prefs))
+    } catch {
+      /* ignore */
+    }
+  }, [
+    filterStatus,
+    priorityFilter,
+    labelFilter,
+    flaggedOnly,
+    starredOnly,
+    sortOrder,
+  ])
+
   const loadMessages = useCallback(async () => {
     setLoadingState(true)
     try {
@@ -142,6 +183,8 @@ export default function EmailInbox() {
           case "subject":
           case "before":
           case "after":
+          case "flagged":
+          case "starred":
             acc[key] = rest.join(":")
             return acc
         }
@@ -158,6 +201,8 @@ export default function EmailInbox() {
       subject: "",
       before: "",
       after: "",
+      flagged: "",
+      starred: "",
     }
   )
 
@@ -175,6 +220,16 @@ export default function EmailInbox() {
         !searchQuery.priority || message.priority === searchQuery.priority
       const matchesQueryLabel =
         !searchQuery.label || (message.labels || []).includes(searchQuery.label)
+      const flaggedQuery = searchQuery.flagged.toLowerCase()
+      const starredQuery = searchQuery.starred.toLowerCase()
+      const matchesQueryFlagged =
+        !searchQuery.flagged ||
+        (!!message.flagged ===
+          (flaggedQuery === "true" || flaggedQuery === "1" || flaggedQuery === "yes"))
+      const matchesQueryStarred =
+        !searchQuery.starred ||
+        (!!message.starred ===
+          (starredQuery === "true" || starredQuery === "1" || starredQuery === "yes"))
       const messageDate = new Date(message.createdAt).getTime()
       const matchesBefore =
         !searchQuery.before || messageDate <= new Date(searchQuery.before).getTime()
@@ -195,6 +250,8 @@ export default function EmailInbox() {
         matchesQueryStatus &&
         matchesQueryPriority &&
         matchesQueryLabel &&
+        matchesQueryFlagged &&
+        matchesQueryStarred &&
         matchesBefore &&
         matchesAfter &&
         matchesStatus &&
@@ -267,23 +324,26 @@ export default function EmailInbox() {
     }
   }
 
-  const bulkDelete = async (ids: string[]) => {
-    setMessages((prev) => prev.filter((msg) => !ids.includes(msg.id)))
-    if (selectedMessage && ids.includes(selectedMessage.id)) {
-      setSelectedMessage(null)
-    }
-    try {
-      await fetch("/api/admin/contact-messages", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids }),
-      })
-    } catch (err) {
-      console.error("Failed to delete messages", err)
-    } finally {
-      setSelectedMessages(new Set())
-    }
-  }
+  const bulkDelete = useCallback(
+    async (ids: string[]) => {
+      setMessages((prev) => prev.filter((msg) => !ids.includes(msg.id)))
+      if (selectedMessage && ids.includes(selectedMessage.id)) {
+        setSelectedMessage(null)
+      }
+      try {
+        await fetch("/api/admin/contact-messages", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids }),
+        })
+      } catch (err) {
+        console.error("Failed to delete messages", err)
+      } finally {
+        setSelectedMessages(new Set())
+      }
+    },
+    [selectedMessage]
+  )
 
   const bulkToggleStar = async (ids: string[], starred: boolean) => {
     setMessages((prev) =>
@@ -320,6 +380,48 @@ export default function EmailInbox() {
       console.error("Failed to update star", err)
     }
   }
+
+  const bulkToggleFlag = useCallback(
+    async (ids: string[], flagged: boolean) => {
+      setMessages((prev) =>
+        prev.map((msg) => (ids.includes(msg.id) ? { ...msg, flagged } : msg))
+      )
+      try {
+        await Promise.all(
+          ids.map((id) =>
+            fetch("/api/admin/contact-messages", {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id, flagged }),
+            })
+          )
+        )
+      } catch (err) {
+        console.error("Failed to update flags", err)
+      } finally {
+        setSelectedMessages(new Set())
+      }
+    },
+    []
+  )
+
+  const toggleFlag = useCallback(
+    async (id: string, flagged: boolean) => {
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === id ? { ...msg, flagged } : msg))
+      )
+      try {
+        await fetch("/api/admin/contact-messages", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, flagged }),
+        })
+      } catch (err) {
+        console.error("Failed to update flag", err)
+      }
+    },
+    []
+  )
 
   const handleLabelChange = async (
     id: string,
@@ -417,6 +519,9 @@ export default function EmailInbox() {
       } else if (key === "s" && selectedMessage) {
         e.preventDefault()
         toggleStar(selectedMessage.id, !selectedMessage.starred)
+      } else if (key === "f" && selectedMessage) {
+        e.preventDefault()
+        toggleFlag(selectedMessage.id, !selectedMessage.flagged)
       } else if (key === "m" && selectedMessage) {
         e.preventDefault()
         const nextStatus =
@@ -431,6 +536,13 @@ export default function EmailInbox() {
           selectedMessages.size > 0 &&
           filteredMessages.every((m) => selectedMessages.has(m.id))
         toggleSelectAll(!currentlyAllSelected)
+      } else if (key === "#" && (selectedMessages.size > 0 || selectedMessage)) {
+        e.preventDefault()
+        const ids =
+          selectedMessages.size > 0
+            ? Array.from(selectedMessages)
+            : [selectedMessage!.id]
+        bulkDelete(ids)
       } else if (e.key === "?" || (e.shiftKey && key === "/")) {
         e.preventDefault()
         setShortcutsOpen(true)
@@ -448,6 +560,8 @@ export default function EmailInbox() {
     shortcutsOpen,
     toggleSelectAll,
     toggleMessageSelection,
+    bulkDelete,
+    toggleFlag,
   ])
 
   const getPriorityColor = (priority: string) => {
@@ -542,6 +656,14 @@ export default function EmailInbox() {
               <span>Star message</span>
             </li>
             <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">F</kbd>
+              <span>Flag message</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">M</kbd>
+              <span>Mark read/unread</span>
+            </li>
+            <li className="flex items-center justify-between">
               <kbd className="px-2 py-1 bg-gray-100 rounded">X</kbd>
               <span>Select message</span>
             </li>
@@ -555,6 +677,10 @@ export default function EmailInbox() {
                 <kbd className="px-2 py-1 bg-gray-100 rounded">Enter</kbd>
               </span>
               <span>Send reply</span>
+            </li>
+            <li className="flex items-center justify-between">
+              <kbd className="px-2 py-1 bg-gray-100 rounded">#</kbd>
+              <span>Delete</span>
             </li>
             <li className="flex items-center justify-between">
               <span className="flex gap-1">
@@ -721,6 +847,20 @@ export default function EmailInbox() {
                   >
                     <StarOff className="h-4 w-4 mr-2" /> Unstar
                   </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bulkToggleFlag(Array.from(selectedMessages), true)}
+                  >
+                    <Flag className="h-4 w-4 mr-2" /> Flag
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => bulkToggleFlag(Array.from(selectedMessages), false)}
+                  >
+                    <FlagOff className="h-4 w-4 mr-2" /> Unflag
+                  </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
@@ -794,6 +934,20 @@ export default function EmailInbox() {
                               {`${message.firstName} ${message.lastName}`}
                             </p>
                             <div className="flex items-center gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toggleFlag(message.id, !message.flagged)
+                                }}
+                                aria-label={message.flagged ? "Unflag message" : "Flag message"}
+                                className="text-gray-400 hover:text-red-500"
+                              >
+                                <Flag
+                                  className={`h-4 w-4 ${
+                                    message.flagged ? "fill-red-500 text-red-500" : ""
+                                  }`}
+                                />
+                              </button>
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation()
@@ -913,6 +1067,16 @@ export default function EmailInbox() {
                       >
                         <Trash className="h-4 w-4 mr-2" />
                         Delete
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          toggleFlag(selectedMessage.id, !selectedMessage.flagged)
+                        }
+                      >
+                        <Flag className="h-4 w-4 mr-2" />
+                        {selectedMessage.flagged ? "Unflag" : "Flag"}
                       </Button>
                       <Button
                         variant="outline"

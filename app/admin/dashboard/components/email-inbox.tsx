@@ -131,16 +131,20 @@ export default function EmailInbox() {
   }, [selectedMessage])
   const searchTokens = searchTerm.toLowerCase().split(/\s+/).filter(Boolean)
   const searchQuery = searchTokens.reduce(
-    (
-      acc,
-      token
-    ) => {
+    (acc, token) => {
       const [key, ...rest] = token.split(":")
-      if (rest.length && ["from", "label", "status", "priority", "subject"].includes(key)) {
-        acc[key as keyof typeof acc] = rest.join(":")
-      } else {
-        acc.text.push(token)
+      if (rest.length) {
+        switch (key) {
+          case "from":
+          case "label":
+          case "status":
+          case "priority":
+          case "subject":
+            acc[key] = rest.join(":")
+            return acc
+        }
       }
+      acc.text.push(token)
       return acc
     },
     {

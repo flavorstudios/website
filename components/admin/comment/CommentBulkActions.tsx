@@ -1,6 +1,6 @@
 "use client"
 import { Button } from '@/components/ui/button'
-import { Check, X, Trash2, Download, Flag } from 'lucide-react
+import { Check, X, Trash2, Download, Flag } from 'lucide-react'
 
 export interface CommentBulkActionsProps {
   count: number
@@ -39,7 +39,7 @@ export default function CommentBulkActions({
         <Button variant="outline" size="sm" onClick={onFlag}>
           <Flag className="mr-1 h-4 w-4" /> Flag
         </Button>
-      )}
+      )}  
       {onExport && (
         <Button variant="outline" size="sm" onClick={onExport}>
           <Download className="mr-1 h-4 w-4" /> Export

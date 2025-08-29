@@ -215,13 +215,13 @@ export async function DELETE(req: NextRequest) {
     await Promise.all(
       ids.map(async (id) => {
         await Promise.all([
-          adminDb.collection("contactMessages").doc(id).delete().catch((e) => {
+          db.collection("contactMessages").doc(id).delete().catch((e) => {
             console.warn(
               "[ADMIN_CONTACT_MESSAGES_DELETE] Failed to delete contactMessages",
               e
             );
           }),
-          db.collection("contactMessages").doc(id).delete().catch((e) => {
+          db.collection("contact_messages").doc(id).delete().catch((e) => {
             console.warn(
               "[ADMIN_CONTACT_MESSAGES_DELETE] Failed to delete contact_messages (legacy)",
               e

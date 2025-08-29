@@ -179,7 +179,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    / At this point, adminDb is guaranteed.
+    // At this point, adminDb is guaranteed.
     const db: Firestore = adminDb;
 
     // Serve from cache if available (TTL: 60s)

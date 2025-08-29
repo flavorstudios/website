@@ -653,7 +653,10 @@ export default function CommentManager() {
         <div className="sm:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button
+                size="sm"
+                className="bg-orange-600 hover:bg-orange-700 text-white"
+              >
                 Filters
               </Button>
             </SheetTrigger>
@@ -779,10 +782,10 @@ export default function CommentManager() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between pt-4">
                   <Button
-                    variant="outline"
                     size="sm"
                     disabled={page === 1}
                     onClick={() => setPage(page - 1)}
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
                   >
                     Previous
                   </Button>
@@ -790,10 +793,10 @@ export default function CommentManager() {
                     Page {page} of {totalPages}
                   </span>
                   <Button
-                    variant="outline"
                     size="sm"
                     disabled={page === totalPages}
                     onClick={() => setPage(page + 1)}
+                    className="bg-orange-600 hover:bg-orange-700 text-white"
                   >
                     Next
                   </Button>
@@ -852,15 +855,16 @@ export default function CommentManager() {
             />
             <DialogFooter className="mt-4">
               <Button
-                variant="outline"
                 onClick={() => setReplyTarget(null)}
                 disabled={replyLoading}
+                className="bg-orange-600 hover:bg-orange-700 text-white"
               >
                 Cancel
               </Button>
               <Button
                 onClick={submitReply}
                 disabled={replyLoading || !replyContent.trim()}
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow"
               >
                 {replyLoading ? "Sending..." : "Send Reply"}
               </Button>
@@ -1002,11 +1006,10 @@ function CommentCard({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        variant="outline"
                         size="sm"
                         onClick={onReply}
                         aria-label="Reply to comment"
-                        className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                        className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow"
                       >
                         <MessageSquare className="h-4 w-4 mr-1" />
                         Reply
@@ -1019,11 +1022,10 @@ function CommentCard({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        variant="outline"
                         size="sm"
                         onClick={() => onUpdateStatus(comment.id, comment.postId, "approved")}
                         aria-label="Approve comment"
-                        className="text-green-600 border-green-200 hover:bg-green-50"
+                        className="bg-orange-600 hover:bg-orange-700 text-white"
                       >
                         <Check className="h-4 w-4 mr-1" />
                         Approve
@@ -1036,11 +1038,10 @@ function CommentCard({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        variant="outline"
                         size="sm"
                         onClick={() => onUpdateStatus(comment.id, comment.postId, "spam")}
                         aria-label="Mark as spam"
-                        className="text-red-600 border-red-200 hover:bg-red-50"
+                        className="bg-orange-600 hover:bg-orange-700 text-white"
                       >
                         <X className="h-4 w-4 mr-1" />
                         Spam
@@ -1053,16 +1054,10 @@ function CommentCard({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        variant="outline"
                         size="sm"
                         onClick={onToggleFlag}
                         aria-label={comment.flagged ? "Unflag comment" : "Flag comment"}
-                        className={cn(
-                          "border-gray-200",
-                          comment.flagged
-                            ? "text-red-600 hover:bg-red-50 border-red-200"
-                            : "text-gray-600 hover:bg-gray-50"
-                        )}
+                        className="bg-orange-600 hover:bg-orange-700 text-white"
                       >
                         <Flag className="h-4 w-4" />
                       </Button>
@@ -1075,11 +1070,10 @@ function CommentCard({
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant="outline"
                       size="sm"
                       onClick={onDelete}
                       aria-label="Delete comment"
-                      className="text-gray-600 border-gray-200 hover:bg-gray-50"
+                      className="bg-orange-600 hover:bg-orange-700 text-white"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

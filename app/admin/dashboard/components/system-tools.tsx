@@ -35,7 +35,11 @@ export default function SystemTools() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={handleRevalidateWebsite} disabled={isRevalidatingWebsite} className="w-full sm:w-auto">
+          <Button
+            onClick={handleRevalidateWebsite}
+            disabled={isRevalidatingWebsite}
+            className="w-full sm:w-auto rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+          >
             <RefreshCw className={`mr-2 h-4 w-4 ${isRevalidatingWebsite ? "animate-spin" : ""}`} />
             {isRevalidatingWebsite ? "Revalidating Website..." : "Revalidate Entire Website"}
           </Button>

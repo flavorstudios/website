@@ -107,8 +107,7 @@ export function CacheCleaner() {
           <Button
             onClick={clearFrontendCache}
             disabled={loading}
-            variant="outline"
-            className="flex flex-col items-center gap-2 h-auto p-4"
+            className="flex flex-col items-center gap-2 h-auto p-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             <div className="text-center">
@@ -120,8 +119,7 @@ export function CacheCleaner() {
           <Button
             onClick={clearBackendCache}
             disabled={loading}
-            variant="outline"
-            className="flex flex-col items-center gap-2 h-auto p-4"
+            className="flex flex-col items-center gap-2 h-auto p-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             <div className="text-center">
@@ -133,12 +131,12 @@ export function CacheCleaner() {
           <Button
             onClick={clearAllCaches}
             disabled={loading}
-            className="flex flex-col items-center gap-2 h-auto p-4 bg-red-600 hover:bg-red-700"
+            className="flex flex-col items-center gap-2 h-auto p-4 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow"
           >
             <Trash2 className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             <div className="text-center">
               <p className="font-medium">Clear All</p>
-              <p className="text-xs text-red-100">Full Cache Reset</p>
+              <p className="text-xs text-white">Full Cache Reset</p>
             </div>
           </Button>
         </div>

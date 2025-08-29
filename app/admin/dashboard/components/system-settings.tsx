@@ -118,7 +118,12 @@ export function SystemSettings() {
           subtitle="Manage your profile, notifications, and appearance preferences"
         />
         <div className="flex items-center gap-2">
-          <Button onClick={handleSave} disabled={saving || loading} aria-label="Save settings">
+          <Button
+            onClick={handleSave}
+            disabled={saving || loading}
+            aria-label="Save settings"
+            className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+          >
             <Save className="h-4 w-4 mr-2" aria-hidden="true" />
             {saving ? "Saving..." : "Save"}
           </Button>

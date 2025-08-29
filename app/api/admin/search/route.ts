@@ -19,7 +19,7 @@ async function readCategories(): Promise<Category[]> {
 }
 
 export async function GET(request: NextRequest) {
-  if (!(await requireAdmin(request, "canViewDashboard"))) {
+  if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

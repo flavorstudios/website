@@ -216,9 +216,7 @@ export default function DashboardOverview() {
               {diagnosticCode}
             </p>
           )}
-          <Button
-            onClick={refresh}
-            className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+          <Button onClick={refresh} variant="adminPrimary">
           >
             Retry Dashboard
           </Button>
@@ -232,10 +230,7 @@ export default function DashboardOverview() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
-          <Button
-            onClick={refresh}
-            className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
-          >
+          <Button onClick={refresh} variant="adminPrimary">
             Refresh Dashboard
           </Button>
         </div>
@@ -251,7 +246,7 @@ export default function DashboardOverview() {
           onClick={refresh}
           disabled={statsQuery.isFetching}
           size="sm"
-          className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+          variant="adminPrimary"
         >
           Refresh
         </Button>

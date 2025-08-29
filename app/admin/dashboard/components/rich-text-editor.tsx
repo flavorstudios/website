@@ -496,7 +496,7 @@ export function RichTextEditor({
                 <Button
                   type="button"
                   onClick={insertLink}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600"
+                  variant="adminCreate"
                 >
                   Insert Link
                 </Button>

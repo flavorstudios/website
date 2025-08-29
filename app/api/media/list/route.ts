@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminSession, logAdminAuditFailure } from "@/lib/admin-auth";
 import { listMedia } from "@/lib/media";
+import { getClientIp } from "@/lib/ip";
 
 // Ensure this API route is always executed at runtime
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     await verifyAdminSession(sessionCookie);
   } catch {
     // Log the denial but do not leak details to the client
-    await logAdminAuditFailure(null, request.ip ?? "", "media_list_denied");
+    await logAdminAuditFailure(null, getClientIp(request), "media_list_denied");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

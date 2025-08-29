@@ -983,7 +983,7 @@ export default function VideoManager() {
           </Button>
           <Button
             onClick={() => setShowCreateForm(true)}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            variant="adminCreate"
             aria-label="Add new video"
             title="Add new video"
           >

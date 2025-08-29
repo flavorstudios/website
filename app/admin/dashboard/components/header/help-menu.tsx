@@ -15,10 +15,9 @@ export function HelpMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
           size="sm"
           aria-label="Help menu"
-          className="h-9 w-9 p-0"
+          className="h-9 w-9 p-0 bg-orange-600 text-white hover:bg-orange-700"
         >
           <HelpCircle className="h-5 w-5" />
         </Button>

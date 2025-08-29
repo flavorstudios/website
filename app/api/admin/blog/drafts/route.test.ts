@@ -2,7 +2,6 @@
  * @jest-environment node
  */
 import { POST } from "./route";
-import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth";
 
 jest.mock("@/lib/admin-auth", () => ({
   requireAdmin: jest.fn().mockResolvedValue(true),

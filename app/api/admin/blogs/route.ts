@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const blogs = await blogStore.getAll()
 
     // Apply filters
-    let filtered = blogs.filter((blog: any) => {
+    const filtered = blogs.filter((blog: any) => {
       const inCategory =
         category === "all" ||
         blog.category === category ||
@@ -33,8 +33,11 @@ export async function GET(request: NextRequest) {
       const inStatus = status === "all" || blog.status === status
       const matchesAuthor =
         !authorParam || String(blog.author || "").toLowerCase().includes(authorParam)
+      const matchesSearch =
+        !search ||
+        String(blog.title || "").toLowerCase().includes(search) ||
+        String(blog.content || "").toLowerCase().includes(search)
       return inCategory && inStatus && matchesSearch && matchesAuthor
-      return inCategory && inStatus && matchesSearch
     })
 
     // Sort

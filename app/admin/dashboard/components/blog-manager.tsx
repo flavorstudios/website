@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { RefreshCw, PlusCircle, AlertCircle } from "lucide-react";
 import useSWR from "swr";
@@ -231,11 +231,11 @@ export default function BlogManager() {
   const loading = postsLoading || categoriesLoading;
   const displayError = postsError || categoriesError ? "Failed to load blog posts." : null;
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     await Promise.all([mutatePosts(), mutateCategories()]);
-  };
+  }, [mutatePosts, mutateCategories]);
 
-  const handleRevalidateBlog = async () => {
+  const handleRevalidateBlog = useCallback(async () => {
     setIsRevalidating(true);
     try {
       const result = await revalidateBlogAndAdminDashboard();
@@ -247,11 +247,11 @@ export default function BlogManager() {
     } finally {
       setIsRevalidating(false);
     }
-  };
+  }, [refreshData, toast]);
 
-  const handleCreatePost = () => {
+  const handleCreatePost = useCallback(() => {
     router.push("/admin/blog/create");
-  };
+  }, [router]);
 
   // --- DELETE POST MODAL HANDLER (single or bulk) ---
   const deletePost = (id: string) => {

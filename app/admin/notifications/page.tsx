@@ -40,7 +40,7 @@ export default function NotificationsPage() {
     { refreshInterval: 30000 }
   )
 
-  const notifications = data?.notifications ?? []
+  const notifications = useMemo(() => data?.notifications ?? [], [data?.notifications])
   const unreadCount = useMemo(() => notifications.filter((n) => !n.read).length, [notifications])
 
   const markAsRead = async (id: string) => {

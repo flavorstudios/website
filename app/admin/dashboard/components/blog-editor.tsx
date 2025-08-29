@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -171,7 +171,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   });
 
   // Helper to combine scheduled date + time
-  const getScheduledDateTime = () => {
+  const getScheduledDateTime = useCallback(() => {
     if (!scheduledDate || !scheduledTime) return undefined;
     const [hours, minutes] = scheduledTime.split(":").map(Number);
     const dt = new Date(scheduledDate);
@@ -179,12 +179,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     if (!isNaN(minutes)) dt.setMinutes(minutes);
     dt.setSeconds(0, 0);
     return dt;
-  };
-
-  const timeZone = useMemo(
-    () => Intl.DateTimeFormat().resolvedOptions().timeZone,
-    []
-  );
+  }, [scheduledDate, scheduledTime]);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -309,7 +304,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []); // savePost is stable enough for our usage here
+  }, [savePost]);
 
   // REMOVED: legacy autosave timers (debounce + heartbeat). Autosave now handled by useAutosave hook.
 
@@ -380,7 +375,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     return () => clearInterval(h);
   }, [ws]);
 
-  const savePost = async (isAutoSave = false) => {
+  const savePost = useCallback(async (isAutoSave = false) => {
     // Prevent overlapping saves
     if (saveInFlight.current) return;
     if (!isAutoSave) setSaving(true);
@@ -426,7 +421,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       saveInFlight.current = false;
       if (!isAutoSave) setSaving(false);
     }
-  };
+  }, [post, getScheduledDateTime, toast]);
 
   const publishPost = async () => {
     if (!post.title?.trim() || !post.content?.trim()) {

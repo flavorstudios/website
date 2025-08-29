@@ -171,13 +171,16 @@ export default function MediaDetailsDrawer({
               src={media.url}
               controls
               className="w-full h-auto rounded bg-black"
-            />
+            >
+              <track kind="captions" />
+            </video>
           ) : isAudio ? (
             <audio
               src={media.url}
               controls
               className="w-full"
             >
+              <track kind="captions" />
               Your browser does not support the audio element.
             </audio>
           ) : isPDF ? (

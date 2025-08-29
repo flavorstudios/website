@@ -17,7 +17,7 @@ export default async function BlogCategoryPage({
   searchParams,
 }: PageProps<{ slug: string }, { page?: string }>) {
   const { slug } = await params;
-  const resolvedSearchParams = await searchParams;
+    const resolvedSearchParams = await searchParams;
   const categorySlug = slug;
 
   // --- Robustly find the category (case-insensitive, defensive fallback) ---
@@ -55,5 +55,5 @@ export default async function BlogCategoryPage({
 
   // BlogPage currently only accepts `searchParams`.
   // To pass `category` or `blogPosts`, extend BlogPage’s props in app/blog/page.tsx.
-  return <BlogPage searchParams={{ ...resolvedSearch, category: categorySlug }} />;
-}
+   return <BlogPage searchParams={{ ...resolvedSearchParams, category: categorySlug }} />;
+  }

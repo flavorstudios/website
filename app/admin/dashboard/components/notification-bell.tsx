@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Link from "next/link";
@@ -141,7 +141,7 @@ export function NotificationBell() {
     revalidateOnFocus: true,
   });
 
-  const raw = data?.notifications || [];
+  const raw = useMemo(() => data?.notifications || [], [data?.notifications]);
 
   // Normalize to ensure category always exists (kept)
   const notifications = useMemo(
@@ -267,11 +267,14 @@ export function NotificationBell() {
   }, [sortedNotifications]);
 
   // --- Optimistic helpers (kept) ---
-  const optimisticUpdate = (updater: (prev: Notification[]) => Notification[]) => {
-    mutate((prev) => ({ notifications: updater(prev?.notifications || []) }), {
-      revalidate: false,
-    });
-  };
+  const optimisticUpdate = useCallback(
+    (updater: (prev: Notification[]) => Notification[]) => {
+      mutate((prev) => ({ notifications: updater(prev?.notifications || []) }), {
+        revalidate: false,
+      });
+    },
+    [mutate]
+  );
 
   const markAsRead = async (id: string) => {
     // Optimistic: flip read true locally
@@ -316,15 +319,22 @@ export function NotificationBell() {
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   };
 
-  const clearSelection = () => setSelected(new Set());
-  const selectAll = () => setSelected(new Set(sortedNotifications.map((n) => n.id)));
+  const clearSelection = useCallback(() => setSelected(new Set()), []);
+  const selectAll = useCallback(
+    () => setSelected(new Set(sortedNotifications.map((n) => n.id))),
+    [sortedNotifications]
+  );
 
-  const bulkMarkRead = async () => {
+  const bulkMarkRead = useCallback(async () => {
     const ids = Array.from(selected);
     optimisticUpdate((prev) =>
       prev.map((n) => (ids.includes(n.id) ? { ...n, read: true } : n))
@@ -347,10 +357,10 @@ export function NotificationBell() {
     }
     clearSelection();
     setSelectionMode(false);
-  };
+  }, [selected, optimisticUpdate, mutate, clearSelection]);
 
   // NEW: Bulk mark unread (kept from your file)
-  const bulkMarkUnread = async () => {
+  const bulkMarkUnread = useCallback(async () => {
     const ids = Array.from(selected);
     optimisticUpdate((prev) =>
       prev.map((n) => (ids.includes(n.id) ? { ...n, read: false } : n))
@@ -373,9 +383,9 @@ export function NotificationBell() {
     }
     clearSelection();
     setSelectionMode(false);
-  };
+  }, [selected, optimisticUpdate, mutate, clearSelection]);
 
-  const bulkDelete = async () => {
+  const bulkDelete = useCallback(async () => {
     const ids = Array.from(selected);
     // Optimistic remove
     optimisticUpdate((prev) => prev.filter((n) => !ids.includes(n.id)));
@@ -395,7 +405,7 @@ export function NotificationBell() {
     }
     clearSelection();
     setSelectionMode(false);
-  };
+  }, [selected, optimisticUpdate, mutate, clearSelection]);
 
   // NEW: Clear all notifications (kept from your file)
   const clearAll = async () => {
@@ -509,7 +519,7 @@ export function NotificationBell() {
       window.clearTimeout(t);
       document.removeEventListener("keydown", onKey as any);
     };
-  }, [isOpen, selected.size]);
+    }, [isOpen, selected.size, bulkMarkRead, bulkMarkUnread, bulkDelete, selectAll]);
 
   // --- SSE live updates (kept) ---
   useEffect(() => {
@@ -752,14 +762,18 @@ export function NotificationBell() {
                               checked={mutedCategories.includes(c)}
                               onCheckedChange={(checked) => {
                                 setMutedCategories((prev) => {
-                                  const set = new Set(prev);
-                                  checked ? set.add(c) : set.delete(c);
-                                  return Array.from(set);
-                                });
-                              }}
-                            >
-                              {c}
-                            </DropdownMenuCheckboxItem>
+                                    const set = new Set(prev);
+                                    if (checked) {
+                                      set.add(c);
+                                    } else {
+                                      set.delete(c);
+                                    }
+                                    return Array.from(set);
+                                  });
+                                }}
+                              >
+                                {c}
+                              </DropdownMenuCheckboxItem>
                           ))}
                         </DropdownMenuContent>
                       </DropdownMenu>

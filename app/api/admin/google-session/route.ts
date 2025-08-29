@@ -1,7 +1,7 @@
 // app/api/admin/google-session/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb, getAllowedAdminEmails } from "@/lib/firebase-admin";
+import { getAdminAuth, getAdminDb, getAllowedAdminEmails } from "@/lib/firebase-admin";
 import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Centralized logging
 
@@ -25,8 +25,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // --- Verify Firebase ID token with revocation checks ---
     let decoded;
+    const auth = getAdminAuth();
     try {
-      decoded = await adminAuth.verifyIdToken(idToken, true);
+      decoded = await auth.verifyIdToken(idToken, true);
       if (debug) {
         console.log("google-session: ID token verified for email:", decoded.email);
       }
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // --- Check admin email authorization securely (server-side only) ---
     try {
-      const testSessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn: 5 * 60 * 1000 });
+      const testSessionCookie = await auth.createSessionCookie(idToken, { expiresIn: 5 * 60 * 1000 });
       await verifyAdminSession(testSessionCookie); // Throws if not allowed
       if (debug) {
         console.log("google-session: Admin email authorized:", decoded.email);
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const expiryDaysEnv = parseInt(process.env.ADMIN_SESSION_EXPIRY_DAYS || "1", 10);
     const expiryDays = Number.isNaN(expiryDaysEnv) || expiryDaysEnv <= 0 ? 1 : expiryDaysEnv;
     const expiresIn = 60 * 60 * 24 * expiryDays * 1000; // ms
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+    const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
     const expiryDate = new Date(Date.now() + expiresIn);
 
     const cookieOptions = {
@@ -93,7 +94,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // Record login event in Firestore
     try {
-      await adminDb.collection("login_events").add({
+      const db = getAdminDb();
+      await db.collection("login_events").add({
         email: decoded.email || "",
         timestamp: new Date().toISOString(),
         ip: req.headers.get("x-forwarded-for") || "",

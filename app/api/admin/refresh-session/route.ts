@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createRefreshSession } from "@/lib/admin-auth";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 
 /**
@@ -25,8 +25,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing refresh token." }, { status: 401 });
     }
 
+    const db = getAdminDb();
     // Lookup the refresh token in Firestore
-    const doc = await adminDb.collection("refreshTokens").doc(refreshToken).get();
+    const doc = await db.collection("refreshTokens").doc(refreshToken).get();
     if (!doc.exists) {
       return NextResponse.json({ error: "Invalid refresh token" }, { status: 401 });
     }
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
     const newRefreshToken = await createRefreshSession(uid);
 
     // Delete the old refresh token (one-time use)
-    await adminDb.collection("refreshTokens").doc(refreshToken).delete();
+    await db.collection("refreshTokens").doc(refreshToken).delete();
 
     return NextResponse.json({ ok: true, refreshToken: newRefreshToken });
   } catch (error) {

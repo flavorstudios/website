@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 import { format, getISOWeek } from "date-fns";
 
 export async function GET(request: NextRequest) {
@@ -9,7 +9,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const snap = await adminDb.collectionGroup("entries").get();
+    const db = getAdminDb();
+    const snap = await db.collectionGroup("entries").get();
     const now = new Date();
 
     const past30 = new Date(now);

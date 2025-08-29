@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 import nodemailer from "nodemailer";
 
 const notifyEnabled = process.env.NOTIFY_NEW_SUBMISSION === "true";
@@ -43,7 +43,8 @@ export async function POST(request: NextRequest) {
       reviewed: false,
     };
 
-    const ref = adminDb.collection("careerSubmissions").doc();
+    const db = getAdminDb();
+    const ref = db.collection("careerSubmissions").doc();
     await ref.set({ id: ref.id, ...data });
 
     // === Notify all admins if enabled ===

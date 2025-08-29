@@ -1,7 +1,7 @@
 // app/api/comments/submit/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 
 // --- CONFIG ---
 const PERSPECTIVE_API_KEY = process.env.PERSPECTIVE_API_KEY!;
@@ -108,7 +108,8 @@ export async function POST(request: NextRequest) {
     };
 
     // Store in Firestore
-    const ref = adminDb
+    const db = getAdminDb();
+    const ref = db
       .collection("comments")
       .doc(postId)
       .collection("entries")

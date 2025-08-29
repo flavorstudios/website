@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 
 // --- Local Comment type (adjust fields as per your schema) ---
 type Comment = {
@@ -22,14 +22,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const db = getAdminDb();
     // Get all comment parent docs (each post's comments)
-    const postsSnap = await adminDb.collection("comments").get();
+    const postsSnap = await db.collection("comments").get();
     let allComments: Comment[] = [];
 
     // Iterate through each post (slug = post ID)
     for (const postDoc of postsSnap.docs) {
       const slug = postDoc.id;
-      const entriesSnap = await adminDb
+      const entriesSnap = await db
         .collection("comments")
         .doc(slug)
         .collection("entries")

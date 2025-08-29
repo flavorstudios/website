@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 import nodemailer from "nodemailer";
 
@@ -67,6 +67,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     auth: { user: smtpUser, pass: smtpPass },
   });
 
+  const db = getAdminDb();
   try {
     const info = await transporter.sendMail({
       from,
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // Log outgoing email to Firestore
     try {
-      await adminDb.collection("replies").add({
+      await db.collection("replies").add({
         messageId: messageId || null,
         to,
         from,
@@ -96,7 +97,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     logError("send-reply", err);
     // Attempt to log failure
     try {
-      await adminDb.collection("replies").add({
+      await db.collection("replies").add({
         messageId: messageId || null,
         to,
         from,

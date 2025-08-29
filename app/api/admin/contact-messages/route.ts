@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 import { requireAdminAction } from "@/lib/admin-auth";
 
 export interface ContactMessage {
@@ -52,15 +52,16 @@ export async function GET(req: NextRequest) {
   const search = (searchParams.get("search") || "").toLowerCase();
 
   try {
+    const db = getAdminDb();
     // Try new collection first
-    let snap = await adminDb
+    let snap = await db
       .collection("contactMessages")
       .orderBy("createdAt", "desc")
       .get();
 
     // Fallback to legacy collection if empty
     if (snap.empty) {
-      snap = await adminDb
+      snap = await db
         .collection("contact_messages")
         .orderBy("timestamp", "desc")
         .get();
@@ -159,8 +160,9 @@ export async function PUT(req: NextRequest) {
     }
 
     // Update both collections (for legacy support)
+    const db = getAdminDb();
     try {
-      await adminDb
+      await db
         .collection("contactMessages")
         .doc(String(id))
         .set({ status }, { merge: true });
@@ -168,7 +170,7 @@ export async function PUT(req: NextRequest) {
       console.warn("[ADMIN_CONTACT_MESSAGES_PUT] Failed to update contactMessages", e);
     }
     try {
-      await adminDb
+      await db
         .collection("contact_messages")
         .doc(String(id))
         .set({ status }, { merge: true });
@@ -209,6 +211,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Missing ids" }, { status: 400 });
     }
 
+    const db = getAdminDb();
     await Promise.all(
       ids.map(async (id) => {
         await Promise.all([
@@ -218,7 +221,7 @@ export async function DELETE(req: NextRequest) {
               e
             );
           }),
-          adminDb.collection("contact_messages").doc(id).delete().catch((e) => {
+          db.collection("contactMessages").doc(id).delete().catch((e) => {
             console.warn(
               "[ADMIN_CONTACT_MESSAGES_DELETE] Failed to delete contact_messages (legacy)",
               e

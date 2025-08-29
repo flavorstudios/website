@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
-import { adminAuth } from "@/lib/firebase-admin";
+import { getAdminAuth } from "@/lib/firebase-admin";
 import { getUserRole } from "@/lib/user-roles";
 
 export async function GET(request: NextRequest) {
@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
     const verifiedFilter = url.searchParams.get("verified") || "";
     const sort = url.searchParams.get("sort") || "created";
 
-    const result = await adminAuth.listUsers(limit, pageToken);
+    const auth = getAdminAuth();
+    const result = await auth.listUsers(limit, pageToken);
     let users = result.users;
     if (search) {
       users = users.filter(

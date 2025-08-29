@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { getUserRole, setUserRole } from "@/lib/user-roles";
 import { logError } from "@/lib/log";
 
@@ -17,7 +17,8 @@ export async function GET(request: NextRequest) {
     const statusFilter = url.searchParams.get("status") || "";
     const sort = url.searchParams.get("sort") || "created";
 
-    const result = await adminAuth.listUsers(limit, pageToken);
+    const auth = getAdminAuth();
+    const result = await auth.listUsers(limit, pageToken);
     let users = result.users;
     if (search) {
       users = users.filter(
@@ -99,12 +100,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No updates specified" }, { status: 400 });
     }
     const actor = await getSessionInfo(request);
+    const auth = getAdminAuth();
+    const db = getAdminDb();
     const results: Record<string, { ok: boolean; error?: string }> = {};
     for (const uid of ids) {
       try {
         if (del) {
-          await adminAuth.deleteUser(uid);
-          await adminDb.collection("admin_audit_logs").add({
+          await auth.deleteUser(uid);
+          await db.collection("admin_audit_logs").add({
             actor: actor?.email || actor?.uid || "unknown",
             action: "delete_user",
             target: uid,
@@ -115,9 +118,9 @@ export async function POST(request: NextRequest) {
             await setUserRole(uid, role);
           }
           if (typeof disabled !== "undefined") {
-            await adminAuth.updateUser(uid, { disabled });
+            await auth.updateUser(uid, { disabled });
           }
-          await adminDb.collection("admin_audit_logs").add({
+          await auth.updateUser(uid, { disabled });
             actor: actor?.email || actor?.uid || "unknown",
             action: "update_user",
             target: uid,

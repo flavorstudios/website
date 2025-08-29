@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { blogStore, videoStore } from "@/lib/content-store";
-import { adminAuth } from "@/lib/firebase-admin";
+import { getAdminAuth } from "@/lib/firebase-admin";
 import type { Category } from "@/types/category";
 import fs from "fs/promises";
 import path from "path";
@@ -28,10 +28,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ posts: [], videos: [], users: [], categories: [], tags: [] });
   }
 
+  const auth = getAdminAuth();
   const [postsAll, videosAll, usersList, categories] = await Promise.all([
     blogStore.getAll(),
     videoStore.getAll(),
-    adminAuth.listUsers(1000).then((r) => r.users),
+    auth.listUsers(1000).then((r) => r.users),
     readCategories(),
   ]);
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 import nodemailer from "nodemailer";
 import { z } from "zod";
 
@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
       ? scores.toxicity > THRESHOLD || scores.insult > THRESHOLD || scores.threat > THRESHOLD
       : true;
 
-    const docRef = adminDb.collection("contactMessages").doc();
+    const db = getAdminDb();
+    const docRef = db.collection("contactMessages").doc();
     await docRef.set({
       id: docRef.id,
       firstName,

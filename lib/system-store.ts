@@ -1,4 +1,4 @@
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 
 export interface SystemStats {
   totalPosts: number;
@@ -14,10 +14,10 @@ export const systemStore = {
   async getStats(): Promise<SystemStats> {
     try {
       const [postsSnap, videosSnap, commentsSnap, pendingSnap] = await Promise.all([
-        adminDb.collection("blogs").get(),
-        adminDb.collection("videos").get(),
-        adminDb.collectionGroup("entries").get(),
-        adminDb.collectionGroup("entries").where("status", "==", "pending").get(),
+        db.collection("blogs").get(),
+        db.collection("videos").get(),
+        db.collectionGroup("entries").get(),
+        db.collectionGroup("entries").where("status", "==", "pending").get(),
       ]);
 
       const totalPosts = postsSnap.size;
@@ -29,7 +29,7 @@ export const systemStore = {
         videosSnap.docs.reduce((sum, d) => sum + (d.data().views || 0), 0);
 
       // Optionally fetch meta data (backup/storage)
-      const systemDoc = await adminDb.collection("system").doc("metrics").get().catch(() => null);
+      const systemDoc = await db.collection("system").doc("metrics").get().catch(() => null);
       const meta = systemDoc && systemDoc.exists ? systemDoc.data() : {};
 
       return {

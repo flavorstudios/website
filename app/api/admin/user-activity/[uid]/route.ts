@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 
 export async function GET(
@@ -19,7 +19,7 @@ export async function GET(
   try {
     const user = await adminAuth.getUser(uid);
     const email = user.email || "";
-    const snap = await adminDb
+    const snap = await db
       .collection("login_events")
       .where("email", "==", email)
       .orderBy("timestamp", "desc")

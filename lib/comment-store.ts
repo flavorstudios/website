@@ -1,6 +1,6 @@
 // --- COMMENT STORE ---
 
-import { adminDb } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
 
 // --- Define and export Comment type ---
 export type Comment = {
@@ -36,7 +36,8 @@ export const commentStore = {
   // Fetch all comments (across all posts), flattened list
   async getAll(): Promise<Comment[]> {
     try {
-      const snap = await adminDb.collectionGroup("entries").get();
+      const db = getAdminDb();
+      const snap = await db.collectionGroup("entries").get();
       return snap.docs.map((doc) => ({
         id: doc.id,
         ...(doc.data() as FirestoreCommentDoc), // << use FirestoreCommentDoc
@@ -50,7 +51,8 @@ export const commentStore = {
   // Get comments by postId and type (blog/video), approved only, newest first
   async getByPost(postId: string, postType: "blog" | "video"): Promise<Comment[]> {
     try {
-      const snap = await adminDb
+      const db = getAdminDb();
+      const snap = await db
         .collection("comments")
         .doc(String(postId))
         .collection("entries")
@@ -130,7 +132,8 @@ export const commentStore = {
     };
 
     try {
-      await adminDb
+      const db = getAdminDb();
+      await db
         .collection("comments")
         .doc(String(comment.postId))
         .collection("entries")
@@ -150,7 +153,8 @@ export const commentStore = {
     status: Comment["status"]
   ): Promise<Comment | null> {
     try {
-      const ref = adminDb
+      const db = getAdminDb();
+      const ref = db
         .collection("comments")
         .doc(String(postId))
         .collection("entries")
@@ -173,7 +177,8 @@ export const commentStore = {
     flagged: boolean
   ): Promise<Comment | null> {
     try {
-      const ref = adminDb
+      const db = getAdminDb();
+      const ref = db
         .collection("comments")
         .doc(String(postId))
         .collection("entries")
@@ -192,7 +197,8 @@ export const commentStore = {
   // Delete a comment
   async delete(postId: string, commentId: string): Promise<boolean> {
     try {
-      const ref = adminDb
+      const db = getAdminDb();
+      const ref = db
         .collection("comments")
         .doc(String(postId))
         .collection("entries")

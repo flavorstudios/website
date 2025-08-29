@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
-import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { getUserRole, setUserRole } from "@/lib/user-roles";
 import { logError } from "@/lib/log";
 
@@ -13,7 +13,8 @@ export async function GET(
   }
   const { uid } = await params;
   try {
-    const userRecord = await adminAuth.getUser(uid);
+    const auth = getAdminAuth();
+    const userRecord = await auth.getUser(uid);
     const role = await getUserRole(uid, userRecord.email || undefined);
     return NextResponse.json({
       user: {
@@ -43,16 +44,18 @@ export async function PATCH(
   }
   const { uid } = await params;
   try {
+    const auth = getAdminAuth();
+    const db = getAdminDb();
     const { role, disabled } = await request.json();
     if (typeof role !== "undefined") {
       await setUserRole(uid, role);
     }
     if (typeof disabled !== "undefined") {
-      await adminAuth.updateUser(uid, { disabled: !!disabled });
+      await auth.updateUser(uid, { disabled: !!disabled });
     }
     const actor = await getSessionInfo(request);
     try {
-      await adminDb.collection("admin_audit_logs").add({
+      await db.collection("admin_audit_logs").add({
         actor: actor?.email || actor?.uid || "unknown",
         action: "update_user",
         target: uid,
@@ -78,10 +81,12 @@ export async function DELETE(
   }
   const { uid } = await params;
   try {
-    await adminAuth.deleteUser(uid);
+    const auth = getAdminAuth();
+    const db = getAdminDb();
+    await auth.deleteUser(uid);
     const actor = await getSessionInfo(request);
     try {
-      await adminDb.collection("admin_audit_logs").add({
+      await db.collection("admin_audit_logs").add({
         actor: actor?.email || actor?.uid || "unknown",
         action: "delete_user",
         target: uid,

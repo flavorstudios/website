@@ -1,7 +1,7 @@
 // app/api/admin/logout/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase-admin";
+import { getAdminAuth } from "@/lib/firebase-admin";
 import { requireAdmin } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Consistent logging
 
@@ -12,9 +12,10 @@ export async function POST(req: NextRequest) {
 
     // If the user is authenticated, revoke their Firebase session (best practice)
     if (sessionCookie && await requireAdmin(req)) {
+      const auth = getAdminAuth();
       try {
-        const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
-        await adminAuth.revokeRefreshTokens(decoded.uid);
+        const decoded = await auth.verifySessionCookie(sessionCookie, true);
+        await auth.revokeRefreshTokens(decoded.uid);
       } catch (err) {
         // If verification fails, just proceed to clear cookie (user is already logged out or token is invalid)
         logError("logout: revokeTokens verification failed", err);

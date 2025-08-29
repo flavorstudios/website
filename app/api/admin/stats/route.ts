@@ -2,7 +2,13 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
-import { AggregateField, Timestamp, Query, AggregateQuery } from "firebase-admin/firestore";
+import {
+  AggregateField,
+  Timestamp,
+  Query,
+  AggregateQuery,
+  Firestore,
+} from "firebase-admin/firestore";
 import { createHash, randomUUID } from "crypto";
 import { z } from "zod";
 
@@ -173,6 +179,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    / At this point, adminDb is guaranteed.
+    const db: Firestore = adminDb;
+
     // Serve from cache if available (TTL: 60s)
     const cached = statsCache[range];
     if (cached && cached.expires > now) {
@@ -253,31 +262,31 @@ export async function GET(request: NextRequest) {
         publishedPosts,
         featuredVideos,
       ] = await Promise.all([
-        safeCount(adminDb.collection("blogs"), "totalPosts"),
-        safeCount(adminDb.collection("videos"), "totalVideos"),
-        safeCount(adminDb.collection("comments"), "totalComments"),
+        safeCount(db.collection("blogs"), "totalPosts"),
+        safeCount(db.collection("videos"), "totalVideos"),
+        safeCount(db.collection("comments"), "totalComments"),
         safeAggregate(
-          adminDb
+          db
             .collection("blogs")
             .aggregate({ views: AggregateField.sum("views") }),
           "blogViews"
         ),
         safeAggregate(
-          adminDb
+          db
             .collection("videos")
             .aggregate({ views: AggregateField.sum("views") }),
           "videoViews"
         ),
         safeCount(
-          adminDb.collection("comments").where("approved", "==", false),
+          db.collection("comments").where("approved", "==", false),
           "pendingComments"
         ),
         safeCount(
-          adminDb.collection("blogs").where("status", "==", "published"),
+          db.collection("blogs").where("status", "==", "published"),
           "publishedPosts"
         ),
         safeCount(
-          adminDb.collection("videos").where("featured", "==", true),
+          db.collection("videos").where("featured", "==", true),
           "featuredVideos"
         ),
       ]);
@@ -328,20 +337,20 @@ export async function GET(request: NextRequest) {
 
         try {
           const [postSnap, videoSnap, commentSnap] = await Promise.all([
-            adminDb
+            db
               .collection("blogs")
               .where("createdAt", ">=", startTs)
               .where("createdAt", "<", endTs)
               .count()
               .get(),
-            adminDb
+            db
               .collection("videos")
               .where("createdAt", ">=", startTs)
               .where("createdAt", "<", endTs)
               .count()
               .get(),
             // Adjust to your comments structure; this uses a collectionGroup example.
-            adminDb
+            db
               .collectionGroup("entries")
               .where("createdAt", ">=", startTs)
               .where("createdAt", "<", endTs)

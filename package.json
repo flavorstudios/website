@@ -140,7 +140,7 @@
     "storybook": "^8.1.0"
   },
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=20.0.0 <21.0.0",
     "pnpm": ">=10"
   },
   "packageManager": "pnpm@10.14.0"

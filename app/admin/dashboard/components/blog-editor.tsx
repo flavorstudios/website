@@ -288,6 +288,54 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
+  const savePost = useCallback(async (isAutoSave = false) => {
+    // Prevent overlapping saves
+    if (saveInFlight.current) return;
+    if (!isAutoSave) setSaving(true);
+    saveInFlight.current = true;
+
+    try {
+      const method = post.id ? "PUT" : "POST";
+      const url = post.id ? `/api/admin/blogs/${post.id}` : "/api/admin/blogs";
+      const normalizedSlug = slugify(post.slug || post.title);
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...post,
+          slug: normalizedSlug,
+          category: post.categories?.[0] || post.category || "",
+          // send ISO strings to the server
+          publishedAt: post.status === "published" ? new Date().toISOString() : undefined,
+          scheduledFor: post.status === "scheduled" ? getScheduledDateTime()?.toISOString() : undefined,
+        }),
+        credentials: "include",
+      });
+
+      if (!response.ok) throw new Error(`Save failed: ${response.status}`);
+
+      const savedPost = await response.json();
+      // prevent the next post state write from marking dirty
+      skipDraftRef.current = true;
+      setPost((prev) => ({ ...prev, id: savedPost.id, slug: normalizedSlug }));
+      setLastSaved(new Date());
+      setIsDirty(false);
+
+      // Quiet autosave; keep toast for manual saves only
+      if (!isAutoSave) {
+        toast.success("Post saved successfully!");
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to save post:", error);
+      // No autosave toast noise; manual saves show a toast
+      if (!isAutoSave) toast.error("Failed to save post");
+    } finally {
+      saveInFlight.current = false;
+      if (!isAutoSave) setSaving(false);
+    }
+  }, [post, getScheduledDateTime, toast]);
+
   // Keyboard shortcuts: Cmd/Ctrl+S to save, Cmd/Ctrl+P to preview
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -374,54 +422,6 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     }, 25000);
     return () => clearInterval(h);
   }, [ws]);
-
-  const savePost = useCallback(async (isAutoSave = false) => {
-    // Prevent overlapping saves
-    if (saveInFlight.current) return;
-    if (!isAutoSave) setSaving(true);
-    saveInFlight.current = true;
-
-    try {
-      const method = post.id ? "PUT" : "POST";
-      const url = post.id ? `/api/admin/blogs/${post.id}` : "/api/admin/blogs";
-      const normalizedSlug = slugify(post.slug || post.title);
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...post,
-          slug: normalizedSlug,
-          category: post.categories?.[0] || post.category || "",
-          // send ISO strings to the server
-          publishedAt: post.status === "published" ? new Date().toISOString() : undefined,
-          scheduledFor: post.status === "scheduled" ? getScheduledDateTime()?.toISOString() : undefined,
-        }),
-        credentials: "include",
-      });
-
-      if (!response.ok) throw new Error(`Save failed: ${response.status}`);
-
-      const savedPost = await response.json();
-      // prevent the next post state write from marking dirty
-      skipDraftRef.current = true;
-      setPost((prev) => ({ ...prev, id: savedPost.id, slug: normalizedSlug }));
-      setLastSaved(new Date());
-      setIsDirty(false);
-
-      // Quiet autosave; keep toast for manual saves only
-      if (!isAutoSave) {
-        toast.success("Post saved successfully!");
-      }
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to save post:", error);
-      // No autosave toast noise; manual saves show a toast
-      if (!isAutoSave) toast.error("Failed to save post");
-    } finally {
-      saveInFlight.current = false;
-      if (!isAutoSave) setSaving(false);
-    }
-  }, [post, getScheduledDateTime, toast]);
 
   const publishPost = async () => {
     if (!post.title?.trim() || !post.content?.trim()) {

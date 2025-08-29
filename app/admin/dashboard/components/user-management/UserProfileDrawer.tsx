@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trash2 } from "lucide-react";
+import { Trash2, Copy, KeyRound, MailCheck } from "lucide-react";
 
 interface UserProfileDrawerProps {
   uid: string | null;
@@ -60,6 +60,35 @@ export default function UserProfileDrawer({ uid, open, onClose, onDeleted }: Use
   const [logsLoading, setLogsLoading] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const copy = async (text: string, message = "Copied") => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(message);
+    } catch {
+      toast.error("Failed to copy");
+    }
+  };
+
+  const handleAccountAction = async (action: "reset" | "verify") => {
+    if (!uid) return;
+    try {
+      const res = await fetch(`/api/admin/users/${uid}/actions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (res.ok && data.link) {
+        await copy(data.link, "Link copied");
+      } else {
+        toast.error(data.error || "Action failed");
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("User action failed", err);
+      toast.error("Action failed");
+    }
+  };
 
   useEffect(() => {
     if (!uid || !open) return;
@@ -138,9 +167,29 @@ export default function UserProfileDrawer({ uid, open, onClose, onDeleted }: Use
                   {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <p className="font-semibold">{user.email}</p>
-                <p className="text-sm text-gray-500">UID: {user.uid}</p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1">
+                  <p className="font-semibold break-all">{user.email}</p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Copy email"
+                    onClick={() => copy(user.email || "")}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="flex items-center gap-1 text-sm text-gray-500">
+                  <span>UID: {user.uid}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Copy UID"
+                    onClick={() => copy(user.uid)}
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
                 {typeof user.emailVerified === "boolean" && (
                   <p className="text-sm text-gray-500">
                     {user.emailVerified ? "✅ Email Verified" : "❌ Email Not Verified"}
@@ -179,6 +228,25 @@ export default function UserProfileDrawer({ uid, open, onClose, onDeleted }: Use
                 <label htmlFor="user-status" className="text-sm">
                   {disabled ? "Disabled" : "Active"}
                 </label>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-sm font-medium">Account Actions</h2>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleAccountAction("reset")}
+                >
+                  <KeyRound className="mr-1 h-4 w-4" /> Reset Password
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleAccountAction("verify")}
+                >
+                  <MailCheck className="mr-1 h-4 w-4" /> Send Verification
+                </Button>
               </div>
             </div>
             <div className="space-y-2">

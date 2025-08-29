@@ -3,6 +3,7 @@
 import { LayoutDashboard, FileText, Image, Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type React from "react"
+import { useEffect, useRef } from "react"
 import type { Dispatch, SetStateAction } from "react"
 import type { SectionId } from "../sections"
 
@@ -13,6 +14,23 @@ interface MobileNavProps {
 
 export default function MobileNav({ activeSection, setActiveSection }: MobileNavProps) {
   const router = useRouter()
+  const navRef = useRef<HTMLElement>(null)
+
+  // Sync CSS variable so main content can pad for the exact nav height
+  useEffect(() => {
+    const root = document.documentElement
+    const updateHeight = () => {
+      if (navRef.current) {
+        root.style.setProperty("--mobile-nav-h", `${navRef.current.offsetHeight}px`)
+      }
+    }
+    updateHeight()
+    window.addEventListener("resize", updateHeight)
+    return () => {
+      window.removeEventListener("resize", updateHeight)
+      root.style.removeProperty("--mobile-nav-h")
+    }
+  }, [])
 
   const items: { id: SectionId; label: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; href: string }[] = [
     { id: "overview", label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
@@ -22,7 +40,11 @@ export default function MobileNav({ activeSection, setActiveSection }: MobileNav
   ]
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 z-50 md:hidden">
+    <nav
+      ref={navRef}
+      aria-label="Mobile primary"
+      className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] z-50 md:hidden"
+    >
       <ul className="flex justify-around">
         {items.map((item) => {
           const Icon = item.icon

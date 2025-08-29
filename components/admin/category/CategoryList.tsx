@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 import { useToast } from "@/hooks/use-toast"
-import { GripVertical, Edit, Trash2, Copy } from "lucide-react"
+import { GripVertical, Edit, Trash2, Copy, ChevronUp, ChevronDown } from "lucide-react"
 import * as Icons from "lucide-react"
 import type { LucideProps } from "lucide-react"
 import {
@@ -40,6 +40,9 @@ export interface CategoryListProps {
   selected: Set<string>
   toggleSelect: (id: string) => void
   toggleSelectAll: (checked: boolean) => void
+  sortBy: string
+  sortDir: "asc" | "desc"
+  onSort: (field: string) => void
 }
 
 // --- Helper: Safe icon renderer ---
@@ -73,6 +76,9 @@ export default function CategoryList({
   selected,
   toggleSelect,
   toggleSelectAll,
+  sortBy,
+  sortDir,
+  onSort,
 }: CategoryListProps) {
   const [items, setItems] = useState<Category[]>([])
   const rowRefs = useRef<HTMLTableRowElement[]>([])
@@ -174,11 +180,67 @@ export default function CategoryList({
                   />
                 </th>
                 <th className="p-3 w-8" />
-                <th className="p-3 text-left">Name</th>
-                <th className="p-3 text-left">Slug</th>
+                <th className="p-3 text-left">
+                  <button
+                    type="button"
+                    className="flex items-center gap-1"
+                    onClick={() => onSort("name")}
+                  >
+                    Name
+                    {sortBy === "name" &&
+                      (sortDir === "asc" ? (
+                        <ChevronUp className="h-3 w-3" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3" />
+                      ))}
+                  </button>
+                </th>
+                <th className="p-3 text-left">
+                  <button
+                    type="button"
+                    className="flex items-center gap-1"
+                    onClick={() => onSort("slug")}
+                  >
+                    Slug
+                    {sortBy === "slug" &&
+                      (sortDir === "asc" ? (
+                        <ChevronUp className="h-3 w-3" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3" />
+                      ))}
+                  </button>
+                </th>
                 <th className="p-3 text-left">Description</th>
-                <th className="p-3 text-center">Status</th>
-                <th className="p-3 text-right">Posts</th>
+                <th className="p-3 text-center">
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 mx-auto"
+                    onClick={() => onSort("status")}
+                  >
+                    Status
+                    {sortBy === "status" &&
+                      (sortDir === "asc" ? (
+                        <ChevronUp className="h-3 w-3" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3" />
+                      ))}
+                  </button>
+                </th>
+                <th className="p-3 text-right">
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 ml-auto"
+                    onClick={() => onSort("posts")}
+                  >
+                    Posts
+                    {sortBy === "posts" &&
+                      (sortDir === "asc" ? (
+                        <ChevronUp className="h-3 w-3" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3" />
+                      ))}
+                  </button>
+                </th>
                 <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>

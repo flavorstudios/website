@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -310,7 +311,19 @@ export default function UserList() {
                     />
                   </td>
                   <td className="p-2">{u.email}</td>
-                  <td className="p-2">{u.role}</td>
+                  <td className="p-2">
+                    <Badge
+                      variant={
+                        u.role === "admin"
+                          ? "destructive"
+                          : u.role === "editor"
+                            ? "secondary"
+                            : "outline"
+                      }
+                    >
+                      {u.role}
+                    </Badge>
+                  </td>
                   <td className="p-2">{u.disabled ? "Disabled" : "Active"}</td>
                   <td className="p-2">
                     {u.emailVerified ? (

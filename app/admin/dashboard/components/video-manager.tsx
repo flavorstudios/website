@@ -563,6 +563,8 @@ export default function VideoManager() {
   const [filterStatus, setFilterStatus] = useState<"all" | Video["status"]>("all");
   const [filterFeatured, setFilterFeatured] = useState<"all" | "featured" | "regular">("all");
   const [filterTag, setFilterTag] = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "title" | "status" | "views">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
@@ -586,6 +588,8 @@ export default function VideoManager() {
       if (saved.filterStatus) setFilterStatus(saved.filterStatus);
       if (saved.filterFeatured) setFilterFeatured(saved.filterFeatured);
       if (saved.filterTag) setFilterTag(saved.filterTag);
+      if (saved.filterDateFrom) setFilterDateFrom(saved.filterDateFrom);
+      if (saved.filterDateTo) setFilterDateTo(saved.filterDateTo);
       if (saved.sortBy) setSortBy(saved.sortBy);
       if (saved.sortOrder) setSortOrder(saved.sortOrder);
       if (saved.videosPerPage) setVideosPerPage(saved.videosPerPage);
@@ -601,6 +605,8 @@ export default function VideoManager() {
       filterStatus,
       filterFeatured,
       filterTag,
+      filterDateFrom,
+      filterDateTo,
       sortBy,
       sortOrder,
       videosPerPage,
@@ -613,6 +619,8 @@ export default function VideoManager() {
     filterStatus,
     filterFeatured,
     filterTag,
+    filterDateFrom,
+    filterDateTo,
     sortBy,
     sortOrder,
     videosPerPage,
@@ -626,6 +634,8 @@ export default function VideoManager() {
     setFilterFeatured("all");
     setFilterTag("");
     setSortBy("date");
+    setFilterDateFrom("");
+    setFilterDateTo("");
     setSortOrder("desc");
     setSelected(new Set());
     setVideosPerPage(10);
@@ -814,6 +824,8 @@ export default function VideoManager() {
   const filteredVideos = useMemo(() => {
     const term = deferredSearch.trim().toLowerCase();
     const tag = filterTag.trim().toLowerCase();
+    const fromDate = filterDateFrom ? new Date(filterDateFrom) : null;
+    const toDate = filterDateTo ? new Date(filterDateTo) : null;
     return videos.filter((video) => {
       const matchesSearch =
         !term ||
@@ -829,15 +841,29 @@ export default function VideoManager() {
         (filterFeatured === "regular" && !video.featured);
       const matchesTag =
         !tag || video.tags.some((t) => t.toLowerCase().includes(tag));
+      const published = new Date(video.publishedAt);
+      const matchesFrom = !fromDate || published >= fromDate;
+      const matchesTo = !toDate || published <= toDate;
       return (
         matchesSearch &&
         matchesCategory &&
         matchesStatus &&
         matchesFeatured &&
-        matchesTag
+        matchesTag &&
+        matchesFrom &&
+        matchesTo
       );
     });
-  }, [videos, deferredSearch, filterCategory, filterStatus, filterFeatured, filterTag]);
+  }, [
+    videos,
+    deferredSearch,
+    filterCategory,
+    filterStatus,
+    filterFeatured,
+    filterTag,
+    filterDateFrom,
+    filterDateTo,
+  ]);
 
   const sortedVideos = useMemo(() => {
     const arr = [...filteredVideos];
@@ -861,7 +887,18 @@ export default function VideoManager() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, filterCategory, filterStatus, filterFeatured, sortBy, sortOrder, filterTag, videosPerPage]);
+  }, [
+    searchTerm,
+    filterCategory,
+    filterStatus,
+    filterFeatured,
+    sortBy,
+    sortOrder,
+    filterTag,
+    filterDateFrom,
+    filterDateTo,
+    videosPerPage,
+  ]);
 
   // Bulk actions --------------------------------------------------------------
   const handleBulk = async (action: "publish" | "unpublish" | "delete") => {
@@ -997,6 +1034,22 @@ export default function VideoManager() {
           onChange={(e) => setFilterTag(e.target.value)}
           className="w-full sm:w-40"
           aria-label="Filter by tag"
+        />
+
+        <Input
+          type="date"
+          value={filterDateFrom}
+          onChange={(e) => setFilterDateFrom(e.target.value)}
+          className="w-full sm:w-44"
+          aria-label="Published after"
+        />
+
+        <Input
+          type="date"
+          value={filterDateTo}
+          onChange={(e) => setFilterDateTo(e.target.value)}
+          className="w-full sm:w-44"
+          aria-label="Published before"
         />
 
         <Select value={filterStatus} onValueChange={(val) => setFilterStatus(val as any)}>

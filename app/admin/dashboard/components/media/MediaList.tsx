@@ -2,7 +2,7 @@
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { MediaDoc } from "@/types/media"
-import { File as FileIcon, Video as VideoIcon, Star } from "lucide-react"
+import { File as FileIcon, Video as VideoIcon, Star, Music } from "lucide-react"
 
 interface Props {
   items: MediaDoc[]
@@ -26,6 +26,7 @@ export default function MediaList({
   const Preview = ({ m }: { m: MediaDoc }) => {
     const isImage = m.mime?.startsWith("image/")
     const isVideo = m.mime?.startsWith("video/")
+    const isAudio = m.mime?.startsWith("audio/")
     return isImage ? (
       <Image
         src={m.url}
@@ -37,7 +38,13 @@ export default function MediaList({
       />
     ) : (
       <div className="flex items-center justify-center w-14 h-14 bg-muted text-muted-foreground rounded flex-shrink-0">
-        {isVideo ? <VideoIcon className="w-6 h-6" /> : <FileIcon className="w-6 h-6" />}
+        {isVideo ? (
+          <VideoIcon className="w-6 h-6" />
+        ) : isAudio ? (
+          <Music className="w-6 h-6" />
+        ) : (
+          <FileIcon className="w-6 h-6" />
+        )}
       </div>
     )
   }

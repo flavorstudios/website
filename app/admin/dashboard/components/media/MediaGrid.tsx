@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import type { MediaDoc } from "@/types/media";
-import { File, Video, Star } from "lucide-react";
+import { File, Video, Star, Music } from "lucide-react";
 
 interface Props {
   items: MediaDoc[];
@@ -30,6 +30,7 @@ export default function MediaGrid({
         const mime = item.mime || item.mimeType || "";
         const isImage = mime.startsWith("image/");
         const isVideo = mime.startsWith("video/");
+        const isAudio = mime.startsWith("audio/");
 
         return (
           <button
@@ -106,7 +107,13 @@ export default function MediaGrid({
               />
             ) : (
               <div className="flex items-center justify-center w-full h-32 bg-muted text-muted-foreground">
-                {isVideo ? <Video className="w-8 h-8" /> : <File className="w-8 h-8" />}
+                {isVideo ? (
+                  <Video className="w-8 h-8" />
+                ) : isAudio ? (
+                  <Music className="w-8 h-8" />
+                ) : (
+                  <File className="w-8 h-8" />
+                )}
               </div>
             )}
 

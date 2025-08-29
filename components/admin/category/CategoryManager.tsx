@@ -199,6 +199,18 @@ export default function CategoryManager() {
   const [importing, setImporting] = useState(false)
   const debouncedSearch = useDebounce(search, 300)
 
+  const handleSort = useCallback(
+    (field: string) => {
+      if (sortBy === field) {
+        setSortDir((d) => (d === "asc" ? "desc" : "asc"))
+      } else {
+        setSortBy(field)
+        setSortDir("asc")
+      }
+    },
+    [sortBy],
+  )
+
   useEffect(() => {
     const nextPrefs = {
       type,
@@ -538,10 +550,12 @@ export default function CategoryManager() {
   }
 
   const filtered = useMemo(() => {
+    const term = debouncedSearch.toLowerCase()
     return categories.filter((c) => {
-      const matchesSearch = c.name
-        .toLowerCase()
-        .includes(debouncedSearch.toLowerCase())
+      const matchesSearch =
+        c.name.toLowerCase().includes(term) ||
+        c.slug.toLowerCase().includes(term) ||
+        (c.description?.toLowerCase().includes(term) ?? false)
       const matchesStatus =
         statusFilter === "all"
           ? true
@@ -558,6 +572,14 @@ export default function CategoryManager() {
         return sortDir === "asc"
           ? a.name.localeCompare(b.name)
           : b.name.localeCompare(a.name)
+      if (sortBy === "slug")
+        return sortDir === "asc"
+          ? a.slug.localeCompare(b.slug)
+          : b.slug.localeCompare(a.slug)
+      if (sortBy === "posts")
+        return sortDir === "asc"
+          ? (a.postCount ?? 0) - (b.postCount ?? 0)
+          : (b.postCount ?? 0) - (a.postCount ?? 0)
       if (sortBy === "status")
         return sortDir === "asc"
           ? Number(a.isActive) - Number(b.isActive)
@@ -642,7 +664,9 @@ export default function CategoryManager() {
               <SelectContent>
                 <SelectItem value="order">Order</SelectItem>
                 <SelectItem value="name">Name</SelectItem>
+                <SelectItem value="slug">Slug</SelectItem>
                 <SelectItem value="status">Status</SelectItem>
+                <SelectItem value="posts">Posts</SelectItem>
               </SelectContent>
             </Select>
             <Select value={sortDir} onValueChange={(v) => setSortDir(v as "asc" | "desc")}>
@@ -729,6 +753,9 @@ export default function CategoryManager() {
           selected={selected}
           toggleSelect={toggleSelect}
           toggleSelectAll={toggleSelectAll}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSort={handleSort}
         />
       <Pagination
         currentPage={currentPage}

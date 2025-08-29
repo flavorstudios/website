@@ -8,6 +8,7 @@ import { signOut } from "firebase/auth";
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase";
 import { fetchJson } from "@/lib/http";
 import useHotkeys from "./hooks/use-hotkeys";
+import { SITE_NAME } from "@/lib/constants";
 
 import { AdminSidebar } from "./components/admin-sidebar";
 import { AdminHeader } from "./components/admin-header";
@@ -311,6 +312,11 @@ export default function AdminDashboardPageClient({
     () => NAV.find((n) => n.id === activeSection)?.title ?? "Dashboard",
     [activeSection]
   );
+
+  // Keep document title in sync with the active section
+  useEffect(() => {
+    document.title = `${currentTitle} | ${SITE_NAME} Admin`;
+  }, [currentTitle]);
 
   if (!mounted) {
     return (

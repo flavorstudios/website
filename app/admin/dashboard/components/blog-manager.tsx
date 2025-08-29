@@ -38,6 +38,7 @@ import { Pagination } from "@/components/admin/Pagination";
 import AdminPageHeader from "@/components/AdminPageHeader";
 import { fetcher } from "@/lib/fetcher";
 import { useDebounce } from "@/hooks/use-debounce";
+import useMediaQuery from "@/hooks/use-media-query";
 
 export default function BlogManager() {
   const { toast } = useToast();
@@ -53,16 +54,25 @@ export default function BlogManager() {
   // New: track a pending bulk publish/unpublish action for confirmation
   const [bulkAction, setBulkAction] = useState<null | "publish" | "unpublish">(null);
 
+  const isMobile = useMediaQuery("(max-width: 639px)");
+  const [filtersOpen, setFiltersOpen] = useState(!isMobile);
+  useEffect(() => {
+    setFiltersOpen(!isMobile);
+  }, [isMobile]);
+
   // ---- Read filters/pagination from URL ----
   const search = searchParams.get("search") ?? "";
   const category = searchParams.get("category") ?? "all";
   const status = searchParams.get("status") ?? "all";
   const sortBy = searchParams.get("sort") ?? "date";
+  const author = searchParams.get("author") ?? "";
   const currentPage = parseInt(searchParams.get("page") ?? "1", 10) || 1;
   const perPage = parseInt(searchParams.get("perPage") ?? "10", 10) || 10;
 
   const [searchInput, setSearchInput] = useState(search);
   const debouncedSearch = useDebounce(searchInput, 500);
+  const [authorInput, setAuthorInput] = useState(author);
+  const debouncedAuthor = useDebounce(authorInput, 500);
 
   useEffect(() => {
     if (debouncedSearch !== search) {
@@ -75,6 +85,17 @@ export default function BlogManager() {
     setSearchInput(search);
   }, [search]);
 
+  useEffect(() => {
+    if (debouncedAuthor !== author) {
+      setParams({ author: debouncedAuthor, page: "1" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedAuthor]);
+
+  useEffect(() => {
+    setAuthorInput(author);
+  }, [author]);
+
   // Helper to push updated query params
   const setParams = (overrides: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -83,6 +104,7 @@ export default function BlogManager() {
     params.set("category", category);
     params.set("status", status);
     params.set("sort", sortBy);
+    params.set("author", author);
     params.set("page", String(currentPage));
     params.set("perPage", String(perPage));
     // apply overrides
@@ -96,6 +118,21 @@ export default function BlogManager() {
   const handleSortChange = (value: string) => setParams({ sort: value, page: "1" });
   const handlePerPageChange = (value: string) => setParams({ perPage: value, page: "1" });
   const handlePageChange = (page: number) => setParams({ page: page.toString() });
+  const handleAuthorChange = (value: string) => setAuthorInput(value);
+
+  const clearFilters = () => {
+    setSearchInput("");
+    setAuthorInput("");
+    setParams({
+      search: "",
+      category: "all",
+      status: "all",
+      sort: "date",
+      author: "",
+      page: "1",
+      perPage: String(perPage),
+    });
+  };
 
   // SWR data sources (server-driven filtering/sorting/pagination)
   const {
@@ -104,13 +141,13 @@ export default function BlogManager() {
     isLoading: postsLoading,
     mutate: mutatePosts,
   } = useSWR<{ posts: BlogPost[]; total: number }>(
-    `/api/admin/blogs?search=${encodeURIComponent(search)}&category=${encodeURIComponent(
-      category,
-    )}&status=${encodeURIComponent(status)}&sort=${encodeURIComponent(
-      sortBy,
-    )}&page=${encodeURIComponent(String(currentPage))}&perPage=${encodeURIComponent(
-      String(perPage),
-    )}`,
+    `/api/admin/blogs?search=${encodeURIComponent(search)}&author=${encodeURIComponent(
+      author,
+    )}&category=${encodeURIComponent(category)}&status=${encodeURIComponent(
+      status,
+    )}&sort=${encodeURIComponent(sortBy)}&page=${encodeURIComponent(
+      String(currentPage),
+    )}&perPage=${encodeURIComponent(String(perPage))}`,
     fetcher,
     {
       // remove polling; rely on SSE
@@ -442,56 +479,87 @@ export default function BlogManager() {
       </div>
 
       {/* Blog management UI section */}
-      <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}>
+      <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}> 
         {/* Filters */}
-        <div className="flex flex-wrap items-center gap-4">
-          <Input
-            placeholder="Search title..."
-            value={searchInput}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full sm:w-60"
-            aria-label="Search by title"
-          />
-          <CategoryDropdown
-            categories={categories}
-            selectedCategory={category}
-            onCategoryChange={handleCategoryChange}
-            placeholder="All categories"
-            className="w-full sm:w-48"
-            aria-label="Category"
-          />
-          <Select value={status} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-full sm:w-40" aria-label="Status">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-              <SelectItem value="scheduled">Scheduled</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sortBy} onValueChange={handleSortChange}>
-            <SelectTrigger className="w-full sm:w-40" aria-label="Sort By">
-              <SelectValue placeholder="Sort By" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="date">Date</SelectItem>
-              <SelectItem value="title">Title</SelectItem>
-              <SelectItem value="status">Status</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={String(perPage)} onValueChange={handlePerPageChange}>
-            <SelectTrigger className="w-full sm:w-40" aria-label="Posts per page">
-              <SelectValue placeholder="Per page" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10 / page</SelectItem>
-              <SelectItem value="20">20 / page</SelectItem>
-              <SelectItem value="50">50 / page</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {isMobile && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setFiltersOpen((v) => !v)}
+            aria-expanded={filtersOpen}
+            aria-controls="blog-filters"
+            className="mb-2"
+          >
+            {filtersOpen ? "Hide Filters" : "Show Filters"}
+          </Button>
+        )}
+        {(!isMobile || filtersOpen) && (
+          <div id="blog-filters" className="flex flex-wrap items-center gap-4">
+            <Input
+              placeholder="Search title..."
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full sm:w-60"
+              aria-label="Search by title"
+            />
+            <Input
+              placeholder="Author..."
+              value={authorInput}
+              onChange={(e) => handleAuthorChange(e.target.value)}
+              className="w-full sm:w-40"
+              aria-label="Filter by author"
+            />
+            <CategoryDropdown
+              categories={categories}
+              selectedCategory={category}
+              onCategoryChange={handleCategoryChange}
+              placeholder="All categories"
+              className="w-full sm:w-48"
+              aria-label="Category"
+            />
+            <Select value={status} onValueChange={handleStatusChange}>
+              <SelectTrigger className="w-full sm:w-40" aria-label="Status">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="scheduled">Scheduled</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={handleSortChange}>
+              <SelectTrigger className="w-full sm:w-40" aria-label="Sort By">
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="title">Title</SelectItem>
+                <SelectItem value="status">Status</SelectItem>
+                <SelectItem value="views">Views</SelectItem>
+                <SelectItem value="comments">Comments</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={String(perPage)} onValueChange={handlePerPageChange}>
+              <SelectTrigger className="w-full sm:w-40" aria-label="Posts per page">
+                <SelectValue placeholder="Per page" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10 / page</SelectItem>
+                <SelectItem value="20">20 / page</SelectItem>
+                <SelectItem value="50">50 / page</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="ml-auto"
+            >
+              Clear
+            </Button>
+          </div>
+        )}
 
         {/* Bulk Actions */}
         <BlogBulkActions

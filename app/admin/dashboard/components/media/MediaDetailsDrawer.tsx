@@ -125,6 +125,9 @@ export default function MediaDetailsDrawer({
 
   const mime = media.mime || media.mimeType || "";
   const isImage = mime.startsWith("image/");
+  const isVideo = mime.startsWith("video/");
+  const isAudio = mime.startsWith("audio/");
+  const isPDF = mime === "application/pdf";
 
   const createdAtMs =
     typeof media.createdAt === "number"
@@ -162,6 +165,26 @@ export default function MediaDetailsDrawer({
               height={400}
               sizes="(max-width: 640px) 100vw, 520px"
               className="object-cover w-full h-auto rounded"
+            />
+          ) : isVideo ? (
+            <video
+              src={media.url}
+              controls
+              className="w-full h-auto rounded bg-black"
+            />
+          ) : isAudio ? (
+            <audio
+              src={media.url}
+              controls
+              className="w-full"
+            >
+              Your browser does not support the audio element.
+            </audio>
+          ) : isPDF ? (
+            <iframe
+              src={media.url}
+              className="w-full h-64 bg-white"
+              title={media.filename || media.name || "PDF preview"}
             />
           ) : (
             <div className="aspect-video w-full grid place-items-center bg-muted text-muted-foreground rounded">

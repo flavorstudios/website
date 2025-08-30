@@ -5,9 +5,9 @@ import { logError } from "@/lib/log";
 
 export async function GET(
   request: Request,
-  context: { params: { slug: string } },
+  { params }: { params: { slug: string } },
 ) {
-  const { slug } = context.params;
+  const { slug } = params;
   try {
     const post = await blogStore.getBySlug(slug);
     if (!post || post.status !== "published") {

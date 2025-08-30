@@ -6,12 +6,12 @@ import { publishToUser } from "@/lib/sse-broker"
 
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = context.params
+  const { id } = params
   try {
     const data = await request.json()
     const session = await getSessionAndRole(request)
@@ -29,12 +29,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = context.params
+  const { id } = params
   try {
     const success = await blogStore.delete(id)
     if (!success) {

@@ -442,7 +442,11 @@ export default function DashboardOverview() {
                     className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
                     onClick={() => {
                       if (typeof window !== "undefined") {
-                        window.dispatchEvent(new CustomEvent("admin-navigate", { detail: action.action }));
+                        window.dispatchEvent(
+                          new CustomEvent("admin:navigate", {
+                            detail: { section: action.action },
+                          })
+                        );
                       }
                     }}
                   >

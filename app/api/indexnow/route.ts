@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 // Use env variable, no hardcoded key
 const INDEXNOW_KEY = process.env.INDEXNOW_KEY;
 const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   const { url } = await request.json();
 
   if (!url) {

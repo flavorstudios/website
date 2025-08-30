@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { blogStore } from "@/lib/content-store";
 import { formatPublicBlog } from "@/lib/formatters";
 import { logError } from "@/lib/log";
 
 export async function GET(
-  _req: NextRequest,
-  { params }: { params: { slug: string } },
+  request: Request,
+  context: { params: { slug: string } },
 ) {
-  const { slug } = params;
+  const { slug } = context.params;
   try {
     const post = await blogStore.getBySlug(slug);
     if (!post || post.status !== "published") {

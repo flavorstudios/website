@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import nodemailer from "nodemailer";
 
@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
     : undefined,
 });
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const {
       firstName = "",

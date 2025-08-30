@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { commentStore } from "@/lib/comment-store";
 import type { Comment } from "@/lib/comment-store";
 
@@ -47,13 +47,13 @@ function isRateLimited(ip: string): boolean {
   return info.count > MAX_COMMENTS;
 }
 
-function getRequestIp(request: NextRequest): string {
+function getRequestIp(request: Request): string {
   const xfwd = request.headers.get("x-forwarded-for");
   if (xfwd) return xfwd.split(",")[0].trim();
   return "unknown";
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const postId = searchParams.get("postId");
@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body: unknown = await request.json();
     const data = body as CommentCreateInput;

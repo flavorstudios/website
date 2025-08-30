@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import nodemailer from "nodemailer";
 import { z } from "zod";
@@ -57,7 +57,7 @@ async function moderateText(text: string) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     // Validate input using zod
     const body = await request.json();

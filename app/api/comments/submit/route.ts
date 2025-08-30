@@ -1,6 +1,6 @@
 // app/api/comments/submit/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 
 // --- CONFIG ---
@@ -48,7 +48,7 @@ async function moderateComment(text: string) {
 }
 
 // --- Handle POST (Comment Submission) ---
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const {
       author,

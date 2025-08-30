@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 // import { firestore } from "@/lib/firebase"; // Uncomment if using Firestore
 
 // Lint-proof: Reference unused variable with void
@@ -9,7 +9,7 @@ async function saveTokenToDatabase(_token: string) {
   return true;
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
     const { token } = await req.json();
     if (!token) {

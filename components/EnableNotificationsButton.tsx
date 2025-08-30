@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { getMessaging, getToken, isSupported } from "firebase/messaging"
-import app, { firebaseInitError } from "@/lib/firebase"
+import { getFirebaseApp, firebaseInitError } from "@/lib/firebase"
 
 export default function EnableNotificationsButton() {
   const [loading, setLoading] = useState(false)
@@ -12,7 +12,7 @@ export default function EnableNotificationsButton() {
     setResult("")
     try {
       // Check for Firebase config error
-      if (firebaseInitError || !app) {
+      if (firebaseInitError) {
         setResult(
           firebaseInitError?.message ||
             "Notifications unavailable: Firebase configuration error. Please contact the site administrator."
@@ -38,6 +38,7 @@ export default function EnableNotificationsButton() {
 
       // Register the unified service worker (handles PWA & push)
       const swReg = await navigator.serviceWorker.register("/sw.js")
+      const app = getFirebaseApp()
       const messaging = getMessaging(app)
 
       // Request permission and get FCM token

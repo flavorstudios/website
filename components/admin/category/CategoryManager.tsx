@@ -188,6 +188,7 @@ export default function CategoryManager() {
   const [editing, setEditing] = useState<Category | null>(null)
   const [deleting, setDeleting] = useState<Category | null>(null)
   const [replacement, setReplacement] = useState<string>("")
+  const [bulkDeleteIds, setBulkDeleteIds] = useState<string[] | null>(null)
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">(
     prefs.statusFilter ?? "all",
   )

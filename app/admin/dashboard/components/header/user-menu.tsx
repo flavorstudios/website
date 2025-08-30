@@ -53,7 +53,7 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onSelect={() => router.push("/admin/account")}> 
+          <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/settings")}>  
             <User className="h-4 w-4 mr-2" /> Profile Settings
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => router.push("/admin/roles")}> 

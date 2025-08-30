@@ -39,7 +39,7 @@ export default function BlogTable({
   onTogglePublish,
 }: BlogTableProps) {
   const allSelected = posts.length > 0 && posts.every((p) => selected.has(p.id))
-  const rowRefs = useRef<HTMLTableRowElement[]>([])
+  const rowRefs = useRef<(HTMLTableRowElement | null)[]>([])
   const isMobile = useMediaQuery("(max-width: 639px)")
 
   if (posts.length === 0) {
@@ -212,7 +212,9 @@ export default function BlogTable({
           {posts.map((post, idx) => (
             <motion.tr
               key={post.id}
-              ref={el => (rowRefs.current[idx] = el!)}
+              ref={el => {
+                rowRefs.current[idx] = el
+              }}
               tabIndex={0}
               onKeyDown={e => {
                 if (e.key === "ArrowDown") {

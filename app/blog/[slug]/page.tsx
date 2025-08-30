@@ -9,7 +9,9 @@ import BlogPostRenderer from "@/components/BlogPostRenderer";
 import type { BlogPost } from "@/lib/content-store";
 
 // Fetch a single blog post by slug from the public API
-const url = `${process.env.NEXT_PUBLIC_BASE_URL || SITE_URL}/api/blogs/${slug}`;
+async function getBlogPost(slug: string): Promise<BlogPost | null> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+  const url = `${baseUrl}/api/blogs/${slug}`;
   const response = await fetch(url, { next: { revalidate: 3600 } });
 
   if (response.ok) {
@@ -20,7 +22,9 @@ const url = `${process.env.NEXT_PUBLIC_BASE_URL || SITE_URL}/api/blogs/${slug}`;
     return null;
   }
 
-  throw new Error(`Failed to fetch blog post: ${response.status} ${response.statusText}`);
+  throw new Error(
+    `Failed to fetch blog post: ${response.status} ${response.statusText}`,
+  );
 }
 
 interface BlogPostPageProps {

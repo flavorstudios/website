@@ -14,7 +14,7 @@ export interface BlogPost {
   publishedAt: string
   author: string
   featured: boolean
-  imageUrl?: string
+  featuredImage?: string
   commentCount?: number    // <-- Codex: enable comment badge support!
   shareCount?: number      // <-- Track how often a post is shared
 }

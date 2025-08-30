@@ -58,7 +58,7 @@ export function BlogList({ posts = [], category = "all", searchQuery = "" }: Blo
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {filteredPosts.map((post) => (
         <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-          <Link href={`/blog/${post.slug}`}>
+          <Link href={`/blog/${post.slug}`} className="block">
             <div className="relative h-48 bg-gray-200">
               {post.featuredImage ? (
                 <Image src={post.featuredImage || "/placeholder.svg"} alt={post.title} fill className="object-cover" />
@@ -74,51 +74,51 @@ export function BlogList({ posts = [], category = "all", searchQuery = "" }: Blo
               )}
 
           <CardHeader className="pb-2">
-            <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-              <Calendar className="w-4 h-4" />
-              <span>{formatDate(post.publishedAt)}</span>
-              <User className="w-4 h-4 ml-2" />
-              <span>{post.author}</span>
-            </div>
-            <Link href={`/blog/${post.slug}`}>
-              <h3 className="text-xl font-semibold hover:text-blue-600 transition-colors line-clamp-2">{post.title}</h3>
-            </Link>
-          </CardHeader>
+                <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>{formatDate(post.publishedAt)}</span>
+                  <User className="w-4 h-4 ml-2" />
+                  <span>{post.author}</span>
+                </div>
+                <h3 className="text-xl font-semibold hover:text-blue-600 transition-colors line-clamp-2">{post.title}</h3>
+              </CardHeader>
 
           <CardContent>
-            <p className="text-gray-600 line-clamp-3 mb-4">{post.excerpt}</p>
+                <p className="text-gray-600 line-clamp-3 mb-4">{post.excerpt}</p>
 
             <div className="flex items-center justify-between flex-wrap gap-2">
-              {/* MULTI-CATEGORY BADGES */}
-              <div className="flex flex-wrap gap-1">
-                {Array.isArray(post.categories) && post.categories.length > 0
-                  ? post.categories.map((cat) => (
-                      <Badge key={cat} variant="secondary" className="text-xs">
-                        {cat}
-                      </Badge>
-                    ))
-                  : (
-                      <Badge variant="secondary" className="text-xs">
-                        {post.category}
-                      </Badge>
-                    )}
-              </div>
-              <div className="flex items-center text-sm text-gray-500">
-                <Clock className="w-4 h-4 mr-1" />
-                <span>{post.readTime || "5 min read"}</span>
-              </div>
-            </div>
+                  {/* MULTI-CATEGORY BADGES */}
+                  <div className="flex flex-wrap gap-1">
+                    {Array.isArray(post.categories) && post.categories.length > 0
+                      ? post.categories.map((cat) => (
+                          <Badge key={cat} variant="secondary" className="text-xs">
+                            {cat}
+                          </Badge>
+                        ))
+                      : (
+                          <Badge variant="secondary" className="text-xs">
+                            {post.category}
+                          </Badge>
+                        )}
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500">
+                    <Clock className="w-4 h-4 mr-1" />
+                    <span>{post.readTime || "5 min read"}</span>
+                  </div>
+                </div>
 
-            {post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-3">
-                {post.tags.slice(0, 3).map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </CardContent>
+                {post.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-3">
+                    {post.tags.slice(0, 3).map((tag) => (
+                      <Badge key={tag} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </div>
+            </Link>
         </Card>
       ))}
     </div>

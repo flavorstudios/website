@@ -10,7 +10,7 @@ export interface BlogPost {
   publishedAt: string
   author: string
   featured: boolean
-  imageUrl?: string
+  featuredImage?: string
   commentCount?: number      // <-- Always present, default 0 if missing
   shareCount?: number        // <-- Always present, default 0 if missing
 }

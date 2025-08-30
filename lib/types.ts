@@ -8,7 +8,6 @@ export interface BlogPost {
   categories?: string[];
   tags?: string[];
   featuredImage?: string;
-  coverImage?: string;
   author?: string;
   publishedAt?: string;
   readTime?: string;

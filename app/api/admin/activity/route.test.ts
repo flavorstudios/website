@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { type NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 import { GET } from './route';
 import { requireAdmin } from '@/lib/admin-auth';
 

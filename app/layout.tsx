@@ -259,13 +259,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         >
           Skip to main content
         </a>
-
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        
+        <ThemeProvider>
           {/* GTM (NOSCRIPT) — only if container id is provided */}
           {gtmId && (
             <noscript>

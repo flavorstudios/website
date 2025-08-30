@@ -1,6 +1,6 @@
 // app/api/admin/logout/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase-admin";
 import { requireAdmin } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Consistent logging

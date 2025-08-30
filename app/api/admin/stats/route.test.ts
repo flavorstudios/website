@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import type { Firestore } from "firebase-admin/firestore";
 
 // Type helper for mocked requireAdmin

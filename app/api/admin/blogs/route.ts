@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/admin-auth"
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { blogStore } from "@/lib/content-store" // <-- Updated as per Codex
 import { publishToUser } from "@/lib/sse-broker"  // <-- Added for SSE broadcast
 

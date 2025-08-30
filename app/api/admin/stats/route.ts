@@ -1,6 +1,6 @@
 // app/api/admin/stats/route.ts
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 import {
   AggregateField,

@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/admin-auth"
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { getNotificationsService } from "@/lib/notifications"
 import { publishToUser } from "@/lib/sse-broker"
 

@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getAdminAuth } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { uid: string } }
+  context: { params: { uid: string } }
 ) {
-  const { uid } = params;
+  const { uid } = context.params;
   if (!(await requireAdmin(req, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

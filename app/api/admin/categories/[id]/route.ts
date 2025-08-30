@@ -29,12 +29,12 @@ function isValidCategoryUpdate(data: unknown): data is Partial<Category> {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   if (!(await requireAdmin(request, "canManageCategories"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id } = params;
+  const { id } = context.params;
   try {
     const data = await request.json();
 

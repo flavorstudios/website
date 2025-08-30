@@ -1,5 +1,5 @@
 // app/api/media/crop/route.ts
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { verifyAdminSession, logAdminAuditFailure } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";

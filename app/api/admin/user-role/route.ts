@@ -1,6 +1,6 @@
 // app/api/admin/user-role/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { verifyAdminSession, requireAdmin } from "@/lib/admin-auth";
 import { getUserRole, setUserRole } from "@/lib/user-roles";
 import { logError } from "@/lib/log";

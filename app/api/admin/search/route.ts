@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { blogStore, videoStore } from "@/lib/content-store";
 import { getAdminAuth } from "@/lib/firebase-admin";

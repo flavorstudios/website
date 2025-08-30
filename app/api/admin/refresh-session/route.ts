@@ -1,6 +1,6 @@
 // app/api/admin/refresh-session/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { createRefreshSession } from "@/lib/admin-auth";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";

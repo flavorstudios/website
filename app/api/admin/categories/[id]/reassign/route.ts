@@ -1,18 +1,18 @@
 import { requireAdmin } from "@/lib/admin-auth";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { categoryStore } from "@/lib/category-store";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { publishToUser } from "@/lib/sse-broker";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = params;
+  const { id } = context.params;
 
   try {
     const { newCategoryId } = await request.json();

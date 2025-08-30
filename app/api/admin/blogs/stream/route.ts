@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { subscribeUser } from "@/lib/sse-broker";
 

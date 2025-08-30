@@ -1,6 +1,6 @@
 // app/api/blogs/route.ts
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { blogStore } from "@/lib/content-store"; // Firestore-backed store
 import { formatPublicBlog } from "@/lib/formatters"; // Your existing formatter
 import { logError } from "@/lib/log"; // Add error logging

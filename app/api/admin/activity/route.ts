@@ -1,6 +1,6 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { adminDb } from "@/lib/firebase-admin";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 // GET /api/admin/activity - Only for authorized admins
 export async function GET(req: NextRequest) {

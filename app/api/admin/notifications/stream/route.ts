@@ -1,6 +1,6 @@
 // app/api/admin/notifications/stream/route.ts
 import { requireAdmin } from "@/lib/admin-auth";
-import { NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 import { subscribeUser } from "@/lib/sse-broker";
 
 export const runtime = "nodejs";

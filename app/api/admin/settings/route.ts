@@ -1,6 +1,6 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { getAdminDb } from "@/lib/firebase-admin"
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
   const session = await getSessionInfo(request)

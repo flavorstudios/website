@@ -1,18 +1,18 @@
 // app/api/admin/comments/[slug]/[id]/approve/route.ts
 
 import { requireAdmin } from "@/lib/admin-auth"
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 
 // PATCH /api/admin/comments/[slug]/[id]/approve
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { slug: string; id: string } }
+  context: { params: { slug: string; id: string } }
 ) {
   if (!(await requireAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { slug, id } = params;
+  const { slug, id } = context.params;
   try {
     const db = getAdminDb();
     const entryRef = db

@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/admin-auth";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 
 // --- Local Comment type (adjust fields as per your schema) ---

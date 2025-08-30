@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { uid: string } }
+  context: { params: { uid: string } }
 ) {
   if (!(await requireAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { uid } = params;
+  const { uid } = context.params;
   if (!uid) {
     return NextResponse.json({ error: "Missing uid" }, { status: 400 });
   }

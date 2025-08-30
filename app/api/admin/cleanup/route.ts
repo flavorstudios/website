@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/admin-auth"
-import { NextRequest, NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { blogStore } from "@/lib/content-store"
 import { videoStore } from "@/lib/content-store" // <-- Correct import, not comment-store!
 import { logError } from "@/lib/log"

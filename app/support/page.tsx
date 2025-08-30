@@ -1,6 +1,6 @@
 // app/support/page.tsx
 
-import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
+import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 
@@ -48,9 +48,6 @@ export const metadata = getMetadata({
     title: `${SITE_NAME} – Fuel Anime & Stories`,
     description: `Help ${SITE_NAME} grow! Support our original anime, blogs, and games by buying us a coffee, joining the community, or donating. Every contribution makes a difference.`,
     images: [`${SITE_URL}/cover.jpg`],
-  },
-  alternates: {
-    canonical: getCanonicalUrl("/support"), // Canonical URL is explicitly set here.
   },
 });
 

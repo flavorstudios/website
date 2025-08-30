@@ -14,21 +14,10 @@ import {
   CheckCheck,
   Trash2,
   Check,
-  ChevronDown,
-  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu";
 import { fetcher } from "@/lib/fetcher";
 
 interface Notification {
@@ -48,90 +37,13 @@ export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
 
-  // New UX states (kept from your file)
-  const [categoryFilter, setCategoryFilter] = useState("all");
+  // Selection and filters
   const [selectionMode, setSelectionMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-
-  // Added: unread-only toggle (persisted)
-  const [unreadOnly, setUnreadOnly] = useState(false);
-
-  // Added: search and sorting
   const [query, setQuery] = useState("");
-  type SortBy = "priority" | "newest" | "oldest" | "unread";
-  const [sortBy, setSortBy] = useState<SortBy>("priority"); // matches your original default
-
-  // Added: category mute/subscribe (persisted)
-  const [mutedCategories, setMutedCategories] = useState<string[]>([]);
 
   // Prefer reduced motion (Codex suggestion)
   const prefersReducedMotion = useReducedMotion();
-
-  // Persist category filter across sessions (kept)
-  useEffect(() => {
-    try {
-      const saved =
-        typeof window !== "undefined"
-          ? localStorage.getItem("admin-notifications-category")
-          : null;
-      if (saved) setCategoryFilter(saved);
-    } catch {
-      // ignore
-    }
-  }, []);
-  useEffect(() => {
-    try {
-      localStorage.setItem("admin-notifications-category", categoryFilter);
-    } catch {
-      // ignore
-    }
-  }, [categoryFilter]);
-
-  // Persist unread-only filter
-  useEffect(() => {
-    try {
-      const saved =
-        typeof window !== "undefined"
-          ? localStorage.getItem("admin-notifications-unread-only")
-          : null;
-      if (saved) setUnreadOnly(saved === "1");
-    } catch {
-      // ignore
-    }
-  }, []);
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        "admin-notifications-unread-only",
-        unreadOnly ? "1" : "0"
-      );
-    } catch {
-      // ignore
-    }
-  }, [unreadOnly]);
-
-  // Persist muted categories
-  useEffect(() => {
-    try {
-      const saved =
-        typeof window !== "undefined"
-          ? localStorage.getItem("admin-notifications-muted")
-          : null;
-      if (saved) setMutedCategories(JSON.parse(saved));
-    } catch {
-      // ignore
-    }
-  }, []);
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        "admin-notifications-muted",
-        JSON.stringify(mutedCategories)
-      );
-    } catch {
-      // ignore
-    }
-  }, [mutedCategories]);
 
   // Keep your existing endpoint and polling. We add SSE for near-real-time updates.
   const { data, error, isLoading, mutate } = useSWR<{
@@ -167,27 +79,18 @@ export function NotificationBell() {
     }
   }, [unreadCount]);
 
-  // Build category list
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    notifications.forEach((n) => set.add(n.category || "other"));
-    return Array.from(set);
-  }, [notifications]);
-
-  // Filtered (category + unreadOnly + search + mute)
+  // Filtered by view + search
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return notifications.filter((n) => {
-      const cat = n.category || "other";
-      if (mutedCategories.includes(cat)) return false;
-      if (categoryFilter !== "all" && cat !== categoryFilter) return false;
-      if (unreadOnly && n.read) return false;
+      if (view === "unread" && n.read) return false;
+      if (view === "important" && priorityValue(n.priority) < 2) return false;
       if (!q) return true;
       const title = n.title?.toLowerCase() || "";
       const msg = n.message?.toLowerCase() || "";
       return title.includes(q) || msg.includes(q);
     });
-  }, [notifications, categoryFilter, unreadOnly, mutedCategories, query]);
+  }, [notifications, view, query]);
 
   // Priority sorting (high → low) then by time (newest first)
   const priorityValue = (p?: string) => {
@@ -205,41 +108,13 @@ export function NotificationBell() {
 
   const sortedNotifications = useMemo(() => {
     const arr = [...filtered];
-    switch (sortBy) {
-      case "priority":
-        arr.sort((a, b) => {
-          const pv = priorityValue(b.priority) - priorityValue(a.priority);
-          if (pv !== 0) return pv;
-          return (
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          );
-        });
-        break;
-      case "newest":
-        arr.sort(
-          (a, b) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
-        break;
-      case "oldest":
-        arr.sort(
-          (a, b) =>
-            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-        );
-        break;
-      case "unread":
-        arr.sort((a, b) => {
-          if (a.read !== b.read) return a.read ? 1 : -1;
-          return (
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-          );
-        });
-        break;
-      default:
-        break;
-    }
+    arr.sort((a, b) => {
+      const pv = priorityValue(b.priority) - priorityValue(a.priority);
+      if (pv !== 0) return pv;
+      return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+    });
     return arr;
-  }, [filtered, sortBy]);
+  }, [filtered]);
 
   // Group notifications by time buckets
   type Group = { label: string; items: Notification[] };
@@ -671,20 +546,6 @@ export function NotificationBell() {
                             </Button>
                           ))}
 
-                        {/* Unread toggle (persisted) */}
-                        {notifications.length > 0 && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            type="button"
-                            onClick={() => setUnreadOnly((p) => !p)}
-                            aria-pressed={unreadOnly}
-                            className="h-8 px-2 text-xs"
-                          >
-                            {unreadOnly ? "Show all" : "Unread"}
-                          </Button>
-                        )}
-
                         {/* Bulk actions (kept) */}
                         {unreadCount > 0 && (
                           <Button
@@ -728,55 +589,21 @@ export function NotificationBell() {
                       View your latest notifications. Use the mark all read button to dismiss unread items.
                     </p>
 
-                    {/* Search, filters & sort */}
+                    {/* Search and view filters */}
                     <div className="mt-3 flex flex-wrap items-center gap-2 px-4">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                      <div className="flex gap-2">
+                        {(["all", "unread", "important"] as const).map((t) => (
                           <Button
-                            variant="outline"
+                            key={t}
+                            variant={view === t ? "secondary" : "ghost"}
                             size="sm"
-                            className="h-8 shrink-0 px-2 text-xs"
+                            className="h-8 px-2 text-xs"
+                            onClick={() => setView(t)}
                           >
-                            <Filter className="mr-1 h-3.5 w-3.5" />
-                            Filters
-                            <ChevronDown className="ml-1 h-3.5 w-3.5" />
+                            {t === "all" ? "All" : t === "unread" ? "Unread" : "Important"}
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-56">
-                          <DropdownMenuLabel>Category</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {["all", ...categories].map((c) => (
-                            <DropdownMenuItem
-                              key={`cat-${c}`}
-                              onClick={() => setCategoryFilter(c)}
-                              className={c === categoryFilter ? "font-semibold" : ""}
-                            >
-                              {c.charAt(0).toUpperCase() + c.slice(1)}
-                            </DropdownMenuItem>
-                          ))}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel>Muted categories</DropdownMenuLabel>
-                          {categories.map((c) => (
-                            <DropdownMenuCheckboxItem
-                              key={`mute-${c}`}
-                              checked={mutedCategories.includes(c)}
-                              onCheckedChange={(checked) => {
-                                setMutedCategories((prev) => {
-                                    const set = new Set(prev);
-                                    if (checked) {
-                                      set.add(c);
-                                    } else {
-                                      set.delete(c);
-                                    }
-                                    return Array.from(set);
-                                  });
-                                }}
-                              >
-                                {c}
-                              </DropdownMenuCheckboxItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                        ))}
+                      </div>
 
                       <Input
                         value={query}
@@ -785,17 +612,6 @@ export function NotificationBell() {
                         className="h-8 flex-1 min-w-0"
                         aria-label="Search notifications"
                       />
-                      <select
-                        aria-label="Sort notifications"
-                        className="h-8 shrink-0 rounded-md border bg-background px-2 text-xs"
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as SortBy)}
-                      >
-                        <option value="priority">Priority</option>
-                        <option value="newest">Newest</option>
-                        <option value="oldest">Oldest</option>
-                        <option value="unread">Unread first</option>
-                      </select>
                     </div>
                   </div>
 
@@ -823,26 +639,6 @@ export function NotificationBell() {
                           <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
                         </Button>
                       </div>
-                    </div>
-                  )}
-
-                  {/* Category chips (kept) */}
-                  {categories.length > 1 && (
-                    <div className="flex gap-2 overflow-x-auto border-b px-4 py-2">
-                      {["all", ...categories].map((cat) => (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() => setCategoryFilter(cat)}
-                          className={`rounded-full px-3 py-1 text-xs capitalize transition-colors ${
-                            categoryFilter === cat
-                              ? "bg-purple-600 text-white dark:bg-purple-500"
-                              : "bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                          }`}
-                        >
-                          {cat === "all" ? "All" : cat}
-                        </button>
-                      ))}
                     </div>
                   )}
 

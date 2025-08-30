@@ -17,30 +17,7 @@ import {
 
 import { getMetadata } from "@/lib/seo/metadata";
 import { getSchema } from "@/lib/seo/schema";
-
-// === TYPES ===
-interface BlogPost {
-  id: string;
-  slug: string;
-  title: string;
-  coverImage?: string;
-  category?: string;
-  categories?: string[];
-  publishedAt: string;
-  excerpt?: string;
-  readingTime?: string;
-  status?: string;
-}
-
-interface Video {
-  id: string;
-  title: string;
-  thumbnail?: string;
-  duration?: string;
-  views?: number;
-  publishedAt?: string;
-  status?: string;
-}
+import type { BlogPost, Video } from "@/lib/content-store";
 
 // --- SEO: Metadata for Home Page ---
 export const metadata = getMetadata({

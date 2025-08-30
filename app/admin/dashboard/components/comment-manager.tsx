@@ -36,6 +36,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
   Check,
@@ -666,6 +667,17 @@ export default function CommentManager() {
           </Sheet>
         </div>
       </div>
+
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline" className="mb-4">
+            View Stats
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-4xl p-6">
+          <CommentStatsChart />
+        </DialogContent>
+      </Dialog>
 
       <CommentStatsChart />
 

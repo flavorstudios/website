@@ -414,7 +414,7 @@ function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority
       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full bg-gradient-to-br from-white to-gray-50">
         <div className="relative h-40 sm:h-48 lg:h-56 overflow-hidden">
           <Image
-            src={post.featuredImage || post.coverImage || "/placeholder.svg?height=256&width=512&text=Featured+Post"}
+            src={post.featuredImage || "/placeholder.svg?height=256&width=512&text=Featured+Post"}
             alt={post.title}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading={priority ? "eager" : "lazy"}
@@ -488,7 +488,7 @@ function BlogPostCard({ post }: { post: BlogPost }) {
       <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 bg-white">
         <div className="relative h-40 sm:h-48 overflow-hidden">
           <Image
-            src={post.featuredImage || post.coverImage || "/placeholder.svg?height=192&width=384&text=Blog+Post"}
+            src={post.featuredImage || "/placeholder.svg?height=192&width=384&text=Blog+Post"}
             alt={post.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
             loading="lazy"

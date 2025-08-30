@@ -6,18 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import ErrorFallback from "@/components/home/ErrorFallback";
 import { formatDate } from "@/lib/date";
-
-interface BlogPost {
-  id: string;
-  slug: string;
-  title: string;
-  coverImage?: string;
-  category?: string;
-  categories?: string[];
-  publishedAt: string;
-  excerpt?: string;
-  readingTime?: string;
-}
+import type { BlogPost } from "@/lib/content-store";
 
 export default function LatestBlogsSection({ posts }: { posts: BlogPost[] }) {
   return (
@@ -36,7 +25,7 @@ export default function LatestBlogsSection({ posts }: { posts: BlogPost[] }) {
                 <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                   <div className="relative h-48 overflow-hidden">
                     <Image
-                      src={post.coverImage || "/placeholder.svg"}
+                      src={post.featuredImage || "/placeholder.svg"}
                       alt={post.title || "Anime blog cover"}
                       fill
                       className="object-cover transition-transform duration-300 hover:scale-105"
@@ -66,7 +55,7 @@ export default function LatestBlogsSection({ posts }: { posts: BlogPost[] }) {
                       </span>
                       <span className="text-sm text-gray-500 flex items-center gap-1">
                         <Clock className="h-3 w-3" aria-hidden="true" />
-                        {post.readingTime || "5 min read"}
+                        {post.readTime || "5 min read"}
                       </span>
                     </div>
                     <CardTitle className="line-clamp-2 text-lg leading-tight">{post.title}</CardTitle>

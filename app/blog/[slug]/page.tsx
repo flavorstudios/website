@@ -8,35 +8,34 @@ import BlogPostRenderer from "@/components/BlogPostRenderer";
 // ⬇️ Use shared type instead of declaring locally!
 import type { BlogPost } from "@/lib/content-store";
 
-// Fetch blog post by slug from PUBLIC API
-async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || SITE_URL}/api/blogs`,
-      { next: { revalidate: 3600 } }
-    );
-    if (!response.ok) {
-      console.error(`Failed to fetch blog posts: ${response.status} ${response.statusText}`);
-      return null;
-    }
-    const data = await response.json();
-    const posts: BlogPost[] = Array.isArray(data) ? data : (data.posts || []);
-    // Filter for published posts only
-    return posts.find((post) => post.slug === slug && post.status === "published") || null;
-  } catch (error) {
-    console.error("Failed to fetch blog post due to exception:", error);
+// Fetch a single blog post by slug from the public API
+const url = `${process.env.NEXT_PUBLIC_BASE_URL || SITE_URL}/api/blogs/${slug}`;
+  const response = await fetch(url, { next: { revalidate: 3600 } });
+
+  if (response.ok) {
+    return (await response.json()) as BlogPost;
+  }
+
+  if (response.status === 404) {
     return null;
   }
+
+  throw new Error(`Failed to fetch blog post: ${response.status} ${response.statusText}`);
 }
 
 interface BlogPostPageProps {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }
 
 // SEO metadata (dynamic per post, using Next.js generateMetadata API)
 export async function generateMetadata({ params }: BlogPostPageProps) {
-  const { slug } = await params;
-  const post = await getBlogPost(slug);
+  const { slug } = params;
+  let post: BlogPost | null = null;
+  try {
+    post = await getBlogPost(slug);
+  } catch (error) {
+    console.error("Failed to fetch blog post:", error);
+  }
 
   // Fallback metadata for posts not found or not published (noindex, follow)
   if (!post) {
@@ -67,7 +66,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
     });
   }
 
-  // --- Codex fix: use featuredImage, not coverImage ---
+  // --- Codex fix: use featuredImage consistently ---
   const ogImage =
     post.openGraphImage ||
     post.featuredImage ||
@@ -101,13 +100,19 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
 
 // Main BlogPost page (server component)
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { slug } = await params;
-  const post = await getBlogPost(slug);
+  const { slug } = params;
+  let post: BlogPost | null;
+  try {
+    post = await getBlogPost(slug);
+  } catch (error) {
+    console.error("Failed to fetch blog post:", error);
+    throw error;
+  }
 
   // If post is not found or not published, trigger Next.js not-found page.
   if (!post) notFound();
 
-  // --- Codex fix: use featuredImage, not coverImage ---
+  // --- Codex fix: use featuredImage consistently ---
   const articleSchema = getSchema({
     type: post.schemaType || "Article",
     path: `/blog/${post.slug}`,

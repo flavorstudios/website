@@ -145,45 +145,46 @@ export default function NotificationsPage() {
       ) : (
         <ul className="space-y-2">
           {filtered.map((n) => (
-            <Card
-              key={n.id}
-              className={cn(n.read ? "bg-background" : "border-blue-200 bg-blue-50")}
-            >
-              <CardContent className="flex items-start justify-between gap-4 p-4">
-                <div className="space-y-1">
-                  {n.href ? (
-                    <a
-                      href={n.href}
-                      onClick={() => markAsRead(n.id)}
-                      className="font-medium hover:underline"
+            <li key={n.id}>
+              <Card
+                className={cn(n.read ? "bg-background" : "border-blue-200 bg-blue-50")}
+              >
+                <CardContent className="flex items-start justify-between gap-4 p-4">
+                  <div className="space-y-1">
+                    {n.href ? (
+                      <a
+                        href={n.href}
+                        onClick={() => markAsRead(n.id)}
+                        className="font-medium hover:underline"
+                      >
+                        {n.title}
+                      </a>
+                    ) : (
+                      <p className="font-medium">{n.title}</p>
+                    )}
+                    <p className="text-sm text-muted-foreground">{n.message}</p>
+                    <p className="text-xs text-muted-foreground">{formatTime(n.timestamp)}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => (n.read ? markAsUnread(n.id) : markAsRead(n.id))}
+                      aria-label={n.read ? "Mark unread" : "Mark read"}
                     >
-                      {n.title}
-                    </a>
-                  ) : (
-                    <p className="font-medium">{n.title}</p>
-                  )}
-                  <p className="text-sm text-muted-foreground">{n.message}</p>
-                  <p className="text-xs text-muted-foreground">{formatTime(n.timestamp)}</p>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => (n.read ? markAsUnread(n.id) : markAsRead(n.id))}
-                    aria-label={n.read ? "Mark unread" : "Mark read"}
-                  >
-                    {n.read ? <Undo2 className="h-4 w-4" /> : <Check className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteNotification(n.id)}
-                    aria-label="Delete notification"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                      {n.read ? <Undo2 className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteNotification(n.id)}
+                      aria-label="Delete notification"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardContent>
-            </Card>
+              </Card>
             </li>
           ))}
         </ul>

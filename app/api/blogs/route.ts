@@ -3,7 +3,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { blogStore } from "@/lib/content-store"; // Firestore-backed store
 import { formatPublicBlog } from "@/lib/formatters"; // Your existing formatter
-import { commentStore } from "@/lib/comment-store"; // <-- add this import
 import { logError } from "@/lib/log"; // Add error logging
 import { BlogPost } from "@/lib/content-store";
 
@@ -73,20 +72,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Attach comment counts for each post (async)
-    const withCounts = await Promise.all(
-      published.map(async (post: BlogPost) => {
-        try {
-          const comments = await commentStore.getByPost(post.id, "blog");
-          return { ...post, commentCount: comments.length };
-        } catch {
-          return { ...post, commentCount: 0 };
-        }
-      }),
-    );
-
-    // Format for the public API response
-    const result = withCounts.map(formatPublicBlog);
+    // Format for the public API response using existing commentCount field
+    const result = published.map(formatPublicBlog);
 
     // Send response with cache headers
     const res = NextResponse.json(result);

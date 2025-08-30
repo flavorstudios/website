@@ -41,6 +41,7 @@ export function NotificationBell() {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
+  const [view, setView] = useState<"all" | "unread" | "important">("all");
 
   // Prefer reduced motion (Codex suggestion)
   const prefersReducedMotion = useReducedMotion();

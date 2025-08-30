@@ -18,16 +18,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge" // Added for multi-category support
 import { formatDate } from "@/lib/date" // <-- Added
-
-interface BlogPost {
-  id: string
-  title: string
-  slug: string
-  category: string
-  categories?: string[]
-  excerpt: string
-  publishedAt: string
-}
+import type { BlogPost } from "@/lib/content-store"
 
 interface Video {
   id: string
@@ -116,10 +107,11 @@ export function SearchFeature() {
                 ? blog.categories.map((c) => c.toLowerCase())
                 : [blog.category?.toLowerCase()]
             return (
-              title.includes(search) ||
-              slug.includes(search) ||
-              excerpt.includes(search) ||
-              categories.some((cat) => cat.includes(search))
+              blog.status === "published" &&
+              (title.includes(search) ||
+                slug.includes(search) ||
+                excerpt.includes(search) ||
+                categories.some((cat) => cat.includes(search)))
             )
           })
           .slice(0, 5)

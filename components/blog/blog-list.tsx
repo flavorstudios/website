@@ -7,21 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, User, Clock } from "lucide-react"
 import { formatDate } from "@/lib/date" // <-- Added
-
-interface BlogPost {
-  id: string
-  title: string
-  slug: string
-  excerpt: string
-  content: string
-  category: string
-  categories?: string[]
-  tags: string[]
-  publishedAt: string
-  author: string
-  featured: boolean
-  imageUrl?: string
-}
+import type { BlogPost } from "@/lib/content-store"
 
 interface BlogListProps {
   posts?: BlogPost[]
@@ -33,7 +19,7 @@ export function BlogList({ posts = [], category = "all", searchQuery = "" }: Blo
   const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>(posts)
 
   useEffect(() => {
-    let filtered = posts
+    let filtered = posts.filter((post) => post.status === "published")
 
     // Filter by category (now supports multi-category)
     if (category !== "all") {
@@ -74,16 +60,18 @@ export function BlogList({ posts = [], category = "all", searchQuery = "" }: Blo
         <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
           <Link href={`/blog/${post.slug}`}>
             <div className="relative h-48 bg-gray-200">
-              {post.imageUrl ? (
-                <Image src={post.imageUrl || "/placeholder.svg"} alt={post.title} fill className="object-cover" />
+              {post.featuredImage ? (
+                <Image src={post.featuredImage || "/placeholder.svg"} alt={post.title} fill className="object-cover" />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                   <span className="text-white text-lg font-semibold">{post.title.charAt(0)}</span>
                 </div>
               )}
-              {post.featured && <Badge className="absolute top-2 left-2 bg-yellow-500 text-black">Featured</Badge>}
-            </div>
-          </Link>
+              {post.status !== "published" && (
+                <Badge className="absolute top-2 left-2" variant="destructive">
+                  {post.status}
+                </Badge>
+              )}
 
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
@@ -117,7 +105,7 @@ export function BlogList({ posts = [], category = "all", searchQuery = "" }: Blo
               </div>
               <div className="flex items-center text-sm text-gray-500">
                 <Clock className="w-4 h-4 mr-1" />
-                <span>5 min read</span>
+                <span>{post.readTime || "5 min read"}</span>
               </div>
             </div>
 

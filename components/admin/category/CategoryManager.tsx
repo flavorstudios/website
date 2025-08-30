@@ -289,6 +289,55 @@ export default function CategoryManager() {
     fileInputRef.current?.click()
   })
 
+  const filtered = useMemo(() => {
+    const term = debouncedSearch.toLowerCase()
+    return categories.filter((c) => {
+      const matchesSearch =
+        c.name.toLowerCase().includes(term) ||
+        c.slug.toLowerCase().includes(term) ||
+        (c.description?.toLowerCase().includes(term) ?? false)
+      const matchesStatus =
+        statusFilter === "all"
+          ? true
+          : statusFilter === "active"
+            ? c.isActive
+            : !c.isActive
+      return matchesSearch && matchesStatus
+    })
+  }, [categories, debouncedSearch, statusFilter])
+
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "name")
+        return sortDir === "asc"
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name)
+      if (sortBy === "slug")
+        return sortDir === "asc"
+          ? a.slug.localeCompare(b.slug)
+          : b.slug.localeCompare(a.slug)
+      if (sortBy === "posts")
+        return sortDir === "asc"
+          ? (a.postCount ?? 0) - (b.postCount ?? 0)
+          : (b.postCount ?? 0) - (a.postCount ?? 0)
+      if (sortBy === "status")
+        return sortDir === "asc"
+          ? Number(a.isActive) - Number(b.isActive)
+          : Number(b.isActive) - Number(a.isActive)
+      return sortDir === "asc"
+        ? (a.order ?? 0) - (b.order ?? 0)
+        : (b.order ?? 0) - (a.order ?? 0)
+    })
+  }, [filtered, sortBy, sortDir])
+
+  const paginated = useMemo(() => {
+    return sorted.slice((currentPage - 1) * perPage, currentPage * perPage)
+  }, [sorted, currentPage, perPage])
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [debouncedSearch, sortBy, sortDir, type, statusFilter, perPage])
+
   const createCategory = async (data: Partial<Category>) => {
     try {
       const res = await fetch("/api/admin/categories", {
@@ -585,55 +634,6 @@ export default function CategoryManager() {
     setStatusFilter("all")
     setPerPage(10)
   }
-
-  const filtered = useMemo(() => {
-    const term = debouncedSearch.toLowerCase()
-    return categories.filter((c) => {
-      const matchesSearch =
-        c.name.toLowerCase().includes(term) ||
-        c.slug.toLowerCase().includes(term) ||
-        (c.description?.toLowerCase().includes(term) ?? false)
-      const matchesStatus =
-        statusFilter === "all"
-          ? true
-          : statusFilter === "active"
-            ? c.isActive
-            : !c.isActive
-      return matchesSearch && matchesStatus
-    })
-  }, [categories, debouncedSearch, statusFilter])
-
-  const sorted = useMemo(() => {
-    return [...filtered].sort((a, b) => {
-      if (sortBy === "name")
-        return sortDir === "asc"
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name)
-      if (sortBy === "slug")
-        return sortDir === "asc"
-          ? a.slug.localeCompare(b.slug)
-          : b.slug.localeCompare(a.slug)
-      if (sortBy === "posts")
-        return sortDir === "asc"
-          ? (a.postCount ?? 0) - (b.postCount ?? 0)
-          : (b.postCount ?? 0) - (a.postCount ?? 0)
-      if (sortBy === "status")
-        return sortDir === "asc"
-          ? Number(a.isActive) - Number(b.isActive)
-          : Number(b.isActive) - Number(a.isActive)
-      return sortDir === "asc"
-        ? (a.order ?? 0) - (b.order ?? 0)
-        : (b.order ?? 0) - (a.order ?? 0)
-    })
-  }, [filtered, sortBy, sortDir])
-
-  const paginated = useMemo(() => {
-    return sorted.slice((currentPage - 1) * perPage, currentPage * perPage)
-  }, [sorted, currentPage, perPage])
-
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [debouncedSearch, sortBy, sortDir, type, statusFilter, perPage])
 
   const activeCount = useMemo(
     () => categories.filter((c) => c.isActive).length,

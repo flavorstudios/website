@@ -1,6 +1,7 @@
 // app/api/media/delete/route.ts
 import { NextResponse } from "next/server";
 import { verifyAdminSession, logAdminAuditFailure } from "@/lib/admin-auth";
+import { getClientIp } from "@/lib/request-ip";
 import { deleteMedia } from "@/lib/media";
 
 export const runtime = "nodejs";
@@ -16,20 +17,6 @@ function getSessionCookie(req: Request): string {
     .find((s) => s.startsWith("admin-session="))
     ?.split("=")[1];
   return raw ? decodeURIComponent(raw) : "";
-}
-
-function getClientIp(req: Request): string {
-  // Common proxy headers; fall back to unknown
-  const xfwd = req.headers.get("x-forwarded-for");
-  if (xfwd) return xfwd.split(",")[0]?.trim() || "unknown";
-  const xreal = req.headers.get("x-real-ip");
-  if (xreal) return xreal.trim();
-  const forwarded = req.headers.get("forwarded");
-  if (forwarded) {
-    const m = forwarded.match(/for="?([^;"]+)"?/i);
-    if (m?.[1]) return m[1];
-  }
-  return "unknown";
 }
 
 // — Route -------------------------------------------------------------------

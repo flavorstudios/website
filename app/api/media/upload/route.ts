@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyAdminSession, logAdminAuditFailure } from "@/lib/admin-auth";
+import { getClientIp } from "@/lib/request-ip";
 import { uploadMedia, validateFile, suggestAltText } from "@/lib/media";
 
 export async function POST(request: NextRequest) {
@@ -7,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     await verifyAdminSession(sessionCookie);
   } catch {
-    await logAdminAuditFailure(null, request.ip ?? "", "media_upload_denied");
+    await logAdminAuditFailure(null, getClientIp(request), "media_upload_denied");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

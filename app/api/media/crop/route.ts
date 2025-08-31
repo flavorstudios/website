@@ -1,23 +1,10 @@
 // app/api/media/crop/route.ts
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyAdminSession, logAdminAuditFailure } from "@/lib/admin-auth";
+import { getClientIp } from "@/lib/request-ip";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-// Small helper to get a client IP safely
-function getClientIp(req: NextRequest): string {
-  const xfwd = req.headers.get("x-forwarded-for");
-  if (xfwd) return xfwd.split(",")[0]?.trim() || "unknown";
-  const xreal = req.headers.get("x-real-ip");
-  if (xreal) return xreal.trim();
-  const fwd = req.headers.get("forwarded");
-  if (fwd) {
-    const m = fwd.match(/for="?([^;"]+)"?/i);
-    if (m?.[1]) return m[1];
-  }
-  return "unknown";
-}
 
 export async function POST(request: NextRequest) {
   // ---- Auth gate ----------------------------------------------------------

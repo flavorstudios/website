@@ -88,7 +88,6 @@ export default function DashboardOverview() {
   const {
     data: activityData,
     error: activityError,
-    isLoading: activityLoading,
     mutate: mutateActivity,
   } = useSWR<{ activities: ActivityItem[] }>(
     canViewAnalytics ? "/api/admin/activity" : null,
@@ -127,8 +126,6 @@ export default function DashboardOverview() {
     }
     return "DASHLOAD_NETWORK";
   }, [firstError]);
-
-  const loading = statsLoading || activityLoading;
 
   const refresh = () => {
     statsQuery.refetch();
@@ -195,7 +192,7 @@ export default function DashboardOverview() {
   }
 
   // First-load spinner only when no cached data yet
-  if (loading && !stats) {
+  if (statsLoading && !stats) {
     return (
       <div className="flex items-center justify-center h-64" data-testid="dashboard-loading">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
@@ -205,7 +202,7 @@ export default function DashboardOverview() {
   }
 
   // Network error overlay (keep last good data otherwise)
-  if (hasNetworkError && !loading && !stats) {
+  if (hasNetworkError && !statsLoading && !stats) {
     return (
       <div className="flex items-center justify-center h-64" data-testid="dashboard-error">
         <div className="text-center">

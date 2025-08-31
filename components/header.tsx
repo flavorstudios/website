@@ -116,7 +116,7 @@ export function Header({
 
           {/* CTA Button */}
           <div className="hidden md:flex">
-            <Button asChild className="bg-orange-600 hover:bg-orange-700">
+            <Button asChild className="bg-orange-700 hover:bg-orange-800 text-white">
               <Link href="/support">
                 <Coffee className="mr-2 h-4 w-4" />
                 Buy Me a Coffee

@@ -46,6 +46,8 @@ const stubResponses = async (page: Page) => {
       body = JSON.stringify({ media: [] });
     } else if (url.includes('/api/admin/notifications')) {
       body = JSON.stringify({ notifications: [] });
+      } else if (url.includes('/api/admin/user-role')) {
+      body = JSON.stringify({ role: 'admin' });
     }
     await route.fulfill({ contentType: 'application/json', body });
   });

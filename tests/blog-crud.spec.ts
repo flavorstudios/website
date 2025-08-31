@@ -18,6 +18,6 @@ test.describe('Blog CRUD', () => {
     expect(hasScroll).toBeFalsy();
 
     // Cards exist at small breakpoints
-    await expect(page.locator('[data-testid="blog-card"]')).toHaveCountGreaterThan(0);
+    expect(await page.locator('[data-testid="blog-card"]').count()).toBeGreaterThan(0);
   });
 });

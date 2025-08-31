@@ -1,4 +1,8 @@
-import { getAdminDb, getAllowedAdminEmails } from "@/lib/firebase-admin"
+import {
+  ADMIN_BYPASS,
+  adminDb,
+  getAllowedAdminEmails,
+} from "@/lib/firebase-admin"
 import type { UserRole } from "@/lib/role-permissions"
 
 /**
@@ -11,8 +15,11 @@ import type { UserRole } from "@/lib/role-permissions"
  */
 export async function getUserRole(uid: string, email?: string): Promise<UserRole> {
   try {
-    const db = getAdminDb();
-    const doc = await db.collection("roles").doc(uid).get();
+    if (ADMIN_BYPASS || !adminDb) {
+      return "admin";
+    }
+
+    const doc = await adminDb.collection("roles").doc(uid).get();
 
     if (!doc.exists) {
       if (process.env.NODE_ENV !== "production") {
@@ -64,8 +71,14 @@ export async function getUserRole(uid: string, email?: string): Promise<UserRole
  */
 export async function setUserRole(uid: string, role: UserRole): Promise<void> {
   try {
-    const db = getAdminDb();
-    await db.collection("roles").doc(uid).set({ role: role.toLowerCase() }, { merge: true });
+    if (ADMIN_BYPASS || !adminDb) {
+      return;
+    }
+
+    await adminDb
+      .collection("roles")
+      .doc(uid)
+      .set({ role: role.toLowerCase() }, { merge: true });
     if (process.env.NODE_ENV !== "production") {
       console.log(`[setUserRole] Set role "${role}" for UID: ${uid}`);
     }

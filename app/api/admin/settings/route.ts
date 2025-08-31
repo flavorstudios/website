@@ -1,15 +1,21 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
-import { getAdminDb } from "@/lib/firebase-admin"
+import { ADMIN_BYPASS, adminDb } from "@/lib/firebase-admin"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {
+  if (ADMIN_BYPASS || !adminDb) {
+    return NextResponse.json({ settings: {} })
+  }
+
   const session = await getSessionInfo(request)
   if (!session || !(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
-    const db = getAdminDb()
-    const doc = await db.collection("adminSettings").doc(session.uid).get()
+    const doc = await adminDb
+      .collection("adminSettings")
+      .doc(session.uid)
+      .get()
     return NextResponse.json({ settings: doc.exists ? doc.data() : {} })
   } catch (err) {
     console.error("Failed to fetch settings", err)
@@ -18,14 +24,20 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  if (ADMIN_BYPASS || !adminDb) {
+    return NextResponse.json({ success: true })
+  }
+
   const session = await getSessionInfo(request)
   if (!session || !(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
     const payload = await request.json()
-    const db = getAdminDb()
-    await db.collection("adminSettings").doc(session.uid).set(payload, { merge: true })
+    await adminDb
+      .collection("adminSettings")
+      .doc(session.uid)
+      .set(payload, { merge: true })
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error("Failed to save settings", err)

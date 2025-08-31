@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { ChevronDown, Sparkles, Grid3X3 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -30,6 +30,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null) // UPDATED
   const menuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
+  const router = useRouter()
 
   // Debounced mouse enter handler
   const debouncedMouseEnter = useCallback((label: string) => {
@@ -57,7 +58,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           if (item.subItems) {
             setActiveMenu(activeMenu === item.label ? null : item.label)
           } else if (item.href) {
-            window.location.href = item.href
+            router.push(item.href)
           }
           break
         case "ArrowDown":
@@ -95,7 +96,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
           break
       }
     },
-    [activeMenu, focusedIndex, items.length],
+    [activeMenu, focusedIndex, items.length, router],
   )
 
   // Click outside handler
@@ -164,7 +165,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault()
-                  window.location.href = subItem.href
+                  router.push(subItem.href)
                 }
               }}
             >

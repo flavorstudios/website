@@ -9,6 +9,11 @@ import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase";
 import { fetchJson } from "@/lib/http";
 import useHotkeys from "./hooks/use-hotkeys";
 import { SITE_NAME } from "@/lib/constants";
+import {
+  ADMIN_NAVIGATE,
+  ADMIN_OPEN_MEDIA_UPLOAD,
+  ADMIN_OPEN_KEYBOARD_SHORTCUTS,
+} from "@/lib/admin-events";
 
 import { AdminSidebar } from "./components/admin-sidebar";
 import { AdminHeader } from "./components/admin-header";
@@ -142,7 +147,7 @@ export default function AdminDashboardPageClient({
   // --- Hotkeys --------------------------------------------------------------
   useHotkeys("n", () => router.push("/admin/blog/create"), undefined, [router]);
   useHotkeys("shift+u", () =>
-    window.dispatchEvent(new Event("admin-open-media-upload"))
+    window.dispatchEvent(new Event(ADMIN_OPEN_MEDIA_UPLOAD))
   );
   // Note: search shortcuts are handled inside AdminHeader now.
 
@@ -156,12 +161,12 @@ export default function AdminDashboardPageClient({
   useEffect(() => {
     const handleOpenShortcuts = () => setShortcutsOpen(true);
     window.addEventListener(
-      "admin-open-keyboard-shortcuts",
+      ADMIN_OPEN_KEYBOARD_SHORTCUTS,
       handleOpenShortcuts
     );
     return () =>
       window.removeEventListener(
-        "admin-open-keyboard-shortcuts",
+        ADMIN_OPEN_KEYBOARD_SHORTCUTS,
         handleOpenShortcuts
       );
   }, []);
@@ -271,9 +276,9 @@ export default function AdminDashboardPageClient({
         setActiveSection(detail.section);
       }
     };
-    window.addEventListener("admin:navigate", onNavigate as EventListener);
+    window.addEventListener(ADMIN_NAVIGATE, onNavigate as EventListener);
     return () =>
-      window.removeEventListener("admin:navigate", onNavigate as EventListener);
+      window.removeEventListener(ADMIN_NAVIGATE, onNavigate as EventListener);
   }, []);
 
   // --- Sync sidebar width globally for responsive layout -------------------

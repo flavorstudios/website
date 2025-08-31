@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { MediaDoc } from "@/types/media";
+import { ADMIN_OPEN_MEDIA_UPLOAD } from "@/lib/admin-events";
 
 interface UploadItem {
   id: string;
@@ -19,8 +20,8 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
   // Open file dialog when global hotkey fires
   useEffect(() => {
     const openPicker = () => inputRef.current?.click();
-    window.addEventListener("admin-open-media-upload", openPicker);
-    return () => window.removeEventListener("admin-open-media-upload", openPicker);
+    window.addEventListener(ADMIN_OPEN_MEDIA_UPLOAD, openPicker);
+    return () => window.removeEventListener(ADMIN_OPEN_MEDIA_UPLOAD, openPicker);
   }, []);
 
   // Handle file(s) from input or drop

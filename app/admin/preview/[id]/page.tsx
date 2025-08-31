@@ -5,8 +5,9 @@ import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
+import { isAdminSdkAvailable } from "@/lib/firebase-admin";
 interface PreviewPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 async function getPost(id: string): Promise<BlogPost | null> {
@@ -19,7 +20,7 @@ async function getPost(id: string): Promise<BlogPost | null> {
 }
 
 export async function generateMetadata({ params }: PreviewPageProps) {
-  const { id } = await params;
+  const { id } = params;
   const post = await getPost(id);
   if (!post) {
     const title = `Post Not Found – ${SITE_NAME}`;
@@ -56,9 +57,23 @@ export async function generateMetadata({ params }: PreviewPageProps) {
 }
 
 export default async function PreviewPage({ params }: PreviewPageProps) {
-  const { id } = await params;
+  const { id } = params;
+  const adminSdkAvailable = isAdminSdkAvailable();
   const post = await getPost(id);
-  if (!post) notFound();
+  if (!post) {
+    if (!adminSdkAvailable) {
+      return (
+        <AdminAuthGuard>
+          <div className="p-8 text-center">
+            <p className="text-gray-700">
+              Firestore unavailable. Set <code>FIREBASE_SERVICE_ACCOUNT_KEY</code> to enable previews.
+            </p>
+          </div>
+        </AdminAuthGuard>
+      );
+    }
+    notFound();
+  }
 
   const articleSchema = getSchema({
     type: post.schemaType || "Article",

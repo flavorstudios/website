@@ -33,8 +33,23 @@ function genId() {
 }
 
 /** Read bucket name from env (server preferred, then public). */
-function getConfiguredBucketName(): string | undefined {
-  return process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+function getConfiguredBucketName(): string {
+  const serverBucket = process.env.FIREBASE_STORAGE_BUCKET;
+  const publicBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+
+  if (!serverBucket && !publicBucket) {
+    throw new Error(
+      "FIREBASE_STORAGE_BUCKET and NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET must be set."
+    );
+  }
+
+  if (serverBucket && publicBucket && serverBucket !== publicBucket) {
+    throw new Error(
+      "FIREBASE_STORAGE_BUCKET and NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET must match."
+    );
+  }
+
+  return serverBucket || publicBucket!;
 }
 
 /** Try to get a bucket instance; return null if not configured or not available. */
@@ -159,7 +174,7 @@ export async function uploadMedia(buffer: Buffer, name: string, mimeType: string
   const id = genId();
   const objectPath = `media/${id}/${name}`;
   const file = bucket.file(objectPath);
-  await file.save(buffer, { contentType: mimeType });
+  await file.save(buffer, { contentType: mimeType, predefinedAcl: "publicRead" });
 
   const url = publicUrlFor(bucket.name, objectPath);
 

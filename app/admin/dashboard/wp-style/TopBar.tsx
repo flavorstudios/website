@@ -4,6 +4,7 @@ import { Search, Bell, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
+import { ADMIN_SEARCH } from "@/lib/admin-events"
 
 interface TopBarProps {
   onQuickAction?: (action: string) => void
@@ -18,7 +19,7 @@ export default function TopBar({ onQuickAction }: TopBarProps) {
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    window.dispatchEvent(new CustomEvent("admin-search", { detail: term }))
+    window.dispatchEvent(new CustomEvent(ADMIN_SEARCH, { detail: term }))
   }
 
   return (

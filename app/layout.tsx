@@ -201,6 +201,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   // GTM env flags
   const gtmId = process.env.NEXT_PUBLIC_GTM_CONTAINER_ID || "";
+  const cookieYesId = process.env.NEXT_PUBLIC_COOKIEYES_ID || "";
 
   let blogCategories: Category[] = [];
   let videoCategories: Category[] = [];
@@ -296,11 +297,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
               <PwaServiceWorker />
               {/* ⭐️ LOAD the stealth detection script only for non-admin */}
               <Script src="/js/_support_banner.js" strategy="afterInteractive" />
-              <Script
-                id="cookieyes"
-                src="https://cdn-cookieyes.com/client_data/abcdef1234567890/script.js"
-                strategy="afterInteractive"
-              />
+              {cookieYesId && (
+                <Script
+                  id="cookieyes"
+                  src={`https://cdn-cookieyes.com/client_data/${cookieYesId}/script.js`}
+                  strategy="afterInteractive"
+                />
+              )}
             </>
           )}
         </ThemeProvider>

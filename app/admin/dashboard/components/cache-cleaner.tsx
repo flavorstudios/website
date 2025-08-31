@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trash2, RefreshCw, CheckCircle, AlertCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { ADMIN_REFRESH } from "@/lib/admin-events"
 
 export function CacheCleaner() {
   const { toast } = useToast()
@@ -36,7 +37,7 @@ export function CacheCleaner() {
       toast("Frontend Cache Cleared")
 
       // Trigger data refresh
-      window.dispatchEvent(new CustomEvent("admin-refresh"))
+      window.dispatchEvent(new CustomEvent(ADMIN_REFRESH))
     } catch (error) {
       console.error("Failed to clear frontend cache:", error)
       toast("Cache Clear Failed")

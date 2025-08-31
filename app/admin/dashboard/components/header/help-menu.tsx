@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { HelpCircle, BookOpen, Keyboard, LifeBuoy } from "lucide-react"
 import { DOCS_URL } from "@/lib/constants"
+import { ADMIN_OPEN_KEYBOARD_SHORTCUTS } from "@/lib/admin-events"
 
 export function HelpMenu() {
   return (
@@ -30,9 +31,7 @@ export function HelpMenu() {
         </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={() =>
-            window.dispatchEvent(
-              new Event("admin-open-keyboard-shortcuts")
-            )
+            window.dispatchEvent(new Event(ADMIN_OPEN_KEYBOARD_SHORTCUTS))
           }
         >
           <Keyboard className="h-4 w-4 mr-2" /> Keyboard Shortcuts

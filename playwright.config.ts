@@ -26,6 +26,7 @@ export default defineConfig({
       NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: 'test',
       NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: 'test',
       NEXT_PUBLIC_FIREBASE_APP_ID: 'test',
+      FIREBASE_STORAGE_BUCKET: 'test',
 
       // Keep telemetry quiet in CI logs (optional)
       NEXT_TELEMETRY_DISABLED: '1',

@@ -1,3 +1,7 @@
+import { config } from "dotenv";
+
+config({ path: ".env.local" });
+
 const required = [
   "NEXT_PUBLIC_FIREBASE_API_KEY",
   "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",

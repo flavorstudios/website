@@ -1,9 +1,6 @@
 import { onRequest } from "firebase-functions/v2/https";
-import cors from "cors";
 import fs from "fs/promises";
 import path from "path";
-
-const corsHandler = cors({ origin: true });
 
 interface Category {
   name: string;
@@ -27,7 +24,6 @@ function format(arr: Partial<Category>[], type: "blog" | "video"): Category[] {
 }
 
 export const getCategories = onRequest({ cors: true }, async (req, res) => {
-  await new Promise((resolve) => corsHandler(req, res, resolve));
 
   if (req.method !== "GET") {
     res.status(405).json({ error: "Method Not Allowed" });

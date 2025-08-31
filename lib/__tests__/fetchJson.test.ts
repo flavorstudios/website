@@ -1,9 +1,15 @@
 import { fetchJson, HttpError } from '../http';
 
+const originalFetch = global.fetch;
+
 describe('fetchJson', () => {
   beforeEach(() => {
-    // @ts-ignore: reset fetch to undefined for test isolation
-    global.fetch = undefined;
+    // @ts-expect-error: reset fetch to undefined for test isolation
+    global.fetch = undefined as unknown as typeof fetch;
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   it('returns data on success', async () => {

@@ -9,7 +9,8 @@ export type AutosaveStatus =
   | "saved"
   | "offline"
   | "error"
-  | "conflict";
+  | "conflict"
+  | "unauthorized";
 
 interface AutosaveOptions<T> {
   userId?: string;
@@ -47,7 +48,10 @@ async function idbDel(key: string) {
   return db.delete("drafts", key);
 }
 
-export function useAutosave<T>({ userId = "anon", draftId, data }: AutosaveOptions<T>) {
+export function useAutosave<T>({ userId = "anon", draftId, data }: AutosaveOptions<T>): {
+  status: AutosaveStatus;
+  savedAt: Date | null;
+} {
   const [status, setStatus] = useState<AutosaveStatus>("idle");
   const [version, setVersion] = useState<number | undefined>();
   const [savedAt, setSavedAt] = useState<Date | null>(null);
@@ -55,11 +59,13 @@ export function useAutosave<T>({ userId = "anon", draftId, data }: AutosaveOptio
   const tokenRef = useRef<symbol | null>(null);
   const retryRef = useRef(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const key = `draft:${userId}:${draftId}`;
 
   const save = useCallback(
     async (payload: T = data, v: number | undefined = version) => {
+      clearTimeout(retryTimeoutRef.current);
       if (!navigator.onLine) {
         await idbSet(key, { payload, version: v, ts: Date.now() });
         setStatus("offline");
@@ -83,23 +89,28 @@ export function useAutosave<T>({ userId = "anon", draftId, data }: AutosaveOptio
           await idbDel(key);
           setStatus("saved");
           retryRef.current = 0;
+          clearTimeout(retryTimeoutRef.current);
         } else if (res.status === 409) {
           setStatus("conflict");
           const json = await res.json();
           await idbSet(key, { payload, version: v, ts: Date.now(), server: json.server });
+          } else if (res.status === 401) {
+          await idbSet(key, { payload, version: v, ts: Date.now() });
+          setStatus("unauthorized");
+          retryRef.current = 0;
         } else {
           await idbSet(key, { payload, version: v, ts: Date.now() });
           setStatus("error");
           retryRef.current += 1;
           const delay = Math.min(30000, 1000 * 2 ** retryRef.current);
-          setTimeout(() => void save(payload, v), delay);
+          retryTimeoutRef.current = setTimeout(() => void save(payload, v), delay);
         }
       } catch {
         await idbSet(key, { payload, version: v, ts: Date.now() });
         setStatus("error");
         retryRef.current += 1;
         const delay = Math.min(30000, 1000 * 2 ** retryRef.current);
-        setTimeout(() => void save(payload, v), delay);
+        retryTimeoutRef.current = setTimeout(() => void save(payload, v), delay);
       }
     },
     [data, draftId, key, version]
@@ -135,6 +146,10 @@ export function useAutosave<T>({ userId = "anon", draftId, data }: AutosaveOptio
       window.removeEventListener("offline", onOffline);
     };
   }, [key, save]);
+
+  useEffect(() => {
+    return () => clearTimeout(retryTimeoutRef.current);
+  }, []);
 
   return { status, savedAt };
 }

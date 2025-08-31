@@ -49,4 +49,24 @@ describe("useAutosave", () => {
     expect(del).toHaveBeenCalled();
     expect(result.current.status).toBe("saved");
   });
+  
+  it("sets unauthorized status on 401 without retries", async () => {
+    Object.defineProperty(navigator, "onLine", { value: true, configurable: true });
+    (fetch as jest.Mock).mockResolvedValue({ ok: false, status: 401, json: async () => ({}) });
+    const payload = { title: "t" };
+    const { result } = renderHook(() => useAutosave({ draftId: "d1", data: payload }));
+
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
+    expect(result.current.status).toBe("unauthorized");
+    expect((fetch as jest.Mock).mock.calls).toHaveLength(1);
+
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
+    expect((fetch as jest.Mock).mock.calls).toHaveLength(1);
+  });
 });

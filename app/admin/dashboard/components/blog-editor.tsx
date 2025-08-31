@@ -502,6 +502,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     if (autosaveStatus === "offline") return "Offline, saving locally";
     if (autosaveStatus === "error") return "Sync failed";
     if (autosaveStatus === "conflict") return "Version changed on server";
+    if (autosaveStatus === "unauthorized") return "Login required";
     return "";
   })();
 

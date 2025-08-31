@@ -105,3 +105,6 @@ The CookieYes banner loads on all pages by default.
 ### Autosave pipeline
 
 The admin blog editor now uses a dedicated autosave pipeline. Drafts are saved through `/api/admin/blog/drafts` with optimistic concurrency and persisted in IndexedDB while offline. A small status chip near the save button reflects states such as "Saving…", "Saved", "Offline" or "Sync failed" and banners clear once a sync succeeds.
+
+`/api/admin/blog/drafts` requires an active admin session. When developing locally, either sign in with an authorized admin account or set `ADMIN_BYPASS=true` in your environment to skip authentication. Without authorization the chip shows **Sync failed**.
+

@@ -111,7 +111,7 @@ export function getSchema<T extends Record<string, unknown>>({
   };
 
   // --- Base schema object ---
-  const baseSchema: Partial<Thing> = {
+  const baseSchema: Record<string, unknown> = {
     "@type": type as SchemaType,
     name: title,
     description,
@@ -140,5 +140,5 @@ export function getSchema<T extends Record<string, unknown>>({
   return {
     ...baseSchema,
     ...(rest && typeof rest === "object" ? rest : {}),
-  } as WithContext<Thing>;
+  } as unknown as WithContext<Thing>;
 }

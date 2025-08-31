@@ -1,4 +1,5 @@
 import { config } from "dotenv";
+import { FIREBASE_REQUIRED_ENV_VARS } from "../lib/firebase-env";
 
 config({ path: ".env.local" });
 

@@ -1,25 +1,25 @@
-// app/api/admin/comments/[slug]/[id]/delete/route.ts
+// app/api/admin/comments/[postId]/[commentId]/delete/route.ts
 
 import { requireAdmin } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 
-// DELETE /api/admin/comments/[slug]/[id]/delete
+// DELETE /api/admin/comments/[postId]/[commentId]/delete
 export async function DELETE(
   req: NextRequest,
-  context: { params: Promise<{ slug: string; id: string }> }
+  context: { params: Promise<{ postId: string; commentId: string }> }
 ) {
   if (!(await requireAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  context: { params: Promise<{ slug: string; id: string }> }
+  const { postId, commentId } = await context.params;
   try {
     const db = getAdminDb();
     const entryRef = db
       .collection("comments")
-      .doc(slug)
+      .doc(postId)
       .collection("entries")
-      .doc(id);
+      .doc(commentId);
 
     await entryRef.delete();
 

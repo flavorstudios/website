@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'; // Correct ES module import
 import { parseStringPromise } from 'xml2js'; // Correct ES module import
 import dotenv from 'dotenv'; // Correct ES module import
 

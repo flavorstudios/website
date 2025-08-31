@@ -54,7 +54,7 @@ export function useAutosave<T>({ userId = "anon", draftId, data }: AutosaveOptio
 
   const tokenRef = useRef<symbol | null>(null);
   const retryRef = useRef(0);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const key = `draft:${userId}:${draftId}`;
 

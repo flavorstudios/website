@@ -8,6 +8,7 @@ const LOGO_DEFAULT_WIDTH = "600";
 const LOGO_DEFAULT_HEIGHT = "60";
 
 type ImageObjectWithCaption = ImageObject & { caption?: string; alt?: string };
+type SchemaType = Extract<Thing, { "@type": any }>["@type"];
 
 // Always return an absolute canonical URL for schema fields.
 function getAbsoluteCanonicalUrlForSchema(inputUrl: string): string {
@@ -111,7 +112,7 @@ export function getSchema<T extends Record<string, unknown>>({
 
   // --- Base schema object ---
   const baseSchema: Partial<Thing> = {
-    "@type": type as Thing["@type"], // <- Codex fix here!
+    "@type": type as SchemaType,
     name: title,
     description,
     url,

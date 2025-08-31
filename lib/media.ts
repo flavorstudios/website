@@ -275,7 +275,6 @@ export async function cropMedia(
   const variant: MediaVariant = {
     id: genId(),
     // include url for consumers that expect it
-    // @ts-expect-error - if MediaVariant doesn't require url, this is harmless extra data
     url: variantUrl,
     path: variantObjectPath,
     width: options.width,

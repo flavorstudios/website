@@ -4,8 +4,7 @@ const originalFetch = global.fetch;
 
 describe('fetchJson', () => {
   beforeEach(() => {
-    // @ts-expect-error: reset fetch to undefined for test isolation
-    global.fetch = undefined as unknown as typeof fetch;
+    global.fetch = undefined as any;
   });
 
   afterEach(() => {

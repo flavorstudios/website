@@ -12,8 +12,9 @@ describe("commentStore.create", () => {
     dbMock.doc = jest.fn(() => dbMock);
     (getAdminDb as jest.Mock).mockReturnValue(dbMock);
 
-    // @ts-expect-error - mock global fetch for Perspective API
-    global.fetch = jest.fn().mockResolvedValue({ json: async () => ({}) });
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({ json: async () => ({}) } as Response);
 
     process.env.PERSPECTIVE_API_KEY = "test";
   });

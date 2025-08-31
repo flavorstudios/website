@@ -39,10 +39,19 @@ export const commentStore = {
     try {
       const db = getAdminDb();
       const snap = await db.collectionGroup("entries").get();
-      return snap.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as FirestoreCommentDoc), // << use FirestoreCommentDoc
-      }));
+      return snap.docs.map<Comment>((doc) => {
+        const data = doc.data() as FirestoreCommentDoc;
+        const { postId, postType, content, status, createdAt, ...rest } = data;
+        return {
+          id: doc.id,
+          postId,
+          postType,
+          content,
+          status,
+          createdAt,
+          ...rest,
+        };
+      });
     } catch (error) {
       console.error("Failed to fetch comments:", error);
       throw new Error("Failed to fetch comments");
@@ -188,7 +197,7 @@ export const commentStore = {
       await ref.update({ flagged });
       const doc = await ref.get();
       if (!doc.exists) return null;
-      return { id: doc.id, ...(doc.data() as FirestoreCommentDoc) };
+      return { id: doc.id, ...(doc.data() as FirestoreCommentDoc) } as Comment;
     } catch (error) {
       console.error(`Failed to update flag for comment ${commentId}:`, error);
       throw new Error("Failed to update comment flag");

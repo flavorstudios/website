@@ -13,6 +13,6 @@ test.describe('Login form', () => {
     // Check that it sits within an aria-live region
     await expect(error.locator('xpath=ancestor::*[@aria-live="assertive"]')).toHaveCount(1);
 
-    await runA11yScan(page, 'login page after error');
+    await runA11yScan(page, { include: 'login page after error' });
   });
 });

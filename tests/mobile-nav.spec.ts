@@ -23,5 +23,5 @@ test('sidebar drawer traps focus and returns focus on close', async ({ page }) =
   // Focus should return to the toggle
   await expect(toggle).toBeFocused();
 
-  await runA11yScan(page, 'mobile drawer closed');
+  await runA11yScan(page, { include: 'mobile drawer closed' });
 });

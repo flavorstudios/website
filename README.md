@@ -34,7 +34,7 @@ Set up your environment and install dependencies:
 bash
 Copy
 Edit
-cp .env.example .env.local
+cp .env.example .env.local  # create local env file (ignored by Git)
 pnpm install  # or `npm install`
 Common development scripts:
 

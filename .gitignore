@@ -22,13 +22,20 @@ yarn-error.log*
 *.log
 
 # --- Environment variable files ---
-.env              # local/private env
-.env.local        # developer overrides
-.env.development  # dev environment
-.env.production   # production config
-.env.test         # test config
-.env*             # catch-all for any other env files
-!.env.example     # keep sample env file public
+# local/private env
+.env
+# developer overrides
+.env.local
+# dev environment
+.env.development
+# production config
+.env.production
+# test config
+.env.test
+# catch-all for any other env files
+.env*
+# keep sample env file public
+!.env.example
 
 # --- Vercel deployment files ---
 .vercel

@@ -24,7 +24,7 @@ export default function VideoTable({
   onTogglePublish
 }: VideoTableProps) {
   const allSelected = videos.length > 0 && videos.every(v => selected.has(v.id))
-  const rowRefs = useRef<HTMLTableRowElement[]>([])
+  const rowRefs = useRef<(HTMLTableRowElement | null)[]>([])
 
   return (
     <div className="overflow-x-auto border rounded-lg">
@@ -51,7 +51,7 @@ export default function VideoTable({
           {videos.map((video, idx) => (
             <motion.tr
               key={video.id}
-              ref={el => (rowRefs.current[idx] = el!)}
+              ref={el => { rowRefs.current[idx] = el }}
               tabIndex={0}
               onKeyDown={e => {
                 if (e.key === "ArrowDown") {

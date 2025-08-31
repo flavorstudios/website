@@ -81,7 +81,7 @@ export default function CategoryList({
   onSort,
 }: CategoryListProps) {
   const [items, setItems] = useState<Category[]>([])
-  const rowRefs = useRef<HTMLTableRowElement[]>([])
+  const rowRefs = useRef<(HTMLTableRowElement | null)[]>([])
   const { toast } = useToast()
   const isMobile = useMediaQuery("(max-width: 639px)")
 
@@ -255,7 +255,7 @@ export default function CategoryList({
                     onToggleStatus={onToggleStatus}
                     onDuplicate={onDuplicate}
                     toggleSelect={toggleSelect}
-                    rowRef={(el) => (rowRefs.current[idx] = el!)}
+                    rowRef={el => { rowRefs.current[idx] = el }}
                     rowRefs={rowRefs}
                     index={idx}
                   />
@@ -277,7 +277,7 @@ interface SortableRowProps {
   onDuplicate: (category: Category) => void
   toggleSelect: (id: string) => void
   rowRef: (el: HTMLTableRowElement | null) => void
-  rowRefs: React.MutableRefObject<HTMLTableRowElement[]>
+  rowRefs: React.MutableRefObject<(HTMLTableRowElement | null)[]>
   index: number
 }
 

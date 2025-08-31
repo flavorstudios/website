@@ -119,12 +119,13 @@ export function AdminHeader({
           {/* Left: Sidebar toggle (mobile only) */}
           <Button
             ref={toggleRef}
+            variant="ghost"
             size="sm"
             onClick={() => setSidebarOpen(!sidebarOpen)}
             aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
             aria-expanded={sidebarOpen}
             aria-controls="app-sidebar"
-            className="lg:hidden min-h-11 px-4 rounded-lg bg-orange-600 text-white hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            className="lg:hidden min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             <Menu className="h-5 w-5" aria-hidden="true" />
           </Button>
@@ -161,7 +162,8 @@ export function AdminHeader({
                 className="block w-full rounded-xl border bg-background pl-10 pr-12 py-2 text-sm outline-none ring-0 focus:border-primary/60 focus:ring-2 focus:ring-primary/20"
               />
               <kbd
-                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 select-none rounded-md border border-orange-200 bg-orange-50 px-1.5 py-0.5 text-[10px] text-orange-600"
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 select-none rounded-md border px-1.5 py-0.5 text-[10px] text-muted-foreground"
+                aria-hidden="true"
               >
                 /
               </kbd>

@@ -121,7 +121,7 @@ export function AdminSidebar({
                 </div>
                 <div className="min-w-0">
                     <span className="font-semibold text-foreground text-sm block truncate">Admin Panel</span>
-                    <span className="text-xs text-orange-600 block truncate">Flavor Studios</span>
+                  <span className="text-xs text-muted-foreground block truncate">Flavor Studios</span>
                 </div>
               </div>
             ) : (
@@ -131,14 +131,15 @@ export function AdminSidebar({
             )}
 
             <Button
-                size="sm"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="hidden md:flex p-1 h-8 w-8 bg-orange-600 text-white hover:bg-orange-700 focus:outline-none focus:ring"
-                aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-                aria-expanded={sidebarOpen}
-                aria-controls={id}
-                type="button"
-              >
+                variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="hidden md:flex p-1 h-8 w-8 focus:outline-none focus:ring"
+              aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+              aria-expanded={sidebarOpen}
+              aria-controls={id}
+              type="button"
+            >
               {sidebarOpen ? (
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
               ) : (
@@ -152,7 +153,7 @@ export function AdminSidebar({
         {sidebarOpen && (
           <div className="px-4 py-3 border-b border-border">
             <p className="font-medium text-foreground text-sm">Administrator</p>
-            <p className="text-xs text-orange-600">Manage your studio</p>
+            <p className="text-xs text-muted-foreground">Manage your studio</p>
           </div>
         )}
 
@@ -169,26 +170,27 @@ export function AdminSidebar({
               return (
                 <Button
                     key={item.id}
-                    asChild={!!item.href}
-                    className={`w-full ${
-                      sidebarOpen ? "justify-start px-3" : "justify-center px-0"
-                    } h-10 ${
-                      active
-                        ? "bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600"
-                        : "text-orange-600 hover:bg-orange-50"
-                    } focus:outline-none focus:ring`}
-                    // Only handle clicks here for non-href items
-                    onClick={
-                      item.href
-                        ? undefined
-                        : () => {
-                            setActiveSection(item.id)
-                            if (isMobile) setSidebarOpen(false)
-                          }
-                    }
-                    // Avoid passing type to <a> when asChild is true
-                    type={item.href ? undefined : "button"}
-                  >
+                  asChild={!!item.href}
+                  variant={active ? "default" : "ghost"}
+                  className={`w-full ${
+                    sidebarOpen ? "justify-start px-3" : "justify-center px-0"
+                  } h-10 ${
+                    active
+                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+                      : "text-muted-foreground hover:bg-muted"
+                  } focus:outline-none focus:ring`}
+                  // Only handle clicks here for non-href items
+                  onClick={
+                    item.href
+                      ? undefined
+                      : () => {
+                          setActiveSection(item.id)
+                          if (isMobile) setSidebarOpen(false)
+                        }
+                  }
+                  // Avoid passing type to <a> when asChild is true
+                  type={item.href ? undefined : "button"}
+                >
                   {item.href ? (
                     <Link
                       href={item.href}
@@ -209,14 +211,12 @@ export function AdminSidebar({
                           {item.count && (
                             <Badge
                                 variant="secondary"
-                                className={`ml-2 text-xs ${
-                                  active
-                                    ? "bg-orange-600 text-white"
-                                    : "bg-orange-100 text-orange-700"
-                                }`}
-                              >
-                                {item.count}
-                              </Badge>
+                              className={`ml-2 text-xs ${
+                                active ? "bg-white/20 text-white" : "bg-muted text-foreground"
+                              }`}
+                            >
+                              {item.count}
+                            </Badge>
                           )}
                         </>
                       )}
@@ -230,10 +230,10 @@ export function AdminSidebar({
                           {item.count && (
                             <Badge
                                 variant="secondary"
-                                className="ml-2 text-xs bg-orange-100 text-orange-700"
-                              >
-                                {item.count}
-                              </Badge>
+                              className="ml-2 text-xs bg-muted text-foreground"
+                            >
+                              {item.count}
+                            </Badge>
                           )}
                         </>
                       )}
@@ -248,7 +248,7 @@ export function AdminSidebar({
         {/* Sidebar Footer */}
         {sidebarOpen && (
           <div className="p-4 border-t border-border mt-auto">
-            <div className="text-xs text-orange-600 text-center">
+            <div className="text-xs text-muted-foreground text-center">
               <p className="font-medium">Flavor Studios Admin</p>
               <p>Version 1.0.0</p>
             </div>

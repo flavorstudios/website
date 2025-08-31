@@ -216,7 +216,10 @@ export default function DashboardOverview() {
               {diagnosticCode}
             </p>
           )}
-          <Button onClick={refresh} variant="adminPrimary">
+          <Button
+            onClick={refresh}
+            className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+          >
             Retry Dashboard
           </Button>
         </div>
@@ -229,7 +232,10 @@ export default function DashboardOverview() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
-          <Button onClick={refresh} variant="adminPrimary">
+          <Button
+            onClick={refresh}
+            className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+          >
             Refresh Dashboard
           </Button>
         </div>
@@ -245,7 +251,7 @@ export default function DashboardOverview() {
           onClick={refresh}
           disabled={statsQuery.isFetching}
           size="sm"
-          variant="adminPrimary"
+          className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
         >
           Refresh
         </Button>
@@ -442,11 +448,7 @@ export default function DashboardOverview() {
                     className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
                     onClick={() => {
                       if (typeof window !== "undefined") {
-                        window.dispatchEvent(
-                          new CustomEvent("admin:navigate", {
-                            detail: { section: action.action },
-                          })
-                        );
+                        window.dispatchEvent(new CustomEvent("admin-navigate", { detail: action.action }));
                       }
                     }}
                   >

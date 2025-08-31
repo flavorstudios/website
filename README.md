@@ -44,6 +44,7 @@ Edit
 pnpm dev    # start the local development server
 pnpm lint   # run eslint checks
 pnpm test   # run Jest unit/integration tests (e.g. validate session)
+pnpm exec playwright install  # install Playwright browsers before running e2e tests
 pnpm e2e    # run end-to-end Playwright tests (admin dashboard login)
 pnpm build  # create an optimized production build
 pnpm start  # run the production server
@@ -51,6 +52,7 @@ pnpm start  # run the production server
 To run a single test file:
 
 pnpm test tests/validate-session.spec.ts
+pnpm exec playwright install  # install Playwright browsers before running e2e tests
 pnpm e2e tests/admin-dashboard-auth.spec.ts
 Firebase configuration
 Firebase powers features like authentication and Firestore. The client SDK

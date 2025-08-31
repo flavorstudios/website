@@ -594,7 +594,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               <TooltipTrigger asChild>
                 <Button
                   onClick={publishPost}
-                  variant="adminCreate"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 flex items-center gap-2"
                   aria-label="Publish post"
                   disabled={!online}
                 >
@@ -1044,8 +1044,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         <Button
           onClick={publishPost}
           disabled={!online}
-          variant="adminCreate"
-          className="flex-1"
+          className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 flex items-center gap-2"
         >
           <Upload className="h-4 w-4" aria-hidden="true" />
           Publish

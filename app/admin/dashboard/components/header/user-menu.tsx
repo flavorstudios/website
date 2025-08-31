@@ -34,8 +34,9 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
+          variant="ghost"
           size="sm"
-          className="rounded-full px-1 bg-orange-600 text-white hover:bg-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          className="rounded-full px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           aria-label="User menu"
         >
           <Avatar className="h-8 w-8">
@@ -48,7 +49,7 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
         <DropdownMenuLabel>
           <div className="flex flex-col">
             <span className="font-medium">{name}</span>
-            <span className="text-xs text-orange-600">{userRole}</span>
+            <span className="text-xs text-muted-foreground">{userRole}</span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

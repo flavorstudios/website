@@ -6,6 +6,7 @@
 
 export const SITE_NAME = "Flavor Studios";
 export const SITE_URL = "https://flavorstudios.in";
+export const DOCS_URL = `${SITE_URL}/docs`;
 export const SITE_BRAND = SITE_NAME;
 
 // Shared admin header/rail height

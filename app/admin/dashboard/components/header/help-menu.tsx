@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { HelpCircle, BookOpen, Keyboard, LifeBuoy } from "lucide-react"
+import { DOCS_URL } from "@/lib/constants"
 
 export function HelpMenu() {
   return (
@@ -23,10 +24,16 @@ export function HelpMenu() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => window.open("/docs", "_blank")}> 
+        <DropdownMenuItem onSelect={() => window.open(DOCS_URL, "_blank")}> 
           <BookOpen className="h-4 w-4 mr-2" /> Documentation
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => window.dispatchEvent(new Event("open-command-palette"))}>
+        <DropdownMenuItem
+          onSelect={() =>
+            window.dispatchEvent(
+              new Event("admin-open-keyboard-shortcuts")
+            )
+          }
+        >
           <Keyboard className="h-4 w-4 mr-2" /> Keyboard Shortcuts
         </DropdownMenuItem>
         <DropdownMenuSeparator />

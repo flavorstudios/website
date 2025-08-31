@@ -152,6 +152,20 @@ export default function AdminDashboardPageClient({
     setShortcutsOpen(true);
   });
 
+  // Allow other components to open the keyboard shortcuts dialog
+  useEffect(() => {
+    const handleOpenShortcuts = () => setShortcutsOpen(true);
+    window.addEventListener(
+      "admin-open-keyboard-shortcuts",
+      handleOpenShortcuts
+    );
+    return () =>
+      window.removeEventListener(
+        "admin-open-keyboard-shortcuts",
+        handleOpenShortcuts
+      );
+  }, []);
+
   // --- One-time init + route prefetch --------------------------------------
   useEffect(() => {
     setMounted(true);

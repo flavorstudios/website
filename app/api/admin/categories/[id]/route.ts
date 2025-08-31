@@ -29,12 +29,12 @@ function isValidCategoryUpdate(data: unknown): data is Partial<Category> {
 
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageCategories"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id } = context.params;
+  const { id } = await context.params;
   try {
     const data = await request.json();
 
@@ -102,12 +102,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageCategories"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id } = params;
+  const { id } = await context.params;
   try {
     const json = await readJSON();
 

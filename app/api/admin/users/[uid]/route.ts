@@ -6,12 +6,12 @@ import { logError } from "@/lib/log";
 
 export async function GET(
   request: NextRequest,
-  context: { params: { uid: string } }
+  context: { params: Promise<{ uid: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { uid } = context.params;
+  const { uid } = await context.params;
   try {
     const auth = getAdminAuth();
     const userRecord = await auth.getUser(uid);
@@ -37,12 +37,12 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: { uid: string } }
+  context: { params: Promise<{ uid: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { uid } = context.params;
+  const { uid } = await context.params;
   try {
     const auth = getAdminAuth();
     const db = getAdminDb();
@@ -74,12 +74,12 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: { uid: string } }
+  context: { params: Promise<{ uid: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { uid } = context.params;
+  const { uid } = await context.params;
   try {
     const auth = getAdminAuth();
     const db = getAdminDb();

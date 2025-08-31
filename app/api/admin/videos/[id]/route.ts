@@ -4,12 +4,12 @@ import { videoStore } from "@/lib/comment-store"
 
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = context.params
+  const { id } = await context.params
   try {
     const data = await request.json()
     const video = await videoStore.update(id, data)
@@ -24,12 +24,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = context.params
+  const { id } = await context.params
   try {
     const success = await videoStore.delete(id)
     if (!success) {

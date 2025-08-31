@@ -5,9 +5,9 @@ import { logError } from "@/lib/log";
 
 export async function POST(
   req: NextRequest,
-  context: { params: { uid: string } }
+  context: { params: Promise<{ uid: string }> }
 ) {
-  const { uid } = context.params;
+  const { uid } = await context.params;
   if (!(await requireAdmin(req, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

@@ -1,6 +1,7 @@
 // --- COMMENT STORE ---
 
 import { getAdminDb } from "@/lib/firebase-admin";
+import { randomUUID } from "crypto";
 
 // --- Define and export Comment type ---
 export type Comment = {
@@ -62,8 +63,8 @@ export const commentStore = {
         .get();
       return snap.docs.map((doc) => ({
         id: doc.id,
-        ...(doc.data() as FirestoreCommentDoc), // << use FirestoreCommentDoc
-      }));
+        ...(doc.data() as FirestoreCommentDoc),
+      })) as Comment[];
     } catch (error) {
       console.error(`Failed to fetch comments for post ${postId}:`, error);
       throw new Error("Failed to fetch comments for this post");
@@ -123,13 +124,13 @@ export const commentStore = {
     const status: Comment["status"] = isFlagged ? "pending" : "approved";
 
     // --- Ensure all required fields are present for Comment type ---
-    const newComment: Comment = {
+    const newComment = {
       ...comment,
-      id: `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: randomUUID(),
       createdAt: new Date().toISOString(),
       status,
       scores,
-    };
+    } as Comment;
 
     try {
       const db = getAdminDb();
@@ -163,7 +164,7 @@ export const commentStore = {
       await ref.update({ status });
       const doc = await ref.get();
       if (!doc.exists) return null;
-      return { id: doc.id, ...(doc.data() as FirestoreCommentDoc) }; // << use FirestoreCommentDoc
+      return { id: doc.id, ...(doc.data() as FirestoreCommentDoc) } as Comment;
     } catch (error) {
       console.error(`Failed to update status for comment ${commentId}:`, error);
       throw new Error("Failed to update comment status");
@@ -182,15 +183,15 @@ export const commentStore = {
         .collection("comments")
         .doc(String(postId))
         .collection("entries")
-        .doc(commentId)
+        .doc(commentId);
 
-      await ref.update({ flagged })
-      const doc = await ref.get()
-      if (!doc.exists) return null
-      return { id: doc.id, ...(doc.data() as FirestoreCommentDoc) }
+      await ref.update({ flagged });
+      const doc = await ref.get();
+      if (!doc.exists) return null;
+      return { id: doc.id, ...(doc.data() as FirestoreCommentDoc) };
     } catch (error) {
-      console.error(`Failed to update flag for comment ${commentId}:`, error)
-      throw new Error("Failed to update comment flag")
+      console.error(`Failed to update flag for comment ${commentId}:`, error);
+      throw new Error("Failed to update comment flag");
     }
   },
 

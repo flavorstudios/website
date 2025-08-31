@@ -1,18 +1,10 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { type NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
+import { type Comment } from "@/lib/comment-store";
 
-// --- Local Comment type (adjust fields as per your schema) ---
-type Comment = {
-  id: string;
-  postSlug: string;
-  user?: string;
-  content: string;
-  status: "approved" | "pending" | "rejected";
-  flagged?: boolean;
-  createdAt: string;
-  // [key: string]: any; // REMOVE this for better type safety!
-};
+// Narrow type used by admin API to ensure each comment includes a post slug
+type AdminComment = Comment & { postSlug: string };
 
 // --- Fetch all flagged (and all) comments, grouped by postSlug (admin only) ---
 export async function GET(request: NextRequest) {
@@ -25,7 +17,7 @@ export async function GET(request: NextRequest) {
     const db = getAdminDb();
     // Get all comment parent docs (each post's comments)
     const postsSnap = await db.collection("comments").get();
-    let allComments: Comment[] = [];
+    let allComments: AdminComment[] = [];
 
     // Iterate through each post (slug = post ID)
     for (const postDoc of postsSnap.docs) {
@@ -38,12 +30,12 @@ export async function GET(request: NextRequest) {
         .get();
 
       // Map entries to unified structure (typed)
-      const comments: Comment[] = entriesSnap.docs.map((doc) => {
-        const data = doc.data() as Omit<Comment, "id" | "postSlug">;
+      const comments: AdminComment[] = entriesSnap.docs.map((doc) => {
+        const data = doc.data() as Comment;
         return {
+          ...data,
           id: doc.id,
           postSlug: slug,
-          ...data,
         };
       });
       allComments = allComments.concat(comments);

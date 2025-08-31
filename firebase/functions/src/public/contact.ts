@@ -1,22 +1,24 @@
-import * as functions from "firebase-functions";
+import { onRequest } from "firebase-functions/v2/https";
+import { setGlobalOptions } from "firebase-functions/v2";
 import * as admin from "firebase-admin";
 import nodemailer from "nodemailer";
+
+setGlobalOptions({ region: "us-central1" });
 
 admin.initializeApp();
 const db = admin.firestore();
 
-const config = functions.config();
-const PERSPECTIVE_API_KEY = config.perspective.key as string;
+const PERSPECTIVE_API_KEY = process.env.PERSPECTIVE_API_KEY as string;
 const THRESHOLD = 0.7;
-const notifyEnabled = config.notify?.new_submission === "true";
-const adminEmailsEnv = config.admin?.emails;
+const notifyEnabled = process.env.NOTIFY_NEW_SUBMISSION === "true";
+const adminEmailsEnv = process.env.ADMIN_EMAILS;
 
 const transporter = nodemailer.createTransport({
-  host: config.smtp.host,
-  port: Number(config.smtp.port || 587),
-  secure: config.smtp.secure === "true",
-  auth: config.smtp.user
-    ? { user: config.smtp.user, pass: config.smtp.pass }
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT || 587),
+  secure: process.env.SMTP_SECURE === "true",
+  auth: process.env.SMTP_USER
+    ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
     : undefined,
 });
 
@@ -49,57 +51,62 @@ async function moderateText(text: string) {
 }
 
 // Firebase HTTPS Function for Contact Form
-export const submitContact = functions
-  .region("us-central1")
-  .https.onRequest(async (req, res) => {
-    if (req.method !== "POST") return res.status(405).end();
-    try {
-      const { firstName, lastName, email, subject, message } = req.body;
+export const submitContact = onRequest(async (req, res) => {
+  if (req.method !== "POST") {
+    res.status(405).end();
+    return;
+  }
+  try {
+    const { firstName, lastName, email, subject, message } = req.body;
 
-      if (!firstName || !lastName || !email || !subject || !message)
-        return res.status(400).json({ error: "Missing required fields" });
+      if (!firstName || !lastName || !email || !subject || !message) {
+      res.status(400).json({ error: "Missing required fields" });
+      return;
+    }
 
       const scores = await moderateText(message);
-      const flagged = scores
-        ? scores.toxicity > THRESHOLD ||
-          scores.insult > THRESHOLD ||
-          scores.threat > THRESHOLD
-        : true;
+    const flagged = scores
+      ? scores.toxicity > THRESHOLD ||
+        scores.insult > THRESHOLD ||
+        scores.threat > THRESHOLD
+      : true;
 
       const docRef = db.collection("contactMessages").doc();
-      await docRef.set({
-        id: docRef.id,
-        firstName,
-        lastName,
-        email,
-        subject,
-        message,
-        createdAt: new Date().toISOString(),
-        flagged,
-        scores: scores || null,
-      });
+    await docRef.set({
+      id: docRef.id,
+      firstName,
+      lastName,
+      email,
+      subject,
+      message,
+      createdAt: new Date().toISOString(),
+      flagged,
+      scores: scores || null,
+    });
 
       if (notifyEnabled && adminEmailsEnv) {
-        const recipients = adminEmailsEnv
-          .split(",")
-          .map((e: string) => e.trim())
-          .filter(Boolean)
-          .join(",");
-        try {
-          await transporter.sendMail({
-            from: config.smtp.user,
-            to: recipients,
-            subject: `New contact submission: ${subject}`,
-            text: `${firstName} ${lastName} <${email}> wrote:\n\n${message}`,
-          });
-        } catch (err) {
-          console.error("[CONTACT_NOTIFY_ERROR]", err);
-        }
+      const recipients = adminEmailsEnv
+        .split(",")
+        .map((e: string) => e.trim())
+        .filter(Boolean)
+        .join(",");
+      try {
+        await transporter.sendMail({
+          from: process.env.SMTP_USER,
+          to: recipients,
+          subject: `New contact submission: ${subject}`,
+          text: `${firstName} ${lastName} <${email}> wrote:\n\n${message}`,
+        });
+      } catch (err) {
+        console.error("[CONTACT_NOTIFY_ERROR]", err);
       }
-
-      return res.json({ success: true, flagged });
-    } catch (err) {
-      console.error("[CONTACT_POST_ERROR]", err);
-      return res.status(500).json({ error: "Failed to submit message" });
     }
-  });
+
+    res.json({ success: true, flagged });
+    return;
+  } catch (err) {
+    console.error("[CONTACT_POST_ERROR]", err);
+    res.status(500).json({ error: "Failed to submit message" });
+    return;
+  }
+});

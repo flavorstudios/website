@@ -72,6 +72,7 @@
     "firebase-admin": "^13.4.0",
     "firebase-functions": "^6.4.0",
     "framer-motion": "^12.17.3",
+    "idb": "^7.1.1",
     "input-otp": "^1.4.2",
     "isomorphic-dompurify": "^2.26.0",
     "jsonwebtoken": "^9.0.2",

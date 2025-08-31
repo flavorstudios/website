@@ -1,5 +1,7 @@
+"use client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
-import { openDB } from "idb";
+import { IDBPDatabase, openDB } from "idb";
 
 export type AutosaveStatus =
   | "idle"
@@ -16,22 +18,32 @@ interface AutosaveOptions<T> {
 }
 
 // simple key helpers for IndexedDB
-const dbPromise = openDB("autosave", 1, {
-  upgrade(db) {
-    db.createObjectStore("drafts");
-  },
-});
+let dbPromise: Promise<IDBPDatabase<any>> | null = null;
+async function getDb() {
+  if (typeof window === "undefined") return null;
+  if (!dbPromise) {
+    dbPromise = openDB("autosave", 1, {
+      upgrade(db) {
+        db.createObjectStore("drafts");
+      },
+    });
+  }
+  return dbPromise;
+}
 
 async function idbSet(key: string, val: unknown) {
-  const db = await dbPromise;
+  const db = await getDb();
+  if (!db) return;
   return db.put("drafts", val, key);
 }
 async function idbGet<T>(key: string): Promise<T | undefined> {
-  const db = await dbPromise;
+  const db = await getDb();
+  if (!db) return undefined;
   return db.get("drafts", key);
 }
 async function idbDel(key: string) {
-  const db = await dbPromise;
+  const db = await getDb();
+  if (!db) return;
   return db.delete("drafts", key);
 }
 
@@ -42,7 +54,7 @@ export function useAutosave<T>({ userId = "anon", draftId, data }: AutosaveOptio
 
   const tokenRef = useRef<symbol | null>(null);
   const retryRef = useRef(0);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   const key = `draft:${userId}:${draftId}`;
 

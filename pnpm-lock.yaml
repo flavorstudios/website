@@ -288,6 +288,9 @@ importers:
       '@storybook/nextjs':
         specifier: ^8.1.0
         version: 8.6.14(esbuild@0.25.8)(next@15.4.4(@babel/core@7.28.0)(@opentelemetry/api@1.9.0)(@playwright/test@1.54.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(storybook@8.6.14)(type-fest@4.41.0)(typescript@5.8.3)(webpack-hot-middleware@2.26.1)(webpack@5.100.2(esbuild@0.25.8))
+      '@storybook/react':
+        specifier: ^8.1.0
+        version: 8.6.14(@storybook/test@8.6.14(storybook@8.6.14))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(storybook@8.6.14)(typescript@5.8.3)
       '@testing-library/jest-dom':
         specifier: ^6.7.0
         version: 6.7.0

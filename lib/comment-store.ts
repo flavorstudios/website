@@ -2,15 +2,16 @@
 
 import { getAdminDb } from "@/lib/firebase-admin";
 import { randomUUID } from "crypto";
+import type { PerspectiveResponse } from "@/types/perspective";
 
 // --- Define and export Comment type ---
-export type Comment = {
+interface BaseComment {
   id: string;
-  postId: string;      // blog/video post id
-  postSlug?: string;   // optional: for convenience
+  postId: string; // blog/video post id
+  postSlug?: string; // optional: for convenience
   postType: "blog" | "video"; // <-- Required!
-  author?: string;     // commenter name
-  user?: string;       // user id or name (optional)
+  author?: string; // commenter name
+  user?: string; // user id or name (optional)
   email?: string;
   website?: string;
   content: string;
@@ -26,11 +27,13 @@ export type Comment = {
   };
   flagged?: boolean;
   createdAt: string;
-  [key: string]: unknown; // Firestore data extension
-};
+  }
+
+export type Comment = BaseComment & Record<string, unknown>;
 
 // Utility: Type for Firestore comment doc (wider than our Comment, but type-safe)
-type FirestoreCommentDoc = Omit<Comment, "id"> & { id?: string };
+type FirestoreCommentDoc =
+  Omit<BaseComment, "id"> & { id?: string } & Record<string, unknown>;
 
 // --- COMMENT STORE LOGIC ---
 export const commentStore = {
@@ -39,19 +42,12 @@ export const commentStore = {
     try {
       const db = getAdminDb();
       const snap = await db.collectionGroup("entries").get();
-      return snap.docs.map<Comment>((doc) => {
-        const data = doc.data() as FirestoreCommentDoc;
-        const { postId, postType, content, status, createdAt, ...rest } = data;
-        return {
+      return snap.docs.map(
+        (doc): Comment => ({
           id: doc.id,
-          postId,
-          postType,
-          content,
-          status,
-          createdAt,
-          ...rest,
-        };
-      });
+          ...(doc.data() as FirestoreCommentDoc),
+        })
+      );
     } catch (error) {
       console.error("Failed to fetch comments:", error);
       throw new Error("Failed to fetch comments");
@@ -88,7 +84,7 @@ export const commentStore = {
     const THRESHOLD = 0.75;
 
     // --- Perspective Moderation ---
-    let moderation: unknown = {};
+    let moderation: PerspectiveResponse = {};
     try {
       moderation = await fetch(
         `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_API_KEY}`,
@@ -111,13 +107,8 @@ export const commentStore = {
       throw new Error("Comment moderation failed");
     }
 
-    // --- Type the moderation response instead of 'any'
-    const attr = (moderation as {
-      attributeScores?: Record<
-        "TOXICITY" | "INSULT" | "THREAT",
-        { summaryScore: { value: number } }
-      >;
-    })?.attributeScores;
+    // --- Access moderation scores from strongly typed response
+    const attr = moderation.attributeScores;
 
     const scores = {
       toxicity: attr?.TOXICITY?.summaryScore.value ?? 0,

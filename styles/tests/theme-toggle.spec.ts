@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
+import type { Page, Route } from '@playwright/test';
 
-const stubResponses = async (page) => {
-  await page.route('**/api/**', async (route) => {
+const stubResponses = async (page: Page) => {
+  await page.route('**/api/**', async (route: Route) => {
     const url = route.request().url();
     let body = '{}';
     if (url.includes('/api/admin/stats')) {

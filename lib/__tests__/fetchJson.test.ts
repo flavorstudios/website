@@ -104,13 +104,13 @@ describe('fetchJson', () => {
 
   it('retries on malformed json and succeeds', async () => {
     const responses: Response[] = [
-      {
+      ({
         ok: true,
         headers: new Headers({ 'content-type': 'application/json' }),
         json: async () => {
           throw new SyntaxError('bad json');
         },
-      } as Response,
+      } as unknown) as Response,
       {
         ok: true,
         headers: new Headers({ 'content-type': 'application/json' }),

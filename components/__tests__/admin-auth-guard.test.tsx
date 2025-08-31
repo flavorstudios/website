@@ -29,13 +29,13 @@ describe("AdminAuthGuard", () => {
 
     // Resolve to avoid unhandled promise rejections
     await act(async () => {
-      resolve({ ok: true });
+      resolve({ ok: true } as Response);
     });
   });
 
   it("renders children when authenticated", async () => {
     global.fetch = jest
-      .fn(() => Promise.resolve({ ok: true }))
+      .fn(() => Promise.resolve({ ok: true } as Response))
       .mockName("fetch");
 
     render(
@@ -51,7 +51,7 @@ describe("AdminAuthGuard", () => {
 
   it("shows login prompt when unauthenticated", async () => {
     global.fetch = jest
-      .fn(() => Promise.resolve({ ok: false }))
+      .fn(() => Promise.resolve({ ok: false } as Response))
       .mockName("fetch");
 
     render(

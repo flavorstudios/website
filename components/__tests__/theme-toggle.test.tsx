@@ -28,7 +28,7 @@ afterEach(() => {
 describe("ThemeToggle", () => {
   const renderToggle = () =>
     render(
-      <ThemeProvider attribute="class" defaultTheme="system">
+      <ThemeProvider>
         <ThemeToggle />
       </ThemeProvider>,
     );

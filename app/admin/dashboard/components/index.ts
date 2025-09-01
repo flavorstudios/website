@@ -9,6 +9,7 @@ import EmailInbox from "./email-inbox";
 import MediaLibrary from "./media/MediaLibrary";
 import CareerApplications from "./career-applications";
 import SystemSettings from "./system-settings";
+import { clientEnv } from "@/env/client";
 
 export {
   DashboardOverview,
@@ -24,7 +25,7 @@ export {
   SystemSettings,
 };
 
-if (process.env.NODE_ENV !== "production") {
+if (clientEnv.NODE_ENV !== "production") {
   const components = {
     DashboardOverview,
     BlogManager,

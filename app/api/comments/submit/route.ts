@@ -2,9 +2,10 @@
 
 import { NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
+import { serverEnv } from "@/env/server";
 
 // --- CONFIG ---
-const PERSPECTIVE_API_KEY = process.env.PERSPECTIVE_API_KEY!;
+const PERSPECTIVE_API_KEY = serverEnv.PERSPECTIVE_API_KEY!;
 const THRESHOLD = 0.75; // Moderation strictness
 
 // --- Moderate comment using Perspective API ---

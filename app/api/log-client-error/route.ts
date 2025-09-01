@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server"
+import { serverEnv } from "@/env/server"
 
 export async function POST(req: Request) {
   try {
     const { error, stack } = await req.json()
     // In production, log on the server
-    if (process.env.NODE_ENV === "production") {
+    if (serverEnv.NODE_ENV === "production") {
       console.error("Client error:", error, stack)
     } else {
       console.error("Client error:", error, stack)

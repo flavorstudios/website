@@ -2,6 +2,7 @@
 import { useState } from "react"
 import { getMessaging, getToken, isSupported } from "firebase/messaging"
 import { getFirebaseApp, firebaseInitError } from "@/lib/firebase"
+import { clientEnv } from "@/env.client"
 
 export default function EnableNotificationsButton() {
   const [loading, setLoading] = useState(false)
@@ -28,7 +29,7 @@ export default function EnableNotificationsButton() {
       }
 
       // Validate VAPID key presence before requesting token
-      const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY
+      const vapidKey = clientEnv.NEXT_PUBLIC_FIREBASE_VAPID_KEY
       if (!vapidKey) {
         setResult(
           "Push notifications cannot be enabled: The VAPID key is missing from the environment configuration. Please contact the site administrator."

@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 import nodemailer from "nodemailer";
+import { serverEnv } from "@/env/server";
 
 type SendReplyPayload = {
   messageId?: string;
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   // Validate allowed "from" addresses
   const allowedEnv =
-    process.env.CONTACT_REPLY_EMAILS || process.env.ADMIN_EMAILS || "";
+    serverEnv.CONTACT_REPLY_EMAILS || serverEnv.ADMIN_EMAILS || "";
   const allowed = allowedEnv
     .split(",")
     .map((e) => e.trim().toLowerCase())
@@ -49,8 +50,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   // Map "from" to SMTP_USER_<NAME> and SMTP_PASS_<NAME>
   const prefix = from.split("@")[0].replace(/[^a-zA-Z0-9]/g, "_").toUpperCase();
-  const smtpUser = process.env[`SMTP_USER_${prefix}`];
-  const smtpPass = process.env[`SMTP_PASS_${prefix}`];
+  const smtpUser = serverEnv[`SMTP_USER_${prefix}`];
+  const smtpPass = serverEnv[`SMTP_PASS_${prefix}`];
 
   if (!smtpUser || !smtpPass) {
     return NextResponse.json(
@@ -61,9 +62,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   // Build transporter with per-sender credentials
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: process.env.SMTP_SECURE === "true",
+    host: serverEnv.SMTP_HOST,
+    port: Number(serverEnv.SMTP_PORT || 587),
+    secure: serverEnv.SMTP_SECURE === "true",
     auth: { user: smtpUser, pass: smtpPass },
   });
 

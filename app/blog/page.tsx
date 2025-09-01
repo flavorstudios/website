@@ -27,6 +27,7 @@ import type { BlogPost } from "@/lib/types";
 import { formatDate } from "@/lib/date"; // <-- Added import
 import { authors } from "@/lib/authors"; // <-- NEW
 import { DateRangePicker } from "@/components/ui/date-range-picker"; // <-- NEW
+import { serverEnv } from "@/env/server";
 
 // --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
@@ -90,7 +91,7 @@ async function getBlogData({
   endDate?: string;
 }) {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+    const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL;
     const params = new URLSearchParams();
     if (author && author !== "all") params.set("author", author);
     if (startDate) params.set("startDate", startDate);

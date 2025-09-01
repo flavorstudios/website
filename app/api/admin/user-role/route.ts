@@ -7,6 +7,7 @@ import { logError } from "@/lib/log";
 import type { UserRole } from "@/lib/role-permissions";
 import { ADMIN_BYPASS, adminDb } from "@/lib/firebase-admin";
 import { z } from "zod";
+import { serverEnv } from "@/env/server";
 
 // Zod schema for POST
 const SetRoleSchema = z.object({
@@ -22,20 +23,20 @@ export async function GET(req: NextRequest) {
   
   try {
     if (!(await requireAdmin(req))) {
-      if (process.env.DEBUG_ADMIN === "true") {
+      if (serverEnv.DEBUG_ADMIN === "true") {
         console.warn("[user-role] Unauthorized access attempt.");
       }
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const sessionCookie = req.cookies.get("admin-session")?.value;
     if (!sessionCookie) {
-      if (process.env.DEBUG_ADMIN === "true") {
+      if (serverEnv.DEBUG_ADMIN === "true") {
         console.warn("[user-role] Missing session cookie.");
       }
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const verified = await verifyAdminSession(sessionCookie);
-    if (process.env.DEBUG_ADMIN === "true") {
+    if (serverEnv.DEBUG_ADMIN === "true") {
       console.log("[user-role] Verified admin:", {
         uid: verified?.uid,
         email: verified?.email,
@@ -44,19 +45,19 @@ export async function GET(req: NextRequest) {
     const role = await getUserRole(verified.uid, verified.email);
 
     if (role === "admin" || role === "editor" || role === "support") {
-      if (process.env.DEBUG_ADMIN === "true") {
+      if (serverEnv.DEBUG_ADMIN === "true") {
         console.log("[user-role] Returning role:", role, "for", verified.email);
       }
       return NextResponse.json({ role });
     } else {
-      if (process.env.DEBUG_ADMIN === "true") {
+      if (serverEnv.DEBUG_ADMIN === "true") {
         console.warn("[user-role] No explicit role, defaulting to support for", verified.email);
       }
       return NextResponse.json({ role: "support" });
     }
   } catch (err: unknown) {
     logError("user-role:get", err);
-    if (process.env.DEBUG_ADMIN === "true") {
+    if (serverEnv.DEBUG_ADMIN === "true") {
       console.error("[user-role] Error fetching role:", err);
     }
     return NextResponse.json({ error: "Failed to fetch role" }, { status: 500 });
@@ -68,7 +69,7 @@ export async function POST(req: NextRequest) {
   let adminUid = "unknown";
   try {
     if (!(await requireAdmin(req))) {
-      if (process.env.DEBUG_ADMIN === "true") {
+      if (serverEnv.DEBUG_ADMIN === "true") {
         console.warn("[user-role:post] Unauthorized access attempt.");
       }
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -95,7 +96,7 @@ export async function POST(req: NextRequest) {
     await setUserRole(uid, role as UserRole);
 
     // Success audit log
-    if (process.env.DEBUG_ADMIN === "true") {
+    if (serverEnv.DEBUG_ADMIN === "true") {
       console.log(`[user-role:post] Set role for ${uid}: ${role}`);
     }
     console.log(`[user-role] Admin ${adminUid} set role for ${uid}: ${role}`);
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     logError("user-role:post", err);
     logError(`user-role:post admin:${adminUid}`, err);
-    if (process.env.DEBUG_ADMIN === "true") {
+    if (serverEnv.DEBUG_ADMIN === "true") {
       console.error("[user-role:post] Error:", err);
     }
     return NextResponse.json({ error: "Failed" }, { status: 500 });

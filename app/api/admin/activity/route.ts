@@ -1,20 +1,21 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { adminDb } from "@/lib/firebase-admin";
 import { type NextRequest, NextResponse } from "next/server";
+import { serverEnv } from "@/env/server";
 
 // GET /api/admin/activity - Only for authorized admins
 export async function GET(req: NextRequest) {
   // Use the improved getSessionInfo helper
   const sessionInfo = await getSessionInfo(req);
 
-  if (process.env.DEBUG_ADMIN === "true") {
+  if (serverEnv.DEBUG_ADMIN === "true") {
     console.log("[admin-activity] Incoming request at", new Date().toISOString());
     console.log("[admin-activity] sessionInfo:", sessionInfo);
   }
 
   const hasAccess = await requireAdmin(req, "canViewAnalytics");
 
-  if (process.env.DEBUG_ADMIN === "true") {
+  if (serverEnv.DEBUG_ADMIN === "true") {
     console.log(
       "[admin-activity] hasAccess:",
       hasAccess,
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (!hasAccess) {
-    if (process.env.DEBUG_ADMIN === "true") {
+    if (serverEnv.DEBUG_ADMIN === "true") {
       console.warn("[admin-activity] ACCESS DENIED. Details:", {
         ip: req.headers.get("x-forwarded-for"),
         role: sessionInfo?.role,
@@ -80,7 +81,7 @@ export async function GET(req: NextRequest) {
       success: true,
     };
 
-    if (process.env.DEBUG_ADMIN === "true") {
+    if (serverEnv.DEBUG_ADMIN === "true") {
       console.log("[admin-activity] Returning payload:", payload);
     }
     return NextResponse.json(payload, { status: 200 });

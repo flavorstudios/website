@@ -1,9 +1,12 @@
-import { config } from "dotenv";
-import { FIREBASE_REQUIRED_ENV_VARS } from "../lib/firebase-env";
+import { config, parse } from "dotenv";
+import { readFileSync } from "fs";
 
 config({ path: ".env.local" });
 
-const missing = FIREBASE_REQUIRED_ENV_VARS.filter(k => !process.env[k]);
+const exampleEnv = parse(readFileSync("env.example", "utf8"));
+const required = Object.keys(exampleEnv).filter(key => key.startsWith("FIREBASE_"));
+
+const missing = required.filter(key => !process.env[key]);
 if (missing.length) {
   console.error("Missing required Firebase env vars:", missing.join(", "));
   process.exit(1);

@@ -30,6 +30,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { clientEnv } from "@/env/client";
 
 // Lazy sections via central registry
 const DashboardOverview = dynamic(
@@ -177,7 +178,7 @@ export default function AdminDashboardPageClient({
 
     // init ping (with credentials)
     fetchJson("/api/admin/init", { method: "POST", credentials: "include" }).catch((err) => {
-      if (process.env.NODE_ENV !== "production")
+      if (clientEnv.NODE_ENV !== "production")
         console.error("Admin init failed:", err);
     });
 
@@ -323,7 +324,7 @@ export default function AdminDashboardPageClient({
       window.location.href = "/admin/login";
     } catch (error) {
       setError("Logout failed. Please try again.");
-      if (process.env.NODE_ENV !== "production")
+      if (clientEnv.NODE_ENV !== "production")
         console.error("Logout failed:", error);
     }
   }, []);

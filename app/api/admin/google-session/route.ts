@@ -4,8 +4,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getAdminAuth, getAdminDb, getAllowedAdminEmails } from "@/lib/firebase-admin";
 import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Centralized logging
+import { serverEnv } from "@/env/server";
 
-const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
+const debug = serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // --- Determine session expiry (in days) from env ---
-    const expiryDaysEnv = parseInt(process.env.ADMIN_SESSION_EXPIRY_DAYS || "1", 10);
+    const expiryDaysEnv = parseInt(serverEnv.ADMIN_SESSION_EXPIRY_DAYS || "1", 10);
     const expiryDays = Number.isNaN(expiryDaysEnv) || expiryDaysEnv <= 0 ? 1 : expiryDaysEnv;
     const expiresIn = 60 * 60 * 24 * expiryDays * 1000; // ms
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });

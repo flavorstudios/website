@@ -4,10 +4,11 @@ import { NextResponse } from "next/server";
 // import { videoStore } from "@/lib/comment-store"; // No longer needed!
 import { generateSitemapXML, SitemapUrl } from "@/lib/sitemap-utils";
 import { SITE_URL } from "@/lib/constants";
+import { serverEnv } from "@/env/server";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_BASE_URL ||
-  process.env.BASE_URL ||
+  serverEnv.NEXT_PUBLIC_BASE_URL ||
+  serverEnv.BASE_URL ||
   SITE_URL ||
   "https://flavorstudios.in";
 
@@ -32,7 +33,7 @@ interface ContentPage {
 export async function GET() {
   try {
     // --- Fetch videos via PUBLIC API ---
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+    const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL;
     const videosRes = await fetch(`${baseUrl}/api/videos`);
     const videos: ContentPage[] = videosRes.ok ? await videosRes.json() : [];
 

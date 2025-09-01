@@ -3,6 +3,7 @@
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
+import { serverEnv } from "@/env/server";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -51,7 +52,7 @@ function toIsoDuration(duration: string): string | undefined {
 async function getVideo(slug: string): Promise<Video | null> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || SITE_URL}/api/videos`,
+      `${serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL}/api/videos`,
       { cache: "no-store" }
     );
     if (!response.ok) {

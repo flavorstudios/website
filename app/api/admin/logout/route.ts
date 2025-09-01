@@ -4,6 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getAdminAuth } from "@/lib/firebase-admin";
 import { requireAdmin } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Consistent logging
+import { serverEnv } from "@/env/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
     const res = NextResponse.json({ ok: true, message: "Logged out" });
     res.cookies.set("admin-session", "", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: serverEnv.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 0,
       path: "/",

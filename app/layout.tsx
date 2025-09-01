@@ -32,6 +32,7 @@ import {
   SITE_BRAND_TWITTER,
   SITE_DESCRIPTION, // ✅ Use constant only
 } from "@/lib/constants";
+import { serverEnv } from "@/env/server";
 
 // --- SEO Default Metadata (App Router global metadata) ---
 const baseMetadata = getMetadata({
@@ -185,7 +186,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   // Admin route prefixes from env (comma-separated)
   const adminPrefixesEnv =
-    process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES ||
+    serverEnv.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES ||
     "/admin,/wp-admin,/dashboard,/backend";
   const adminPrefixes = adminPrefixesEnv
     .split(",")
@@ -200,8 +201,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   // (Intentionally no admin session verification here; handled in admin-only routes)
 
   // GTM env flags
-  const gtmId = process.env.NEXT_PUBLIC_GTM_CONTAINER_ID || "";
-  const cookieYesId = process.env.NEXT_PUBLIC_COOKIEYES_ID || "";
+  const gtmId = serverEnv.NEXT_PUBLIC_GTM_CONTAINER_ID || "";
+  const cookieYesId = serverEnv.NEXT_PUBLIC_COOKIEYES_ID || "";
 
   let blogCategories: Category[] = [];
   let videoCategories: Category[] = [];
@@ -222,7 +223,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       lang="en"
       style={{ fontFamily: "var(--font-poppins)" }}
       suppressHydrationWarning
-      data-app-env={process.env.NODE_ENV}
+      data-app-env={serverEnv.NODE_ENV}
     >
       <head>
         {/* Meta viewport fallback for bots/legacy */}

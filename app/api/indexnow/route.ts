@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
+import { serverEnv } from "@/env/server";
 
 // Use env variable, no hardcoded key
-const INDEXNOW_KEY = process.env.INDEXNOW_KEY;
+const INDEXNOW_KEY = serverEnv.INDEXNOW_KEY;
 const INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
 
 export async function POST(request: Request) {

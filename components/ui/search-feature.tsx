@@ -19,6 +19,7 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge" // Added for multi-category support
 import { formatDate } from "@/lib/date" // <-- Added
 import type { BlogPost } from "@/lib/content-store"
+import { clientEnv } from "@/env/client"
 
 interface Video {
   id: string
@@ -73,8 +74,8 @@ export function SearchFeature() {
   // Path-based admin detection (prevents registering shortcuts on admin routes)
   const pathname = usePathname()
   const adminPrefixes =
-    process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES
-      ? process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES.split(",").map((p) => p.trim()).filter(Boolean)
+    clientEnv.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES
+      ? clientEnv.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES.split(",").map((p) => p.trim()).filter(Boolean)
       : DEFAULT_ADMIN_ROUTE_PREFIXES
   const isAdmin = isAdminRoute(pathname || "/", adminPrefixes)
 

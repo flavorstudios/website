@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { clientEnv } from '@/env/client';
 
 export default function PwaServiceWorker() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -32,7 +33,7 @@ export default function PwaServiceWorker() {
             };
           })
           .catch(error => {
-            if (process.env.NODE_ENV === 'development') {
+            if (clientEnv.NODE_ENV === 'development') {
               // Only log in development
               console.error('Service worker registration failed:', error);
             }

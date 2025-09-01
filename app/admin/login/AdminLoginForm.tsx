@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Shield, Loader2, Sparkles } from "lucide-react"
 import EmailLoginForm from "./EmailLoginForm"
 import useAuthError from "@/hooks/useAuthError"
+import { clientEnv } from "@/env/client"
 
 // --- Firebase Auth (client-only getters) ---
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
@@ -21,7 +22,7 @@ import {
 
 // Safe client-side error logger (dev only)
 function safeLogError(...args: unknown[]) {
-  if (process.env.NODE_ENV !== "production") {
+  if (clientEnv.NODE_ENV !== "production") {
     // eslint-disable-next-line no-console
     console.error(...args)
   }

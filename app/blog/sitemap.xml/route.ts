@@ -4,10 +4,11 @@ import { NextResponse } from "next/server";
 // import { blogStore } from "@/lib/comment-store"; // No longer needed!
 import { generateSitemapXML, SitemapUrl } from "@/lib/sitemap-utils";
 import { SITE_URL } from "@/lib/constants";
+import { serverEnv } from "@/env/server";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_BASE_URL ||
-  process.env.BASE_URL ||
+  serverEnv.NEXT_PUBLIC_BASE_URL ||
+  serverEnv.BASE_URL ||
   SITE_URL ||
   "https://flavorstudios.in";
 
@@ -27,7 +28,7 @@ interface ContentPage {
 export async function GET() {
   try {
     // --- Fetch blogs via PUBLIC API ---
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+    const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL;
     const blogsRes = await fetch(`${baseUrl}/api/blogs`);
     const blogs: ContentPage[] = blogsRes.ok ? await blogsRes.json() : [];
 

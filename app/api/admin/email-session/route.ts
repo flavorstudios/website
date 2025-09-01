@@ -2,9 +2,10 @@ import { type NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import { logError } from "@/lib/log"
+import { serverEnv } from "@/env/server"
 
 function getAllowedAdminEmails(): string[] {
-  const emails = process.env.ADMIN_EMAILS || process.env.ADMIN_EMAIL || ""
+  const emails = serverEnv.ADMIN_EMAILS || serverEnv.ADMIN_EMAIL || ""
   return emails
     .split(",")
     .map((e) => e.trim().toLowerCase())
@@ -12,7 +13,7 @@ function getAllowedAdminEmails(): string[] {
 }
 
 function getAllowedAdminDomain(): string | null {
-  const domain = process.env.ADMIN_DOMAIN || ""
+  const domain = serverEnv.ADMIN_DOMAIN || ""
   return domain ? domain.trim().toLowerCase() : null
 }
 
@@ -44,13 +45,13 @@ export async function POST(req: NextRequest) {
     if (!passwordMatch) {
       return NextResponse.json({ error: "Authentication failed." }, { status: 401 })
     }
-    if (process.env.ADMIN_TOTP_SECRET) {
+    if (serverEnv.ADMIN_TOTP_SECRET) {
       const { totp } = await import("otplib")
-      if (!otp || !totp.check(otp, process.env.ADMIN_TOTP_SECRET)) {
+      if (!otp || !totp.check(otp, serverEnv.ADMIN_TOTP_SECRET)) {
         return NextResponse.json({ error: "Invalid 2FA code." }, { status: 401 })
       }
     }
-    const secret = process.env.ADMIN_JWT_SECRET
+    const secret = serverEnv.ADMIN_JWT_SECRET
     if (!secret) {
       logError("email-session", "Missing ADMIN_JWT_SECRET")
       return NextResponse.json({ error: "Server error." }, { status: 500 })

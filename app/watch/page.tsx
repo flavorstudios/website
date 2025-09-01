@@ -12,6 +12,7 @@ import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lu
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { formatDate } from "@/lib/date";
+import { serverEnv } from "@/env/server";
 type Category = { name: string; slug: string };
 
 export const metadata = getMetadata({
@@ -73,7 +74,7 @@ type VideoType = {
 
 async function getWatchData() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+    const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL;
     const [videosRes, { videoCategories }] = await Promise.all([
       fetch(`${baseUrl}/api/videos`, { next: { revalidate: 300 } }),
       getDynamicCategories('video'),

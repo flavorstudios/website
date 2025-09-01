@@ -15,6 +15,8 @@ import {
   SITE_DESCRIPTION, // ✅ Import centralized description
 } from "@/lib/constants";
 
+import { serverEnv } from "@/env/server";
+
 import { getMetadata } from "@/lib/seo/metadata";
 import { getSchema } from "@/lib/seo/schema";
 import type { BlogPost, Video } from "@/lib/content-store";
@@ -62,9 +64,9 @@ async function getHomePageContent() {
     featuredVideos: [],
     stats: null,
   };
-  if (process.env.NODE_ENV === "development") return fallbackContent;
+  if (serverEnv.NODE_ENV === "development") return fallbackContent;
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+    const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL;
     const [statsResult, videosResult, blogsResult] = await Promise.allSettled([
       fetch(`${baseUrl}/api/stats`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),
       fetch(`${baseUrl}/api/videos`, { next: { revalidate: 3600 } }).then((res) => (res.ok ? res.json() : null)),

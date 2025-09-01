@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from "react"
 import { onAuthStateChanged, signOut, User } from "firebase/auth"
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { clientEnv } from "@/env/client"
 
 // ---- Define Context Shape ----
 interface AdminAuthContextType {
@@ -55,7 +56,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         setError("Authentication error.")
         setLoading(false)
         // Optionally log the error for devs
-        if (process.env.NODE_ENV !== "production") {
+        if (clientEnv.NODE_ENV !== "production") {
           console.error("[AdminAuthProvider] Auth listener error:", err)
         }
       }
@@ -75,7 +76,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       await fetch("/api/admin/logout", { method: "POST" })
     } catch (err: unknown) {
       setError("Failed to sign out. Please try again.")
-      if (process.env.NODE_ENV !== "production") {
+      if (clientEnv.NODE_ENV !== "production") {
         console.error("[AdminAuthProvider] Sign out error:", err)
       }
     } finally {

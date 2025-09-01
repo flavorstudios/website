@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { getCanonicalUrl } from "@/lib/seo-utils";
+import { serverEnv } from "@/env/server";
 
 // This route dynamically generates robots.txt for your site.
 export async function GET(): Promise<NextResponse> {
@@ -9,7 +10,7 @@ export async function GET(): Promise<NextResponse> {
   const sitemapIndexUrl = getCanonicalUrl("/sitemap.xml");
 
   // Is this a production environment?
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = serverEnv.NODE_ENV === "production";
 
   // In production: Allow all except /cdn-cgi/
   // In dev/staging: Disallow everything

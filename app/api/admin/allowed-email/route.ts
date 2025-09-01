@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/admin-auth"; // Helper should verify session and decode email
 import { logError } from "@/lib/log"; // Consistent server logging
+import { serverEnv } from "@/env/server";
 
 export async function GET() {
   // Retrieve session cookie
@@ -26,8 +27,8 @@ export async function GET() {
 
   // Gather allowed emails and domain from env
   // Accept both ADMIN_EMAIL and ADMIN_EMAILS for safety
-  const singleAdminEmail = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
-  const adminEmails = (process.env.ADMIN_EMAILS || "")
+  const singleAdminEmail = (serverEnv.ADMIN_EMAIL || "").trim().toLowerCase();
+  const adminEmails = (serverEnv.ADMIN_EMAILS || "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
@@ -37,7 +38,7 @@ export async function GET() {
     adminEmails.push(singleAdminEmail);
   }
 
-  const adminDomain = (process.env.ADMIN_DOMAIN || "").trim().toLowerCase();
+  const adminDomain = (serverEnv.ADMIN_DOMAIN || "").trim().toLowerCase();
 
   // Check if the user is allowed (email or domain match)
   const userEmail = (decoded.email || "").toLowerCase();

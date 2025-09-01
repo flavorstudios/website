@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { clientEnv } from '@/env/client';
 
 export class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -17,7 +18,7 @@ export class ErrorBoundary extends React.Component<
   }
   render() {
     if (this.state.error) {
-      if (process.env.NODE_ENV === 'development') {
+      if (clientEnv.NODE_ENV === 'development') {
         return (
           <div className="p-4 rounded-lg border bg-red-50 text-red-900">
             <div className="font-semibold">Render error</div>

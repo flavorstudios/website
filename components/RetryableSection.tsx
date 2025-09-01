@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { HttpError } from '@/lib/http';
+import { clientEnv } from '@/env/client';
 
 type Loader<T> = () => Promise<T>;
 type Render<T> = (data: T) => React.ReactNode;
@@ -35,7 +36,7 @@ export function RetryableSection<T>({
 
   if (state.loading) return <div className="p-4 text-sm opacity-80">Loading…</div>;
   if (state.error) {
-    if (process.env.NODE_ENV === 'development') {
+    if (clientEnv.NODE_ENV === 'development') {
       const e = state.error as HttpError;
       return (
         <div className="p-4 rounded-lg border bg-red-50 text-red-900 space-y-2">

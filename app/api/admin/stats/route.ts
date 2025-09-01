@@ -11,6 +11,7 @@ import {
 } from "firebase-admin/firestore";
 import { createHash, randomUUID } from "crypto";
 import { z } from "zod";
+import { serverEnv } from "@/env/server";
 
 export const runtime = "nodejs";
 
@@ -76,14 +77,14 @@ export async function GET(request: NextRequest) {
   const requestId = randomUUID();
   const sessionInfo = await getSessionInfo(request);
 
-  if (process.env.DEBUG_ADMIN === "true") {
+  if (serverEnv.DEBUG_ADMIN === "true") {
     console.log("[admin-stats] Incoming request at", new Date().toISOString());
     console.log("[admin-stats] sessionInfo:", sessionInfo);
   }
 
   const hasAccess = await requireAdmin(request, "canViewAnalytics");
 
-  if (process.env.DEBUG_ADMIN === "true") {
+  if (serverEnv.DEBUG_ADMIN === "true") {
     console.log(
       "[admin-stats] hasAccess:",
       hasAccess,
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (!hasAccess) {
-    if (process.env.DEBUG_ADMIN === "true") {
+    if (serverEnv.DEBUG_ADMIN === "true") {
       console.warn("[admin-stats] ACCESS DENIED. Details:", {
         ip: request.headers.get("x-forwarded-for"),
         role: sessionInfo?.role,
@@ -188,7 +189,7 @@ export async function GET(request: NextRequest) {
       const etag = `"${createHash("md5")
         .update(JSON.stringify(cached.data))
         .digest("hex")}"`;
-      if (process.env.DEBUG_ADMIN === "true") {
+      if (serverEnv.DEBUG_ADMIN === "true") {
         console.log(
           "[admin-stats] Returning cached stats (range:",
           range,
@@ -395,7 +396,7 @@ export async function GET(request: NextRequest) {
     // Update cache for this range
     statsCache[range] = { data: response, expires: now + 60_000 };
 
-    if (process.env.DEBUG_ADMIN === "true") {
+    if (serverEnv.DEBUG_ADMIN === "true") {
       console.log("[admin-stats] Returning stats (range:", range, "):", response);
     }
 

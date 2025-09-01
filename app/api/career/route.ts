@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import nodemailer from "nodemailer";
+import { serverEnv } from "@/env/server";
 
-const notifyEnabled = process.env.NOTIFY_NEW_SUBMISSION === "true";
-const adminEmailsEnv = process.env.ADMIN_EMAILS;
+const notifyEnabled = serverEnv.NOTIFY_NEW_SUBMISSION === "true";
+const adminEmailsEnv = serverEnv.ADMIN_EMAILS;
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT || 587),
-  secure: process.env.SMTP_SECURE === "true",
-  auth: process.env.SMTP_USER
+  host: serverEnv.SMTP_HOST,
+  port: Number(serverEnv.SMTP_PORT || 587),
+  secure: serverEnv.SMTP_SECURE === "true",
+  auth: serverEnv.SMTP_USER
     ? {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: serverEnv.SMTP_USER,
+        pass: serverEnv.SMTP_PASS,
       }
     : undefined,
 });
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
         .join(",");
       try {
         await transporter.sendMail({
-          from: process.env.SMTP_USER,
+          from: serverEnv.SMTP_USER,
           to: recipients,
           subject: "New career submission",
           text: `${firstName} ${lastName} <${email}> applied.\nSkills: ${skills}\nPortfolio: ${portfolio}\n\n${message}`,

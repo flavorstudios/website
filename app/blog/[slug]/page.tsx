@@ -5,12 +5,13 @@ import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
+import { serverEnv } from "@/env/server";
 // ⬇️ Use shared type instead of declaring locally!
 import type { BlogPost } from "@/lib/content-store";
 
 // Fetch a single blog post by slug from the public API
 async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || SITE_URL;
+  const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL;
   const url = `${baseUrl}/api/blogs/${slug}`;
   const response = await fetch(url, { next: { revalidate: 3600 } });
 

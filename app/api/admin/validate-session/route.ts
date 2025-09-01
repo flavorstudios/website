@@ -4,9 +4,10 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { verifyAdminSession } from "@/lib/admin-auth"; // Secure session verifier
 import { logError } from "@/lib/log"; // Consistent server logging
+import { serverEnv } from "@/env/server";
 
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
-const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
+const debug = serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
 
 export async function GET() {
   try {

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { type UserRole, hasPermission, getAccessibleSections, type RolePermissions } from "@/lib/role-permissions"
+import { clientEnv } from "@/env/client"
 
 interface RoleContextType {
   userRole: UserRole
@@ -42,7 +43,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       }
       if (!res.ok) {
         setError((data as Record<string, unknown>).error as string || "Failed to fetch role")
-        if (process.env.NODE_ENV !== "production") {
+        if (clientEnv.NODE_ENV !== "production") {
           setDebugInfo(extractDebugInfo(data as Record<string, unknown>))
         }
         return
@@ -51,7 +52,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         setUserRole(data.role as UserRole)
       } else {
         setError("Unknown role")
-        if (process.env.NODE_ENV !== "production") {
+        if (clientEnv.NODE_ENV !== "production") {
           setDebugInfo(extractDebugInfo(data as Record<string, unknown>))
         }
       }
@@ -80,7 +81,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       <div style={{ padding: "2rem", textAlign: "center", color: "red" }}>
         <h2>Unable to load dashboard</h2>
         <p>{error}</p>
-        {process.env.NODE_ENV !== "production" && debugInfo && (
+        {clientEnv.NODE_ENV !== "production" && debugInfo && (
           <div style={{ color: "#666", fontSize: "12px", margin: "12px 0" }}>
             <div>Role: {debugInfo.role}</div>
             <div>Email: {debugInfo.email}</div>

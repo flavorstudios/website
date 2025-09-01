@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, type ReactNode } from 'react'
-import { Toaster, toast as sonnerToast } from 'sonner'
+import { toast as sonnerToast } from 'sonner'
 
 const ToastContext = createContext(sonnerToast)
 
@@ -9,7 +9,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={sonnerToast}>
       {children}
-      <Toaster theme="system" richColors closeButton position="top-right" />
     </ToastContext.Provider>
   )
 }

@@ -39,7 +39,7 @@ export function Footer() {
     { name: "DMCA", href: "/dmca" },
     { name: "Cookie Policy", href: "/cookie-policy" },
     { name: "Disclaimer", href: "/disclaimer" },
-    { name: "Media Usage Policy", href: "/media-usage-policy" },
+    { name: "Usage Policy", href: "/media-usage-policy", ariaLabel: "Media Usage Policy" },
   ]
 
   return (
@@ -102,7 +102,11 @@ export function Footer() {
             <ul className="space-y-3">
               {legalLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-white hover:text-gray-400 transition-colors text-sm">
+                  <Link
+                    href={link.href}
+                    className="text-white hover:text-gray-400 transition-colors text-sm"
+                    aria-label={link.ariaLabel}
+                  >
                     {link.name}
                   </Link>
                 </li>

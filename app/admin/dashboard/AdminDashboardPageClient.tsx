@@ -18,7 +18,6 @@ import {
 import { AdminSidebar } from "./components/admin-sidebar";
 import { AdminHeader } from "./components/admin-header";
 import { RoleProvider } from "./contexts/role-context";
-import { ToastProvider } from "./components/ui/toast-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Spinner from "@/components/ui/spinner";
 import MobileNav from "./components/mobile-nav";
@@ -82,6 +81,7 @@ const SystemSettings = dynamic(
 // ---- Route map (reused) ----------------------------------------------------
 const NAV: { id: SectionId; href: string; title: string }[] = [
   { id: "overview", href: "/admin/dashboard", title: "Overview" },
+  { id: "blogs", href: "/admin/dashboard/blog", title: "Blog Posts" },
   { id: "blogs", href: "/admin/dashboard/blog-posts", title: "Blog Posts" },
   { id: "videos", href: "/admin/dashboard/videos", title: "Videos" },
   { id: "media", href: "/admin/dashboard/media", title: "Media" },
@@ -380,8 +380,7 @@ export default function AdminDashboardPageClient({
   };
 
   return (
-    <ToastProvider>
-      <RoleProvider>
+    <RoleProvider>
           {/* Accessible skip link */}
           <a
             href="#main"
@@ -499,6 +498,5 @@ export default function AdminDashboardPageClient({
             </DialogContent>
           </Dialog>
         </RoleProvider>
-      </ToastProvider>
   );
 }

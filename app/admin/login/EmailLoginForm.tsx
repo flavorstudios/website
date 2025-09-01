@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
+import { Label } from "@/components/ui/label"
 import useAuthError from "@/hooks/useAuthError"
 
 export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
@@ -51,31 +52,31 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
         )}
       </div>
 
-      <label htmlFor="login-email" className="sr-only">
-        Email
-      </label>
-      <Input
-        id="login-email"
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-        aria-describedby={error ? "login-error" : undefined}
-      />
+      <div className="space-y-2">
+        <Label htmlFor="login-email">Email</Label>
+        <Input
+          id="login-email"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          aria-describedby={error ? "login-error" : undefined}
+        />
+      </div>
 
-      <label htmlFor="login-password" className="sr-only">
-        Password
-      </label>
-      <Input
-        id="login-password"
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-        aria-describedby={error ? "login-error" : undefined}
-      />
+      <div className="space-y-2">
+        <Label htmlFor="login-password">Password</Label>
+        <Input
+          id="login-password"
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          aria-describedby={error ? "login-error" : undefined}
+        />
+      </div>
 
       <label htmlFor="login-otp" className="sr-only">
         2FA code (if enabled)
@@ -91,7 +92,7 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
 
       <Button type="submit" disabled={loading} className="w-full">
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-        Login
+        Sign in
       </Button>
       <Button type="button" variant="ghost" onClick={onCancel} className="w-full">
         Back

@@ -97,6 +97,8 @@ export default function DashboardOverview() {
       refreshInterval: live ? 15_000 : 60_000,
       revalidateOnFocus: false,
       refreshWhenHidden: false,
+      errorRetryCount: 0,
+      shouldRetryOnError: () => false,
     }
   );
   const recentActivity = activityData?.activities || [];

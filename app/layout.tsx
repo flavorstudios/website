@@ -253,10 +253,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body
         className={`${inter.variable} ${lora.variable} ${roboto.variable} ${notoSerif.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
       >
-        {/* Skip link for keyboard users */}
+        {/* Skip link for keyboard and pointer users */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] bg-white p-2 text-sm shadow rounded"
+          className="fixed top-2 left-2 z-[100] pointer-events-auto bg-white p-2 text-sm shadow rounded"
         >
           Skip to main content
         </a>
@@ -288,7 +288,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             />
           )}
 
-          <main id="main-content">{children}</main>
+          <main id="main-content" tabIndex={-1}>
+            {children}
+          </main>
 
           {!isAdmin && (
             <>

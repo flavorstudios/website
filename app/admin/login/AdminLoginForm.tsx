@@ -39,7 +39,7 @@ export default function AdminLoginForm() {
   const { error, setError, clearError } = useAuthError()
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [method, setMethod] = useState<"google" | "email">("google")
+  const [method, setMethod] = useState<"google" | "email">("email")
   const router = useRouter()
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
 

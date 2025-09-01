@@ -41,6 +41,7 @@ export function useDashboardStats(live = false, enabled = true) {
       etag = res.headers.get('etag') || undefined;
       return (await res.json()) as DashboardStats;
     },
+    retry: 0,
     staleTime: 60_000,
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,

@@ -27,14 +27,19 @@ export function QuickActions() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={() => router.push("/admin/blog/create")}>
-          New Blog Post
+        <DropdownMenuItem
+          onSelect={() => router.push("/admin/dashboard/blog-posts?mode=create")}
+        >
+          Create New Post
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/media?upload=1")}>
-          Upload Media
+        <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/videos")}>
+          Add Video
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/users?mode=create")}>
-          Add User
+        <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/comments")}>
+          Moderate Comments
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/users")}>
+          Manage Users
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

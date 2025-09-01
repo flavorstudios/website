@@ -12,14 +12,15 @@ import { logError } from "@/lib/log";
 import jwt from "jsonwebtoken";
 import type { UserRole } from "@/lib/role-permissions";
 import { getUserRole } from "@/lib/user-roles";
+import { serverEnv } from "@/env/server";
 
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
 const debug =
-  process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
+  serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
 
 // Parse allowed admin domain from env
 function getAllowedAdminDomain(): string | null {
-  const domain = process.env.ADMIN_DOMAIN || "";
+  const domain = serverEnv.ADMIN_DOMAIN || "";
   return domain ? domain.trim().toLowerCase() : null;
 }
 
@@ -139,7 +140,7 @@ export async function verifyAdminSession(
   // Fallback: try JWT (for email/password logins)
   if (!decoded) {
     try {
-      const secret = process.env.ADMIN_JWT_SECRET || "";
+      const secret = serverEnv.ADMIN_JWT_SECRET || "";
       decoded = jwt.verify(sessionCookie, secret) as jwt.JwtPayload;
       if (debug) {
         console.log("[admin-auth] JWT session verified for:", decoded.email);
@@ -316,7 +317,7 @@ export async function createSessionCookieFromIdToken(
     const cookieStore = await cookies();
     cookieStore.set("admin-session", "bypass", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: serverEnv.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 2,
       path: "/",
@@ -405,14 +406,14 @@ export async function createRefreshSession(uid: string): Promise<string> {
     const cookieStore = await cookies();
     cookieStore.set("admin-session", "bypass", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: serverEnv.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 2,
       path: "/",
     });
     cookieStore.set("admin-refresh-token", "bypass-refresh", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: serverEnv.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 24 * 30,
       path: "/",
@@ -430,7 +431,7 @@ export async function createRefreshSession(uid: string): Promise<string> {
     const customToken = await adminAuth.createCustomToken(uid);
 
     // Exchange custom token for ID token and refresh token via Firebase REST API
-    const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "";
+    const apiKey = serverEnv.NEXT_PUBLIC_FIREBASE_API_KEY || "";
     const resp = await fetch(
       `https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=${apiKey}`,
       {
@@ -463,14 +464,14 @@ export async function createRefreshSession(uid: string): Promise<string> {
     const cookieStore = await cookies();
     cookieStore.set("admin-session", sessionCookie, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: serverEnv.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 2,
       path: "/",
     });
     cookieStore.set("admin-refresh-token", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: serverEnv.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 60 * 60 * 24 * 30,
       path: "/",

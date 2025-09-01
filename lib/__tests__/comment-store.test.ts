@@ -1,5 +1,6 @@
 import { commentStore } from "@/lib/comment-store";
 import { getAdminDb } from "@/lib/firebase-admin";
+import { serverEnv } from "@/env/server";
 
 jest.mock("@/lib/firebase-admin", () => ({ getAdminDb: jest.fn() }));
 
@@ -16,7 +17,7 @@ describe("commentStore.create", () => {
       .fn()
       .mockResolvedValue({ json: async () => ({}) } as Response);
 
-    process.env.PERSPECTIVE_API_KEY = "test";
+    serverEnv.PERSPECTIVE_API_KEY = "test";
   });
 
   it("generates unique ids", async () => {

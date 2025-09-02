@@ -50,6 +50,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   // Map "from" to SMTP_USER_<NAME> and SMTP_PASS_<NAME>
   const prefix = from.split("@")[0].replace(/[^a-zA-Z0-9]/g, "_").toUpperCase();
+  // These dynamic keys are resolved at runtime via serverEnv's index signature
   const smtpUser = serverEnv[`SMTP_USER_${prefix}`];
   const smtpPass = serverEnv[`SMTP_PASS_${prefix}`];
 

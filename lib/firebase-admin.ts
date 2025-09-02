@@ -20,7 +20,9 @@ if (debug) {
 }
 
 // 🔐 Retrieve the service account JSON from env
-const serviceAccountKey = serverEnv.FIREBASE_SERVICE_ACCOUNT_KEY;
+// Prefer FIREBASE_SERVICE_ACCOUNT_KEY but allow FIREBASE_SERVICE_ACCOUNT_JSON as an alias
+const serviceAccountJson =
+  serverEnv.FIREBASE_SERVICE_ACCOUNT_KEY || serverEnv.FIREBASE_SERVICE_ACCOUNT_JSON;
 
 // Accept ADMIN_EMAILS if it contains a real value; otherwise fall back to ADMIN_EMAIL
 const rawEmails = (serverEnv.ADMIN_EMAILS ?? "").trim();
@@ -34,13 +36,15 @@ let parsedCredentials: ServiceAccount | null = null;
 // If we're in bypass mode, skip any initialization work entirely.
 if (ADMIN_BYPASS) {
   if (debug) console.warn("[Firebase Admin] ADMIN_BYPASS=true — skipping Admin SDK initialization.");
-} else if (!serviceAccountKey) {
+} else if (!serviceAccountJson) {
   if (debug) {
-    console.warn("[Firebase Admin] FIREBASE_SERVICE_ACCOUNT_KEY not set. Admin features are disabled.");
+    console.warn(
+      "[Firebase Admin] FIREBASE_SERVICE_ACCOUNT_KEY/FIREBASE_SERVICE_ACCOUNT_JSON not set. Admin features are disabled."
+    );
   }
 } else {
   try {
-    parsedCredentials = JSON.parse(serviceAccountKey) as ServiceAccount;
+    parsedCredentials = JSON.parse(serviceAccountJson) as ServiceAccount;
     // 🛡 Initialize Firebase Admin SDK (only once)
     if (!getApps().length) {
       // Pass storageBucket from env, fallback to NEXT_PUBLIC for local/dev
@@ -59,7 +63,10 @@ if (ADMIN_BYPASS) {
       }
     }
   } catch (error) {
-    console.error("[Firebase Admin] Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:", error);
+    console.error(
+      "[Firebase Admin] Failed to parse Firebase service account JSON:",
+      error
+    );
     // Don't throw, just disable admin features!
     parsedCredentials = null;
   }
@@ -105,10 +112,10 @@ export const getAllowedAdminEmails = (): string[] => {
 
 // ✅ Export Firebase Admin Services - export undefined if not initialized OR if bypassing
 export const adminAuth: Auth | undefined =
-  !ADMIN_BYPASS && serviceAccountKey && parsedCredentials ? getAuth() : undefined;
+  !ADMIN_BYPASS && serviceAccountJson && parsedCredentials ? getAuth() : undefined;
 
 export const adminDb: Firestore | undefined =
-  !ADMIN_BYPASS && serviceAccountKey && parsedCredentials ? getFirestore() : undefined;
+  !ADMIN_BYPASS && serviceAccountJson && parsedCredentials ? getFirestore() : undefined;
 
 /** Quick status helper (never throws) */
 export function isAdminSdkAvailable(): boolean {
@@ -120,8 +127,10 @@ export function isAdminSdkAvailable(): boolean {
  * Use for type-safety and DX.
  */
 export function getAdminAuth(): Auth {
-  if (!adminAuth) throw new Error("Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY missing/invalid or ADMIN_BYPASS enabled.");
-  return adminAuth;
+  if (!adminAuth)
+    throw new Error(
+      "Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY/FIREBASE_SERVICE_ACCOUNT_JSON missing/invalid or ADMIN_BYPASS enabled."
+    );
 }
 
 /**
@@ -129,8 +138,10 @@ export function getAdminAuth(): Auth {
  * Use for type-safety and DX.
  */
 export function getAdminDb(): Firestore {
-  if (!adminDb) throw new Error("Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY missing/invalid or ADMIN_BYPASS enabled.");
-  return adminDb;
+  if (!adminDb)
+    throw new Error(
+      "Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY/FIREBASE_SERVICE_ACCOUNT_JSON missing/invalid or ADMIN_BYPASS enabled."
+    );
 }
 
 /* ------------------------------------------------------------------ */

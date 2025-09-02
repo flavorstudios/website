@@ -49,6 +49,9 @@ pnpm e2e    # run end-to-end Playwright tests (admin dashboard login)
 pnpm build  # create an optimized production build
 pnpm start  # run the production server
 
+> Tip: set `SKIP_ENV_VALIDATION=true` or `ADMIN_BYPASS=true` to bypass the
+> Firebase Admin env check when admin features aren't needed.
+
 To run a single test file:
 
 pnpm test tests/validate-session.spec.ts
@@ -95,6 +98,23 @@ you must also supply Firebase Admin credentials:
 
 Without these variables the Firebase Admin SDK remains disabled, and preview pages
 will show a friendly message instead of crashing.
+
+If these admin features aren't needed (for example in CI), set
+`SKIP_ENV_VALIDATION=true` or `ADMIN_BYPASS=true` to skip the service-account
+environment check during build.
+
+`pnpm build` runs `scripts/validate-env.ts` to verify this configuration. The build
+fails unless either `FIREBASE_SERVICE_ACCOUNT_KEY` or `FIREBASE_SERVICE_ACCOUNT_JSON`
+is set and `FIREBASE_STORAGE_BUCKET` matches `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`.
+
+Add them to `.env.local`, for example:
+
+```bash
+FIREBASE_SERVICE_ACCOUNT_JSON='{"project_id":"my-project","private_key":"-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n","client_email":"firebase-adminsdk@my-project.iam.gserviceaccount.com"}'
+FIREBASE_STORAGE_BUCKET=my-project.appspot.com
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=my-project.appspot.com
+```
+
 
 Cookie Consent Banner
 

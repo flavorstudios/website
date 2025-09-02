@@ -36,4 +36,6 @@ describe("firebase-admin env loading", () => {
   it("initializes with FIREBASE_SERVICE_ACCOUNT_JSON", async () => {
     process.env.FIREBASE_SERVICE_ACCOUNT_JSON = JSON.stringify(serviceAccount);
     const { isAdminSdkAvailable } = await import("../firebase-admin");
+    expect(isAdminSdkAvailable()).toBe(true);
+  });
 });

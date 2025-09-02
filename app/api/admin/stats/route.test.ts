@@ -46,33 +46,44 @@ describe("GET /api/admin/stats", () => {
       get: jest.fn().mockResolvedValue({ data: () => ({ views: n }) }),
     });
 
+    const query = (n: number) => ({
+      where: () => query(n),
+      count: () => count(n),
+    });
+
     const collection = (name: string) => {
       if (name === "blogs") {
         return {
           count: () => count(counts.blogs),
           aggregate: () => sum(counts.viewsBlogs),
-          where: () => ({ count: () => count(counts.published) }),
+          where: (field: string) =>
+            field === "status" ? query(counts.published) : query(counts.blogs),
         };
       }
       if (name === "videos") {
         return {
           count: () => count(counts.videos),
           aggregate: () => sum(counts.viewsVideos),
-          where: () => ({ count: () => count(counts.featured) }),
+          where: (field: string) =>
+            field === "featured" ? query(counts.featured) : query(counts.videos),
         };
       }
       if (name === "comments") {
         return {
           count: () => count(counts.comments),
-          where: () => ({ count: () => count(counts.pending) }),
+          where: (field: string) =>
+            field === "approved" ? query(counts.pending) : query(counts.comments),
         };
       }
-      return { count: () => count(0) };
+      return { count: () => count(0), where: () => query(0) };
     };
 
-    const collectionGroup = () => ({
-      where: () => ({ count: () => count(0) }),
-    });
+    const collectionGroup = (name: string) => {
+      if (name === "entries") {
+        return { where: () => query(counts.comments) };
+      }
+      return { where: () => query(0) };
+    };
 
     return { collection, collectionGroup };
   }

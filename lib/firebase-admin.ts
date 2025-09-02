@@ -6,17 +6,15 @@ import { getAuth, Auth } from "firebase-admin/auth";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
 import type { ServiceAccount } from "firebase-admin"; // Strict type import
 import { serverEnv } from "@/env/server";
+import { logger, debug } from "@/lib/logger";
 
 // Allow e2e/CI to short-circuit any admin boot (actual auth bypass is implemented in lib/admin-auth.ts)
 export const ADMIN_BYPASS = serverEnv.ADMIN_BYPASS === "true";
 
-// Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
-const debug = serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
-
 // === EARLY LOGS FOR ENV DEBUGGING ===
 if (debug) {
-  console.log("[ENV] ADMIN_EMAIL:", serverEnv.ADMIN_EMAIL);
-  console.log("[ENV] ADMIN_EMAILS:", serverEnv.ADMIN_EMAILS);
+  logger.debug("[ENV] ADMIN_EMAIL:", serverEnv.ADMIN_EMAIL);
+  logger.debug("[ENV] ADMIN_EMAILS:", serverEnv.ADMIN_EMAILS);
 }
 
 // 🔐 Retrieve the service account JSON from env
@@ -35,10 +33,10 @@ let parsedCredentials: ServiceAccount | null = null;
 
 // If we're in bypass mode, skip any initialization work entirely.
 if (ADMIN_BYPASS) {
-  if (debug) console.warn("[Firebase Admin] ADMIN_BYPASS=true — skipping Admin SDK initialization.");
+  if (debug) logger.warn("[Firebase Admin] ADMIN_BYPASS=true — skipping Admin SDK initialization.");
 } else if (!serviceAccountJson) {
   if (debug) {
-    console.warn(
+    logger.warn(
       "[Firebase Admin] FIREBASE_SERVICE_ACCOUNT_KEY/FIREBASE_SERVICE_ACCOUNT_JSON not set. Admin features are disabled."
     );
   }
@@ -55,15 +53,15 @@ if (ADMIN_BYPASS) {
           serverEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       });
       if (debug) {
-        console.log("[Firebase Admin] Firebase Admin initialized successfully.");
-        console.log(
+        logger.debug("[Firebase Admin] Firebase Admin initialized successfully.");
+        logger.debug(
           "[Firebase Admin] Using storage bucket:",
           serverEnv.FIREBASE_STORAGE_BUCKET || serverEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
         );
       }
     }
   } catch (error) {
-    console.error(
+    logger.error(
       "[Firebase Admin] Failed to parse Firebase service account JSON:",
       error
     );
@@ -74,9 +72,9 @@ if (ADMIN_BYPASS) {
 
 if (debug) {
   if (!adminEmailsEnv && !ADMIN_BYPASS) {
-    console.warn("[Firebase Admin] Warning: ADMIN_EMAIL or ADMIN_EMAILS environment variable is missing. Admin routes will deny all access!");
+    logger.warn("[Firebase Admin] Warning: ADMIN_EMAIL or ADMIN_EMAILS environment variable is missing. Admin routes will deny all access!");
   }
-  console.log("[Firebase Admin] STARTUP Loaded ADMIN_EMAILS/ADMIN_EMAIL:", adminEmailsEnv);
+  logger.debug("[Firebase Admin] STARTUP Loaded ADMIN_EMAILS/ADMIN_EMAIL:", adminEmailsEnv);
 }
 
 /**
@@ -89,11 +87,11 @@ export const getAllowedAdminEmails = (): string[] => {
     .filter(Boolean);
 
   if (debug) {
-    console.log("[Firebase Admin] DEBUG_ADMIN enabled");
-    console.log("[Firebase Admin] Loaded ADMIN_EMAILS:", serverEnv.ADMIN_EMAILS);
-    console.log("[Firebase Admin] Loaded ADMIN_EMAIL:", serverEnv.ADMIN_EMAIL);
-    console.log("[Firebase Admin] Final allowed admin emails:", allowedEmails);
-    console.log(
+    logger.debug("[Firebase Admin] DEBUG_ADMIN enabled");
+    logger.debug("[Firebase Admin] Loaded ADMIN_EMAILS:", serverEnv.ADMIN_EMAILS);
+    logger.debug("[Firebase Admin] Loaded ADMIN_EMAIL:", serverEnv.ADMIN_EMAIL);
+    logger.debug("[Firebase Admin] Final allowed admin emails:", allowedEmails);
+    logger.debug(
       "[ENV DUMP]",
       JSON.stringify(
         {
@@ -131,8 +129,8 @@ export function getAdminAuth(): Auth {
     throw new Error(
       "Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY/FIREBASE_SERVICE_ACCOUNT_JSON missing/invalid or ADMIN_BYPASS enabled."
     );
+  return adminAuth;  
 }
-return adminAuth;
 
 /**
  * Safe getter for adminDb that throws with a clear error if unavailable.
@@ -143,8 +141,8 @@ export function getAdminDb(): Firestore {
     throw new Error(
       "Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY/FIREBASE_SERVICE_ACCOUNT_JSON missing/invalid or ADMIN_BYPASS enabled."
     );
+  return adminDb;  
 }
-return adminDb;
 
 /* ------------------------------------------------------------------ */
 /* Back-compat aliases (fixes imports expecting `safeAdminDb/Auth`)   */

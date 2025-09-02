@@ -14,7 +14,7 @@ const customJestConfig = {
   // Allow a single Jest spec in the Playwright tests directory
   testPathIgnorePatterns: [
     '<rootDir>/functions/',
-    '<rootDir>/tests/(?!validate-session\\.spec\\.ts$).*',
+    '<rootDir>/tests/(?!validate-session\\.spec\\.ts$|firebase-admin\\.test\\.ts$).*',
     '<rootDir>/styles/tests/',
   ],
 }

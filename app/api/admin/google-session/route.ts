@@ -73,13 +73,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
     const expiryDate = new Date(Date.now() + expiresIn);
 
+    const cookieDomain =
+      serverEnv.NODE_ENV === "production" ? serverEnv.ADMIN_COOKIE_DOMAIN : undefined;
+
     const cookieOptions = {
       httpOnly: true,
       secure: true,
       sameSite: "lax" as const, // use "none" with secure: true if you have cross-site flows
       path: "/",
-      domain: ".flavorstudios.in",
-      };
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
+    };
 
     // Set secure cookie attributes for admin-session
     const res = NextResponse.json({ ok: true, expiresAt: expiryDate.toISOString(), expiryDays });

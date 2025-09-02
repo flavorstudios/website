@@ -139,8 +139,13 @@ export async function verifyAdminSession(
 
   // Fallback: try JWT (for email/password logins)
   if (!decoded) {
+    const secret = serverEnv.ADMIN_JWT_SECRET;
+    if (!secret) {
+      const err = new Error("Missing ADMIN_JWT_SECRET");
+      logError("admin-auth: verifyAdminSession (missing secret)", err);
+      throw err;
+    }
     try {
-      const secret = serverEnv.ADMIN_JWT_SECRET || "";
       decoded = jwt.verify(sessionCookie, secret) as jwt.JwtPayload;
       if (debug) {
         console.log("[admin-auth] JWT session verified for:", decoded.email);

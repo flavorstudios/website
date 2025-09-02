@@ -8,6 +8,7 @@ import 'server-only';
 export const serverEnv: Record<string, string | undefined> & {
   ADMIN_AUTH_DISABLED: string | undefined;
   ADMIN_BYPASS: string | undefined;
+  ADMIN_COOKIE_DOMAIN: string | undefined;
   ADMIN_DOMAIN: string | undefined;
   ADMIN_EMAIL: string | undefined;
   ADMIN_EMAILS: string | undefined;
@@ -46,6 +47,7 @@ export const serverEnv: Record<string, string | undefined> & {
 } = {
   ADMIN_AUTH_DISABLED: process.env.ADMIN_AUTH_DISABLED,
   ADMIN_BYPASS: process.env.ADMIN_BYPASS,
+  ADMIN_COOKIE_DOMAIN: process.env.ADMIN_COOKIE_DOMAIN,
   ADMIN_DOMAIN: process.env.ADMIN_DOMAIN,
   ADMIN_EMAIL: process.env.ADMIN_EMAIL,
   ADMIN_EMAILS: process.env.ADMIN_EMAILS,

@@ -30,6 +30,7 @@ jobs:
 
       - name: Build
         env:
+          SKIP_ENV_VALIDATION: "true"
           NEXT_PUBLIC_FIREBASE_API_KEY: stub
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: stub.firebaseapp.com
           NEXT_PUBLIC_FIREBASE_PROJECT_ID: stub

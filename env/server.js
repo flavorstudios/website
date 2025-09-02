@@ -12,4 +12,5 @@ export var serverEnv = {
     NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
     BING_API_KEY: process.env.BING_API_KEY,
     INDEXNOW_KEY: process.env.INDEXNOW_KEY,
+    ADMIN_COOKIE_DOMAIN: process.env.ADMIN_COOKIE_DOMAIN,
 };

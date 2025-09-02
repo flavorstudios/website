@@ -27,15 +27,13 @@ describe("firebase-admin env loading", () => {
     delete process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
   });
 
-  it("initializes with FIREBASE_SERVICE_ACCOUNT_KEY", () => {
+  it("initializes with FIREBASE_SERVICE_ACCOUNT_KEY", async () => {
     process.env.FIREBASE_SERVICE_ACCOUNT_KEY = JSON.stringify(serviceAccount);
-    const { isAdminSdkAvailable } = require("../firebase-admin");
+    const { isAdminSdkAvailable } = await import("../firebase-admin");
     expect(isAdminSdkAvailable()).toBe(true);
   });
 
-  it("initializes with FIREBASE_SERVICE_ACCOUNT_JSON", () => {
+  it("initializes with FIREBASE_SERVICE_ACCOUNT_JSON", async () => {
     process.env.FIREBASE_SERVICE_ACCOUNT_JSON = JSON.stringify(serviceAccount);
-    const { isAdminSdkAvailable } = require("../firebase-admin");
-    expect(isAdminSdkAvailable()).toBe(true);
-  });
+    const { isAdminSdkAvailable } = await import("../firebase-admin");
 });

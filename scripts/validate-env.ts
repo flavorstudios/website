@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 
 config({ path: ".env.local" });
 
+const { serverEnv } = await import("@/env/server");
+
 const exampleEnv = parse(readFileSync("env.example", "utf8"));
 const required = Object.keys(exampleEnv).filter((key) => key.startsWith("FIREBASE_"));
 
@@ -17,10 +19,13 @@ if (serverEnv.FIREBASE_STORAGE_BUCKET !== process.env.NEXT_PUBLIC_FIREBASE_STORA
   );
 }
 
-if (FIREBASE_STORAGE_BUCKET !== NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) {
+if (
+  process.env.FIREBASE_STORAGE_BUCKET !==
+  process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+) {
   throw new Error(
     `FIREBASE_STORAGE_BUCKET must match NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET.\n` +
-      `FIREBASE_STORAGE_BUCKET: ${FIREBASE_STORAGE_BUCKET}\n` +
+      `FIREBASE_STORAGE_BUCKET: ${process.env.FIREBASE_STORAGE_BUCKET}\n` +
       `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}`
   );
 }

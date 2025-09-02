@@ -89,7 +89,7 @@ Use `.env.example` as a reference for the correct variable names and structure.
 To use admin-only features (e.g., the dashboard or preview pages) in production,
 you must also supply Firebase Admin credentials:
 
-- `FIREBASE_SERVICE_ACCOUNT_KEY` – service account JSON as a single-line string.
+`FIREBASE_SERVICE_ACCOUNT_KEY` – service account JSON as a single-line string. `FIREBASE_SERVICE_ACCOUNT_JSON` may be used instead; only one is required.
 - `FIREBASE_STORAGE_BUCKET` – must match the client `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`.
 - `ADMIN_EMAIL` or `ADMIN_EMAILS` – comma-separated list of allowed admin logins.
 

@@ -2,8 +2,8 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  // Exclude Jest-only spec from Playwright runs
-  testIgnore: ['validate-session.spec.ts'],
+  // Exclude Jest-only tests from Playwright runs
+  testIgnore: ['validate-session.spec.ts', 'firebase-admin.test.ts'],
   timeout: 30000,
   retries: 0,
   webServer: {

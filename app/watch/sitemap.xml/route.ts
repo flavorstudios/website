@@ -33,9 +33,15 @@ interface ContentPage {
 export async function GET() {
   try {
     // --- Fetch videos via PUBLIC API ---
-    const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL;
-    const videosRes = await fetch(`${baseUrl}/api/videos`);
-    const videos: ContentPage[] = videosRes.ok ? await videosRes.json() : [];
+    let videos: ContentPage[] = [];
+    try {
+      const res = await fetch(`${BASE_URL}/api/videos`);
+      if (res.ok) {
+        videos = await res.json();
+      }
+    } catch (err) {
+      console.error("Failed to fetch videos for sitemap:", err);
+    }
 
     // Always include the root /watch page
     const videoPages: SitemapUrl[] = [

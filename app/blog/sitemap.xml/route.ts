@@ -28,9 +28,15 @@ interface ContentPage {
 export async function GET() {
   try {
     // --- Fetch blogs via PUBLIC API ---
-    const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL;
-    const blogsRes = await fetch(`${baseUrl}/api/blogs`);
-    const blogs: ContentPage[] = blogsRes.ok ? await blogsRes.json() : [];
+    let blogs: ContentPage[] = [];
+    try {
+      const res = await fetch(`${BASE_URL}/api/blogs`);
+      if (res.ok) {
+        blogs = await res.json();
+      }
+    } catch (err) {
+      console.error("Failed to fetch blogs for sitemap:", err);
+    }
 
     // Always include root /blog
     const blogPages: SitemapUrl[] = [

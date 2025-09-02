@@ -29,13 +29,25 @@ interface ContentPage {
 export async function GET() {
   try {
     // --- Fetch published blogs and videos via PUBLIC API ---
-    const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL;
-    const [blogsRes, videosRes] = await Promise.all([
-      fetch(`${baseUrl}/api/blogs`),
-      fetch(`${baseUrl}/api/videos`),
-    ]);
-    const blogs: ContentPage[] = blogsRes.ok ? await blogsRes.json() : [];
-    const videos: ContentPage[] = videosRes.ok ? await videosRes.json() : [];
+    let blogs: ContentPage[] = [];
+    let videos: ContentPage[] = [];
+    try {
+      const res = await fetch(`${BASE_URL}/api/blogs`);
+      if (res.ok) {
+        blogs = await res.json();
+      }
+    } catch (err) {
+      console.error("Failed to fetch blogs for sitemap:", err);
+    }
+
+    try {
+      const res = await fetch(`${BASE_URL}/api/videos`);
+      if (res.ok) {
+        videos = await res.json();
+      }
+    } catch (err) {
+      console.error("Failed to fetch videos for sitemap:", err);
+    }
 
     // Blogs (relative URLs only!)
     const blogPages: SitemapUrl[] = (blogs as ContentPage[])

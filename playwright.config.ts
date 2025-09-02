@@ -22,6 +22,7 @@ export default defineConfig({
       // Bypass admin auth in tests (pair this with server-side check)
       ADMIN_BYPASS: 'true',
       ADMIN_AUTH_DISABLED: '1',
+      ADMIN_JWT_SECRET: 'test-secret',
 
       // Public Firebase envs (test placeholders)
       NEXT_PUBLIC_FIREBASE_API_KEY: 'test',

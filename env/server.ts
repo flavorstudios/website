@@ -44,6 +44,7 @@ export const serverEnv: Record<string, string | undefined> & {
   SMTP_USER: string | undefined;
   VAPID_PRIVATE_KEY: string | undefined;
   VAPID_PUBLIC_KEY: string | undefined;
+  TEST_MODE: string | undefined;
 } = {
   ADMIN_AUTH_DISABLED: process.env.ADMIN_AUTH_DISABLED,
   ADMIN_BYPASS: process.env.ADMIN_BYPASS,
@@ -83,6 +84,7 @@ export const serverEnv: Record<string, string | undefined> & {
   SMTP_USER: process.env.SMTP_USER,
   VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
   VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY,
+  TEST_MODE: process.env.TEST_MODE,
 };
 
 export type ServerEnv = typeof serverEnv;

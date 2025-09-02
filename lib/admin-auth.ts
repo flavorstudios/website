@@ -18,6 +18,11 @@ import { serverEnv } from "@/env/server";
 const debug =
   serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
 
+  // Combined flag to short-circuit all auth checks when either bypass is enabled
+// or auth is explicitly disabled via environment variable.
+export const DISABLE_AUTH =
+  ADMIN_BYPASS || serverEnv.ADMIN_AUTH_DISABLED === "1";
+
 // Parse allowed admin domain from env
 function getAllowedAdminDomain(): string | null {
   const domain = serverEnv.ADMIN_DOMAIN || "";
@@ -108,9 +113,11 @@ function bypassAdmin(): VerifiedAdmin {
 export async function verifyAdminSession(
   sessionCookie: string
 ): Promise<VerifiedAdmin> {
-  if (ADMIN_BYPASS) {
+  if (DISABLE_AUTH) {
     if (debug)
-      console.warn("[admin-auth] ADMIN_BYPASS=true — skipping verification.");
+      console.warn(
+        "[admin-auth] DISABLE_AUTH=true — skipping verification."
+      );
     return bypassAdmin();
   }
 
@@ -186,9 +193,11 @@ export async function verifyAdminSession(
 export async function getSessionAndRole(
   req: NextRequest
 ): Promise<VerifiedAdmin | null> {
-  if (ADMIN_BYPASS) {
+  if (DISABLE_AUTH) {
     if (debug)
-      console.warn("[admin-auth] ADMIN_BYPASS=true — returning bypass session.");
+      console.warn(
+        "[admin-auth] DISABLE_AUTH=true — returning bypass session."
+      );
     return bypassAdmin();
   }
 
@@ -215,9 +224,11 @@ export async function getSessionAndRole(
 export async function getSessionInfo(
   req: NextRequest
 ): Promise<VerifiedAdmin | null> {
-  if (ADMIN_BYPASS) {
+  if (DISABLE_AUTH) {
     if (debug)
-      console.warn("[admin-auth] ADMIN_BYPASS=true — returning bypass session.");
+      console.warn(
+        "[admin-auth] DISABLE_AUTH=true — returning bypass session."
+      );
     return bypassAdmin();
   }
 
@@ -236,10 +247,10 @@ export async function requireAdmin(
   req: NextRequest,
   permission?: keyof import("./role-permissions").RolePermissions
 ): Promise<boolean> {
-  if (ADMIN_BYPASS) {
+  if (DISABLE_AUTH) {
     if (debug)
       console.warn(
-        "[admin-auth] ADMIN_BYPASS=true — requireAdmin returns true."
+        "[admin-auth] DISABLE_AUTH=true — requireAdmin returns true."
       );
     return true;
   }
@@ -273,10 +284,10 @@ export async function requireAdmin(
 export async function requireAdminAction(
   permission?: keyof import("./role-permissions").RolePermissions
 ): Promise<boolean> {
-  if (ADMIN_BYPASS) {
+  if (DISABLE_AUTH) {
     if (debug)
       console.warn(
-        "[admin-auth] ADMIN_BYPASS=true — requireAdminAction returns true."
+        "[admin-auth] DISABLE_AUTH=true — requireAdminAction returns true."
       );
     return true;
   }
@@ -314,10 +325,10 @@ export async function createSessionCookieFromIdToken(
   idToken: string,
   expiresIn: number
 ): Promise<string> {
-  if (ADMIN_BYPASS) {
+  if (DISABLE_AUTH) {
     if (debug)
       console.warn(
-        "[admin-auth] ADMIN_BYPASS=true — returning fake session cookie."
+        "[admin-auth] DISABLE_AUTH=true — returning fake session cookie."
       );
     const cookieStore = await cookies();
     cookieStore.set("admin-session", "bypass", {

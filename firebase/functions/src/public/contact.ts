@@ -2,7 +2,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import { setGlobalOptions } from "firebase-functions/v2";
 import * as admin from "firebase-admin";
 import nodemailer from "nodemailer";
-import { serverEnv } from "../../../env/server";
+import { serverEnv } from "../../../../env/server";
 
 setGlobalOptions({ region: "us-central1" });
 

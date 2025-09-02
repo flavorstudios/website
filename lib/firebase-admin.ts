@@ -132,6 +132,7 @@ export function getAdminAuth(): Auth {
       "Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY/FIREBASE_SERVICE_ACCOUNT_JSON missing/invalid or ADMIN_BYPASS enabled."
     );
 }
+return adminAuth;
 
 /**
  * Safe getter for adminDb that throws with a clear error if unavailable.
@@ -143,6 +144,7 @@ export function getAdminDb(): Firestore {
       "Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY/FIREBASE_SERVICE_ACCOUNT_JSON missing/invalid or ADMIN_BYPASS enabled."
     );
 }
+return adminDb;
 
 /* ------------------------------------------------------------------ */
 /* Back-compat aliases (fixes imports expecting `safeAdminDb/Auth`)   */

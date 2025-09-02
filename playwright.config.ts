@@ -15,6 +15,10 @@ export default defineConfig({
     env: {
       PORT: '3000',
 
+      NEXT_PUBLIC_BASE_URL: 'http://127.0.0.1:3000',
+      BASE_URL: 'http://127.0.0.1:3000',
+      NEXTAUTH_URL: 'http://127.0.0.1:3000',
+
       // Bypass admin auth in tests (pair this with server-side check)
       ADMIN_BYPASS: 'true',
       ADMIN_AUTH_DISABLED: '1',

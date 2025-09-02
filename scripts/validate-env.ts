@@ -1,6 +1,6 @@
 import { config, parse } from "dotenv";
 import { readFileSync } from "node:fs";
-import { serverEnv } from "../env/server";
+import { serverEnv } from "../env/server.js";
 
 config({ path: ".env.local" });
 

@@ -1,5 +1,7 @@
 // lib/prisma.ts
 
+import { serverEnv } from "@/env/server";
+
 // Minimal local type so builds don’t require @prisma/client
 export type PrismaClientLike = {
   post: { count: () => Promise<number> };
@@ -40,7 +42,7 @@ export async function getPrisma(): Promise<PrismaClientLike> {
   if (!prismaPromise) {
     prismaPromise = (async () => {
       const client = await createPrisma();
-      if (process.env.NODE_ENV !== "production") {
+      if (serverEnv.NODE_ENV !== "production") {
         g.__prisma = client;
       }
       return client;

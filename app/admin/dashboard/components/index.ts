@@ -9,7 +9,7 @@ import EmailInbox from "./email-inbox";
 import MediaLibrary from "./media/MediaLibrary";
 import CareerApplications from "./career-applications";
 import SystemSettings from "./system-settings";
-import { clientEnv } from "@/env/client";
+import { clientEnv } from "@/env.client";
 
 export {
   DashboardOverview,

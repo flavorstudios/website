@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { clientEnv } from '@/env/client';
+import { clientEnv } from '@/env.client';
 
 export default function PwaServiceWorker() {
   const [updateAvailable, setUpdateAvailable] = useState(false);

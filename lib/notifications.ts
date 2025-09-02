@@ -1,4 +1,5 @@
 import { createHash } from "crypto";
+import { serverEnv } from "@/env/server";
 
 export interface Notification {
   id: string;
@@ -98,9 +99,9 @@ let service: NotificationsProvider | null = null;
 
 export function getNotificationsService(): NotificationsProvider {
   if (service) return service;
-  if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
+  if (serverEnv.NEXT_PUBLIC_FIREBASE_API_KEY) {
     service = new InMemoryProvider("fcm");
-  } else if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  } else if (serverEnv.VAPID_PUBLIC_KEY && serverEnv.VAPID_PRIVATE_KEY) {
     service = new InMemoryProvider("webpush");
   } else {
     service = new InMemoryProvider("db");

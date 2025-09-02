@@ -1,11 +1,12 @@
 import { parseStringPromise } from 'xml2js'; // Correct ES module import
 import dotenv from 'dotenv'; // Correct ES module import
+import { serverEnv } from '../env/server.js';
 
 dotenv.config();
 
-const apiKey = process.env.BING_API_KEY;
-const indexnowKey = process.env.INDEXNOW_KEY;
-let siteUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL;
+const apiKey = serverEnv.BING_API_KEY;
+const indexnowKey = serverEnv.INDEXNOW_KEY;
+let siteUrl = serverEnv.BASE_URL || serverEnv.NEXT_PUBLIC_BASE_URL;
 
 if (!siteUrl) {
     console.error("❌ siteUrl is undefined. Please set BASE_URL or NEXT_PUBLIC_BASE_URL in your .env file.");

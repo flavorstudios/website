@@ -3,6 +3,7 @@
 import { getAdminDb } from "@/lib/firebase-admin";
 import { randomUUID } from "crypto";
 import type { PerspectiveResponse } from "@/types/perspective";
+import { serverEnv } from "@/env/server";
 
 // --- Define and export Comment type ---
 interface BaseComment {
@@ -80,7 +81,7 @@ export const commentStore = {
   async create(
     comment: Omit<Comment, "id" | "createdAt" | "status" | "scores">
   ): Promise<Comment> {
-    const PERSPECTIVE_API_KEY = process.env.PERSPECTIVE_API_KEY;
+    const PERSPECTIVE_API_KEY = serverEnv.PERSPECTIVE_API_KEY;
     const THRESHOLD = 0.75;
 
     // --- Perspective Moderation ---

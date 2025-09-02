@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { serverEnv } from "@/env/server";
 // Node.js-specific admin auth utilities are not imported here because
 // middleware runs in the Edge runtime by default. Any sensitive session
 // verification should be handled server-side within API routes.
@@ -51,7 +52,7 @@ function getRequestIp(request: NextRequest): string {
 
 export async function middleware(request: NextRequest) {
   // 🔓 Test/CI bypass: allow all when explicitly disabled (Codex suggestion)
-  if (process.env.ADMIN_AUTH_DISABLED === "1") {
+  if (serverEnv.ADMIN_AUTH_DISABLED === "1") {
     return NextResponse.next();
   }
 

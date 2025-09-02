@@ -1,3 +1,5 @@
+import { clientEnv } from "@/env.client";
+
 export type UserRole = string
 
 export interface RolePermissions {
@@ -50,7 +52,7 @@ export const defaultRolePermissions: Record<string, RolePermissions> = {
 
 let customRolePermissions: Record<string, RolePermissions> = {}
 try {
-  const raw = process.env.CUSTOM_ROLE_PERMISSIONS || process.env.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS
+  const raw = clientEnv.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS
   if (raw) {
     customRolePermissions = JSON.parse(raw)
   }

@@ -2,9 +2,10 @@ import { onRequest } from "firebase-functions/v2/https";
 import { db } from "../config";
 import { FieldValue } from "firebase-admin/firestore";
 import nodemailer from "nodemailer";
+import { serverEnv } from "../../../env/server";
 
 // Config variables (Firebase environment)
-const config = process.env.FUNCTIONS_EMULATOR
+const config = serverEnv.FUNCTIONS_EMULATOR
   ? require("firebase-functions").config()
   : (global as any).firebaseConfig || {};
 const PERSPECTIVE_API_KEY = config.perspective?.key as string;

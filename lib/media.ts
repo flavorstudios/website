@@ -6,6 +6,7 @@ import { safeAdminDb } from "@/lib/firebase-admin"; // value (Firestore | undefi
 import type { MediaDoc, MediaVariant } from "@/types/media";
 import crypto from "node:crypto";
 import type { Sharp } from "sharp";
+import { serverEnv } from "@/env/server";
 
 /**
  * IMPORTANT:
@@ -34,8 +35,8 @@ function genId() {
 
 /** Read bucket name from env (server preferred, then public). */
 function getConfiguredBucketName(): string {
-  const serverBucket = process.env.FIREBASE_STORAGE_BUCKET;
-  const publicBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+  const serverBucket = serverEnv.FIREBASE_STORAGE_BUCKET;
+  const publicBucket = serverEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
 
   if (!serverBucket && !publicBucket) {
     throw new Error(

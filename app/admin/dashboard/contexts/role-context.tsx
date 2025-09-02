@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { type UserRole, hasPermission, getAccessibleSections, type RolePermissions } from "@/lib/role-permissions"
-import { clientEnv } from "@/env/client"
+import { clientEnv } from "@/env.client"
 
 interface RoleContextType {
   userRole: UserRole

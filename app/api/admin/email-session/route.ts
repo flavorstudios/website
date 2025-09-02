@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     if (!isEmailAllowed(email)) {
       return NextResponse.json({ error: "Authentication failed." }, { status: 401 })
     }
-    const hash = process.env.ADMIN_PASSWORD_HASH
+    const hash = serverEnv.ADMIN_PASSWORD_HASH
     if (!hash) {
       logError("email-session", "Missing ADMIN_PASSWORD_HASH")
       return NextResponse.json({ error: "Server error." }, { status: 500 })

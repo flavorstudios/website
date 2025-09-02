@@ -2,8 +2,9 @@
 
 // Import the necessary modules
 import bundleAnalyzer from '@next/bundle-analyzer';
+import { serverEnv } from './env/server.js';
 
-const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'true' });
+const withBundleAnalyzer = bundleAnalyzer({ enabled: serverEnv.ANALYZE === 'true' });
 
 // Next.js configuration
 /** @type {import('next').NextConfig} */

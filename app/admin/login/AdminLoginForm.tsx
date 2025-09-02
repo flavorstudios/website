@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Shield, Loader2, Sparkles } from "lucide-react"
 import EmailLoginForm from "./EmailLoginForm"
 import useAuthError from "@/hooks/useAuthError"
-import { clientEnv } from "@/env/client"
+import { clientEnv } from "@/env.client"
 
 // --- Firebase Auth (client-only getters) ---
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"

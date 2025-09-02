@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { HttpError } from '@/lib/http';
-import { clientEnv } from '@/env/client';
+import { clientEnv } from '@/env.client';
 
 type Loader<T> = () => Promise<T>;
 type Render<T> = (data: T) => React.ReactNode;

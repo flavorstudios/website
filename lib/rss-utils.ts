@@ -4,6 +4,7 @@ import { SITE_URL, SITE_NAME } from "@/lib/constants";
 import { getCanonicalUrl } from "@/lib/seo-utils";
 import fs from "fs";
 import path from "path";
+import { serverEnv } from "@/env/server";
 import type { BlogPost } from "@/lib/content-store";
 
 // ---- Video interface with categories? ----
@@ -103,15 +104,15 @@ export function truncateDescription(text: string, maxLength = 200): string {
 
 function getRssAdminContact(): string {
   return (
-    process.env.RSS_ADMIN_CONTACT ||
-    process.env.ADMIN_EMAILS?.split(",")[0]?.trim() ||
+    serverEnv.RSS_ADMIN_CONTACT ||
+    serverEnv.ADMIN_EMAILS?.split(",")[0]?.trim() ||
     "contact@flavorstudios.in"
   );
 }
 function getRssManagingEditor(): string {
   return (
-    process.env.RSS_MANAGING_EDITOR ||
-    process.env.ADMIN_EMAILS?.split(",")[0]?.trim() ||
+    serverEnv.RSS_MANAGING_EDITOR ||
+    serverEnv.ADMIN_EMAILS?.split(",")[0]?.trim() ||
     "editor@flavorstudios.in"
   );
 }
@@ -177,8 +178,8 @@ export async function generateRssFeed(): Promise<string> {
   try {
     // --- Fetch blogs and videos via PUBLIC API ---
     const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      process.env.BASE_URL ||
+      serverEnv.NEXT_PUBLIC_BASE_URL ||
+      serverEnv.BASE_URL ||
       SITE_URL ||
       "https://flavorstudios.in";
 

@@ -19,7 +19,7 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge" // Added for multi-category support
 import { formatDate } from "@/lib/date" // <-- Added
 import type { BlogPost } from "@/lib/content-store"
-import { clientEnv } from "@/env/client"
+import { clientEnv } from "@/env.client"
 
 interface Video {
   id: string

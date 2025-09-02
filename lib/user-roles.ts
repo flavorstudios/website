@@ -4,6 +4,7 @@ import {
   getAllowedAdminEmails,
 } from "@/lib/firebase-admin"
 import type { UserRole } from "@/lib/role-permissions"
+import { serverEnv } from "@/env/server"
 
 /**
  * Fetches the user's role from the Firestore 'roles' collection.
@@ -22,18 +23,18 @@ export async function getUserRole(uid: string, email?: string): Promise<UserRole
     const doc = await adminDb.collection("roles").doc(uid).get();
 
     if (!doc.exists) {
-      if (process.env.NODE_ENV !== "production") {
+      if (serverEnv.NODE_ENV !== "production") {
         console.warn(`[getUserRole] No role document found for UID: ${uid}`);
       }
       if (email) {
         const normalized = email.trim().toLowerCase();
         const allowed = getAllowedAdminEmails();
-        const allowedDomain = process.env.ADMIN_DOMAIN || "";
+        const allowedDomain = serverEnv.ADMIN_DOMAIN || "";
         if (
           allowed.includes(normalized) ||
           (allowedDomain && normalized.endsWith("@" + allowedDomain))
         ) {
-          if (process.env.NODE_ENV !== "production") {
+          if (serverEnv.NODE_ENV !== "production") {
             console.warn(
               `[getUserRole] Defaulting to admin based on allowed email ${email}`
             );
@@ -53,7 +54,7 @@ export async function getUserRole(uid: string, email?: string): Promise<UserRole
       return normalizedRole as UserRole;
     }
 
-    if (process.env.NODE_ENV !== "production") {
+    if (serverEnv.NODE_ENV !== "production") {
       console.warn(
         `[getUserRole] Unrecognized role value "${data?.role}" (normalized: "${normalizedRole}") for UID: ${uid}`
       );
@@ -79,7 +80,7 @@ export async function setUserRole(uid: string, role: UserRole): Promise<void> {
       .collection("roles")
       .doc(uid)
       .set({ role: role.toLowerCase() }, { merge: true });
-    if (process.env.NODE_ENV !== "production") {
+    if (serverEnv.NODE_ENV !== "production") {
       console.log(`[setUserRole] Set role "${role}" for UID: ${uid}`);
     }
   } catch (err) {

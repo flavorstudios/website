@@ -4,8 +4,10 @@
  * - error: The error object, string, or unknown (optional)
  * - Only logs in non-production; never leaks details to clients.
  */
+import { serverEnv } from "@/env/server";
+
 export function logError(context: string, error?: unknown) {
-  if (process.env.NODE_ENV !== "production") {
+  if (serverEnv.NODE_ENV !== "production") {
     const time = new Date().toISOString();
     if (typeof error === "undefined") {
       // Only context provided

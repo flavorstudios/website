@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from "react"
 import { onAuthStateChanged, signOut, User } from "firebase/auth"
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { clientEnv } from "@/env/client"
+import { clientEnv } from "@/env.client"
 
 // ---- Define Context Shape ----
 interface AdminAuthContextType {

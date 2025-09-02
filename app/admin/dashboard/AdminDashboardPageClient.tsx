@@ -30,7 +30,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { clientEnv } from "@/env/client";
+import { clientEnv } from "@/env.client";
 
 // Lazy sections via central registry
 const DashboardOverview = dynamic(

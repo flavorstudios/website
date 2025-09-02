@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { clientEnv } from '@/env/client';
+import { clientEnv } from '@/env.client';
 
 export class ErrorBoundary extends React.Component<
   { children: React.ReactNode },

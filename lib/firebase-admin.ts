@@ -5,25 +5,26 @@ import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth, Auth } from "firebase-admin/auth";
 import { getFirestore, Firestore } from "firebase-admin/firestore";
 import type { ServiceAccount } from "firebase-admin"; // Strict type import
+import { serverEnv } from "@/env/server";
 
 // Allow e2e/CI to short-circuit any admin boot (actual auth bypass is implemented in lib/admin-auth.ts)
-export const ADMIN_BYPASS = process.env.ADMIN_BYPASS === "true";
+export const ADMIN_BYPASS = serverEnv.ADMIN_BYPASS === "true";
 
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
-const debug = process.env.DEBUG_ADMIN === "true" || process.env.NODE_ENV !== "production";
+const debug = serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
 
 // === EARLY LOGS FOR ENV DEBUGGING ===
 if (debug) {
-  console.log("[ENV] ADMIN_EMAIL:", process.env.ADMIN_EMAIL);
-  console.log("[ENV] ADMIN_EMAILS:", process.env.ADMIN_EMAILS);
+  console.log("[ENV] ADMIN_EMAIL:", serverEnv.ADMIN_EMAIL);
+  console.log("[ENV] ADMIN_EMAILS:", serverEnv.ADMIN_EMAILS);
 }
 
 // 🔐 Retrieve the service account JSON from env
-const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+const serviceAccountKey = serverEnv.FIREBASE_SERVICE_ACCOUNT_KEY;
 
 // Accept ADMIN_EMAILS if it contains a real value; otherwise fall back to ADMIN_EMAIL
-const rawEmails = (process.env.ADMIN_EMAILS ?? "").trim();
-export const adminEmailsEnv = rawEmails !== "" ? rawEmails : process.env.ADMIN_EMAIL;
+const rawEmails = (serverEnv.ADMIN_EMAILS ?? "").trim();
+export const adminEmailsEnv = rawEmails !== "" ? rawEmails : serverEnv.ADMIN_EMAIL;
 
 // ======= ENVIRONMENT VARIABLE VALIDATION =======
 
@@ -46,14 +47,14 @@ if (ADMIN_BYPASS) {
       initializeApp({
         credential: cert(parsedCredentials),
         storageBucket:
-          process.env.FIREBASE_STORAGE_BUCKET ||
-          process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+          serverEnv.FIREBASE_STORAGE_BUCKET ||
+          serverEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       });
       if (debug) {
         console.log("[Firebase Admin] Firebase Admin initialized successfully.");
         console.log(
           "[Firebase Admin] Using storage bucket:",
-          process.env.FIREBASE_STORAGE_BUCKET || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+          serverEnv.FIREBASE_STORAGE_BUCKET || serverEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
         );
       }
     }
@@ -82,16 +83,16 @@ export const getAllowedAdminEmails = (): string[] => {
 
   if (debug) {
     console.log("[Firebase Admin] DEBUG_ADMIN enabled");
-    console.log("[Firebase Admin] Loaded ADMIN_EMAILS:", process.env.ADMIN_EMAILS);
-    console.log("[Firebase Admin] Loaded ADMIN_EMAIL:", process.env.ADMIN_EMAIL);
+    console.log("[Firebase Admin] Loaded ADMIN_EMAILS:", serverEnv.ADMIN_EMAILS);
+    console.log("[Firebase Admin] Loaded ADMIN_EMAIL:", serverEnv.ADMIN_EMAIL);
     console.log("[Firebase Admin] Final allowed admin emails:", allowedEmails);
     console.log(
       "[ENV DUMP]",
       JSON.stringify(
         {
-          ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-          ADMIN_EMAILS: process.env.ADMIN_EMAILS,
-          NODE_ENV: process.env.NODE_ENV,
+          ADMIN_EMAIL: serverEnv.ADMIN_EMAIL,
+          ADMIN_EMAILS: serverEnv.ADMIN_EMAILS,
+          NODE_ENV: serverEnv.NODE_ENV,
           ADMIN_BYPASS,
         },
         null,

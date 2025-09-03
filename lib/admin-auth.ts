@@ -109,14 +109,6 @@ function bypassAdmin(): VerifiedAdmin {
   };
 }
 
-// Checks for a server-only API key in the request headers
-function hasValidAdminApiKey(req: NextRequest): boolean {
-  const key = serverEnv.ADMIN_API_KEY;
-  if (!key) return false;
-  const header = req.headers.get("api-key") || req.headers.get("x-api-key");
-  return header === key;
-}
-
 // Verifies the session cookie (Firebase or JWT) and checks admin status.
 export async function verifyAdminSession(
   sessionCookie: string
@@ -209,10 +201,6 @@ export async function getSessionAndRole(
     return bypassAdmin();
   }
 
-  if (hasValidAdminApiKey(req)) {
-    return bypassAdmin();
-  }
-
   const sessionCookie = req.cookies.get("admin-session")?.value;
   if (!sessionCookie) return null;
   try {
@@ -244,10 +232,6 @@ export async function getSessionInfo(
     return bypassAdmin();
   }
 
-  if (hasValidAdminApiKey(req)) {
-    return bypassAdmin();
-  }
-
   const sessionCookie = req.cookies.get("admin-session")?.value;
   if (!sessionCookie) return null;
   try {
@@ -268,10 +252,6 @@ export async function requireAdmin(
       console.warn(
         "[admin-auth] DISABLE_AUTH=true — requireAdmin returns true."
       );
-    return true;
-  }
-
-  if (hasValidAdminApiKey(req)) {
     return true;
   }
 

@@ -85,6 +85,7 @@ export const serverEnv: Record<string, string | undefined> & {
   SMTP_PORT: process.env.SMTP_PORT,
   SMTP_SECURE: process.env.SMTP_SECURE,
   SMTP_USER: process.env.SMTP_USER,
+  VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
   VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY,
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,

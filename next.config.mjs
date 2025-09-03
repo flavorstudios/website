@@ -22,7 +22,7 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: '/admin/login',
         headers: [
           {
             key: 'Cross-Origin-Opener-Policy',

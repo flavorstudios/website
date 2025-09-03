@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import useAuthError from "@/hooks/useAuthError"
-export default function EmailLoginForm({ onCancel, apiKey }: { onCancel: () => void; apiKey?: string }) {
+export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
   const router = useRouter()
   const { error, setError } = useAuthError()
   const [email, setEmail] = useState("")
@@ -24,7 +24,6 @@ export default function EmailLoginForm({ onCancel, apiKey }: { onCancel: () => v
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "api-key": apiKey || "",
         },
         body: JSON.stringify({ email, password, otp }),
         credentials: "include",

@@ -9,12 +9,8 @@ import { serverEnv } from "@/env/server";
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
 const debug = serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
 
-export async function GET(req: NextRequest) {
+export async function GET(_req: NextRequest) {
   try {
-    const apiKey = req.headers.get("api-key");
-    if (apiKey !== serverEnv.ADMIN_API_KEY) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
     // Fix: Await cookies() as it's now async in Next.js 14+
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("admin-session")?.value;

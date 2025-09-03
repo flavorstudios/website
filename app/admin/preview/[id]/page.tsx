@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
-import { serverEnv } from "@/env/server";
 import { blogStore, type BlogPost } from "@/lib/content-store";
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
@@ -64,7 +63,7 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
   if (!post) {
     if (!adminSdkAvailable) {
       return (
-        <AdminAuthGuard apiKey={serverEnv.ADMIN_API_KEY}>
+        <AdminAuthGuard>
           <div className="p-8 text-center">
             <p className="text-gray-700">
               Firestore unavailable. Set <code>FIREBASE_SERVICE_ACCOUNT_KEY</code> to enable previews.
@@ -89,7 +88,7 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
   });
 
   return (
-    <AdminAuthGuard apiKey={serverEnv.ADMIN_API_KEY}>
+    <AdminAuthGuard>
       <div className="min-h-screen bg-gray-50">
         <StructuredData schema={articleSchema} />
         <BlogPostRenderer post={post} />

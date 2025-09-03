@@ -3,7 +3,6 @@
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import AdminLoginForm from "./AdminLoginForm";
-import { serverEnv } from "@/env/server";
 
 // --- SEO METADATA: Admin pages must be noindex, nofollow ---
 export const metadata = getMetadata({
@@ -45,5 +44,5 @@ export const viewport = {
 
 export default function AdminLoginPage() {
   // No client-side redirect or session check; handled by middleware!
-  return <AdminLoginForm apiKey={serverEnv.ADMIN_API_KEY} />;
+  return <AdminLoginForm />;
 }

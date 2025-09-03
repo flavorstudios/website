@@ -20,7 +20,6 @@ process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID = 'test'
 process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = 'test-bucket'
 process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID = 'test'
 process.env.NEXT_PUBLIC_FIREBASE_APP_ID = 'test'
-process.env.ADMIN_API_KEY = 'test-key'
 
 jest.mock('@/components/ui/calendar', () => ({
   Calendar: ({ onSelect }: { onSelect?: (date: Date) => void }) =>

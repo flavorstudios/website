@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-process.env.ADMIN_API_KEY = 'test-key';
 import { cookies } from 'next/headers';
 import { verifyAdminSession } from '@/lib/admin-auth';
 import { NextRequest } from 'next/server';
@@ -29,17 +28,13 @@ describe('GET /api/admin/validate-session', () => {
       const mod = await import('@/app/api/admin/validate-session/route');
       GET = mod.GET;
     });
-    const req = {
-      headers: new Headers({ 'api-key': 'test-key' }),
-    } as unknown as NextRequest;
-
-    const res = await GET(req);
+    const res = await GET({} as NextRequest);
     
     expect(res.status).toBe(401);
     expect(mockedVerify).not.toHaveBeenCalled();
   });
 
-  it('returns 401 when the api-key header is missing', async () => {
+  it('returns 200 when session cookie is valid', async () => {
     mockedCookies.mockResolvedValue({ get: () => ({ value: 'valid-cookie' }) });
     mockedVerify.mockResolvedValue({ uid: '1', role: 'admin', email: 'test@example.com' });
     let GET: (req: NextRequest) => Promise<any>;
@@ -47,13 +42,10 @@ describe('GET /api/admin/validate-session', () => {
       const mod = await import('@/app/api/admin/validate-session/route');
       GET = mod.GET;
     });
-    const req = {
-      headers: new Headers(),
-    } as unknown as NextRequest;
 
-    const res = await GET(req);
+    const res = await GET({} as NextRequest);
 
-    expect(res.status).toBe(401);
-    expect(mockedVerify).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    expect(mockedVerify).toHaveBeenCalledWith('valid-cookie');
   });
 });

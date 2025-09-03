@@ -10,10 +10,6 @@ const debug = serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "produc
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
-    const apiKey = req.headers.get("api-key");
-    if (apiKey !== serverEnv.ADMIN_API_KEY) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
     if (await requireAdmin(req)) {
       if (debug) {
         console.log("google-session: User already logged in as admin.");
@@ -82,7 +78,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const cookieOptions = {
       httpOnly: true,
-      secure: true,
+      secure: serverEnv.NODE_ENV === "production",
       sameSite: "lax" as const, // use "none" with secure: true if you have cross-site flows
       path: "/",
       ...(cookieDomain ? { domain: cookieDomain } : {}),

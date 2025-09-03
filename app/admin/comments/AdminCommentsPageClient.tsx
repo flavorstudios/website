@@ -3,9 +3,9 @@
 import AdminAuthGuard from "@/components/AdminAuthGuard";
 import CommentManager from "@/app/admin/dashboard/components/comment-manager";
 
-export default function AdminCommentsPageClient({ apiKey }: { apiKey?: string }) {
+export default function AdminCommentsPageClient() {
   return (
-    <AdminAuthGuard apiKey={apiKey}>
+    <AdminAuthGuard>
       <div className="p-4 md:p-8">
         <CommentManager />
       </div>

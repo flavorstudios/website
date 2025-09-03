@@ -12,34 +12,34 @@ type Status = "loading" | "authenticated" | "unauthenticated";
  * - Shows a login prompt if validation fails
  * - Renders children only when authenticated
  */
-export default function AdminAuthGuard({ children, apiKey }: { children: React.ReactNode; apiKey?: string }) {
+export default function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<Status>("loading");
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
 
     async function validate() {
       try {
         const res = await fetch("/api/admin/validate-session", {
           credentials: "include",
           cache: "no-store",
-          headers: { "api-key": apiKey || "" },
+          signal: controller.signal,
         });
         if (!cancelled) {
           setStatus(res.ok ? "authenticated" : "unauthenticated");
         }
       } catch {
         if (!cancelled) setStatus("unauthenticated");
-        
-        }
     }
 
     validate();
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
-  }, []);
+  }, [apiKey]);
 
   if (status === "loading") {
     return (

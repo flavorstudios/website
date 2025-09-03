@@ -3,7 +3,6 @@
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import BlogEditorPageClient from "./BlogEditorPageClient";
-import { serverEnv } from "@/env/server";
 
 // === SEO METADATA (ADMIN - NOINDEX) ===
 export const metadata = getMetadata({
@@ -36,5 +35,5 @@ export const metadata = getMetadata({
 
 // This server component simply renders the client component
 export default function BlogEditorPage() {
-  return <BlogEditorPageClient apiKey={serverEnv.ADMIN_API_KEY} />;
+  return <BlogEditorPageClient />;
 }

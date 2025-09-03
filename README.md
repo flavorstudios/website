@@ -95,6 +95,7 @@ you must also supply Firebase Admin credentials:
 `FIREBASE_SERVICE_ACCOUNT_KEY` – service account JSON as a single-line string. `FIREBASE_SERVICE_ACCOUNT_JSON` may be used instead; only one is required.
 - `FIREBASE_STORAGE_BUCKET` – must match the client `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`.
 - `ADMIN_EMAIL` or `ADMIN_EMAILS` – comma-separated list of allowed admin logins.
+`ADMIN_API_KEY` (optional) – server-only key for programmatic access to `/api/admin/*` routes. Browser requests rely on session cookies and do **not** require an API key.
 
 Without these variables the Firebase Admin SDK remains disabled, and preview pages
 will show a friendly message instead of crashing.

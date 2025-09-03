@@ -63,6 +63,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
     } catch (err: unknown) {
       logError("google-session: admin email unauthorized", err);
+      console.warn('[Auth] Denied Google sign-in for', decoded.email);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

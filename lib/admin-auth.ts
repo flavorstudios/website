@@ -77,9 +77,10 @@ function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
         allowedDomain,
         "for email:",
         normalizedEmail
-      );
+    );
     return true;
   }
+  console.warn('[Auth] Rejected admin email', normalizedEmail);
   if (debug) {
     console.warn(
       "[admin-auth] Rejected admin email:",

@@ -32,6 +32,7 @@ export const serverEnv: Record<string, string | undefined> & {
   NEXT_PUBLIC_FIREBASE_API_KEY: string | undefined;
   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: string | undefined;
   NEXT_PUBLIC_GTM_CONTAINER_ID: string | undefined;
+  NEXT_PUBLIC_API_KEY: string | undefined;
   NODE_ENV: string | undefined;
   NOTIFY_NEW_SUBMISSION: string | undefined;
   PERSPECTIVE_API_KEY: string | undefined;
@@ -44,6 +45,8 @@ export const serverEnv: Record<string, string | undefined> & {
   SMTP_USER: string | undefined;
   VAPID_PRIVATE_KEY: string | undefined;
   VAPID_PUBLIC_KEY: string | undefined;
+  UPSTASH_REDIS_REST_URL: string | undefined;
+  UPSTASH_REDIS_REST_TOKEN: string | undefined;
   TEST_MODE: string | undefined;
 } = {
   ADMIN_AUTH_DISABLED: process.env.ADMIN_AUTH_DISABLED,
@@ -72,6 +75,7 @@ export const serverEnv: Record<string, string | undefined> & {
   NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   NEXT_PUBLIC_GTM_CONTAINER_ID: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID,
+  NEXT_PUBLIC_API_KEY: process.env.NEXT_PUBLIC_API_KEY,
   NODE_ENV: process.env.NODE_ENV,
   NOTIFY_NEW_SUBMISSION: process.env.NOTIFY_NEW_SUBMISSION,
   PERSPECTIVE_API_KEY: process.env.PERSPECTIVE_API_KEY,
@@ -84,6 +88,8 @@ export const serverEnv: Record<string, string | undefined> & {
   SMTP_USER: process.env.SMTP_USER,
   VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
   VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY,
+  UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+  UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
   TEST_MODE: process.env.TEST_MODE,
 };
 

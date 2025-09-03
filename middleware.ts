@@ -3,44 +3,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { serverEnv } from "@/env/server";
+import {
+  incrementAttempts,
+  isRateLimited,
+  resetAttempts,
+} from "@/lib/rate-limit";
 // Node.js-specific admin auth utilities are not imported here because
 // middleware runs in the Edge runtime by default. Any sensitive session
 // verification should be handled server-side within API routes.
-
-// --- In-memory rate limiter (per Codex) ---
-type RateInfo = { count: number; lastAttempt: number };
-const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
-const MAX_FAILURES = 5;
-const rateMap: Map<string, RateInfo> =
-  (globalThis as { __adminRateMap?: Map<string, RateInfo> }).__adminRateMap ||
-  ((globalThis as { __adminRateMap?: Map<string, RateInfo> }).__adminRateMap = new Map<string, RateInfo>());
-
-function recordFailure(ip: string) {
-  const now = Date.now();
-  const info = rateMap.get(ip);
-  if (!info || now - info.lastAttempt > RATE_LIMIT_WINDOW) {
-    rateMap.set(ip, { count: 1, lastAttempt: now });
-    return 1;
-  }
-  info.count += 1;
-  info.lastAttempt = now;
-  rateMap.set(ip, info);
-  return info.count;
-}
-
-function isRateLimited(ip: string): boolean {
-  const info = rateMap.get(ip);
-  if (!info) return false;
-  if (Date.now() - info.lastAttempt > RATE_LIMIT_WINDOW) {
-    rateMap.delete(ip);
-    return false;
-  }
-  return info.count > MAX_FAILURES;
-}
-
-function resetRate(ip: string) {
-  rateMap.delete(ip);
-}
 
 // --- Helper to get IP address from request (Next.js 13/14 safe) ---
 function getRequestIp(request: NextRequest): string {
@@ -63,10 +33,10 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/api/media")) {
     const sessionCookie = request.cookies.get("admin-session")?.value || "";
     if (!sessionCookie) {
-      recordFailure(ip);
+      await incrementAttempts(ip);
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    resetRate(ip);
+    await resetAttempts(ip);
     return NextResponse.next();
   }
 
@@ -80,14 +50,14 @@ export async function middleware(request: NextRequest) {
     const sessionCookie = request.cookies.get("admin-session")?.value || "";
 
     // --- Rate limiter: block if too many invalid attempts ---
-    if (isRateLimited(ip)) {
+    if (await isRateLimited(ip)) {
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
 
     // --- Login page: redirect if and only if session cookie exists ---
     if (isLoginPage) {
       if (sessionCookie) {
-        resetRate(ip);
+        await resetAttempts(ip);
         return NextResponse.redirect(new URL("/admin/dashboard", request.url));
       }
       return NextResponse.next();
@@ -95,11 +65,11 @@ export async function middleware(request: NextRequest) {
 
     // --- Protected /admin routes: require a session cookie ---
     if (!sessionCookie) {
-      recordFailure(ip);
+      await incrementAttempts(ip);
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
 
-    resetRate(ip);
+    await resetAttempts(ip);
   }
 
   // --- All other routes: allow through ---

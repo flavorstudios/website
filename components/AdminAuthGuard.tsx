@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Spinner from "@/components/ui/spinner";
+import { clientEnv } from "@/env.client";
 
 type Status = "loading" | "authenticated" | "unauthenticated";
 
@@ -24,6 +25,7 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
         const res = await fetch("/api/admin/validate-session", {
           credentials: "include",
           cache: "no-store",
+          headers: { "api-key": clientEnv.NEXT_PUBLIC_API_KEY || "" },
         });
         if (!cancelled) {
           setStatus(res.ok ? "authenticated" : "unauthenticated");

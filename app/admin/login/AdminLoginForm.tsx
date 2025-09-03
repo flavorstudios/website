@@ -33,6 +33,7 @@ const checkServerSession = async () =>
   (
     await fetch("/api/admin/validate-session", {
       credentials: "include",
+      headers: { "api-key": clientEnv.NEXT_PUBLIC_API_KEY || "" },
     })
   ).ok
 
@@ -138,7 +139,10 @@ export default function AdminLoginForm() {
       // POST the ID token to the backend to set the session cookie
       const res = await fetch("/api/admin/google-session", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": clientEnv.NEXT_PUBLIC_API_KEY || "",
+        },
         body: JSON.stringify({ idToken }),
         credentials: "include",
       })

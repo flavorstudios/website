@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import useAuthError from "@/hooks/useAuthError"
+import { clientEnv } from "@/env.client"
 
 export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
   const router = useRouter()
@@ -23,7 +24,10 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
     try {
       const res = await fetch("/api/admin/email-session", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": clientEnv.NEXT_PUBLIC_API_KEY || "",
+        },
         body: JSON.stringify({ email, password, otp }),
         credentials: "include",
       })

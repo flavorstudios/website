@@ -29,6 +29,10 @@ function isEmailAllowed(email: string): boolean {
 
 export async function POST(req: NextRequest) {
   try {
+    const apiKey = req.headers.get("api-key");
+    if (apiKey !== serverEnv.NEXT_PUBLIC_API_KEY) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const { email, password, otp } = await req.json()
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password required." }, { status: 400 })
@@ -57,13 +61,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Server error." }, { status: 500 })
     }
     const token = jwt.sign({ email }, secret, { expiresIn: "1d" })
+
+    const cookieDomain =
+      serverEnv.NODE_ENV === "production" ? serverEnv.ADMIN_COOKIE_DOMAIN : undefined
+      
     const cookieOptions = {
       httpOnly: true,
-      secure: true,
+      secure: serverEnv.NODE_ENV === "production",
       sameSite: "lax" as const, // use "none" with secure: true if you have cross-site flows
       path: "/",
-      domain: ".flavorstudios.in",
-      }
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
+    }
 
     const res = NextResponse.json({ ok: true })
     res.cookies.set("admin-session", token, {

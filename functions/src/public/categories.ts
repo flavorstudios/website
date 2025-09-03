@@ -23,21 +23,22 @@ function format(arr: Partial<Category>[], type: "blog" | "video"): Category[] {
     })) as Category[];
 }
 
-export const getCategories = onRequest({ cors: true }, async (req, res) => {
-
-  if (req.method !== "GET") {
-    res.status(405).json({ error: "Method Not Allowed" });
-    return;
-  }
+export const getCategories = onRequest(
+  { cors: ["https://flavorstudios.in"] },
+  async (req, res) => {
+    if (req.method !== "GET") {
+      res.status(405).json({ error: "Method Not Allowed" });
+      return;
+    }
 
   try {
-    const filePath = path.join(
-      __dirname,
-      "../../../content-data/categories.json",
-    );
-    const json = await fs.readFile(filePath, "utf8");
-    const siteData = JSON.parse(json);
-    const { blog = [], watch = [] } = siteData.CATEGORIES || {};
+      const filePath = path.join(
+        __dirname,
+        "../../../content-data/categories.json",
+      );
+      const json = await fs.readFile(filePath, "utf8");
+      const siteData = JSON.parse(json);
+      const { blog = [], watch = [] } = siteData.CATEGORIES || {};
 
     const type = req.query.type as string | undefined;
 
@@ -48,10 +49,10 @@ export const getCategories = onRequest({ cors: true }, async (req, res) => {
     }
 
     if (type === "video") {
-      res.set("Cache-Control", "public, max-age=300");
-      res.json({ categories: format(watch, "video") });
-      return;
-    }
+        res.set("Cache-Control", "public, max-age=300");
+        res.json({ categories: format(watch, "video") });
+        return;
+      }
 
     res.set("Cache-Control", "public, max-age=300");
     res.json({

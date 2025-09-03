@@ -20,17 +20,7 @@ const nextConfig = {
   },
 
   async headers() {
-    return [
-      {
-        source: '/admin/login',
-        headers: [
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups',
-          },
-        ],
-      },
-    ];
+    return [];
   },
 
   // The `experimental.nodeMiddleware` flag was removed to ensure

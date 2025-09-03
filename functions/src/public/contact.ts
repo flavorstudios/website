@@ -53,7 +53,7 @@ async function moderateText(text: string) {
 
 // The main contact endpoint
 export const submitContact = onRequest(
-  { cors: true }, // Enable CORS on the function!
+  { cors: ["https://flavorstudios.in"] }, // Enable CORS on the function!
   async (req, res) => {
     if (req.method !== "POST") {
       res.status(405).end();

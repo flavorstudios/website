@@ -101,7 +101,7 @@ export function getNotificationsService(): NotificationsProvider {
   if (service) return service;
   if (serverEnv.NEXT_PUBLIC_FIREBASE_API_KEY) {
     service = new InMemoryProvider("fcm");
-  } else if (serverEnv.VAPID_PUBLIC_KEY && serverEnv.VAPID_PRIVATE_KEY) {
+  } else if (serverEnv.VAPID_PRIVATE_KEY) {
     service = new InMemoryProvider("webpush");
   } else {
     service = new InMemoryProvider("db");

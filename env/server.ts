@@ -16,6 +16,7 @@ export const serverEnv: Record<string, string | undefined> & {
   ADMIN_PASSWORD_HASH: string | undefined;
   ADMIN_SESSION_EXPIRY_DAYS: string | undefined;
   ADMIN_TOTP_SECRET: string | undefined;
+  ADMIN_API_KEY: string | undefined;
   ANALYZE: string | undefined;
   BASE_URL: string | undefined;
   BING_API_KEY: string | undefined;
@@ -43,7 +44,6 @@ export const serverEnv: Record<string, string | undefined> & {
   SMTP_SECURE: string | undefined;
   SMTP_USER: string | undefined;
   VAPID_PRIVATE_KEY: string | undefined;
-  VAPID_PUBLIC_KEY: string | undefined;
   UPSTASH_REDIS_REST_URL: string | undefined;
   UPSTASH_REDIS_REST_TOKEN: string | undefined;
   TEST_MODE: string | undefined;
@@ -58,6 +58,7 @@ export const serverEnv: Record<string, string | undefined> & {
   ADMIN_PASSWORD_HASH: process.env.ADMIN_PASSWORD_HASH,
   ADMIN_SESSION_EXPIRY_DAYS: process.env.ADMIN_SESSION_EXPIRY_DAYS,
   ADMIN_TOTP_SECRET: process.env.ADMIN_TOTP_SECRET,
+  ADMIN_API_KEY: process.env.ADMIN_API_KEY,
   ANALYZE: process.env.ANALYZE,
   BASE_URL: process.env.BASE_URL,
   BING_API_KEY: process.env.BING_API_KEY,
@@ -84,7 +85,6 @@ export const serverEnv: Record<string, string | undefined> & {
   SMTP_PORT: process.env.SMTP_PORT,
   SMTP_SECURE: process.env.SMTP_SECURE,
   SMTP_USER: process.env.SMTP_USER,
-  VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
   VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY,
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,

@@ -31,6 +31,7 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
         }
       } catch {
         if (!cancelled) setStatus("unauthenticated");
+      }
     }
 
     validate();
@@ -39,7 +40,7 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
       cancelled = true;
       controller.abort();
     };
-  }, [apiKey]);
+  }, []);
 
   if (status === "loading") {
     return (

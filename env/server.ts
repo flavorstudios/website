@@ -32,7 +32,7 @@ export const serverEnv: Record<string, string | undefined> & {
   NEXT_PUBLIC_FIREBASE_API_KEY: string | undefined;
   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: string | undefined;
   NEXT_PUBLIC_GTM_CONTAINER_ID: string | undefined;
-  NEXT_PUBLIC_API_KEY: string | undefined;
+  ADMIN_API_KEY: string | undefined;
   NODE_ENV: string | undefined;
   NOTIFY_NEW_SUBMISSION: string | undefined;
   PERSPECTIVE_API_KEY: string | undefined;
@@ -75,7 +75,7 @@ export const serverEnv: Record<string, string | undefined> & {
   NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   NEXT_PUBLIC_GTM_CONTAINER_ID: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID,
-  NEXT_PUBLIC_API_KEY: process.env.NEXT_PUBLIC_API_KEY,
+  ADMIN_API_KEY: process.env.ADMIN_API_KEY,
   NODE_ENV: process.env.NODE_ENV,
   NOTIFY_NEW_SUBMISSION: process.env.NOTIFY_NEW_SUBMISSION,
   PERSPECTIVE_API_KEY: process.env.PERSPECTIVE_API_KEY,

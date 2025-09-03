@@ -30,7 +30,7 @@ function isEmailAllowed(email: string): boolean {
 export async function POST(req: NextRequest) {
   try {
     const apiKey = req.headers.get("api-key");
-    if (apiKey !== serverEnv.NEXT_PUBLIC_API_KEY) {
+    if (apiKey !== serverEnv.ADMIN_API_KEY) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const { email, password, otp } = await req.json()

@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Spinner from "@/components/ui/spinner";
-import { clientEnv } from "@/env.client";
-
 type Status = "loading" | "authenticated" | "unauthenticated";
 
 /**
@@ -14,7 +12,7 @@ type Status = "loading" | "authenticated" | "unauthenticated";
  * - Shows a login prompt if validation fails
  * - Renders children only when authenticated
  */
-export default function AdminAuthGuard({ children }: { children: React.ReactNode }) {
+export default function AdminAuthGuard({ children, apiKey }: { children: React.ReactNode; apiKey?: string }) {
   const [status, setStatus] = useState<Status>("loading");
 
   useEffect(() => {
@@ -25,7 +23,7 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
         const res = await fetch("/api/admin/validate-session", {
           credentials: "include",
           cache: "no-store",
-          headers: { "api-key": clientEnv.NEXT_PUBLIC_API_KEY || "" },
+          headers: { "api-key": apiKey || "" },
         });
         if (!cancelled) {
           setStatus(res.ok ? "authenticated" : "unauthenticated");

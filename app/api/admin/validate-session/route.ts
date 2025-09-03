@@ -12,7 +12,7 @@ const debug = serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "produc
 export async function GET(req: NextRequest) {
   try {
     const apiKey = req.headers.get("api-key");
-    if (apiKey !== serverEnv.NEXT_PUBLIC_API_KEY) {
+    if (apiKey !== serverEnv.ADMIN_API_KEY) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     // Fix: Await cookies() as it's now async in Next.js 14+

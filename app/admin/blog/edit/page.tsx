@@ -3,6 +3,7 @@ import { blogStore } from "@/lib/content-store";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import BlogEditorPageClient from "./BlogEditorPageClient";
+import { serverEnv } from "@/env/server";
 import type { BlogPost as StoreBlogPost } from "@/lib/content-store";
 import type { BlogPost as EditorBlogPost } from "@/app/admin/dashboard/components/blog-editor";
 
@@ -90,5 +91,5 @@ export default async function BlogEditPage({ searchParams }: PageProps) {
     readTime,
   };
 
-  return <BlogEditorPageClient post={safePost} />;
+  return <BlogEditorPageClient post={safePost} apiKey={serverEnv.ADMIN_API_KEY} />;
 }

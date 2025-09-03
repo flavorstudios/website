@@ -5,13 +5,15 @@ import { BlogEditor, type BlogPost } from "@/app/admin/dashboard/components/blog
 
 export default function BlogEditorPageClient({
   post,
+  apiKey,
 }: {
   post: BlogPost;
+  apiKey?: string;
 }) {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <AdminAuthGuard>
+        <AdminAuthGuard apiKey={apiKey}>
           <BlogEditor initialPost={post} />
         </AdminAuthGuard>
       </div>

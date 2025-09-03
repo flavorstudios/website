@@ -29,15 +29,15 @@ function safeLogError(...args: unknown[]) {
 }
 
 // Helper to validate the admin session on the server
-const checkServerSession = async () =>
+const checkServerSession = async (apiKey?: string) =>
   (
     await fetch("/api/admin/validate-session", {
       credentials: "include",
-      headers: { "api-key": clientEnv.NEXT_PUBLIC_API_KEY || "" },
+      headers: { "api-key": apiKey || "" },
     })
   ).ok
 
-export default function AdminLoginForm() {
+export default function AdminLoginForm({ apiKey }: { apiKey?: string }) {
   const { error, setError, clearError } = useAuthError()
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -87,7 +87,7 @@ export default function AdminLoginForm() {
 
     const unsubscribe = onAuthStateChanged(auth, async (user: User | null) => {
       if (user) {
-        if (await checkServerSession()) {
+        if (await checkServerSession(apiKey)) {
           finalizeLogin()
         } else {
           await signOut(auth)
@@ -141,7 +141,7 @@ export default function AdminLoginForm() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "api-key": clientEnv.NEXT_PUBLIC_API_KEY || "",
+          "api-key": apiKey || "",
         },
         body: JSON.stringify({ idToken }),
         credentials: "include",
@@ -152,7 +152,7 @@ export default function AdminLoginForm() {
         return
       }
       // Optionally check the server session after setting cookie
-      if (await checkServerSession()) {
+      if (await checkServerSession(apiKey)) {
         finalizeLogin()
       } else {
         await signOut(auth)
@@ -218,7 +218,7 @@ export default function AdminLoginForm() {
                 </div>
               </>
             ) : (
-              <EmailLoginForm onCancel={() => { clearError(); setMethod("google") }} />
+              <EmailLoginForm apiKey={apiKey} onCancel={() => { clearError(); setMethod("google") }} />
             )}
           </div>
         </CardContent>

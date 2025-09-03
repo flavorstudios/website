@@ -19,6 +19,20 @@ const nextConfig = {
     domains: ['storage.googleapis.com', 'firebasestorage.googleapis.com'],
   },
 
+  async headers() {
+    return [
+      {
+        source: '/admin/login',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+        ],
+      },
+    ];
+  },
+
   // The `experimental.nodeMiddleware` flag was removed to ensure
   // compatibility with the stable Next.js release. Node.js middleware
   // currently requires the latest canary builds, so removing the flag

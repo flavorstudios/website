@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-process.env.NEXT_PUBLIC_API_KEY = 'test-key';
+process.env.ADMIN_API_KEY = 'test-key';
 import { cookies } from 'next/headers';
 import { verifyAdminSession } from '@/lib/admin-auth';
 import { NextRequest } from 'next/server';

@@ -257,7 +257,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* Skip link for keyboard and pointer users */}
         <a
           href="#main-content"
-          className="fixed top-2 left-2 z-[100] pointer-events-auto bg-white p-2 text-sm shadow rounded"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] bg-white p-2 text-sm shadow rounded"
         >
           Skip to main content
         </a>

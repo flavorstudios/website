@@ -61,8 +61,11 @@ if (ADMIN_BYPASS) {
       }
     }
   } catch (error) {
+    const source = serverEnv.FIREBASE_SERVICE_ACCOUNT_KEY
+      ? "FIREBASE_SERVICE_ACCOUNT_KEY"
+      : "FIREBASE_SERVICE_ACCOUNT_JSON";
     logger.error(
-      "[Firebase Admin] Failed to parse Firebase service account JSON:",
+      `[Firebase Admin] Failed to parse service account JSON from ${source}`,
       error
     );
     // Don't throw, just disable admin features!

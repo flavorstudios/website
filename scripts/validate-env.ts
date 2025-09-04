@@ -37,10 +37,7 @@ if (!skipValidation) {
     missing.push("FIREBASE_SERVICE_ACCOUNT_KEY or FIREBASE_SERVICE_ACCOUNT_JSON");
   }
 
-  if (
-    !process.env.FIREBASE_STORAGE_BUCKET &&
-    !process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-  ) {
+  if (!process.env.FIREBASE_STORAGE_BUCKET && !process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) {
     missing.push("FIREBASE_STORAGE_BUCKET or NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET");
   }
 }

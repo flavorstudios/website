@@ -31,7 +31,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       auth = getAdminAuth();
     } catch (err) {
       logError("google-session: Admin SDK unavailable", err);
-      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+      const message =
+        err instanceof Error
+          ? err.message
+          : "FIREBASE_SERVICE_ACCOUNT_KEY missing or invalid";
+      return NextResponse.json({ error: message }, { status: 500 });
     }
     try {
       decoded = await auth.verifyIdToken(idToken, true);

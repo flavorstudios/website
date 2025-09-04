@@ -145,7 +145,16 @@ export default function AdminLoginForm() {
         credentials: "include",
       })
       if (!res.ok) {
-        setError("Authentication failed. You are not authorized to access this admin area.")
+        let data: { error?: string } | undefined
+        try {
+          data = await res.json()
+        } catch {
+          // ignore JSON parsing errors
+        }
+        setError(
+          data?.error ||
+            "Authentication failed. You are not authorized to access this admin area."
+        )
         setLoading(false)
         return
       }

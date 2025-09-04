@@ -71,6 +71,16 @@ if (ADMIN_BYPASS) {
 }
 
 if (debug) {
+  logger.debug(
+    "[Firebase Admin] Service account credentials parsed successfully:",
+    parsedCredentials !== null
+  );
+  if (parsedCredentials) {
+    const projectId =
+      parsedCredentials.projectId ||
+      (parsedCredentials as any).project_id;
+    logger.debug("[Firebase Admin] Derived projectId:", projectId);
+  }
   if (!adminEmailsEnv && !ADMIN_BYPASS) {
     logger.warn("[Firebase Admin] Warning: ADMIN_EMAIL or ADMIN_EMAILS environment variable is missing. Admin routes will deny all access!");
   }

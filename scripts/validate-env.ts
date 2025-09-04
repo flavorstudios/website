@@ -42,6 +42,10 @@ if (!skipValidation) {
   }
 }
 
+if (!process.env.ADMIN_EMAILS && !process.env.ADMIN_EMAIL) {
+  missing.push("ADMIN_EMAILS or ADMIN_EMAIL");
+}
+
 if (missing.length > 0) {
   throw new Error(`Missing required Firebase env vars: ${missing.join(", ")}`);
 }

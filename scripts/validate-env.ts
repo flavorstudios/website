@@ -40,10 +40,10 @@ if (!skipValidation) {
   if (!process.env.FIREBASE_STORAGE_BUCKET && !process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) {
     missing.push("FIREBASE_STORAGE_BUCKET or NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET");
   }
-}
 
 if (!process.env.ADMIN_EMAILS && !process.env.ADMIN_EMAIL) {
-  missing.push("ADMIN_EMAILS or ADMIN_EMAIL");
+    missing.push("ADMIN_EMAILS or ADMIN_EMAIL");
+  }
 }
 
 if (missing.length > 0) {

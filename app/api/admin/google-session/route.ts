@@ -26,7 +26,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // --- Verify Firebase ID token with revocation checks ---
     let decoded;
-    const auth = getAdminAuth();
+    let auth;
+    try {
+      auth = getAdminAuth();
+    } catch (err) {
+      logError("google-session: Admin SDK unavailable", err);
+      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+    }
     try {
       decoded = await auth.verifyIdToken(idToken, true);
       if (debug) {
@@ -46,14 +52,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Authentication failed." }, { status: 401 });
     }
 
+    const allowedAdminEmails = getAllowedAdminEmails();
+    if (allowedAdminEmails.length === 0) {
+      logError("google-session: no admin emails configured", {});
+      return NextResponse.json({ error: "No admin emails configured" }, { status: 500 });
+    }
+
     // --- Log normalized email and allowed admin emails for debug ---
     if (debug) {
       const normalizedLoginEmail = decoded.email?.trim().toLowerCase();
-      const allowedAdminEmails = getAllowedAdminEmails();
-      if (allowedAdminEmails.length === 0) {
-        logError("google-session: no admin emails configured", {});
-        return NextResponse.json({ error: "No admin emails configured" }, { status: 500 });
-      }
       console.log("[google-session] Normalized login email:", `"${normalizedLoginEmail}"`);
       console.log("[google-session] Allowed admin emails:", allowedAdminEmails.map(e => `"${e}"`));
     }

@@ -36,11 +36,12 @@ export async function POST(req: NextRequest) {
     if (!isEmailAllowed(email)) {
       return NextResponse.json({ error: "Authentication failed." }, { status: 401 })
     }
-    const hash = serverEnv.ADMIN_PASSWORD_HASH
-    if (!hash) {
-      logError("email-session", "Missing ADMIN_PASSWORD_HASH")
-      return NextResponse.json({ error: "Server error." }, { status: 500 })
+    if (!serverEnv.ADMIN_PASSWORD_HASH || !serverEnv.ADMIN_JWT_SECRET) {
+      logError("email-session: missing ADMIN_PASSWORD_HASH or ADMIN_JWT_SECRET", {})
+      return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
     }
+    const hash = serverEnv.ADMIN_PASSWORD_HASH
+    const secret = serverEnv.ADMIN_JWT_SECRET
     const passwordMatch = await bcrypt.compare(password, hash)
     if (!passwordMatch) {
       return NextResponse.json({ error: "Authentication failed." }, { status: 401 })
@@ -50,11 +51,6 @@ export async function POST(req: NextRequest) {
       if (!otp || !totp.check(otp, serverEnv.ADMIN_TOTP_SECRET)) {
         return NextResponse.json({ error: "Invalid 2FA code." }, { status: 401 })
       }
-    }
-    const secret = serverEnv.ADMIN_JWT_SECRET
-    if (!secret) {
-      logError("email-session", "Missing ADMIN_JWT_SECRET")
-      return NextResponse.json({ error: "Server error." }, { status: 500 })
     }
     const token = jwt.sign({ email }, secret, { expiresIn: "1d" })
 

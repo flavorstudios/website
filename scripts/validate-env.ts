@@ -46,6 +46,19 @@ if (missing.length > 0) {
   throw new Error(`Missing required Firebase env vars: ${missing.join(", ")}`);
 }
 
+const json =
+  process.env.FIREBASE_SERVICE_ACCOUNT_KEY ??
+  process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+if (json) {
+  try {
+    JSON.parse(json);
+  } catch {
+    throw new Error(
+      "FIREBASE_SERVICE_ACCOUNT_KEY/FIREBASE_SERVICE_ACCOUNT_JSON contains invalid JSON"
+    );
+  }
+}
+
 if (!process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) {
   throw new Error(
     "Missing required environment variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"

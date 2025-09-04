@@ -26,6 +26,10 @@ const serviceAccountJson =
 const rawEmails = (serverEnv.ADMIN_EMAILS ?? "").trim();
 export const adminEmailsEnv = rawEmails !== "" ? rawEmails : serverEnv.ADMIN_EMAIL;
 
+if (debug) {
+  logger.debug("[Firebase Admin] Loaded admin emails:", getAllowedAdminEmails());
+}
+
 // ======= ENVIRONMENT VARIABLE VALIDATION =======
 
 // If missing, warn and export undefined. Do NOT throw!
@@ -93,7 +97,7 @@ if (debug) {
 /**
  * Helper: Get allowed admin emails as a lowercase array
  */
-export const getAllowedAdminEmails = (): string[] => {
+export function getAllowedAdminEmails(): string[] {
   const allowedEmails = (adminEmailsEnv || "")
     .split(",")
     .map((email) => email.trim().toLowerCase())
@@ -119,7 +123,7 @@ export const getAllowedAdminEmails = (): string[] => {
     );
   }
   return allowedEmails;
-};
+}
 
 // ✅ Export Firebase Admin Services - export undefined if not initialized OR if bypassing
 export const adminAuth: Auth | undefined =

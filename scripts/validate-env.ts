@@ -50,6 +50,12 @@ if (!skipValidation) {
   ) {
     missing.push("ADMIN_EMAILS (cannot be empty)");
   }
+  if (
+    process.env.ADMIN_EMAIL !== undefined &&
+    process.env.ADMIN_EMAIL.trim() === ""
+  ) {
+    missing.push("ADMIN_EMAIL (cannot be empty)");
+  }
 }
 
 if (missing.length > 0) {

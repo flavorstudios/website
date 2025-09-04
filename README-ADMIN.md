@@ -6,12 +6,12 @@ Either `ADMIN_EMAILS` (preferred) or `ADMIN_EMAIL` must be defined for builds an
 
 ## How `/api/admin/google-session` authorizes emails
 
-The Google admin login endpoint calls `getAllowedAdminEmails()` from `lib/firebase-admin`. That helper builds a lowercase list from `ADMIN_EMAILS` (comma‑separated) or falls back to `ADMIN_EMAIL` when the list is empty. When a login request arrives, `/api/admin/google-session` verifies the decoded Google ID token and then ensures the email is included in that allowed list before issuing the `admin-session` cookie.
+The Google admin login endpoint calls `getAllowedAdminEmails()` from `lib/firebase-admin`. That helper builds a lowercase list from `ADMIN_EMAILS` (comma‑separated); if `ADMIN_EMAILS` is undefined or empty, it falls back to `ADMIN_EMAIL`. When a login request arrives, `/api/admin/google-session` verifies the decoded Google ID token and then ensures the email is included in that allowed list before issuing the `admin-session` cookie.
 
 **Note:**
 
-* `ADMIN_EMAILS` takes precedence over `ADMIN_EMAIL`.
-* Leaving `ADMIN_EMAILS` blank overrides `ADMIN_EMAIL` and results in “No admin emails configured.”
+* When `ADMIN_EMAILS` is defined and non-empty, it overrides `ADMIN_EMAIL`.
+* If `ADMIN_EMAILS` is empty or undefined, `ADMIN_EMAIL` is used instead.
 
 ## Managing admin emails on Vercel
 

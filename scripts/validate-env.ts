@@ -41,8 +41,14 @@ if (!skipValidation) {
     missing.push("FIREBASE_STORAGE_BUCKET or NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET");
   }
 
-if (!process.env.ADMIN_EMAILS && !process.env.ADMIN_EMAIL) {
+  if (!process.env.ADMIN_EMAILS && !process.env.ADMIN_EMAIL) {
     missing.push("ADMIN_EMAILS or ADMIN_EMAIL");
+  }
+  if (
+    process.env.ADMIN_EMAILS !== undefined &&
+    process.env.ADMIN_EMAILS.trim() === ""
+  ) {
+    missing.push("ADMIN_EMAILS (cannot be empty)");
   }
 }
 

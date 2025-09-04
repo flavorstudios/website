@@ -133,6 +133,12 @@ export async function verifyAdminSession(
     | null = null;
   let firestoreEmails: string[] = [];
 
+  if (!adminAuth && debug) {
+    console.warn(
+      "[admin-auth] Admin SDK unavailable; set FIREBASE_SERVICE_ACCOUNT_KEY"
+    );
+  }
+
   // Try Firebase session cookie if Admin SDK is available
   if (adminAuth) {
     try {
@@ -165,6 +171,11 @@ export async function verifyAdminSession(
   }
 
   firestoreEmails = await getFirestoreAdminEmails();
+
+  if (!decoded.email) {
+    logError("admin-auth: verifyAdminSession (missing email)", decoded);
+    throw new Error("Session token missing email");
+  }
 
   if (debug) {
     console.log(

@@ -50,6 +50,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (debug) {
       const normalizedLoginEmail = decoded.email?.trim().toLowerCase();
       const allowedAdminEmails = getAllowedAdminEmails();
+      if (allowedAdminEmails.length === 0) {
+        logError("google-session: no admin emails configured", {});
+        return NextResponse.json({ error: "No admin emails configured" }, { status: 500 });
+      }
       console.log("[google-session] Normalized login email:", `"${normalizedLoginEmail}"`);
       console.log("[google-session] Allowed admin emails:", allowedAdminEmails.map(e => `"${e}"`));
     }

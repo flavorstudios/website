@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
-import { getAllowedAdminEmails } from "@/lib/firebase-admin";
-import { serverEnv } from "@/env/server";
 
-// Endpoint to expose allowed admin emails when DEBUG_ADMIN is enabled.
+// Endpoint to expose admin emails when DEBUG_ADMIN is enabled.
 // Use this to verify environment configuration during deployments.
 export function GET() {
-  if (serverEnv.DEBUG_ADMIN !== "true") {
+  if (process.env.DEBUG_ADMIN !== "true") {
     return NextResponse.json({}, { status: 401 });
   }
 
-  return NextResponse.json({ emails: getAllowedAdminEmails() });
+  const envEmails = process.env.ADMIN_EMAILS ?? process.env.ADMIN_EMAIL ?? "";
+  const adminEmails = envEmails
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+
+  return NextResponse.json({ adminEmails });
 }

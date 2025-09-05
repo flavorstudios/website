@@ -9,6 +9,13 @@ if (!process.env.ADMIN_EMAILS && !process.env.ADMIN_EMAIL) {
   missing.push("ADMIN_EMAILS or ADMIN_EMAIL");
 }
 
+if (
+  process.env.ADMIN_EMAILS?.trim() === "" ||
+  process.env.ADMIN_EMAIL?.trim() === ""
+) {
+  missing.push("ADMIN_EMAILS/ADMIN_EMAIL cannot be empty");
+}
+
 if (!process.env.FIREBASE_SERVICE_ACCOUNT_KEY && !process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
   missing.push("FIREBASE_SERVICE_ACCOUNT_KEY or FIREBASE_SERVICE_ACCOUNT_JSON");
 }

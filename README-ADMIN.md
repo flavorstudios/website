@@ -2,7 +2,7 @@
 
 ## Setup
 
-Either `ADMIN_EMAILS` (preferred) or `ADMIN_EMAIL` must be defined for builds and runtime; otherwise all admin routes will fail.
+Either `ADMIN_EMAILS` (preferred) or `ADMIN_EMAIL` must be defined for builds and runtime. A non-empty `ADMIN_EMAILS` always takes precedence over `ADMIN_EMAIL`. If both variables are empty or undefined, the allowed admin list is empty and all admin logins will fail.
 
 After updating `ADMIN_EMAILS` or `ADMIN_EMAIL` in Vercel, trigger a new deployment; existing builds continue using the old values.
 
@@ -14,8 +14,9 @@ The Google admin login endpoint calls `getAllowedAdminEmails()` from `lib/fireba
 
 **Note:**
 
-* When `ADMIN_EMAILS` is defined and non-empty, it overrides `ADMIN_EMAIL`.
+* Non-empty `ADMIN_EMAILS` takes precedence over `ADMIN_EMAIL`.
 * If `ADMIN_EMAILS` is empty or undefined, `ADMIN_EMAIL` is used instead.
+* If both variables are empty or undefined, the admin list is empty and all admin logins fail.
 
 ## Managing admin emails on Vercel
 

@@ -31,6 +31,7 @@ import {
   ExternalLink,
   Users,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { fetcher } from "@/lib/fetcher";
 import { useRole } from "../contexts/role-context";
 import { HttpError } from "@/lib/http";

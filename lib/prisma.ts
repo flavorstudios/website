@@ -5,8 +5,13 @@ import { serverEnv } from "@/env/server";
 // Minimal local type so builds don’t require @prisma/client
 export type PrismaClientLike = {
   post: { count: () => Promise<number> };
+  draft: {
+    findUnique: (args: unknown) => Promise<unknown>;
+    upsert: (args: unknown) => Promise<unknown>;
+  };
   $transaction: <T>(fn: (tx: unknown) => Promise<T>) => Promise<T>;
   $disconnect?: () => Promise<void>;
+  __dbMissing?: true;
 };
 
 type GlobalWithPrisma = typeof globalThis & {
@@ -24,9 +29,15 @@ async function createPrisma(): Promise<PrismaClientLike> {
     return new mod.PrismaClient() as unknown as PrismaClientLike;
   } catch {
     // Fallback mock to avoid runtime crashes when Prisma client is missing
+    const draft = {
+      findUnique: async () => null,
+      upsert: async ({ create }: any) => create,
+    };
     return {
       post: { count: async () => 0 },
-      $transaction: async (fn: any) => fn({} as unknown),
+      draft,
+      $transaction: async (fn: any) => fn({ draft }),
+      __dbMissing: true,
     };
   }
 }

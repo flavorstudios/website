@@ -94,10 +94,16 @@ export function useAutosave<T>({ userId = "anon", draftId, data }: AutosaveOptio
           setStatus("conflict");
           const json = await res.json();
           await idbSet(key, { payload, version: v, ts: Date.now(), server: json.server });
-          } else if (res.status === 401) {
+        } else if (res.status === 401) {
           await idbSet(key, { payload, version: v, ts: Date.now() });
           setStatus("unauthorized");
           retryRef.current = 0;
+        } else if (res.status === 503) {
+          await idbSet(key, { payload, version: v, ts: Date.now() });
+          setStatus("offline");
+          retryRef.current += 1;
+          const delay = Math.min(30000, 1000 * 2 ** retryRef.current);
+          retryTimeoutRef.current = setTimeout(() => void save(payload, v), delay);
         } else {
           await idbSet(key, { payload, version: v, ts: Date.now() });
           setStatus("error");

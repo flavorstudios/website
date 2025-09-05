@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
-import { blogStore } from "@/lib/content-store" // <-- Updated as per Codex
+import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store" // <-- Updated as per Codex
 import { publishToUser } from "@/lib/sse-broker"  // <-- Added for SSE broadcast
 
 // GET: Fetch all blogs for admin dashboard (with filtering, sorting, pagination)
@@ -166,15 +166,20 @@ export async function POST(request: NextRequest) {
     // Notify connected admin clients via SSE
     publishToUser("blog", "posts", {})
 
-    return NextResponse.json({
-      blog: {
+    return NextResponse.json(
+      {
         ...blog,
         commentCount: blog.commentCount ?? 0,
         shareCount: blog.shareCount ?? 0,
-      }
-    }, { status: 201 })
+      },
+      { status: 201 },
+    )
   } catch (error) {
     console.error("Error creating blog:", error)
+    const message = (error as Error).message
+    if (message === ADMIN_DB_UNAVAILABLE) {
+      return NextResponse.json({ error: message }, { status: 503 })
+    }
     return NextResponse.json(
       {
         error: "Failed to create blog",

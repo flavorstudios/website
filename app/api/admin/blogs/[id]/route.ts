@@ -1,6 +1,6 @@
 import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
-import { blogStore } from "@/lib/content-store" // Use the correct store
+import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store" // Use the correct store
 import { logError } from "@/lib/log"
 import { publishToUser } from "@/lib/sse-broker"
 
@@ -23,6 +23,10 @@ export async function PUT(
     return NextResponse.json(blog)
   } catch (error) {
     logError("admin/blogs:id:PUT", error)
+    const message = (error as Error).message
+    if (message === ADMIN_DB_UNAVAILABLE) {
+      return NextResponse.json({ error: message }, { status: 503 })
+    }
     return NextResponse.json({ error: "Failed to update blog" }, { status: 500 })
   }
 }
@@ -44,6 +48,10 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     logError("admin/blogs:id:DELETE", error)
+    const message = (error as Error).message
+    if (message === ADMIN_DB_UNAVAILABLE) {
+      return NextResponse.json({ error: message }, { status: 503 })
+    }
     return NextResponse.json({ error: "Failed to delete blog" }, { status: 500 })
   }
 }

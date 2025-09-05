@@ -8,11 +8,14 @@ jest.mock("@/lib/admin-auth", () => ({
   getSessionAndRole: jest.fn().mockResolvedValue({ uid: "u1" }),
 }));
 
-// simple in-memory prisma mock
-const store: Record<string, any> = {};
-jest.mock("@/lib/prisma", () => ({
-  __esModule: true,
-  getPrisma: async () => ({
+jest.mock("@/lib/prisma", () => ({ __esModule: true, getPrisma: jest.fn() }));
+import { getPrisma } from "@/lib/prisma";
+
+let store: Record<string, any> = {};
+
+beforeEach(() => {
+  store = {};
+  (getPrisma as jest.Mock).mockResolvedValue({
     $transaction: async (fn: any) =>
       fn({
         draft: {
@@ -25,8 +28,8 @@ jest.mock("@/lib/prisma", () => ({
           },
         },
       }),
-  }),
-}));
+  });
+});
 
 function makeReq(body: any) {
   return new Request("http://test/api", {
@@ -51,5 +54,13 @@ describe("POST /api/admin/blog/drafts", () => {
     (store["c1"].version = 2);
     const res = await POST(makeReq({ draftId: "c1", title: "b", version: 1 }));
     expect(res.status).toBe(409);
+  });
+
+  it("returns 503 when database unavailable", async () => {
+    getPrisma.mockResolvedValueOnce({ __dbMissing: true } as any);
+    const res = await POST(makeReq({ draftId: "x" }));
+    const json = await res.json();
+    expect(res.status).toBe(503);
+    expect(json.code).toBe("DB_UNAVAILABLE");
   });
 });

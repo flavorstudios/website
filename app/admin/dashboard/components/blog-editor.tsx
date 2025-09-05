@@ -312,7 +312,16 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         credentials: "include",
       });
 
-      if (!response.ok) throw new Error(`Save failed: ${response.status}`);
+      if (!response.ok) {
+        let message = `Save failed: ${response.status}`;
+        try {
+          const err = await response.json();
+          if (err?.error) message = err.error;
+        } catch {
+          // ignore parse errors
+        }
+        throw new Error(message);
+      }
 
       const savedPost = await response.json();
       // prevent the next post state write from marking dirty
@@ -329,7 +338,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       // eslint-disable-next-line no-console
       console.error("Failed to save post:", error);
       // No autosave toast noise; manual saves show a toast
-      if (!isAutoSave) toast.error("Failed to save post");
+      if (!isAutoSave) toast.error((error as Error).message || "Failed to save post");
     } finally {
       saveInFlight.current = false;
       if (!isAutoSave) setSaving(false);

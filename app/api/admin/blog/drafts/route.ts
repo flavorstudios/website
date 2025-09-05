@@ -35,6 +35,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, code: "UNAUTHORIZED" }, { status: 401 });
     }
     const prisma = await getPrisma();
+    if ((prisma as any).__dbMissing) {
+      return NextResponse.json(
+        { ok: false, code: "DB_UNAVAILABLE" },
+        { status: 503 }
+      );
+    }
     const saved = await prisma.$transaction(async (tx) => {
       const existing = await (tx as any).draft.findUnique({ where: { id: draftId } });
       if (existing && version && existing.version !== version) {

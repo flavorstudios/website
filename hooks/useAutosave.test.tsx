@@ -69,4 +69,16 @@ describe("useAutosave", () => {
 
     expect((fetch as jest.Mock).mock.calls).toHaveLength(1);
   });
+
+  it("treats 503 as offline", async () => {
+    Object.defineProperty(navigator, "onLine", { value: true, configurable: true });
+    (fetch as jest.Mock).mockResolvedValue({ ok: false, status: 503 });
+    const payload = { title: "t" };
+    const { result } = renderHook(() => useAutosave({ draftId: "d1", data: payload }));
+    await act(async () => {
+      jest.runAllTimers();
+    });
+    expect(result.current.status).toBe("offline");
+    expect(put).toHaveBeenCalled();
+  });
 });

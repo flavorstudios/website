@@ -36,6 +36,7 @@ import { useRole } from "../contexts/role-context";
 import { HttpError } from "@/lib/http";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { dispatchAdminNavigate } from "@/lib/admin-events";
+import type { SectionId } from "../sections";
 
 // Register Chart.js primitives once
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -70,6 +71,45 @@ interface ActivityItem {
   timestamp: string;
   status: string;
 }
+
+interface QuickAction {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  action: SectionId;
+  color: string;
+}
+
+const quickActions: QuickAction[] = [
+  {
+    title: "Create New Post",
+    description: "Write a new blog article",
+    icon: FileText,
+    action: "blogs",
+    color: "bg-blue-500",
+  },
+  {
+    title: "Add Video",
+    description: "Upload new video content",
+    icon: Video,
+    action: "videos",
+    color: "bg-purple-500",
+  },
+  {
+    title: "Moderate Comments",
+    description: "Review pending comments",
+    icon: MessageSquare,
+    action: "comments",
+    color: "bg-green-500",
+  },
+  {
+    title: "Manage Users",
+    description: "Edit user roles and permissions",
+    icon: Users,
+    action: "users",
+    color: "bg-teal-500",
+  },
+];
 
 export default function DashboardOverview() {
   const { theme } = useTheme();
@@ -409,57 +449,28 @@ export default function DashboardOverview() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                {
-                  title: "Create New Post",
-                  description: "Write a new blog article",
-                  icon: FileText,
-                  action: "blogs",
-                  color: "bg-blue-500",
-                },
-                {
-                  title: "Add Video",
-                  description: "Upload new video content",
-                  icon: Video,
-                  action: "videos",
-                  color: "bg-purple-500",
-                },
-                {
-                  title: "Moderate Comments",
-                  description: "Review pending comments",
-                  icon: MessageSquare,
-                  action: "comments",
-                  color: "bg-green-500",
-                },
-                {
-                  title: "Manage Users",
-                  description: "Edit user roles and permissions",
-                  icon: Users,
-                  action: "users",
-                  color: "bg-teal-500",
-                },
-              ].map((action, index) => {
-                const Icon = action.icon;
-                return (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
-                    onClick={() => dispatchAdminNavigate(action.action)}
-                  >
-                    <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center`}>
-                      <Icon className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium text-gray-900">{action.title}</p>
-                      <p className="text-sm text-gray-500">{action.description}</p>
-                    </div>
-                  </Button>
-                );
-              })}
-            </div>
-          </CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {quickActions.map((action, index) => {
+                  const Icon = action.icon;
+                  return (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
+                      onClick={() => dispatchAdminNavigate(action.action)}
+                    >
+                      <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center`}>
+                        <Icon className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-medium text-gray-900">{action.title}</p>
+                        <p className="text-sm text-gray-500">{action.description}</p>
+                      </div>
+                    </Button>
+                  );
+                })}
+              </div>
+            </CardContent>
         </Card>
 
         {/* Real-time Recent Activity */}

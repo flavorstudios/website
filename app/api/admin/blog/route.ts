@@ -1,7 +1,7 @@
 import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import type { BlogPost } from "@/lib/content-store"
-import { blogStore } from "@/lib/content-store"
+import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store"
 
 export async function POST(request: NextRequest) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
@@ -61,6 +61,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(post, { status: blogData.id ? 200 : 201 })
   } catch (error) {
     console.error("Error saving blog post:", error)
+    const message = (error as Error).message
+    if (message === ADMIN_DB_UNAVAILABLE) {
+      return NextResponse.json({ error: message }, { status: 503 })
+    }
     return NextResponse.json({ error: "Failed to save blog post" }, { status: 500 })
   }
 }

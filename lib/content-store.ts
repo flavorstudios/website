@@ -2,6 +2,7 @@ import { getAdminDb } from "@/lib/firebase-admin";
 import type { Firestore } from "firebase-admin/firestore";
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
+import { HttpError } from "@/lib/http";
 
 /**
  * Retrieve the Firebase Admin Firestore instance or return `null` if the
@@ -17,7 +18,8 @@ function getDbOrNull(): Firestore | null {
   }
 }
 
-const ADMIN_DB_UNAVAILABLE = "Admin Firestore unavailable. Set FIREBASE_SERVICE_ACCOUNT_KEY.";
+export const ADMIN_DB_UNAVAILABLE =
+  "Admin Firestore unavailable. Set FIREBASE_SERVICE_ACCOUNT_KEY.";
 
 // --- Interfaces (with commentCount, multi-category, etc.) ---
 export interface BlogPost {
@@ -208,7 +210,7 @@ export const blogStore = {
       shareCount: 0,
     };
     const db = getDbOrNull();
-    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db.collection("blogs").doc(id).set(newPost);
     return newPost;
   },
@@ -221,7 +223,7 @@ export const blogStore = {
     // Validate input (partial allows patching)
     const data = BlogPostSchema.partial().parse(updates);
     const db = getDbOrNull();
-    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     const ref = db.collection("blogs").doc(id);
 
     const beforeSnap = await ref.get();
@@ -278,7 +280,7 @@ export const blogStore = {
     editor = "unknown"
   ): Promise<BlogPost | null> {
     const db = getDbOrNull();
-    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     const ref = db.collection("blogs").doc(id);
     const revDoc = await ref.collection("revisions").doc(revisionId).get();
     if (!revDoc.exists) return null;
@@ -311,7 +313,7 @@ export const blogStore = {
 
   async incrementViews(id: string): Promise<void> {
     const db = getDbOrNull();
-    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db
       .collection("blogs")
       .doc(id)
@@ -320,7 +322,7 @@ export const blogStore = {
 
   async setCommentCount(id: string, count: number): Promise<void> {
     const db = getDbOrNull();
-    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db
       .collection("blogs")
       .doc(id)
@@ -329,7 +331,7 @@ export const blogStore = {
 
   async delete(id: string): Promise<boolean> {
     const db = getDbOrNull();
-    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     const ref = db.collection("blogs").doc(id);
     const doc = await ref.get();
     if (!doc.exists) return false;
@@ -385,14 +387,14 @@ export const videoStore = {
       views: 0,
     };
     const db = getDbOrNull();
-    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db.collection("videos").doc(id).set(newVideo);
     return newVideo;
   },
 
   async update(id: string, updates: Partial<Video>): Promise<Video | null> {
     const db = getDbOrNull();
-    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     const data = VideoSchema.partial().parse(updates);
     const ref = db.collection("videos").doc(id);
     await ref.set({ ...data, updatedAt: new Date().toISOString() }, { merge: true });
@@ -402,7 +404,7 @@ export const videoStore = {
 
   async incrementViews(id: string): Promise<void> {
     const db = getDbOrNull();
-    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db
       .collection("videos")
       .doc(id)
@@ -411,7 +413,7 @@ export const videoStore = {
 
   async delete(id: string): Promise<boolean> {
     const db = getDbOrNull();
-    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     const ref = db.collection("videos").doc(id);
     const doc = await ref.get();
     if (!doc.exists) return false;
@@ -445,7 +447,7 @@ export const pageStore = {
       updatedBy,
     };
     const db = getDbOrNull();
-    if (!db) throw new Error(ADMIN_DB_UNAVAILABLE);
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db.collection("pages").doc(id).set(entry);
     return entry;
   },

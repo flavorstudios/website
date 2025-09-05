@@ -4,7 +4,11 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdminSession } from "@/lib/admin-auth"; // Helper should verify session and decode email
 import { logError } from "@/lib/log"; // Consistent server logging
-import { serverEnv } from "@/env/server";
+import {
+  getAllowedAdminEmails,
+  getAllowedAdminDomain,
+  isEmailAllowed,
+} from "@/lib/admin-allowlist";
 
 export async function GET() {
   // Retrieve session cookie
@@ -25,27 +29,10 @@ export async function GET() {
     return NextResponse.json({ isAllowed: false }, { status: 401 });
   }
 
-  // Gather allowed emails and domain from env
-  // Accept both ADMIN_EMAIL and ADMIN_EMAILS for safety
-  const singleAdminEmail = (serverEnv.ADMIN_EMAIL || "").trim().toLowerCase();
-  const adminEmails = (serverEnv.ADMIN_EMAILS || "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-
-  // If single email env var is set, add it to the array (prevents empty checks)
-  if (singleAdminEmail && !adminEmails.includes(singleAdminEmail)) {
-    adminEmails.push(singleAdminEmail);
-  }
-
-  const adminDomain = (serverEnv.ADMIN_DOMAIN || "").trim().toLowerCase();
-
-  // Check if the user is allowed (email or domain match)
   const userEmail = (decoded.email || "").toLowerCase();
-  const isAllowed =
-    (userEmail && adminEmails.includes(userEmail)) ||
-    (adminDomain && userEmail.endsWith("@" + adminDomain)) ||
-    false;
+  const adminEmails = getAllowedAdminEmails();
+  const adminDomain = getAllowedAdminDomain();
+  const isAllowed = isEmailAllowed(userEmail);
 
   if (!isAllowed) {
     console.warn(

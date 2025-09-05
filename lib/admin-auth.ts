@@ -1,12 +1,12 @@
 import "server-only";
 
 import { NextRequest } from "next/server";
+import { adminAuth, adminDb, ADMIN_BYPASS } from "@/lib/firebase-admin";
 import {
-  adminAuth,
-  adminDb,
   getAllowedAdminEmails,
-  ADMIN_BYPASS,
-} from "@/lib/firebase-admin";
+  getAllowedAdminDomain,
+  isEmailAllowed,
+} from "@/lib/admin-allowlist";
 import { cookies } from "next/headers";
 import { logError } from "@/lib/log";
 import jwt from "jsonwebtoken";
@@ -22,12 +22,6 @@ const debug =
 // or auth is explicitly disabled via environment variable.
 export const DISABLE_AUTH =
   ADMIN_BYPASS || serverEnv.ADMIN_AUTH_DISABLED === "1";
-
-// Parse allowed admin domain from env
-function getAllowedAdminDomain(): string | null {
-  const domain = serverEnv.ADMIN_DOMAIN || "";
-  return domain ? domain.trim().toLowerCase() : null;
-}
 
 // Fetch admin emails from Firestore's admin_users collection (lowercased, trimmed).
 async function getFirestoreAdminEmails(): Promise<string[]> {
@@ -48,47 +42,6 @@ async function getFirestoreAdminEmails(): Promise<string[]> {
     logError("admin-auth: fetch admin_users", err);
     return [];
   }
-}
-
-// Checks if an email is allowed as admin (case-insensitive). Combines env and Firestore emails.
-function isEmailAllowed(email: string, extraEmails: string[] = []): boolean {
-  if (!email) return false;
-  const allowedEmails = getAllowedAdminEmails();
-  const allowedDomain = getAllowedAdminDomain();
-  const normalizedEmail = email.trim().toLowerCase();
-  const combinedEmails = [...new Set([...allowedEmails, ...extraEmails])];
-
-  if (debug) {
-    console.log("[admin-auth] Normalized login email:", `"${normalizedEmail}"`);
-    console.log(
-      "[admin-auth] Combined allowed emails:",
-      combinedEmails.map((e) => `"${e}"`)
-    );
-  }
-
-  if (combinedEmails.includes(normalizedEmail)) {
-    if (debug) console.log("[admin-auth] Allowed admin email:", normalizedEmail);
-    return true;
-  }
-  if (allowedDomain && normalizedEmail.endsWith("@" + allowedDomain)) {
-    if (debug)
-      console.log(
-        "[admin-auth] Allowed admin domain:",
-        allowedDomain,
-        "for email:",
-        normalizedEmail
-    );
-    return true;
-  }
-  console.warn('[Auth] Rejected admin email', normalizedEmail);
-  if (debug) {
-    console.warn(
-      "[admin-auth] Rejected admin email:",
-      `"${normalizedEmail}"`,
-      "(not in allowed list or domain)"
-    );
-  }
-  return false;
 }
 
 export interface VerifiedAdmin {

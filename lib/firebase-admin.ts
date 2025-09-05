@@ -7,6 +7,7 @@ import { getFirestore, Firestore } from "firebase-admin/firestore";
 import type { ServiceAccount } from "firebase-admin"; // Strict type import
 import { serverEnv } from "@/env/server";
 import { logger, debug } from "@/lib/logger";
+import { getAllowedAdminEmails } from "@/lib/admin-allowlist";
 
 // Allow e2e/CI to short-circuit any admin boot (actual auth bypass is implemented in lib/admin-auth.ts)
 export const ADMIN_BYPASS = serverEnv.ADMIN_BYPASS === "true";
@@ -97,33 +98,7 @@ if (debug) {
 /**
  * Helper: Get allowed admin emails as a lowercase array
  */
-export function getAllowedAdminEmails(): string[] {
-  const allowedEmails = (adminEmailsEnv || "")
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
-
-  if (debug) {
-    logger.debug("[Firebase Admin] DEBUG_ADMIN enabled");
-    logger.debug("[Firebase Admin] Loaded ADMIN_EMAILS:", serverEnv.ADMIN_EMAILS);
-    logger.debug("[Firebase Admin] Loaded ADMIN_EMAIL:", serverEnv.ADMIN_EMAIL);
-    logger.debug("[Firebase Admin] Final allowed admin emails:", allowedEmails);
-    logger.debug(
-      "[ENV DUMP]",
-      JSON.stringify(
-        {
-          ADMIN_EMAIL: serverEnv.ADMIN_EMAIL,
-          ADMIN_EMAILS: serverEnv.ADMIN_EMAILS,
-          NODE_ENV: serverEnv.NODE_ENV,
-          ADMIN_BYPASS,
-        },
-        null,
-        2
-      )
-    );
-  }
-  return allowedEmails;
-}
+export { getAllowedAdminEmails };
 
 // ✅ Export Firebase Admin Services - export undefined if not initialized OR if bypassing
 export const adminAuth: Auth | undefined =

@@ -4,28 +4,7 @@ import jwt from "jsonwebtoken"
 import { logError } from "@/lib/log"
 import { serverEnv } from "@/env/server"
 
-function getAllowedAdminEmails(): string[] {
-  const emails = serverEnv.ADMIN_EMAILS || serverEnv.ADMIN_EMAIL || ""
-  return emails
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean)
-}
-
-function getAllowedAdminDomain(): string | null {
-  const domain = serverEnv.ADMIN_DOMAIN || ""
-  return domain ? domain.trim().toLowerCase() : null
-}
-
-function isEmailAllowed(email: string): boolean {
-  if (!email) return false
-  const allowedEmails = getAllowedAdminEmails()
-  const allowedDomain = getAllowedAdminDomain()
-  const normalized = email.trim().toLowerCase()
-  if (allowedEmails.length && allowedEmails.includes(normalized)) return true
-  if (allowedDomain && normalized.endsWith("@" + allowedDomain)) return true
-  return false
-}
+import { isEmailAllowed } from "@/lib/admin-allowlist"
 
 export async function POST(req: NextRequest) {
   try {

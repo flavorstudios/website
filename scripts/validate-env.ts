@@ -39,14 +39,11 @@ if (!skipValidation) {
     missing.push("FIREBASE_SERVICE_ACCOUNT_KEY or FIREBASE_SERVICE_ACCOUNT_JSON");
   }
 
-  // Accept either server or public storage bucket; require at least one
   if (
     !process.env.FIREBASE_STORAGE_BUCKET &&
     !process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
   ) {
-    missing.push(
-      "FIREBASE_STORAGE_BUCKET or NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"
-    );
+    missing.push("FIREBASE_STORAGE_BUCKET or NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET");
   }
 
   // Admin email allow-list: require one of ADMIN_EMAILS / ADMIN_EMAIL and disallow empty strings

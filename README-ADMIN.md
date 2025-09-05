@@ -8,7 +8,7 @@ Either `ADMIN_EMAILS` (preferred) or `ADMIN_EMAIL` must be defined for builds an
 
 After updating `ADMIN_EMAILS` or `ADMIN_EMAIL` in Vercel, trigger a new deployment; existing builds continue using the old values.
 
-**Note:** The admin password must be stored as `ADMIN_PASSWORD_HASH` (bcrypt hash). `ADMIN_PASSWORD` is ignored; set `ADMIN_JWT_SECRET` for session signing.
+* The admin password must be provided as `ADMIN_PASSWORD_HASH` (bcrypt). `ADMIN_PASSWORD` is ignored.
 
 ## How `/api/admin/google-session` authorizes emails
 

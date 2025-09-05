@@ -74,16 +74,35 @@ function requireBucket() {
   return bucket;
 }
 
-/** Generate a public URL for a gs:// file path. */
-function publicUrlFor(bucketName: string, path: string) {
-  const encoded = path.split("/").map(encodeURIComponent).join("/");
-  return `https://storage.googleapis.com/${bucketName}/${encoded}`;
+/**
+ * Resolve a readable URL for a Storage file.
+ *
+ * If the bucket or object is public, returns the public URL. Otherwise a
+ * signed URL is generated that expires in one hour. The expiration timestamp
+ * is returned so callers can refresh URLs for long-lived dashboard sessions.
+ */
+async function fileUrl(file: any): Promise<{ url: string; expiresAt?: number }> {
+  try {
+    const [isPublic] = await file.isPublic();
+    if (isPublic) {
+      return { url: file.publicUrl() };
+    }
+  } catch {
+    // If we can't determine public status, fall back to a signed URL.
+  }
+
+  const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
+  const [signedUrl] = await file.getSignedUrl({
+    action: "read",
+    expires: expiresAt,
+  });
+  return { url: signedUrl, expiresAt };
 }
 
 /** Derive the object path from a stored URL; fall back to a best guess. */
 function derivePathFromUrlOrGuess(url: string, bucketName: string, fallbackPath: string) {
   const prefix = `https://storage.googleapis.com/${bucketName}/`;
-  if (url?.startsWith(prefix)) return url.slice(prefix.length);
+  if (url?.startsWith(prefix)) return url.slice(prefix.length).split("?")[0];
   return fallbackPath;
 }
 
@@ -175,9 +194,9 @@ export async function uploadMedia(buffer: Buffer, name: string, mimeType: string
   const id = genId();
   const objectPath = `media/${id}/${name}`;
   const file = bucket.file(objectPath);
-  await file.save(buffer, { contentType: mimeType, predefinedAcl: "publicRead" });
+  await file.save(buffer, { contentType: mimeType });
 
-  const url = publicUrlFor(bucket.name, objectPath);
+  const { url, expiresAt } = await fileUrl(file);
 
   const doc: MediaDoc = {
     id,
@@ -197,6 +216,11 @@ export async function uploadMedia(buffer: Buffer, name: string, mimeType: string
     variants: [],
     favorite: false, // ✅ default favorite flag
   };
+
+  if (expiresAt) {
+    // Store expiry so the dashboard can refresh signed URLs before they lapse.
+    doc.urlExpiresAt = expiresAt;
+  }
 
   // Dynamically import sharp to avoid cold-start penalties and guard for non-images
   try {
@@ -286,7 +310,7 @@ export async function cropMedia(
   const variantFile = bucket.file(variantObjectPath);
   await variantFile.save(outBuffer, { contentType: data.mime });
 
-  const variantUrl = publicUrlFor(bucket.name, variantObjectPath);
+  const { url: variantUrl, expiresAt: variantExpiresAt } = await fileUrl(variantFile);
 
   const variant: MediaVariant = {
     id: genId(),
@@ -302,6 +326,10 @@ export async function cropMedia(
     type: "crop",
     label: variantName,
   };
+  if (variantExpiresAt) {
+    // Allow admin UI to refresh signed URLs for variants as well.
+    variant.urlExpiresAt = variantExpiresAt;
+  }
 
   const variants = Array.isArray(data.variants) ? [...data.variants, variant] : [variant];
 

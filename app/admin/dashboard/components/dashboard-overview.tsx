@@ -35,7 +35,7 @@ import { fetcher } from "@/lib/fetcher";
 import { useRole } from "../contexts/role-context";
 import { HttpError } from "@/lib/http";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
-import { ADMIN_NAVIGATE } from "@/lib/admin-events";
+import { dispatchAdminNavigate } from "@/lib/admin-events";
 
 // Register Chart.js primitives once
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -446,15 +446,7 @@ export default function DashboardOverview() {
                     key={index}
                     variant="outline"
                     className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
-                    onClick={() => {
-                      if (typeof window !== "undefined") {
-                        window.dispatchEvent(
-                          new CustomEvent(ADMIN_NAVIGATE, {
-                            detail: action.action,
-                          })
-                        );
-                      }
-                    }}
+                    onClick={() => dispatchAdminNavigate(action.action)}
                   >
                     <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center`}>
                       <Icon className="w-4 h-4 text-white" />

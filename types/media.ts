@@ -28,12 +28,22 @@ export interface MediaVariant {
   type?: string;         // e.g., "crop", "resize"
   createdAt?: number | string;
   createdBy?: string;
+  /**
+   * Expiration timestamp for signed URLs (ms since epoch).
+   * Admin dashboard should refresh the URL once this time has passed.
+   */
+  urlExpiresAt?: number;
 }
 
 export interface MediaDoc {
   // Required
   id: string;
   url: string;
+  /**
+   * Expiration timestamp for signed URLs (ms since epoch).
+   * Admin dashboard should refresh the URL once this time has passed.
+   */
+  urlExpiresAt?: number;
 
   // Names
   name?: string;         // optional logical name

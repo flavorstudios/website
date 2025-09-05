@@ -1,9 +1,11 @@
 "use client";
 import Image from "next/image";
+import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import type { MediaDoc } from "@/types/media";
 import { File, Video, Star, Music } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   items: MediaDoc[];
@@ -23,10 +25,24 @@ export default function MediaGrid({
   toggleSelect,
   onToggleFavorite,
 }: Props) {
+  const [failed, setFailed] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
+
+  const handleError = (item: MediaDoc) => {
+    setFailed((prev) => {
+      const next = new Set(prev);
+      next.add(item.id);
+      return next;
+    });
+    // eslint-disable-next-line no-console
+    console.error("Failed to load media", item.url);
+    toast.error?.("Failed to load media. Check permissions.");
+  };
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
       {items.map((item) => {
         const isSelected = selected?.has(item.id);
+        const hasError = failed.has(item.id);
         const mime = item.mime || item.mimeType || "";
         const isImage = mime.startsWith("image/");
         const isVideo = mime.startsWith("video/");
@@ -95,7 +111,7 @@ export default function MediaGrid({
             )}
 
             {/* Preview */}
-            {isImage ? (
+            {isImage && !hasError ? (
               <Image
                 src={item.url}
                 alt={item.alt || item.filename || item.name || "media"}
@@ -104,15 +120,24 @@ export default function MediaGrid({
                 sizes="(max-width: 640px) 50vw, 200px"
                 className="object-cover w-full h-32"
                 loading="lazy"
+                onError={() => handleError(item)}
               />
             ) : (
-              <div className="flex items-center justify-center w-full h-32 bg-muted text-muted-foreground">
+              <div className="relative flex items-center justify-center w-full h-32 bg-muted text-muted-foreground">
                 {isVideo ? (
                   <Video className="w-8 h-8" />
                 ) : isAudio ? (
                   <Music className="w-8 h-8" />
                 ) : (
                   <File className="w-8 h-8" />
+                )}
+                {hasError && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute top-1 right-1 z-10 text-[10px] px-1 py-0"
+                  >
+                    Error
+                  </Badge>
                 )}
               </div>
             )}

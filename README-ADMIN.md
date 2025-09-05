@@ -4,6 +4,8 @@
 
 Either `ADMIN_EMAILS` (preferred) or `ADMIN_EMAIL` must be defined for builds and runtime; otherwise all admin routes will fail.
 
+Changes to `ADMIN_EMAILS` or `ADMIN_EMAIL` require a fresh deployment; existing builds will still use the old values.
+
 ## How `/api/admin/google-session` authorizes emails
 
 The Google admin login endpoint calls `getAllowedAdminEmails()` from `lib/firebase-admin`. That helper builds a lowercase list from `ADMIN_EMAILS` (comma‑separated); if `ADMIN_EMAILS` is undefined or empty, it falls back to `ADMIN_EMAIL`. When a login request arrives, `/api/admin/google-session` verifies the decoded Google ID token and then ensures the email is included in that allowed list before issuing the `admin-session` cookie.

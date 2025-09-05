@@ -4,7 +4,7 @@
 
 Either `ADMIN_EMAILS` (preferred) or `ADMIN_EMAIL` must be defined for builds and runtime; otherwise all admin routes will fail.
 
-Changes to `ADMIN_EMAILS` or `ADMIN_EMAIL` require a fresh deployment; existing builds will still use the old values.
+After updating `ADMIN_EMAILS` or `ADMIN_EMAIL` in Vercel, trigger a new deployment; existing builds continue using the old values.
 
 ## How `/api/admin/google-session` authorizes emails
 

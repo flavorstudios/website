@@ -2,6 +2,7 @@
 
 // Import the necessary modules
 import bundleAnalyzer from '@next/bundle-analyzer';
+// Load server-only environment variables (compiled from env/server.ts)
 import { serverEnv } from './env/server.js';
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: serverEnv.ANALYZE === 'true' });

@@ -6,6 +6,8 @@ Either `ADMIN_EMAILS` (preferred) or `ADMIN_EMAIL` must be defined for builds an
 
 After updating `ADMIN_EMAILS` or `ADMIN_EMAIL` in Vercel, trigger a new deployment; existing builds continue using the old values.
 
+For email/password logins, set `ADMIN_PASSWORD_HASH` (bcrypt hash) and `ADMIN_JWT_SECRET`. The plain `ADMIN_PASSWORD` variable has no effect.
+
 ## How `/api/admin/google-session` authorizes emails
 
 The Google admin login endpoint calls `getAllowedAdminEmails()` from `lib/firebase-admin`. That helper builds a lowercase list from `ADMIN_EMAILS` (comma‑separated); if `ADMIN_EMAILS` is undefined or empty, it falls back to `ADMIN_EMAIL`. When a login request arrives, `/api/admin/google-session` verifies the decoded Google ID token and then ensures the email is included in that allowed list before issuing the `admin-session` cookie.

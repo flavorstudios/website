@@ -16,7 +16,17 @@ import type {
 } from "@/types/media";
 import { useToast } from "@/hooks/use-toast";
 
-export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) => void }) {
+interface MediaLibraryProps {
+  onSelect?: (url: string) => void;
+  detailsOpen?: boolean;
+  onDetailsOpenChange?: (open: boolean) => void;
+}
+
+export default function MediaLibrary({
+  onSelect,
+  detailsOpen,
+  onDetailsOpenChange,
+}: MediaLibraryProps) {
   const { toast } = useToast();
   const [items, setItems] = useState<MediaDoc[]>([]);
   const [cursor, setCursor] = useState<number | null>(null); // Pagination cursor
@@ -368,10 +378,28 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   };
 
   // Selecting an item also stores its index within the filtered set for prev/next
+  useEffect(() => {
+    if (detailsOpen === false) {
+      setSelectedItem(null);
+      setSelectedIndex(null);
+    }
+  }, [detailsOpen]);
   const handleSelectItem = (item: MediaDoc) => {
     const idx = filtered.findIndex((m) => m.id === item.id);
     setSelectedIndex(idx >= 0 ? idx : null);
     setSelectedItem(item);
+    onDetailsOpenChange?.(true);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedItem(null);
+    setSelectedIndex(null);
+    onDetailsOpenChange?.(false);
+  };
+
+  const handleDrawerOpenChange = (open: boolean) => {
+    if (!open) handleCloseDetails();
+    else onDetailsOpenChange?.(true);
   };
 
   const handleUpdateItem = (updated: MediaDoc) => {
@@ -469,8 +497,8 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
       {selectedItem && (
         <MediaDetailsDrawer
           media={selectedItem}
-          open={true}
-          onClose={() => setSelectedItem(null)}
+          open={detailsOpen ?? true}
+          onOpenChange={handleDrawerOpenChange}
           onPrev={showPrev ? goPrev : undefined}
           onNext={showNext ? goNext : undefined}
           onUpdate={handleUpdateItem}

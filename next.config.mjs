@@ -17,7 +17,11 @@ const nextConfig = {
     // This avoids 4xx/5xx errors when the optimizer endpoint isn't available
     // on the hosting platform (e.g., static deployments behind Cloudflare).
     unoptimized: true,
-    domains: ['storage.googleapis.com', 'firebasestorage.googleapis.com'],
+    domains: [
+      'storage.googleapis.com',
+      'firebasestorage.googleapis.com',
+      'flavorstudios.in',
+    ],
   },
 
   async headers() {

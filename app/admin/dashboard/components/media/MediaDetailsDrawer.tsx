@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 interface MediaDetailsDrawerProps {
   media: MediaDoc;
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
 
   /** Optional navigation controls; pass these if you support next/prev browsing */
   onPrev?: () => void;
@@ -36,7 +36,7 @@ const formatBytes = (b?: number) => {
 export default function MediaDetailsDrawer({
   media,
   open,
-  onClose,
+  onOpenChange,
   onPrev,
   onNext,
   onUpdate,
@@ -137,8 +137,8 @@ export default function MediaDetailsDrawer({
       : undefined;
 
   return (
-    <Sheet open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <SheetContent className="p-4 space-y-4 max-w-md w-full" aria-label="Media details">
+    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
+      <DialogContent className="p-4 space-y-4 max-w-md w-full" aria-label="Media details">
         {(onPrev || onNext) && (
           <div className="flex justify-between">
             {onPrev ? (
@@ -315,7 +315,7 @@ export default function MediaDetailsDrawer({
             {savingAlt ? "Saving…" : "Save"}
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

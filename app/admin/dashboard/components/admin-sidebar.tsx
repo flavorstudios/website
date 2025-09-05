@@ -103,8 +103,8 @@ export function AdminSidebar({
         className={`
           h-full md:h-screen overflow-y-auto bg-background border-r
           ${isMobile
-            ? "fixed left-0 top-0 z-50 transition-transform duration-300 ease-in-out"
-            : "sticky top-0 z-50"}
+            ? "fixed left-0 top-0 z-40 transition-transform duration-300 ease-in-out"
+            : "sticky top-0 z-40"}
           ${sidebarOpen ? "" : "-translate-x-full md:translate-x-0"}
           w-64 ${sidebarOpen ? "md:w-64" : "md:w-20"}
           flex flex-col md:relative

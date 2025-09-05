@@ -9,6 +9,20 @@ import SocialShare from "@/app/blog/[slug]/components/social-share";
 import { SITE_URL } from "@/lib/constants";
 import type { BlogPost } from "@/lib/content-store"; // Use your central type!
 
+const ALLOWED_IMAGE_DOMAINS = [
+  "storage.googleapis.com",
+  "firebasestorage.googleapis.com",
+  "flavorstudios.in",
+];
+
+function isAllowedImageDomain(url: string) {
+  try {
+    return ALLOWED_IMAGE_DOMAINS.includes(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
 interface BlogPostRendererProps {
   post: BlogPost;
 }
@@ -20,6 +34,7 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
       : post.category;
 
   const image = post.openGraphImage || post.featuredImage; // UPDATED
+  const isAllowedImage = image ? isAllowedImageDomain(image) : false;
 
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -65,14 +80,22 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
 
       {image && (
         <div className="mb-8 w-full h-64 md:h-96 relative rounded-lg shadow-lg overflow-hidden">
-          <Image
-            src={image}
-            alt={post.title || "Blog post cover image"}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 1024px"
-            priority
-          />
+          {isAllowedImage ? (
+            <Image
+              src={image}
+              alt={post.title || "Blog post cover image"}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 1024px"
+              priority
+            />
+          ) : (
+            <img
+              src={image}
+              alt={post.title || "Blog post cover image"}
+              className="object-cover w-full h-full"
+            />
+          )}
         </div>
       )}
 

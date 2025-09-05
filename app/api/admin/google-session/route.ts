@@ -58,11 +58,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const allowedAdminEmails = getAllowedAdminEmails();
     if (allowedAdminEmails.length === 0) {
-      logError("google-session: no admin emails configured", {});
-      return NextResponse.json(
-        { error: "No admin emails configured" },
-        { status: 500 }
-      );
+      const message = "No admin emails configured";
+      // Ensure we fail fast even when DEBUG_ADMIN is enabled
+      logError(`google-session: ${message}`, {});
+      return NextResponse.json({ error: message }, { status: 500 });
     }
 
     // --- Log normalized email and allowed admin emails for debug ---

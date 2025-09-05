@@ -37,8 +37,13 @@ if (!skipValidation) {
     missing.push("FIREBASE_SERVICE_ACCOUNT_KEY or FIREBASE_SERVICE_ACCOUNT_JSON");
   }
 
-  if (!process.env.FIREBASE_STORAGE_BUCKET && !process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) {
-    missing.push("FIREBASE_STORAGE_BUCKET or NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET");
+  if (
+    !process.env.FIREBASE_STORAGE_BUCKET &&
+    !process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+  ) {
+    missing.push(
+      "FIREBASE_STORAGE_BUCKET or NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"
+    );
   }
 
   if (!process.env.ADMIN_EMAILS && !process.env.ADMIN_EMAIL) {
@@ -73,12 +78,6 @@ if (json) {
       "FIREBASE_SERVICE_ACCOUNT_KEY/FIREBASE_SERVICE_ACCOUNT_JSON contains invalid JSON"
     );
   }
-}
-
-if (!process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) {
-  throw new Error(
-    "Missing required environment variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"
-  );
 }
 
 const { FIREBASE_STORAGE_BUCKET, NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET } = serverEnv;

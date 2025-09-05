@@ -32,11 +32,14 @@ const adminVars = [
 const required = firebaseKeys.filter((key) => !adminVars.includes(key));
 
 const missing = required.filter((key) => !process.env[key]);
+
 if (!skipValidation) {
+  // Require at least one service-account source
   if (!adminVars.slice(0, 2).some((key) => process.env[key])) {
     missing.push("FIREBASE_SERVICE_ACCOUNT_KEY or FIREBASE_SERVICE_ACCOUNT_JSON");
   }
 
+  // Accept either server or public storage bucket; require at least one
   if (
     !process.env.FIREBASE_STORAGE_BUCKET &&
     !process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
@@ -46,6 +49,7 @@ if (!skipValidation) {
     );
   }
 
+  // Admin email allow-list: require one of ADMIN_EMAILS / ADMIN_EMAIL and disallow empty strings
   if (!process.env.ADMIN_EMAILS && !process.env.ADMIN_EMAIL) {
     missing.push("ADMIN_EMAILS or ADMIN_EMAIL");
   }
@@ -70,6 +74,7 @@ if (missing.length > 0) {
 const json =
   process.env.FIREBASE_SERVICE_ACCOUNT_KEY ??
   process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+
 if (json) {
   try {
     JSON.parse(json);
@@ -82,6 +87,7 @@ if (json) {
 
 const { FIREBASE_STORAGE_BUCKET, NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET } = serverEnv;
 
+// Only compare buckets when both are present
 if (
   !skipValidation &&
   FIREBASE_STORAGE_BUCKET &&

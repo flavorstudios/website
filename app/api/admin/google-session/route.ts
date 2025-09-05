@@ -25,8 +25,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // --- Verify Firebase ID token with revocation checks ---
-    let decoded;
-    let auth;
+    let decoded: any;
+    let auth: ReturnType<typeof getAdminAuth>;
     try {
       auth = getAdminAuth();
     } catch (err) {
@@ -56,6 +56,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: "Authentication failed." }, { status: 401 });
     }
 
+    // --- NEW: log raw admin email envs before building the allowlist ---
+    if (debug) {
+      console.log("[google-session] ADMIN_EMAILS raw:", serverEnv.ADMIN_EMAILS);
+      console.log("[google-session] ADMIN_EMAIL raw:", serverEnv.ADMIN_EMAIL);
+    }
+
     const allowedAdminEmails = getAllowedAdminEmails();
     if (allowedAdminEmails.length === 0) {
       const message = "No admin emails configured";
@@ -80,7 +86,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
     } catch (err: unknown) {
       logError("google-session: admin email unauthorized", err);
-      console.warn('[Auth] Denied Google sign-in for', decoded.email);
+      console.warn("[Auth] Denied Google sign-in for", decoded.email);
       if (err instanceof Error && err.message === "Unauthorized admin email") {
         return NextResponse.json({ error: "Email not on admin list" }, { status: 401 });
       }

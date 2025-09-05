@@ -4,13 +4,15 @@
 
 Either `ADMIN_EMAILS` (preferred) or `ADMIN_EMAIL` must be defined for builds and runtime. A non-empty `ADMIN_EMAILS` always takes precedence over `ADMIN_EMAIL`. If both variables are empty or undefined, the allowed admin list is empty and all admin logins will fail.
 
+`ADMIN_EMAILS` (comma-separated) overrides `ADMIN_EMAIL`. **If `ADMIN_EMAILS` is defined—even as an empty string—`ADMIN_EMAIL` is ignored.**
+
 After updating `ADMIN_EMAILS` or `ADMIN_EMAIL` in Vercel, trigger a new deployment; existing builds continue using the old values.
 
 **Note:** The admin password must be stored as `ADMIN_PASSWORD_HASH` (bcrypt hash). `ADMIN_PASSWORD` is ignored; set `ADMIN_JWT_SECRET` for session signing.
 
 ## How `/api/admin/google-session` authorizes emails
 
-The Google admin login endpoint calls `getAllowedAdminEmails()` from `lib/firebase-admin`. That helper builds a lowercase list from `ADMIN_EMAILS` (comma‑separated); if `ADMIN_EMAILS` is undefined or empty, it falls back to `ADMIN_EMAIL`. When a login request arrives, `/api/admin/google-session` verifies the decoded Google ID token and then ensures the email is included in that allowed list before issuing the `admin-session` cookie.
+The Google admin login endpoint calls `getAllowedAdminEmails()` from `lib/firebase-admin`. That helper builds a lowercase list from `ADMIN_EMAILS` (comma-separated); if `ADMIN_EMAILS` is undefined or empty, it falls back to `ADMIN_EMAIL`. When a login request arrives, `/api/admin/google-session` verifies the decoded Google ID token and then ensures the email is included in that allowed list before issuing the `admin-session` cookie.
 
 **Note:**
 
@@ -22,7 +24,7 @@ The Google admin login endpoint calls `getAllowedAdminEmails()` from `lib/fireba
 
 1. Open your project in the Vercel dashboard.
 2. Go to **Settings → Environment Variables**.
-3. Add or edit `ADMIN_EMAILS` for multiple addresses (comma‑separated) or `ADMIN_EMAIL` for a single address.
+3. Add or edit `ADMIN_EMAILS` for multiple addresses (comma-separated) or `ADMIN_EMAIL` for a single address.
 4. To add an admin, append their email to `ADMIN_EMAILS`.
 5. To remove an admin, delete their email from the list.
 
@@ -36,4 +38,3 @@ After updating environment variables:
 vercel env pull .env.local   # sync the latest vars locally
 pnpm tsx scripts/check-admin-env.ts  # verify admin env configuration
 vercel deploy --prod          # redeploy with the updated vars
-```

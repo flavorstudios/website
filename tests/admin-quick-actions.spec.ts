@@ -59,18 +59,25 @@ test.beforeEach(async ({ page }) => {
 
 test('quick action buttons navigate to expected sections', async ({ page }) => {
   const actions = [
-    { button: 'Create New Post', expected: 'Blog Management' },
-    { button: 'Add Video', expected: 'Video Manager' },
-    { button: 'Moderate Comments', expected: 'Comments & Reviews' },
-    { button: 'Manage Users', expected: 'Users' },
+    {
+      button: 'Create New Post',
+      expected: 'Blog Management',
+      url: '/admin/dashboard/blog-posts',
+    },
+    { button: 'Add Video', expected: 'Video Manager', url: '/admin/dashboard/videos' },
+    {
+      button: 'Moderate Comments',
+      expected: 'Comments & Reviews',
+      url: '/admin/dashboard/comments',
+    },
+    { button: 'Manage Users', expected: 'Users', url: '/admin/dashboard/users' },
   ];
 
-  for (const { button, expected } of actions) {
+  for (const { button, expected, url } of actions) {
     await page.goto('/admin/dashboard');
-    await Promise.all([
-      page.waitForSelector(`text=${expected}`, { state: 'visible' }),
-      page.getByRole('button', { name: button }).click(),
-    ]);
+    await page.getByRole('button', { name: button }).click();
+    await expect(page).toHaveURL(url);
+    await expect(page.getByText(expected)).toBeVisible();
     await expect(page.getByText('Loading Admin Dashboard...')).not.toBeVisible();
   }
 });

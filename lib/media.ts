@@ -246,6 +246,33 @@ export async function updateMedia(id: string, updates: Partial<MediaDoc>): Promi
 }
 
 /**
+ * Refresh the signed URL for a media object and persist the new values.
+ */
+export async function refreshMediaUrl(id: string): Promise<MediaDoc | null> {
+  const bucket = requireBucket();
+  const collection = requireCollection();
+
+  const snap = await collection.doc(id).get();
+  if (!snap.exists) return null;
+  const data = snap.data() as MediaDoc;
+
+  const guessPath = `media/${id}/${data.filename}`;
+  const filePath = derivePathFromUrlOrGuess(data.url, bucket.name, guessPath);
+  const file = bucket.file(filePath);
+
+  const { url, expiresAt } = await fileUrl(file);
+
+  const updates: Partial<MediaDoc> = {
+    url,
+    urlExpiresAt: expiresAt,
+    updatedAt: Date.now(),
+  };
+
+  await collection.doc(id).set(updates, { merge: true });
+  return { ...data, ...updates } as MediaDoc;
+}
+
+/**
  * Delete a media object from Storage (if possible) and remove its Firestore doc.
  * If the bucket is not configured, still remove the Firestore doc to avoid blocking.
  */

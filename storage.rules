@@ -6,9 +6,20 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /{allPaths=**} {
-      // Allow public reads; restrict writes.
-      allow read: if true;
-      allow write: if false;
+      // Only authenticated admins may access Storage.
+      // Admins can be identified either by custom claims
+      // (role === "admin" or isAdmin === true) or by a flag in
+      // the corresponding Firestore user document.
+
+      function isAdmin() {
+        return request.auth != null && (
+          request.auth.token.role == "admin" ||
+          request.auth.token.isAdmin == true ||
+          firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true
+        );
+      }
+
+      allow read, write: if isAdmin();
     }
   }
 }

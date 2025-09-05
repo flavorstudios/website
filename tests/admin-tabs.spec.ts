@@ -61,21 +61,22 @@ test('admin nav tabs render correct content', async ({ page }) => {
   await page.goto('/admin/dashboard');
 
   const sections = [
-    { label: 'Dashboard', expected: /Welcome back/i },
-    { label: 'Blog Posts', expected: /Blog Management/i },
-    { label: 'Videos', expected: /Video Manager/i },
-    { label: 'Media', expected: /Media Library/i },
-    { label: 'Categories', expected: /^Categories$/i },
-    { label: 'Comments', expected: /Comments & Reviews/i },
-    { label: 'Applications', expected: /^Applications$/i },
-    { label: 'Email Inbox', expected: /Email Inbox/i },
-    { label: 'Users', expected: /^Users$/i },
-    { label: 'Settings', expected: /^Settings$/i },
-    { label: 'System Tools', expected: /Revalidate Entire Website/i },
+    { label: 'Dashboard', expected: /Welcome back/i, path: '/admin/dashboard' },
+    { label: 'Blog Posts', expected: /Blog Management/i, path: '/admin/dashboard/blog-posts' },
+    { label: 'Videos', expected: /Video Manager/i, path: '/admin/dashboard/videos' },
+    { label: 'Media', expected: /Media Library/i, path: '/admin/dashboard/media' },
+    { label: 'Categories', expected: /^Categories$/i, path: '/admin/dashboard/categories' },
+    { label: 'Comments', expected: /Comments & Reviews/i, path: '/admin/dashboard/comments' },
+    { label: 'Applications', expected: /^Applications$/i, path: '/admin/dashboard/applications' },
+    { label: 'Email Inbox', expected: /Email Inbox/i, path: '/admin/dashboard/inbox' },
+    { label: 'Users', expected: /^Users$/i, path: '/admin/dashboard/users' },
+    { label: 'Settings', expected: /^Settings$/i, path: '/admin/dashboard/settings' },
+    { label: 'System Tools', expected: /Revalidate Entire Website/i, path: '/admin/dashboard/system' },
   ];
 
-  for (const { label, expected } of sections) {
+  for (const { label, expected, path } of sections) {
     await page.getByRole('link', { name: label }).click();
+    await expect(page).toHaveURL(path);
     await expect(page.getByText(expected)).toBeVisible();
     await expect(page.getByText('Loading Admin Dashboard...')).not.toBeVisible();
   }

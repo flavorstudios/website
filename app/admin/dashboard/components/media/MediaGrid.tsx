@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, type SyntheticEvent } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import type { MediaDoc } from "@/types/media";
@@ -28,15 +28,42 @@ export default function MediaGrid({
   const [failed, setFailed] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
-  const handleError = (item: MediaDoc) => {
+  const handleError = async (
+    item: MediaDoc,
+    event?: SyntheticEvent<HTMLImageElement, Event>
+  ) => {
     setFailed((prev) => {
       const next = new Set(prev);
       next.add(item.id);
       return next;
     });
+
+    const src = event?.currentTarget?.src || item.url;
+    let status: number | undefined;
+    try {
+      if (src) {
+        const res = await fetch(src, { method: "HEAD" });
+        status = res.status;
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Error checking media status", {
+        url: item.url,
+        err,
+      });
+    }
+
+    let message = "Failed to load media. Check permissions.";
+    if (status === 404) message = "File missing";
+    else if (status === 401 || status === 403) message = "URL expired";
+
     // eslint-disable-next-line no-console
-    console.error("Failed to load media", item.url);
-    toast.error?.("Failed to load media. Check permissions.");
+    console.error("Failed to load media", {
+      url: item.url,
+      status,
+      event,
+    });
+    toast.error?.(message);
   };
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
@@ -111,17 +138,37 @@ export default function MediaGrid({
             )}
 
             {/* Preview */}
-            {isImage && !hasError ? (
-              <Image
-                src={item.url}
-                alt={item.alt || item.filename || item.name || "media"}
-                width={160}
-                height={160}
-                sizes="(max-width: 640px) 50vw, 200px"
-                className="object-cover w-full h-32"
-                loading="lazy"
-                onError={() => handleError(item)}
-              />
+            {isImage ? (
+              hasError ? (
+                <div className="relative w-full h-32">
+                  <Image
+                    src="/placeholder.png"
+                    alt="placeholder"
+                    width={160}
+                    height={160}
+                    className="object-cover w-full h-32"
+                  />
+                  <Badge
+                    variant="destructive"
+                    className="absolute top-1 right-1 z-10 text-[10px] px-1 py-0"
+                  >
+                    Error
+                  </Badge>
+                </div>
+              ) : (
+                <Image
+                  src={item.url}
+                  alt={item.alt || item.filename || item.name || "media"}
+                  width={160}
+                  height={160}
+                  sizes="(max-width: 640px) 50vw, 200px"
+                  className="object-cover w-full h-32"
+                  loading="lazy"
+                  onError={(e) => {
+                    void handleError(item, e);
+                  }}
+                />
+              )
             ) : (
               <div className="relative flex items-center justify-center w-full h-32 bg-muted text-muted-foreground">
                 {isVideo ? (

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import MediaToolbar from "./MediaToolbar";
 import MediaGrid from "./MediaGrid";
 import MediaList from "./MediaList";
@@ -34,6 +34,58 @@ export default function MediaLibrary({ onSelect }: { onSelect?: (url: string) =>
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [tagFilter, setTagFilter] = useState("");
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+
+  // Track items currently being refreshed to avoid duplicate calls
+  const refreshingIds = useRef<Set<string>>(new Set());
+
+  const refreshItem = useCallback(
+    async (id: string) => {
+      if (refreshingIds.current.has(id)) return;
+      refreshingIds.current.add(id);
+      try {
+        const res = await fetch("/api/media/refresh", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+        const data = await res.json();
+        if (data.media) {
+          setItems((prev) =>
+            prev.map((m) => (m.id === id ? data.media : m)),
+          );
+          setSelectedItem((prev) =>
+            prev && prev.id === id ? (data.media as MediaDoc) : prev,
+          );
+        }
+      } catch {
+        // ignore refresh failures
+      } finally {
+        refreshingIds.current.delete(id);
+      }
+    },
+    [setItems, setSelectedItem],
+  );
+
+  const checkExpirations = useCallback(() => {
+    const now = Date.now();
+    items.forEach((item) => {
+      if (item.urlExpiresAt && item.urlExpiresAt - now < 5 * 60 * 1000) {
+        void refreshItem(item.id);
+      }
+    });
+  }, [items, refreshItem]);
+
+  // Check on mount and whenever items change
+  useEffect(() => {
+    checkExpirations();
+  }, [items, checkExpirations]);
+
+  // Periodic refresh for long sessions
+  useEffect(() => {
+    const interval = setInterval(checkExpirations, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [checkExpirations]);
+
 
   // Load persisted preferences
   useEffect(() => {

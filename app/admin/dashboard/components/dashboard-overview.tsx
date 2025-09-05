@@ -4,6 +4,7 @@
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import {
   Chart as ChartJS,
@@ -36,8 +37,6 @@ import { fetcher } from "@/lib/fetcher";
 import { useRole } from "../contexts/role-context";
 import { HttpError } from "@/lib/http";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
-import { dispatchAdminNavigate } from "@/lib/admin-events";
-import type { SectionId } from "../sections";
 
 // Register Chart.js primitives once
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -77,7 +76,7 @@ interface QuickAction {
   title: string;
   description: string;
   icon: LucideIcon;
-  action: SectionId;
+  href: string;
   color: string;
 }
 
@@ -86,34 +85,35 @@ const quickActions: QuickAction[] = [
     title: "Create New Post",
     description: "Write a new blog article",
     icon: FileText,
-    action: "blogs",
+    href: "/admin/dashboard/blog-posts",
     color: "bg-blue-500",
   },
   {
     title: "Add Video",
     description: "Upload new video content",
     icon: Video,
-    action: "videos",
+    href: "/admin/dashboard/videos",
     color: "bg-purple-500",
   },
   {
     title: "Moderate Comments",
     description: "Review pending comments",
     icon: MessageSquare,
-    action: "comments",
+    href: "/admin/dashboard/comments",
     color: "bg-green-500",
   },
   {
     title: "Manage Users",
     description: "Edit user roles and permissions",
     icon: Users,
-    action: "users",
+    href: "/admin/dashboard/users",
     color: "bg-teal-500",
   },
 ];
 
 export default function DashboardOverview() {
   const { theme } = useTheme();
+  const router = useRouter();
   const { hasPermission } = useRole();
   const canViewAnalytics = hasPermission?.("canViewAnalytics") ?? false;
 
@@ -458,7 +458,7 @@ export default function DashboardOverview() {
                       key={index}
                       variant="outline"
                       className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
-                      onClick={() => dispatchAdminNavigate(action.action)}
+                      onClick={() => router.push(action.href)}
                     >
                       <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center`}>
                         <Icon className="w-4 h-4 text-white" />

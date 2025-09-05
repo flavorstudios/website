@@ -38,3 +38,23 @@ After updating environment variables:
 vercel env pull .env.local   # sync the latest vars locally
 pnpm tsx scripts/check-admin-env.ts  # verify admin env configuration
 vercel deploy --prod          # redeploy with the updated vars
+```
+
+## Uploading media to Firebase Storage
+
+Firebase Storage rules block all client-side reads and writes. Uploads must be
+performed from trusted server environments using the Firebase Admin SDK. The
+`lib/media.ts` module wraps common operations and is used by Next.js API routes
+for media management.
+
+Example server upload:
+
+```ts
+import { getStorage } from "firebase-admin/storage";
+
+const bucket = getStorage().bucket();
+await bucket.upload("./local-file.png", { destination: "media/local-file.png" });
+```
+
+Client code should never attempt direct writes; browser uploads will fail due to
+the restrictive `storage.rules`.

@@ -197,7 +197,8 @@ export default function AdminDashboardPageClient({
     if (next !== activeSection) {
       setActiveSection(next);
     }
-  }, [pathname, activeSection]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   // --- Optional: respect ?section= if user directly visits with query -------
   useEffect(() => {
@@ -274,13 +275,14 @@ export default function AdminDashboardPageClient({
     const onNavigate = (e: Event) => {
       const detail = (e as CustomEvent).detail as { section?: string } | undefined;
       if (detail?.section && validSection(detail.section)) {
-        setActiveSection(detail.section);
+        const target = NAV.find((n) => n.id === detail.section);
+        if (target) router.push(target.href);
       }
     };
     window.addEventListener(ADMIN_NAVIGATE, onNavigate as EventListener);
     return () =>
       window.removeEventListener(ADMIN_NAVIGATE, onNavigate as EventListener);
-  }, []);
+  }, [router]);
 
   // --- Sync sidebar width globally for responsive layout -------------------
   useEffect(() => {

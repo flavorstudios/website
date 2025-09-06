@@ -31,6 +31,7 @@ import {
   Plus,
   ExternalLink,
   Users,
+  TrendingDown,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { fetcher } from "@/lib/fetcher";
@@ -283,6 +284,13 @@ export default function DashboardOverview() {
       </div>
     );
   }
+  const sign = stats.monthlyGrowth > 0 ? "+" : stats.monthlyGrowth < 0 ? "-" : "";
+  const growthColor =
+    stats.monthlyGrowth > 0
+      ? "text-green-600"
+      : stats.monthlyGrowth < 0
+        ? "text-red-600"
+        : "text-gray-600";
 
   return (
     <div className="space-y-6">
@@ -358,11 +366,17 @@ export default function DashboardOverview() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Posts</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.totalPosts}</p>
-                {stats.monthlyGrowth > 0 && (
-                  <p className="text-sm text-green-600 flex items-center mt-1">
-                    <TrendingUp className="h-3 w-3 mr-1" />+{stats.monthlyGrowth}% this month
-                  </p>
-                )}
+                <p className={`text-sm flex items-center mt-1 ${growthColor}`}>
+                  {stats.monthlyGrowth !== 0 && (
+                    stats.monthlyGrowth > 0 ? (
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                    ) : (
+                      <TrendingDown className="h-3 w-3 mr-1" />
+                    )
+                  )}
+                  {sign}
+                  {Math.abs(stats.monthlyGrowth)}% this month
+                </p>
                 {stats.totalPosts === 0 && <p className="text-sm text-gray-500 mt-1">No posts yet</p>}
               </div>
               <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -602,7 +616,7 @@ export default function DashboardOverview() {
             <CardContent>
               <div className="space-y-4">
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-green-600">+{stats.monthlyGrowth}%</p>
+                  <p className={`text-3xl font-bold ${growthColor}`}>{sign}{Math.abs(stats.monthlyGrowth)}%</p>
                   <p className="text-sm text-gray-600">Content Growth</p>
                 </div>
                 <div className="space-y-2">

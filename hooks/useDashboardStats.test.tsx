@@ -75,4 +75,66 @@ test('fetches dashboard stats for multiple ranges', async () => {
   expect(fetchMock.mock.calls[2][1]?.headers).toEqual({
     'If-None-Match': 'etag-12',
   });
+  });
+
+test.each([
+  {
+    label: 'positive',
+    history: [
+      { month: 'Apr', posts: 1, videos: 0, comments: 0 },
+      { month: 'May', posts: 2, videos: 0, comments: 0 },
+    ],
+    expected: 100,
+  },
+  {
+    label: 'negative',
+    history: [
+      { month: 'Apr', posts: 2, videos: 0, comments: 0 },
+      { month: 'May', posts: 1, videos: 0, comments: 0 },
+    ],
+    expected: -50,
+  },
+  {
+    label: 'zero',
+    history: [
+      { month: 'Apr', posts: 2, videos: 0, comments: 0 },
+      { month: 'May', posts: 2, videos: 0, comments: 0 },
+    ],
+    expected: 0,
+  },
+])('returns $label monthly growth', async ({ history, expected }) => {
+  const fetchMock = jest.fn().mockResolvedValue({
+    ok: true,
+    status: 200,
+    json: async () => ({
+      totalPosts: 0,
+      totalVideos: 0,
+      totalComments: 0,
+      totalViews: 0,
+      pendingComments: 0,
+      publishedPosts: 0,
+      featuredVideos: 0,
+      monthlyGrowth: expected,
+      history,
+    }),
+    headers: new Headers(),
+  });
+
+  global.fetch = fetchMock as any;
+
+  const client = new QueryClient();
+  function wrapper({ children }: { children: ReactNode }) {
+    return (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+  }
+
+  const { result } = renderHook(
+    () => useDashboardStats(false, true, '12mo'),
+    { wrapper }
+  );
+
+  await waitFor(() => expect(result.current.isSuccess).toBe(true));
+  expect(result.current.data?.monthlyGrowth).toBe(expected);
+  expect(result.current.data?.history).toEqual(history);
 });

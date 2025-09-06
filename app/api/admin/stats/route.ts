@@ -318,44 +318,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Stats unavailable" }, { status: 503 });
     }
 
-    // Calculate month-over-month post growth
-    const nowDate = new Date();
-    const startCurrentMonth = new Date(
-      Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), 1)
-    );
-    const startNextMonth = new Date(
-      Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() + 1, 1)
-    );
-    const startPrevMonth = new Date(
-      Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() - 1, 1)
-    );
-
-    const [currentMonthPosts, previousMonthPosts] = await Promise.all([
-      safeCount(
-        db
-          .collection("blogs")
-          .where("createdAt", ">=", Timestamp.fromDate(startCurrentMonth))
-          .where("createdAt", "<", Timestamp.fromDate(startNextMonth)),
-        "currentMonthPosts"
-      ),
-      safeCount(
-        db
-          .collection("blogs")
-          .where("createdAt", ">=", Timestamp.fromDate(startPrevMonth))
-          .where("createdAt", "<", Timestamp.fromDate(startCurrentMonth)),
-        "previousMonthPosts"
-      ),
-    ]);
-
-    base.monthlyGrowth =
-      previousMonthPosts === 0
-        ? currentMonthPosts > 0
-          ? 100
-          : 0
-        : Math.round(
-            ((currentMonthPosts - previousMonthPosts) / previousMonthPosts) * 100
-          );
-
     let history: MonthlyStats[] | undefined;
 
     // Optional 12-month history for charts (guarded per month)
@@ -421,6 +383,79 @@ export async function GET(request: NextRequest) {
         }
       }
     }
+
+    // Calculate month-over-month growth for posts and videos
+    let monthlyGrowth = 0;
+    if (history && history.length >= 2) {
+      const latest = history[history.length - 1];
+      const prev = history[history.length - 2];
+      const currentTotal = latest.posts + latest.videos;
+      const prevTotal = prev.posts + prev.videos;
+      monthlyGrowth =
+        prevTotal === 0
+          ? currentTotal > 0
+            ? 100
+            : 0
+          : Math.round(((currentTotal - prevTotal) / prevTotal) * 100);
+    } else {
+      const nowDate = new Date();
+      const startCurrentMonth = new Date(
+        Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), 1)
+      );
+      const startNextMonth = new Date(
+        Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() + 1, 1)
+      );
+      const startPrevMonth = new Date(
+        Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() - 1, 1)
+      );
+
+      const [
+        currentMonthPosts,
+        previousMonthPosts,
+        currentMonthVideos,
+        previousMonthVideos,
+      ] = await Promise.all([
+        safeCount(
+          db
+            .collection("blogs")
+            .where("createdAt", ">=", Timestamp.fromDate(startCurrentMonth))
+            .where("createdAt", "<", Timestamp.fromDate(startNextMonth)),
+          "currentMonthPosts"
+        ),
+        safeCount(
+          db
+            .collection("blogs")
+            .where("createdAt", ">=", Timestamp.fromDate(startPrevMonth))
+            .where("createdAt", "<", Timestamp.fromDate(startCurrentMonth)),
+          "previousMonthPosts"
+        ),
+        safeCount(
+          db
+            .collection("videos")
+            .where("createdAt", ">=", Timestamp.fromDate(startCurrentMonth))
+            .where("createdAt", "<", Timestamp.fromDate(startNextMonth)),
+          "currentMonthVideos"
+        ),
+        safeCount(
+          db
+            .collection("videos")
+            .where("createdAt", ">=", Timestamp.fromDate(startPrevMonth))
+            .where("createdAt", "<", Timestamp.fromDate(startCurrentMonth)),
+          "previousMonthVideos"
+        ),
+      ]);
+
+      const currentTotal = currentMonthPosts + currentMonthVideos;
+      const prevTotal = previousMonthPosts + previousMonthVideos;
+      monthlyGrowth =
+        prevTotal === 0
+          ? currentTotal > 0
+            ? 100
+            : 0
+          : Math.round(((currentTotal - prevTotal) / prevTotal) * 100);
+    }
+
+    base.monthlyGrowth = monthlyGrowth;
 
     const response: StatsResponse = {
       ok: true,

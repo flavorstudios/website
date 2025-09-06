@@ -40,6 +40,8 @@ describe("GET /api/admin/stats", () => {
     featured: 3,
     currentMonthPosts: 2,
     previousMonthPosts: 1,
+    currentMonthVideos: 0,
+    previousMonthVideos: 0,
   }) {
     const count = (n: number) => ({
       get: jest.fn().mockResolvedValue({ data: () => ({ count: n }) }),
@@ -54,6 +56,7 @@ describe("GET /api/admin/stats", () => {
     });
 
     let createdAtCall = 0;
+    let createdAtCallVideos = 0;
 
     const collection = (name: string) => {
       if (name === "blogs") {
@@ -79,11 +82,25 @@ describe("GET /api/admin/stats", () => {
         };
       }
       if (name === "videos") {
+        const queryWithCount = (n: number) => ({
+          where: () => queryWithCount(n),
+          count: () => count(n),
+        });
         return {
           count: () => count(counts.videos),
           aggregate: () => sum(counts.viewsVideos),
-          where: (field: string) =>
-            field === "featured" ? query(counts.featured) : query(counts.videos),
+          where: (field: string) => {
+            if (field === "featured") return query(counts.featured);
+            if (field === "createdAt") {
+              createdAtCallVideos++;
+              const n =
+                createdAtCallVideos === 1
+                  ? counts.currentMonthVideos
+                  : counts.previousMonthVideos;
+              return queryWithCount(n);
+            }
+            return query(counts.videos);
+          },
         };
       }
       if (name === "comments") {
@@ -181,26 +198,36 @@ describe("GET /api/admin/stats", () => {
     const json = await res.json();
     expect(json.error).toBe("Stats unavailable");
   });
+  it.each([
+    { label: "positive", current: 3, previous: 1, expected: 200 },
+    { label: "negative", current: 1, previous: 3, expected: -67 },
+    { label: "zero", current: 2, previous: 2, expected: 0 },
+  ])(
+    "computes %s month-over-month growth",
+    async ({ current, previous, expected }) => {
+      const baseCounts = {
+        blogs: 5,
+        videos: 2,
+        comments: 7,
+        viewsBlogs: 100,
+        viewsVideos: 50,
+        pending: 1,
+        published: 4,
+        featured: 3,
+      };
 
-  it("computes month-over-month growth", async () => {
-    mockAdminDb = buildDb({
-      blogs: 5,
-      videos: 2,
-      comments: 7,
-      viewsBlogs: 100,
-      viewsVideos: 50,
-      pending: 1,
-      published: 4,
-      featured: 3,
-      currentMonthPosts: 3,
-      previousMonthPosts: 1,
-    });
+      mockAdminDb = buildDb({
+        ...baseCounts,
+        currentMonthPosts: current,
+        previousMonthPosts: previous,
+      });
 
-    const { GET } = await import("./route");
-    const req = new NextRequest("http://test/api/admin/stats?range=30d");
-    const res = await GET(req);
-    expect(res.status).toBe(200);
-    const json = await res.json();
-    expect(json.monthlyGrowth).toBe(200);
-  });
+      const { GET } = await import("./route");
+      const req = new NextRequest("http://test/api/admin/stats?range=30d");
+      const res = await GET(req);
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.monthlyGrowth).toBe(expected);
+    }
+  );
 });

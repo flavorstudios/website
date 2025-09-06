@@ -102,7 +102,6 @@ export default async function WatchPage({
   const { videos, categories } = await getWatchData();
   const selectedCategory = searchParams?.category ?? "all";
   const currentPage = Number.parseInt(searchParams?.page ?? "1");
-  const { videos, categories } = await getWatchData();
   const videosPerPage = 12;
 
   const normalizeSlug = (name: string) =>

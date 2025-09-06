@@ -97,11 +97,12 @@ async function getWatchData() {
 export default async function WatchPage({
   searchParams,
 }: {
-  searchParams?: { category?: string; page?: string };
+  searchParams?: Promise<{ category?: string; page?: string }>;
 }) {
   const { videos, categories } = await getWatchData();
-  const selectedCategory = searchParams?.category ?? "all";
-  const currentPage = Number.parseInt(searchParams?.page ?? "1");
+  const params = (await searchParams) ?? {};
+  const selectedCategory = params.category ?? "all";
+  const currentPage = Number.parseInt(params.page ?? "1");
   const videosPerPage = 12;
 
   const normalizeSlug = (name: string) =>

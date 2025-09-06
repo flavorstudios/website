@@ -122,7 +122,7 @@ async function getBlogData({
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     category?: string;
     page?: string;
     search?: string;
@@ -130,7 +130,7 @@ export default async function BlogPage({
     author?: string;      // <-- NEW
     startDate?: string;   // <-- NEW
     endDate?: string;     // <-- NEW
-  };
+  }>;
 }) {
   const {
     category: selectedCategory = "all",
@@ -140,7 +140,7 @@ export default async function BlogPage({
     author: selectedAuthor = "all",
     startDate = "",
     endDate = "",
-  } = searchParams;
+  } = await searchParams;
 
   const { posts, categories } = await getBlogData({
     author: selectedAuthor,

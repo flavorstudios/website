@@ -8,7 +8,7 @@ import Link from "next/link";
 
 interface BlogCategoryPageProps {
   params: { slug: string };
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }
 
 /**
@@ -21,7 +21,7 @@ export default async function BlogCategoryPage({
   searchParams,
 }: BlogCategoryPageProps) {
   const { slug } = params;
-  const resolvedSearchParams = searchParams;
+  const resolvedSearchParams = await searchParams;
   const categorySlug = slug;
 
   // --- Robustly find the category (case-insensitive, defensive fallback) ---

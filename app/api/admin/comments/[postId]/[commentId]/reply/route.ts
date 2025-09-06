@@ -4,12 +4,12 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(
   request: NextRequest,
-  context: { params: Promise<{ postId: string; commentId: string }> }
+  context: { params: { postId: string; commentId: string } }
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { postId, commentId } = await context.params
+  const { postId, commentId } = context.params
   try {
     const body = await request.json()
     const { content, postType } = body as {

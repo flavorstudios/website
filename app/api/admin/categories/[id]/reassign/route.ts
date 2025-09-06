@@ -6,13 +6,13 @@ import { publishToUser } from "@/lib/sse-broker";
 
 export async function POST(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> }
+  context: { params: { id: string } }
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await context.params;
+  const { id } = context.params;
 
   try {
     const { newCategoryId } = await request.json();

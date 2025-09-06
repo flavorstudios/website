@@ -7,7 +7,7 @@ import type { BlogPost as StoreBlogPost } from "@/lib/content-store";
 import type { BlogPost as EditorBlogPost } from "@/app/admin/dashboard/components/blog-editor";
 
 interface PageProps {
-  searchParams: Promise<{ id?: string; slug?: string }>;
+  searchParams: { id?: string; slug?: string };
 }
 
 export const metadata = getMetadata({
@@ -45,7 +45,7 @@ function computeWordCount(html: string): number {
 }
 
 export default async function BlogEditPage({ searchParams }: PageProps) {
-  const { id, slug } = await searchParams;
+  const { id, slug } = searchParams;
   let post: StoreBlogPost | null = null;
 
   if (id) {

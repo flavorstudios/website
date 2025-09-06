@@ -5,11 +5,11 @@ export default async function WatchCategoryPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string }>;
+  params: { slug: string };
+  searchParams: { page?: string };
 }) {
-  const { slug } = await params;
-  const resolvedSearchParams = await searchParams;
+  const { slug } = params;
+  const resolvedSearchParams = searchParams;
   const categorySlug = slug;
 
   // Look up the video category in JSON, not the DB!

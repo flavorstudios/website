@@ -5,13 +5,13 @@ import { logError } from "@/lib/log";
 
 export async function GET(
   req: NextRequest,
-  context: { params: Promise<{ uid: string }> }
+  context: { params: { uid: string } }
 ) {
   if (!(await requireAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { uid } = await context.params;
+  const { uid } = context.params;
   if (!uid) {
     return NextResponse.json({ error: "Missing uid" }, { status: 400 });
   }

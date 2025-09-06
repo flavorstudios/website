@@ -29,12 +29,12 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
 }
 
 interface BlogPostPageProps {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }
 
 // SEO metadata (dynamic per post, using Next.js generateMetadata API)
 export async function generateMetadata({ params }: BlogPostPageProps) {
-  const { slug } = await params;
+  const { slug } = params;
   let post: BlogPost | null = null;
   try {
     post = await getBlogPost(slug);
@@ -105,7 +105,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
 
 // Main BlogPost page (server component)
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { slug } = await params;
+  const { slug } = params;
   let post: BlogPost | null;
   try {
     post = await getBlogPost(slug);

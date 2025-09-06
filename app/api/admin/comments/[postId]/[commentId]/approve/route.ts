@@ -7,12 +7,12 @@ import { getAdminDb } from "@/lib/firebase-admin";
 // PATCH /api/admin/comments/[postId]/[commentId]/approve
 export async function PATCH(
   req: NextRequest,
-  context: { params: Promise<{ postId: string; commentId: string }> }
+  context: { params: { postId: string; commentId: string } }
 ) {
   if (!(await requireAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { postId, commentId } = await context.params;
+  const { postId, commentId } = context.params;
   try {
     const db = getAdminDb();
     const entryRef = db

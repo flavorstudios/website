@@ -73,6 +73,15 @@ test('history card hides when all totals are zero', async ({ page }) => {
   await expect(page.getByText('Posts, Videos & Comments (12 months)')).toHaveCount(0);
 });
 
+test('history card hides when entries exist but all metrics are zero', async ({ page }) => {
+  await stubDashboard(page, {
+    ...baseStats,
+    history: [{ month: 'Jan', posts: 0, videos: 0, comments: 0 }],
+  });
+  await page.goto('/admin/dashboard');
+  await expect(page.getByText('Posts, Videos & Comments (12 months)')).toHaveCount(0);
+});
+
 test('history card shows when any metric nonzero', async ({ page }) => {
   await stubDashboard(page, {
     ...baseStats,

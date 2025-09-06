@@ -1,27 +1,41 @@
 import { notFound } from "next/navigation";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
-import { blogStore, type BlogPost } from "@/lib/content-store";
+import {
+  blogStore,
+  type BlogPost,
+  ADMIN_DB_UNAVAILABLE,
+} from "@/lib/content-store";
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
-import { isAdminSdkAvailable } from "@/lib/firebase-admin";
+import { HttpError } from "@/lib/http";
+import { ErrorBoundary } from "@/app/admin/dashboard/components/ErrorBoundary";
 interface PreviewPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 async function getPost(id: string): Promise<BlogPost | null> {
-  try {
-    return await blogStore.getById(id);
-  } catch (err) {
-    console.error("Failed to fetch blog post:", err);
-    return null;
-  }
+  return blogStore.getById(id);
 }
 
 export async function generateMetadata({ params }: PreviewPageProps) {
-  const { id } = await params;
-  const post = await getPost(id);
+  const { id } = params;
+  let post: BlogPost | null = null;
+  try {
+    post = await getPost(id);
+  } catch (err) {
+    if (err instanceof HttpError && err.message === ADMIN_DB_UNAVAILABLE) {
+      const title = `Preview Unavailable – ${SITE_NAME}`;
+      return getMetadata({
+        title,
+        description: "Firestore unavailable. Set FIREBASE_SERVICE_ACCOUNT_KEY to enable previews.",
+        path: `/admin/preview/${id}`,
+        robots: "noindex, nofollow",
+      });
+    }
+    console.error("Failed to fetch blog post:", err);
+  }
   if (!post) {
     const title = `Post Not Found – ${SITE_NAME}`;
     return getMetadata({
@@ -57,11 +71,12 @@ export async function generateMetadata({ params }: PreviewPageProps) {
 }
 
 export default async function PreviewPage({ params }: PreviewPageProps) {
-  const { id } = await params;
-  const adminSdkAvailable = isAdminSdkAvailable();
-  const post = await getPost(id);
-  if (!post) {
-    if (!adminSdkAvailable) {
+  const { id } = params;
+  let post: BlogPost | null = null;
+  try {
+    post = await getPost(id);
+  } catch (err) {
+    if (err instanceof HttpError && err.message === ADMIN_DB_UNAVAILABLE) {
       return (
         <AdminAuthGuard>
           <div className="p-8 text-center">
@@ -72,6 +87,9 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
         </AdminAuthGuard>
       );
     }
+    throw err;
+  }
+  if (!post) {
     notFound();
   }
 
@@ -89,10 +107,18 @@ export default async function PreviewPage({ params }: PreviewPageProps) {
 
   return (
     <AdminAuthGuard>
-      <div className="min-h-screen bg-gray-50">
-        <StructuredData schema={articleSchema} />
-        <BlogPostRenderer post={post} />
-      </div>
+      <ErrorBoundary
+        fallback={
+          <div className="p-8 text-center">
+            <p className="text-gray-700">Failed to render post preview.</p>
+          </div>
+        }
+      >
+        <div className="min-h-screen bg-gray-50">
+          <StructuredData schema={articleSchema} />
+          <BlogPostRenderer post={post} />
+        </div>
+      </ErrorBoundary>
     </AdminAuthGuard>
   );
 }

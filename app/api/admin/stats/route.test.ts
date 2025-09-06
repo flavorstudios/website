@@ -55,8 +55,8 @@ describe("GET /api/admin/stats", () => {
       count: () => count(n),
     });
 
-    let createdAtCall = 0;
-    let createdAtCallVideos = 0;
+    let publishedAtCall = 0;
+    let publishedAtCallVideos = 0;
 
     const collection = (name: string) => {
       if (name === "blogs") {
@@ -69,12 +69,18 @@ describe("GET /api/admin/stats", () => {
           aggregate: () => sum(counts.viewsBlogs),
           where: (field: string) => {
             if (field === "status") return query(counts.published);
-            if (field === "createdAt") {
-              createdAtCall++;
+            if (field === "publishedAt") {
+              publishedAtCall++;
               const n =
-                createdAtCall === 1
+                publishedAtCall === 1
                   ? counts.currentMonthPosts
-                  : counts.previousMonthPosts;
+                  : publishedAtCall === 2
+                  ? 0
+                  : publishedAtCall === 3
+                  ? counts.previousMonthPosts
+                  : publishedAtCall === 4
+                  ? 0
+                  : counts.blogs;
               return queryWithCount(n);
             }
             return query(counts.blogs);
@@ -91,33 +97,37 @@ describe("GET /api/admin/stats", () => {
           aggregate: () => sum(counts.viewsVideos),
           where: (field: string) => {
             if (field === "featured") return query(counts.featured);
-            if (field === "createdAt") {
-              createdAtCallVideos++;
+            if (field === "publishedAt") {
+              publishedAtCallVideos++;
               const n =
-                createdAtCallVideos === 1
+                publishedAtCallVideos === 1
                   ? counts.currentMonthVideos
-                  : counts.previousMonthVideos;
+                  publishedAtCallVideos === 2
+                  ? 0
+                  : publishedAtCallVideos === 3
+                  ? counts.previousMonthVideos
+                  : publishedAtCallVideos === 4
+                  ? 0
+                  : counts.videos;
               return queryWithCount(n);
             }
             return query(counts.videos);
           },
         };
       }
-      if (name === "comments") {
-        return {
-          count: () => count(counts.comments),
-          where: (field: string) =>
-            field === "approved" ? query(counts.pending) : query(counts.comments),
-        };
-      }
+      // No direct "comments" collection access in stats; handled via collectionGroup
       return { count: () => count(0), where: () => query(0) };
     };
 
     const collectionGroup = (name: string) => {
       if (name === "entries") {
-        return { where: () => query(counts.comments) };
+        return {
+          count: () => count(counts.comments),
+          where: (field: string) =>
+            field === "status" ? query(counts.pending) : query(counts.comments),
+        };
       }
-      return { where: () => query(0) };
+      return { count: () => count(0), where: () => query(0) };
     };
 
     return { collection, collectionGroup };
@@ -154,6 +164,18 @@ describe("GET /api/admin/stats", () => {
 
     if (range === "12mo") {
       expect(Array.isArray(json.history)).toBe(true);
+      expect(json.history).toHaveLength(12);
+      (json.history as Array<{
+        month: string;
+        posts: number;
+        videos: number;
+        comments: number;
+      }>).forEach((h) => {
+        expect(typeof h.month).toBe("string");
+        expect(typeof h.posts).toBe("number");
+        expect(typeof h.videos).toBe("number");
+        expect(typeof h.comments).toBe("number");
+      });
     }
   });
 

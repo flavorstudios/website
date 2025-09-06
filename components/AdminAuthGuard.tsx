@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Spinner from "@/components/ui/spinner";
-type Status = "loading" | "authenticated" | "unauthenticated";
+
+type Status = "loading" | "authenticated" | "unauthenticated" | "error";
 
 /**
  * Guard that validates the admin session before rendering children.
@@ -14,6 +15,7 @@ type Status = "loading" | "authenticated" | "unauthenticated";
  */
 export default function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<Status>("loading");
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -26,11 +28,17 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
           cache: "no-store",
           signal: controller.signal,
         });
-        if (!cancelled) {
-          setStatus(res.ok ? "authenticated" : "unauthenticated");
+        if (cancelled) return;
+
+        if (res.ok) {
+          setStatus("authenticated");
+        } else if (res.status === 401 || res.status === 403) {
+          setStatus("unauthenticated");
+        } else {
+          setStatus("error");
         }
       } catch {
-        if (!cancelled) setStatus("unauthenticated");
+        if (!cancelled) setStatus("error");
       }
     }
 
@@ -40,7 +48,7 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
       cancelled = true;
       controller.abort();
     };
-  }, []);
+  }, [retryCount]);
 
   if (status === "loading") {
     return (
@@ -59,6 +67,23 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
         <Link href="/admin/login" className="text-purple-600 underline">
           Go to login
         </Link>
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-2">
+        <p className="text-red-600 text-sm">Failed to validate session.</p>
+        <button
+          onClick={() => {
+            setStatus("loading");
+            setRetryCount((c) => c + 1);
+          }}
+          className="text-purple-600 underline"
+        >
+          Try again
+        </button>
       </div>
     );
   }

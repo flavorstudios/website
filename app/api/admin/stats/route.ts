@@ -251,6 +251,30 @@ export async function GET(request: NextRequest) {
       }
     };
 
+    const countPublishedOrCreatedRange = async (
+      ref: Query,
+      start: Date,
+      end: Date,
+      label: string,
+    ): Promise<number> => {
+      const startTs = Timestamp.fromDate(start);
+      const endTs = Timestamp.fromDate(end);
+      const [pub, legacy] = await Promise.all([
+        safeCount(
+          ref.where("publishedAt", ">=", startTs).where("publishedAt", "<", endTs),
+          `${label}:published`,
+        ),
+        safeCount(
+          ref
+            .where("publishedAt", "==", null)
+            .where("createdAt", ">=", startTs)
+            .where("createdAt", "<", endTs),
+          `${label}:legacy`,
+        ),
+      ]);
+      return pub + legacy;
+    };
+
     // Fetch Firestore stats in parallel (guarded)
     const baseFetch = async (): Promise<Stats> => {
       const [
@@ -265,7 +289,7 @@ export async function GET(request: NextRequest) {
       ] = await Promise.all([
         safeCount(db.collection("blogs"), "totalPosts"),
         safeCount(db.collection("videos"), "totalVideos"),
-        safeCount(db.collection("comments"), "totalComments"),
+        safeCount(db.collectionGroup("entries"), "totalComments"),
         safeAggregate(
           db
             .collection("blogs")
@@ -279,7 +303,7 @@ export async function GET(request: NextRequest) {
           "videoViews"
         ),
         safeCount(
-          db.collection("comments").where("approved", "==", false),
+          db.collectionGroup("entries").where("status", "==", "pending"),
           "pendingComments"
         ),
         safeCount(
@@ -322,8 +346,8 @@ export async function GET(request: NextRequest) {
 
     // Optional 12-month history for charts (guarded per month)
     if (range === "12mo") {
-      history = [];
       const current = new Date();
+      const historyPromises: Promise<MonthlyStats>[] = [];
 
       for (let i = 11; i >= 0; i--) {
         const monthStart = new Date(
@@ -333,55 +357,55 @@ export async function GET(request: NextRequest) {
           Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i + 1, 1)
         );
 
-        const startTs = Timestamp.fromDate(monthStart);
-        const endTs = Timestamp.fromDate(monthEnd);
-
-        try {
-          const [postSnap, videoSnap, commentSnap] = await Promise.all([
-            db
-              .collection("blogs")
-              .where("createdAt", ">=", startTs)
-              .where("createdAt", "<", endTs)
-              .count()
-              .get(),
-            db
-              .collection("videos")
-              .where("createdAt", ">=", startTs)
-              .where("createdAt", "<", endTs)
-              .count()
-              .get(),
-            // Adjust to your comments structure; this uses a collectionGroup example.
-            db
-              .collectionGroup("entries")
-              .where("createdAt", ">=", startTs)
-              .where("createdAt", "<", endTs)
-              .count()
-              .get(),
-          ]);
-
-          history.push({
+        const promise = Promise.all([
+          db
+            .collection("blogs")
+            .where("createdAt", ">=", startTs)
+            .where("createdAt", "<", endTs)
+            .count()
+            .get(),
+          db
+            .collection("videos")
+            .where("createdAt", ">=", startTs)
+            .where("createdAt", "<", endTs)
+            .count()
+            .get(),
+          // Comments are stored at /comments/{postId}/entries/{commentId}
+          // so we query the shared "entries" collection group.
+          db
+            .collectionGroup("entries")
+            .where("createdAt", ">=", startTs)
+            .where("createdAt", "<", endTs)
+            .count()
+            .get(),
+        ])
+          .then(([postSnap, videoSnap, commentSnap]) => ({
             month: monthStart.toLocaleString("default", { month: "short" }),
             posts: postSnap.data().count,
             videos: videoSnap.data().count,
             comments: commentSnap.data().count,
+          }))
+          .catch((err) => {
+            console.error(
+              JSON.stringify({
+                requestId,
+                msg: "monthly aggregation failed",
+                month: monthStart.toISOString(),
+                error: err instanceof Error ? err.message : String(err),
+              })
+            );
+            return {
+              month: monthStart.toLocaleString("default", { month: "short" }),
+              posts: 0,
+              videos: 0,
+              comments: 0,
+            };
           });
-        } catch (err) {
-          console.error(
-            JSON.stringify({
-              requestId,
-              msg: "monthly aggregation failed",
-              month: monthStart.toISOString(),
-              error: err instanceof Error ? err.message : String(err),
-            })
-          );
-          history.push({
-            month: monthStart.toLocaleString("default", { month: "short" }),
-            posts: 0,
-            videos: 0,
-            comments: 0,
-          });
-        }
+          
+        historyPromises.push(promise);
       }
+
+      history = await Promise.all(historyPromises);
     }
 
     // Calculate month-over-month growth for posts and videos

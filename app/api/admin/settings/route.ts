@@ -1,6 +1,7 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { ADMIN_BYPASS, adminDb } from "@/lib/firebase-admin"
 import { type NextRequest, NextResponse } from "next/server"
+import { logActivity } from "@/lib/activity-log"
 
 export async function GET(request: NextRequest) {
   if (ADMIN_BYPASS || !adminDb) {
@@ -38,6 +39,13 @@ export async function POST(request: NextRequest) {
       .collection("adminSettings")
       .doc(session.uid)
       .set(payload, { merge: true })
+    await logActivity({
+      type: "settings.update",
+      title: "Admin settings",
+      description: "Updated admin settings",
+      status: "success",
+      user: session.email || session.uid,
+    })
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error("Failed to save settings", err)

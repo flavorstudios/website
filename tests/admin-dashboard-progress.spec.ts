@@ -31,6 +31,20 @@ test('progress bars clamp values between 0 and 100', async ({ page }) => {
   const bars = page.getByRole('progressbar');
   await expect(bars).toHaveCount(3);
   await expect(bars.nth(0)).toHaveAttribute('aria-valuenow', '100');
+  await expect(bars.nth(0)).toHaveAttribute('aria-valuemax', '100');
   await expect(bars.nth(1)).toHaveAttribute('aria-valuenow', '100');
+  await expect(bars.nth(1)).toHaveAttribute('aria-valuemax', '100');
   await expect(bars.nth(2)).toHaveAttribute('aria-valuenow', '0');
+  await expect(bars.nth(2)).toHaveAttribute('aria-valuemax', '100');
+
+  // All progress bars should report integer percentages
+  const values = await Promise.all([
+    bars.nth(0).getAttribute('aria-valuenow'),
+    bars.nth(1).getAttribute('aria-valuenow'),
+    bars.nth(2).getAttribute('aria-valuenow'),
+  ]);
+  for (const val of values) {
+    expect(val).not.toBeNull();
+    expect(Number(val)).toBe(Math.round(Number(val)));
+  }
 });

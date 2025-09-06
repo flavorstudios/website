@@ -1,8 +1,9 @@
 // app/api/admin/comments/[postId]/[commentId]/approve/route.ts
 
-import { requireAdmin } from "@/lib/admin-auth"
+import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
+import { logActivity } from "@/lib/activity-log";
 
 // PATCH /api/admin/comments/[postId]/[commentId]/approve
 export async function PATCH(
@@ -22,6 +23,14 @@ export async function PATCH(
       .doc(commentId);
 
     await entryRef.update({ flagged: false });
+    const actor = await getSessionInfo(req);
+    await logActivity({
+      type: "comment.approve",
+      title: commentId,
+      description: `Approved comment ${commentId} on post ${postId}`,
+      status: "success",
+      user: actor?.email || actor?.uid || "unknown",
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

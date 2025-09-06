@@ -3,10 +3,10 @@ import React from 'react';
 import { clientEnv } from '@/env.client';
 
 export class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
+  { children: React.ReactNode; fallback?: React.ReactNode },
   { error: Error | null }
 > {
-  constructor(props: { children: React.ReactNode }) {
+  constructor(props: { children: React.ReactNode; fallback?: React.ReactNode }) {
     super(props);
     this.state = { error: null };
   }
@@ -18,6 +18,9 @@ export class ErrorBoundary extends React.Component<
   }
   render() {
     if (this.state.error) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
       if (clientEnv.NODE_ENV === 'development') {
         return (
           <div className="p-4 rounded-lg border bg-red-50 text-red-900">

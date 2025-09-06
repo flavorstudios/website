@@ -3,6 +3,7 @@
  */
 import { NextRequest } from 'next/server';
 import { requireAdmin } from '@/lib/admin-auth';
+import { Timestamp } from 'firebase-admin/firestore';
 
 jest.mock('@/lib/admin-auth', () => ({
   requireAdmin: jest.fn().mockResolvedValue(true),
@@ -35,7 +36,7 @@ describe('GET /api/admin/activity', () => {
             data: () => ({
               action: 'login',
               user: 'tester',
-              timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
+              timestamp: Timestamp.fromDate(new Date('2024-01-01T00:00:00Z')),
             }),
           },
         ],

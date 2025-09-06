@@ -8,7 +8,7 @@ function wrapper({ children }: { children: ReactNode }) {
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
 
-test('fetches dashboard stats for multiple ranges', async () => {
+test('fetches dashboard stats for multiple ranges based on publishedAt', async () => {
   const fetchMock = jest
     .fn()
     .mockResolvedValueOnce({

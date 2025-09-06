@@ -1,6 +1,7 @@
-import { requireAdmin } from "@/lib/admin-auth"
+import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import { videoStore } from "@/lib/comment-store"
+import { logActivity } from "@/lib/activity-log"
 
 export async function GET(request: NextRequest) {
   if (!(await requireAdmin(request, "canManageVideos"))) {
@@ -70,6 +71,14 @@ export async function POST(request: NextRequest) {
       status: videoData.status || "draft",
       publishedAt: videoData.publishedAt || new Date().toISOString(),
       featured: videoData.featured || false,
+    })
+    const actor = await getSessionInfo(request)
+    await logActivity({
+      type: "video.create",
+      title: video.title,
+      description: `Created video ${video.title}`,
+      status: "success",
+      user: actor?.email || actor?.uid || "unknown",
     })
 
     return NextResponse.json({ video }, { status: 201 })

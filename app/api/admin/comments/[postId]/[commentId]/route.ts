@@ -1,6 +1,7 @@
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { type NextRequest, NextResponse } from "next/server";
 import { commentStore } from "@/lib/comment-store";
+import { logActivity } from "@/lib/activity-log";
 
 // Updated route handlers to use both postId and commentId
 
@@ -20,6 +21,14 @@ export async function PUT(
     if (typeof body.flagged === "boolean") {
       await commentStore.updateFlag(postId, commentId, body.flagged);
     }
+    const actor = await getSessionInfo(request);
+    await logActivity({
+      type: "comment.update",
+      title: commentId,
+      description: `Updated comment ${commentId} on post ${postId}`,
+      status: "success",
+      user: actor?.email || actor?.uid || "unknown",
+    });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to update comment" }, { status: 500 });
@@ -39,6 +48,14 @@ export async function DELETE(
     if (!success) {
       return NextResponse.json({ error: "Comment not found" }, { status: 404 });
     }
+    const actor = await getSessionInfo(request);
+    await logActivity({
+      type: "comment.delete",
+      title: commentId,
+      description: `Deleted comment ${commentId} on post ${postId}`,
+      status: "success",
+      user: actor?.email || actor?.uid || "unknown",
+    });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Failed to delete comment" }, { status: 500 });

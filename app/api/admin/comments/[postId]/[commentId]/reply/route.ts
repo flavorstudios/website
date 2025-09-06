@@ -1,5 +1,6 @@
-import { requireAdmin } from "@/lib/admin-auth"
+import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { commentStore } from "@/lib/comment-store"
+import { logActivity } from "@/lib/activity-log"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(
@@ -25,6 +26,14 @@ export async function POST(
       author: "Admin",
       content,
       parentId: commentId,
+    })
+    const actor = await getSessionInfo(request)
+    await logActivity({
+      type: "comment.reply",
+      title: commentId,
+      description: `Replied to comment ${commentId} on post ${postId}`,
+      status: "success",
+      user: actor?.email || actor?.uid || "unknown",
     })
     return NextResponse.json({ comment: reply })
   } catch (err) {

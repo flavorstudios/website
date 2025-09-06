@@ -2,6 +2,7 @@ import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { adminDb } from "@/lib/firebase-admin";
 import { type NextRequest, NextResponse } from "next/server";
 import { serverEnv } from "@/env/server";
+import type { Timestamp } from "firebase-admin/firestore";
 
 // GET /api/admin/activity - Only for authorized admins
 export async function GET(req: NextRequest) {
@@ -67,18 +68,14 @@ export async function GET(req: NextRequest) {
         status?: string;
         action?: string;
         user?: string;
-        timestamp?: { toDate(): Date } | string;
+        timestamp?: Timestamp;
       };
       const type = data.type || data.action || "info";
       const title = data.title || data.action || "Untitled";
       const description =
-        data.description ||
-        (data.user ? `Performed by ${data.user}` : "");
+        data.description || (data.user ? `Performed by ${data.user}` : "");
       const status = data.status || "unknown";
-      const timestamp =
-        typeof data.timestamp === "string"
-          ? data.timestamp
-          : data.timestamp?.toDate().toISOString();
+      const timestamp = data.timestamp?.toDate().toISOString();
       return { id: doc.id, type, title, description, status, timestamp };
     });
 

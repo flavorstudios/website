@@ -1,5 +1,6 @@
 import { adminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
+import { FieldValue } from "firebase-admin/firestore";
 
 export interface ActivityLogEntry {
   type: string;
@@ -7,7 +8,7 @@ export interface ActivityLogEntry {
   description?: string;
   status?: string;
   user?: string;
-  timestamp?: string;
+  timestamp?: FieldValue;
 }
 
 /**
@@ -20,7 +21,7 @@ export async function logActivity({
   description = "",
   status = "success",
   user = "system",
-  timestamp = new Date().toISOString(),
+  timestamp,
 }: ActivityLogEntry): Promise<void> {
   try {
     if (!adminDb) return;
@@ -30,7 +31,7 @@ export async function logActivity({
       description,
       status,
       user,
-      timestamp,
+      timestamp: timestamp ?? FieldValue.serverTimestamp(),
     });
   } catch (err) {
     logError("activity-log", err);

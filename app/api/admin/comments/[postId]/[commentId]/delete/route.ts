@@ -1,8 +1,9 @@
 // app/api/admin/comments/[postId]/[commentId]/delete/route.ts
 
-import { requireAdmin } from "@/lib/admin-auth"
+import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
+import { logActivity } from "@/lib/activity-log";
 
 // DELETE /api/admin/comments/[postId]/[commentId]/delete
 export async function DELETE(
@@ -22,6 +23,14 @@ export async function DELETE(
       .doc(commentId);
 
     await entryRef.delete();
+    const actor = await getSessionInfo(req);
+    await logActivity({
+      type: "comment.delete",
+      title: commentId,
+      description: `Deleted comment ${commentId} on post ${postId}`,
+      status: "success",
+      user: actor?.email || actor?.uid || "unknown",
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

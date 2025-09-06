@@ -19,7 +19,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import ProgressStat from "./progress-stat";
 import {
   TrendingUp,
   FileText,
@@ -225,6 +225,10 @@ export default function DashboardOverview() {
   }, [theme]);
   // ↑↑↑ PRECOMPUTE CHART HOOKS BEFORE ANY CONDITIONAL RETURNS ↑↑↑
 
+  const hasActivity = stats?.history?.some(
+    (m) => m.posts || m.videos || m.comments,
+  );
+
   // Permission warning (do not attempt fetching or show generic errors)
   if (!canViewAnalytics || unauthorized) {
     return (
@@ -375,7 +379,7 @@ export default function DashboardOverview() {
                     )
                   )}
                   {sign}
-                  {Math.abs(stats.monthlyGrowth)}% this month
+                  {Math.abs(stats.monthlyGrowth)}% posts+videos growth this month
                 </p>
                 {stats.totalPosts === 0 && <p className="text-sm text-gray-500 mt-1">No posts yet</p>}
               </div>
@@ -426,7 +430,7 @@ export default function DashboardOverview() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Views</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.totalViews.toLocaleString()}</p>
-                <p className="text-sm text-blue-600 mt-1">This month</p>
+                <p className="text-sm text-blue-600 mt-1">All time</p>
               </div>
               <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
                 <Eye className="w-6 h-6 text-orange-600" />
@@ -437,7 +441,7 @@ export default function DashboardOverview() {
       </div>
 
       {/* 12-Month Activity Chart */}
-      {stats.history && stats.history.length > 0 && (
+      {stats.history && hasActivity && (
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -549,58 +553,25 @@ export default function DashboardOverview() {
             <CardContent>
               <div className="space-y-4">
                 {stats.totalPosts > 0 && (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Published Posts</span>
-                      <span className="text-sm text-gray-600">
-                        {stats.publishedPosts}/{stats.totalPosts}
-                      </span>
-                    </div>
-                    <Progress
-                      value={Math.min(
-                        100,
-                        Math.max(0, (stats.publishedPosts / stats.totalPosts) * 100)
-                      )}
-                      className="h-2"
-                    />
-                  </div>
+                  <ProgressStat
+                    label="Published Posts"
+                    current={stats.publishedPosts}
+                    total={stats.totalPosts}
+                  />
                 )}
                 {stats.totalVideos > 0 && (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Featured Videos</span>
-                      <span className="text-sm text-gray-600">
-                        {stats.featuredVideos}/{stats.totalVideos}
-                      </span>
-                    </div>
-                    <Progress
-                      value={Math.min(
-                        100,
-                        Math.max(0, (stats.featuredVideos / stats.totalVideos) * 100)
-                      )}
-                      className="h-2"
-                    />
-                  </div>
+                  <ProgressStat
+                    label="Featured Videos"
+                    current={stats.featuredVideos}
+                    total={stats.totalVideos}
+                  />
                 )}
                 {stats.totalComments > 0 && (
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">Approved Comments</span>
-                      <span className="text-sm text-gray-600">
-                        {stats.totalComments - stats.pendingComments}/{stats.totalComments}
-                      </span>
-                    </div>
-                    <Progress
-                      value={Math.min(
-                        100,
-                        Math.max(
-                          0,
-                          ((stats.totalComments - stats.pendingComments) / stats.totalComments) * 100
-                        )
-                      )}
-                      className="h-2"
-                    />
-                  </div>
+                  <ProgressStat
+                    label="Approved Comments"
+                    current={stats.totalComments - stats.pendingComments}
+                    total={stats.totalComments}
+                  />
                 )}
               </div>
             </CardContent>

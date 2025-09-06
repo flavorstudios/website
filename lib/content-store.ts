@@ -154,7 +154,7 @@ export const blogStore = {
 
   async getById(id: string): Promise<BlogPost | null> {
     const db = getDbOrNull();
-    if (!db) return null;
+    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     const doc = await db.collection("blogs").doc(id).get();
     if (!doc.exists) return null;
     const data = doc.data() as BlogPost;

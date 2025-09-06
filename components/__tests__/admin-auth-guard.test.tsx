@@ -51,7 +51,7 @@ describe("AdminAuthGuard", () => {
 
   it("shows login prompt when unauthenticated", async () => {
     global.fetch = jest
-      .fn(() => Promise.resolve({ ok: false } as Response))
+      .fn(() => Promise.resolve({ ok: false, status: 401 } as Response))
       .mockName("fetch");
 
     render(
@@ -70,5 +70,35 @@ describe("AdminAuthGuard", () => {
     expect(
       screen.getByRole("link", { name: /go to login/i })
     ).toHaveAttribute("href", "/admin/login");
+  });
+  
+it("shows error message and allows retry on failure", async () => {
+    const fetchMock = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce({ ok: true } as Response);
+    global.fetch = fetchMock;
+
+    render(
+      <AdminAuthGuard>
+        <div>after retry</div>
+      </AdminAuthGuard>
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/failed to validate session/i)
+      ).toBeInTheDocument()
+    );
+
+    await act(async () => {
+      screen.getByRole("button", { name: /try again/i }).click();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByText("after retry")).toBeInTheDocument()
+    );
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

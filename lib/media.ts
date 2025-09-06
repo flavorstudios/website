@@ -376,8 +376,13 @@ export function suggestAltText(filename: string): string {
 }
 
 /** Validate file type and size (<= 10 MB). */
+export const ALLOWED_IMAGE_MIME_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/webp",
+  "image/gif",
+];
 export function validateFile(mimeType: string, size: number): boolean {
-  const allowed = ["image/png", "image/jpeg", "image/webp", "image/gif"];
-  if (!allowed.includes(mimeType)) return false;
+  if (!ALLOWED_IMAGE_MIME_TYPES.includes(mimeType)) return false;
   return size <= 10 * 1024 * 1024;
 }

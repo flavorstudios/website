@@ -5,6 +5,8 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { MediaDoc } from "@/types/media";
 import { ADMIN_OPEN_MEDIA_UPLOAD } from "@/lib/admin-events";
+import { useToast } from "@/hooks/use-toast";
+import { handleAdminSessionExpiry } from "@/lib/admin-auth-client";
 
 interface UploadItem {
   id: string;
@@ -16,6 +18,7 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [dragging, setDragging] = useState(false);
+  const { toast } = useToast();
 
   // Open file dialog when global hotkey fires
   useEffect(() => {
@@ -25,36 +28,67 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
   }, []);
 
   // Handle file(s) from input or drop
-  const handleFiles = useCallback((files: FileList | null) => {
-    if (!files) return;
-    Array.from(files).forEach((file) => {
-      const id = Math.random().toString(36).slice(2);
-      setUploads((u) => [...u, { id, file, progress: 0 }]);
+  const handleFiles = useCallback(
+    (files: FileList | null) => {
+      if (!files) return;
+      Array.from(files).forEach((file) => {
+        const id = Math.random().toString(36).slice(2);
+        setUploads((u) => [...u, { id, file, progress: 0 }]);
 
-      const form = new FormData();
-      form.append("file", file);
-      const xhr = new XMLHttpRequest();
-      xhr.upload.addEventListener("progress", (e) => {
-        if (e.lengthComputable) {
-          const pct = (e.loaded / e.total) * 100;
-          setUploads((u) =>
-            u.map((it) => (it.id === id ? { ...it, progress: pct } : it))
-          );
-        }
-      });
-      xhr.onload = async () => {
-        try {
-          const data = JSON.parse(xhr.responseText);
-          onUploaded(data.media);
-        } finally {
+        const form = new FormData();
+        form.append("file", file);
+        const xhr = new XMLHttpRequest();
+
+        const cleanup = () =>
           setUploads((u) => u.filter((it) => it.id !== id));
-        }
-      };
-      xhr.open("POST", "/api/media/upload");
-      xhr.send(form);
-    });
-    if (inputRef.current) inputRef.current.value = "";
-  }, [onUploaded]);
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const pct = (e.loaded / e.total) * 100;
+            setUploads((u) =>
+              u.map((it) => (it.id === id ? { ...it, progress: pct } : it))
+            );
+          }
+        });
+
+        xhr.onerror = () => {
+          toast.error?.("Upload failed");
+          cleanup();
+        };
+
+        xhr.onabort = () => {
+          toast.error?.("Upload aborted");
+          cleanup();
+        };
+
+        xhr.onload = () => {
+          try {
+            if (xhr.status >= 400) {
+              let message = "Upload failed";
+              try {
+                const err = JSON.parse(xhr.responseText);
+                message = err.error || message;
+              } catch {
+                // ignore JSON parse errors
+              }
+              toast.error?.(message);
+            } else {
+              const data = JSON.parse(xhr.responseText);
+              onUploaded(data.media);
+            }
+          } catch {
+            toast.error?.("Upload failed");
+          } finally {
+            cleanup();
+          }
+        };
+
+        xhr.open("POST", "/api/media/upload");
+        xhr.send(form);
+      });
+      if (inputRef.current) inputRef.current.value = "";
+    },
+    [onUploaded, toast]
+  );
 
   // Paste support – allow uploading files via clipboard (e.g. screenshots)
   useEffect(() => {
@@ -101,12 +135,15 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
         multiple
         hidden
         ref={inputRef}
-        accept="image/*,video/*,audio/*,application/*"
+        accept="image/png,image/jpeg,image/webp,image/gif"
         onChange={(e) => handleFiles(e.target.files)}
         aria-label="Select media files"
       />
       <p className="text-sm mb-2">
         Drag & drop, click or paste files to upload
+      </p>
+      <p className="text-xs text-muted-foreground mb-2">
+        Only PNG, JPG, WebP or GIF images up to 10 MB
       </p>
       <div aria-live="polite">
         {uploads.map((u) => (

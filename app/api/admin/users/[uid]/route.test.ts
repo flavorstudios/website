@@ -21,7 +21,7 @@ describe('DELETE /api/admin/users/[uid]', () => {
   it('logs activity after deleting user', async () => {
     const { DELETE } = await import('./route');
     const req = new NextRequest('http://test/api/admin/users/123');
-    const res = await DELETE(req, { params: { uid: '123' } });
+    const res = await DELETE(req, { params: Promise.resolve({ uid: '123' }) });
     expect(res.status).toBe(200);
     expect(logActivity).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'user.delete', user: 'admin@test.com' })

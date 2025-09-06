@@ -17,7 +17,7 @@ describe('GET /api/admin/validate-session', () => {
 
   it('returns 401 when admin check fails', async () => {
     mockedRequire.mockResolvedValue(false);
-    let GET: (req: NextRequest) => Promise<any>;
+    let GET!: (req: NextRequest) => Promise<any>;
     await jest.isolateModulesAsync(async () => {
       const mod = await import('@/app/api/admin/validate-session/route');
       GET = mod.GET;
@@ -30,7 +30,7 @@ describe('GET /api/admin/validate-session', () => {
 
   it('returns 200 when admin check succeeds', async () => {
     mockedRequire.mockResolvedValue(true);
-    let GET: (req: NextRequest) => Promise<any>;
+    let GET!: (req: NextRequest) => Promise<any>;
     await jest.isolateModulesAsync(async () => {
       const mod = await import('@/app/api/admin/validate-session/route');
       GET = mod.GET;

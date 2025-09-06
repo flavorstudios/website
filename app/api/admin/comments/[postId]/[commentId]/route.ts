@@ -6,12 +6,12 @@ import { commentStore } from "@/lib/comment-store";
 
 export async function PUT(
   request: NextRequest,
-  context: { params: { postId: string; commentId: string } }
+  { params }: { params: Promise<{ postId: string; commentId: string }> }
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { postId, commentId } = context.params;
+  const { postId, commentId } = await params;
   try {
     const body = await request.json();
     if (body.status) {
@@ -28,12 +28,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: { postId: string; commentId: string } }
+  { params }: { params: Promise<{ postId: string; commentId: string }> }
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { postId, commentId } = context.params;
+  const { postId, commentId } = await params;
   try {
     const success = await commentStore.delete(postId, commentId);
     if (!success) {

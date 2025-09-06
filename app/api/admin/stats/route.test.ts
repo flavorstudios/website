@@ -220,6 +220,8 @@ describe("GET /api/admin/stats", () => {
         ...baseCounts,
         currentMonthPosts: current,
         previousMonthPosts: previous,
+        currentMonthVideos: 0,
+        previousMonthVideos: 0,
       });
 
       const { GET } = await import("./route");

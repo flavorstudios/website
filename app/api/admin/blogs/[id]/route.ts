@@ -7,12 +7,12 @@ import { logActivity } from "@/lib/activity-log"
 
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = context.params
+  const { id } = await params
   try {
     const data = await request.json()
     const session = await getSessionAndRole(request)
@@ -41,12 +41,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = context.params
+  const { id } = await params
   try {
     const session = await getSessionAndRole(request)
     const success = await blogStore.delete(id)

@@ -8,12 +8,12 @@ interface Submission {
 
 export async function PUT(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!(await requireAdmin(request, "canHandleContacts"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = context.params
+  const { id } = await params
   try {
     const body = await request.json()
     const allowed = [

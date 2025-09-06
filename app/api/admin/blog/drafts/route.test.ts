@@ -57,7 +57,7 @@ describe("POST /api/admin/blog/drafts", () => {
   });
 
   it("returns 503 when database unavailable", async () => {
-    getPrisma.mockResolvedValueOnce({ __dbMissing: true } as any);
+    (getPrisma as jest.Mock).mockResolvedValueOnce({ __dbMissing: true } as any);
     const res = await POST(makeReq({ draftId: "x" }));
     const json = await res.json();
     expect(res.status).toBe(503);

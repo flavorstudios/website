@@ -15,6 +15,8 @@ interface Props {
   toggleSelect?: (id: string, shiftKey?: boolean) => void;
   /** Optional: pass to show a star button that toggles favorites */
   onToggleFavorite?: (item: MediaDoc) => void;
+  /** Optional: refresh a media item (e.g., renew signed URL) */
+  onRefresh?: (item: MediaDoc) => Promise<void>;
 }
 
 export default function MediaGrid({
@@ -24,6 +26,7 @@ export default function MediaGrid({
   selected,
   toggleSelect,
   onToggleFavorite,
+  onRefresh,
 }: Props) {
   const [failed, setFailed] = useState<Set<string>>(new Set());
   const { toast } = useToast();
@@ -46,6 +49,7 @@ export default function MediaGrid({
         status = res.status;
       }
     } catch (err) {
+      status = 0;
       // eslint-disable-next-line no-console
       console.error("Error checking media status", {
         url: item.url,
@@ -53,9 +57,24 @@ export default function MediaGrid({
       });
     }
 
+    if ((status === 401 || status === 403) && onRefresh) {
+      try {
+        await onRefresh(item);
+        setFailed((prev) => {
+          const next = new Set(prev);
+          next.delete(item.id);
+          return next;
+        });
+        return;
+      } catch {
+        // continue to show toast
+      }
+    }
+
     let message = "Failed to load media. Check permissions.";
     if (status === 404) message = "File missing";
     else if (status === 401 || status === 403) message = "URL expired";
+    else if (status === 0) message = "Network error";
 
     // eslint-disable-next-line no-console
     console.error("Failed to load media", {

@@ -7,7 +7,7 @@ import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
 import { isAdminSdkAvailable } from "@/lib/firebase-admin";
 interface PreviewPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function getPost(id: string): Promise<BlogPost | null> {
@@ -20,7 +20,7 @@ async function getPost(id: string): Promise<BlogPost | null> {
 }
 
 export async function generateMetadata({ params }: PreviewPageProps) {
-  const { id } = params;
+  const { id } = await params;
   const post = await getPost(id);
   if (!post) {
     const title = `Post Not Found – ${SITE_NAME}`;
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: PreviewPageProps) {
 }
 
 export default async function PreviewPage({ params }: PreviewPageProps) {
-  const { id } = params;
+  const { id } = await params;
   const adminSdkAvailable = isAdminSdkAvailable();
   const post = await getPost(id);
   if (!post) {

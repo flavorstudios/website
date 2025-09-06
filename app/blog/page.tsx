@@ -122,7 +122,7 @@ async function getBlogData({
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     category?: string;
     page?: string;
     search?: string;
@@ -130,12 +130,17 @@ export default async function BlogPage({
     author?: string;      // <-- NEW
     startDate?: string;   // <-- NEW
     endDate?: string;     // <-- NEW
-  };
+  }>;
 }) {
-  const selectedCategory = searchParams.category || "all";
-  const selectedAuthor = searchParams.author || "all"; // <-- NEW
-  const startDate = searchParams.startDate || "";      // <-- NEW
-  const endDate = searchParams.endDate || "";          // <-- NEW
+  const {
+    category: selectedCategory = "all",
+    page = "1",
+    search = "",
+    sort = "date",
+    author: selectedAuthor = "all",
+    startDate = "",
+    endDate = "",
+  } = await searchParams;
 
   const { posts, categories } = await getBlogData({
     author: selectedAuthor,
@@ -143,9 +148,9 @@ export default async function BlogPage({
     endDate,
   });
 
-  const currentPage = Number.parseInt(searchParams.page || "1");
-  const searchQuery = (searchParams.search || "").toLowerCase();
-  const sortOption = searchParams.sort || "date";
+  const currentPage = Number.parseInt(page);
+  const searchQuery = search.toLowerCase();
+  const sortOption = sort;
   const postsPerPage = 9;
 
   // Clean/normalize the slug for filtering
@@ -309,7 +314,7 @@ export default async function BlogPage({
             <Input
               name="search"
               placeholder="Search posts..."
-              defaultValue={searchParams.search || ""}
+              defaultValue={search}
               className="w-full sm:w-64"
             />
 
@@ -353,7 +358,7 @@ export default async function BlogPage({
                   currentPage={currentPage}
                   totalPages={totalPages}
                   selectedCategory={selectedCategory}
-                  search={searchParams.search}
+                  search={search}
                   sort={sortOption}
                   author={selectedAuthor}     // <-- NEW
                   startDate={startDate}       // <-- NEW

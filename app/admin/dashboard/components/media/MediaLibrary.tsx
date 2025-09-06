@@ -458,6 +458,7 @@ export default function MediaLibrary({
           selected={selectedIds}
           toggleSelect={toggleSelect}
           onToggleFavorite={handleToggleFavorite}
+          onRefresh={(item) => refreshItem(item.id)}
         />
       ) : (
         <MediaList

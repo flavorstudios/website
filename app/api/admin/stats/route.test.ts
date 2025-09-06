@@ -38,6 +38,8 @@ describe("GET /api/admin/stats", () => {
     pending: 1,
     published: 4,
     featured: 3,
+    currentMonthPosts: 2,
+    previousMonthPosts: 1,
   }) {
     const count = (n: number) => ({
       get: jest.fn().mockResolvedValue({ data: () => ({ count: n }) }),
@@ -51,13 +53,29 @@ describe("GET /api/admin/stats", () => {
       count: () => count(n),
     });
 
+    let createdAtCall = 0;
+
     const collection = (name: string) => {
       if (name === "blogs") {
+        const queryWithCount = (n: number) => ({
+          where: () => queryWithCount(n),
+          count: () => count(n),
+        });
         return {
           count: () => count(counts.blogs),
           aggregate: () => sum(counts.viewsBlogs),
-          where: (field: string) =>
-            field === "status" ? query(counts.published) : query(counts.blogs),
+          where: (field: string) => {
+            if (field === "status") return query(counts.published);
+            if (field === "createdAt") {
+              createdAtCall++;
+              const n =
+                createdAtCall === 1
+                  ? counts.currentMonthPosts
+                  : counts.previousMonthPosts;
+              return queryWithCount(n);
+            }
+            return query(counts.blogs);
+          },
         };
       }
       if (name === "videos") {
@@ -115,6 +133,7 @@ describe("GET /api/admin/stats", () => {
     expect(json.pendingComments).toBe(1);
     expect(json.publishedPosts).toBe(4);
     expect(json.featuredVideos).toBe(3);
+    expect(typeof json.monthlyGrowth).toBe("number");
 
     if (range === "12mo") {
       expect(Array.isArray(json.history)).toBe(true);
@@ -161,5 +180,27 @@ describe("GET /api/admin/stats", () => {
     expect(res.status).toBe(503);
     const json = await res.json();
     expect(json.error).toBe("Stats unavailable");
+  });
+
+  it("computes month-over-month growth", async () => {
+    mockAdminDb = buildDb({
+      blogs: 5,
+      videos: 2,
+      comments: 7,
+      viewsBlogs: 100,
+      viewsVideos: 50,
+      pending: 1,
+      published: 4,
+      featured: 3,
+      currentMonthPosts: 3,
+      previousMonthPosts: 1,
+    });
+
+    const { GET } = await import("./route");
+    const req = new NextRequest("http://test/api/admin/stats?range=30d");
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.monthlyGrowth).toBe(200);
   });
 });

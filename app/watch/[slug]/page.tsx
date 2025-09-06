@@ -74,8 +74,12 @@ async function getVideo(slug: string): Promise<Video | null> {
 }
 
 // === DYNAMIC METADATA ===
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
   const video = await getVideo(slug);
 
   if (!video) {
@@ -122,7 +126,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return getMetadata({
     title: seoTitle,
     description: seoDescription,
-    path: `/watch/${video.slug}`,
+    path: `/watch/${slug}`,
     robots: "index,follow",
     openGraph: {
       title: seoTitle,
@@ -142,21 +146,25 @@ export async function generateMetadata({ params }: { params: { slug: string } })
       images: [thumbnailUrl],
     },
     // alternates: {
-    //   canonical: getCanonicalUrl(`/watch/${video.slug}`),
+      //   canonical: getCanonicalUrl(`/watch/${slug}`),
     // },
   });
 }
 
 // === PAGE COMPONENT ===
-export default async function VideoPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default async function VideoPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
   const video = await getVideo(slug);
 
   if (!video) {
     notFound();
   }
 
-  const canonicalUrl = getCanonicalUrl(`/watch/${video.slug}`);
+  const canonicalUrl = getCanonicalUrl(`/watch/${slug}`);
   const thumbnailUrl =
     video.thumbnail || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`;
   const embedUrl = `https://www.youtube.com/embed/${video.youtubeId}?rel=0&modestbranding=1`;
@@ -167,7 +175,7 @@ export default async function VideoPage({ params }: { params: { slug: string } }
   // --- JSON-LD VideoObject Schema ---
   const schema = getSchema({
     type: "VideoObject",
-    path: `/watch/${video.slug}`,
+    path: `/watch/${slug}`,
     title: video.title, // <- CHANGED from name: to title:
     description: video.description || "No description available.",
     thumbnailUrl: [thumbnailUrl],

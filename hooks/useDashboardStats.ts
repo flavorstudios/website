@@ -20,25 +20,26 @@ export interface DashboardStats {
   }[];
 }
 
-let etag: string | undefined;
+const etags: Record<string, string | undefined> = {};
 
-export function useDashboardStats(live = false, enabled = true) {
+export function useDashboardStats(live = false, enabled = true, range = '12mo') {
   const queryClient = useQueryClient();
   return useQuery<DashboardStats>({
-    queryKey: ['dashboard'],
+    queryKey: ['dashboard', range],
     queryFn: async () => {
-      const res = await fetch('/api/admin/stats?range=12mo', {
-        headers: etag ? { 'If-None-Match': etag } : undefined,
+      const url = `/api/admin/stats?range=${range}`;
+      const res = await fetch(url, {
+        headers: etags[range] ? { 'If-None-Match': etags[range] } : undefined,
         cache: 'no-store',
         credentials: 'include',
       });
       if (res.status === 304) {
-        const cached = queryClient.getQueryData<DashboardStats>(['dashboard']);
-        if (!cached) throw new HttpError('Not Modified', 304, '/api/admin/stats');
+        const cached = queryClient.getQueryData<DashboardStats>(['dashboard', range]);
+        if (!cached) throw new HttpError('Not Modified', 304, url);
         return cached;
       }
-      if (!res.ok) throw new HttpError('Failed to load', res.status, '/api/admin/stats');
-      etag = res.headers.get('etag') || undefined;
+      if (!res.ok) throw new HttpError('Failed to load', res.status, url);
+      etags[range] = res.headers.get('etag') || undefined;
       return (await res.json()) as DashboardStats;
     },
     retry: 0,

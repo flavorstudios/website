@@ -1,7 +1,8 @@
-import { requireAdmin } from "@/lib/admin-auth"
+import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store" // <-- Updated as per Codex
 import { publishToUser } from "@/lib/sse-broker"  // <-- Added for SSE broadcast
+import { logActivity } from "@/lib/activity-log"
 
 // GET: Fetch all blogs for admin dashboard (with filtering, sorting, pagination)
 export async function GET(request: NextRequest) {
@@ -165,6 +166,15 @@ export async function POST(request: NextRequest) {
 
     // Notify connected admin clients via SSE
     publishToUser("blog", "posts", {})
+
+    const actor = await getSessionInfo(request)
+    await logActivity({
+      type: "blog.create",
+      title: blog.title,
+      description: `Created blog ${blog.title}`,
+      status: "success",
+      user: actor?.email || actor?.uid || "unknown",
+    })
 
     return NextResponse.json(
       {

@@ -503,6 +503,7 @@ export default function DashboardOverview() {
                       }`}
                     ></div>
                     <div className="flex-1">
+                      <p className="text-xs uppercase text-gray-400">{activity.type}</p>
                       <p className="text-sm font-medium text-gray-900">{activity.title}</p>
                       <p className="text-sm text-gray-600">{activity.description}</p>
                       <p className="text-xs text-gray-500 mt-1">{activity.timestamp}</p>
@@ -541,7 +542,13 @@ export default function DashboardOverview() {
                         {stats.publishedPosts}/{stats.totalPosts}
                       </span>
                     </div>
-                    <Progress value={(stats.publishedPosts / stats.totalPosts) * 100} className="h-2" />
+                    <Progress
+                      value={Math.min(
+                        100,
+                        Math.max(0, (stats.publishedPosts / stats.totalPosts) * 100)
+                      )}
+                      className="h-2"
+                    />
                   </div>
                 )}
                 {stats.totalVideos > 0 && (
@@ -552,7 +559,13 @@ export default function DashboardOverview() {
                         {stats.featuredVideos}/{stats.totalVideos}
                       </span>
                     </div>
-                    <Progress value={(stats.featuredVideos / stats.totalVideos) * 100} className="h-2" />
+                    <Progress
+                      value={Math.min(
+                        100,
+                        Math.max(0, (stats.featuredVideos / stats.totalVideos) * 100)
+                      )}
+                      className="h-2"
+                    />
                   </div>
                 )}
                 {stats.totalComments > 0 && (
@@ -564,7 +577,13 @@ export default function DashboardOverview() {
                       </span>
                     </div>
                     <Progress
-                      value={((stats.totalComments - stats.pendingComments) / stats.totalComments) * 100}
+                      value={Math.min(
+                        100,
+                        Math.max(
+                          0,
+                          ((stats.totalComments - stats.pendingComments) / stats.totalComments) * 100
+                        )
+                      )}
                       className="h-2"
                     />
                   </div>

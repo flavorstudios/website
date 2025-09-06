@@ -3,6 +3,7 @@ import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { getUserRole, setUserRole } from "@/lib/user-roles";
 import { logError } from "@/lib/log";
+import { logActivity } from "@/lib/activity-log";
 
 export async function GET(
   request: NextRequest,
@@ -65,6 +66,13 @@ export async function PATCH(
     } catch (e) {
       logError("admin-users:audit", e);
     }
+    await logActivity({
+      type: "user.update",
+      title: `Updated user ${uid}`,
+      description: JSON.stringify({ role, disabled }),
+      status: "success",
+      user: actor?.email || actor?.uid || "unknown",
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     logError("admin-users:patch", err);
@@ -95,6 +103,12 @@ export async function DELETE(
     } catch (e) {
       logError("admin-users:audit", e);
     }
+    await logActivity({
+      type: "user.delete",
+      title: `Deleted user ${uid}`,
+      status: "success",
+      user: actor?.email || actor?.uid || "unknown",
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     logError("admin-users:delete", err);

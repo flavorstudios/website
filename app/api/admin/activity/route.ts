@@ -61,19 +61,25 @@ export async function GET(req: NextRequest) {
 
     const activities = snap.docs.map((doc) => {
       const data = doc.data() as {
+        type?: string;
+        title?: string;
+        description?: string;
+        status?: string;
         action?: string;
         user?: string;
         timestamp?: { toDate(): Date } | string;
       };
-      return {
-        id: doc.id,
-        action: data.action || "",
-        user: data.user || "",
-        timestamp:
-          typeof data.timestamp === "string"
-            ? data.timestamp
-            : data.timestamp?.toDate().toISOString(),
-      };
+      const type = data.type || data.action || "info";
+      const title = data.title || data.action || "Untitled";
+      const description =
+        data.description ||
+        (data.user ? `Performed by ${data.user}` : "");
+      const status = data.status || "unknown";
+      const timestamp =
+        typeof data.timestamp === "string"
+          ? data.timestamp
+          : data.timestamp?.toDate().toISOString();
+      return { id: doc.id, type, title, description, status, timestamp };
     });
 
     const payload = {

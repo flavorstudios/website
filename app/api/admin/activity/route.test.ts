@@ -2,7 +2,6 @@
  * @jest-environment node
  */
 import { NextRequest } from 'next/server';
-import { GET } from './route';
 import { requireAdmin } from '@/lib/admin-auth';
 
 jest.mock('@/lib/admin-auth', () => ({
@@ -14,24 +13,68 @@ jest.mock('@/lib/admin-auth', () => ({
   }),
 }));
 
-jest.mock('@/lib/firebase-admin', () => ({
-  adminDb: undefined,
-}));
-
 describe('GET /api/admin/activity', () => {
   it('returns empty activities when adminDb missing', async () => {
-    const req = new NextRequest('http://test/api/admin/activity');
-    const res = await GET(req);
-    const json = await res.json();
-    expect(res.status).toBe(200);
-    expect(json.activities).toEqual([]);
+    await jest.isolateModulesAsync(async () => {
+      jest.doMock('@/lib/firebase-admin', () => ({ adminDb: undefined }));
+      const { GET } = await import('./route');
+      const req = new NextRequest('http://test/api/admin/activity');
+      const res = await GET(req);
+      const json = await res.json();
+      expect(res.status).toBe(200);
+      expect(json.activities).toEqual([]);
+    });
+  });
+
+  it('returns mapped activities with defaults', async () => {
+    await jest.isolateModulesAsync(async () => {
+      const getMock = jest.fn().mockResolvedValue({
+        docs: [
+          {
+            id: '1',
+            data: () => ({
+              action: 'login',
+              user: 'tester',
+              timestamp: { toDate: () => new Date('2024-01-01T00:00:00Z') },
+            }),
+          },
+        ],
+      });
+      const orderByMock = jest.fn().mockReturnValue({ get: getMock });
+      const collectionMock = jest.fn().mockReturnValue({ orderBy: orderByMock });
+
+      jest.doMock('@/lib/firebase-admin', () => ({
+        adminDb: { collection: collectionMock },
+      }));
+
+      const { GET } = await import('./route');
+      const req = new NextRequest('http://test/api/admin/activity');
+      const res = await GET(req);
+      const json = await res.json();
+
+      expect(res.status).toBe(200);
+      expect(json.activities).toEqual([
+        {
+          id: '1',
+          type: 'login',
+          title: 'login',
+          description: 'Performed by tester',
+          status: 'unknown',
+          timestamp: '2024-01-01T00:00:00.000Z',
+        },
+      ]);
+    });
   });
 
   it('denies unauthorized', async () => {
-    const mockedRequireAdmin = requireAdmin as jest.MockedFunction<typeof requireAdmin>;
-    mockedRequireAdmin.mockResolvedValueOnce(false);
-    const req = new NextRequest('http://test/api/admin/activity');
-    const res = await GET(req);
-    expect(res.status).toBe(401);
+    await jest.isolateModulesAsync(async () => {
+      const mockedRequireAdmin = requireAdmin as jest.MockedFunction<typeof requireAdmin>;
+      mockedRequireAdmin.mockResolvedValueOnce(false);
+      jest.doMock('@/lib/firebase-admin', () => ({ adminDb: undefined }));
+      const { GET } = await import('./route');
+      const req = new NextRequest('http://test/api/admin/activity');
+      const res = await GET(req);
+      expect(res.status).toBe(401);
+    });
   });
 });

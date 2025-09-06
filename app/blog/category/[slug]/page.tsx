@@ -7,7 +7,7 @@ import BlogPage from "../../page";
 import Link from "next/link";
 
 interface BlogCategoryPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{ page?: string }>;
 }
 
@@ -20,7 +20,7 @@ export default async function BlogCategoryPage({
   params,
   searchParams,
 }: BlogCategoryPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   const resolvedSearchParams = await searchParams;
   const categorySlug = slug;
 

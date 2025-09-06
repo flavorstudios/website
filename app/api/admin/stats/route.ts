@@ -318,6 +318,44 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Stats unavailable" }, { status: 503 });
     }
 
+    // Calculate month-over-month post growth
+    const nowDate = new Date();
+    const startCurrentMonth = new Date(
+      Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), 1)
+    );
+    const startNextMonth = new Date(
+      Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() + 1, 1)
+    );
+    const startPrevMonth = new Date(
+      Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() - 1, 1)
+    );
+
+    const [currentMonthPosts, previousMonthPosts] = await Promise.all([
+      safeCount(
+        db
+          .collection("blogs")
+          .where("createdAt", ">=", Timestamp.fromDate(startCurrentMonth))
+          .where("createdAt", "<", Timestamp.fromDate(startNextMonth)),
+        "currentMonthPosts"
+      ),
+      safeCount(
+        db
+          .collection("blogs")
+          .where("createdAt", ">=", Timestamp.fromDate(startPrevMonth))
+          .where("createdAt", "<", Timestamp.fromDate(startCurrentMonth)),
+        "previousMonthPosts"
+      ),
+    ]);
+
+    base.monthlyGrowth =
+      previousMonthPosts === 0
+        ? currentMonthPosts > 0
+          ? 100
+          : 0
+        : Math.round(
+            ((currentMonthPosts - previousMonthPosts) / previousMonthPosts) * 100
+          );
+
     let history: MonthlyStats[] | undefined;
 
     // Optional 12-month history for charts (guarded per month)

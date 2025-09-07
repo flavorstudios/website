@@ -6,15 +6,7 @@ export const viewport = {
 
 import type { ReactNode } from "react";
 import "./globals.css";
-import "./fonts/poppins.css";
-import {
-  Poppins,
-  Inter,
-  Lora,
-  JetBrains_Mono,
-  Roboto,
-  Noto_Serif,
-} from "next/font/google";
+import localFont from "next/font/local";
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -106,23 +98,39 @@ import type { CategoryData } from "@/lib/dynamic-categories";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-// next/font: load fonts with CSS variables exposed to globals.css
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+// next/font/local: load fonts with CSS variables exposed to globals.css
+const poppins = localFont({
+  src: [
+    { path: "../public/fonts/poppins/poppins-v23-latin-400.woff2", weight: "400", style: "normal" },
+    { path: "../public/fonts/poppins/poppins-v23-latin-500.woff2", weight: "500", style: "normal" },
+    { path: "../public/fonts/poppins/poppins-v23-latin-600.woff2", weight: "600", style: "normal" },
+    { path: "../public/fonts/poppins/poppins-v23-latin-700.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-poppins",
   display: "swap",
 });
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const lora = Lora({ subsets: ["latin"], variable: "--font-lora", display: "swap" });
-const roboto = Roboto({ subsets: ["latin"], variable: "--font-roboto", display: "swap" });
-const notoSerif = Noto_Serif({
-  subsets: ["latin"],
+const inter = localFont({
+  src: [{ path: "../public/fonts/inter/inter-v12-latin-regular.woff2", weight: "400", style: "normal" }],
+  variable: "--font-inter",
+  display: "swap",
+});
+const lora = localFont({
+  src: [{ path: "../public/fonts/lora/lora-v32-latin-regular.woff2", weight: "400", style: "normal" }],
+  variable: "--font-lora",
+  display: "swap",
+});
+const roboto = localFont({
+  src: [{ path: "../public/fonts/roboto/roboto-v30-latin-regular.woff2", weight: "400", style: "normal" }],
+  variable: "--font-roboto",
+  display: "swap",
+});
+const notoSerif = localFont({
+  src: [{ path: "../public/fonts/noto-serif/noto-serif-v18-latin-regular.woff2", weight: "400", style: "normal" }],
   variable: "--font-noto-serif",
   display: "swap",
 });
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
+const jetbrains = localFont({
+  src: [{ path: "../public/fonts/jetbrains-mono/jetbrains-mono-v14-latin-regular.woff2", weight: "400", style: "normal" }],
   variable: "--font-jetbrains",
   display: "swap",
 });

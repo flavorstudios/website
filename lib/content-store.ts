@@ -47,11 +47,15 @@ export interface BlogPost {
   openGraphImage?: string;    // <--- ADDED for SEO & preview
 }
 
+export type BlogDiff = {
+  [K in keyof BlogPost]?: { before: BlogPost[K]; after: BlogPost[K] };
+};
+
 export interface BlogRevision {
   id: string;
   timestamp: string;
   author: string;
-  diff: Record<string, { before: unknown; after: unknown }>;
+  diff: BlogDiff;
 }
 
 export interface Video {
@@ -238,11 +242,13 @@ export const blogStore = {
     const updated = afterSnap.data() as BlogPost;
 
     // Field-level diff only for keys we attempted to change
-    const diff: Record<string, { before: unknown; after: unknown }> = {};
-    for (const key of Object.keys(data)) {
-      const k = key as keyof BlogPost;
-      if ((before as any)[k] !== (updated as any)[k]) {
-        diff[key] = { before: (before as any)[k], after: (updated as any)[k] };
+    const diff: BlogDiff = {};
+    const setDiff = <K extends keyof BlogPost>(key: K, beforeVal: BlogPost[K], afterVal: BlogPost[K]) => {
+      diff[key] = { before: beforeVal, after: afterVal } as BlogDiff[K];
+    };
+    for (const key of Object.keys(data) as (keyof BlogPost)[]) {
+      if (before[key] !== updated[key]) {
+        setDiff(key, before[key], updated[key]);
       }
     }
 
@@ -289,8 +295,12 @@ export const blogStore = {
 
     // Build updates by reverting each changed field back to its "before" value
     const updates: Partial<BlogPost> = {};
-    for (const [key, value] of Object.entries(revision.diff)) {
-      (updates as any)[key] = value.before;
+    const setUpdate = <K extends keyof BlogPost>(key: K, value: BlogPost[K]) => {
+      updates[key] = value;
+    };
+    for (const key of Object.keys(revision.diff) as (keyof BlogPost)[]) {
+      const change = revision.diff[key];
+      if (change) setUpdate(key, change.before);
     }
 
     // Apply update (this will also write a new revision entry via blogStore.update)
@@ -298,15 +308,21 @@ export const blogStore = {
     if (!post) return null;
 
     // Optional: also log a restore action entry for extra audit clarity
+    const reverseDiff: BlogDiff = {};
+    const setReverse = <K extends keyof BlogPost>(key: K, beforeVal: BlogPost[K], afterVal: BlogPost[K]) => {
+      reverseDiff[key] = { before: beforeVal, after: afterVal } as BlogDiff[K];
+    };
+    for (const key of Object.keys(revision.diff) as (keyof BlogPost)[]) {
+      const change = revision.diff[key];
+      if (change) setReverse(key, change.after, change.before);
+    }
     await ref.collection("revisions").add({
       timestamp: new Date().toISOString(),
       author: editor,
-      diff: Object.fromEntries(
-        Object.entries(revision.diff).map(([k, v]) => [k, { before: v.after, after: v.before }])
-      ),
+      diff: reverseDiff,
       action: "restore",
       fromRevisionId: revisionId,
-    } as any);
+    });
 
     return post;
   },

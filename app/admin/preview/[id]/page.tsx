@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import type { PageProps } from "next";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
 import {
   blogStore,
@@ -17,8 +16,12 @@ async function getPost(id: string): Promise<BlogPost | null> {
   return blogStore.getById(id);
 }
 
-export async function generateMetadata({ params }: PageProps<{ id: string }>) {
-  const { id } = await params;
+interface PreviewPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const { id } = params;
   let post: BlogPost | null = null;
   try {
     post = await getPost(id);
@@ -68,8 +71,8 @@ export async function generateMetadata({ params }: PageProps<{ id: string }>) {
   });
 }
 
-export default async function PreviewPage({ params }: PageProps<{ id: string }>) {
-  const { id } = await params;
+export default async function PreviewPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   let post: BlogPost | null = null;
   try {
     post = await getPost(id);

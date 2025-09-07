@@ -109,31 +109,6 @@ const poppins = localFont({
   variable: "--font-poppins",
   display: "swap",
 });
-const inter = localFont({
-  src: [{ path: "../public/fonts/inter/inter-v12-latin-regular.woff2", weight: "400", style: "normal" }],
-  variable: "--font-inter",
-  display: "swap",
-});
-const lora = localFont({
-  src: [{ path: "../public/fonts/lora/lora-v32-latin-regular.woff2", weight: "400", style: "normal" }],
-  variable: "--font-lora",
-  display: "swap",
-});
-const roboto = localFont({
-  src: [{ path: "../public/fonts/roboto/roboto-v30-latin-regular.woff2", weight: "400", style: "normal" }],
-  variable: "--font-roboto",
-  display: "swap",
-});
-const notoSerif = localFont({
-  src: [{ path: "../public/fonts/noto-serif/noto-serif-v18-latin-regular.woff2", weight: "400", style: "normal" }],
-  variable: "--font-noto-serif",
-  display: "swap",
-});
-const jetbrains = localFont({
-  src: [{ path: "../public/fonts/jetbrains-mono/jetbrains-mono-v14-latin-regular.woff2", weight: "400", style: "normal" }],
-  variable: "--font-jetbrains",
-  display: "swap",
-});
 
 // 🟩 UPDATED GUARD: All fields properly checked!
 function mapCategoryDataToCategory(
@@ -259,9 +234,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         )}
         {/* END GTM (HEAD) */}
       </head>
-      <body
-        className={`${inter.variable} ${lora.variable} ${roboto.variable} ${notoSerif.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
-      >
+      <body className={`${poppins.variable} antialiased`}>
         {/* Skip link for keyboard and pointer users */}
         <a
           href="#main-content"

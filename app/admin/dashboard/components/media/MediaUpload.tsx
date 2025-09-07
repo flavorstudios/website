@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import type { MediaDoc } from "@/types/media";
 import { ADMIN_OPEN_MEDIA_UPLOAD } from "@/lib/admin-events";
 import { useToast } from "@/hooks/use-toast";
-import { handleAdminSessionExpiry } from "@/lib/admin-auth-client";
 
 interface UploadItem {
   id: string;

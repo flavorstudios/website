@@ -4,7 +4,6 @@ import { NextRequest } from "next/server";
 import { adminAuth, adminDb, ADMIN_BYPASS } from "@/lib/firebase-admin";
 import {
   getAllowedAdminEmails,
-  getAllowedAdminDomain,
   isEmailAllowed,
 } from "@/lib/admin-allowlist";
 import { cookies } from "next/headers";

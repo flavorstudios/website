@@ -100,15 +100,15 @@ describe("GET /api/admin/stats", () => {
             if (field === "publishedAt") {
               publishedAtCallVideos++;
               const n =
-                publishedAtCallVideos === 1
-                  ? counts.currentMonthVideos
-                  publishedAtCallVideos === 2
-                  ? 0
-                  : publishedAtCallVideos === 3
-                  ? counts.previousMonthVideos
-                  : publishedAtCallVideos === 4
-                  ? 0
-                  : counts.videos;
+                  publishedAtCallVideos === 1
+                    ? counts.currentMonthVideos
+                    : publishedAtCallVideos === 2
+                    ? 0
+                    : publishedAtCallVideos === 3
+                    ? counts.previousMonthVideos
+                    : publishedAtCallVideos === 4
+                    ? 0
+                    : counts.videos;
               return queryWithCount(n);
             }
             return query(counts.videos);

@@ -251,30 +251,6 @@ export async function GET(request: NextRequest) {
       }
     };
 
-    const countPublishedOrCreatedRange = async (
-      ref: Query,
-      start: Date,
-      end: Date,
-      label: string,
-    ): Promise<number> => {
-      const startTs = Timestamp.fromDate(start);
-      const endTs = Timestamp.fromDate(end);
-      const [pub, legacy] = await Promise.all([
-        safeCount(
-          ref.where("publishedAt", ">=", startTs).where("publishedAt", "<", endTs),
-          `${label}:published`,
-        ),
-        safeCount(
-          ref
-            .where("publishedAt", "==", null)
-            .where("createdAt", ">=", startTs)
-            .where("createdAt", "<", endTs),
-          `${label}:legacy`,
-        ),
-      ]);
-      return pub + legacy;
-    };
-
     // Fetch Firestore stats in parallel (guarded)
     const baseFetch = async (): Promise<Stats> => {
       const [
@@ -356,26 +332,28 @@ export async function GET(request: NextRequest) {
         const monthEnd = new Date(
           Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i + 1, 1)
         );
+        const startTs = Timestamp.fromDate(monthStart);
+        const endTs = Timestamp.fromDate(monthEnd);
 
         const promise = Promise.all([
           db
             .collection("blogs")
-            .where("createdAt", ">=", startTs)
-            .where("createdAt", "<", endTs)
+            .where("createdAt", ">=", Timestamp.fromDate(monthStart))
+            .where("createdAt", "<", Timestamp.fromDate(monthEnd))
             .count()
             .get(),
           db
             .collection("videos")
-            .where("createdAt", ">=", startTs)
-            .where("createdAt", "<", endTs)
+            .where("createdAt", ">=", Timestamp.fromDate(monthStart))
+            .where("createdAt", "<", Timestamp.fromDate(monthEnd))
             .count()
             .get(),
           // Comments are stored at /comments/{postId}/entries/{commentId}
           // so we query the shared "entries" collection group.
           db
             .collectionGroup("entries")
-            .where("createdAt", ">=", startTs)
-            .where("createdAt", "<", endTs)
+            .where("createdAt", ">=", Timestamp.fromDate(monthStart))
+            .where("createdAt", "<", Timestamp.fromDate(monthEnd))
             .count()
             .get(),
         ])

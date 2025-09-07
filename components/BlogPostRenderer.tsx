@@ -90,10 +90,14 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
               priority
             />
           ) : (
-            <img
+            // eslint-disable-next-line @next/next/no-img-element
+            <Image
               src={image}
               alt={post.title || "Blog post cover image"}
-              className="object-cover w-full h-full"
+              fill
+              className="object-cover"
+              unoptimized
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 1024px"
             />
           )}
         </div>

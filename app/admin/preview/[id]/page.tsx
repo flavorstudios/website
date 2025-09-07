@@ -20,8 +20,8 @@ interface PreviewPageProps {
   params: Promise<{ id: string }>;
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const { id } = params;
+export async function generateMetadata({ params }: PreviewPageProps) {
+  const { id } = await params;
   let post: BlogPost | null = null;
   try {
     post = await getPost(id);
@@ -71,8 +71,8 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   });
 }
 
-export default async function PreviewPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function PreviewPage({ params }: PreviewPageProps) {
+  const { id } = await params;
   let post: BlogPost | null = null;
   try {
     post = await getPost(id);

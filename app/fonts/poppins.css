@@ -1,0 +1,19 @@
+/* poppins-regular - latin */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/poppins/poppins-v23-latin-regular.woff2') format('woff2');
+  font-display: swap;
+}
+/* poppins-600 - latin */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/fonts/poppins/poppins-v23-latin-600.woff2') format('woff2');
+  font-display: swap;
+}
+:root {
+  --font-poppins: 'Poppins', sans-serif;
+}

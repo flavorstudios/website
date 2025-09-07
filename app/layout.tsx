@@ -6,7 +6,15 @@ export const viewport = {
 
 import type { ReactNode } from "react";
 import "./globals.css";
-import localFont from "next/font/local";
+import "./fonts/poppins.css";
+import {
+  Poppins,
+  Inter,
+  Lora,
+  JetBrains_Mono,
+  Roboto,
+  Noto_Serif,
+} from "next/font/google";
 
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -98,15 +106,19 @@ import type { CategoryData } from "@/lib/dynamic-categories";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-// next/font/local: load fonts with CSS variables exposed to globals.css
-const poppins = localFont({
-  src: [
-    { path: "../public/fonts/poppins/poppins-v23-latin-400.woff2", weight: "400", style: "normal" },
-    { path: "../public/fonts/poppins/poppins-v23-latin-500.woff2", weight: "500", style: "normal" },
-    { path: "../public/fonts/poppins/poppins-v23-latin-600.woff2", weight: "600", style: "normal" },
-    { path: "../public/fonts/poppins/poppins-v23-latin-700.woff2", weight: "700", style: "normal" },
-  ],
+// next/font: load fonts with CSS variables exposed to globals.css
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-poppins",
+  display: "swap",
+});
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const lora = Lora({ subsets: ["latin"], variable: "--font-lora", display: "swap" });
+const roboto = Roboto({ subsets: ["latin"], variable: "--font-roboto", display: "swap" });
+const notoSerif = Noto_Serif({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
   display: "swap",
 });
 

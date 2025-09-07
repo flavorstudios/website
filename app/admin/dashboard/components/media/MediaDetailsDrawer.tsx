@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import type { MediaDoc } from "@/types/media";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface MediaDetailsDrawerProps {
   media: MediaDoc;
@@ -49,6 +50,7 @@ export default function MediaDetailsDrawer({
   const [savingAlt, setSavingAlt] = useState(false);
   const [savingName, setSavingName] = useState(false);
   const [savingTags, setSavingTags] = useState(false);
+  const { toast } = useToast();
 
   // Keep local fields in sync when the selected media changes
   useEffect(() => {
@@ -73,6 +75,7 @@ export default function MediaDetailsDrawer({
       onUpdate?.(data.media as MediaDoc);
     } catch (err) {
       console.error(err);
+      toast.error?.("Failed to save alt text");
     } finally {
       setSavingAlt(false);
     }
@@ -94,6 +97,7 @@ export default function MediaDetailsDrawer({
       onUpdate?.(data.media as MediaDoc);
     } catch (err) {
       console.error(err);
+      toast.error?.("Failed to save name");
     } finally {
       setSavingName(false);
     }
@@ -118,6 +122,7 @@ export default function MediaDetailsDrawer({
       onUpdate?.(data.media as MediaDoc);
     } catch (err) {
       console.error(err);
+      toast.error?.("Failed to save tags");
     } finally {
       setSavingTags(false);
     }
@@ -210,7 +215,23 @@ export default function MediaDetailsDrawer({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => navigator.clipboard.writeText(media.url)}
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(media.url);
+                } catch {
+                  toast.error("Unable to copy URL");
+                  try {
+                    const input = document.createElement("input");
+                    input.value = media.url;
+                    document.body.appendChild(input);
+                    input.select();
+                    document.execCommand("copy");
+                    document.body.removeChild(input);
+                  } catch {
+                    /* ignore */
+                  }
+                }
+              }}
             >
               Copy URL
             </Button>
@@ -240,9 +261,11 @@ export default function MediaDetailsDrawer({
         {!!media.alt && (
           <div>
             <label className="block text-xs font-semibold mb-1 text-gray-700">
-              ALT Text (current)
+              Current ALT text
             </label>
-            <p className="text-xs bg-gray-50 px-2 py-1 rounded break-all">{media.alt}</p>
+            <p className="text-xs bg-gray-50 px-2 py-1 rounded break-all">
+              {media.alt}
+            </p>
           </div>
         )}
 
@@ -297,14 +320,17 @@ export default function MediaDetailsDrawer({
         </div>
 
         <div>
-          <label className="block text-xs font-semibold mb-1 text-gray-700">ALT Text</label>
+          <label className="block text-xs font-semibold mb-1 text-gray-700">
+            Edit ALT text
+          </label>
           <Input
             value={alt}
             onChange={(e) => setAlt(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !savingAlt) saveAlt();
             }}
-            aria-label="Alternative text"
+            aria-label="Edit alternative text"
+            placeholder="Describe the media"
           />
           <Button
             size="sm"

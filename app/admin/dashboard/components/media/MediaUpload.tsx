@@ -134,7 +134,7 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
         multiple
         hidden
         ref={inputRef}
-        accept="image/png,image/jpeg,image/webp,image/gif"
+        accept="image/png,image/jpeg,image/webp,image/gif,video/*,audio/*,application/pdf"
         onChange={(e) => handleFiles(e.target.files)}
         aria-label="Select media files"
       />
@@ -142,7 +142,7 @@ export default function MediaUpload({ onUploaded }: { onUploaded: (item: MediaDo
         Drag & drop, click or paste files to upload
       </p>
       <p className="text-xs text-muted-foreground mb-2">
-        Only PNG, JPG, WebP or GIF images up to 10 MB
+        Only PNG, JPG, WebP, GIF, video, audio or PDF files up to 10 MB
       </p>
       <div aria-live="polite">
         {uploads.map((u) => (

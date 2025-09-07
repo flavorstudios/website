@@ -331,15 +331,28 @@ export default function MediaLibrary({
 
   // Bulk actions (kept as-is; can be upgraded to optimistic + rollback later)
   const handleBulkDelete = async () => {
-    for (const id of selectedIds) {
-      await fetch("/api/media/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-    }
+    const failures: string[] = [];
+    await Promise.all(
+      Array.from(selectedIds).map(async (id) => {
+        try {
+          const res = await fetch("/api/media/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id }),
+          });
+          if (!res.ok) throw new Error();
+        } catch {
+          failures.push(id);
+        }
+      }),
+    );
     setSelectedIds(new Set());
     void loadMedia();
+    if (failures.length) {
+      toast.error(
+        `Failed to delete ${failures.length} item(s): ${failures.join(", ")}`,
+      );
+    }
   };
 
   const handleBulkTag = async () => {

@@ -3,6 +3,7 @@ import type { Firestore } from "firebase-admin/firestore";
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
 import { HttpError } from "@/lib/http";
+import { extractMediaIds, linkMediaToPost, unlinkMediaFromPost } from "@/lib/media";
 
 /**
  * Retrieve the Firebase Admin Firestore instance or return `null` if the
@@ -216,6 +217,16 @@ export const blogStore = {
     const db = getDbOrNull();
     if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db.collection("blogs").doc(id).set(newPost);
+    try {
+      const ids = extractMediaIds(
+        newPost.content,
+        newPost.featuredImage,
+        newPost.openGraphImage
+      );
+      await linkMediaToPost(ids, id);
+    } catch {
+      /* ignore linking errors */
+    }
     return newPost;
   },
 
@@ -240,6 +251,27 @@ export const blogStore = {
     const afterSnap = await ref.get();
     if (!afterSnap.exists) return null;
     const updated = afterSnap.data() as BlogPost;
+
+    try {
+      const beforeIds = extractMediaIds(
+        before.content,
+        before.featuredImage,
+        before.openGraphImage
+      );
+      const afterIds = extractMediaIds(
+        updated.content,
+        updated.featuredImage,
+        updated.openGraphImage
+      );
+      const toAdd = afterIds.filter((m) => !beforeIds.includes(m));
+      const toRemove = beforeIds.filter((m) => !afterIds.includes(m));
+      await Promise.all([
+        linkMediaToPost(toAdd, id),
+        unlinkMediaFromPost(toRemove, id),
+      ]);
+    } catch {
+      /* ignore linking errors */
+    }
 
     // Field-level diff only for keys we attempted to change
     const diff: BlogDiff = {};
@@ -351,6 +383,17 @@ export const blogStore = {
     const ref = db.collection("blogs").doc(id);
     const doc = await ref.get();
     if (!doc.exists) return false;
+    const data = doc.data() as BlogPost;
+    try {
+      const ids = extractMediaIds(
+        data.content,
+        data.featuredImage,
+        data.openGraphImage
+      );
+      await unlinkMediaFromPost(ids, id);
+    } catch {
+      /* ignore */
+    }
     await ref.delete();
     return true;
   },

@@ -32,18 +32,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Accept ID from JSON body (primary) or query string (fallback)
+  // Accept ID and optional force flag from JSON body or query string
   let id: string | undefined;
+  let force = false;
   try {
     const body = await request.json().catch(() => null);
-    id = typeof body?.id === "string" ? body.id : undefined;
+    if (body) {
+      id = typeof body.id === "string" ? body.id : undefined;
+      force = body.force === true;
+    }
   } catch {
-    // ignore, we'll check query param below
+    // ignore
   }
+  const url = new URL(request.url);
   if (!id) {
-    const url = new URL(request.url);
     const q = url.searchParams.get("id");
     if (q) id = q;
+  }
+  if (!force) {
+    force = url.searchParams.get("force") === "true";
   }
 
   id = typeof id === "string" ? id.trim() : "";
@@ -53,10 +60,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const success = await deleteMedia(id);
+    const success = await deleteMedia(id, force);
     return NextResponse.json({ success }, { status: 200 });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "delete failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const status = message === "MEDIA_IN_USE" ? 400 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
 }

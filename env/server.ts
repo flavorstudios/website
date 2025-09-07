@@ -17,6 +17,7 @@ export const serverEnv: Record<string, string | undefined> & {
   ADMIN_PASSWORD_HASH: string | undefined;
   ADMIN_SESSION_EXPIRY_DAYS: string | undefined;
   ADMIN_TOTP_SECRET: string | undefined;
+  PREVIEW_SECRET: string | undefined;
   ANALYZE: string | undefined;
   BASE_URL: string | undefined;
   BING_API_KEY: string | undefined;
@@ -59,6 +60,7 @@ export const serverEnv: Record<string, string | undefined> & {
   ADMIN_PASSWORD_HASH: process.env.ADMIN_PASSWORD_HASH,
   ADMIN_SESSION_EXPIRY_DAYS: process.env.ADMIN_SESSION_EXPIRY_DAYS,
   ADMIN_TOTP_SECRET: process.env.ADMIN_TOTP_SECRET,
+  PREVIEW_SECRET: process.env.PREVIEW_SECRET,
   ANALYZE: process.env.ANALYZE,
   BASE_URL: process.env.BASE_URL,
   BING_API_KEY: process.env.BING_API_KEY,

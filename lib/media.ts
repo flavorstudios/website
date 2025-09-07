@@ -2,6 +2,7 @@
 import "server-only";
 
 import { getStorage } from "firebase-admin/storage";
+import { FieldValue } from "firebase-admin/firestore";
 import { safeAdminDb } from "@/lib/firebase-admin"; // value (Firestore | undefined)
 import type { MediaDoc, MediaVariant } from "@/types/media";
 import crypto from "node:crypto";
@@ -114,6 +115,47 @@ export function isStorageConfigured(): boolean {
 export function storageInfo(): { configured: boolean; bucket?: string } {
   const b = tryGetBucket();
   return { configured: !!b, bucket: b?.name };
+}
+
+/** Extract media IDs from any strings containing Storage paths or URLs. */
+export function extractMediaIds(...inputs: Array<string | undefined | null>): string[] {
+  const ids = new Set<string>();
+  const patterns = [
+    /media\/(\w{16})\//g, // raw paths
+    /media%2F(\w{16})%2F/g, // encoded paths
+  ];
+  for (const input of inputs) {
+    if (!input) continue;
+    for (const pattern of patterns) {
+      let m: RegExpExecArray | null;
+      while ((m = pattern.exec(input))) {
+        ids.add(m[1]);
+      }
+    }
+  }
+  return Array.from(ids);
+}
+
+/** Add postId to attachedTo for each media ID. */
+export async function linkMediaToPost(mediaIds: string[], postId: string): Promise<void> {
+  if (!mediaIds.length) return;
+  const col = requireCollection();
+  await Promise.all(
+    mediaIds.map((id) =>
+      col.doc(id).update({ attachedTo: FieldValue.arrayUnion(postId) })
+    )
+  );
+}
+
+/** Remove postId from attachedTo for each media ID. */
+export async function unlinkMediaFromPost(mediaIds: string[], postId: string): Promise<void> {
+  if (!mediaIds.length) return;
+  const col = requireCollection();
+  await Promise.all(
+    mediaIds.map((id) =>
+      col.doc(id).update({ attachedTo: FieldValue.arrayRemove(postId) })
+    )
+  );
 }
 
 // --- Public API --------------------------------------------------------------
@@ -276,12 +318,16 @@ export async function refreshMediaUrl(id: string): Promise<MediaDoc | null> {
  * Delete a media object from Storage (if possible) and remove its Firestore doc.
  * If the bucket is not configured, still remove the Firestore doc to avoid blocking.
  */
-export async function deleteMedia(id: string): Promise<boolean> {
+export async function deleteMedia(id: string, force = false): Promise<boolean> {
   const collection = requireCollection();
   const doc = await collection.doc(id).get();
   if (!doc.exists) return false;
 
   const data = doc.data() as MediaDoc;
+
+  if (data.attachedTo?.length && !force) {
+    throw new Error("MEDIA_IN_USE");
+  }
 
   // Attempt to delete from Storage only if bucket is available.
   const bucket = tryGetBucket();

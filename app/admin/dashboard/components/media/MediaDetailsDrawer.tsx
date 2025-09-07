@@ -50,6 +50,7 @@ export default function MediaDetailsDrawer({
   const [savingAlt, setSavingAlt] = useState(false);
   const [savingName, setSavingName] = useState(false);
   const [savingTags, setSavingTags] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
 
   // Keep local fields in sync when the selected media changes
@@ -125,6 +126,37 @@ export default function MediaDetailsDrawer({
       toast.error?.("Failed to save tags");
     } finally {
       setSavingTags(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    let force = false;
+    if (media.attachedTo?.length) {
+      const ok = window.confirm(
+        `This media is used in ${media.attachedTo.length} item(s). Delete anyway?`
+      );
+      if (!ok) return;
+      force = true;
+    }
+    setDeleting(true);
+    try {
+      const url = force ? "/api/media/delete?force=true" : "/api/media/delete";
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: media.id }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error?.(err.error || "Failed to delete media");
+        return;
+      }
+      onOpenChange(false);
+    } catch (err) {
+      console.error(err);
+      toast.error?.("Failed to delete media");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -339,6 +371,18 @@ export default function MediaDetailsDrawer({
             disabled={savingAlt || alt.trim() === (media.alt || "")}
           >
             {savingAlt ? "Saving…" : "Save"}
+          </Button>
+        </div>
+
+        <div>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={deleting}
+            className="mt-4"
+          >
+            {deleting ? "Deleting…" : "Delete"}
           </Button>
         </div>
       </DialogContent>

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { PageProps } from "next";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
 import {
   blogStore,
@@ -11,16 +12,13 @@ import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
 import { HttpError } from "@/lib/http";
 import { ErrorBoundary } from "@/app/admin/dashboard/components/ErrorBoundary";
-interface PreviewPageProps {
-  params: { id: string };
-}
 
 async function getPost(id: string): Promise<BlogPost | null> {
   return blogStore.getById(id);
 }
 
-export async function generateMetadata({ params }: PreviewPageProps) {
-  const { id } = params;
+export async function generateMetadata({ params }: PageProps<{ id: string }>) {
+  const { id } = await params;
   let post: BlogPost | null = null;
   try {
     post = await getPost(id);
@@ -70,8 +68,8 @@ export async function generateMetadata({ params }: PreviewPageProps) {
   });
 }
 
-export default async function PreviewPage({ params }: PreviewPageProps) {
-  const { id } = params;
+export default async function PreviewPage({ params }: PageProps<{ id: string }>) {
+  const { id } = await params;
   let post: BlogPost | null = null;
   try {
     post = await getPost(id);

@@ -116,11 +116,8 @@ const poppins = Poppins({
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora", display: "swap" });
 const roboto = Roboto({ subsets: ["latin"], variable: "--font-roboto", display: "swap" });
-const notoSerif = Noto_Serif({
-  subsets: ["latin"],
-  variable: "--font-jetbrains",
-  display: "swap",
-});
+const notoSerif = Noto_Serif({ subsets: ["latin"], variable: "--font-noto-serif", display: "swap" });
+const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
 // 🟩 UPDATED GUARD: All fields properly checked!
 function mapCategoryDataToCategory(
@@ -246,7 +243,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         )}
         {/* END GTM (HEAD) */}
       </head>
-      <body className={`${poppins.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${lora.variable} ${roboto.variable} ${notoSerif.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
+      >
         {/* Skip link for keyboard and pointer users */}
         <a
           href="#main-content"

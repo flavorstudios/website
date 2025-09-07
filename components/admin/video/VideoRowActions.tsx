@@ -46,7 +46,11 @@ export default function VideoRowActions({ video, onDelete, onTogglePublish }: Vi
             aria-label="View on site"
             title="View"
           >
-            <Link href={`/watch/${video.slug}`} target="_blank">
+            <Link
+              href={`/watch/${video.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Eye className="h-4 w-4" />
             </Link>
           </Button>

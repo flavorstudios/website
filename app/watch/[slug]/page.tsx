@@ -8,6 +8,7 @@ import { serverEnv } from "@/env/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { VideoPlayer } from "./VideoPlayer";
 import {
   Eye,
   Clock,
@@ -199,12 +200,10 @@ export default async function VideoPage({
           <div className="lg:col-span-2 space-y-6">
             <Card className="overflow-hidden">
               <div className="relative aspect-video">
-                <iframe
-                  src={embedUrl}
+                <VideoPlayer
+                  embedUrl={embedUrl}
+                  thumbnailUrl={thumbnailUrl}
                   title={video.title}
-                  className="w-full h-full"
-                  allowFullScreen
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 />
               </div>
             </Card>

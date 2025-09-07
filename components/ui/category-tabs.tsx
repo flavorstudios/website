@@ -79,7 +79,7 @@ export function CategoryTabs({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute left-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-sm rounded-full"
+            className="absolute left-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border border-border shadow-sm rounded-full"
             onClick={() => scroll("left")}
             aria-label="Scroll categories left"
           >
@@ -154,7 +154,7 @@ export function CategoryTabs({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute right-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-sm rounded-full"
+            className="absolute right-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border border-border shadow-sm rounded-full"
             onClick={() => scroll("right")}
             aria-label="Scroll categories right"
           >

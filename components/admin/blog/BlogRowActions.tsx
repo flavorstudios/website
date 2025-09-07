@@ -48,7 +48,11 @@ export default function BlogRowActions({
             aria-label="Preview post"
             title="Preview"
           >
-            <Link href={`/admin/preview/${post.id}`} target="_blank">
+            <Link
+              href={`/admin/preview/${post.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Eye className="h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>

@@ -143,7 +143,11 @@ export default function BlogTable({
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild>
-                    <Link href={`/admin/preview/${post.id}`} target="_blank" rel="noreferrer">
+                    <Link
+                      href={`/admin/preview/${post.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Eye className="h-4 w-4 mr-2" aria-hidden="true" />
                       <span>Preview</span>
                     </Link>

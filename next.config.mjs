@@ -13,10 +13,8 @@ const nextConfig = {
   reactStrictMode: true, // Add this for best practice, optional
   eslint: { ignoreDuringBuilds: true },
   images: {
-    // Disable Next.js image optimization so remote URLs are loaded directly.
-    // This avoids 4xx/5xx errors when the optimizer endpoint isn't available
-    // on the hosting platform (e.g., static deployments behind Cloudflare).
-    unoptimized: true,
+    // Next.js image optimization is enabled.
+    // For static hosting, use a CDN (e.g., Cloudflare Images) or a custom loader.
     domains: [
       'storage.googleapis.com',
       'firebasestorage.googleapis.com',

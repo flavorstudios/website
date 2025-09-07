@@ -686,7 +686,7 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
               <a
                 href={submission.portfolio}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="text-blue-600 underline"
               >
                 View
@@ -704,7 +704,7 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
                 <a
                   href={submission.resumeUrl}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="text-sm text-blue-600 underline"
                 >
                   Download Resume

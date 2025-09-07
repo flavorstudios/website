@@ -223,7 +223,7 @@ export function SearchFeature() {
       {/* Search Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent
-          className="max-w-full max-h-full sm:max-w-2xl p-0 gap-0 border-none bg-transparent sm:bg-white sm:border sm:rounded-lg"
+          className="max-w-full max-h-full sm:max-w-2xl p-0 gap-0 border-none bg-transparent sm:bg-white sm:border sm:border-border sm:rounded-lg"
           onKeyDown={handleModalKeyDown}
         >
           <DialogHeader>
@@ -234,7 +234,7 @@ export function SearchFeature() {
           </DialogHeader>
 
           <div className="fixed inset-0 sm:relative bg-background/95 backdrop-blur-sm sm:bg-transparent sm:backdrop-blur-none flex flex-col">
-            <div className="flex-shrink-0 border-b bg-white p-4">
+            <div className="flex-shrink-0 border-b border-border bg-white p-4">
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
                 <Input
@@ -346,7 +346,7 @@ export function SearchFeature() {
 
               {/* Keyboard Shortcuts Hint */}
               {!debouncedSearchQuery.trim() && !isLoading && (
-                <div className="p-4 border-t bg-muted/30">
+                <div className="p-4 border-t border-border bg-muted/30">
                   <div className="text-xs text-muted-foreground text-center">
                     <div className="hidden sm:block">
                       <kbd className="px-2 py-1 bg-muted rounded text-xs">↑↓</kbd> to navigate •{" "}

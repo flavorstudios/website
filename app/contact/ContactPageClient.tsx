@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { useState } from "react";
+import DOMPurify from "isomorphic-dompurify";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -507,7 +508,10 @@ export default function ContactPageClient() {
                             <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white font-bold" />
                           </div>
                         </div>
-                        <span className="text-xs sm:text-sm text-blue-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: expectation }} />
+                        <span
+                          className="text-xs sm:text-sm text-blue-800 leading-relaxed"
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(expectation) }}
+                        />
                       </div>
                     ))}
                   </div>
@@ -550,7 +554,10 @@ export default function ContactPageClient() {
                           </div>
                         </CardHeader>
                         <CardContent className="pt-0">
-                          <CardDescription className="text-sm sm:text-base leading-relaxed" dangerouslySetInnerHTML={{ __html: process.description }} />
+                          <CardDescription
+                            className="text-sm sm:text-base leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(process.description) }}
+                          />
                         </CardContent>
                       </Card>
                     </div>

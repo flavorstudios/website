@@ -93,7 +93,7 @@ export function WatchPageClient({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Beautiful Header */}
-      <div className="bg-white border-b">
+      <div className="bg-white border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
             <div className="inline-flex items-center gap-2 bg-blue-600 text-white rounded-full px-6 py-2 mb-6 text-sm font-medium">

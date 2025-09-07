@@ -341,7 +341,11 @@ export default function AboutPage() {
                   variant="outline"
                   className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white h-9 sm:h-10 text-xs sm:text-sm"
                 >
-                  <Link href="https://www.youtube.com/@flavorstudios" target="_blank">
+                  <Link
+                    href="https://www.youtube.com/@flavorstudios"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Visit YouTube Channel
                   </Link>
                 </Button>

@@ -81,7 +81,7 @@ export async function generateMetadata({ params }: PreviewPageProps) {
 export default async function PreviewPage({ params, searchParams }: PreviewPageProps) {
   const { id } = await params;
   const { token } = await searchParams;
-  const reqHeaders = headers();
+  const reqHeaders = await headers();
   const requestId = reqHeaders.get("x-request-id") || crypto.randomUUID();
 
   function logFailure(status: number, err: unknown, uid?: string) {

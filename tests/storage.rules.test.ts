@@ -8,14 +8,37 @@ import {
 } from "@firebase/rules-unit-testing";
 import { ref, uploadString, getBytes } from "firebase/storage";
 
+function parseHostPort(envVar: string, defaultValue: string) {
+  const value = process.env[envVar] || defaultValue;
+  const [host, port] = value.split(":");
+  return { host, port: Number(port) };
+}
+
 describe("storage security rules", () => {
   let testEnv: any;
 
   beforeAll(async () => {
+    const firestore = parseHostPort(
+      "FIRESTORE_EMULATOR_HOST",
+      "127.0.0.1:8080",
+    );
+    const storage = parseHostPort(
+      "FIREBASE_STORAGE_EMULATOR_HOST",
+      "127.0.0.1:9199",
+    );
+
     testEnv = await initializeTestEnvironment({
       projectId: "demo-storage-rules",
-      firestore: { rules: readFileSync("firestore.rules", "utf8") },
-      storage: { rules: readFileSync("storage.rules", "utf8") },
+      firestore: {
+        rules: readFileSync("firestore.rules", "utf8"),
+        host: firestore.host,
+        port: firestore.port,
+      },
+      storage: {
+        rules: readFileSync("storage.rules", "utf8"),
+        host: storage.host,
+        port: storage.port,
+      },
     });
 
     // Seed a test file for read tests
@@ -26,7 +49,7 @@ describe("storage security rules", () => {
   });
 
   afterAll(async () => {
-    await testEnv.cleanup();
+    await testEnv?.cleanup();
   });
 
   it("denies unauthenticated access", async () => {

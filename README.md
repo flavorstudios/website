@@ -57,6 +57,7 @@ To run a single test file:
 pnpm test tests/validate-session.spec.ts
 pnpm exec playwright install  # install Playwright browsers before running e2e tests
 pnpm e2e tests/admin-dashboard-auth.spec.ts
+> For tests that access Firestore or Storage emulators (e.g. `tests/storage.rules.test.ts`), start the emulators and set `FIRESTORE_EMULATOR_HOST` and `FIREBASE_STORAGE_EMULATOR_HOST` (defaults `127.0.0.1:8080` and `127.0.0.1:9199`) before running `pnpm test`.
 Firebase configuration
 Firebase powers features like authentication and Firestore. The client SDK
 requires several environment variables, all of which must be present in your

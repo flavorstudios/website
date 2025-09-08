@@ -25,8 +25,16 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+        - name: Start Firebase emulators
+        run: |
+          npx firebase-tools emulators:start --only firestore,storage --project demo-storage-rules &
+          npx wait-on tcp:8080 tcp:9199
+
       - name: Jest tests
-        run: pnpm test
+        env:
+          FIRESTORE_EMULATOR_HOST: 127.0.0.1:8080
+          FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199
+        run: pnpm dlx firebase-tools emulators:exec --only firestore,storage "pnpm test"
 
       - name: Build
         env:

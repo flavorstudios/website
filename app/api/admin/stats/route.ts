@@ -34,6 +34,11 @@ type MonthlyStats = {
   comments: number;
 };
 
+export function calculateMoMGrowth(current: number, previous: number): number {
+  if (previous === 0) return current === 0 ? 0 : 100;
+  return Math.round(((current - previous) / previous) * 100);
+}
+
 // Whitelisted ranges. Any other value results in a 400 response.
 const RangeSchema = z.enum(["7d", "30d", "3mo", "6mo", "12mo"]);
 type Range = z.infer<typeof RangeSchema>;
@@ -338,22 +343,22 @@ export async function GET(request: NextRequest) {
         const promise = Promise.all([
           db
             .collection("blogs")
-            .where("createdAt", ">=", startTs)
-            .where("createdAt", "<", endTs)
+            .where("publishedAt", ">=", startTs)
+            .where("publishedAt", "<", endTs)
             .count()
             .get(),
           db
             .collection("videos")
-            .where("createdAt", ">=", startTs)
-            .where("createdAt", "<", endTs)
+            .where("publishedAt", ">=", startTs)
+            .where("publishedAt", "<", endTs)
             .count()
             .get(),
           // Comments are stored at /comments/{postId}/entries/{commentId}
           // so we query the shared "entries" collection group.
           db
             .collectionGroup("entries")
-            .where("createdAt", ">=", startTs)
-            .where("createdAt", "<", endTs)
+            .where("publishedAt", ">=", startTs)
+            .where("publishedAt", "<", endTs)
             .count()
             .get(),
         ])
@@ -393,12 +398,7 @@ export async function GET(request: NextRequest) {
       const prev = history[history.length - 2];
       const currentTotal = latest.posts + latest.videos;
       const prevTotal = prev.posts + prev.videos;
-      monthlyGrowth =
-        prevTotal === 0
-          ? currentTotal > 0
-            ? 100
-            : 0
-          : Math.round(((currentTotal - prevTotal) / prevTotal) * 100);
+      monthlyGrowth = calculateMoMGrowth(currentTotal, prevTotal);
     } else {
       const nowDate = new Date();
       const startCurrentMonth = new Date(
@@ -420,41 +420,36 @@ export async function GET(request: NextRequest) {
         safeCount(
           db
             .collection("blogs")
-            .where("createdAt", ">=", Timestamp.fromDate(startCurrentMonth))
-            .where("createdAt", "<", Timestamp.fromDate(startNextMonth)),
+            .where("publishedAt", ">=", Timestamp.fromDate(startCurrentMonth))
+            .where("publishedAt", "<", Timestamp.fromDate(startNextMonth)),
           "currentMonthPosts"
         ),
         safeCount(
           db
             .collection("blogs")
-            .where("createdAt", ">=", Timestamp.fromDate(startPrevMonth))
-            .where("createdAt", "<", Timestamp.fromDate(startCurrentMonth)),
+            .where("publishedAt", ">=", Timestamp.fromDate(startPrevMonth))
+            .where("publishedAt", "<", Timestamp.fromDate(startCurrentMonth)),
           "previousMonthPosts"
         ),
         safeCount(
           db
             .collection("videos")
-            .where("createdAt", ">=", Timestamp.fromDate(startCurrentMonth))
-            .where("createdAt", "<", Timestamp.fromDate(startNextMonth)),
+            .where("publishedAt", ">=", Timestamp.fromDate(startCurrentMonth))
+            .where("publishedAt", "<", Timestamp.fromDate(startNextMonth)),
           "currentMonthVideos"
         ),
         safeCount(
           db
             .collection("videos")
-            .where("createdAt", ">=", Timestamp.fromDate(startPrevMonth))
-            .where("createdAt", "<", Timestamp.fromDate(startCurrentMonth)),
+            .where("publishedAt", ">=", Timestamp.fromDate(startPrevMonth))
+            .where("publishedAt", "<", Timestamp.fromDate(startCurrentMonth)),
           "previousMonthVideos"
         ),
       ]);
 
       const currentTotal = currentMonthPosts + currentMonthVideos;
       const prevTotal = previousMonthPosts + previousMonthVideos;
-      monthlyGrowth =
-        prevTotal === 0
-          ? currentTotal > 0
-            ? 100
-            : 0
-          : Math.round(((currentTotal - prevTotal) / prevTotal) * 100);
+      monthlyGrowth = calculateMoMGrowth(currentTotal, prevTotal);
     }
 
     base.monthlyGrowth = monthlyGrowth;

@@ -60,56 +60,30 @@ describe("GET /api/admin/stats", () => {
 
     const collection = (name: string) => {
       if (name === "blogs") {
-        const queryWithCount = (n: number) => ({
-          where: () => queryWithCount(n),
-          count: () => count(n),
-        });
         return {
           count: () => count(counts.blogs),
           aggregate: () => sum(counts.viewsBlogs),
           where: (field: string) => {
             if (field === "status") return query(counts.published);
             if (field === "publishedAt") {
-              publishedAtCall++;
-              const n =
-                publishedAtCall === 1
-                  ? counts.currentMonthPosts
-                  : publishedAtCall === 2
-                  ? 0
-                  : publishedAtCall === 3
-                  ? counts.previousMonthPosts
-                  : publishedAtCall === 4
-                  ? 0
-                  : counts.blogs;
-              return queryWithCount(n);
+              const map = [counts.currentMonthPosts, counts.previousMonthPosts];
+              const n = map[publishedAtCall++] ?? counts.blogs;
+              return query(n);
             }
             return query(counts.blogs);
           },
         };
       }
       if (name === "videos") {
-        const queryWithCount = (n: number) => ({
-          where: () => queryWithCount(n),
-          count: () => count(n),
-        });
         return {
           count: () => count(counts.videos),
           aggregate: () => sum(counts.viewsVideos),
           where: (field: string) => {
             if (field === "featured") return query(counts.featured);
             if (field === "publishedAt") {
-              publishedAtCallVideos++;
-              const n =
-                  publishedAtCallVideos === 1
-                    ? counts.currentMonthVideos
-                    : publishedAtCallVideos === 2
-                    ? 0
-                    : publishedAtCallVideos === 3
-                    ? counts.previousMonthVideos
-                    : publishedAtCallVideos === 4
-                    ? 0
-                    : counts.videos;
-              return queryWithCount(n);
+              const map = [counts.currentMonthVideos, counts.previousMonthVideos];
+              const n = map[publishedAtCallVideos++] ?? counts.videos;
+              return query(n);
             }
             return query(counts.videos);
           },
@@ -223,7 +197,8 @@ describe("GET /api/admin/stats", () => {
   it.each([
     { label: "positive", current: 3, previous: 1, expected: 200 },
     { label: "negative", current: 1, previous: 3, expected: -67 },
-    { label: "zero", current: 2, previous: 2, expected: 0 },
+    { label: "both zero", current: 0, previous: 0, expected: 0 },
+    { label: "prev zero", current: 2, previous: 0, expected: 100 },
   ])(
     "computes %s month-over-month growth",
     async ({ current, previous, expected }) => {
@@ -252,6 +227,21 @@ describe("GET /api/admin/stats", () => {
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(json.monthlyGrowth).toBe(expected);
+    }
+  );
+});
+
+describe("calculateMoMGrowth", () => {
+  it.each([
+    { current: 3, previous: 1, expected: 200 },
+    { current: 1, previous: 3, expected: -67 },
+    { current: 0, previous: 0, expected: 0 },
+    { current: 2, previous: 0, expected: 100 },
+  ])(
+    "returns $expected for current=$current previous=$previous",
+    async ({ current, previous, expected }) => {
+      const { calculateMoMGrowth } = await import("./route");
+      expect(calculateMoMGrowth(current, previous)).toBe(expected);
     }
   );
 });

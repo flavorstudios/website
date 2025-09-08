@@ -10,10 +10,10 @@ export async function GET(
 ) {
   const { key } = await params;
   try {
-    const normalized = normalizeSlug(key);
-    let post = await blogStore.getBySlug(normalized);
+    const normalizedKey = normalizeSlug(key);
+    let post = await blogStore.getBySlug(normalizedKey);
 
-    if (!post && process.env.ACCEPT_ID_FALLBACK === "true") {
+    if (!post && (process.env.ACCEPT_ID_FALLBACK || "").toLowerCase() === "true") {
       post = await blogStore.getById(key);
     }
 

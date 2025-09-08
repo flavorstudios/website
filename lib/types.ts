@@ -24,13 +24,12 @@ export interface BlogPost {
   openGraphImage?: string;
 }
 
-export interface PublicBlogDetail extends Omit<BlogPost, "status"> {}
+export type PublicBlogDetail = Omit<BlogPost, "status">;
 
-export interface PublicBlogSummary
-  extends Omit<
-    PublicBlogDetail,
-    "content" | "createdAt" | "updatedAt" | "schemaType" | "openGraphImage"
-  > {}
+export type PublicBlogSummary = Omit<
+  PublicBlogDetail,
+  "content" | "createdAt" | "updatedAt" | "schemaType" | "openGraphImage"
+>;
 
 
 export interface Video {

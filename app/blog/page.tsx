@@ -28,6 +28,7 @@ import { formatDate } from "@/lib/date"; // <-- Added import
 import { authors } from "@/lib/authors"; // <-- NEW
 import { DateRangePicker } from "@/components/ui/date-range-picker"; // <-- NEW
 import { serverEnv } from "@/env/server";
+import { normalizeSlug } from "@/lib/slugify";
 
 // --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
@@ -152,10 +153,6 @@ export default async function BlogPage({
   const searchQuery = search.toLowerCase();
   const sortOption = sort;
   const postsPerPage = 9;
-
-  // Clean/normalize the slug for filtering
-  const normalizeSlug = (name: string | undefined) =>
-    name?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   // --- TRUE MULTI-CATEGORY FILTER ---
   const filteredPosts =
@@ -432,7 +429,7 @@ function FeaturedPostCard({
       ? post.categories[0]
       : post.category;
   return (
-    <Link href={`/blog/${post.slug}`} className="group">
+    <Link href={`/blog/${normalizeSlug(post.slug)}`} className="group">
       <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full bg-gradient-to-br from-white to-gray-50">
         <div className="relative h-40 sm:h-48 lg:h-56 overflow-hidden">
           <Image
@@ -506,7 +503,7 @@ function BlogPostCard({ post }: { post: PublicBlogSummary }) {
       ? post.categories[0]
       : post.category;
   return (
-    <Link href={`/blog/${post.slug}`} className="group">
+    <Link href={`/blog/${normalizeSlug(post.slug)}`} className="group">
       <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 bg-white">
         <div className="relative h-40 sm:h-48 overflow-hidden">
           <Image

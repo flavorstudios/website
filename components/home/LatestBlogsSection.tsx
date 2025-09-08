@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import ErrorFallback from "@/components/home/ErrorFallback";
 import { formatDate } from "@/lib/date";
+import { normalizeSlug } from "@/lib/slugify";
 import type { BlogPost } from "@/lib/content-store";
 
 export default function LatestBlogsSection({ posts }: { posts: BlogPost[] }) {
@@ -21,7 +22,7 @@ export default function LatestBlogsSection({ posts }: { posts: BlogPost[] }) {
         {posts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {posts.map((post) => (
-              <Link key={post.id} href={`/blog/${post.slug}`}>
+              <Link key={post.id} href={`/blog/${normalizeSlug(post.slug)}`}>
                 <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                   <div className="relative h-48 overflow-hidden">
                     <Image

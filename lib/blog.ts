@@ -15,6 +15,7 @@ export async function getBlogPost(key: string): Promise<PublicBlogDetail | null>
   }
 
   if (response.status === 404) {
+    // Missing posts are represented as null so pages can trigger notFound()
     return null
   }
 

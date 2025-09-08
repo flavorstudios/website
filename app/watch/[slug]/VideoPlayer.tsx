@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Play } from "lucide-react";
 
 interface VideoPlayerProps {
@@ -29,13 +30,17 @@ export function VideoPlayer({ embedUrl, thumbnailUrl, title }: VideoPlayerProps)
           onClick={() => setIsLoaded(true)}
           className="relative w-full h-full group"
         >
-          <img
+          <Image
             src={thumbnailUrl}
             alt={title}
-            className="w-full h-full object-cover"
-            loading="lazy"
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority={false}
           />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/50 transition-colors">
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/50 transition-colors"
+          >
             <Play className="h-16 w-16 text-white" aria-hidden="true" />
           </div>
         </button>

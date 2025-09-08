@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, User, Clock } from "lucide-react"
 import { formatDate } from "@/lib/date" // <-- Added
+import { normalizeSlug } from "@/lib/slugify"
 import type { BlogPost } from "@/lib/content-store"
 
 interface BlogListProps {
@@ -58,7 +59,7 @@ export function BlogList({ posts = [], category = "all", searchQuery = "" }: Blo
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {filteredPosts.map((post) => (
         <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-          <Link href={`/blog/${post.slug}`} className="block">
+          <Link href={`/blog/${normalizeSlug(post.slug)}`} className="block">
             <div className="relative h-48 bg-gray-200">
               {post.featuredImage ? (
                 <Image src={post.featuredImage || "/placeholder.svg"} alt={post.title} fill className="object-cover" />

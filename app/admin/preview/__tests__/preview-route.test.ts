@@ -2,6 +2,10 @@
  * @jest-environment node
  */
 import React from 'react';
+import PreviewPage from '../[id]/page';
+import { verifyAdminSession } from '@/lib/admin-auth';
+import { blogStore } from '@/lib/content-store';
+import { validatePreviewToken } from '@/lib/preview-token';
 
 jest.mock('@/lib/admin-auth', () => ({
   verifyAdminSession: jest.fn(),
@@ -32,11 +36,6 @@ jest.mock('next/navigation', () => ({
     throw new Error('NEXT_NOT_FOUND');
   },
 }));
-
-const PreviewPage = require('../[id]/page').default;
-const { verifyAdminSession } = require('@/lib/admin-auth');
-const { blogStore } = require('@/lib/content-store');
-const { validatePreviewToken } = require('@/lib/preview-token');
 
 // Ensures any HTTP server started during tests is closed even if assertions fail.
 let server: { close: () => void } | null = null;

@@ -338,22 +338,22 @@ export async function GET(request: NextRequest) {
         const promise = Promise.all([
           db
             .collection("blogs")
-            .where("createdAt", ">=", Timestamp.fromDate(monthStart))
-            .where("createdAt", "<", Timestamp.fromDate(monthEnd))
+            .where("createdAt", ">=", startTs)
+            .where("createdAt", "<", endTs)
             .count()
             .get(),
           db
             .collection("videos")
-            .where("createdAt", ">=", Timestamp.fromDate(monthStart))
-            .where("createdAt", "<", Timestamp.fromDate(monthEnd))
+            .where("createdAt", ">=", startTs)
+            .where("createdAt", "<", endTs)
             .count()
             .get(),
           // Comments are stored at /comments/{postId}/entries/{commentId}
           // so we query the shared "entries" collection group.
           db
             .collectionGroup("entries")
-            .where("createdAt", ">=", Timestamp.fromDate(monthStart))
-            .where("createdAt", "<", Timestamp.fromDate(monthEnd))
+            .where("createdAt", ">=", startTs)
+            .where("createdAt", "<", endTs)
             .count()
             .get(),
         ])

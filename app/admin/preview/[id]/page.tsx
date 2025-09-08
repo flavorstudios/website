@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { cookies, headers } from "next/headers";
-import { NextResponse } from "next/server";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
 import {
   blogStore,
@@ -105,22 +104,46 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
     userId = verified.uid;
   } catch (err) {
     logFailure(403, err);
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return (
+      <AdminAuthGuard>
+        <div className="p-8 text-center">
+          <p className="text-gray-700">Access denied.</p>
+        </div>
+      </AdminAuthGuard>
+    );
   }
 
   if (!token) {
     logFailure(403, new Error("Missing token"), userId);
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return (
+      <AdminAuthGuard>
+        <div className="p-8 text-center">
+          <p className="text-gray-700">Missing token.</p>
+        </div>
+      </AdminAuthGuard>
+    );
   }
 
   const validation = validatePreviewToken(token, id, userId);
   if (validation === "invalid") {
     logFailure(403, new Error("Invalid token"), userId);
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return (
+      <AdminAuthGuard>
+        <div className="p-8 text-center">
+          <p className="text-gray-700">Invalid token.</p>
+        </div>
+      </AdminAuthGuard>
+    );
   }
   if (validation === "expired") {
     logFailure(410, new Error("Expired token"), userId);
-    return NextResponse.json({ error: "Expired" }, { status: 410 });
+    return (
+      <AdminAuthGuard>
+        <div className="p-8 text-center">
+          <p className="text-gray-700">Preview token expired.</p>
+        </div>
+      </AdminAuthGuard>
+    );
   }
   let post: BlogPost | null = null;
   try {
@@ -142,7 +165,7 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   }
   if (!post) {
     logFailure(404, new Error("Post not found"), userId);
-    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+    notFound();
   }
 
   const articleSchema = getSchema({

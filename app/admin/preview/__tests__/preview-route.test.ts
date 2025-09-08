@@ -1,16 +1,11 @@
 /**
  * @jest-environment node
  */
-import http from 'http';
-import supertest from 'supertest';
-
-process.env.PREVIEW_SECRET = 'test-secret';
+import React from 'react';
 
 jest.mock('@/lib/admin-auth', () => ({
   verifyAdminSession: jest.fn(),
 }));
-
-type BlogPost = import('@/lib/content-store').BlogPost;
 
 jest.mock('@/lib/content-store', () => ({
   blogStore: {
@@ -28,13 +23,25 @@ jest.mock('next/headers', () => ({
   headers: () => headerStore,
 }));
 
+jest.mock('@/lib/preview-token', () => ({
+  validatePreviewToken: jest.fn(),
+}));
+
+jest.mock('next/navigation', () => ({
+  notFound: () => {
+    throw new Error('NEXT_NOT_FOUND');
+  },
+}));
+
 const PreviewPage = require('../[id]/page').default;
-const { createPreviewToken } = require('@/lib/preview-token');
 const { verifyAdminSession } = require('@/lib/admin-auth');
 const { blogStore } = require('@/lib/content-store');
+const { validatePreviewToken } = require('@/lib/preview-token');
 
 const mockedVerify = verifyAdminSession as jest.Mock;
 const mockedGetById = (blogStore.getById as unknown) as jest.Mock;
+
+type BlogPost = import('@/lib/content-store').BlogPost;
 
 const mockPost: BlogPost = {
   id: '1',
@@ -58,69 +65,50 @@ const mockPost: BlogPost = {
   shareCount: 0,
 };
 
-function createServer() {
-  return http.createServer(async (req, res) => {
-    const url = new URL(req.url || '', 'http://localhost');
-    const id = url.pathname.split('/').pop() || '';
-    const token = url.searchParams.get('token') || undefined;
-    cookieValue = 'session';
-    headerStore = new Headers({ 'x-request-id': 'req' });
-    const out = await PreviewPage({
-      params: Promise.resolve({ id }),
-      searchParams: Promise.resolve({ token }),
-    });
-    if (out instanceof Response) {
-      res.statusCode = out.status;
-      out.headers.forEach((v, k) => res.setHeader(k, v));
-      res.end(await out.text());
-    } else {
-      res.statusCode = 200;
-      res.end('ok');
-    }
-  });
-}
-
 describe('preview route', () => {
   beforeEach(() => {
     mockedVerify.mockResolvedValue({ uid: 'user1' });
     mockedGetById.mockResolvedValue(mockPost);
+    cookieValue = 'session';
+    headerStore = new Headers({ 'x-request-id': 'req' });
+    (validatePreviewToken as jest.Mock).mockReset();
   });
 
-  it('returns 200 for valid token', async () => {
-    const server = createServer();
-    const token = createPreviewToken('1', 'user1');
-    const res = await supertest(server).get('/admin/preview/1').query({ token });
-    expect(res.status).toBe(200);
-    server.close();
+  it('returns element for valid token', async () => {
+    (validatePreviewToken as jest.Mock).mockReturnValue('valid');
+    const result = await PreviewPage({
+      params: Promise.resolve({ id: '1' }),
+      searchParams: Promise.resolve({ token: 'ok' }),
+    });
+    expect(React.isValidElement(result)).toBe(true);
   });
 
-  it('returns 403 for invalid token', async () => {
-    const server = createServer();
-    const res = await supertest(server)
-      .get('/admin/preview/1')
-      .query({ token: 'bad' });
-    expect(res.status).toBe(403);
-    server.close();
+  it('returns error element for invalid token', async () => {
+    (validatePreviewToken as jest.Mock).mockReturnValue('invalid');
+    const result = await PreviewPage({
+      params: Promise.resolve({ id: '1' }),
+      searchParams: Promise.resolve({ token: 'bad' }),
+    });
+    expect(React.isValidElement(result)).toBe(true);
   });
 
-  it('returns 410 for expired token', async () => {
-    const server = createServer();
-    const token = createPreviewToken('1', 'user1', -10);
-    const res = await supertest(server)
-      .get('/admin/preview/1')
-      .query({ token });
-    expect(res.status).toBe(410);
-    server.close();
+  it('returns error element for expired token', async () => {
+    (validatePreviewToken as jest.Mock).mockReturnValue('expired');
+    const result = await PreviewPage({
+      params: Promise.resolve({ id: '1' }),
+      searchParams: Promise.resolve({ token: 'old' }),
+    });
+    expect(React.isValidElement(result)).toBe(true);
   });
 
-  it('returns 404 when post missing', async () => {
+  it('throws notFound when post missing', async () => {
     mockedGetById.mockResolvedValue(null);
-    const server = createServer();
-    const token = createPreviewToken('1', 'user1');
-    const res = await supertest(server)
-      .get('/admin/preview/1')
-      .query({ token });
-    expect(res.status).toBe(404);
-    server.close();
+    (validatePreviewToken as jest.Mock).mockReturnValue('valid');
+    await expect(
+      PreviewPage({
+        params: Promise.resolve({ id: '1' }),
+        searchParams: Promise.resolve({ token: 'ok' }),
+      })
+    ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 });

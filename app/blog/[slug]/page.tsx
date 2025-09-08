@@ -5,28 +5,9 @@ import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
+import { getBlogPost } from "@/lib/blog";
 // ⬇️ Use shared public type instead of declaring locally!
 import type { PublicBlogDetail } from "@/lib/types";
-
-// Fetch a single blog post by slug from the public API
-export async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  const response = await fetch(`/api/blogs/${slug}`, {
-    next: { revalidate: 3600 },
-  });
-
-  if (response.ok) {
-    return (await response.json()) as PublicBlogDetail;
-  }
-
-  if (response.status === 404) {
-    return null;
-  }
-
-  const body = await response.text();
-  throw new Error(
-    `Failed to fetch blog post: ${response.status} ${response.statusText} - ${body}`,
-  );
-}
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;

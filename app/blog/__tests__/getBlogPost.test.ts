@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { getBlogPost } from '../[slug]/page';
+import { getBlogPost } from '@/lib/blog';
 
 describe('getBlogPost server fetch', () => {
   const slug = 'demo';

@@ -1,3 +1,5 @@
+import type { PublicBlogDetail } from "@/lib/types"
+
 export interface BlogPost {
   id: string
   title: string
@@ -14,6 +16,24 @@ export interface BlogPost {
   commentCount?: number      // <-- Always present, default 0 if missing
   shareCount?: number        // <-- Always present, default 0 if missing
 }
+
+export async function getBlogPost(slug: string): Promise<PublicBlogDetail | null> {
+  const response = await fetch(`/api/blogs/${slug}`, {
+    next: { revalidate: 3600 },
+  })
+
+  if (response.ok) {
+    return (await response.json()) as PublicBlogDetail
+  }
+
+  if (response.status === 404) {
+    return null
+  }
+
+  const body = await response.text()
+  throw new Error(`Failed to fetch blog post: ${response.status} ${response.statusText} - ${body}`)
+}
+
 
 export const blogStore = {
   async getAllPosts(): Promise<BlogPost[]> {

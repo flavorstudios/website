@@ -2,6 +2,10 @@
 
 import type { Category } from "@/types/category" // <-- Unified type!
 import type { PublicBlogSummary } from "@/lib/types"
+import { serverEnv } from "@/env/server"
+import { SITE_URL } from "@/lib/constants"
+
+const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL
 
 export type BlogPost = PublicBlogSummary
 
@@ -29,7 +33,7 @@ export interface Video {
  */
 export async function getDynamicCategories(): Promise<Category[]> {
   try {
-    const response = await fetch("/api/categories", { cache: "no-store" });
+    const response = await fetch(`${baseUrl}/api/categories`, { cache: "no-store" });
     if (response.ok) {
       const data = await response.json();
       // API (modern): { blogCategories, videoCategories }
@@ -51,7 +55,7 @@ export async function getDynamicCategories(): Promise<Category[]> {
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
-    const response = await fetch("/api/blogs", { cache: "no-store" }); // <-- Codex update
+    const response = await fetch(`${baseUrl}/api/blogs`, { cache: "no-store" }); // <-- Codex update
     if (response.ok) {
       const posts = await response.json();
       // Always expose .categories[] and .commentCount for every post
@@ -74,7 +78,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 
 export async function getVideos(): Promise<Video[]> {
   try {
-    const response = await fetch("/api/videos", { cache: "no-store" }); // <-- Codex update
+    const response = await fetch(`${baseUrl}/api/videos`, { cache: "no-store" }); // <-- Codex update
     if (response.ok) {
       const videos = await response.json();
       // Always expose .categories[] for every video

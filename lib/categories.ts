@@ -1,6 +1,10 @@
 // lib/categories.ts
 
 import type { Category } from "@/types/category" // Use the shared type
+import { serverEnv } from "@/env/server"
+import { SITE_URL } from "@/lib/constants"
+
+const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL
 
 // --------- CATEGORY FETCH (DEPRECATED, MERGES BLOG & VIDEO) ---------
 
@@ -11,7 +15,7 @@ import type { Category } from "@/types/category" // Use the shared type
  */
 export async function getDynamicCategories(): Promise<Category[]> {
   try {
-    const response = await fetch("/api/categories", { cache: "no-store" });
+    const response = await fetch(`${baseUrl}/api/categories`, { cache: "no-store" });
     if (response.ok) {
       const data = await response.json();
 

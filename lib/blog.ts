@@ -1,7 +1,12 @@
 import type { PublicBlogDetail, PublicBlogSummary } from "@/lib/types"
+import { serverEnv } from "@/env/server"
+import { SITE_URL } from "@/lib/constants"
+
+const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL
 
 export async function getBlogPost(slug: string): Promise<PublicBlogDetail | null> {
-  const response = await fetch(`/api/blogs/${slug}`, {
+  const encodedSlug = encodeURIComponent(slug)
+  const response = await fetch(`${baseUrl}/api/blogs/${encodedSlug}`, {
     next: { revalidate: 3600 },
   })
 
@@ -21,7 +26,7 @@ export async function getBlogPost(slug: string): Promise<PublicBlogDetail | null
 export const blogStore = {
   async getAllPosts(): Promise<PublicBlogSummary[]> {
     try {
-      const response = await fetch("/api/blogs", {
+      const response = await fetch(`${baseUrl}/api/blogs`, {
         cache: "no-store",
       })
 

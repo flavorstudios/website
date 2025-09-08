@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { getBlogPost } from '@/lib/blog';
+import { SITE_URL } from '@/lib/constants';
 
 describe('getBlogPost server fetch', () => {
   const slug = 'demo';
@@ -15,12 +15,22 @@ describe('getBlogPost server fetch', () => {
   afterEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
+    delete process.env.NEXT_PUBLIC_BASE_URL;
   });
 
-  it.each([undefined, 'https://example.com'])('fetches relative URL with BASE_URL %s', async (base) => {
-    process.env.BASE_URL = base;
+  it.each([undefined, 'https://example.com'])('fetches absolute URL with NEXT_PUBLIC_BASE_URL %s', async (base) => {
+    if (base) {
+      process.env.NEXT_PUBLIC_BASE_URL = base;
+    } else {
+      delete process.env.NEXT_PUBLIC_BASE_URL;
+    }
+    const { getBlogPost } = await import('@/lib/blog');
     const post = await getBlogPost(slug);
     expect(post).toEqual({ slug });
-    expect(global.fetch).toHaveBeenCalledWith(`/api/blogs/${slug}`, expect.any(Object));
+    const expectedBase = base || SITE_URL;
+    expect(global.fetch).toHaveBeenCalledWith(
+      `${expectedBase}/api/blogs/${encodeURIComponent(slug)}`,
+      expect.any(Object)
+    );
   });
 });

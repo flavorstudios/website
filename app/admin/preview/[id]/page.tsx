@@ -100,7 +100,7 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
 
   let userId: string | undefined;
   try {
-    const sessionCookie = cookies().get("admin-session")?.value || "";
+    const sessionCookie = (await cookies()).get("admin-session")?.value || "";
     const verified = await verifyAdminSession(sessionCookie);
     userId = verified.uid;
   } catch (err) {

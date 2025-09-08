@@ -305,6 +305,25 @@ export default function AdminDashboardPageClient({
     return () => root.classList.remove("overflow-hidden");
   }, [isMobile, sidebarOpen]);
 
+  // --- Toggle drawer-open class on app root ---------------------------------
+  useEffect(() => {
+    const appRoot =
+      (typeof document !== "undefined" &&
+        (document.querySelector<HTMLElement>("#app") ||
+          document.body)) ||
+      null;
+    if (appRoot) {
+      if (isMobile && sidebarOpen) {
+        appRoot.classList.add("drawer-open");
+      } else {
+        appRoot.classList.remove("drawer-open");
+      }
+    }
+    return () => {
+      appRoot?.classList.remove("drawer-open");
+    };
+  }, [isMobile, sidebarOpen]);
+
   const handleLogout = useCallback(async () => {
     try {
       const firebaseErrorMessage =
@@ -460,15 +479,8 @@ export default function AdminDashboardPageClient({
             </div>
           </div>
 
-          {/* Backdrop overlay to close sidebar on mobile */}
-          {isMobile && sidebarOpen && (
-            <button
-              type="button"
-              className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-              aria-label="Close sidebar"
-              onClick={() => setSidebarOpen(false)}
-            />
-          )}
+          {/* Mobile backdrop overlay */}
+          {isMobile && <div className="backdrop" aria-hidden="true"></div>}
 
           <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
             <DialogContent>

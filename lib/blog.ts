@@ -4,9 +4,9 @@ import { SITE_URL } from "@/lib/constants"
 
 const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL
 
-export async function getBlogPost(slug: string): Promise<PublicBlogDetail | null> {
-  const encodedSlug = encodeURIComponent(slug)
-  const response = await fetch(`${baseUrl}/api/blogs/${encodedSlug}`, {
+export async function getBlogPost(key: string): Promise<PublicBlogDetail | null> {
+  const encodedKey = encodeURIComponent(key)
+  const response = await fetch(`${baseUrl}/api/blogs/${encodedKey}`, {
     next: { revalidate: 3600 },
   })
 

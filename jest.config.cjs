@@ -16,6 +16,7 @@ const customJestConfig = {
     '<rootDir>/functions/',
     '<rootDir>/tests/(?!validate-session\\.spec\\.ts$|firebase-admin\\.test\\.ts$|storage\\.rules\\.test\\.ts$).*',
     '<rootDir>/styles/tests/',
+    '<rootDir>/e2e/',
   ],
 }
 

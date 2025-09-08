@@ -38,6 +38,9 @@ const { verifyAdminSession } = require('@/lib/admin-auth');
 const { blogStore } = require('@/lib/content-store');
 const { validatePreviewToken } = require('@/lib/preview-token');
 
+// Ensures any HTTP server started during tests is closed even if assertions fail.
+let server: { close: () => void } | null = null;
+
 const mockedVerify = verifyAdminSession as jest.Mock;
 const mockedGetById = (blogStore.getById as unknown) as jest.Mock;
 
@@ -66,6 +69,11 @@ const mockPost: BlogPost = {
 };
 
 describe('preview route', () => {
+  afterEach(() => {
+    server?.close();
+    server = null;
+  });
+  
   beforeEach(() => {
     mockedVerify.mockResolvedValue({ uid: 'user1' });
     mockedGetById.mockResolvedValue(mockPost);

@@ -154,6 +154,9 @@ export async function POST(request: NextRequest) {
       excerpt,
       status: blogData.status || "draft",
       category: blogData.category || "Episodes",
+      categories: Array.isArray(blogData.categories)
+        ? blogData.categories
+        : [blogData.category || "Episodes"],
       tags: blogData.tags || [],
       featuredImage: blogData.featuredImage || "",
       seoTitle: blogData.seoTitle || blogData.title,

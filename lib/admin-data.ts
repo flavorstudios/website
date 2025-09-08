@@ -12,6 +12,7 @@ export interface Video {
   description: string
   embedUrl: string
   thumbnail: string
+  category: string
   createdAt: string
   updatedAt: string
 }

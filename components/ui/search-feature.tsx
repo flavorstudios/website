@@ -28,6 +28,7 @@ interface Video {
   views: number
   duration: string
   publishedAt: string
+  category: string
 }
 
 interface SearchResults {
@@ -185,13 +186,13 @@ export function SearchFeature() {
     } else if (e.key === "Enter" && selectedIndex >= 0) {
       e.preventDefault()
       const allResults = [...results.blogs, ...results.videos]
-      const selectedResult = allResults[selectedIndex]
-      if (selectedResult) {
-        const href = "category" in selectedResult ? `/blog/${selectedResult.slug}` : `/watch/${selectedResult.slug}`
-        window.location.href = href
-        setIsOpen(false)
+        const selectedResult = allResults[selectedIndex]
+        if (selectedResult) {
+          const href = "excerpt" in selectedResult ? `/blog/${selectedResult.slug}` : `/watch/${selectedResult.slug}`
+          window.location.href = href
+          setIsOpen(false)
+        }
       }
-    }
   }
 
   useEffect(() => {

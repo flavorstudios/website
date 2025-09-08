@@ -32,6 +32,7 @@ export async function createBlogPost(formData: FormData) {
     excerpt,
     status,
     category,
+    categories: [category],
     tags,
     featuredImage,
     seoTitle,
@@ -46,13 +47,15 @@ export async function createBlogPost(formData: FormData) {
 export async function updateBlogPost(id: string, formData: FormData) {
   if (!(await requireAdminAction())) throw new Error("Unauthorized")
 
+    const category = formData.get("category") as string
   const updates = {
     title: formData.get("title") as string,
     slug: formData.get("slug") as string,
     content: formData.get("content") as string,
     excerpt: formData.get("excerpt") as string,
     status: formData.get("status") as "draft" | "published" | "scheduled",
-    category: formData.get("category") as string,
+    category,
+    categories: [category],
     tags: (formData.get("tags") as string)
       .split(",")
       .map((tag) => tag.trim())

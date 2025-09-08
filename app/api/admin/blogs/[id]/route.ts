@@ -16,7 +16,14 @@ export async function PUT(
   try {
     const data = await request.json()
     const session = await getSessionAndRole(request)
-    const blog = await blogStore.update(id, data, session?.email || "unknown")
+    const blog = await blogStore.update(
+      id,
+      {
+        ...data,
+        categories: Array.isArray(data.categories) ? data.categories : [data.category],
+      },
+      session?.email || "unknown"
+    )
     if (!blog) {
       return NextResponse.json({ error: "Blog not found" }, { status: 404 })
     }

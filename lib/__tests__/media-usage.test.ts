@@ -79,6 +79,7 @@ describe('media usage linking', () => {
       excerpt: 'e',
       status: 'draft',
       category: 'c',
+      categories: ['c'],
       tags: [],
       featuredImage: '',
       seoTitle: '',

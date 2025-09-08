@@ -13,6 +13,7 @@ interface Video {
   duration?: string;
   views?: number;
   publishedAt?: string;
+  category: string;
 }
 
 export default function WatchSection({ videos }: { videos: Video[] }) {

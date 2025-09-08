@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
         id,
         {
           ...updates,
+          categories: Array.isArray(updates.categories)
+            ? updates.categories
+            : [updates.category],
           // Server-authoritative timestamps
           updatedAt: nowIso,
           // Ensure dates are strings
@@ -47,6 +50,9 @@ export async function POST(request: NextRequest) {
       const newId = `blog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       post = await blogStore.create({
         ...blogData,
+        categories: Array.isArray(blogData.categories)
+          ? blogData.categories
+          : [blogData.category],
         id: newId,
         // Server-authoritative timestamps
         createdAt: nowIso,

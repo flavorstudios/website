@@ -5,8 +5,8 @@ export interface BlogPost {
   content: string;
   excerpt: string;
   status: "draft" | "published" | "scheduled";
+  category: string;
   categories?: string[];
-  categories: string[];
   tags: string[];
   featuredImage: string;
   featured?: boolean;
@@ -40,7 +40,7 @@ export interface Video {
   youtubeId?: string;
   thumbnail?: string;
   description?: string;
-  category?: string;
+  category: string;
   categories?: string[];
   tags?: string[];
   duration?: string;

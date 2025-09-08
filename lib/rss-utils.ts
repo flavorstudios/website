@@ -16,7 +16,7 @@ export interface Video {
   youtubeId?: string;
   thumbnail?: string;
   duration?: string;
-  category?: string;
+  category: string;
   categories?: string[]; // <-- Added as per Codex audit
   publishedAt: string;
   views?: number;

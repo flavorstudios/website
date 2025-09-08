@@ -1,20 +1,29 @@
-export interface BlogPost {
+export interface PublicBlogSummary {
   id: string;
   title: string;
   slug: string;
-  excerpt?: string;
-  content?: string;
-  category?: string;
-  categories?: string[];
-  tags?: string[];
-  featuredImage?: string;
-  author?: string;
-  publishedAt?: string;
+  excerpt: string;
+  featuredImage: string;
+  category: string;
+  categories: string[];
+  tags: string[];
+  publishedAt: string;
   readTime?: string;
-  views?: number;
+  views: number;
+  seoTitle?: string;
+  seoDescription?: string;
   featured?: boolean;
-  commentCount?: number;
-  shareCount?: number; // <-- Added for share metrics, default 0 if missing
+  commentCount: number;
+  shareCount: number; // <-- Added for share metrics, default 0 if missing
+}
+
+export interface PublicBlogDetail extends PublicBlogSummary {
+  content: string;
+  author: string;
+  createdAt: string;
+  updatedAt: string;
+  schemaType?: string;
+  openGraphImage?: string;
 }
 
 export interface Video {

@@ -5,26 +5,26 @@ import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import BlogPostRenderer from "@/components/BlogPostRenderer";
-import { serverEnv } from "@/env/server";
-// ⬇️ Use shared type instead of declaring locally!
-import type { BlogPost } from "@/lib/content-store";
+// ⬇️ Use shared public type instead of declaring locally!
+import type { PublicBlogDetail } from "@/lib/types";
 
 // Fetch a single blog post by slug from the public API
-async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL;
-  const url = `${baseUrl}/api/blogs/${slug}`;
-  const response = await fetch(url, { next: { revalidate: 3600 } });
+export async function getBlogPost(slug: string): Promise<BlogPost | null> {
+  const response = await fetch(`/api/blogs/${slug}`, {
+    next: { revalidate: 3600 },
+  });
 
   if (response.ok) {
-    return (await response.json()) as BlogPost;
+    return (await response.json()) as PublicBlogDetail;
   }
 
   if (response.status === 404) {
     return null;
   }
 
+  const body = await response.text();
   throw new Error(
-    `Failed to fetch blog post: ${response.status} ${response.statusText}`,
+    `Failed to fetch blog post: ${response.status} ${response.statusText} - ${body}`,
   );
 }
 
@@ -35,7 +35,7 @@ interface BlogPostPageProps {
 // SEO metadata (dynamic per post, using Next.js generateMetadata API)
 export async function generateMetadata({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  let post: BlogPost | null = null;
+  let post: PublicBlogDetail | null = null;
   try {
     post = await getBlogPost(slug);
   } catch (error) {
@@ -106,7 +106,7 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
 // Main BlogPost page (server component)
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  let post: BlogPost | null;
+  let post: PublicBlogDetail | null;
   try {
     post = await getBlogPost(slug);
   } catch (error) {

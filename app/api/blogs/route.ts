@@ -2,7 +2,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import { blogStore } from "@/lib/content-store"; // Firestore-backed store
-import { formatPublicBlog } from "@/lib/formatters"; // Your existing formatter
+import { formatPublicBlogSummary } from "@/lib/formatters"; // Summary formatter
 import { logError } from "@/lib/log"; // Add error logging
 import { BlogPost } from "@/lib/content-store";
 
@@ -72,8 +72,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Format for the public API response using existing commentCount field
-    const result = published.map(formatPublicBlog);
+    // Format for the public API response using summary shape
+    const result = published.map(formatPublicBlogSummary);
 
     // Send response with cache headers
     const res = NextResponse.json(result);

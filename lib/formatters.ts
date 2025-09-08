@@ -4,12 +4,12 @@ import type { BlogPost } from "./content-store"; // Adjust path if needed
 import type { Video } from "./content-store";    // Adjust path if needed
 
 /**
- * Formats a blog object for safe public API responses.
- * Only exposes non-admin fields.
+ * Formats a blog object for safe public API responses in list views.
+ * Only exposes non-admin fields and omits full content.
  * Adds .categories[] for multi-category support (fallbacks to [category]).
  * Adds .commentCount and .shareCount for badge support.
  */
-export function formatPublicBlog(blog: BlogPost) {
+export function formatPublicBlogSummary(blog: BlogPost) {
   return {
     id: blog.id,
     title: blog.title,
@@ -26,8 +26,58 @@ export function formatPublicBlog(blog: BlogPost) {
     views: blog.views,
     seoTitle: blog.seoTitle,
     seoDescription: blog.seoDescription,
+    featured: blog.featured,
     commentCount: typeof blog.commentCount === "number" ? blog.commentCount : 0,
     shareCount: typeof blog.shareCount === "number" ? blog.shareCount : 0,
+  };
+}
+
+/**
+ * Formats a blog object with full details for public API responses.
+ * Includes full content and SEO fields while still omitting admin-only
+ * properties like status. Ensures categories array and default counts.
+ */
+export function formatPublicBlogDetail(blog: BlogPost) {
+  return {
+    id: blog.id,
+    title: blog.title,
+    slug: blog.slug,
+    content: blog.content,
+    excerpt: blog.excerpt,
+    featuredImage: blog.featuredImage,
+    category: blog.category,
+    categories: Array.isArray(blog.categories) && blog.categories.length > 0
+      ? blog.categories
+      : [blog.category],
+    tags: blog.tags,
+    author: blog.author,
+    publishedAt: blog.publishedAt,
+    createdAt: blog.createdAt,
+    updatedAt: blog.updatedAt,
+    readTime: blog.readTime,
+    views: blog.views,
+    seoTitle: blog.seoTitle,
+    seoDescription: blog.seoDescription,
+    featured: blog.featured,
+    commentCount: typeof blog.commentCount === "number" ? blog.commentCount : 0,
+    shareCount: typeof blog.shareCount === "number" ? blog.shareCount : 0,
+    schemaType: blog.schemaType,
+    openGraphImage: blog.openGraphImage,
+  };
+}
+
+/**
+ * Formats a blog object with full content for detail pages.
+ * Includes fields omitted from `formatPublicBlog` such as content and author
+ * while still removing any admin-only data.
+ */
+export function formatFullBlog(blog: BlogPost) {
+  return {
+    ...formatPublicBlog(blog),
+    content: blog.content,
+    author: blog.author,
+    openGraphImage: blog.openGraphImage,
+    schemaType: blog.schemaType,
   };
 }
 

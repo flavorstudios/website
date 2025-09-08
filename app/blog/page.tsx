@@ -23,7 +23,7 @@ import { getCanonicalUrl } from "@/lib/seo/canonical";
 import { getSchema } from "@/lib/seo/schema";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
-import type { BlogPost } from "@/lib/types";
+import type { PublicBlogSummary } from "@/lib/types";
 import { formatDate } from "@/lib/date"; // <-- Added import
 import { authors } from "@/lib/authors"; // <-- NEW
 import { DateRangePicker } from "@/components/ui/date-range-picker"; // <-- NEW
@@ -106,7 +106,7 @@ async function getBlogData({
       getDynamicCategories("blog"),
     ]);
 
-    let posts: BlogPost[] = [];
+    let posts: PublicBlogSummary[] = [];
     if (postsRes.ok) {
       const data = await postsRes.json();
       posts = Array.isArray(data) ? data : data.posts || [];
@@ -161,7 +161,7 @@ export default async function BlogPage({
   const filteredPosts =
     selectedCategory === "all"
       ? posts
-      : posts.filter((post: BlogPost) => {
+      : posts.filter((post: PublicBlogSummary) => {
           const postCategories =
             post.categories && post.categories.length > 0
               ? post.categories
@@ -174,41 +174,51 @@ export default async function BlogPage({
 
   // --- SEARCH FILTER ---
   const searchedPosts = searchQuery
-    ? filteredPosts.filter((post: BlogPost) =>
+    ? filteredPosts.filter((post: PublicBlogSummary) =>
         post.title.toLowerCase().includes(searchQuery)
       )
     : filteredPosts;
 
   // --- SORTING ---
-  const sortedPosts = [...searchedPosts].sort((a: BlogPost, b: BlogPost) => {
-    if (sortOption === "views") {
-      return (b.views || 0) - (a.views || 0);
-    }
-    if (sortOption === "title") {
-      return a.title.localeCompare(b.title);
-    }
-    // Default to date (newest first)
-    const aDate = a.publishedAt ? new Date(a.publishedAt) : new Date(0);
-    const bDate = b.publishedAt ? new Date(b.publishedAt) : new Date(0);
-    return bDate.getTime() - aDate.getTime();
-  });
+  const sortedPosts = [...searchedPosts].sort(
+    (a: PublicBlogSummary, b: PublicBlogSummary) => {
+      if (sortOption === "views") {
+        return (b.views || 0) - (a.views || 0);
+      }
+      if (sortOption === "title") {
+        return a.title.localeCompare(b.title);
+      }
+      // Default to date (newest first)
+      const aDate = a.publishedAt ? new Date(a.publishedAt) : new Date(0);
+      const bDate = b.publishedAt ? new Date(b.publishedAt) : new Date(0);
+      return bDate.getTime() - aDate.getTime();
+    },
+  );
 
   // --- PAGINATION ---
   const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
   const startIndex = (currentPage - 1) * postsPerPage;
   const paginatedPosts = sortedPosts.slice(startIndex, startIndex + postsPerPage);
 
-  const featuredPosts = sortedPosts.filter((post: BlogPost) => post.featured).slice(0, 3);
-  const regularPosts = paginatedPosts.filter((post: BlogPost) => !post.featured);
+  const featuredPosts = sortedPosts
+    .filter((post: PublicBlogSummary) => post.featured)
+    .slice(0, 3);
+  const regularPosts = paginatedPosts.filter(
+    (post: PublicBlogSummary) => !post.featured,
+  );
 
   // Analytics data (multi-category safe)
-  const totalViews = posts.reduce((sum: number, post: BlogPost) => sum + (post.views || 0), 0);
+  const totalViews = posts.reduce(
+    (sum: number, post: PublicBlogSummary) => sum + (post.views || 0),
+    0,
+  );
   const avgReadTime =
     posts.length > 0
       ? Math.round(
           posts.reduce(
-            (sum: number, post: BlogPost) =>
-              sum + Number.parseInt(post.readTime?.replace(" min read", "") || "5"),
+            (sum: number, post: PublicBlogSummary) =>
+              sum +
+              Number.parseInt(post.readTime?.replace(" min read", "") || "5"),
             0,
           ) / posts.length,
         )
@@ -272,7 +282,7 @@ export default async function BlogPage({
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Featured Posts</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-              {featuredPosts.map((post: BlogPost, index: number) => (
+              {featuredPosts.map((post: PublicBlogSummary, index: number) => (
                 <FeaturedPostCard key={post.id} post={post} priority={index === 0} />
               ))}
             </div>
@@ -349,7 +359,7 @@ export default async function BlogPage({
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-                {regularPosts.map((post: BlogPost) => (
+                {regularPosts.map((post: PublicBlogSummary) => (
                   <BlogPostCard key={post.id} post={post} />
                 ))}
               </div>
@@ -410,7 +420,13 @@ export default async function BlogPage({
 
 // --- COMPONENTS (with comment badge) ---
 
-function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority?: boolean }) {
+function FeaturedPostCard({
+  post,
+  priority = false,
+}: {
+  post: PublicBlogSummary;
+  priority?: boolean;
+}) {
   const mainCategory =
     post.categories && post.categories.length > 0
       ? post.categories[0]
@@ -484,7 +500,7 @@ function FeaturedPostCard({ post, priority = false }: { post: BlogPost; priority
   );
 }
 
-function BlogPostCard({ post }: { post: BlogPost }) {
+function BlogPostCard({ post }: { post: PublicBlogSummary }) {
   const mainCategory =
     post.categories && post.categories.length > 0
       ? post.categories[0]

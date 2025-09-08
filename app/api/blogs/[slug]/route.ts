@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { blogStore } from "@/lib/content-store";
-import { formatPublicBlog } from "@/lib/formatters";
+import { formatPublicBlogDetail } from "@/lib/formatters";
 import { logError } from "@/lib/log";
 
 export async function GET(
@@ -14,12 +14,13 @@ export async function GET(
       return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
     }
 
-    const res = NextResponse.json(formatPublicBlog(post));
+    const res = NextResponse.json(formatPublicBlogDetail(post));
     res.headers.set("Cache-Control", "public, max-age=300");
     return res;
   } catch (error) {
     try {
-      logError("blogs/[slug]:GET", error);
+      const requestId = request.headers.get("x-request-id") ?? undefined;
+      logError("blogs/[slug]:GET", error, { slug, requestId });
     } catch {
       // ignore logging errors
     }

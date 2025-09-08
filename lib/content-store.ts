@@ -34,6 +34,7 @@ export interface BlogPost {
   categories?: string[];      // <--- Codex: allow multiple categories
   tags: string[];
   featuredImage: string;
+  featured?: boolean;
   seoTitle: string;
   seoDescription: string;
   author: string;
@@ -108,6 +109,7 @@ export const BlogPostSchema = z.object({
   categories: z.array(z.string()).optional(),    // <--- Codex: optional
   tags: z.array(z.string()),
   featuredImage: z.string(),
+  featured: z.boolean().optional(),
   seoTitle: z.string(),
   seoDescription: z.string(),
   author: z.string(),

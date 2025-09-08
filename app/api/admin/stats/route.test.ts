@@ -240,7 +240,7 @@ describe("calculateMoMGrowth", () => {
   ])(
     "returns $expected for current=$current previous=$previous",
     async ({ current, previous, expected }) => {
-      const { calculateMoMGrowth } = await import("./route");
+      const { calculateMoMGrowth } = await import("./utils");
       expect(calculateMoMGrowth(current, previous)).toBe(expected);
     }
   );

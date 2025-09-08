@@ -12,6 +12,7 @@ import {
 import { createHash, randomUUID } from "crypto";
 import { z } from "zod";
 import { serverEnv } from "@/env/server";
+import { calculateMoMGrowth } from "./utils";
 
 export const runtime = "nodejs";
 
@@ -33,11 +34,6 @@ type MonthlyStats = {
   videos: number;
   comments: number;
 };
-
-export function calculateMoMGrowth(current: number, previous: number): number {
-  if (previous === 0) return current === 0 ? 0 : 100;
-  return Math.round(((current - previous) / previous) * 100);
-}
 
 // Whitelisted ranges. Any other value results in a 400 response.
 const RangeSchema = z.enum(["7d", "30d", "3mo", "6mo", "12mo"]);

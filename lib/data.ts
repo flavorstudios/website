@@ -1,23 +1,9 @@
 // --------- DATA TYPES ---------
 
 import type { Category } from "@/types/category" // <-- Unified type!
+import type { PublicBlogSummary } from "@/lib/types"
 
-export interface BlogPost {
-  id: string
-  title: string
-  slug: string
-  excerpt: string
-  content: string
-  category: string
-  categories?: string[]  // <-- NEW: multi-category support
-  tags: string[]
-  publishedAt: string
-  author: string
-  featured: boolean
-  featuredImage?: string
-  commentCount?: number    // <-- Codex: enable comment badge support!
-  shareCount?: number      // <-- Track how often a post is shared
-}
+export type BlogPost = PublicBlogSummary
 
 export interface Video {
   id: string

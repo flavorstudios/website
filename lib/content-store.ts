@@ -4,6 +4,9 @@ import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
 import { HttpError } from "@/lib/http";
 import { extractMediaIds, linkMediaToPost, unlinkMediaFromPost } from "@/lib/media";
+import type { BlogPost } from "@/lib/types";
+
+export type { BlogPost };
 
 /**
  * Retrieve the Firebase Admin Firestore instance or return `null` if the
@@ -21,33 +24,6 @@ function getDbOrNull(): Firestore | null {
 
 export const ADMIN_DB_UNAVAILABLE =
   "Admin Firestore unavailable. Set FIREBASE_SERVICE_ACCOUNT_KEY.";
-
-// --- Interfaces (with commentCount, multi-category, etc.) ---
-export interface BlogPost {
-  id: string;
-  title: string;
-  slug: string;
-  content: string;
-  excerpt: string;
-  status: "draft" | "published" | "scheduled";
-  category: string;
-  categories?: string[];      // <--- Codex: allow multiple categories
-  tags: string[];
-  featuredImage: string;
-  featured?: boolean;
-  seoTitle: string;
-  seoDescription: string;
-  author: string;
-  publishedAt: string;
-  createdAt: string;
-  updatedAt: string;
-  views: number;
-  readTime?: string;
-  commentCount?: number;      // <--- Codex: comment count for API/UI
-  shareCount?: number;        // <--- Track how often a post is shared
-  schemaType?: string;        // <--- ADDED for SEO & preview
-  openGraphImage?: string;    // <--- ADDED for SEO & preview
-}
 
 export type BlogDiff = {
   [K in keyof BlogPost]?: { before: BlogPost[K]; after: BlogPost[K] };

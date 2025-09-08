@@ -1,21 +1,4 @@
-import type { PublicBlogDetail } from "@/lib/types"
-
-export interface BlogPost {
-  id: string
-  title: string
-  slug: string
-  excerpt: string
-  content: string
-  category: string           // Main/legacy category
-  categories?: string[]      // New: multiple categories, optional
-  tags: string[]
-  publishedAt: string
-  author: string
-  featured: boolean
-  featuredImage?: string
-  commentCount?: number      // <-- Always present, default 0 if missing
-  shareCount?: number        // <-- Always present, default 0 if missing
-}
+import type { PublicBlogDetail, PublicBlogSummary } from "@/lib/types"
 
 export async function getBlogPost(slug: string): Promise<PublicBlogDetail | null> {
   const response = await fetch(`/api/blogs/${slug}`, {
@@ -36,7 +19,7 @@ export async function getBlogPost(slug: string): Promise<PublicBlogDetail | null
 
 
 export const blogStore = {
-  async getAllPosts(): Promise<BlogPost[]> {
+  async getAllPosts(): Promise<PublicBlogSummary[]> {
     try {
       const response = await fetch("/api/blogs", {
         cache: "no-store",
@@ -46,7 +29,7 @@ export const blogStore = {
         const posts = await response.json()
         // Always ensure categories[] exists (for old posts)
         // and commentCount/shareCount are present
-        return (posts || []).map((post: BlogPost) => ({
+        return (posts || []).map((post: PublicBlogSummary) => ({
           ...post,
           categories: Array.isArray(post.categories) && post.categories.length > 0
             ? post.categories
@@ -62,7 +45,7 @@ export const blogStore = {
     return []
   },
 
-  async getPostBySlug(slug: string): Promise<BlogPost | null> {
+  async getPostBySlug(slug: string): Promise<PublicBlogSummary | null> {
     try {
       const posts = await this.getAllPosts()
       return posts.find((post) => post.slug === slug) || null
@@ -72,7 +55,7 @@ export const blogStore = {
     }
   },
 
-  async getPostsByCategory(category: string): Promise<BlogPost[]> {
+  async getPostsByCategory(category: string): Promise<PublicBlogSummary[]> {
     try {
       const posts = await this.getAllPosts()
       if (category === "all") return posts
@@ -88,7 +71,7 @@ export const blogStore = {
     }
   },
 
-  async getFeaturedPosts(): Promise<BlogPost[]> {
+  async getFeaturedPosts(): Promise<PublicBlogSummary[]> {
     try {
       const posts = await this.getAllPosts()
       return posts.filter((post) => post.featured)

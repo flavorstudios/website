@@ -2,6 +2,7 @@
 
 import type { BlogPost } from "./content-store"; // Adjust path if needed
 import type { Video } from "./content-store";    // Adjust path if needed
+import type { PublicBlogSummary, PublicBlogDetail } from "./types";
 
 /**
  * Formats a blog object for safe public API responses in list views.
@@ -9,7 +10,7 @@ import type { Video } from "./content-store";    // Adjust path if needed
  * Adds .categories[] for multi-category support (fallbacks to [category]).
  * Adds .commentCount and .shareCount for badge support.
  */
-export function formatPublicBlogSummary(blog: BlogPost) {
+export function formatPublicBlogSummary(blog: BlogPost): PublicBlogSummary {
   return {
     id: blog.id,
     title: blog.title,
@@ -29,6 +30,7 @@ export function formatPublicBlogSummary(blog: BlogPost) {
     featured: blog.featured,
     commentCount: typeof blog.commentCount === "number" ? blog.commentCount : 0,
     shareCount: typeof blog.shareCount === "number" ? blog.shareCount : 0,
+    author: blog.author,
   };
 }
 
@@ -37,7 +39,7 @@ export function formatPublicBlogSummary(blog: BlogPost) {
  * Includes full content and SEO fields while still omitting admin-only
  * properties like status. Ensures categories array and default counts.
  */
-export function formatPublicBlogDetail(blog: BlogPost) {
+export function formatPublicBlogDetail(blog: BlogPost): PublicBlogDetail {
   return {
     id: blog.id,
     title: blog.title,
@@ -63,21 +65,6 @@ export function formatPublicBlogDetail(blog: BlogPost) {
     shareCount: typeof blog.shareCount === "number" ? blog.shareCount : 0,
     schemaType: blog.schemaType,
     openGraphImage: blog.openGraphImage,
-  };
-}
-
-/**
- * Formats a blog object with full content for detail pages.
- * Includes fields omitted from `formatPublicBlog` such as content and author
- * while still removing any admin-only data.
- */
-export function formatFullBlog(blog: BlogPost) {
-  return {
-    ...formatPublicBlog(blog),
-    content: blog.content,
-    author: blog.author,
-    openGraphImage: blog.openGraphImage,
-    schemaType: blog.schemaType,
   };
 }
 

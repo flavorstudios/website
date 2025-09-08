@@ -686,10 +686,10 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                     onChange={(e) => setPost((prev) => ({ ...prev, seoTitle: e.target.value }))}
                     placeholder="SEO optimized title..."
                   />
-                  <p className={`text-xs mt-1 ${getLengthClass(post.seoTitle.length, titleMin, titleMax)}`}>
-                    {post.seoTitle.length}/{titleMax} characters
+                  <p className={`text-xs mt-1 ${getLengthClass((post.seoTitle ?? "").length, titleMin, titleMax)}`}>
+                    {(post.seoTitle ?? "").length}/{titleMax} characters
                   </p>
-                  <p className={`text-xs ${getLengthClass(post.seoTitle.length, titleMin, titleMax)}`}>{getLengthMessage(post.seoTitle.length, titleMin, titleMax)}</p>
+                  <p className={`text-xs ${getLengthClass((post.seoTitle ?? "").length, titleMin, titleMax)}`}>{getLengthMessage((post.seoTitle ?? "").length, titleMin, titleMax)}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Meta Description</label>
@@ -704,10 +704,10 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                     placeholder="Brief description for search engines..."
                     rows={3}
                   />
-                <p className={`text-xs mt-1 ${getLengthClass(post.seoDescription.length, descMin, descMax)}`}>
-                    {post.seoDescription.length}/{descMax} characters
+                <p className={`text-xs mt-1 ${getLengthClass((post.seoDescription ?? "").length, descMin, descMax)}`}>
+                    {(post.seoDescription ?? "").length}/{descMax} characters
                   </p>
-                  <p className={`text-xs ${getLengthClass(post.seoDescription.length, descMin, descMax)}`}>{getLengthMessage(post.seoDescription.length, descMin, descMax)}</p>
+                  <p className={`text-xs ${getLengthClass((post.seoDescription ?? "").length, descMin, descMax)}`}>{getLengthMessage((post.seoDescription ?? "").length, descMin, descMax)}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Keywords</label>

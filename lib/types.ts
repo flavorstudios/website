@@ -1,30 +1,37 @@
-export interface PublicBlogSummary {
+export interface BlogPost {
   id: string;
   title: string;
   slug: string;
+  content: string;
   excerpt: string;
-  featuredImage: string;
-  category: string;
+  status: "draft" | "published" | "scheduled";
+  categories?: string[];
   categories: string[];
   tags: string[];
-  publishedAt: string;
-  readTime?: string;
-  views: number;
+  featuredImage: string;
+  featured?: boolean;
   seoTitle?: string;
   seoDescription?: string;
-  featured?: boolean;
-  commentCount: number;
-  shareCount: number; // <-- Added for share metrics, default 0 if missing
-}
-
-export interface PublicBlogDetail extends PublicBlogSummary {
-  content: string;
   author: string;
+  publishedAt: string;
   createdAt: string;
   updatedAt: string;
+  views: number;
+  readTime?: string;
+  commentCount?: number;
+  shareCount?: number;
   schemaType?: string;
   openGraphImage?: string;
 }
+
+export interface PublicBlogDetail extends Omit<BlogPost, "status"> {}
+
+export interface PublicBlogSummary
+  extends Omit<
+    PublicBlogDetail,
+    "content" | "createdAt" | "updatedAt" | "schemaType" | "openGraphImage"
+  > {}
+
 
 export interface Video {
   id: string;

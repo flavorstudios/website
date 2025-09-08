@@ -7,7 +7,9 @@ import { Calendar, Eye, User, Clock } from "lucide-react";
 import CommentSection from "@/app/blog/[slug]/components/comment-section";
 import SocialShare from "@/app/blog/[slug]/components/social-share";
 import { SITE_URL } from "@/lib/constants";
-import type { BlogPost } from "@/lib/content-store"; // Use your central type!
+import type { BlogPost as StoreBlogPost } from "@/lib/content-store"; // Use your central type!
+import type { PublicBlogDetail } from "@/lib/types";
+
 
 const ALLOWED_IMAGE_DOMAINS = [
   "storage.googleapis.com",
@@ -24,7 +26,7 @@ function isAllowedImageDomain(url: string) {
 }
 
 interface BlogPostRendererProps {
-  post: BlogPost;
+  post: PublicBlogDetail | StoreBlogPost;
 }
 
 export default function BlogPostRenderer({ post }: BlogPostRendererProps) {

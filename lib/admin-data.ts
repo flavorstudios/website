@@ -1,22 +1,10 @@
 import { promises as fs } from "fs"
 import path from "path"
+import type { BlogPost } from "@/lib/types"
+
+export type { BlogPost }
 
 const DATA_DIR = path.join(process.cwd(), "data")
-
-export interface BlogPost {
-  id: string
-  title: string
-  category: string             // Main category (backward compatible)
-  categories?: string[]        // New: multiple categories (optional)
-  metaTitle: string
-  metaDescription: string
-  thumbnail: string
-  content: string
-  createdAt: string
-  updatedAt: string
-  commentCount?: number        // <-- ADDED
-  shareCount?: number          // <-- Track how often a post is shared
-}
 
 export interface Video {
   id: string

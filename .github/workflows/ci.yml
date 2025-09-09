@@ -3,13 +3,26 @@ on:
   push: { branches: [ main, develop ] }
   pull_request: { branches: [ main, develop ] }
 
+permissions:
+  contents: read
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
-    env:
-      GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
-    steps:
-      - uses: actions/checkout@v4
+env:
+  GOOGLE_APPLICATION_CREDENTIALS: "${{ runner.temp }}/firebase-service-account.json"
+steps:
+  - uses: actions/checkout@v4
+  - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      # Install pnpm; version is taken from package.json "packageManager"
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - run: mkdir -p "$(dirname "$GOOGLE_APPLICATION_CREDENTIALS")"
       - name: Write Firebase service account key
         run: |
@@ -17,18 +30,8 @@ jobs:
           ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           EOF
 
-      # Install pnpm; version is taken from package.json "packageManager"
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install deps
-        run: pnpm install --frozen-lockfile
+      name: Install pnpm
+        run: pnpm install
 
       - name: Determine Firebase emulator version
         id: firebase-tools

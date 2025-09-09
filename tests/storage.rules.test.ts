@@ -9,7 +9,7 @@ import {
   assertFails,
   assertSucceeds,
 } from "@firebase/rules-unit-testing";
-import { ref, uploadString, getBytes, getStorage } from "firebase/storage";
+import { ref, uploadString, getBytes } from "firebase/storage";
 
 function parseHostPort(
   envVar: string,
@@ -64,7 +64,7 @@ describe("storage security rules", () => {
 
     // Seed a test file for read tests
     await testEnv.withSecurityRulesDisabled(async (context: any) => {
-      const storage = getStorage(context.app);
+      const storage = context.storage();
       await uploadString(ref(storage, "test/seed.txt"), "seed");
     });
   });
@@ -74,22 +74,22 @@ describe("storage security rules", () => {
   });
 
   it("denies unauthenticated access", async () => {
-    const storage = getStorage(testEnv.unauthenticatedContext().app);
+    const storage = testEnv.unauthenticatedContext().storage();
     const fileRef = ref(storage, "test/seed.txt");
     await assertFails(getBytes(fileRef));
     await assertFails(uploadString(ref(storage, "test/blocked.txt"), "hi"));
   });
 
   it("denies non-admin users", async () => {
-    const userStorage = getStorage(testEnv.authenticatedContext("user").app);
+    const userStorage = testEnv.authenticatedContext("user").storage();
     await assertFails(getBytes(ref(userStorage, "test/seed.txt")));
     await assertFails(uploadString(ref(userStorage, "test/blocked.txt"), "hi"));
   });
 
   it("allows admins via custom claims", async () => {
-    const adminStorage = getStorage(
-      testEnv.authenticatedContext("admin", { role: "admin" }).app,
-    );
+    const adminStorage = testEnv
+      .authenticatedContext("admin", { role: "admin" })
+      .storage();
     await assertSucceeds(uploadString(ref(adminStorage, "test/ok.txt"), "hi"));
     await assertSucceeds(getBytes(ref(adminStorage, "test/ok.txt")));
   });
@@ -104,7 +104,9 @@ describe("storage security rules", () => {
         .set({ isAdmin: true });
     });
 
-    const storage = getStorage(testEnv.authenticatedContext("firestoreAdmin").app);
+    const storage = testEnv
+      .authenticatedContext("firestoreAdmin")
+      .storage();
     await assertSucceeds(uploadString(ref(storage, "test/fs.txt"), "hi"));
     await assertSucceeds(getBytes(ref(storage, "test/fs.txt")));
   });

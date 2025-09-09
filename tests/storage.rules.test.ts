@@ -87,8 +87,12 @@ describe("storage security rules", () => {
       const maxAttempts = 10;
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const isOpen = await new Promise<boolean>((resolve) => {
-          const socket = net
-            .createConnection({ host, port })
+          const socket = net.createConnection({ host, port });
+          socket.setTimeout(1000, () => {
+            socket.destroy();
+            resolve(false);
+          });
+          socket
             .once("connect", () => {
               socket.destroy();
               resolve(true);
@@ -114,11 +118,15 @@ describe("storage security rules", () => {
       ensureReachable(storage.host, storage.port, "Storage"),
     ]);
 
+    const projectId = getProjectId();
+    process.env.FIREBASE_PROJECT_ID = projectId;
+    process.env.GCLOUD_PROJECT = projectId;
+
     const maxInitAttempts = 5;
     for (let attempt = 0; attempt < maxInitAttempts; attempt++) {
       try {
         testEnv = await initializeTestEnvironment({
-          projectId: "demo-storage-rules",
+          projectId,
           firestore: {
             rules: readFileSync("firestore.rules", "utf8"),
             host: firestore.host,

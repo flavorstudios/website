@@ -9,7 +9,7 @@ import {
   assertFails,
   assertSucceeds,
 } from "@firebase/rules-unit-testing";
-import { ref, uploadString, getBytes } from "firebase/storage";
+import { ref, uploadString, getBytes, listAll } from "firebase/storage";
 import {
   parseHostPort,
   getProjectId,
@@ -86,13 +86,20 @@ describe("storage security rules", () => {
     }
 
     // Seed a test file for read tests
-    const seedTimeoutMs = 15000;
+    const seedTimeoutMs = 30000;
+    const maxBackoffMs = 5000;
     const start = Date.now();
+    let attempt = 0;
     while (true) {
       try {
         await testEnv.withSecurityRulesDisabled(async (context: any) => {
           const storage = context.storage();
-          const uploadPromise = uploadString(ref(storage, "test/seed.txt"), "seed");
+          // Verify the emulator is ready by listing the root bucket
+          await listAll(ref(storage, ""));
+          const uploadPromise = uploadString(
+            ref(storage, "test/seed.txt"),
+            "seed",
+          );
           await Promise.race([
             uploadPromise,
             new Promise((_, reject) =>
@@ -110,16 +117,15 @@ describe("storage security rules", () => {
         });
         break;
       } catch (err) {
-        if (
-          Date.now() - start >= seedTimeoutMs ||
-          (err instanceof Error && err.message.includes("timed out"))
-        ) {
+        if (Date.now() - start >= seedTimeoutMs) {
           console.error("Failed to seed test file", err);
           throw new Error(
             `Seeding test file timed out after ${seedTimeoutMs}ms. Is the Storage emulator running?`,
           );
         }
-        await new Promise((r) => setTimeout(r, 500));
+        const backoff = Math.min(500 * 2 ** attempt, maxBackoffMs);
+        attempt++;
+        await new Promise((r) => setTimeout(r, backoff));
       }
     }
   });

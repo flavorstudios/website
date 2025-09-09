@@ -119,23 +119,29 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=my-project.appspot.com
 
 ### CI deployment
 
-Generate a Firebase CLI token once on your local machine:
+Create a Google Cloud service account with access to your Firebase project and save
+its JSON key in a CI secret named `FIREBASE_SERVICE_ACCOUNT`.
+
+In your GitHub Actions workflow, write the secret to a file and point
+`GOOGLE_APPLICATION_CREDENTIALS` at it so Firebase commands can authenticate:
+
+```yaml
+env:
+  GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+
+steps:
+  - name: Write Firebase service account key
+    run: |
+      cat <<'EOF' > "$GOOGLE_APPLICATION_CREDENTIALS"
+      ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      EOF
+```   
+
+Firebase CLI commands then pick up the credentials automatically:
 
 ```bash
-firebase login:ci
-```
-
-Save the resulting token in an environment variable named `FIREBASE_TOKEN` in your CI system:
-
-```bash
-export FIREBASE_TOKEN="<token>"
-```
-
-Use the token with Firebase commands during CI, for example:
-
-```bash
-firebase deploy --token "$FIREBASE_TOKEN"
-firebase projects:list --token "$FIREBASE_TOKEN" # optional validation
+firebase deploy
+firebase projects:list # optional validation
 ```
 
 Cookie Consent Banner

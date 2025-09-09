@@ -7,9 +7,15 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     env:
-      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
     steps:
       - uses: actions/checkout@v4
+      
+    - name: Write Firebase service account key
+        run: |
+          cat <<'EOF' > "$GOOGLE_APPLICATION_CREDENTIALS"
+          ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          EOF
 
       # Install pnpm; version is taken from package.json "packageManager"
       - uses: pnpm/action-setup@v4
@@ -28,20 +34,28 @@ jobs:
         id: firebase-tools
         run: echo "version=$(pnpm dlx firebase-tools --version)" >> "$GITHUB_OUTPUT"
       
-      - name: Cache Firebase emulators
-        uses: actions/cache@v4
+      - name: Restore Firebase emulators
+        id: firebase-emulators-cache
+        uses: actions/cache/restore@v4
         with:
-          path: /home/runner/.cache/firebase/emulators
+          path: ~/.cache/firebase/emulators
           key: ${{ runner.os }}-firebase-emulators-${{ steps.firebase-tools.outputs.version }}
 
       - name: Lint
         run: pnpm lint
 
       - name: Verify Firebase authentication
-        run: pnpm dlx firebase-tools projects:list --token "$FIREBASE_TOKEN"
+        run: pnpm dlx firebase-tools projects:list
 
       - name: Jest tests
         run: pnpm dlx firebase-tools emulators:exec --only firestore,storage "pnpm test"
+
+      - name: Save Firebase emulators
+        if: steps.firebase-emulators-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/firebase/emulators
+          key: ${{ runner.os }}-firebase-emulators-${{ steps.firebase-tools.outputs.version }}
 
       - name: Build
         env:

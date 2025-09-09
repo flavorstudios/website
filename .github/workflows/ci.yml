@@ -37,8 +37,8 @@ jobs:
       - name: Lint
         run: pnpm lint
       
-      - name: Firebase login
-        run: pnpm dlx firebase-tools login:ci --token "$FIREBASE_TOKEN" > /dev/null 2>&1
+      - name: Verify Firebase authentication
+        run: pnpm dlx firebase-tools login:ci --token "$FIREBASE_TOKEN"
 
       - name: Jest tests
         run: pnpm dlx firebase-tools emulators:exec --only firestore,storage "pnpm test"

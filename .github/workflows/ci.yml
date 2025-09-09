@@ -7,9 +7,10 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     env:
-      GOOGLE_APPLICATION_CREDENTIALS: ${RUNNER_TEMP}/firebase-service-account.json
+      GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
     steps:
       - uses: actions/checkout@v4
+      - run: mkdir -p "$(dirname "$GOOGLE_APPLICATION_CREDENTIALS")"
       - name: Write Firebase service account key
         run: |
           cat <<'EOF' > "$GOOGLE_APPLICATION_CREDENTIALS"
@@ -74,3 +75,7 @@ jobs:
 
       - name: Playwright tests
         run: pnpm e2e
+
+      - name: Clean up service account key
+        if: always()
+        run: rm -f "$GOOGLE_APPLICATION_CREDENTIALS"

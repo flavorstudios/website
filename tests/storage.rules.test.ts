@@ -60,6 +60,7 @@ describe("storage security rules", () => {
             rules: readFileSync("storage.rules", "utf8"),
             host: storage.host,
             port: storage.port,
+            storageBucket: `${projectId}.appspot.com`,
           },
         });
         testEnv = await Promise.race([
@@ -91,11 +92,28 @@ describe("storage security rules", () => {
       try {
         await testEnv.withSecurityRulesDisabled(async (context: any) => {
           const storage = context.storage();
-          await uploadString(ref(storage, "test/seed.txt"), "seed");
+          const uploadPromise = uploadString(ref(storage, "test/seed.txt"), "seed");
+          await Promise.race([
+            uploadPromise,
+            new Promise((_, reject) =>
+              setTimeout(
+                () =>
+                  reject(
+                    new Error(
+                      `uploadString timed out after ${seedTimeoutMs}ms`,
+                    ),
+                  ),
+                seedTimeoutMs,
+              ),
+            ),
+          ]);
         });
         break;
       } catch (err) {
-        if (Date.now() - start >= seedTimeoutMs) {
+        if (
+          Date.now() - start >= seedTimeoutMs ||
+          (err instanceof Error && err.message.includes("timed out"))
+        ) {
           console.error("Failed to seed test file", err);
           throw new Error(
             `Seeding test file timed out after ${seedTimeoutMs}ms. Is the Storage emulator running?`,

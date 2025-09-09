@@ -9,8 +9,6 @@ on:
 jobs:
   submit-and-audit:
     runs-on: ubuntu-latest
-    env:
-      SITEMAP_URL: ${{ secrets.SITEMAP_URL }}
 
     steps:
       - name: 📦 Checkout repository
@@ -33,12 +31,9 @@ jobs:
           NEXT_PUBLIC_BASE_URL: ${{ secrets.NEXT_PUBLIC_BASE_URL }}
           BING_API_KEY: ${{ secrets.BING_API_KEY }}
           INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
-          SITEMAP_URL: ${{ secrets.SITEMAP_URL }}
         run: node scripts/pingAllSearchEngines.mjs  # Fixed script path
 
       - name: 🔍 Run SEO Indexability Audit
-      env:
-          SITEMAP_URL: ${{ secrets.SITEMAP_URL }}
         run: |
           mkdir -p audit-results
           node scripts/audit-indexability.js > audit-results/seo-audit-$(date +'%Y-%m-%d_%H-%M').log

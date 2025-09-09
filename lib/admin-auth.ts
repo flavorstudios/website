@@ -12,6 +12,7 @@ import jwt from "jsonwebtoken";
 import type { UserRole } from "@/lib/role-permissions";
 import { getUserRole } from "@/lib/user-roles";
 import { serverEnv } from "@/env/server";
+import { createHash } from "crypto";
 
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
 const debug =
@@ -434,10 +435,16 @@ export async function createRefreshSession(uid: string): Promise<string> {
       expiresIn: 1000 * 60 * 60 * 2, // 2 hours
     });
 
-    // Persist refresh token for later validation
+    // Hash the refresh token so Firestore never stores the raw value.
+    // Hashed tokens mitigate exposure if Firestore is compromised.
+    const refreshTokenHash = createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
+
+    // Persist hashed refresh token for later validation
     await adminDb
       .collection("refreshTokens")
-      .doc(refreshToken)
+      .doc(refreshTokenHash)
       .set({ uid, createdAt: new Date().toISOString() });
 
     // Set cookies (server context)

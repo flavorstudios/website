@@ -4,6 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { createRefreshSession } from "@/lib/admin-auth";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
+import { createHash } from "crypto";
 
 /**
  * POST /api/admin/refresh-session
@@ -26,8 +27,12 @@ export async function POST(req: NextRequest) {
     }
 
     const db = getAdminDb();
-    // Lookup the refresh token in Firestore
-    const doc = await db.collection("refreshTokens").doc(refreshToken).get();
+    // Hash the presented token to compare with stored hashes. This avoids
+    // keeping raw tokens in Firestore should it ever be compromised.
+    const tokenHash = createHash("sha256").update(refreshToken).digest("hex");
+
+    // Lookup the refresh token in Firestore by its hash
+    const doc = await db.collection("refreshTokens").doc(tokenHash).get();
     if (!doc.exists) {
       return NextResponse.json({ error: "Invalid refresh token" }, { status: 401 });
     }
@@ -37,8 +42,8 @@ export async function POST(req: NextRequest) {
     // The helper sets cookies in the server context
     const newRefreshToken = await createRefreshSession(uid);
 
-    // Delete the old refresh token (one-time use)
-    await db.collection("refreshTokens").doc(refreshToken).delete();
+    // Delete the old refresh token hash (one-time use)
+    await db.collection("refreshTokens").doc(tokenHash).delete();
 
     return NextResponse.json({ ok: true, refreshToken: newRefreshToken });
   } catch (error) {

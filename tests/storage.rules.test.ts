@@ -45,7 +45,7 @@ describe("storage security rules", () => {
     process.env.FIREBASE_PROJECT_ID = projectId;
     process.env.GCLOUD_PROJECT = projectId;
 
-    const initTimeoutMs = 10000;
+    const initTimeoutMs = 15000;
     const maxInitAttempts = 2;
     for (let attempt = 0; attempt < maxInitAttempts; attempt++) {
       try {
@@ -66,7 +66,8 @@ describe("storage security rules", () => {
           initPromise,
           new Promise((_, reject) => {
             const timer = setTimeout(() => {
-              const msg = `initializeTestEnvironment timed out after ${initTimeoutMs}ms. Check Firestore emulator at ${firestore.host}:${firestore.port} and Storage emulator at ${storage.host}:${storage.port}`;
+              const msg =
+                `initializeTestEnvironment timed out after ${initTimeoutMs}ms. Ensure the Firestore emulator at ${firestore.host}:${firestore.port} and the Storage emulator at ${storage.host}:${storage.port} are running and reachable.`;
               console.error(msg);
               reject(new Error(msg));
             }, initTimeoutMs);
@@ -84,10 +85,30 @@ describe("storage security rules", () => {
     }
 
     // Seed a test file for read tests
-    await testEnv.withSecurityRulesDisabled(async (context: any) => {
-      const storage = context.storage();
-      await uploadString(ref(storage, "test/seed.txt"), "seed");
-    });
+    try {
+      const seedPromise = testEnv.withSecurityRulesDisabled(
+        async (context: any) => {
+          const storage = context.storage();
+          await uploadString(ref(storage, "test/seed.txt"), "seed");
+        },
+      );
+      await Promise.race([
+        seedPromise,
+        new Promise((_, reject) => {
+          const timer = setTimeout(() => {
+            reject(
+              new Error(
+                "Seeding test file timed out after 5000ms. Is the Storage emulator running?",
+              ),
+            );
+          }, 5000);
+          seedPromise.finally(() => clearTimeout(timer));
+        }),
+      ]);
+    } catch (err) {
+      console.error("Failed to seed test file", err);
+      throw err;
+    }
   });
 
   afterAll(async () => {

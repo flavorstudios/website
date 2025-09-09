@@ -4,6 +4,7 @@
 jest.setTimeout(120000);
 
 import { readFileSync } from "node:fs";
+import { Socket } from "node:net";
 import {
   initializeTestEnvironment,
   assertFails,
@@ -28,6 +29,50 @@ function parseHostPort(
   };
 }
 
+function getProjectId() {
+  const envProject =
+    process.env.FIREBASE_PROJECT_ID ||
+    process.env.GCLOUD_PROJECT ||
+    process.env.FIREBASE_PROJECT;
+  if (envProject) {
+    return envProject;
+  }
+
+  try {
+    const firebaseRc = JSON.parse(readFileSync(".firebaserc", "utf8"));
+    const projectId = firebaseRc?.projects?.default;
+    if (projectId) {
+      return projectId;
+    }
+  } catch (err) {
+    /* ignore, we'll throw below */
+  }
+
+  throw new Error(
+    "Cannot determine Firebase project ID. Set FIREBASE_PROJECT_ID or ensure .firebaserc exists.",
+  );
+}
+
+function ensureReachable(host: string, port: number, name: string) {
+  return new Promise<void>((resolve, reject) => {
+    const socket = new Socket();
+    const fail = (err: Error | string) => {
+      socket.destroy();
+      reject(
+        new Error(
+          `${name} emulator at ${host}:${port} unreachable: ${typeof err === "string" ? err : err.message}`,
+        ),
+      );
+    };
+    socket.setTimeout(1000, () => fail("timeout"));
+    socket.once("error", fail);
+    socket.connect(port, host, () => {
+      socket.end();
+      resolve();
+    });
+  });
+}
+
 describe("storage security rules", () => {
   let testEnv: any;
 
@@ -37,29 +82,62 @@ describe("storage security rules", () => {
       "127.0.0.1",
       8080,
     );
+    async function waitForEmulator(host: string, port: number) {
+      const maxAttempts = 10;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const isOpen = await new Promise<boolean>((resolve) => {
+          const socket = net
+            .createConnection({ host, port })
+            .once("connect", () => {
+              socket.destroy();
+              resolve(true);
+            })
+            .once("error", () => {
+              socket.destroy();
+              resolve(false);
+            });
+        });
+        if (isOpen) return;
+        await new Promise((r) => setTimeout(r, 500));
+      }
+      throw new Error(`Emulator at ${host}:${port} did not respond`);
+    }
     const storage = parseHostPort(
       "FIREBASE_STORAGE_EMULATOR_HOST",
       "127.0.0.1",
       9199,
     );
 
-    try {
-      testEnv = await initializeTestEnvironment({
-        projectId: "demo-storage-rules",
-        firestore: {
-          rules: readFileSync("firestore.rules", "utf8"),
-          host: firestore.host,
-          port: firestore.port,
-        },
-        storage: {
-          rules: readFileSync("storage.rules", "utf8"),
-          host: storage.host,
-          port: storage.port,
-        },
-      });
-    } catch (err) {
-      console.error("Failed to init test env", err);
-      throw err;
+    await Promise.all([
+      ensureReachable(firestore.host, firestore.port, "Firestore"),
+      ensureReachable(storage.host, storage.port, "Storage"),
+    ]);
+
+    const maxInitAttempts = 5;
+    for (let attempt = 0; attempt < maxInitAttempts; attempt++) {
+      try {
+        testEnv = await initializeTestEnvironment({
+          projectId: "demo-storage-rules",
+          firestore: {
+            rules: readFileSync("firestore.rules", "utf8"),
+            host: firestore.host,
+            port: firestore.port,
+          },
+          storage: {
+            rules: readFileSync("storage.rules", "utf8"),
+            host: storage.host,
+            port: storage.port,
+          },
+        });
+        await waitForEmulator(storage.host, storage.port);
+        break;
+      } catch (err) {
+        if (attempt === maxInitAttempts - 1) {
+          console.error("Failed to init test env", err);
+          throw err;
+        }
+        await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+      }
     }
 
     // Seed a test file for read tests

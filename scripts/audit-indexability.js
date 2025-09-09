@@ -3,7 +3,9 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';  // Updated to match the ES module import for cheerio
 import xml2js from 'xml2js';
 
-const sitemapUrl = 'https://flavorstudios.in/sitemap.xml';
+// Allow overriding the sitemap location via environment variable
+// falling back to the production sitemap if not provided
+const sitemapUrl = process.env.SITEMAP_URL || 'https://flavorstudios.in/sitemap.xml';
 
 // Function to get URLs from the sitemap
 async function getUrlsFromSitemap() {

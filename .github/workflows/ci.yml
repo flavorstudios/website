@@ -7,7 +7,7 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     env:
-      GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+      GOOGLE_APPLICATION_CREDENTIALS: ${RUNNER_TEMP}/firebase-service-account.json
     steps:
       - uses: actions/checkout@v4
       - name: Write Firebase service account key

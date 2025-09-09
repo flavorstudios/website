@@ -27,6 +27,8 @@ jobs:
         with:
           path: /home/runner/.cache/firebase/emulators
           key: ${{ runner.os }}-firebase-emulators-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-firebase-emulators-
 
       - name: Lint
         run: pnpm lint

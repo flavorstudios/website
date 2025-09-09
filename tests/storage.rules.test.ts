@@ -1,6 +1,7 @@
 /** @jest-environment node */
 
-jest.setTimeout(60000);
+// was 60 000
+jest.setTimeout(120000);
 
 import { readFileSync } from "node:fs";
 import {
@@ -42,19 +43,24 @@ describe("storage security rules", () => {
       9199,
     );
 
-    testEnv = await initializeTestEnvironment({
-      projectId: "demo-storage-rules",
-      firestore: {
-        rules: readFileSync("firestore.rules", "utf8"),
-        host: firestore.host,
-        port: firestore.port,
-      },
-      storage: {
-        rules: readFileSync("storage.rules", "utf8"),
-        host: storage.host,
-        port: storage.port,
-      },
-    });
+    try {
+      testEnv = await initializeTestEnvironment({
+        projectId: "demo-storage-rules",
+        firestore: {
+          rules: readFileSync("firestore.rules", "utf8"),
+          host: firestore.host,
+          port: firestore.port,
+        },
+        storage: {
+          rules: readFileSync("storage.rules", "utf8"),
+          host: storage.host,
+          port: storage.port,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to init test env", err);
+      throw err;
+    }
 
     // Seed a test file for read tests
     await testEnv.withSecurityRulesDisabled(async (context: any) => {

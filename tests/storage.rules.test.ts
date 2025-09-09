@@ -4,7 +4,6 @@
 jest.setTimeout(180000);
 
 import { readFileSync } from "node:fs";
-import * as net from "node:net";
 import {
   initializeTestEnvironment,
   assertFails,
@@ -26,47 +25,28 @@ describe("storage security rules", () => {
       "127.0.0.1",
       8080,
     );
-    async function waitForEmulator(host: string, port: number) {
-      const maxAttempts = 10;
-      for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        const isOpen = await new Promise<boolean>((resolve) => {
-          const socket = net.createConnection({ host, port });
-          socket.setTimeout(1000, () => {
-            socket.destroy();
-            resolve(false);
-          });
-          socket
-            .once("connect", () => {
-              socket.destroy();
-              resolve(true);
-            })
-            .once("error", () => {
-              socket.destroy();
-              resolve(false);
-            });
-        });
-        if (isOpen) return;
-        await new Promise((r) => setTimeout(r, 500));
-      }
-      throw new Error(`Emulator at ${host}:${port} did not respond`);
-    }
     const storage = parseHostPort(
       "FIREBASE_STORAGE_EMULATOR_HOST",
       "127.0.0.1",
       9199,
     );
 
-    await Promise.all([
-      ensureReachable(firestore.host, firestore.port, "Firestore"),
-      ensureReachable(storage.host, storage.port, "Storage"),
-    ]);
+    try {
+      await Promise.all([
+        ensureReachable(firestore.host, firestore.port, "Firestore"),
+        ensureReachable(storage.host, storage.port, "Storage"),
+      ]);
+    } catch (err) {
+      console.error("Emulator unreachable", err);
+      throw err;
+    }
 
     const projectId = getProjectId();
     process.env.FIREBASE_PROJECT_ID = projectId;
     process.env.GCLOUD_PROJECT = projectId;
 
-    const initTimeoutMs = 30000;
-    const maxInitAttempts = 5;
+    const initTimeoutMs = 10000;
+    const maxInitAttempts = 2;
     for (let attempt = 0; attempt < maxInitAttempts; attempt++) {
       try {
         const initPromise = initializeTestEnvironment({
@@ -93,7 +73,6 @@ describe("storage security rules", () => {
             initPromise.finally(() => clearTimeout(timer));
           }),
         ]);
-        await waitForEmulator(storage.host, storage.port);
         break;
       } catch (err) {
         if (attempt === maxInitAttempts - 1) {

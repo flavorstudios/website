@@ -117,6 +117,26 @@ FIREBASE_STORAGE_BUCKET=my-project.appspot.com
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=my-project.appspot.com
 ```
 
+### CI deployment
+
+Generate a Firebase CLI token once on your local machine:
+
+```bash
+firebase login:ci
+```
+
+Save the resulting token in an environment variable named `FIREBASE_TOKEN` in your CI system:
+
+```bash
+export FIREBASE_TOKEN="<token>"
+```
+
+Use the token with Firebase commands during CI, for example:
+
+```bash
+firebase deploy --token "$FIREBASE_TOKEN"
+firebase projects:list --token "$FIREBASE_TOKEN" # optional validation
+```
 
 Cookie Consent Banner
 

@@ -6,6 +6,8 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    env:
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -21,17 +23,22 @@ jobs:
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
+
+      - name: Determine Firebase emulator version
+        id: firebase-tools
+        run: echo "version=$(pnpm dlx firebase-tools --version)" >> "$GITHUB_OUTPUT"
       
       - name: Cache Firebase emulators
         uses: actions/cache@v4
         with:
           path: /home/runner/.cache/firebase/emulators
-          key: ${{ runner.os }}-firebase-emulators-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-firebase-emulators-
+          key: ${{ runner.os }}-firebase-emulators-${{ steps.firebase-tools.outputs.version }}
 
       - name: Lint
         run: pnpm lint
+      
+      - name: Firebase login
+        run: pnpm dlx firebase-tools login:ci --token "$FIREBASE_TOKEN" > /dev/null 2>&1
 
       - name: Jest tests
         run: pnpm dlx firebase-tools emulators:exec --only firestore,storage "pnpm test"

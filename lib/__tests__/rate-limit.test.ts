@@ -15,9 +15,11 @@ describe('rate-limit redis failures', () => {
   afterEach(() => {
     process.env = originalEnv;
     global.fetch = originalFetch;
+    jest.restoreAllMocks();
   });
 
   it('returns safe defaults when fetch rejects', async () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
     global.fetch = jest.fn().mockRejectedValue(new Error('network error')) as any;
     const { incrementAttempts, isRateLimited, resetAttempts } = await import('../rate-limit');
     await expect(incrementAttempts('1.2.3.4')).resolves.toBe(0);
@@ -26,6 +28,7 @@ describe('rate-limit redis failures', () => {
   });
 
   it('returns safe defaults on non-ok responses', async () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
     global.fetch = jest.fn().mockResolvedValue({ ok: false } as Response) as any;
     const { incrementAttempts, isRateLimited, resetAttempts } = await import('../rate-limit');
     await expect(incrementAttempts('1.2.3.4')).resolves.toBe(0);

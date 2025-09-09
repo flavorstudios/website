@@ -85,29 +85,24 @@ describe("storage security rules", () => {
     }
 
     // Seed a test file for read tests
-    try {
-      const seedPromise = testEnv.withSecurityRulesDisabled(
-        async (context: any) => {
+    const seedTimeoutMs = 15000;
+    const start = Date.now();
+    while (true) {
+      try {
+        await testEnv.withSecurityRulesDisabled(async (context: any) => {
           const storage = context.storage();
           await uploadString(ref(storage, "test/seed.txt"), "seed");
-        },
-      );
-      await Promise.race([
-        seedPromise,
-        new Promise((_, reject) => {
-          const timer = setTimeout(() => {
-            reject(
-              new Error(
-                "Seeding test file timed out after 5000ms. Is the Storage emulator running?",
-              ),
-            );
-          }, 5000);
-          seedPromise.finally(() => clearTimeout(timer));
-        }),
-      ]);
-    } catch (err) {
-      console.error("Failed to seed test file", err);
-      throw err;
+        });
+        break;
+      } catch (err) {
+        if (Date.now() - start >= seedTimeoutMs) {
+          console.error("Failed to seed test file", err);
+          throw new Error(
+            `Seeding test file timed out after ${seedTimeoutMs}ms. Is the Storage emulator running?`,
+          );
+        }
+        await new Promise((r) => setTimeout(r, 500));
+      }
     }
   });
 

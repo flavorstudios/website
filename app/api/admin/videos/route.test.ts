@@ -15,6 +15,21 @@ jest.mock('@/lib/comment-store', () => ({
   videoStore: { create },
 }));
 
+let infoSpy: jest.SpyInstance;
+let errorSpy: jest.SpyInstance;
+
+beforeEach(() => {
+  if (!process.env.DEBUG) {
+    infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  }
+});
+
+afterEach(() => {
+  infoSpy?.mockRestore();
+  errorSpy?.mockRestore();
+});
+
 describe('POST /api/admin/videos', () => {
   it('logs activity on create', async () => {
     const { POST } = await import('./route');

@@ -1,10 +1,9 @@
 /** @jest-environment node */
 
 // was 60 000
-jest.setTimeout(120000);
+jest.setTimeout(180000);
 
 import { readFileSync } from "node:fs";
-import { Socket } from "node:net";
 import * as net from "node:net";
 import {
   initializeTestEnvironment,
@@ -12,67 +11,11 @@ import {
   assertSucceeds,
 } from "@firebase/rules-unit-testing";
 import { ref, uploadString, getBytes } from "firebase/storage";
-
-function parseHostPort(
-  envVar: string,
-  defaultHost: string,
-  defaultPort: number,
-) {
-  const value = process.env[envVar];
-  if (!value) {
-    return { host: defaultHost, port: defaultPort };
-  }
-  const [host, portStr] = value.split(":");
-  const port = Number.parseInt(portStr ?? "", 10);
-  return {
-    host: host || defaultHost,
-    port: Number.isNaN(port) ? defaultPort : port,
-  };
-}
-
-function getProjectId() {
-  const envProject =
-    process.env.FIREBASE_PROJECT_ID ||
-    process.env.GCLOUD_PROJECT ||
-    process.env.FIREBASE_PROJECT;
-  if (envProject) {
-    return envProject;
-  }
-
-  try {
-    const firebaseRc = JSON.parse(readFileSync(".firebaserc", "utf8"));
-    const projectId = firebaseRc?.projects?.default;
-    if (projectId) {
-      return projectId;
-    }
-  } catch (err) {
-    /* ignore, we'll throw below */
-  }
-
-  throw new Error(
-    "Cannot determine Firebase project ID. Set FIREBASE_PROJECT_ID or ensure .firebaserc exists.",
-  );
-}
-
-function ensureReachable(host: string, port: number, name: string) {
-  return new Promise<void>((resolve, reject) => {
-    const socket = new Socket();
-    const fail = (err: Error | string) => {
-      socket.destroy();
-      reject(
-        new Error(
-          `${name} emulator at ${host}:${port} unreachable: ${typeof err === "string" ? err : err.message}`,
-        ),
-      );
-    };
-    socket.setTimeout(1000, () => fail("timeout"));
-    socket.once("error", fail);
-    socket.connect(port, host, () => {
-      socket.end();
-      resolve();
-    });
-  });
-}
+import {
+  parseHostPort,
+  getProjectId,
+  ensureReachable,
+} from "./utils/emulator";
 
 describe("storage security rules", () => {
   let testEnv: any;
@@ -122,10 +65,11 @@ describe("storage security rules", () => {
     process.env.FIREBASE_PROJECT_ID = projectId;
     process.env.GCLOUD_PROJECT = projectId;
 
+    const initTimeoutMs = 30000;
     const maxInitAttempts = 5;
     for (let attempt = 0; attempt < maxInitAttempts; attempt++) {
       try {
-        testEnv = await initializeTestEnvironment({
+        const initPromise = initializeTestEnvironment({
           projectId,
           firestore: {
             rules: readFileSync("firestore.rules", "utf8"),
@@ -138,6 +82,17 @@ describe("storage security rules", () => {
             port: storage.port,
           },
         });
+        testEnv = await Promise.race([
+          initPromise,
+          new Promise((_, reject) => {
+            const timer = setTimeout(() => {
+              const msg = `initializeTestEnvironment timed out after ${initTimeoutMs}ms. Check Firestore emulator at ${firestore.host}:${firestore.port} and Storage emulator at ${storage.host}:${storage.port}`;
+              console.error(msg);
+              reject(new Error(msg));
+            }, initTimeoutMs);
+            initPromise.finally(() => clearTimeout(timer));
+          }),
+        ]);
         await waitForEmulator(storage.host, storage.port);
         break;
       } catch (err) {

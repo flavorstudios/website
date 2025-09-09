@@ -16,6 +16,21 @@ jest.mock('@/lib/firebase-admin', () => ({
   adminDb: { collection: () => ({ doc: () => ({ set }) }) },
 }));
 
+let infoSpy: jest.SpyInstance;
+let errorSpy: jest.SpyInstance;
+
+beforeEach(() => {
+  if (!process.env.DEBUG) {
+    infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  }
+});
+
+afterEach(() => {
+  infoSpy?.mockRestore();
+  errorSpy?.mockRestore();
+});
+
 describe('POST /api/admin/settings', () => {
   it('logs activity on save', async () => {
     const { POST } = await import('./route');

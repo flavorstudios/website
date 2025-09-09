@@ -23,6 +23,21 @@ jest.mock('@/lib/firebase-admin', () => ({
   })
 }));
 
+let infoSpy: jest.SpyInstance;
+let errorSpy: jest.SpyInstance;
+
+beforeEach(() => {
+  if (!process.env.DEBUG) {
+    infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  }
+});
+
+afterEach(() => {
+  infoSpy?.mockRestore();
+  errorSpy?.mockRestore();
+});
+
 describe('DELETE /api/admin/comments/[postId]/[commentId]/delete', () => {
   it('logs activity on delete', async () => {
     const { DELETE } = await import('./route');

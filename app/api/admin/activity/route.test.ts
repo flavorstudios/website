@@ -14,6 +14,21 @@ jest.mock('@/lib/admin-auth', () => ({
   }),
 }));
 
+let infoSpy: jest.SpyInstance;
+let errorSpy: jest.SpyInstance;
+
+beforeEach(() => {
+  if (!process.env.DEBUG) {
+    infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  }
+});
+
+afterEach(() => {
+  infoSpy?.mockRestore();
+  errorSpy?.mockRestore();
+});
+
 describe('GET /api/admin/activity', () => {
   it('returns empty activities when adminDb missing', async () => {
     await jest.isolateModulesAsync(async () => {

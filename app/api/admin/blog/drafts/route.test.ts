@@ -12,6 +12,8 @@ jest.mock("@/lib/prisma", () => ({ __esModule: true, getPrisma: jest.fn() }));
 import { getPrisma } from "@/lib/prisma";
 
 let store: Record<string, any> = {};
+let infoSpy: jest.SpyInstance;
+let errorSpy: jest.SpyInstance;
 
 beforeEach(() => {
   store = {};
@@ -29,6 +31,15 @@ beforeEach(() => {
         },
       }),
   });
+  if (!process.env.DEBUG) {
+    infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  }
+});
+
+afterEach(() => {
+  infoSpy?.mockRestore();
+  errorSpy?.mockRestore();
 });
 
 function makeReq(body: any) {

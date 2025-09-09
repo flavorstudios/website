@@ -15,6 +15,21 @@ jest.mock('@/lib/comment-store', () => ({
   commentStore: { create },
 }));
 
+let infoSpy: jest.SpyInstance;
+let errorSpy: jest.SpyInstance;
+
+beforeEach(() => {
+  if (!process.env.DEBUG) {
+    infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  }
+});
+
+afterEach(() => {
+  infoSpy?.mockRestore();
+  errorSpy?.mockRestore();
+});
+
 describe('POST /api/admin/comments/[postId]/[commentId]/reply', () => {
   it('logs activity on reply', async () => {
     const { POST } = await import('./route');

@@ -16,6 +16,21 @@ jest.mock('@/lib/comment-store', () => ({
   videoStore: { update, delete: remove },
 }));
 
+let infoSpy: jest.SpyInstance;
+let errorSpy: jest.SpyInstance;
+
+beforeEach(() => {
+  if (!process.env.DEBUG) {
+    infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  }
+});
+
+afterEach(() => {
+  infoSpy?.mockRestore();
+  errorSpy?.mockRestore();
+});
+
 describe('PUT /api/admin/videos/[id]', () => {
   beforeEach(() => {
     jest.clearAllMocks();

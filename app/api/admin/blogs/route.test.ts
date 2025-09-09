@@ -19,6 +19,21 @@ jest.mock('@/lib/content-store', () => ({
 
 jest.mock('@/lib/sse-broker', () => ({ publishToUser: jest.fn() }));
 
+let infoSpy: jest.SpyInstance;
+let errorSpy: jest.SpyInstance;
+
+beforeEach(() => {
+  if (!process.env.DEBUG) {
+    infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  }
+});
+
+afterEach(() => {
+  infoSpy?.mockRestore();
+  errorSpy?.mockRestore();
+});
+
 describe('POST /api/admin/blogs', () => {
   it('logs activity on create', async () => {
     const { POST } = await import('./route');

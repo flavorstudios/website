@@ -3,8 +3,8 @@
  */
 process.env.PREVIEW_SECRET = 'test-secret';
 /* eslint-disable @typescript-eslint/no-require-imports */
-import { serverEnv } from "@/env/server";
-import { createPreviewToken, validatePreviewToken } from "../preview-token";
+require("@/env/server").serverEnv.PREVIEW_SECRET = "test-secret";
+const { createPreviewToken, validatePreviewToken } = require("../preview-token");
 /* eslint-enable @typescript-eslint/no-require-imports */
 
 describe('preview token', () => {

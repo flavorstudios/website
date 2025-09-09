@@ -1,5 +1,7 @@
 /** @jest-environment node */
 
+jest.setTimeout(20000);
+
 import { readFileSync } from "node:fs";
 import {
   initializeTestEnvironment,

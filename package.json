@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "e2e": "playwright install && playwright test",
+    "e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

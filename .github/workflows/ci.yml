@@ -10,8 +10,7 @@ jobs:
       GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
     steps:
       - uses: actions/checkout@v4
-      
-    - name: Write Firebase service account key
+      - name: Write Firebase service account key
         run: |
           cat <<'EOF' > "$GOOGLE_APPLICATION_CREDENTIALS"
           ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
@@ -33,7 +32,7 @@ jobs:
       - name: Determine Firebase emulator version
         id: firebase-tools
         run: echo "version=$(pnpm dlx firebase-tools --version)" >> "$GITHUB_OUTPUT"
-      
+        
       - name: Restore Firebase emulators
         id: firebase-emulators-cache
         uses: actions/cache/restore@v4

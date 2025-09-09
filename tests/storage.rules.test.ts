@@ -5,6 +5,7 @@ jest.setTimeout(120000);
 
 import { readFileSync } from "node:fs";
 import { Socket } from "node:net";
+import * as net from "node:net";
 import {
   initializeTestEnvironment,
   assertFails,

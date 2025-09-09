@@ -1,6 +1,6 @@
 /** @jest-environment node */
 
-jest.setTimeout(20000);
+jest.setTimeout(60000);
 
 import { readFileSync } from "node:fs";
 import {
@@ -10,10 +10,21 @@ import {
 } from "@firebase/rules-unit-testing";
 import { ref, uploadString, getBytes } from "firebase/storage";
 
-function parseHostPort(envVar: string, defaultValue: string) {
-  const value = process.env[envVar] || defaultValue;
-  const [host, port] = value.split(":");
-  return { host, port: Number(port) };
+function parseHostPort(
+  envVar: string,
+  defaultHost: string,
+  defaultPort: number,
+) {
+  const value = process.env[envVar];
+  if (!value) {
+    return { host: defaultHost, port: defaultPort };
+  }
+  const [host, portStr] = value.split(":");
+  const port = Number.parseInt(portStr ?? "", 10);
+  return {
+    host: host || defaultHost,
+    port: Number.isNaN(port) ? defaultPort : port,
+  };
 }
 
 describe("storage security rules", () => {
@@ -22,11 +33,13 @@ describe("storage security rules", () => {
   beforeAll(async () => {
     const firestore = parseHostPort(
       "FIRESTORE_EMULATOR_HOST",
-      "127.0.0.1:8080",
+      "127.0.0.1",
+      8080,
     );
     const storage = parseHostPort(
       "FIREBASE_STORAGE_EMULATOR_HOST",
-      "127.0.0.1:9199",
+      "127.0.0.1",
+      9199,
     );
 
     testEnv = await initializeTestEnvironment({

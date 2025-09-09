@@ -21,6 +21,12 @@ jobs:
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
+      
+      - name: Cache Firebase emulators
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/.cache/firebase/emulators
+          key: ${{ runner.os }}-firebase-emulators-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Lint
         run: pnpm lint

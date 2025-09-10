@@ -10,9 +10,11 @@ jest.mock('next/navigation', () => ({
 
 const originalFetch = global.fetch
 
-global.fetch = jest.fn(() =>
-  Promise.resolve({ json: () => Promise.resolve({ categories: [] }) })
-) as jest.Mock
+if (typeof window !== 'undefined') {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({ json: () => Promise.resolve({ categories: [] }) })
+  ) as jest.Mock
+}
 
 afterAll(() => {
   global.fetch = originalFetch

@@ -11,15 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
+      
       # Install pnpm; version is taken from package.json "packageManager"
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
 
       - name: Set Google Credentials Path
         run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ runner.temp }}/firebase-service-account.json" >> $GITHUB_ENV
@@ -31,7 +32,7 @@ jobs:
           ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           EOF
 
-      - name: Install pnpm
+      - name: Install dependencies
         run: pnpm install
 
       - name: Determine Firebase emulator version

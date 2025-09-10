@@ -13,8 +13,8 @@ service firebase.storage {
 
       function isAdmin() {
           return request.auth != null && (
-            request.auth.token.role == "admin" ||
-            request.auth.token.isAdmin == true ||
+            ('role' in request.auth.token && request.auth.token.role == "admin") ||
+            ('isAdmin' in request.auth.token && request.auth.token.isAdmin == true) ||
             (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
              firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true)
           );

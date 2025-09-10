@@ -94,7 +94,7 @@ describe("storage security rules", () => {
       try {
         await testEnv.withSecurityRulesDisabled(async (context: any) => {
           const storage = context.storage();
-          storage.maxUploadRetryTime = seedTimeoutMs;
+          storage.setMaxUploadRetryTime(seedTimeoutMs);
           // Simple readiness check: attempt to read a non-existent object
           await getBytes(ref(storage, "ready-check")).catch(() => {});
           const uploadPromise = uploadString(

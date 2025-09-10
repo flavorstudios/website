@@ -42,6 +42,8 @@ describe("storage security rules", () => {
     }
 
     const projectId = getProjectId();
+    const bucket = `${projectId}.appspot.com`;
+
     process.env.FIREBASE_PROJECT_ID = projectId;
     process.env.GCLOUD_PROJECT = projectId;
 
@@ -66,7 +68,7 @@ describe("storage security rules", () => {
             rules: readFileSync("storage.rules", "utf8"),
             host: storage.host,
             port: storage.port,
-            storageBucket: `${projectId}.appspot.com`,
+            storageBucket: bucket,
           },
         });
 
@@ -93,32 +95,32 @@ describe("storage security rules", () => {
       }
     }
 
+    // Small settle delay: ports may be open but rules/runtime not fully ready yet
+    await new Promise((r) => setTimeout(r, 750));
+
     // Seed a test file for read tests
-    const seedTimeoutMs = 60000;
+    const seedTimeoutMs = 120000; // was 60000; CI download/startup can be slow
     const maxBackoffMs = 5000;
     const start = Date.now();
     let attempt = 0;
+
     while (true) {
       try {
         await testEnv.withSecurityRulesDisabled(async (context: any) => {
-          const storage = context.storage();
-          storage.setMaxUploadRetryTime(seedTimeoutMs);
-          // Simple readiness check: attempt to read a non-existent object
-          await getBytes(ref(storage, "ready-check")).catch(() => {});
+          const s = context.storage(bucket);
+          s.setMaxUploadRetryTime(seedTimeoutMs);
+          // Readiness check (object won't exist; we ignore the error)
+          await getBytes(ref(s, "ready-check")).catch(() => {});
           const uploadPromise = uploadString(
-            ref(storage, "test/seed.txt"),
+            ref(s, "test/seed.txt"),
             "seed",
+            { contentType: "text/plain" },
           );
           await Promise.race([
             uploadPromise,
             new Promise((_, reject) =>
               setTimeout(
-                () =>
-                  reject(
-                    new Error(
-                      `uploadString timed out after ${seedTimeoutMs}ms`,
-                    ),
-                  ),
+                () => reject(new Error(`uploadString timed out after ${seedTimeoutMs}ms`)),
                 seedTimeoutMs,
               ),
             ),
@@ -149,24 +151,25 @@ describe("storage security rules", () => {
   });
 
   it("denies unauthenticated access", async () => {
-    const storage = testEnv.unauthenticatedContext().storage();
-    const fileRef = ref(storage, "test/seed.txt");
+    const bucket = `${process.env.FIREBASE_PROJECT_ID}.appspot.com`;
+    const s = testEnv.unauthenticatedContext().storage(bucket);
+    const fileRef = ref(s, "test/seed.txt");
     await assertFails(getBytes(fileRef));
-    await assertFails(uploadString(ref(storage, "test/blocked.txt"), "hi"));
+    await assertFails(uploadString(ref(s, "test/blocked.txt"), "hi", { contentType: "text/plain" }));
   });
 
   it("denies non-admin users", async () => {
-    const userStorage = testEnv.authenticatedContext("user").storage();
-    await assertFails(getBytes(ref(userStorage, "test/seed.txt")));
-    await assertFails(uploadString(ref(userStorage, "test/blocked.txt"), "hi"));
+    const bucket = `${process.env.FIREBASE_PROJECT_ID}.appspot.com`;
+    const s = testEnv.authenticatedContext("user").storage(bucket);
+    await assertFails(getBytes(ref(s, "test/seed.txt")));
+    await assertFails(uploadString(ref(s, "test/blocked.txt"), "hi", { contentType: "text/plain" }));
   });
 
   it("allows admins via custom claims", async () => {
-    const adminStorage = testEnv
-      .authenticatedContext("admin", { role: "admin" })
-      .storage();
-    await assertSucceeds(uploadString(ref(adminStorage, "test/ok.txt"), "hi"));
-    await assertSucceeds(getBytes(ref(adminStorage, "test/ok.txt")));
+    const bucket = `${process.env.FIREBASE_PROJECT_ID}.appspot.com`;
+    const s = testEnv.authenticatedContext("admin", { role: "admin" }).storage(bucket);
+    await assertSucceeds(uploadString(ref(s, "test/ok.txt"), "hi", { contentType: "text/plain" }));
+    await assertSucceeds(getBytes(ref(s, "test/ok.txt")));
   });
 
   it("allows admins flagged in Firestore", async () => {
@@ -179,10 +182,9 @@ describe("storage security rules", () => {
         .set({ isAdmin: true });
     });
 
-    const storage = testEnv
-      .authenticatedContext("firestoreAdmin")
-      .storage();
-    await assertSucceeds(uploadString(ref(storage, "test/fs.txt"), "hi"));
-    await assertSucceeds(getBytes(ref(storage, "test/fs.txt")));
+    const bucket = `${process.env.FIREBASE_PROJECT_ID}.appspot.com`;
+    const s = testEnv.authenticatedContext("firestoreAdmin").storage(bucket);
+    await assertSucceeds(uploadString(ref(s, "test/fs.txt"), "hi", { contentType: "text/plain" }));
+    await assertSucceeds(getBytes(ref(s, "test/fs.txt")));
   });
 });

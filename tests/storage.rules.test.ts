@@ -24,15 +24,21 @@ describe("storage security rules", () => {
     const getRes = await fetch(`http://${hostWithPort}/storage/v1/b/${encodeURIComponent(bucket)}`);
     if (getRes.ok) return;
 
-    const createRes = await fetch(`http://${hostWithPort}/storage/v1/b?project=${encodeURIComponent(projectId)}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: bucket }),
-    });
+    const createRes = await fetch(
+      `http://${hostWithPort}/storage/v1/b?project=${encodeURIComponent(projectId)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: bucket }),
+      },
+    );
 
-    if (!createRes.ok && createRes.status !== 409) {
+    // 409: already exists, 501: emulator auto-provisions default bucket
+    if (!createRes.ok && createRes.status !== 409 && createRes.status !== 501) {
       const text = await createRes.text().catch(() => "");
-      throw new Error(`Failed to create emulator bucket "${bucket}" (status ${createRes.status}): ${text}`);
+      throw new Error(
+        `Failed to create emulator bucket "${bucket}" (status ${createRes.status}): ${text}`,
+      );
     }
   }
 

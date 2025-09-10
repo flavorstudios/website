@@ -39,13 +39,20 @@ jobs:
       - name: Determine Firebase emulator version
         id: firebase-tools
         run: echo "version=$(pnpm dlx firebase-tools --version)" >> "$GITHUB_OUTPUT"
+
+      - name: Set Firebase emulator cache key
+        id: firebase-emulators-key
+        run: echo "key=${{ runner.os }}-firebase-emulators-${{ steps.firebase-tools.outputs.version }}" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure Firebase emulator cache directory exists
+        run: mkdir -p ~/.cache/firebase/emulators
         
       - name: Restore Firebase emulators
         id: firebase-emulators-cache
         uses: actions/cache/restore@v4
         with:
           path: ~/.cache/firebase/emulators
-          key: ${{ runner.os }}-firebase-emulators-${{ steps.firebase-tools.outputs.version }}
+          key: ${{ steps.firebase-emulators-key.outputs.key }}
 
       - name: Lint
         run: pnpm lint
@@ -61,7 +68,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ~/.cache/firebase/emulators
-          key: ${{ runner.os }}-firebase-emulators-${{ steps.firebase-tools.outputs.version }}
+          key: ${{ steps.firebase-emulators-key.outputs.key }}
 
       - name: Build
         env:

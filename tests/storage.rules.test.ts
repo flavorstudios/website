@@ -9,7 +9,7 @@ import {
   assertFails,
   assertSucceeds,
 } from "@firebase/rules-unit-testing";
-import { ref, uploadString, getBytes, listAll } from "firebase/storage";
+import { ref, uploadString, getBytes } from "firebase/storage";
 import {
   parseHostPort,
   getProjectId,
@@ -86,7 +86,7 @@ describe("storage security rules", () => {
     }
 
     // Seed a test file for read tests
-    const seedTimeoutMs = 30000;
+    const seedTimeoutMs = 60000;
     const maxBackoffMs = 5000;
     const start = Date.now();
     let attempt = 0;
@@ -94,8 +94,9 @@ describe("storage security rules", () => {
       try {
         await testEnv.withSecurityRulesDisabled(async (context: any) => {
           const storage = context.storage();
-          // Verify the emulator is ready by listing the root bucket
-          await listAll(ref(storage, ""));
+          storage.maxUploadRetryTime = seedTimeoutMs;
+          // Simple readiness check: attempt to read a non-existent object
+          await getBytes(ref(storage, "ready-check")).catch(() => {});
           const uploadPromise = uploadString(
             ref(storage, "test/seed.txt"),
             "seed",

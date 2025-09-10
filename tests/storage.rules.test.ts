@@ -1,6 +1,6 @@
 /** @jest-environment node */
 
-// was 60 000
+// was 60 000
 jest.setTimeout(180000);
 
 import { readFileSync } from "node:fs";
@@ -45,8 +45,14 @@ describe("storage security rules", () => {
     process.env.FIREBASE_PROJECT_ID = projectId;
     process.env.GCLOUD_PROJECT = projectId;
 
-    const initTimeoutMs = 15000;
-    const maxInitAttempts = 2;
+    // Ensure SDKs also see explicit emulator hosts in CI where resolution may lag
+    process.env.FIRESTORE_EMULATOR_HOST = `${firestore.host}:${firestore.port}`;
+    process.env.FIREBASE_STORAGE_EMULATOR_HOST = `${storage.host}:${storage.port}`;
+
+    // Give CI more breathing room to download emulators & start up
+    const initTimeoutMs = 90000;
+    const maxInitAttempts = 3;
+
     for (let attempt = 0; attempt < maxInitAttempts; attempt++) {
       try {
         const initPromise = initializeTestEnvironment({
@@ -63,6 +69,7 @@ describe("storage security rules", () => {
             storageBucket: `${projectId}.appspot.com`,
           },
         });
+
         testEnv = await Promise.race([
           initPromise,
           new Promise((_, reject) => {
@@ -81,7 +88,8 @@ describe("storage security rules", () => {
           console.error("Failed to init test env", err);
           throw err;
         }
-        await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+        // Exponential backoff between attempts
+        await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
       }
     }
 
@@ -132,7 +140,12 @@ describe("storage security rules", () => {
   });
 
   afterAll(async () => {
-    await testEnv?.cleanup();
+    try {
+      await testEnv?.cleanup?.();
+    } finally {
+      // Let any pending emulator I/O settle to avoid Jest open handles warning
+      await new Promise((r) => setTimeout(r, 100));
+    }
   });
 
   it("denies unauthenticated access", async () => {

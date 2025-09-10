@@ -9,8 +9,6 @@ permissions:
 jobs:
   build-test:
     runs-on: ubuntu-latest
-    env:
-      GOOGLE_APPLICATION_CREDENTIALS: "${{ runner.temp }}/firebase-service-account.json"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,6 +20,9 @@ jobs:
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
+
+      - name: Set Google Credentials Path
+        run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ runner.temp }}/firebase-service-account.json" >> $GITHUB_ENV
 
       - run: mkdir -p "$(dirname \"$GOOGLE_APPLICATION_CREDENTIALS\")"
       - name: Write Firebase service account key

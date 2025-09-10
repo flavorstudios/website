@@ -9,7 +9,15 @@ import {
   assertFails,
   assertSucceeds,
 } from "@firebase/rules-unit-testing";
-import { ref, uploadString, uploadBytes, getBytes } from "firebase/storage";
+import { initializeApp, deleteApp } from "firebase/app";
+import {
+  ref,
+  uploadString,
+  uploadBytes,
+  getBytes,
+  getStorage,
+  connectStorageEmulator,
+} from "firebase/storage";
 import {
   parseHostPort,
   getProjectId,
@@ -93,6 +101,12 @@ describe("storage security rules", () => {
     process.env.FIRESTORE_EMULATOR_HOST = `${firestore.host}:${firestore.port}`;
     process.env.FIREBASE_STORAGE_EMULATOR_HOST = `${storage.host}:${storage.port}`;
 
+    // Preconnect to the Storage emulator to ensure it's ready before tests run
+    const tempApp = initializeApp({ projectId: `${projectId}-temp` });
+    const tempStorage = getStorage(tempApp);
+    connectStorageEmulator(tempStorage, storage.host, storage.port);
+    await deleteApp(tempApp);
+
     // Give CI more breathing room to download emulators & start up
     const initTimeoutMs = 90000;
     const maxInitAttempts = 3;
@@ -142,6 +156,24 @@ describe("storage security rules", () => {
     // Ensure the bucket is created in the emulator before first write
     const storageHostWithPort = `${storage.host}:${storage.port}`;
     await ensureEmulatorBucket(storageHostWithPort, bucket, projectId);
+
+    // Verify basic storage operations are functional
+    try {
+      await testEnv.withSecurityRulesDisabled(async (context: any) => {
+        const s = context.storage(bucket);
+        const testRef = ref(s, "test/verify.txt");
+        await uploadString(testRef, "verify", { contentType: "text/plain" });
+        const bytes = await getBytes(testRef);
+        if (Buffer.from(bytes).toString() !== "verify") {
+          throw new Error(
+            `Expected "verify" but got "${Buffer.from(bytes).toString()}"`,
+          );
+        }
+      });
+    } catch (err) {
+      console.error("Storage emulator verification failed", err);
+      throw err;
+    }
 
     // Seed a test file for read tests
     const seedTimeoutMs = 150000; // was 120000; CI can still be slow on first write

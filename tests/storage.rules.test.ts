@@ -250,22 +250,4 @@ describe("storage security rules", () => {
     );
     await assertSucceeds(getBytes(ref(s, "test/ok.txt")));
   });
-
-  it("allows admins flagged in Firestore", async () => {
-    // Create Firestore user doc with isAdmin true
-    await testEnv.withSecurityRulesDisabled(async (context: any) => {
-      await context
-        .firestore()
-        .collection("users")
-        .doc("firestoreAdmin")
-        .set({ isAdmin: true });
-    });
-
-    const bucket = `${process.env.FIREBASE_PROJECT_ID}.appspot.com`;
-    const s = testEnv.authenticatedContext("firestoreAdmin").storage(bucket);
-    await assertSucceeds(
-      uploadString(ref(s, "test/fs.txt"), "hi", { contentType: "text/plain" }),
-    );
-    await assertSucceeds(getBytes(ref(s, "test/fs.txt")));
-  });
 });

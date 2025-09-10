@@ -7,18 +7,14 @@ service firebase.storage {
   match /b/{bucket}/o {
     match /{allPaths=**} {
       // Only authenticated admins may access Storage.
-      // Admins can be identified either by custom claims
-      // (role === "admin" or isAdmin === true) or by a flag in
-      // the corresponding Firestore user document.
+      // Admins are identified via custom claims on the auth token.
 
       function isAdmin() {
           return request.auth != null && (
-            ('role' in request.auth.token && request.auth.token.role == "admin") ||
-            ('isAdmin' in request.auth.token && request.auth.token.isAdmin == true) ||
-            (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
-             firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true)
-          );
-        }
+          ('role' in request.auth.token && request.auth.token.role == "admin") ||
+          ('isAdmin' in request.auth.token && request.auth.token.isAdmin == true)
+        );
+      }
 
       allow read, write: if isAdmin();
     }

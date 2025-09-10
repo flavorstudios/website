@@ -9,7 +9,7 @@ import {
   assertFails,
   assertSucceeds,
 } from "@firebase/rules-unit-testing";
-import { ref, uploadString, getBytes } from "firebase/storage";
+import { ref, uploadString, uploadBytes, getBytes } from "firebase/storage";
 import {
   parseHostPort,
   getProjectId,
@@ -95,8 +95,8 @@ describe("storage security rules", () => {
       }
     }
 
-    // Small settle delay: ports may be open but rules/runtime not fully ready yet
-    await new Promise((r) => setTimeout(r, 750));
+    // Slightly longer settle delay: ports may be open but rules/runtime not fully ready yet
+    await new Promise((r) => setTimeout(r, 2000));
 
     // Seed a test file for read tests
     const seedTimeoutMs = 120000; // was 60000; CI download/startup can be slow
@@ -109,18 +109,23 @@ describe("storage security rules", () => {
         await testEnv.withSecurityRulesDisabled(async (context: any) => {
           const s = context.storage(bucket);
           s.setMaxUploadRetryTime(seedTimeoutMs);
-          // Readiness check (object won't exist; we ignore the error)
-          await getBytes(ref(s, "ready-check")).catch(() => {});
-          const uploadPromise = uploadString(
-            ref(s, "test/seed.txt"),
-            "seed",
-            { contentType: "text/plain" },
-          );
+          s.setMaxOperationRetryTime(seedTimeoutMs);
+
+          // Create a tiny ".keep" to ensure prefix exists (emulator sometimes hiccups on first write)
+          const keepData = new Uint8Array([0x6b]); // "k"
+          await uploadBytes(ref(s, "test/.keep"), keepData, { contentType: "application/octet-stream" });
+
+          // Now upload the actual seed
+          const seedData = new Uint8Array([0x73, 0x65, 0x65, 0x64]); // "seed"
+          const uploadPromise = uploadBytes(ref(s, "test/seed.txt"), seedData, {
+            contentType: "text/plain",
+          });
+
           await Promise.race([
             uploadPromise,
             new Promise((_, reject) =>
               setTimeout(
-                () => reject(new Error(`uploadString timed out after ${seedTimeoutMs}ms`)),
+                () => reject(new Error(`uploadBytes timed out after ${seedTimeoutMs}ms`)),
                 seedTimeoutMs,
               ),
             ),
@@ -155,20 +160,26 @@ describe("storage security rules", () => {
     const s = testEnv.unauthenticatedContext().storage(bucket);
     const fileRef = ref(s, "test/seed.txt");
     await assertFails(getBytes(fileRef));
-    await assertFails(uploadString(ref(s, "test/blocked.txt"), "hi", { contentType: "text/plain" }));
+    await assertFails(
+      uploadString(ref(s, "test/blocked.txt"), "hi", { contentType: "text/plain" }),
+    );
   });
 
   it("denies non-admin users", async () => {
     const bucket = `${process.env.FIREBASE_PROJECT_ID}.appspot.com`;
     const s = testEnv.authenticatedContext("user").storage(bucket);
     await assertFails(getBytes(ref(s, "test/seed.txt")));
-    await assertFails(uploadString(ref(s, "test/blocked.txt"), "hi", { contentType: "text/plain" }));
+    await assertFails(
+      uploadString(ref(s, "test/blocked.txt"), "hi", { contentType: "text/plain" }),
+    );
   });
 
   it("allows admins via custom claims", async () => {
     const bucket = `${process.env.FIREBASE_PROJECT_ID}.appspot.com`;
     const s = testEnv.authenticatedContext("admin", { role: "admin" }).storage(bucket);
-    await assertSucceeds(uploadString(ref(s, "test/ok.txt"), "hi", { contentType: "text/plain" }));
+    await assertSucceeds(
+      uploadString(ref(s, "test/ok.txt"), "hi", { contentType: "text/plain" }),
+    );
     await assertSucceeds(getBytes(ref(s, "test/ok.txt")));
   });
 
@@ -184,7 +195,9 @@ describe("storage security rules", () => {
 
     const bucket = `${process.env.FIREBASE_PROJECT_ID}.appspot.com`;
     const s = testEnv.authenticatedContext("firestoreAdmin").storage(bucket);
-    await assertSucceeds(uploadString(ref(s, "test/fs.txt"), "hi", { contentType: "text/plain" }));
+    await assertSucceeds(
+      uploadString(ref(s, "test/fs.txt"), "hi", { contentType: "text/plain" }),
+    );
     await assertSucceeds(getBytes(ref(s, "test/fs.txt")));
   });
 });

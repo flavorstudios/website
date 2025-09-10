@@ -19,6 +19,26 @@ import {
 describe("storage security rules", () => {
   let testEnv: any;
 
+  // Ensure the emulator bucket exists (Storage emulator JSON API)
+  async function ensureEmulatorBucket(hostWithPort: string, bucket: string, projectId: string) {
+    // Check if bucket exists
+    const getRes = await fetch(`http://${hostWithPort}/storage/v1/b/${encodeURIComponent(bucket)}`);
+    if (getRes.ok) return;
+
+    // Create bucket
+    const createRes = await fetch(`http://${hostWithPort}/storage/v1/b?project=${encodeURIComponent(projectId)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: bucket }),
+    });
+
+    // 200/201 OK, 409 = already exists (race)—both fine
+    if (!createRes.ok && createRes.status !== 409) {
+      const text = await createRes.text().catch(() => "");
+      throw new Error(`Failed to create emulator bucket "${bucket}" (status ${createRes.status}): ${text}`);
+    }
+  }
+
   beforeAll(async () => {
     const firestore = parseHostPort(
       "FIRESTORE_EMULATOR_HOST",
@@ -98,8 +118,11 @@ describe("storage security rules", () => {
     // Slightly longer settle delay: ports may be open but rules/runtime not fully ready yet
     await new Promise((r) => setTimeout(r, 2000));
 
+    // Ensure the bucket is created in the emulator before first write
+    await ensureEmulatorBucket(`${storage.host}:${storage.port}`, bucket, projectId);
+
     // Seed a test file for read tests
-    const seedTimeoutMs = 120000; // was 60000; CI download/startup can be slow
+    const seedTimeoutMs = 150000; // was 120000; CI can still be slow on first write
     const maxBackoffMs = 5000;
     const start = Date.now();
     let attempt = 0;

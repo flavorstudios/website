@@ -55,7 +55,8 @@ export function ensureReachable(host: string, port: number, name: string) {
         ),
       );
     };
-    socket.setTimeout(1000, () => fail("timeout"));
+    // Bump timeout to reduce CI flakiness
+    socket.setTimeout(3000, () => fail("timeout"));
     socket.once("error", fail);
     socket.connect(port, host, () => {
       socket.end();

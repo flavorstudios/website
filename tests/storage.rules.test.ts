@@ -21,22 +21,38 @@ describe("storage security rules", () => {
 
   // Ensure the emulator bucket exists (Storage emulator JSON API)
   async function ensureEmulatorBucket(hostWithPort: string, bucket: string, projectId: string) {
-    // Check if bucket exists
     const getRes = await fetch(`http://${hostWithPort}/storage/v1/b/${encodeURIComponent(bucket)}`);
     if (getRes.ok) return;
 
-    // Create bucket
     const createRes = await fetch(`http://${hostWithPort}/storage/v1/b?project=${encodeURIComponent(projectId)}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: bucket }),
     });
 
-    // 200/201 OK, 409 = already exists (race)—both fine
     if (!createRes.ok && createRes.status !== 409) {
       const text = await createRes.text().catch(() => "");
       throw new Error(`Failed to create emulator bucket "${bucket}" (status ${createRes.status}): ${text}`);
     }
+  }
+
+  // Seed an object using the emulator's JSON API (avoids client SDK retries)
+  async function seedViaJsonApi(
+    hostWithPort: string,
+    bucket: string,
+    objectName: string,
+    data: Uint8Array,
+    contentType: string,
+  ) {
+    const url =
+      `http://${hostWithPort}/upload/storage/v1/b/${encodeURIComponent(bucket)}/o` +
+      `?uploadType=media&name=${encodeURIComponent(objectName)}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": contentType },
+      body: Buffer.from(data),
+    });
+    return res.ok;
   }
 
   beforeAll(async () => {
@@ -110,7 +126,6 @@ describe("storage security rules", () => {
           console.error("Failed to init test env", err);
           throw err;
         }
-        // Exponential backoff between attempts
         await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
       }
     }
@@ -119,7 +134,8 @@ describe("storage security rules", () => {
     await new Promise((r) => setTimeout(r, 2000));
 
     // Ensure the bucket is created in the emulator before first write
-    await ensureEmulatorBucket(`${storage.host}:${storage.port}`, bucket, projectId);
+    const storageHostWithPort = `${storage.host}:${storage.port}`;
+    await ensureEmulatorBucket(storageHostWithPort, bucket, projectId);
 
     // Seed a test file for read tests
     const seedTimeoutMs = 150000; // was 120000; CI can still be slow on first write
@@ -129,17 +145,40 @@ describe("storage security rules", () => {
 
     while (true) {
       try {
+        // First try JSON API (bypasses SDK retry behavior)
+        const keepData = new Uint8Array([0x6b]); // "k"
+        const seedData = new Uint8Array([0x73, 0x65, 0x65, 0x64]); // "seed"
+
+        const keepOk = await seedViaJsonApi(
+          storageHostWithPort,
+          bucket,
+          "test/.keep",
+          keepData,
+          "application/octet-stream",
+        );
+
+        const seedOk = keepOk
+          ? await seedViaJsonApi(
+              storageHostWithPort,
+              bucket,
+              "test/seed.txt",
+              seedData,
+              "text/plain",
+            )
+          : false;
+
+        if (keepOk && seedOk) break;
+
+        // Fallback: use SDK with rules disabled
         await testEnv.withSecurityRulesDisabled(async (context: any) => {
           const s = context.storage(bucket);
           s.setMaxUploadRetryTime(seedTimeoutMs);
           s.setMaxOperationRetryTime(seedTimeoutMs);
 
-          // Create a tiny ".keep" to ensure prefix exists (emulator sometimes hiccups on first write)
-          const keepData = new Uint8Array([0x6b]); // "k"
-          await uploadBytes(ref(s, "test/.keep"), keepData, { contentType: "application/octet-stream" });
+          await uploadBytes(ref(s, "test/.keep"), keepData, {
+            contentType: "application/octet-stream",
+          });
 
-          // Now upload the actual seed
-          const seedData = new Uint8Array([0x73, 0x65, 0x65, 0x64]); // "seed"
           const uploadPromise = uploadBytes(ref(s, "test/seed.txt"), seedData, {
             contentType: "text/plain",
           });
@@ -154,6 +193,7 @@ describe("storage security rules", () => {
             ),
           ]);
         });
+
         break;
       } catch (err) {
         if (Date.now() - start >= seedTimeoutMs) {
@@ -173,7 +213,6 @@ describe("storage security rules", () => {
     try {
       await testEnv?.cleanup?.();
     } finally {
-      // Let any pending emulator I/O settle to avoid Jest open handles warning
       await new Promise((r) => setTimeout(r, 100));
     }
   });

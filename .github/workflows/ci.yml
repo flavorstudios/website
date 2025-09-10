@@ -9,11 +9,11 @@ permissions:
 jobs:
   build-test:
     runs-on: ubuntu-latest
-env:
-  GOOGLE_APPLICATION_CREDENTIALS: "${{ runner.temp }}/firebase-service-account.json"
-steps:
-  - uses: actions/checkout@v4
-  - uses: actions/setup-node@v4
+    env:
+      GOOGLE_APPLICATION_CREDENTIALS: "${{ runner.temp }}/firebase-service-account.json"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
@@ -23,14 +23,14 @@ steps:
         with:
           run_install: false
 
-      - run: mkdir -p "$(dirname "$GOOGLE_APPLICATION_CREDENTIALS")"
+      - run: mkdir -p "$(dirname \"$GOOGLE_APPLICATION_CREDENTIALS\")"
       - name: Write Firebase service account key
         run: |
           cat <<'EOF' > "$GOOGLE_APPLICATION_CREDENTIALS"
           ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           EOF
 
-      name: Install pnpm
+      - name: Install pnpm
         run: pnpm install
 
       - name: Determine Firebase emulator version

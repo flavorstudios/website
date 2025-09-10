@@ -25,7 +25,8 @@ jobs:
       - name: Set Google Credentials Path
         run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ runner.temp }}/firebase-service-account.json" >> $GITHUB_ENV
 
-      - run: mkdir -p "$(dirname \"$GOOGLE_APPLICATION_CREDENTIALS\")"
+      - name: Ensure credentials directory exists
+        run: mkdir -p "$(dirname "$GOOGLE_APPLICATION_CREDENTIALS")"
       - name: Write Firebase service account key
         run: |
           cat <<'EOF' > "$GOOGLE_APPLICATION_CREDENTIALS"
@@ -33,7 +34,7 @@ jobs:
           EOF
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Determine Firebase emulator version
         id: firebase-tools

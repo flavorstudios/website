@@ -52,7 +52,9 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
             ) : (
               <>
                 <button
-                  ref={(el) => (buttonRefs.current[item.label] = el)}
+                  ref={(el) => {
+                    buttonRefs.current[item.label] = el;
+                  }}
                   className={cn(
                     "w-full flex items-center justify-between py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 group relative overflow-hidden",
                     "focus:outline-none focus:ring-2 focus:ring-blue-500/30 hover:shadow-lg hover:scale-[1.02]",
@@ -101,7 +103,9 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                 {/* Codex fix: submenu in a min-h panel for Blog, Watch, About */}
                 {item.subItems && (
                   <section
-                    ref={(el) => (submenuRefs.current[item.label] = el)}
+                    ref={(el) => {
+                      submenuRefs.current[item.label] = el;
+                    }}
                     id={submenuId}
                     tabIndex={-1}
                     className={cn(

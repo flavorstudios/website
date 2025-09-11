@@ -25,14 +25,6 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
     setExpanded(expanded === label ? null : label)
   }
 
-  // Checks if a menu item's link matches the current path
-  const isActive = (href?: string) => {
-    if (!href) return false
-    if (href === "/" && pathname === "/") return true
-    if (href !== "/" && pathname.startsWith(href)) return true
-    return false
-  }
-
   return (
     <div className="bg-gradient-to-b from-gray-50/80 to-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
       <nav className={cn("p-4", className)} aria-label="Mobile menu">

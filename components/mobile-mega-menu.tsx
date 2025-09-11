@@ -100,9 +100,10 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
 
                 {/* Codex fix: submenu in a min-h panel for Blog, Watch, About */}
                 {item.subItems && (
-                  <div
+                  <section
                     ref={(el) => (submenuRefs.current[item.label] = el)}
                     id={submenuId}
+                    tabIndex={-1}
                     className={cn(
                       "overflow-hidden transition-all duration-500 ease-out",
                       expanded === item.label ? "opacity-100 mt-3" : "max-h-0 opacity-0",
@@ -110,7 +111,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                     style={{
                       maxHeight: expanded === item.label ? "none" : "0px",
                     }}
-                    role="region"
+                    role="menu"
                     aria-label={`${item.label} submenu`}
                     onKeyDown={(e) => {
                       if (e.key === "Escape") {
@@ -235,7 +236,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                         ))}
                       </div>
                     )}
-                  </div>
+                  </section>
                 )}
               </>
             )}

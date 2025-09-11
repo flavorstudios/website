@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   if (auth) return auth;
   try {
     for (const p of paths) {
-      revalidatePath(p);
+      await revalidatePath(p);
     }
     return NextResponse.json({ revalidated: paths, timestamp: new Date().toISOString() });
   } catch (error) {

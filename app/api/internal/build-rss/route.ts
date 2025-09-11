@@ -6,7 +6,7 @@ export async function POST(req: Request) {
   const auth = requireCronAuth(req);
   if (auth) return auth;
   try {
-    revalidatePath("/rss.xml");
+    await revalidatePath("/rss.xml");
     return NextResponse.json({ rebuilt: ["/rss.xml"], timestamp: new Date().toISOString() });
   } catch (error) {
     console.error("rss rebuild failed", error);

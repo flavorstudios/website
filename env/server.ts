@@ -22,6 +22,7 @@ export const serverEnv: Record<string, string | undefined> & {
   BASE_URL: string | undefined;
   BING_API_KEY: string | undefined;
   CONTACT_REPLY_EMAILS: string | undefined;
+  CRON_SECRET: string | undefined;
   DEBUG_ADMIN: string | undefined;
   FIREBASE_SERVICE_ACCOUNT_JSON: string | undefined;
   FIREBASE_SERVICE_ACCOUNT_KEY: string | undefined;
@@ -65,6 +66,7 @@ export const serverEnv: Record<string, string | undefined> & {
   BASE_URL: process.env.BASE_URL,
   BING_API_KEY: process.env.BING_API_KEY,
   CONTACT_REPLY_EMAILS: process.env.CONTACT_REPLY_EMAILS,
+    CRON_SECRET: process.env.CRON_SECRET,
   DEBUG_ADMIN: process.env.DEBUG_ADMIN,
   FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
   FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,

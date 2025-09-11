@@ -12,7 +12,8 @@
     "test": "jest",
     "e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "test:cron": "tsx scripts/test-cron.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

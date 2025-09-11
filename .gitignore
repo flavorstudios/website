@@ -36,6 +36,7 @@ yarn-error.log*
 .env*
 # keep sample env file public
 !.env.example
+!.env.local.example
 
 # --- Vercel deployment files ---
 .vercel

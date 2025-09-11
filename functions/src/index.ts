@@ -15,3 +15,4 @@ export * from "./test";
 // export * from "./public/other-endpoint";
 // export * from "./admin/auth";
 // ...etc.
+export * from "./scheduler";

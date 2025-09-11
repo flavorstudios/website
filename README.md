@@ -156,3 +156,26 @@ The admin blog editor now uses a dedicated autosave pipeline. Drafts are saved t
 
 `/api/admin/blog/drafts` requires an active admin session. When developing locally, either sign in with an authorized admin account or set `ADMIN_BYPASS=true` in your environment to skip authentication. Without authorization the chip shows **Sync failed**.
 
+
+## Scheduled maintenance
+
+Authenticated cron endpoints keep cache and feeds fresh. Set `CRON_SECRET` in the environment (see `.env.local.example`).
+
+### Jobs
+- `POST /api/cron/revalidate` – revalidates `/`, `/blog` and `/tags` (hourly).
+- `POST /api/internal/build-sitemap` – rebuilds `sitemap.xml` (daily at 02:00 Asia/Kolkata).
+- `POST /api/internal/build-rss` – rebuilds `rss.xml` (daily at 02:00 Asia/Kolkata).
+- `POST /api/internal/analytics-rollup` – placeholder for nightly analytics.
+- `POST /api/internal/backup` – placeholder for daily backups.
+
+### Hosting schedules
+Firebase/Google Cloud deployments use scheduled functions in `functions/src/scheduler.ts` to call these endpoints. Adjust cron strings there to change cadence. If deploying on Vercel, configure matching Vercel Cron Jobs hitting the same routes.
+
+### Secret rotation
+Update `CRON_SECRET` in your host's env settings and redeploy. Rotate regularly and update local `.env.local` files as needed.
+
+### Local testing
+Run `pnpm test:cron` to send signed requests to each endpoint, or `pnpm test tests/cron.spec.ts` for Jest coverage.
+
+### Troubleshooting
+401 errors usually mean a missing or mismatched `CRON_SECRET`. For Cloud Scheduler, check Cloud Function logs; for Vercel Cron Jobs, inspect deployment logs and ensure the secret is configured.

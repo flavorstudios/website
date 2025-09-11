@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { requireCronAuth } from "@/lib/cronAuth";
 
 const paths = ["/", "/blog", "/tags"] as const;
@@ -11,7 +11,12 @@ export async function POST(req: Request) {
     for (const p of paths) {
       await revalidatePath(p);
     }
-    return NextResponse.json({ revalidated: paths, timestamp: new Date().toISOString() });
+    await revalidateTag("feeds");
+    return NextResponse.json({
+      revalidated: paths,
+      revalidatedTags: ["feeds"],
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
     console.error("revalidate cron failed", error);
     return NextResponse.json({ error: "Failed to revalidate" }, { status: 500 });

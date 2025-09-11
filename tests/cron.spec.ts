@@ -2,7 +2,10 @@
 
 process.env.CRON_SECRET = "test-secret";
 
-jest.mock("next/cache", () => ({ revalidatePath: () => {} }));
+jest.mock("next/cache", () => ({
+  revalidatePath: () => {},
+  revalidateTag: () => {},
+}));
 
 describe("cron endpoints", () => {
   let revalidate: any;

@@ -18,7 +18,7 @@ interface MobileMegaMenuProps {
 export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenuProps) {
   const [expanded, setExpanded] = useState<string | null>(null)
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({})
-  const submenuRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const submenuRefs = useRef<Record<string, HTMLElement | null>>({})
   const pathname = usePathname()
 
   const toggleExpanded = (label: string) => {

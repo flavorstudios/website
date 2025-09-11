@@ -5,6 +5,8 @@ import { generateRssFeed } from "@/lib/rss-utils"; // Correctly imports your RSS
 import { SITE_NAME } from "@/lib/constants"; // SITE_NAME imported for fallback title.
 import { getCanonicalUrl } from "@/lib/seo-utils"; // For canonicalizing fallback URLs.
 
+export const revalidate = 3600;
+
 export async function GET() {
   try {
     // Attempt to generate the full RSS feed.

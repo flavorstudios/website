@@ -26,6 +26,8 @@ interface ContentPage {
   createdAt?: string;
 }
 
+export const revalidate = 3600;
+
 export async function GET() {
   try {
     // --- Fetch published blogs and videos via PUBLIC API ---
@@ -36,7 +38,9 @@ export async function GET() {
     
     if (!skipFetch) {
       try {
-        const res = await fetch(`${BASE_URL}/api/blogs`);
+        const res = await fetch(`${BASE_URL}/api/blogs`, {
+          next: { tags: ["feeds"], revalidate: 3600 },
+        });
         if (res.ok) {
           blogs = await res.json();
         }
@@ -44,7 +48,9 @@ export async function GET() {
         console.error("Failed to fetch blogs for sitemap:", err);
       }
     try {
-        const res = await fetch(`${BASE_URL}/api/videos`);
+        const res = await fetch(`${BASE_URL}/api/videos`, {
+          next: { tags: ["feeds"], revalidate: 3600 },
+        });
         if (res.ok) {
           videos = await res.json();
         }

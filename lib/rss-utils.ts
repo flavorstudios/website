@@ -184,8 +184,12 @@ export async function generateRssFeed(): Promise<string> {
       "https://flavorstudios.in";
 
     const [blogsRes, videosRes] = await Promise.all([
-      fetch(`${baseUrl}/api/blogs`),
-      fetch(`${baseUrl}/api/videos`),
+      fetch(`${baseUrl}/api/blogs`, {
+        next: { tags: ["feeds"], revalidate: 3600 },
+      }),
+      fetch(`${baseUrl}/api/videos`, {
+        next: { tags: ["feeds"], revalidate: 3600 },
+      }),
     ]);
     const blogPosts: BlogPost[] = blogsRes.ok ? await blogsRes.json() : [];
     const videos: Video[] = videosRes.ok ? await videosRes.json() : [];

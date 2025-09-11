@@ -7,6 +7,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { ChevronDown, Sparkles, Grid3X3 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { isActive } from "@/lib/nav-utils"
 
 export interface MenuItem {
   label: string
@@ -111,14 +112,6 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Check if current path matches menu item
-  const isActive = (href?: string) => {
-    if (!href) return false
-    if (href === "/" && pathname === "/") return true
-    if (href !== "/" && pathname.startsWith(href)) return true
-    return false
-  }
-
   // Desktop dropdown with mobile-inspired design
   const renderDropdown = (item: MenuItem) => {
     if (!item.subItems || item.subItems.length === 0) return null
@@ -154,7 +147,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                 "group flex items-start justify-between py-3 px-3 text-sm rounded-xl transition-all duration-300 relative overflow-hidden mb-1 last:mb-0 border border-transparent",
                 "hover:shadow-md hover:scale-[1.01] hover:bg-white/80 hover:border-gray-200/50",
                 "focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-gray-200/50",
-                isActive(subItem.href) &&
+                isActive(pathname, subItem.href) &&
                   "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50",
                 focusedIndex === index && "bg-white/80 border-gray-200/50",
               )}
@@ -175,7 +168,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                   <div
                     className={cn(
                       "font-medium transition-colors",
-                      isActive(subItem.href) ? "text-blue-700" : "text-gray-900 group-hover:text-gray-900",
+                      isActive(pathname, subItem.href) ? "text-blue-700" : "text-gray-900 group-hover:text-gray-900",
                     )}
                   >
                     {subItem.label}
@@ -221,11 +214,11 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               className={cn(
                 "flex items-center py-2 px-3 text-sm font-medium rounded-xl transition-all duration-300 group relative overflow-hidden",
                 "hover:shadow-lg hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
-                isActive(item.href)
+                isActive(pathname, item.href)
                   ? "text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
                   : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-gray-900",
               )}
-              aria-current={isActive(item.href) ? "page" : undefined}
+              aria-current={isActive(pathname, item.href) ? "page" : undefined}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <span className="relative z-10">{item.label}</span>

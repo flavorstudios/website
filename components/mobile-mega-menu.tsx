@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ChevronDown, Coffee, Sparkles, Grid3X3 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { slugify } from "@/lib/slugify"
+import { isActive } from "@/lib/nav-utils"
 import type { MenuItem } from "./mega-menu"
 
 interface MobileMegaMenuProps {
@@ -13,15 +15,10 @@ interface MobileMegaMenuProps {
   className?: string
 }
 
-function slugify(label: string) {
-  return label
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "")
-}
-
 export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenuProps) {
   const [expanded, setExpanded] = useState<string | null>(null)
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+  const submenuRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const pathname = usePathname()
 
   const toggleExpanded = (label: string) => {
@@ -50,12 +47,12 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                 className={cn(
                   "flex items-center py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 group relative overflow-hidden",
                   "hover:shadow-lg hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
-                  isActive(item.href)
+                  isActive(pathname, item.href)
                     ? "text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
                     : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-gray-900",
                 )}
                 onClick={onItemClick}
-                aria-current={isActive(item.href) ? "page" : undefined}
+                aria-current={isActive(pathname, item.href) ? "page" : undefined}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <span className="relative z-10">{item.label}</span>
@@ -63,6 +60,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
             ) : (
               <>
                 <button
+                  ref={(el) => (buttonRefs.current[item.label] = el)}
                   className={cn(
                     "w-full flex items-center justify-between py-4 px-4 text-base font-medium rounded-xl transition-all duration-300 group relative overflow-hidden",
                     "focus:outline-none focus:ring-2 focus:ring-blue-500/30 hover:shadow-lg hover:scale-[1.02]",
@@ -71,6 +69,23 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                       : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-gray-900",
                   )}
                   onClick={() => toggleExpanded(item.label)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      const isOpening = expanded !== item.label
+                      toggleExpanded(item.label)
+                      if (isOpening) {
+                        requestAnimationFrame(() => {
+                          const firstLink = submenuRefs.current[item.label]?.querySelector("a") as HTMLElement | null
+                          firstLink?.focus()
+                        })
+                      }
+                    } else if (e.key === "Escape" && expanded === item.label) {
+                      e.preventDefault()
+                      setExpanded(null)
+                      buttonRefs.current[item.label]?.focus()
+                    }
+                  }}
                   aria-expanded={expanded === item.label}
                   aria-controls={submenuId}
                   type="button"
@@ -94,6 +109,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                 {/* Codex fix: submenu in a min-h panel for Blog, Watch, About */}
                 {item.subItems && (
                   <div
+                    ref={(el) => (submenuRefs.current[item.label] = el)}
                     id={submenuId}
                     className={cn(
                       "overflow-hidden transition-all duration-500 ease-out",
@@ -104,6 +120,24 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                     }}
                     role="region"
                     aria-label={`${item.label} submenu`}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") {
+                        e.preventDefault()
+                        setExpanded(null)
+                        buttonRefs.current[item.label]?.focus()
+                      } else if (e.key === "Tab") {
+                        const links = submenuRefs.current[item.label]?.querySelectorAll("a") || []
+                        const firstLink = links[0] as HTMLElement | undefined
+                        const lastLink = links[links.length - 1] as HTMLElement | undefined
+                        if (e.shiftKey && document.activeElement === firstLink) {
+                          e.preventDefault()
+                          setExpanded(null)
+                          buttonRefs.current[item.label]?.focus()
+                        } else if (!e.shiftKey && document.activeElement === lastLink) {
+                          setExpanded(null)
+                        }
+                      }
+                    }}
                   >
                     {(item.label === "Blog" || item.label === "Watch" || item.label === "About") ? (
                       <div
@@ -127,12 +161,12 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                               className={cn(
                                 "group flex items-start justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden border border-transparent",
                                 "hover:shadow-md hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
-                                isActive(subItem.href)
+                                isActive(pathname, subItem.href)
                                   ? "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50"
                                   : "text-gray-600 hover:text-gray-900 hover:bg-white/80 hover:border-gray-200/50",
                               )}
                               onClick={onItemClick}
-                              aria-current={isActive(subItem.href) ? "page" : undefined}
+                              aria-current={isActive(pathname, subItem.href) ? "page" : undefined}
                             >
                               <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                               <div className="flex-1 min-w-0 relative z-10 pr-3">
@@ -176,12 +210,12 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                             className={cn(
                               "group flex items-start justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden border border-transparent",
                               "hover:shadow-md hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
-                              isActive(subItem.href)
+                              isActive(pathname, subItem.href)
                                 ? "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50"
                                 : "text-gray-600 hover:text-gray-900 hover:bg-white/80 hover:border-gray-200/50",
                             )}
                             onClick={onItemClick}
-                            aria-current={isActive(subItem.href) ? "page" : undefined}
+                            aria-current={isActive(pathname, subItem.href) ? "page" : undefined}
                           >
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             <div className="flex-1 min-w-0 relative z-10 pr-3">

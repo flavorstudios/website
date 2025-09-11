@@ -21,7 +21,8 @@ import {
 } from "lucide-react"
 import { useRole } from "../contexts/role-context"
 import type React from "react"
-import { useState, useEffect, useMemo, Dispatch, SetStateAction } from "react"
+import { useEffect, useMemo, Dispatch, SetStateAction } from "react"
+import useMediaQuery from "@/hooks/use-media-query"
 import { ADMIN_HEADER_HEIGHT } from "@/lib/constants"
 import { SectionId } from "../sections"
 
@@ -50,7 +51,7 @@ export function AdminSidebar({
   setSidebarOpen,
 }: AdminSidebarProps) {
   const { accessibleSections } = useRole()
-  const [isMobile, setIsMobile] = useState(false)
+  const isMobile = useMediaQuery("(max-width: 767px)")
   const pathname = usePathname()
 
   const menuItems: MenuItem[] = [
@@ -81,13 +82,6 @@ export function AdminSidebar({
       .sort((a, b) => (b.href!.length - a.href!.length))[0]
     return match?.id || activeSection
   }, [pathname, filteredNavItems, activeSection])
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768)
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-    return () => window.removeEventListener("resize", checkMobile)
-  }, [])
 
   // Auto-close the sidebar on route change for small screens
   useEffect(() => {

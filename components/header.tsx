@@ -101,13 +101,22 @@ export function Header({
             <div className="flex items-center md:hidden">
               <SearchFeature />
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-expanded={isOpen}
+                  aria-controls="mobile-menu"
+                >
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
             </div>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+            <SheetContent
+              id="mobile-menu"
+              side="right"
+              className="w-[300px] sm:w-[400px]"
+            >
               <div className="mt-8">
                 <MobileMegaMenu items={menuItems} onItemClick={() => setIsOpen(false)} />
               </div>

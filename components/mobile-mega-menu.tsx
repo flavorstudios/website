@@ -13,6 +13,13 @@ interface MobileMegaMenuProps {
   className?: string
 }
 
+function slugify(label: string) {
+  return label
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "")
+}
+
 export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenuProps) {
   const [expanded, setExpanded] = useState<string | null>(null)
   const pathname = usePathname()
@@ -32,7 +39,9 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
   return (
     <div className="bg-gradient-to-b from-gray-50/80 to-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden">
       <nav className={cn("p-4", className)} aria-label="Mobile menu">
-        {items.map((item) => (
+        {items.map((item) => {
+          const submenuId = `mobile-submenu-${slugify(item.label)}`
+          return (
           <div key={item.label} className="mb-2 last:mb-0">
             {/* Single link, no subItems */}
             {item.href && !item.subItems ? (
@@ -63,7 +72,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                   )}
                   onClick={() => toggleExpanded(item.label)}
                   aria-expanded={expanded === item.label}
-                  aria-controls={`mobile-submenu-${item.label}`}
+                  aria-controls={submenuId}
                   type="button"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -85,7 +94,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                 {/* Codex fix: submenu in a min-h panel for Blog, Watch, About */}
                 {item.subItems && (
                   <div
-                    id={`mobile-submenu-${item.label}`}
+                    id={submenuId}
                     className={cn(
                       "overflow-hidden transition-all duration-500 ease-out",
                       expanded === item.label ? "opacity-100 mt-3" : "max-h-0 opacity-0",
@@ -205,7 +214,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
               </>
             )}
           </div>
-        ))}
+          )})}
 
         {/* Fixed CTA without blinking dot */}
         <div className="mt-6 pt-4 border-t border-gray-200/50">

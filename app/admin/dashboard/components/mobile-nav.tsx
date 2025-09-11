@@ -1,7 +1,8 @@
 "use client"
 
 import { LayoutDashboard, FileText, Image, Settings } from "lucide-react"
-import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import type React from "react"
 import { useEffect, useRef } from "react"
 import type { Dispatch, SetStateAction } from "react"
@@ -13,7 +14,7 @@ interface MobileNavProps {
 }
 
 export default function MobileNav({ activeSection, setActiveSection }: MobileNavProps) {
-  const router = useRouter()
+  const pathname = usePathname()
   const navRef = useRef<HTMLElement>(null)
 
   // Sync CSS variable so main content can pad for the exact nav height
@@ -49,21 +50,21 @@ export default function MobileNav({ activeSection, setActiveSection }: MobileNav
         {items.map((item) => {
           const Icon = item.icon
           const active = activeSection === item.id
+          const isCurrent = pathname === item.href
           return (
             <li key={item.id}>
-              <button
+              <Link
+                href={item.href}
                 className={`flex flex-col items-center text-xs focus:outline-none ${
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
-                onClick={() => {
-                  setActiveSection(item.id)
-                  if (item.href) router.push(item.href)
-                }}
+                onClick={() => setActiveSection(item.id)}
                 aria-label={item.label}
+                aria-current={isCurrent ? "page" : undefined}
               >
                 <Icon className="h-5 w-5" />
                 <span className="mt-1">{item.label}</span>
-              </button>
+              </Link>
             </li>
           )
         })}

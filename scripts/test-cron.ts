@@ -1,3 +1,5 @@
+import 'cross-fetch/polyfill';
+
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 const CRON_SECRET = process.env.CRON_SECRET || 'test-secret';
 
@@ -20,6 +22,8 @@ const endpoints = [
       console.log(path, res.status, data);
     } catch (err) {
       console.error(path, err);
+      console.error(`Ensure dev server is running at ${BASE_URL}`);
+      process.exit(1);
     }
   }
 })();

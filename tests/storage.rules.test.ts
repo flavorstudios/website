@@ -165,7 +165,7 @@ describe("storage security rules", () => {
     try {
       await testEnv.withSecurityRulesDisabled(async (context: any) => {
         const s = context.storage(bucket);
-        s.useEmulator(storageHost, storagePort);
+        connectStorageEmulator(s, storageHost, storagePort);
         const testRef = ref(s, "test/verify.txt");
         await uploadString(testRef, "verify", { contentType: "text/plain" });
         const bytes = await getBytes(testRef);
@@ -264,7 +264,7 @@ describe("storage security rules", () => {
   it("denies unauthenticated access", async () => {
     const bucket = `${process.env.FIREBASE_PROJECT_ID}.appspot.com`;
     const s = testEnv.unauthenticatedContext().storage(bucket);
-    s.useEmulator(storageHost, storagePort);
+    connectStorageEmulator(s, storageHost, storagePort);
     const fileRef = ref(s, "test/seed.txt");
     await assertFails(getBytes(fileRef));
     await assertFails(
@@ -275,7 +275,7 @@ describe("storage security rules", () => {
   it("denies non-admin users", async () => {
     const bucket = `${process.env.FIREBASE_PROJECT_ID}.appspot.com`;
     const s = testEnv.authenticatedContext("user").storage(bucket);
-    s.useEmulator(storageHost, storagePort);
+    connectStorageEmulator(s, storageHost, storagePort);
     await assertFails(getBytes(ref(s, "test/seed.txt")));
     await assertFails(
       uploadString(ref(s, "test/blocked.txt"), "hi", { contentType: "text/plain" }),
@@ -285,7 +285,7 @@ describe("storage security rules", () => {
   it("allows admins via custom claims", async () => {
     const bucket = `${process.env.FIREBASE_PROJECT_ID}.appspot.com`;
     const s = testEnv.authenticatedContext("admin", { role: "admin" }).storage(bucket);
-    s.useEmulator(storageHost, storagePort);
+    connectStorageEmulator(s, storageHost, storagePort);
     await assertSucceeds(
       uploadString(ref(s, "test/ok.txt"), "hi", { contentType: "text/plain" }),
     );

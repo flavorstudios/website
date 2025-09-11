@@ -159,7 +159,7 @@ The admin blog editor now uses a dedicated autosave pipeline. Drafts are saved t
 
 ## Scheduled maintenance
 
-Authenticated cron endpoints keep cache and feeds fresh. Set `CRON_SECRET` in the environment (see `.env.local.example`).
+Authenticated cron endpoints keep cache and feeds fresh. Set `CRON_SECRET` in the environment (see `.env.local.example`). `BASE_URL` must include the protocol and point to the production domain so scheduled functions can call back into the site.
 
 ### Jobs
 - `POST /api/cron/revalidate` – revalidates `/`, `/blog` and `/tags` (hourly).

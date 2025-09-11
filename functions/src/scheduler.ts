@@ -1,6 +1,12 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
 const BASE_URL = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL;
+if (!BASE_URL) {
+  console.warn("Missing BASE_URL for scheduler");
+  throw new Error("BASE_URL is required for scheduled functions");
+} else if (!BASE_URL.startsWith("http")) {
+  console.warn("BASE_URL should include protocol (http/https)");
+}
 const CRON_SECRET = process.env.CRON_SECRET;
 
 async function post(path: string) {

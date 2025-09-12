@@ -12,6 +12,8 @@ permissions:
 jobs:
   submit-and-audit:
     runs-on: ubuntu-latest
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
 
     steps:
       - name: 📦 Checkout repository

@@ -50,7 +50,8 @@ pnpm build  # create an optimized production build
 pnpm start  # run the production server
 
 > Tip: set `SKIP_ENV_VALIDATION=true` or `ADMIN_BYPASS=true` to bypass the
-> Firebase Admin env check when admin features aren't needed.
+> Firebase Admin env check when admin features aren't needed. This also
+> disables cron features that rely on `CRON_SECRET`.
 
 To run a single test file:
 
@@ -103,7 +104,8 @@ will show a friendly message instead of crashing.
 
 If these admin features aren't needed (for example in CI), set
 `SKIP_ENV_VALIDATION=true` or `ADMIN_BYPASS=true` to skip the service-account
-environment check during build.
+environment check during build. Cron features are disabled when validation is
+skipped.
 
 `pnpm build` runs `scripts/validate-env.ts` to verify this configuration. The build
 fails unless either `FIREBASE_SERVICE_ACCOUNT_KEY` or `FIREBASE_SERVICE_ACCOUNT_JSON`

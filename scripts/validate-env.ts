@@ -32,7 +32,7 @@ const adminVars = [
   "FIREBASE_STORAGE_BUCKET",
 ];
 const required = firebaseKeys.filter((key) => !adminVars.includes(key));
-required.push("CRON_SECRET");
+if (!skipValidation) required.push("CRON_SECRET");
 
 const missing = required.filter((key) => !process.env[key]);
 

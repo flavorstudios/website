@@ -9,6 +9,8 @@ permissions:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    env:
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - uses: actions/checkout@v4
       

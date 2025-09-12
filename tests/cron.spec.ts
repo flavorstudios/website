@@ -58,7 +58,7 @@ describe("cron endpoints", () => {
     expect(data).toEqual({
       ok: true,
       job: "build-sitemap",
-      artifacts: ["feeds"],
+      artifacts: ["/sitemap.xml"],
       timestamp: expect.any(String),
     });
   });
@@ -70,7 +70,7 @@ describe("cron endpoints", () => {
     expect(data).toEqual({
       ok: true,
       job: "build-rss",
-      artifacts: ["feeds"],
+      artifacts: ["/rss.xml"],
       timestamp: expect.any(String),
     });
   });

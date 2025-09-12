@@ -14,6 +14,7 @@ describe("cron endpoints", () => {
   let buildRss: any;
   let analyticsRollup: any;
   let backup: any;
+  let maintenance: any;
   let NextRequest: any;
 
   beforeAll(async () => {
@@ -23,6 +24,7 @@ describe("cron endpoints", () => {
     buildRss = (await import("@/app/api/internal/build-rss/route")).POST;
     analyticsRollup = (await import("@/app/api/internal/analytics-rollup/route")).POST;
     backup = (await import("@/app/api/internal/backup/route")).POST;
+    maintenance = (await import("@/app/api/cron/maintenance/route")).POST;
   });
 
   const authReq = () =>
@@ -97,5 +99,32 @@ describe("cron endpoints", () => {
       artifacts: [],
       timestamp: expect.any(String),
     });
+  });
+
+  it("runs maintenance jobs when authorized", async () => {
+    const fetchMock = jest
+      .spyOn(global, "fetch" as any)
+      .mockResolvedValue(new Response(null, { status: 200 }));
+    const req = new NextRequest("http://test/api/cron/maintenance", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer test-secret",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ jobs: ["revalidate", "rss"] }),
+    });
+    const res = await maintenance(req);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data).toEqual({
+      ok: true,
+      job: "maintenance",
+      artifacts: [
+        { job: "revalidate", status: 200 },
+        { job: "rss", status: 200 },
+      ],
+      timestamp: expect.any(String),
+    });
+    fetchMock.mockRestore();
   });
 });

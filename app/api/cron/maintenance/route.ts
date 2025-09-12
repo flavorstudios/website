@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireCronAuth } from "@/lib/cronAuth";
+import { handleCron } from "@/lib/cron";
 
 const jobMap: Record<string, string> = {
   revalidate: "/api/cron/revalidate",
@@ -10,8 +10,6 @@ const jobMap: Record<string, string> = {
 };
 
 export async function POST(req: Request) {
-  const auth = await requireCronAuth(req);
-  if (auth) return auth;
 
   let body: unknown;
   try {
@@ -23,22 +21,24 @@ export async function POST(req: Request) {
   const jobs = Array.isArray((body as any).jobs) ? ((body as any).jobs as string[]) : [];
   const headers = { Authorization: req.headers.get("authorization") ?? "" };
 
-  const results: { job: string; status: number }[] = [];
+  return handleCron("maintenance", req, async () => {
+    const results: { job: string; status: number }[] = [];
 
   for (const job of jobs) {
-    const path = jobMap[job];
-    if (!path) {
-      results.push({ job, status: 400 });
-      continue;
+      const path = jobMap[job];
+      if (!path) {
+        results.push({ job, status: 400 });
+        continue;
+      }
+      try {
+        const res = await fetch(new URL(path, req.url), { method: "POST", headers });
+        results.push({ job, status: res.status });
+      } catch (err) {
+        console.error(`Failed job ${job}`, err);
+        results.push({ job, status: 500 });
+      }
     }
-    try {
-      const res = await fetch(new URL(path, req.url), { method: "POST", headers });
-      results.push({ job, status: res.status });
-    } catch (err) {
-      console.error(`Failed job ${job}`, err);
-      results.push({ job, status: 500 });
-    }
-  }
 
-  return NextResponse.json({ results, timestamp: new Date().toISOString() });
+  return { artifacts: results };
+  });
 }

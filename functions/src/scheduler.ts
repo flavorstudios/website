@@ -9,7 +9,7 @@ if (!BASE_URL) {
 }
 const CRON_SECRET = process.env.CRON_SECRET;
 
-async function post(path: string) {
+async function post(path: string, body?: unknown) {
   if (!BASE_URL || !CRON_SECRET) {
     console.warn("Missing BASE_URL or CRON_SECRET for scheduler");
     return;
@@ -17,7 +17,11 @@ async function post(path: string) {
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${CRON_SECRET}` },
+      headers: {
+        Authorization: `Bearer ${CRON_SECRET}`,
+        ...(body ? { "Content-Type": "application/json" } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
     });
     console.log(path, res.status);
   } catch (err) {
@@ -25,28 +29,31 @@ async function post(path: string) {
   }
 }
 
+async function maintenance(jobs: string[]) {
+  await post("/api/cron/maintenance", { jobs });
+}
+
 export const scheduledRevalidate = onSchedule("every 60 minutes", async () => {
-  await post("/api/cron/revalidate");
+  await maintenance(["revalidate"]);
 });
 
 export const scheduledSitemap = onSchedule(
   { schedule: "0 2 * * *", timeZone: "Asia/Kolkata" },
   async () => {
-    await post("/api/internal/build-sitemap");
-    await post("/api/internal/build-rss");
+    await maintenance(["sitemap", "rss"]);
   }
 );
 
 export const scheduledAnalytics = onSchedule(
   { schedule: "30 2 * * *", timeZone: "Asia/Kolkata" },
   async () => {
-    await post("/api/internal/analytics-rollup");
+    await maintenance(["analytics"]);
   }
 );
 
 export const scheduledBackup = onSchedule(
   { schedule: "0 3 * * *", timeZone: "Asia/Kolkata" },
   async () => {
-    await post("/api/internal/backup");
+    await maintenance(["backup"]);
   }
 );

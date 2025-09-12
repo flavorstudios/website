@@ -2,8 +2,13 @@ import { NextResponse } from "next/server";
 import { requireCronAuth } from "@/lib/cronAuth";
 
 export async function POST(req: Request) {
-  const auth = requireCronAuth(req);
+  const auth = await requireCronAuth(req);
   if (auth) return auth;
   // TODO: hook into real backup system
-  return NextResponse.json({ ok: true, message: "backup trigger noop", timestamp: new Date().toISOString() });
+  rreturn NextResponse.json({
+    ok: true,
+    job: "backup",
+    artifacts: [],
+    timestamp: new Date().toISOString(),
+  });
 }

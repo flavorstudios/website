@@ -5,7 +5,7 @@ import { requireCronAuth } from "@/lib/cronAuth";
 const paths = ["/", "/blog", "/tags"] as const;
 
 export async function POST(req: Request) {
-  const auth = requireCronAuth(req);
+  const auth = await requireCronAuth(req);
   if (auth) return auth;
   try {
     for (const p of paths) {
@@ -13,8 +13,9 @@ export async function POST(req: Request) {
     }
     await revalidateTag("feeds");
     return NextResponse.json({
-      revalidated: paths,
-      revalidatedTags: ["feeds"],
+      ok: true,
+      job: "revalidate",
+      artifacts: [...paths, "feeds"],
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

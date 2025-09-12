@@ -115,6 +115,8 @@ describe("storage security rules", () => {
       throw err;
     }
 
+    await waitForStorageEmulatorReady(storageHost, storagePort);
+
     const projectId = getProjectId();
     const bucket = `${projectId}.appspot.com`;
 

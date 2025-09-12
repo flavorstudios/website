@@ -1,22 +1,7 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
-
-const BASE_URL = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL;
-if (!BASE_URL) {
-  console.warn("Missing BASE_URL for scheduler");
-  throw new Error("BASE_URL is required for scheduled functions");
-} else if (!BASE_URL.startsWith("http")) {
-  console.warn("BASE_URL should include protocol (http/https)");
-}
-const CRON_SECRET = process.env.CRON_SECRET;
-if (!CRON_SECRET) {
-  console.warn("Missing CRON_SECRET for scheduler; scheduled jobs will be skipped");
-}
+import { BASE_URL, CRON_SECRET } from "../../lib/env";
 
 async function post(path: string, body?: unknown) {
-  if (!CRON_SECRET) {
-    console.warn(`Skipping ${path}: CRON_SECRET is not configured`);
-    return;
-  }
   const attempts = 2;
   for (let i = 0; i < attempts; i++) {
     const controller = new AbortController();

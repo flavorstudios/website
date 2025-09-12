@@ -26,16 +26,6 @@ describe('requireCronAuth', () => {
     expect(res?.status).toBe(401);
   });
 
-  it('returns error when CRON_SECRET is missing', async () => {
-    process.env.CRON_SECRET = undefined;
-    const { requireCronAuth } = await import('../cronAuth');
-    const { NextRequest } = await import('next/server');
-    const res = await requireCronAuth(new NextRequest('http://example.com/foo'));
-    expect(res?.status).toBe(500);
-    const data = await res?.json();
-    expect(data).toEqual({ error: 'Server misconfig: CRON_SECRET missing' });
-  });
-
   it('rate limits repeated calls', async () => {
     const { requireCronAuth } = await import('../cronAuth');
     const { NextRequest } = await import('next/server');

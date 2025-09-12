@@ -1,7 +1,15 @@
 /** @jest-environment node */
 
+import { mkdtempSync, writeFileSync } from "fs";
+import { join } from "path";
+import { tmpdir } from "os";
+
 process.env.CRON_SECRET = "test-secret";
 process.env.BASE_URL = "http://localhost:3000";
+const tmpBackupDir = mkdtempSync(join(tmpdir(), "backup-"));
+process.env.BACKUP_DIR = tmpBackupDir;
+process.env.GOOGLE_APPLICATION_CREDENTIALS = join(tmpBackupDir, "creds.json");
+writeFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, "{}");
 
 jest.mock("next/cache", () => ({
   revalidatePath: () => {},
@@ -84,7 +92,7 @@ describe("cron endpoints", () => {
     expect(data).toEqual({
       ok: true,
       job: "analytics-rollup",
-      artifacts: [],
+      artifacts: expect.any(Array),
       timestamp: expect.any(String),
     });
   });
@@ -93,12 +101,16 @@ describe("cron endpoints", () => {
     const res = await backup(authReq());
     expect(res.status).toBe(200);
     const data = await res.json();
-    expect(data).toEqual({
-      ok: true,
-      job: "backup",
-      artifacts: [],
-      timestamp: expect.any(String),
-    });
+    expect(data.ok).toBe(true);
+    expect(data.job).toBe("backup");
+    expect(data.artifacts).toHaveLength(2);
+    expect(data.artifacts).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("db-"),
+        expect.stringContaining("storage-"),
+      ])
+    );
+    expect(data.timestamp).toEqual(expect.any(String));
   });
 
   it("runs maintenance jobs when authorized", async () => {

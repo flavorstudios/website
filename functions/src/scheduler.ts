@@ -1,11 +1,19 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
-import { BASE_URL, CRON_SECRET } from "../../lib/env";
+import {
+  BASE_URL,
+  CRON_SECRET,
+  CRON_TIMEOUT_MS,
+  CRON_MAX_ATTEMPTS,
+} from "../../lib/env";
+import { logError } from "../../lib/log";
 
 async function post(path: string, body?: unknown) {
-  const attempts = 2;
-  for (let i = 0; i < attempts; i++) {
+  const maxAttempts = CRON_MAX_ATTEMPTS ?? 2;
+  const timeoutMs = CRON_TIMEOUT_MS ?? 10_000;
+  let delay = 1_000;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10_000);
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
     try {
       const res = await fetch(`${BASE_URL}${path}`, {
         method: "POST",
@@ -18,21 +26,25 @@ async function post(path: string, body?: unknown) {
       });
       if (!res.ok) {
         const text = await res.text();
-        console.error(`Failed to call ${path}: ${res.status} ${text}`);
-        if (i === attempts - 1) {
+        logError(`scheduler:post ${path}`, `HTTP ${res.status} ${text}`);
+        if (attempt === maxAttempts) {
           throw new Error(`Request failed with status ${res.status}`);
         }
-        continue;
+        } else {
+        console.log(path, res.status);
+        return;
       }
-      console.log(path, res.status);
-      return;
     } catch (err) {
-      console.error(`Failed to call ${path}`, err);
-      if (i === attempts - 1) {
+      logError(`scheduler:post ${path}`, err);
+      if (attempt === maxAttempts) {
         throw err;
       }
     } finally {
       clearTimeout(timeout);
+    }
+    if (attempt < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      delay *= 2;
     }
   }
 }
@@ -41,9 +53,12 @@ async function maintenance(jobs: string[]) {
   await post("/api/cron/maintenance", { jobs });
 }
 
-export const scheduledRevalidate = onSchedule("every 60 minutes", async () => {
-  await maintenance(["revalidate"]);
-});
+export const scheduledRevalidate = onSchedule(
+  { schedule: "0 * * * *" },
+  async () => {
+    await maintenance(["revalidate"]);
+  },
+);
 
 export const scheduledSitemap = onSchedule(
   { schedule: "0 2 * * *", timeZone: "Asia/Kolkata" },

@@ -157,27 +157,44 @@ The admin blog editor now uses a dedicated autosave pipeline. Drafts are saved t
 `/api/admin/blog/drafts` requires an active admin session. When developing locally, either sign in with an authorized admin account or set `ADMIN_BYPASS=true` in your environment to skip authentication. Without authorization the chip shows **Sync failed**.
 
 
-## Scheduled maintenance
+## Cron Jobs
 
-Authenticated cron endpoints keep cache and feeds fresh. Set `CRON_SECRET` in the environment (see `.env.local.example`). `BASE_URL` must include the protocol and point to the production domain so scheduled functions can call back into the site.
+Authenticated cron endpoints keep cache and feeds fresh.
+
+### Environment variables
+
+- `CRON_SECRET` – shared bearer token used to authenticate requests.
+- `BASE_URL` – full URL (including protocol) pointing at the deployed site so scheduled functions can call back into the app.
+
+See [.env.local.example](.env.local.example) for other related settings.
 
 ### Jobs
-- `POST /api/cron/revalidate` – revalidates `/`, `/blog` and `/tags` (hourly).
-- `POST /api/internal/build-sitemap` – rebuilds `sitemap.xml` (daily at 02:00 Asia/Kolkata).
-- `POST /api/internal/build-rss` – rebuilds `rss.xml` (daily at 02:00 Asia/Kolkata).
-- `POST /api/internal/analytics-rollup` – placeholder for nightly analytics.
-- `POST /api/internal/backup` – placeholder for daily backups.
+| Job | Endpoint | Schedule | Code |
+| --- | --- | --- | --- |
+| Revalidate | `POST /api/cron/revalidate` | every 60 minutes | [`app/api/cron/revalidate/route.ts`](app/api/cron/revalidate/route.ts) |
+| Build sitemap | `POST /api/internal/build-sitemap` | 02:00 Asia/Kolkata daily | [`app/api/internal/build-sitemap/route.ts`](app/api/internal/build-sitemap/route.ts) |
+| Build RSS | `POST /api/internal/build-rss` | 02:00 Asia/Kolkata daily | [`app/api/internal/build-rss/route.ts`](app/api/internal/build-rss/route.ts) |
+| Analytics rollup | `POST /api/internal/analytics-rollup` | 02:30 Asia/Kolkata daily | [`app/api/internal/analytics-rollup/route.ts`](app/api/internal/analytics-rollup/route.ts) |
+| Backup | `POST /api/internal/backup` | 03:00 Asia/Kolkata daily | [`app/api/internal/backup/route.ts`](app/api/internal/backup/route.ts) |
+
+### Backup configuration
+`POST /api/internal/backup` writes artifacts to the directory specified by `BACKUP_DIR` and
+uses credentials from `GOOGLE_APPLICATION_CREDENTIALS` for privileged exports. Ensure
+`BACKUP_DIR` is writable and the service account JSON exists before running the job.
 
 ### Hosting schedules
-Firebase/Google Cloud deployments use scheduled functions in `functions/src/scheduler.ts` to call these endpoints. Adjust cron strings there to change cadence. If deploying on Vercel, configure matching Vercel Cron Jobs hitting the same routes.
+
+Cron schedules are defined in [`functions/src/scheduler.ts`](functions/src/scheduler.ts). Adjust the cron strings there to change cadence. If deploying on Vercel, configure matching Vercel Cron Jobs hitting the same routes.
 
 ### Secret rotation
+
 Update `CRON_SECRET` in your host's env settings and redeploy. Rotate regularly and update local `.env.local` files as needed.
 
 ### Local testing
 Run `pnpm test:cron` to send signed requests to each endpoint, or `pnpm test tests/cron.spec.ts` for Jest coverage.
 
 ### Troubleshooting
+
 401 errors usually mean a missing or mismatched `CRON_SECRET`. For Cloud Scheduler, check Cloud Function logs; for Vercel Cron Jobs, inspect deployment logs and ensure the secret is configured.
 
 ### Cron logging
@@ -190,4 +207,4 @@ To view recent log entries locally:
 pnpm cron:logs
 ```
 
-This script requires Firebase Admin credentials in your environment. Logs can also be viewed in the Firebase console under **Firestore → cronLog**.
+The script [`scripts/query-cron-logs.ts`](scripts/query-cron-logs.ts) requires Firebase Admin credentials in your environment. Logs can also be viewed in the Firebase console under **Firestore → cronLog**.

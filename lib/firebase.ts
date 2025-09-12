@@ -9,7 +9,10 @@ import {
 } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
-import { PUBLIC_FIREBASE_CONFIG, getMissingFirebaseEnv } from "./env";
+import {
+  PUBLIC_FIREBASE_CONFIG,
+  getMissingFirebaseEnv,
+} from "./firebase-client-env";
 
 let app: FirebaseApp | null = null;
 export let firebaseInitError: Error | null = null;

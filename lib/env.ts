@@ -1,43 +1,26 @@
-"use client";
+import 'server-only';
+import { z } from 'zod';
 
-import { FIREBASE_REQUIRED_ENV_VARS } from "./firebase-env";
-import { clientEnv } from "@/env.client";
+const schema = z.object({
+  CRON_SECRET: z.string().min(1, 'CRON_SECRET is required'),
+  BASE_URL: z.string().url('BASE_URL must be a valid URL'),
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+});
 
-/**
- * Public Firebase config sourced from NEXT_PUBLIC_* environment variables.
- * These must be set in `.env.local` for local dev or in your hosting platform (e.g., Vercel).
- * Do not import any Node-only modules here.
- */
-export const PUBLIC_FIREBASE_CONFIG = {
-  apiKey: clientEnv.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: clientEnv.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: clientEnv.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: clientEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: clientEnv.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: clientEnv.NEXT_PUBLIC_FIREBASE_APP_ID,
-  // Optional, used by analytics
-  measurementId: clientEnv.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-} as const;
+const _env = schema.safeParse(process.env);
 
-/**
- * Returns the list of missing required Firebase environment variables (by env var name).
- * Measurement ID is optional and therefore not included in this check.
- */
-export function getMissingFirebaseEnv(): string[] {
-  return FIREBASE_REQUIRED_ENV_VARS.filter(
-    v => v.startsWith("NEXT_PUBLIC_") && !clientEnv[v as keyof typeof clientEnv]
-  );
-}
-
-/**
- * Dev-only warning helper. Safe in both server and browser contexts.
- */
-export function assertClientEnv(): void {
-  const missing = getMissingFirebaseEnv();
-  if (missing.length > 0 && clientEnv.NODE_ENV !== "production") {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `[Firebase] Missing Firebase environment variable(s): ${missing.join(", ")}. Check your environment (e.g., .env.local or hosting dashboard).`
-    );
+if (!_env.success) {
+  const { fieldErrors } = _env.error.flatten();
+  const message = Object.entries(fieldErrors)
+    .map(([key, value]) => `${key}: ${value?.join(', ')}`)
+    .join('\n');
+  if (process.env.NODE_ENV === 'production') {
+    console.error('Invalid environment variables\n' + message);
+    process.exit(1);
   }
+  throw new Error('Invalid environment variables\n' + message);
 }
+
+export const env = _env.data;
+export const { CRON_SECRET, BASE_URL, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } = env;

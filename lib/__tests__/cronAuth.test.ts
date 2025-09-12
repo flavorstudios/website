@@ -10,6 +10,7 @@ describe('requireCronAuth', () => {
       CRON_SECRET: 'secret',
       UPSTASH_REDIS_REST_URL: undefined,
       UPSTASH_REDIS_REST_TOKEN: undefined,
+      BASE_URL: 'http://localhost:3000',
     } as NodeJS.ProcessEnv;
   });
 

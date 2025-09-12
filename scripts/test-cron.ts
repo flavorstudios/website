@@ -1,7 +1,5 @@
 import 'cross-fetch/polyfill';
-
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
-const CRON_SECRET = process.env.CRON_SECRET || 'test-secret';
+import { BASE_URL, CRON_SECRET } from '../lib/env';
 
 const endpoints = [
   '/api/cron/revalidate',

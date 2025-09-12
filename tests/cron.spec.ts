@@ -1,6 +1,7 @@
 /** @jest-environment node */
 
 process.env.CRON_SECRET = "test-secret";
+process.env.BASE_URL = "http://localhost:3000";
 
 jest.mock("next/cache", () => ({
   revalidatePath: () => {},

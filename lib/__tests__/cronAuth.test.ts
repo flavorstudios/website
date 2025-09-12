@@ -34,7 +34,7 @@ describe('requireCronAuth', () => {
         headers: { authorization: 'Bearer secret' },
       });
     const first = await requireCronAuth(makeReq());
-    expect(first).toBeNull();
+    expect(first).toBeUndefined();
     const second = await requireCronAuth(makeReq());
     expect(second?.status).toBe(429);
   });

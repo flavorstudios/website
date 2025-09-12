@@ -10,7 +10,7 @@ const jobMap: Record<string, string> = {
 };
 
 export async function POST(req: Request) {
-  const auth = requireCronAuth(req);
+  const auth = await requireCronAuth(req);
   if (auth) return auth;
 
   let body: unknown;

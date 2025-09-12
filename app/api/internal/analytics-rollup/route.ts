@@ -1,7 +1,9 @@
 import { handleCron } from "@/lib/cron";
 import { adminDb } from "@/lib/firebase-admin";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
+import type { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<NextResponse> {
   return handleCron("analytics-rollup", req, async () => {
     if (!adminDb) return { artifacts: [] };
 

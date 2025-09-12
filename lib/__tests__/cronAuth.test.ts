@@ -33,7 +33,7 @@ describe('requireCronAuth', () => {
     const res = await requireCronAuth(new NextRequest('http://example.com/foo'));
     expect(res?.status).toBe(500);
     const data = await res?.json();
-    expect(data).toEqual({ error: 'CRON_SECRET is not set' });
+    expect(data).toEqual({ error: 'Server misconfig: CRON_SECRET missing' });
   });
 
   it('rate limits repeated calls', async () => {

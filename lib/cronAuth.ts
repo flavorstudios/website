@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import {
-  CRON_SECRET,
   UPSTASH_REDIS_REST_URL as redisUrl,
   UPSTASH_REDIS_REST_TOKEN as redisToken,
 } from "./env";
@@ -50,15 +49,16 @@ async function isRateLimited(path: string): Promise<boolean> {
 export async function requireCronAuth(
   req: Request
 ): Promise<NextResponse | void> {
-  if (!CRON_SECRET) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) {
     return NextResponse.json(
-      { error: "CRON_SECRET is not set" },
+      { error: "Server misconfig: CRON_SECRET missing" },
       { status: 500 }
     );
   }
   
   const auth = req.headers.get("authorization");
-  if (auth !== `Bearer ${CRON_SECRET}`) {
+  if (auth !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

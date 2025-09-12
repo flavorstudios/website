@@ -17,18 +17,38 @@ async function post(path: string, body?: unknown) {
     console.warn(`Skipping ${path}: CRON_SECRET is not configured`);
     return;
   }
-  try {
-    const res = await fetch(`${BASE_URL}${path}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${CRON_SECRET}`,
-        ...(body ? { "Content-Type": "application/json" } : {}),
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    console.log(path, res.status);
-  } catch (err) {
-    console.error(`Failed to call ${path}`, err);
+  const attempts = 2;
+  for (let i = 0; i < attempts; i++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10_000);
+    try {
+      const res = await fetch(`${BASE_URL}${path}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${CRON_SECRET}`,
+          ...(body ? { "Content-Type": "application/json" } : {}),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        console.error(`Failed to call ${path}: ${res.status} ${text}`);
+        if (i === attempts - 1) {
+          throw new Error(`Request failed with status ${res.status}`);
+        }
+        continue;
+      }
+      console.log(path, res.status);
+      return;
+    } catch (err) {
+      console.error(`Failed to call ${path}`, err);
+      if (i === attempts - 1) {
+        throw err;
+      }
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 }
 

@@ -7,14 +7,26 @@ export function parseHostPort(
   defaultPort: number,
 ) {
   const value = process.env[envVar];
+  let host: string;
+  let port: number;
+
   if (!value) {
-    return { host: defaultHost, port: defaultPort };
+    host = defaultHost;
+    port = defaultPort;
+  } else {
+    const [rawHost, portStr] = value.split(":");
+    const parsedPort = Number.parseInt(portStr ?? "", 10);
+    host = rawHost || defaultHost;
+    port = Number.isNaN(parsedPort) ? defaultPort : parsedPort;
   }
-  const [host, portStr] = value.split(":");
-  const port = Number.parseInt(portStr ?? "", 10);
+
+  if (host === "localhost") {
+    host = "127.0.0.1";
+  }
+
   return {
-    host: host || defaultHost,
-    port: Number.isNaN(port) ? defaultPort : port,
+    host,
+    port,
   };
 }
 

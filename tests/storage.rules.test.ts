@@ -88,7 +88,7 @@ describe("storage security rules", () => {
     try {
       await Promise.all([
         ensureReachable(firestore.host, firestore.port, "Firestore"),
-        ensureReachable(storage.host, storage.port, "Storage"),
+        ensureReachable(storageHost, storagePort, "Storage"),
       ]);
     } catch (err) {
       console.error("Emulator unreachable", err);
@@ -103,7 +103,7 @@ describe("storage security rules", () => {
 
     // Ensure SDKs also see explicit emulator hosts in CI where resolution may lag
     process.env.FIRESTORE_EMULATOR_HOST = `${firestore.host}:${firestore.port}`;
-    process.env.FIREBASE_STORAGE_EMULATOR_HOST = `${storage.host}:${storage.port}`;
+    process.env.FIREBASE_STORAGE_EMULATOR_HOST = `${storageHost}:${storagePort}`;
 
     // Preconnect to the Storage emulator to ensure it's ready before tests run
     const tempApp = initializeApp({ projectId: `${projectId}-temp` });
@@ -126,8 +126,8 @@ describe("storage security rules", () => {
           },
           storage: {
             rules: readFileSync("storage.rules", "utf8"),
-            host: storage.host,
-            port: storage.port,
+            host: storageHost,
+            port: storagePort,
             storageBucket: bucket,
           },
         });
@@ -137,7 +137,7 @@ describe("storage security rules", () => {
           new Promise((_, reject) => {
             const timer = setTimeout(() => {
               const msg =
-                `initializeTestEnvironment timed out after ${initTimeoutMs}ms. Ensure the Firestore emulator at ${firestore.host}:${firestore.port} and the Storage emulator at ${storage.host}:${storage.port} are running and reachable.`;
+                `initializeTestEnvironment timed out after ${initTimeoutMs}ms. Ensure the Firestore emulator at ${firestore.host}:${firestore.port} and the Storage emulator at ${storageHost}:${storagePort} are running and reachable.`;
               console.error(msg);
               reject(new Error(msg));
             }, initTimeoutMs);
@@ -158,7 +158,7 @@ describe("storage security rules", () => {
     await new Promise((r) => setTimeout(r, 2000));
 
     // Ensure the bucket is created in the emulator before first write
-    const storageHostWithPort = `${storage.host}:${storage.port}`;
+    const storageHostWithPort = `${storageHost}:${storagePort}`;
     await ensureEmulatorBucket(storageHostWithPort, bucket, projectId);
 
     // Verify basic storage operations are functional

@@ -71,6 +71,26 @@ describe("storage security rules", () => {
     return res.ok;
   }
 
+  // Wait for the Storage emulator's REST API to be ready
+  async function waitForStorageEmulatorReady(host: string, port: number) {
+    const url = `http://${host}:${port}/storage/v1/b`;
+    const timeoutMs = 15000;
+    const intervalMs = 500;
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      try {
+        const res = await fetch(url);
+        if (res.status === 200) return;
+      } catch {
+        // ignore errors and retry
+      }
+      await new Promise((r) => setTimeout(r, intervalMs));
+    }
+    throw new Error(
+      `Storage emulator at ${url} did not return 200 within ${timeoutMs}ms`,
+    );
+  }
+
   beforeAll(async () => {
     const firestore = parseHostPort(
       "FIRESTORE_EMULATOR_HOST",

@@ -1,20 +1,9 @@
-import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { requireCronAuth } from "@/lib/cronAuth";
+import { handleCron } from "@/lib/cron";
 
 export async function POST(req: Request) {
-  const auth = await requireCronAuth(req);
-  if (auth) return auth;
-  try {
+  return handleCron("build-rss", req, async () => {
     await revalidateTag("feeds");
-    return NextResponse.json({
-      ok: true,
-      job: "build-rss",
-      artifacts: ["feeds"],
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error("rss rebuild failed", error);
-    return NextResponse.json({ error: "Failed to rebuild RSS" }, { status: 500 });
-  }
+    return { artifacts: ["feeds"] };
+  });
 }

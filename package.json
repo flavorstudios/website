@@ -13,7 +13,8 @@
     "e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test:cron": "tsx scripts/test-cron.ts"
+    "test:cron": "tsx scripts/test-cron.ts",
+    "cron:logs": "tsx scripts/query-cron-logs.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

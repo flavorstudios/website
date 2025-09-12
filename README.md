@@ -179,3 +179,15 @@ Run `pnpm test:cron` to send signed requests to each endpoint, or `pnpm test tes
 
 ### Troubleshooting
 401 errors usually mean a missing or mismatched `CRON_SECRET`. For Cloud Scheduler, check Cloud Function logs; for Vercel Cron Jobs, inspect deployment logs and ensure the secret is configured.
+
+### Cron logging
+
+Each cron job writes an entry to the Firestore `cronLog` collection with fields `{ job, ok, durationMs, error?, timestamp }` for basic monitoring.
+
+To view recent log entries locally:
+
+```bash
+pnpm cron:logs
+```
+
+This script requires Firebase Admin credentials in your environment. Logs can also be viewed in the Firebase console under **Firestore → cronLog**.

@@ -1,14 +1,8 @@
-import { NextResponse } from "next/server";
-import { requireCronAuth } from "@/lib/cronAuth";
+import { handleCron } from "@/lib/cron";
 
 export async function POST(req: Request) {
-  const auth = await requireCronAuth(req);
-  if (auth) return auth;
-  // TODO: implement analytics aggregation
-  return NextResponse.json({
-    ok: true,
-    job: "analytics-rollup",
-    artifacts: [],
-    timestamp: new Date().toISOString(),
+  return handleCron("analytics-rollup", req, async () => {
+    // TODO: implement analytics aggregation
+    return { artifacts: [] };
   });
 }

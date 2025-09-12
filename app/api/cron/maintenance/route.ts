@@ -24,14 +24,17 @@ export async function POST(req: Request) {
   return handleCron("maintenance", req, async () => {
     const results: { job: string; status: number }[] = [];
 
-  for (const job of jobs) {
+    for (const job of jobs) {
       const path = jobMap[job];
       if (!path) {
         results.push({ job, status: 400 });
         continue;
       }
       try {
-        const res = await fetch(new URL(path, req.url), { method: "POST", headers });
+        const res = await fetch(new URL(path, req.url), {
+          method: "POST",
+          headers,
+        });
         results.push({ job, status: res.status });
       } catch (err) {
         console.error(`Failed job ${job}`, err);
@@ -39,6 +42,13 @@ export async function POST(req: Request) {
       }
     }
 
-  return { artifacts: results };
+  const failed = results.filter((r) => r.status >= 400);
+    if (failed.length > 0) {
+      throw new Error(
+        `Failed jobs: ${failed.map((f) => `${f.job} (${f.status})`).join(", ")}`
+      );
+    }
+
+    return { artifacts: results };
   });
 }

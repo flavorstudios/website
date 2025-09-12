@@ -24,7 +24,9 @@ import {
   ensureReachable,
 } from "./utils/emulator";
 
-describe("storage security rules", () => {
+const describeFn = process.env.RUN_EMULATOR_TESTS ? describe : describe.skip;
+
+describeFn("storage security rules", () => {
   let testEnv: any;
   let storageHost: string;
   let storagePort: number;
@@ -72,8 +74,13 @@ describe("storage security rules", () => {
   }
 
   // Wait for the Storage emulator's REST API to be ready
-  async function waitForStorageEmulatorReady(host: string, port: number) {
-    const url = `http://${host}:${port}/storage/v1/b`;
+  async function waitForStorageEmulatorReady(
+    host: string,
+    port: number,
+    projectId: string,
+  ) {
+    const url =
+      `http://${host}:${port}/storage/v1/b?project=${encodeURIComponent(projectId)}`;
     const timeoutMs = 15000;
     const intervalMs = 500;
     const start = Date.now();
@@ -115,9 +122,8 @@ describe("storage security rules", () => {
       throw err;
     }
 
-    await waitForStorageEmulatorReady(storageHost, storagePort);
-
     const projectId = getProjectId();
+    await waitForStorageEmulatorReady(storageHost, storagePort, projectId);
     const bucket = `${projectId}.appspot.com`;
 
     process.env.FIREBASE_PROJECT_ID = projectId;

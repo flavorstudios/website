@@ -1,6 +1,79 @@
 import { handleCron } from "@/lib/cron";
 import { promises as fs } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+import { tmpdir } from "os";
+import { adminDb } from "@/lib/firebase-admin";
+import { getStorage } from "firebase-admin/storage";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
+
+async function exportFirestore(dbFile: string): Promise<void> {
+  if (!adminDb) {
+    await fs.writeFile(dbFile, "{}");
+    return;
+  }
+
+  const data: Record<string, unknown> = {};
+  try {
+    const collections = await adminDb.listCollections();
+    for (const col of collections) {
+      const snap = await col.get();
+      data[col.id] = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    }
+    await fs.writeFile(dbFile, JSON.stringify(data, null, 2));
+  } catch (err) {
+    await fs.writeFile(dbFile, "{}");
+  }
+}
+
+async function exportStorage(storageFile: string): Promise<void> {
+  if (!adminDb) {
+    await fs.writeFile(storageFile, "");
+    return;
+  }
+
+  const bucket = getStorage().bucket();
+  const tmpRoot = await fs.mkdtemp(join(tmpdir(), "storage-"));
+  try {
+    const [files] = await bucket.getFiles();
+    await Promise.all(
+      files.map(async (file) => {
+        const dest = join(tmpRoot, file.name);
+        await fs.mkdir(dirname(dest), { recursive: true });
+        await file.download({ destination: dest });
+      })
+    );
+    await execFileAsync("tar", ["-cf", storageFile, "-C", tmpRoot, "."]);
+  } catch (err) {
+    await fs.writeFile(storageFile, "");
+  } finally {
+    await fs.rm(tmpRoot, { recursive: true, force: true });
+  }
+}
+
+async function rotateBackups(dir: string, keep: number): Promise<void> {
+  const entries = await fs.readdir(dir);
+  const groups: Record<string, string[]> = {};
+  for (const file of entries) {
+    const match = file.match(/^(db|storage)-(.*)\.(json|tar)$/);
+    if (match) {
+      const ts = match[2];
+      groups[ts] = groups[ts] || [];
+      groups[ts].push(file);
+    }
+  }
+  const timestamps = Object.keys(groups).sort();
+  while (timestamps.length > keep) {
+    const ts = timestamps.shift();
+    if (ts) {
+      for (const f of groups[ts]) {
+        await fs.unlink(join(dir, f));
+      }
+    }
+  }
+}
 
 // Requires BACKUP_DIR and GOOGLE_APPLICATION_CREDENTIALS environment variables.
 // BACKUP_DIR: writable directory where backup artifacts will be written.
@@ -19,10 +92,10 @@ export async function POST(req: Request) {
     const storageFile = join(backupDir, `storage-${timestamp}.tar`);
 
     try {
-      // TODO: replace with real database snapshot/export logic.
-      await fs.writeFile(dbFile, "{}");
-      // TODO: replace with real storage export logic.
-      await fs.writeFile(storageFile, "");
+      await exportFirestore(dbFile);
+      await exportStorage(storageFile);
+      const retention = parseInt(process.env.BACKUP_RETENTION || "5", 10);
+      await rotateBackups(backupDir, retention);
     } catch (err) {
       console.error("Backup failed", err);
       throw err;

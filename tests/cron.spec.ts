@@ -1,6 +1,6 @@
 /** @jest-environment node */
 
-import { mkdtempSync, writeFileSync } from "fs";
+import { mkdtempSync, writeFileSync, readdirSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 
@@ -113,11 +113,20 @@ describe("cron endpoints", () => {
     expect(data.timestamp).toEqual(expect.any(String));
   });
 
+  it("rotates old backups", async () => {
+    process.env.BACKUP_RETENTION = "1";
+    await backup(authReq());
+    await backup(authReq());
+    const files = readdirSync(tmpBackupDir);
+    expect(files.filter((f) => f.startsWith("db-")).length).toBe(1);
+    expect(files.filter((f) => f.startsWith("storage-")).length).toBe(1);
+  });
+
   it("runs maintenance jobs when authorized", async () => {
-    const fetchMock = jest
-      .spyOn(global, "fetch" as any)
-      .mockResolvedValue(new Response(null, { status: 200 }));
-    const req = new NextRequest("http://test/api/cron/maintenance", {
+      const fetchMock = jest
+        .spyOn(global, "fetch" as any)
+        .mockResolvedValue(new Response(null, { status: 200 }));
+      const req = new NextRequest("http://test/api/cron/maintenance", {
       method: "POST",
       headers: {
         Authorization: "Bearer test-secret",
@@ -138,5 +147,31 @@ describe("cron endpoints", () => {
       timestamp: expect.any(String),
     });
     fetchMock.mockRestore();
+  });
+
+  it("returns 500 if any maintenance job fails", async () => {
+    jest.resetModules();
+    const { POST: maintenanceFail } = await import(
+      "@/app/api/cron/maintenance/route"
+    );
+    const fetchMock = jest
+      .spyOn(global, "fetch" as any)
+      .mockResolvedValue(new Response(null, { status: 500 }));
+    const req = new NextRequest("http://test/api/cron/maintenance", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer test-secret",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ jobs: ["revalidate"] }),
+    });
+    const consoleSpy = jest.spyOn(console, "error").mockImplementation();
+    const res = await maintenanceFail(req);
+    expect(res.status).toBe(500);
+    const data = await res.json();
+    expect(data).toEqual({ error: "Failed to maintenance" });
+    expect(consoleSpy).toHaveBeenCalled();
+    fetchMock.mockRestore();
+    consoleSpy.mockRestore();
   });
 });

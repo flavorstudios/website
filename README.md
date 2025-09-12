@@ -201,7 +201,7 @@ Run `pnpm test:cron` to send signed requests to each endpoint, or `pnpm test tes
 
 ### Cron logging
 
-Each cron job writes an entry to the Firestore `cronLog` collection with fields `{ job, ok, durationMs, error?, timestamp }` for basic monitoring.
+Each cron job writes an entry to the Firestore `cronLog` collection with fields `{ job, ok, durationMs, error?, timestamp }` for basic monitoring. Logs older than 30 days are trimmed by a scheduled cleanup job (configurable via `CRON_LOG_RETENTION_DAYS`).
 
 To view recent log entries locally:
 

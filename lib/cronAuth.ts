@@ -33,7 +33,9 @@ async function isRateLimited(path: string): Promise<boolean> {
         );
       }
       return result > 1;
-    } catch {
+    } catch (err) {
+      console.error("Redis rate-limit check failed", err);
+      // TODO: Emit metrics or alerts to surface persistent failures
       return false;
     }
   }

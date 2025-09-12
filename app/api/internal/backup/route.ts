@@ -24,7 +24,9 @@ async function exportFirestore(dbFile: string): Promise<void> {
     }
     await fs.writeFile(dbFile, JSON.stringify(data, null, 2));
   } catch (err) {
+    console.error("Firestore export failed", err);
     await fs.writeFile(dbFile, "{}");
+    throw err;
   }
 }
 
@@ -47,7 +49,9 @@ async function exportStorage(storageFile: string): Promise<void> {
     );
     await execFileAsync("tar", ["-cf", storageFile, "-C", tmpRoot, "."]);
   } catch (err) {
+    console.error("Storage export failed", err);
     await fs.writeFile(storageFile, "");
+    throw err;
   } finally {
     await fs.rm(tmpRoot, { recursive: true, force: true });
   }

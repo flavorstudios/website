@@ -4,7 +4,10 @@ import {
   CRON_SECRET,
   CRON_TIMEOUT_MS,
   CRON_MAX_ATTEMPTS,
+  CRON_LOG_RETENTION_DAYS,
 } from "../../lib/env";
+import { adminDb } from "../../lib/firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 // Use console.error directly to ensure logging in production
 // where lib/log.ts suppresses output based on NODE_ENV.
 
@@ -14,7 +17,7 @@ async function post(path: string, body?: unknown) {
     if (!BASE_URL) missing.push("BASE_URL");
     if (!CRON_SECRET) missing.push("CRON_SECRET");
     const message = `Missing required env vars: ${missing.join(", ")}`;
-    logError("scheduler:post", message);
+    console.error("scheduler:post", message);
     throw new Error(message);
   }
   const maxAttempts = CRON_MAX_ATTEMPTS ?? 2;
@@ -87,5 +90,51 @@ export const scheduledBackup = onSchedule(
   { schedule: "0 3 * * *", timeZone: "Asia/Kolkata" },
   async () => {
     await maintenance(["backup"]);
+  }
+);
+
+export const scheduledCronLogCleanup = onSchedule(
+  { schedule: "0 4 * * *", timeZone: "Asia/Kolkata" },
+  async () => {
+    if (!adminDb) {
+      console.error("cronLogCleanup: adminDb not initialized");
+      return;
+    }
+    const retentionDays = CRON_LOG_RETENTION_DAYS ?? 30;
+    const cutoff = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+    const start = Date.now();
+    let deleted = 0;
+    try {
+      while (true) {
+        const snap = await adminDb
+          .collection("cronLog")
+          .where("timestamp", "<", cutoff)
+          .limit(100)
+          .get();
+        if (snap.empty) break;
+        const batch = adminDb.batch();
+        snap.docs.forEach((doc) => batch.delete(doc.ref));
+        await batch.commit();
+        deleted += snap.size;
+      }
+      await adminDb.collection("cronLog").add({
+        job: "cronLogCleanup",
+        ok: true,
+        durationMs: Date.now() - start,
+        deleted,
+        timestamp: FieldValue.serverTimestamp(),
+      });
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err);
+      await adminDb.collection("cronLog").add({
+        job: "cronLogCleanup",
+        ok: false,
+        durationMs: Date.now() - start,
+        error,
+        timestamp: FieldValue.serverTimestamp(),
+      });
+      console.error("cronLogCleanup", err);
+      throw err;
+    }
   }
 );

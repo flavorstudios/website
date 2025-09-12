@@ -8,6 +8,7 @@ const schema = z.object({
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   CRON_TIMEOUT_MS: z.coerce.number().int().positive().optional(),
   CRON_MAX_ATTEMPTS: z.coerce.number().int().positive().optional(),
+  CRON_LOG_RETENTION_DAYS: z.coerce.number().int().positive().optional(),
 });
 
 const _env = schema.safeParse(process.env);
@@ -32,4 +33,5 @@ export const {
   UPSTASH_REDIS_REST_TOKEN,
   CRON_TIMEOUT_MS,
   CRON_MAX_ATTEMPTS,
+  CRON_LOG_RETENTION_DAYS,
 } = env;

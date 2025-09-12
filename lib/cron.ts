@@ -20,6 +20,7 @@ async function writeCronRecord(record: CronLogRecord): Promise<void> {
       timestamp: record.timestamp ?? FieldValue.serverTimestamp(),
     });
   } catch (err) {
+    console.error("cron-log write failed", err);
     logError("cron-log", err);
   }
 }

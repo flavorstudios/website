@@ -32,6 +32,7 @@ const adminVars = [
   "FIREBASE_STORAGE_BUCKET",
 ];
 const required = firebaseKeys.filter((key) => !adminVars.includes(key));
+required.push("BASE_URL", "NEXT_PUBLIC_BASE_URL");
 if (!skipValidation) required.push("CRON_SECRET");
 
 const missing = required.filter((key) => !process.env[key]);
@@ -78,7 +79,9 @@ if (!skipValidation) {
 }
 
 if (missing.length > 0) {
-  throw new Error(`Missing required Firebase env vars: ${missing.join(", ")}`);
+  throw new Error(
+    `Missing required env vars: ${missing.join(", ")}. Set them in your environment or .env.local.`,
+  );
 }
 
 const json =

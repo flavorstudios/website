@@ -6,9 +6,10 @@ import type { NextResponse } from "next/server";
 export async function POST(req: Request): Promise<NextResponse> {
   return handleCron("analytics-rollup", req, async () => {
     if (!adminDb) return { artifacts: [] };
+    const db = adminDb;
 
     // Fetch raw analytics events
-    const rawSnap = await adminDb.collection("analyticsRaw").get();
+    const rawSnap = await db.collection("analyticsRaw").get();
     const rollups: Record<string, number> = {};
 
     rawSnap.forEach((doc) => {
@@ -21,15 +22,15 @@ export async function POST(req: Request): Promise<NextResponse> {
     });
 
     // Persist aggregated results
-    const batch = adminDb.batch();
-    Object.entries(rollups).forEach(([date, total]) => {
-      const ref = adminDb.collection("analyticsRollups").doc(date);
+    const batch = db.batch();
+    for (const [date, total] of Object.entries(rollups)) {
+      const ref = db.collection("analyticsRollups").doc(date);
       batch.set(
         ref,
         { date, total, updatedAt: FieldValue.serverTimestamp() },
         { merge: true }
       );
-    });
+    }
 
     if (Object.keys(rollups).length) {
       await batch.commit();

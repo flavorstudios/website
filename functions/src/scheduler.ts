@@ -8,10 +8,13 @@ if (!BASE_URL) {
   console.warn("BASE_URL should include protocol (http/https)");
 }
 const CRON_SECRET = process.env.CRON_SECRET;
+if (!CRON_SECRET) {
+  console.warn("Missing CRON_SECRET for scheduler; scheduled jobs will be skipped");
+}
 
 async function post(path: string, body?: unknown) {
-  if (!BASE_URL || !CRON_SECRET) {
-    console.warn("Missing BASE_URL or CRON_SECRET for scheduler");
+  if (!CRON_SECRET) {
+    console.warn(`Skipping ${path}: CRON_SECRET is not configured`);
     return;
   }
   try {

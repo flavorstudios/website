@@ -1,6 +1,12 @@
 import 'cross-fetch/polyfill';
 import { BASE_URL, CRON_SECRET } from '../lib/env';
 
+const secret = CRON_SECRET;
+if (!secret) {
+  console.error('CRON_SECRET is not set');
+  process.exit(1);
+}
+
 const endpoints = [
   '/api/cron/revalidate',
   '/api/internal/build-sitemap',
@@ -14,7 +20,7 @@ const endpoints = [
     try {
       const res = await fetch(`${BASE_URL}${path}`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${CRON_SECRET}` },
+        headers: { Authorization: `Bearer ${secret}` },
       });
       const data = await res.json().catch(() => ({}));
       console.log(path, res.status, data);

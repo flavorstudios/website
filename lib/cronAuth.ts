@@ -50,6 +50,13 @@ async function isRateLimited(path: string): Promise<boolean> {
 export async function requireCronAuth(
   req: Request
 ): Promise<NextResponse | void> {
+  if (!CRON_SECRET) {
+    return NextResponse.json(
+      { error: "CRON_SECRET is not set" },
+      { status: 500 }
+    );
+  }
+  
   const auth = req.headers.get("authorization");
   if (auth !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

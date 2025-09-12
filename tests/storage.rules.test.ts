@@ -261,7 +261,13 @@ describe("storage security rules", () => {
         break;
       } catch (err) {
         if (Date.now() - start >= seedTimeoutMs) {
-          console.error("Failed to seed test file", err);
+          const error = err as any;
+          console.error(
+            "Failed to seed test file",
+            error,
+            error?.customData?.serverResponse,
+            error?.status_,
+          );
           throw new Error(
             `Seeding test file timed out after ${seedTimeoutMs}ms. Is the Storage emulator running?`,
           );

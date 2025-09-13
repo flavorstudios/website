@@ -161,7 +161,14 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
       );
     }
     logFailure(500, err, userId);
-    throw err;
+    console.error("Failed to load post preview:", err);
+    return (
+      <AdminAuthGuard>
+        <div className="p-8 text-center">
+          <p className="text-gray-700">Unable to load post preview.</p>
+        </div>
+      </AdminAuthGuard>
+    );
   }
   if (!post) {
     logFailure(404, new Error("Post not found"), userId);

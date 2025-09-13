@@ -1,33 +1,43 @@
 import type { PublicBlogDetail, PublicBlogSummary } from "@/lib/types"
 import { serverEnv } from "@/env/server"
-import { SITE_URL } from "@/lib/constants"
 
-const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL
+const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL
 
 export async function getBlogPost(key: string): Promise<PublicBlogDetail | null> {
-  const encodedKey = encodeURIComponent(key)
-  const response = await fetch(`${baseUrl}/api/blogs/${encodedKey}`, {
-    next: { revalidate: 3600 },
-  })
+  try {
+    const encodedKey = encodeURIComponent(key)
+    const response = await fetch(
+    baseUrl ? `${baseUrl}/api/blogs/${encodedKey}` : `/api/blogs/${encodedKey}`,
+    {
+      next: { revalidate: 3600 },
+    },
+  )
 
   if (response.ok) {
-    return (await response.json()) as PublicBlogDetail
-  }
+      return (await response.json()) as PublicBlogDetail
+    }
+
+    const body = await response.text()
+    console.warn(
+      `Failed to fetch blog post: ${response.status} ${response.statusText} - ${body}`,
+    )
+  } catch (error) {
+    console.warn("Failed to fetch blog post:", error)
+    }
 
   if (response.status === 404) {
     // Missing posts are represented as null so pages can trigger notFound()
     return null
   }
 
-  const body = await response.text()
-  throw new Error(`Failed to fetch blog post: ${response.status} ${response.statusText} - ${body}`)
+  return null
 }
 
 
 export const blogStore = {
   async getAllPosts(): Promise<PublicBlogSummary[]> {
     try {
-      const response = await fetch(`${baseUrl}/api/blogs`, {
+      const response = await fetch(baseUrl ? `${baseUrl}/api/blogs` : `/api/blogs`, {
         cache: "no-store",
       })
 

@@ -87,12 +87,11 @@ export async function generateMetadata({ params }: BlogPostPageProps) {
 // Main BlogPost page (server component)
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  let post: PublicBlogDetail | null;
+  let post: PublicBlogDetail | null = null;
   try {
     post = await getBlogPost(slug);
   } catch (error) {
     console.error("Failed to fetch blog post:", error);
-    throw error;
   }
 
   // If post is not found or not published, trigger Next.js not-found page.

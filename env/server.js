@@ -1,3 +1,19 @@
+const { VERCEL_ENV, VERCEL_URL, NODE_ENV, NEXT_PUBLIC_BASE_URL } = process.env;
+
+if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
+  let resolved;
+  if (VERCEL_ENV === 'preview' || VERCEL_ENV === 'production') {
+    if (VERCEL_URL) {
+      resolved = `https://${VERCEL_URL}`;
+    }
+  } else if (NODE_ENV === 'development') {
+    resolved = 'http://localhost:3000';
+  }
+  if (resolved) {
+    process.env.NEXT_PUBLIC_BASE_URL = resolved;
+  }
+}
+
 /**
  * Server-only Firebase environment variables.
  * Values are read directly from `process.env` to ensure they are

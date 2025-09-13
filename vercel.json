@@ -1,1 +1,5 @@
-{}
+{
+  "functions": {
+    "nodeVersion": "20.x"
+  }
+}

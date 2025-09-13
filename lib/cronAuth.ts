@@ -4,6 +4,7 @@ import {
   UPSTASH_REDIS_REST_TOKEN as redisToken,
   CRON_SECRET as secret,
 } from "./env";
+import { logError } from "./log";
 
 const WINDOW_SECONDS = 60;
 const PREFIX = "cron:limit:";
@@ -34,8 +35,10 @@ async function isRateLimited(path: string): Promise<boolean> {
       }
       return result > 1;
     } catch (err) {
-      console.error("Redis rate-limit check failed", err);
-      // TODO: Emit metrics or alerts to surface persistent failures
+      logError("cronAuth: Redis rate-limit check failed", err, {
+        path,
+        rateLimited: "unknown",
+      });
       return false;
     }
   }

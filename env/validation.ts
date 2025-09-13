@@ -1,0 +1,114 @@
+import { z } from 'zod';
+
+export const clientEnvSchema = z.object({
+  NODE_ENV: z.string().optional(),
+  NEXT_PUBLIC_BASE_URL: z.string().min(1),
+  NEXT_PUBLIC_GTM_CONTAINER_ID: z.string().optional(),
+  NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER: z.string().optional(),
+  NEXT_PUBLIC_COOKIEYES_ID: z.string().optional(),
+  NEXT_PUBLIC_FIREBASE_API_KEY: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_APP_ID: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_VAPID_KEY: z.string().optional(),
+  NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: z.string().optional(),
+  NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: z.string().optional(),
+  NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS: z.string().optional(),
+});
+
+export const serverEnvSchema = z.object({
+  BASE_URL: z.string().min(1),
+  NEXT_PUBLIC_BASE_URL: z.string().min(1),
+  CRON_SECRET: z.string().min(1),
+  FIREBASE_SERVICE_ACCOUNT_KEY: z.string().optional(),
+  FIREBASE_SERVICE_ACCOUNT_JSON: z.string().optional(),
+  FIREBASE_STORAGE_BUCKET: z.string().optional(),
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string().min(1),
+  ADMIN_EMAILS: z.string().optional(),
+  ADMIN_EMAIL: z.string().optional(),
+});
+
+const skipValidation =
+  process.env.ADMIN_BYPASS === 'true' ||
+  process.env.SKIP_ENV_VALIDATION === 'true';
+
+const _client = skipValidation
+  ? { success: true, data: {
+      NODE_ENV: process.env.NODE_ENV,
+      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+      NEXT_PUBLIC_GTM_CONTAINER_ID: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID,
+      NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER: process.env.NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER,
+      NEXT_PUBLIC_COOKIEYES_ID: process.env.NEXT_PUBLIC_COOKIEYES_ID,
+      NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+      NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+      NEXT_PUBLIC_FIREBASE_VAPID_KEY: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+      NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
+      NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS: process.env.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS,
+    }}
+  : clientEnvSchema.safeParse({
+      NODE_ENV: process.env.NODE_ENV,
+      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+      NEXT_PUBLIC_GTM_CONTAINER_ID: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID,
+      NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER: process.env.NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER,
+      NEXT_PUBLIC_COOKIEYES_ID: process.env.NEXT_PUBLIC_COOKIEYES_ID,
+      NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+      NEXT_PUBLIC_FIREBASE_APP_ID: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+      NEXT_PUBLIC_FIREBASE_VAPID_KEY: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+      NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
+      NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS: process.env.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS,
+    });
+
+if (!_client.success) {
+  const { fieldErrors } = _client.error.flatten();
+  const message = Object.entries(fieldErrors)
+    .map(([key, value]) => `${key}: ${value?.join(', ')}`)
+    .join('\n');
+  throw new Error('Invalid client environment variables\n' + message);
+}
+
+const _server = skipValidation
+  ? { success: true, data: {
+      BASE_URL: process.env.BASE_URL,
+      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+      CRON_SECRET: process.env.CRON_SECRET,
+      FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
+      FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
+      FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+      ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    }}
+  : serverEnvSchema.safeParse({
+      BASE_URL: process.env.BASE_URL,
+      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+      CRON_SECRET: process.env.CRON_SECRET,
+      FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
+      FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
+      FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+      ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    });
+
+if (!_server.success) {
+  const { fieldErrors } = _server.error.flatten();
+  const message = Object.entries(fieldErrors)
+    .map(([key, value]) => `${key}: ${value?.join(', ')}`)
+    .join('\n');
+  throw new Error('Invalid server environment variables\n' + message);
+}
+
+export const clientEnv = _client.data;
+export const serverEnv = _server.data;

@@ -11,7 +11,7 @@ const withBundleAnalyzer = bundleAnalyzer({ enabled: serverEnv.ANALYZE === 'true
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true, // Add this for best practice, optional
-  eslint: { ignoreDuringBuilds: true },
+  eslint: { ignoreDuringBuilds: false },
   images: {
     // Next.js image optimization is enabled.
     // For static hosting, use a CDN (e.g., Cloudflare Images) or a custom loader.

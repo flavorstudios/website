@@ -64,6 +64,7 @@ export const serverEnv: Record<string, string | undefined> & {
   SMTP_SECURE: string | undefined;
   SMTP_USER: string | undefined;
   VAPID_PRIVATE_KEY: string | undefined;
+  VAPID_PUBLIC_KEY: string | undefined;
   UPSTASH_REDIS_REST_URL: string | undefined;
   UPSTASH_REDIS_REST_TOKEN: string | undefined;
   TEST_MODE: string | undefined;

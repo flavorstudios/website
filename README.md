@@ -25,6 +25,8 @@ preference on first visit.
 
 ## Getting Started
 
+This project requires **Node.js 20**. The repository includes a `.nvmrc` file to enforce the version, and `vercel.json` configures Vercel to run Node 20.x.
+
 1. **Clone the repo:**
    ```bash
    git clone https://github.com/flavorstudios/flavorstudios-website.git

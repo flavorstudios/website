@@ -1,7 +1,8 @@
+const baseUrlKey = "NEXT_PUBLIC_BASE_URL";
 const { VERCEL_ENV, VERCEL_URL, NODE_ENV } = process.env;
-const NEXT_PUBLIC_BASE_URL = process.env["NEXT_PUBLIC_BASE_URL"];
+let baseUrl = process.env[baseUrlKey];
 
-if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
+if (!baseUrl && NODE_ENV !== 'test') {
   let resolved: string | undefined;
   if (VERCEL_ENV === 'preview' || VERCEL_ENV === 'production') {
     if (VERCEL_URL) {
@@ -12,7 +13,8 @@ if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
   }
 
   if (resolved) {
-    process.env["NEXT_PUBLIC_BASE_URL"] = resolved;
+    process.env[baseUrlKey] = resolved;
+    baseUrl = resolved;
   }
 }
 
@@ -91,7 +93,7 @@ export const serverEnv: Record<string, string | undefined> & {
   FUNCTIONS_EMULATOR: process.env.FUNCTIONS_EMULATOR,
   INDEXNOW_KEY: process.env.INDEXNOW_KEY,
   NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
-  NEXT_PUBLIC_BASE_URL: process.env["NEXT_PUBLIC_BASE_URL"],
+  NEXT_PUBLIC_BASE_URL: baseUrl,
   NEXT_PUBLIC_COOKIEYES_ID: process.env.NEXT_PUBLIC_COOKIEYES_ID,
   NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,

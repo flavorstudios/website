@@ -6,8 +6,7 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "build": {
     "env": {
-      "NODE_VERSION": "20",
-      "NEXT_DISABLE_MINIFY": "true"
+      "NODE_VERSION": "20"
     }
   }
 }

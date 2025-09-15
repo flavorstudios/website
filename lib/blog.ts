@@ -8,12 +8,17 @@ export async function getBlogPost(key: string): Promise<PublicBlogDetail | null>
     const encodedKey = encodeURIComponent(key)
     const response = await fetch(
     baseUrl ? `${baseUrl}/api/blogs/${encodedKey}` : `/api/blogs/${encodedKey}`,
-    {
-      next: { revalidate: 3600 },
-    },
-  )
+      {
+        next: { revalidate: 3600 },
+      },
+    )
 
-  if (response.ok) {
+    if (response.status === 404) {
+      // Missing posts are represented as null so pages can trigger notFound()
+      return null
+    }
+
+    if (response.ok) {
       return (await response.json()) as PublicBlogDetail
     }
 
@@ -23,11 +28,6 @@ export async function getBlogPost(key: string): Promise<PublicBlogDetail | null>
     )
   } catch (error) {
     console.warn("Failed to fetch blog post:", error)
-    }
-
-  if (response.status === 404) {
-    // Missing posts are represented as null so pages can trigger notFound()
-    return null
   }
 
   return null

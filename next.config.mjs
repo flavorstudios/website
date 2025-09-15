@@ -11,6 +11,7 @@ const withBundleAnalyzer = bundleAnalyzer({ enabled: serverEnv.ANALYZE === 'true
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true, // Add this for best practice, optional
+  swcMinify: false, // Skip SWC minification due to Next.js issue
   eslint: { ignoreDuringBuilds: false },
   images: {
     // Next.js image optimization is enabled.

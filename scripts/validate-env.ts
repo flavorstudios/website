@@ -56,7 +56,7 @@ if (!skipValidation) {
     process.env.CRON_SECRET !== undefined &&
     process.env.CRON_SECRET.trim() === ""
   ) {
-    missing.push("CRON_SECRET (cannot be empty)");
+    throw new Error("CRON_SECRET (cannot be empty)");
   }
 }
 

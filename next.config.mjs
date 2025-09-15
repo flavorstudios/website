@@ -37,7 +37,13 @@ const nextConfig = {
   },
 
   // Disable Next.js minification when NEXT_DISABLE_MINIFY is set
-  swcMinify: process.env.NEXT_DISABLE_MINIFY ? false : true,
+   webpack: (config) => {
+    if (process.env.NEXT_DISABLE_MINIFY === 'true') {
+      config.optimization = config.optimization ?? {};
+      config.optimization.minimize = false;
+    }
+    return config;
+  },
 
   // The `experimental.nodeMiddleware` flag was removed to ensure
   // compatibility with the stable Next.js release. Node.js middleware

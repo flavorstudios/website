@@ -31,18 +31,25 @@ if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
   }
 }
 
-const _server = skipValidation
-  ? { success: true, data: {
-      BASE_URL: process.env.BASE_URL,
-      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
-      CRON_SECRET: process.env.CRON_SECRET,
-      FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
-      FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
-      FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
-      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      ADMIN_EMAILS: process.env.ADMIN_EMAILS,
-      ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-    }}
+const _server: z.SafeParseReturnType<
+  Record<string, string | undefined>,
+  z.infer<typeof serverEnvSchema>
+> = skipValidation
+  ? {
+      success: true as const,
+      data: {
+        BASE_URL: process.env.BASE_URL,
+        NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+        CRON_SECRET: process.env.CRON_SECRET,
+        FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
+        FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
+        FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
+        NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:
+          process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+        ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+      } as z.infer<typeof serverEnvSchema>,
+    }
   : serverEnvSchema.safeParse({
       BASE_URL: process.env.BASE_URL,
       NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
@@ -50,7 +57,8 @@ const _server = skipValidation
       FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
       FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
       FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
-      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:
+        process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
       ADMIN_EMAILS: process.env.ADMIN_EMAILS,
       ADMIN_EMAIL: process.env.ADMIN_EMAIL,
     });

@@ -2,10 +2,10 @@
 
 // Import the necessary modules
 import bundleAnalyzer from '@next/bundle-analyzer';
-// Load server-only environment variables (compiled from env/server.ts)
-import { serverEnv } from './env/server.js';
+// Access server-only environment variables directly
+const { ANALYZE, BASE_URL } = process.env;
 
-const withBundleAnalyzer = bundleAnalyzer({ enabled: serverEnv.ANALYZE === 'true' });
+const withBundleAnalyzer = bundleAnalyzer({ enabled: ANALYZE === 'true' });
 
 // Next.js configuration
 /** @type {import('next').NextConfig} */
@@ -37,7 +37,7 @@ const nextConfig = {
   },
 
   serverRuntimeConfig: {
-    BASE_URL: serverEnv.BASE_URL,
+    BASE_URL,
   },
 
   // Disable Next.js minification when NEXT_DISABLE_MINIFY=true

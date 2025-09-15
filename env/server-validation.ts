@@ -16,7 +16,8 @@ const skipValidation =
   process.env.ADMIN_BYPASS === 'true' ||
   process.env.SKIP_ENV_VALIDATION === 'true';
 
-const { VERCEL_ENV, VERCEL_URL, NODE_ENV, NEXT_PUBLIC_BASE_URL } = process.env;
+const { VERCEL_ENV, VERCEL_URL, NODE_ENV } = process.env;
+const NEXT_PUBLIC_BASE_URL = process.env["NEXT_PUBLIC_BASE_URL"];
 if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
   let resolved: string | undefined;
   if (VERCEL_ENV === 'preview' || VERCEL_ENV === 'production') {
@@ -27,7 +28,7 @@ if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
     resolved = 'http://localhost:3000';
   }
   if (resolved) {
-    process.env.NEXT_PUBLIC_BASE_URL = resolved;
+    process.env["NEXT_PUBLIC_BASE_URL"] = resolved;
   }
 }
 
@@ -39,7 +40,7 @@ const _server: z.SafeParseReturnType<
       success: true as const,
       data: {
         BASE_URL: process.env.BASE_URL,
-        NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+        NEXT_PUBLIC_BASE_URL: process.env["NEXT_PUBLIC_BASE_URL"],
         CRON_SECRET: process.env.CRON_SECRET,
         FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
         FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
@@ -52,7 +53,7 @@ const _server: z.SafeParseReturnType<
     }
   : serverEnvSchema.safeParse({
       BASE_URL: process.env.BASE_URL,
-      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+      NEXT_PUBLIC_BASE_URL: process.env["NEXT_PUBLIC_BASE_URL"],
       CRON_SECRET: process.env.CRON_SECRET,
       FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
       FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,

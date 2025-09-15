@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "tsx scripts/validate-env.ts",
-    "build": "NEXT_DISABLE_MINIFY=true next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",

@@ -3,5 +3,10 @@
   "functions": {
     "app/api/**/*": { "runtime": "@vercel/node@20.0.0" }
   },
-  "installCommand": "pnpm install --frozen-lockfile"
+  "installCommand": "pnpm install --frozen-lockfile",
+  "build": {
+    "env": {
+      "NODE_VERSION": "20"
+    }
+  }
 }

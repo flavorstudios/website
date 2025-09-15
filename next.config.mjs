@@ -40,7 +40,13 @@ const nextConfig = {
     BASE_URL: serverEnv.BASE_URL,
   },
 
-  swcMinify: process.env.NEXT_DISABLE_MINIFY !== 'true',
+  // Disable Next.js minification when NEXT_DISABLE_MINIFY=true
+  webpack: (config) => {
+    if (process.env.NEXT_DISABLE_MINIFY === 'true') {
+      config.optimization.minimize = false;
+    }
+    return config;
+  },
 
   // The `experimental.nodeMiddleware` flag was removed to ensure
   // compatibility with the stable Next.js release. Node.js middleware

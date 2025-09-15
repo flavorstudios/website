@@ -17,7 +17,15 @@ function getDbOrNull(): Firestore | null {
   try {
     return getAdminDb();
   } catch (err) {
-    console.error("Firebase Admin Firestore unavailable:", err);
+    if (
+      process.env.ADMIN_BYPASS === "true" ||
+      process.env.TEST_MODE === "true"
+    ) {
+      // Avoid noisy error logs in bypass or test modes
+      console.debug("Firebase Admin Firestore unavailable:", err);
+    } else {
+      console.error("Firebase Admin Firestore unavailable:", err);
+    }
     return null;
   }
 }

@@ -2,6 +2,24 @@
 
 This is the official website of **Flavor Studios** — your source for Anime News & Original Stories That Inspire.
 
+> New to this project? Jump straight to the [Quick Start](#quick-start).
+
+---
+
+## Quick Start
+
+1. Copy the example environment file:
+
+   ```bash
+   cp .env.local.example .env.local
+   ```
+
+2. Set the mandatory variables in `.env.local`:
+
+   - `BASE_URL`
+   - `NEXT_PUBLIC_BASE_URL`
+   - `CRON_SECRET`
+
 ---
 
 ## Features

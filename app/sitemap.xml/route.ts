@@ -29,10 +29,12 @@ interface ContentPage {
 export const revalidate = 3600;
 
 export async function GET() {
+  const skipFetch =
+    serverEnv.NODE_ENV === "test" ||
+    serverEnv.TEST_MODE === "true" ||
+    process.env.TEST_MODE === "true";
   try {
     // --- Fetch published blogs and videos via PUBLIC API ---
-    const skipFetch =
-      serverEnv.NODE_ENV === "test" || serverEnv.TEST_MODE === "true";
     let blogs: ContentPage[] = [];
     let videos: ContentPage[] = [];
     
@@ -105,7 +107,11 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Sitemap generation failed:", error);
+    if (skipFetch) {
+      console.warn("Sitemap generation skipped or failed:", error);
+    } else {
+      console.error("Sitemap generation failed:", error);
+    }
     const now = new Date().toISOString();
     const fallbackXml = generateSitemapXML(BASE_URL, [
       { url: "/", changefreq: "daily", priority: "1.0", lastmod: now },

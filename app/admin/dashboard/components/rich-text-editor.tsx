@@ -35,9 +35,7 @@ import Image from "@tiptap/extension-image"
 import TextAlign from "@tiptap/extension-text-align"
 import Placeholder from "@tiptap/extension-placeholder"
 import { TextStyle } from "@tiptap/extension-text-style"
-import FontFamily from "@tiptap/extension-font-family"
 import DOMPurify from "isomorphic-dompurify"
-import { FontFamilySelect } from "./FontFamilySelect"
 
 interface RichTextEditorProps {
   value: string
@@ -72,7 +70,6 @@ export function RichTextEditor({
         underline: false,
       }),
       TextStyle,
-      FontFamily,
       Underline,
       Link.configure({ openOnClick: false }),
       Image,
@@ -85,16 +82,6 @@ export function RichTextEditor({
       onChange(html)
     },
   })
-
-  const handleFontChange = (font: string) => {
-    if (!editor) return
-    const chain = editor.chain().focus()
-    if (font) {
-      chain.setFontFamily(font).run()
-    } else {
-      chain.unsetFontFamily().run()
-    }
-  }
 
   // Keep TipTap in sync with prop changes
   useEffect(() => {
@@ -190,14 +177,6 @@ export function RichTextEditor({
       {/* Toolbar */}
       <div className="border-b border-gray-200 p-3 bg-gray-50 sticky top-0 z-10">
         <div className="flex flex-wrap gap-2 items-center">
-          {/* Font family selector */}
-          {editor && (
-            <FontFamilySelect
-              value={(editor.getAttributes("textStyle")?.fontFamily as string) || ""}
-              onChange={handleFontChange}
-            />
-          )}
-
           {/* Headings */}
           <div className="flex gap-1 border-r border-gray-300 pr-2">
             <Button

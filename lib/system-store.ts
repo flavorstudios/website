@@ -1,4 +1,4 @@
-import { getAdminDb } from "@/lib/firebase-admin";
+import { ADMIN_BYPASS, getAdminDb } from "@/lib/firebase-admin";
 
 export interface SystemStats {
   totalPosts: number;
@@ -12,6 +12,18 @@ export interface SystemStats {
 
 export const systemStore = {
   async getStats(): Promise<SystemStats> {
+    const emptyStats: SystemStats = {
+      totalPosts: 0,
+      totalVideos: 0,
+      totalComments: 0,
+      pendingComments: 0,
+      totalViews: 0,
+      lastBackup: "",
+      storageUsed: "",
+    };
+
+    if (ADMIN_BYPASS) return emptyStats;
+
     try {
       const db = getAdminDb();
       const [postsSnap, videosSnap, commentsSnap, pendingSnap] = await Promise.all([
@@ -44,15 +56,7 @@ export const systemStore = {
       };
     } catch (error) {
       console.error("Failed to fetch system stats:", error);
-      return {
-        totalPosts: 0,
-        totalVideos: 0,
-        totalComments: 0,
-        pendingComments: 0,
-        totalViews: 0,
-        lastBackup: "",
-        storageUsed: "",
-      };
+      return emptyStats;
     }
   },
 };

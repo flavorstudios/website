@@ -12,8 +12,6 @@ import {
   Inter,
   Lora,
   JetBrains_Mono,
-  Roboto,
-  Noto_Serif,
 } from "next/font/google";
 
 import { Header } from "@/components/header";
@@ -115,8 +113,6 @@ const poppins = Poppins({
 });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora", display: "swap" });
-const roboto = Roboto({ subsets: ["latin"], variable: "--font-roboto", display: "swap" });
-const notoSerif = Noto_Serif({ subsets: ["latin"], variable: "--font-noto-serif", display: "swap" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
 // 🟩 UPDATED GUARD: All fields properly checked!
@@ -244,7 +240,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         {/* END GTM (HEAD) */}
       </head>
       <body
-        className={`${inter.variable} ${lora.variable} ${roboto.variable} ${notoSerif.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
+        className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
       >
         {/* Skip link for keyboard and pointer users */}
         <a

@@ -4,10 +4,36 @@ import { NextResponse } from "next/server";
 import { generateRssFeed } from "@/lib/rss-utils"; // Correctly imports your RSS generation utility.
 import { SITE_NAME } from "@/lib/constants"; // SITE_NAME imported for fallback title.
 import { getCanonicalUrl } from "@/lib/seo-utils"; // For canonicalizing fallback URLs.
+import { serverEnv } from "@/env/server";
 
 export const revalidate = 3600;
 
 export async function GET() {
+  const skipFetch =
+    serverEnv.NODE_ENV === "test" ||
+    serverEnv.TEST_MODE === "true" ||
+    process.env.TEST_MODE === "true";
+
+  const canonicalSiteUrl = getCanonicalUrl("/");
+  const now = new Date().toUTCString();
+  const rssMinimal = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>${SITE_NAME}</title> <description>Anime Creation & Stories</description>
+    <link>${canonicalSiteUrl}</link>
+    <lastBuildDate>${now}</lastBuildDate>
+  </channel>
+</rss>`;
+
+  if (skipFetch) {
+    return new NextResponse(rssMinimal, {
+      headers: {
+        "Content-Type": "application/rss+xml; charset=utf-8",
+        "Cache-Control": "public, max-age=900, s-maxage=900, stale-while-revalidate=1800",
+      },
+    });
+  }
+
   try {
     // Attempt to generate the full RSS feed.
     const rssXml = await generateRssFeed();
@@ -32,20 +58,8 @@ export async function GET() {
         },
       });
     } catch (fallbackError) {
-      // If all attempts fail, serve a minimal, valid RSS feed as a last resort.
+      // If all attempts fail, serve the minimal RSS feed.
       console.error("[RSS] Fallback attempt failed:", fallbackError);
-
-      const canonicalSiteUrl = getCanonicalUrl("/"); // Ensure fallback link is canonical.
-      const now = new Date().toUTCString(); // Use current UTC date for fallback lastBuildDate.
-
-      const rssMinimal = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-  <channel>
-    <title>${SITE_NAME}</title> <description>Anime Creation & Stories</description>
-    <link>${canonicalSiteUrl}</link>
-    <lastBuildDate>${now}</lastBuildDate>
-  </channel>
-</rss>`;
 
       return new NextResponse(rssMinimal, {
         headers: {

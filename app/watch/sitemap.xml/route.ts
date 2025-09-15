@@ -31,10 +31,12 @@ interface ContentPage {
 }
 
 export async function GET() {
+  const skipFetch =
+    serverEnv.NODE_ENV === "test" ||
+    serverEnv.TEST_MODE === "true" ||
+    process.env.TEST_MODE === "true";
   try {
     // --- Fetch videos via PUBLIC API ---
-    const skipFetch =
-      serverEnv.NODE_ENV === "test" || serverEnv.TEST_MODE === "true";
     let videos: ContentPage[] = [];
     if (!skipFetch) {
       try {
@@ -87,7 +89,11 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Video sitemap generation failed:", error);
+    if (skipFetch) {
+      console.warn("Video sitemap generation skipped or failed:", error);
+    } else {
+      console.error("Video sitemap generation failed:", error);
+    }
     const now = new Date().toISOString();
     const fallbackXml = generateSitemapXML(BASE_URL, [
       { url: "/watch", changefreq: "weekly", priority: "0.5", lastmod: now },

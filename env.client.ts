@@ -1,3 +1,3 @@
 'use client';
 
-export { clientEnv } from './env/validation';
+export { clientEnv } from './env/client-validation';

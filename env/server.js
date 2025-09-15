@@ -9,16 +9,12 @@ if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
   } else if (NODE_ENV === 'development') {
     resolved = 'http://localhost:3000';
   }
+
   if (resolved) {
     process.env.NEXT_PUBLIC_BASE_URL = resolved;
   }
 }
 
-/**
- * Server-only Firebase environment variables.
- * Values are read directly from `process.env` to ensure they are
- * excluded from client bundles.
- */
 export const serverEnv = {
   ADMIN_AUTH_DISABLED: process.env.ADMIN_AUTH_DISABLED,
   ADMIN_BYPASS: process.env.ADMIN_BYPASS,
@@ -31,10 +27,12 @@ export const serverEnv = {
   ADMIN_PASSWORD_HASH: process.env.ADMIN_PASSWORD_HASH,
   ADMIN_SESSION_EXPIRY_DAYS: process.env.ADMIN_SESSION_EXPIRY_DAYS,
   ADMIN_TOTP_SECRET: process.env.ADMIN_TOTP_SECRET,
+  PREVIEW_SECRET: process.env.PREVIEW_SECRET,
   ANALYZE: process.env.ANALYZE,
   BASE_URL: process.env.BASE_URL,
   BING_API_KEY: process.env.BING_API_KEY,
   CONTACT_REPLY_EMAILS: process.env.CONTACT_REPLY_EMAILS,
+  CRON_SECRET: process.env.CRON_SECRET,
   DEBUG_ADMIN: process.env.DEBUG_ADMIN,
   FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
   FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,

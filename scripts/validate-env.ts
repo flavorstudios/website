@@ -1,9 +1,9 @@
 import { config } from "dotenv";
+import { clientEnvSchema } from "../env/client-validation";
 import {
-  clientEnvSchema,
   serverEnvSchema,
   serverEnv,
-} from "../env/validation";
+} from "../env/server-validation";
 
 const skipValidation =
   process.env.ADMIN_BYPASS === "true" ||

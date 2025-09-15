@@ -1,5 +1,22 @@
-const { VERCEL_ENV, VERCEL_URL, NODE_ENV, NEXT_PUBLIC_BASE_URL } = process.env;
+import { z } from 'zod';
 
+export const serverEnvSchema = z.object({
+  BASE_URL: z.string().min(1),
+  NEXT_PUBLIC_BASE_URL: z.string().min(1),
+  CRON_SECRET: z.string().min(1),
+  FIREBASE_SERVICE_ACCOUNT_KEY: z.string().optional(),
+  FIREBASE_SERVICE_ACCOUNT_JSON: z.string().optional(),
+  FIREBASE_STORAGE_BUCKET: z.string().optional(),
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string().min(1),
+  ADMIN_EMAILS: z.string().optional(),
+  ADMIN_EMAIL: z.string().optional(),
+});
+
+const skipValidation =
+  process.env.ADMIN_BYPASS === 'true' ||
+  process.env.SKIP_ENV_VALIDATION === 'true';
+
+const { VERCEL_ENV, VERCEL_URL, NODE_ENV, NEXT_PUBLIC_BASE_URL } = process.env;
 if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
   let resolved: string | undefined;
   if (VERCEL_ENV === 'preview' || VERCEL_ENV === 'production') {
@@ -9,17 +26,43 @@ if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
   } else if (NODE_ENV === 'development') {
     resolved = 'http://localhost:3000';
   }
-
   if (resolved) {
     process.env.NEXT_PUBLIC_BASE_URL = resolved;
   }
 }
 
-/**
- * Server-only Firebase environment variables.
- * Values are read directly from `process.env` to ensure they are
- * excluded from client bundles.
- */
+const _server = skipValidation
+  ? { success: true, data: {
+      BASE_URL: process.env.BASE_URL,
+      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+      CRON_SECRET: process.env.CRON_SECRET,
+      FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
+      FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
+      FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+      ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    }}
+  : serverEnvSchema.safeParse({
+      BASE_URL: process.env.BASE_URL,
+      NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+      CRON_SECRET: process.env.CRON_SECRET,
+      FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
+      FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
+      FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+      ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    });
+
+if (!_server.success) {
+  const { fieldErrors } = _server.error.flatten();
+  const message = Object.entries(fieldErrors)
+    .map(([key, value]) => `${key}: ${value?.join(', ')}`)
+    .join('\n');
+  throw new Error('Invalid server environment variables\n' + message);
+}
+
 export const serverEnv: Record<string, string | undefined> & {
   ADMIN_AUTH_DISABLED: string | undefined;
   ADMIN_BYPASS: string | undefined;
@@ -79,21 +122,21 @@ export const serverEnv: Record<string, string | undefined> & {
   ADMIN_TOTP_SECRET: process.env.ADMIN_TOTP_SECRET,
   PREVIEW_SECRET: process.env.PREVIEW_SECRET,
   ANALYZE: process.env.ANALYZE,
-  BASE_URL: process.env.BASE_URL,
+  BASE_URL: _server.data.BASE_URL,
   BING_API_KEY: process.env.BING_API_KEY,
   CONTACT_REPLY_EMAILS: process.env.CONTACT_REPLY_EMAILS,
-  CRON_SECRET: process.env.CRON_SECRET,
+  CRON_SECRET: _server.data.CRON_SECRET,
   DEBUG_ADMIN: process.env.DEBUG_ADMIN,
-  FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
-  FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
-  FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
+  FIREBASE_SERVICE_ACCOUNT_JSON: _server.data.FIREBASE_SERVICE_ACCOUNT_JSON,
+  FIREBASE_SERVICE_ACCOUNT_KEY: _server.data.FIREBASE_SERVICE_ACCOUNT_KEY,
+  FIREBASE_STORAGE_BUCKET: _server.data.FIREBASE_STORAGE_BUCKET,
   FUNCTIONS_EMULATOR: process.env.FUNCTIONS_EMULATOR,
   INDEXNOW_KEY: process.env.INDEXNOW_KEY,
   NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
-  NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+  NEXT_PUBLIC_BASE_URL: _server.data.NEXT_PUBLIC_BASE_URL,
   NEXT_PUBLIC_COOKIEYES_ID: process.env.NEXT_PUBLIC_COOKIEYES_ID,
   NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: _server.data.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   NEXT_PUBLIC_GTM_CONTAINER_ID: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID,
   NODE_ENV: process.env.NODE_ENV,
   NOTIFY_NEW_SUBMISSION: process.env.NOTIFY_NEW_SUBMISSION,

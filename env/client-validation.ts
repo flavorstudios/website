@@ -18,6 +18,10 @@ export const clientEnvSchema = z.object({
   NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS: z.string().optional(),
 });
 
+const skipValidation =
+  process.env.ADMIN_BYPASS === 'true' ||
+  process.env.SKIP_ENV_VALIDATION === 'true';
+
 const _client: z.SafeParseReturnType<
   z.infer<typeof clientEnvSchema>,
   z.infer<typeof clientEnvSchema>

@@ -36,6 +36,7 @@ export default defineConfig({
       // Keep telemetry quiet in CI logs (optional)
       NEXT_TELEMETRY_DISABLED: '1',
       NODE_ENV: 'production',
+      NEXT_DISABLE_MINIFY: 'true',
     },
   },
   use: {

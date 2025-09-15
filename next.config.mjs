@@ -40,6 +40,8 @@ const nextConfig = {
     BASE_URL: serverEnv.BASE_URL,
   },
 
+  swcMinify: process.env.NEXT_DISABLE_MINIFY !== 'true',
+
   // The `experimental.nodeMiddleware` flag was removed to ensure
   // compatibility with the stable Next.js release. Node.js middleware
   // currently requires the latest canary builds, so removing the flag

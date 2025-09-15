@@ -43,7 +43,7 @@ preference on first visit.
 
 ## Getting Started
 
-This project requires **Node.js 20**. The repository includes a `.nvmrc` file to enforce the version, and `vercel.json` configures Vercel to run Node 20.x.
+This project requires **Node.js 20**. Use the root `.nvmrc` file to align your local Node version, and `vercel.json` ensures Vercel runs on Node 20.x.
 
 1. **Clone the repo:**
    ```bash

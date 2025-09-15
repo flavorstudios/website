@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RefreshCw } from "lucide-react"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
-import { revalidateEntireWebsite } from "@/app/admin/actions"
+import { revalidateEntireWebsite } from "@/app/admin/actions/system"
 
 export default function SystemTools() {
   const { toast } = useToast()

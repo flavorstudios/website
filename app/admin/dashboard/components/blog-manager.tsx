@@ -32,7 +32,7 @@ import BlogTableSkeleton from "@/components/admin/blog/BlogTableSkeleton";
 
 import type { BlogPost } from "@/lib/content-store";
 import type { CategoryData } from "@/lib/dynamic-categories";
-import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions";
+import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions/blog";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/components/admin/Pagination";
 import AdminPageHeader from "@/components/AdminPageHeader";

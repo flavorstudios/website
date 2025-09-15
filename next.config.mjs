@@ -3,7 +3,7 @@
 // Import the necessary modules
 import bundleAnalyzer from '@next/bundle-analyzer';
 // Access server-only environment variables directly
-const { ANALYZE, BASE_URL } = process.env;
+const { ANALYZE } = process.env;
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: ANALYZE === 'true' });
 
@@ -36,17 +36,8 @@ const nextConfig = {
     ];
   },
 
-  serverRuntimeConfig: {
-    BASE_URL,
-  },
-
-  // Disable Next.js minification when NEXT_DISABLE_MINIFY=true
-  webpack: (config) => {
-    if (process.env.NEXT_DISABLE_MINIFY === 'true') {
-      config.optimization.minimize = false;
-    }
-    return config;
-  },
+  // Disable Next.js minification when NEXT_DISABLE_MINIFY is set
+  swcMinify: process.env.NEXT_DISABLE_MINIFY ? false : true,
 
   // The `experimental.nodeMiddleware` flag was removed to ensure
   // compatibility with the stable Next.js release. Node.js middleware

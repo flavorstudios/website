@@ -38,6 +38,7 @@ interface AdminSidebarProps {
 type MenuItem = {
   id: SectionId
   label: string
+  ariaLabel?: string
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   count: number | null
   href?: string
@@ -63,7 +64,14 @@ export function AdminSidebar({
     { id: "comments", label: "Comments", icon: MessageSquare, count: null, href: "/admin/dashboard/comments" },
     { id: "applications", label: "Applications", icon: ClipboardList, count: null, href: "/admin/dashboard/applications" },
     { id: "inbox", label: "Email Inbox", icon: Mail, count: null, href: "/admin/dashboard/inbox" },
-    { id: "users", label: "Users", icon: Users, count: null, href: "/admin/dashboard/users" },
+    {
+      id: "users",
+      label: "User Management",
+      ariaLabel: "Users",
+      icon: Users,
+      count: null,
+      href: "/admin/dashboard/users",
+    },
     { id: "settings", label: "Settings", icon: Settings, count: null, href: "/admin/dashboard/settings" },
   ]
 
@@ -92,7 +100,7 @@ export function AdminSidebar({
     <>
       <aside
         id={id}
-        role="navigation"
+        role="complementary"
         aria-hidden={isMobile && !sidebarOpen}
         className={`
           h-full md:h-screen overflow-y-auto bg-background border-r
@@ -103,7 +111,7 @@ export function AdminSidebar({
           w-64 ${sidebarOpen ? "md:w-64" : "md:w-20"}
           flex flex-col md:relative
         `}
-        aria-label="Admin sidebar"
+        aria-label="Admin navigation"
       >
         {/* Sidebar Header: match main nav height, remove extra vertical padding */}
         <div className={`${sidebarOpen ? "px-4" : "px-2"} border-b border-border ${ADMIN_HEADER_HEIGHT} flex items-center`}>
@@ -129,7 +137,7 @@ export function AdminSidebar({
               size="sm"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="hidden md:flex p-1 h-8 w-8 focus:outline-none focus:ring"
-              aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+              aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
               aria-expanded={sidebarOpen}
               aria-controls={id}
               type="button"
@@ -189,7 +197,7 @@ export function AdminSidebar({
                     <Link
                       href={item.href}
                       className="flex items-center w-full"
-                      aria-label={item.label}
+                      aria-label={item.ariaLabel ?? item.label}
                       aria-current={active ? "page" : undefined}
                       title={!sidebarOpen ? item.label : undefined}
                       onClick={() => {

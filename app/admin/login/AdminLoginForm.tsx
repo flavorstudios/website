@@ -40,7 +40,7 @@ export default function AdminLoginForm() {
   const { error, setError, clearError } = useAuthError()
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [method, setMethod] = useState<"google" | "email">("google")
+  const [method, setMethod] = useState<"google" | "email">("email")
   const router = useRouter()
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
 
@@ -217,7 +217,15 @@ export default function AdminLoginForm() {
                     </>
                   )}
                 </Button>
-                <Button variant="ghost" onClick={() => { clearError(); setMethod("email") }} className="w-full">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    clearError()
+                    setLoading(false)
+                    setMethod("email")
+                  }}
+                  className="w-full"
+                >
                   Use Email &amp; Password
                 </Button>
                 <div className="mt-4 sm:mt-6 text-center">
@@ -225,7 +233,13 @@ export default function AdminLoginForm() {
                 </div>
               </>
             ) : (
-              <EmailLoginForm onCancel={() => { clearError(); setMethod("google") }} />
+              <EmailLoginForm
+                onCancel={() => {
+                  clearError()
+                  setLoading(false)
+                  setMethod("google")
+                }}
+              />
             )}
           </div>
         </CardContent>

@@ -7,7 +7,12 @@ import { LayoutDashboard, Image as ImageIcon, Users, Settings } from "lucide-rea
 const items = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/dashboard/media", label: "Media", icon: ImageIcon },
-  { href: "/admin/dashboard/users", label: "Users", icon: Users },
+  {
+    href: "/admin/dashboard/users",
+    label: "User management",
+    ariaLabel: "Users",
+    icon: Users,
+  },
   { href: "/admin/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
@@ -24,7 +29,7 @@ export default function BottomNav() {
               <Link
                 href={item.href}
                 className={`flex flex-col items-center justify-center h-14 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${active ? "text-primary" : "text-muted-foreground"}`}
-                aria-label={item.label}
+                aria-label={item.ariaLabel ?? item.label}
               >
                 <Icon className="h-5 w-5 mb-1" aria-hidden="true" />
                 <span className="sr-only sm:not-sr-only">{item.label}</span>

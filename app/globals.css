@@ -97,6 +97,35 @@ samp {
   overflow: hidden;
 }
 
+/* Skip link utility */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  width: auto;
+  height: auto;
+  clip: auto;
+  overflow: visible;
+  white-space: normal;
+  z-index: 999;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  box-shadow: 0 10px 25px -15px rgba(15, 23, 42, 0.6);
+}
+
 /* Admin Panel Specific Styles */
 .admin-gradient {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

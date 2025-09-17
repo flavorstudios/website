@@ -13,7 +13,7 @@ import BlogPostRenderer from "@/components/BlogPostRenderer";
 import { HttpError } from "@/lib/http";
 import { ErrorBoundary } from "@/app/admin/dashboard/components/ErrorBoundary";
 import { verifyAdminSession } from "@/lib/admin-auth";
-import { validatePreviewToken } from "@/lib/preview-token";
+import { inspectPreviewToken } from "@/lib/preview-token";
 import { logError } from "@/lib/log";
 import crypto from "crypto";
 
@@ -98,21 +98,7 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   }
 
   let userId: string | undefined;
-  try {
-    const sessionCookie = (await cookies()).get("admin-session")?.value || "";
-    const verified = await verifyAdminSession(sessionCookie);
-    userId = verified.uid;
-  } catch (err) {
-    logFailure(403, err);
-    return (
-      <AdminAuthGuard>
-        <div className="p-8 text-center">
-          <p className="text-gray-700">Access denied.</p>
-        </div>
-      </AdminAuthGuard>
-    );
-  }
-
+  
   if (!token) {
     logFailure(403, new Error("Missing token"), userId);
     return (
@@ -123,11 +109,10 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
       </AdminAuthGuard>
     );
   }
-  let validation: "valid" | "expired" | "invalid";
-  try {
-    validation = validatePreviewToken(token, id, userId);
-  } catch (err) {
-    logFailure(500, err, userId);
+
+  const inspection = inspectPreviewToken(token);
+  if (inspection.status === "invalid") {
+    logFailure(403, new Error("Invalid token"));
     return (
       <AdminAuthGuard>
         <div className="p-8 text-center">
@@ -136,22 +121,51 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
       </AdminAuthGuard>
     );
   }
-  if (validation === "invalid") {
+  if (inspection.status === "expired") {
+    logFailure(410, new Error("Expired token"));
+    return (
+      <AdminAuthGuard>
+        <div className="p-8 text-center">
+          <p className="text-gray-700">Preview token expired.</p>
+        </div>
+      </AdminAuthGuard>
+    );
+  }
+
+  const payload = inspection.payload;
+
+  if (payload.postId !== id) {
+    logFailure(403, new Error("Invalid token"));
+    return (
+      <AdminAuthGuard>
+        <div className="p-8 text-center">
+          <p className="text-gray-700">Invalid token.</p>
+        </div>
+      </AdminAuthGuard>
+    );
+  }
+
+  try {
+    const sessionCookie = (await cookies()).get("admin-session")?.value || "";
+    const verified = await verifyAdminSession(sessionCookie);
+    userId = verified.uid;
+  } catch (err) {
+    logFailure(403, err, payload.uid);
+    return (
+      <AdminAuthGuard>
+        <div className="p-8 text-center">
+          <p className="text-gray-700">Access denied.</p>
+        </div>
+      </AdminAuthGuard>
+    );
+  }
+
+  if (payload.uid !== userId) {
     logFailure(403, new Error("Invalid token"), userId);
     return (
       <AdminAuthGuard>
         <div className="p-8 text-center">
           <p className="text-gray-700">Invalid token.</p>
-        </div>
-      </AdminAuthGuard>
-    );
-  }
-  if (validation === "expired") {
-    logFailure(410, new Error("Expired token"), userId);
-    return (
-      <AdminAuthGuard>
-        <div className="p-8 text-center">
-          <p className="text-gray-700">Preview token expired.</p>
         </div>
       </AdminAuthGuard>
     );

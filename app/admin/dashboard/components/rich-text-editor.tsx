@@ -8,7 +8,7 @@
  *   <div className="tiptap" dangerouslySetInnerHTML={{ __html: html }} />
  */
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import { motion } from "framer-motion"
 import {
   Bold,
@@ -66,6 +66,24 @@ export function RichTextEditor({
   const activeClass = (active: boolean) =>
     active ? "bg-gray-200 text-gray-900" : ""
 
+  const editorAttributes = useMemo(() => {
+    const attributes: Record<string, string> = {
+      contenteditable: "true",
+      role: "textbox",
+      "aria-multiline": "true",
+    }
+
+    if (ariaLabelledBy) {
+      attributes["aria-labelledby"] = ariaLabelledBy
+    }
+
+    if (ariaLabel) {
+      attributes["aria-label"] = ariaLabel
+    }
+
+    return attributes
+  }, [ariaLabel, ariaLabelledBy])
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -81,11 +99,39 @@ export function RichTextEditor({
       Placeholder.configure({ placeholder: placeholder ?? "Start typing…" }),
     ],
     content: value,
+    editorProps: {
+      attributes: {
+        ...editorAttributes,
+        class: "tiptap min-h-[60vh] p-6 focus:outline-none prose-lg max-w-none",
+      },
+    },
     onUpdate({ editor }) {
       const html = sanitizeHtmlClient(editor.getHTML())
       onChange(html)
     },
   })
+
+  useEffect(() => {
+    if (!editor) return
+
+    const trackedAttributes = [
+      "contenteditable",
+      "role",
+      "aria-multiline",
+      "aria-labelledby",
+      "aria-label",
+    ] as const
+
+    trackedAttributes.forEach((key) => {
+      const value = editorAttributes[key]
+
+      if (value) {
+        editor.view.dom.setAttribute(key, value)
+      } else {
+        editor.view.dom.removeAttribute(key)
+      }
+    })
+  }, [editor, editorAttributes])
 
   // Keep TipTap in sync with prop changes
   useEffect(() => {
@@ -399,13 +445,10 @@ export function RichTextEditor({
         <EditorContent
           editor={editor}
           data-placeholder={placeholder}
-          className="tiptap min-h-[60vh] p-6 focus:outline-none prose-lg max-w-none"
           style={{
             lineHeight: "1.7",
             fontSize: "18px",
           }}
-          aria-labelledby={ariaLabelledBy}
-          aria-label={ariaLabel}
         />
 
         {editor &&

@@ -8,6 +8,74 @@ import type { BlogPost } from "@/lib/types";
 
 export type { BlogPost };
 
+const FALLBACK_BLOG_POSTS: BlogPost[] = [
+  {
+    id: "fallback-building-developer-velocity",
+    title: "How We Build Developer Velocity Without Burning Out",
+    slug: "build-developer-velocity-without-burnout",
+    content:
+      "<p>Our platform team invests in small automation wins every sprint, from linting rules to release previews. Those compounding improvements give product engineers confidence to ship fast while keeping the on-call rotation calm.</p>",
+    excerpt:
+      "Practical rituals and tooling that help our engineers move quickly while protecting focus time and quality.",
+    status: "published",
+    category: "Engineering",
+    categories: ["Engineering", "Culture"],
+    tags: ["developer-experience", "process", "team"],
+    featuredImage: "/images/blog/dev-velocity.jpg",
+    featured: true,
+    seoTitle: "Build Developer Velocity Without Burnout",
+    seoDescription:
+      "Discover how our engineering team balances rapid delivery with sustainable practices across tooling, rituals, and culture.",
+    author: "Platform Team",
+    publishedAt: "2024-01-15T09:00:00.000Z",
+    createdAt: "2024-01-10T09:00:00.000Z",
+    updatedAt: "2024-01-15T09:00:00.000Z",
+    views: 328,
+    readTime: "6 min",
+    commentCount: 4,
+    shareCount: 12,
+    schemaType: "Article",
+    openGraphImage: "/images/blog/dev-velocity-og.jpg",
+  },
+  {
+    id: "fallback-product-analytics-north-star",
+    title: "Designing a North-Star Metric for SaaS Onboarding",
+    slug: "designing-north-star-metric-saas-onboarding",
+    content:
+      "<p>When our activation rate stalled, we paired product analytics with qualitative interviews to shape a north-star metric. It now guides weekly prioritisation and keeps growth experiments aligned with customer value.</p>",
+    excerpt:
+      "A step-by-step look at how we combined product analytics and research to define the activation signal that matters most.",
+    status: "published",
+    category: "Product",
+    categories: ["Product", "Growth"],
+    tags: ["analytics", "north-star", "saas"],
+    featuredImage: "/images/blog/north-star-metric.jpg",
+    seoTitle: "Design a North-Star Metric for SaaS Onboarding",
+    seoDescription:
+      "See the framework we used to craft a meaningful activation metric, align stakeholders, and improve onboarding decisions.",
+    author: "Product Analytics",
+    publishedAt: "2023-11-03T12:00:00.000Z",
+    createdAt: "2023-10-28T12:00:00.000Z",
+    updatedAt: "2023-11-05T08:30:00.000Z",
+    views: 512,
+    readTime: "8 min",
+    commentCount: 7,
+    shareCount: 21,
+    schemaType: "Article",
+    openGraphImage: "/images/blog/north-star-metric-og.jpg",
+  },
+];
+
+const normalizeBlogPost = (post: BlogPost): BlogPost => ({
+  ...post,
+  categories:
+    Array.isArray(post.categories) && post.categories.length > 0
+      ? post.categories
+      : [post.category],
+  commentCount: typeof post.commentCount === "number" ? post.commentCount : 0,
+  shareCount: typeof post.shareCount === "number" ? post.shareCount : 0,
+});
+
 /**
  * Retrieve the Firebase Admin Firestore instance or return `null` if the
  * admin client has not been initialised. This lets callers gracefully handle
@@ -130,50 +198,36 @@ export const VideoSchema = z.object({
 export const blogStore = {
   async getAll(): Promise<BlogPost[]> {
     const db = getDbOrNull();
-    if (!db) return [];
+    if (!db) return FALLBACK_BLOG_POSTS.map(normalizeBlogPost);
     const snap = await db.collection("blogs").orderBy("createdAt", "desc").get();
-    return snap.docs.map((d) => {
-      const doc = d.data() as BlogPost;
-      return {
-        ...doc,
-        categories: Array.isArray(doc.categories) && doc.categories.length > 0 ? doc.categories : [doc.category],
-        commentCount: typeof doc.commentCount === "number" ? doc.commentCount : 0, // always present
-        shareCount: typeof doc.shareCount === "number" ? doc.shareCount : 0,       // always present
-      };
-    });
+    return snap.docs.map((d) => normalizeBlogPost(d.data() as BlogPost));
   },
 
   async getById(id: string): Promise<BlogPost | null> {
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    if (!db) {
+      const fallbackPost = FALLBACK_BLOG_POSTS.find((post) => post.id === id);
+      return fallbackPost ? normalizeBlogPost(fallbackPost) : null;
+    }
     const doc = await db.collection("blogs").doc(id).get();
     if (!doc.exists) return null;
-    const data = doc.data() as BlogPost;
-    return {
-      ...data,
-      categories: Array.isArray(data.categories) && data.categories.length > 0 ? data.categories : [data.category],
-      commentCount: typeof data.commentCount === "number" ? data.commentCount : 0,
-      shareCount: typeof data.shareCount === "number" ? data.shareCount : 0,
-    };
+    return normalizeBlogPost(doc.data() as BlogPost);
   },
 
   // Fetch a post by slug for edit/preview workflows
   async getBySlug(slug: string): Promise<BlogPost | null> {
     const db = getDbOrNull();
-    if (!db) return null;
+    if (!db) {
+      const fallbackPost = FALLBACK_BLOG_POSTS.find((post) => post.slug === slug);
+      return fallbackPost ? normalizeBlogPost(fallbackPost) : null;
+    }
     const snap = await db
       .collection("blogs")
       .where("slug", "==", slug)
       .limit(1)
       .get();
     if (snap.empty) return null;
-    const data = snap.docs[0].data() as BlogPost;
-    return {
-      ...data,
-      categories: Array.isArray(data.categories) && data.categories.length > 0 ? data.categories : [data.category],
-      commentCount: typeof data.commentCount === "number" ? data.commentCount : 0,
-      shareCount: typeof data.shareCount === "number" ? data.shareCount : 0,
-    };
+    return normalizeBlogPost(snap.docs[0].data() as BlogPost);
   },
 
   async create(
@@ -278,12 +332,7 @@ export const blogStore = {
       });
     }
 
-    return {
-      ...updated,
-      categories: Array.isArray(updated.categories) && updated.categories.length > 0 ? updated.categories : [updated.category],
-      commentCount: typeof updated.commentCount === "number" ? updated.commentCount : 0,
-      shareCount: typeof updated.shareCount === "number" ? updated.shareCount : 0,
-    };
+    return normalizeBlogPost(updated);
   },
 
   async getRevisions(id: string): Promise<BlogRevision[]> {

@@ -96,10 +96,7 @@ export function AdminHeader({
   return (
     <>
       {/* Skip link for keyboard and screen reader users */}
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-primary focus:text-primary-foreground focus:p-2 focus:outline-none focus:ring"
-      >
+      <a href="#main" className="skip-link">
         Skip to main content
       </a>
 

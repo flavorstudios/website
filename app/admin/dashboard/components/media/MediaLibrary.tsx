@@ -33,7 +33,12 @@ export default function MediaLibrary({
   const [selectedItem, setSelectedItem] = useState<MediaDoc | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const [view, setView] = useState<"grid" | "list">("grid");
+  const [view, setView] = useState<"grid" | "list">(() => {
+    if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+      return window.matchMedia("(min-width: 768px)").matches ? "list" : "grid";
+    }
+    return "grid";
+  });
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [sortBy, setSortBy] = useState<SortBy>("date");

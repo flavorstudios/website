@@ -9,6 +9,61 @@ import crypto from "node:crypto";
 import type { Sharp } from "sharp";
 import { serverEnv } from "@/env/server";
 
+const FALLBACK_MEDIA: MediaDoc[] = [
+  {
+    id: "fallback-image",
+    filename: "placeholder.png",
+    basename: "placeholder",
+    ext: ".png",
+    mime: "image/png",
+    size: 24576,
+    url: "/placeholder.png",
+    createdAt: 1704067200000, // 2024-01-01
+    updatedAt: 1704067200000,
+    width: 1600,
+    height: 900,
+    alt: "Placeholder image used for demo media",
+    tags: ["sample"],
+    createdBy: "system",
+    variants: [],
+    favorite: false,
+  },
+  {
+    id: "fallback-video",
+    filename: "placeholder-video.mp4",
+    basename: "placeholder-video",
+    ext: ".mp4",
+    mime: "video/mp4",
+    size: 1048576,
+    url: "/placeholder.png",
+    createdAt: 1706745600000, // 2024-02-01
+    updatedAt: 1706745600000,
+    width: 1280,
+    height: 720,
+    alt: "Placeholder video thumbnail",
+    tags: ["demo"],
+    createdBy: "system",
+    variants: [],
+    favorite: false,
+  },
+  {
+    id: "fallback-audio",
+    filename: "placeholder-audio.mp3",
+    basename: "placeholder-audio",
+    ext: ".mp3",
+    mime: "audio/mpeg",
+    size: 512000,
+    url: "/placeholder.png",
+    createdAt: 1709251200000, // 2024-03-01
+    updatedAt: 1709251200000,
+    alt: "Placeholder audio artwork",
+    tags: ["demo"],
+    createdBy: "system",
+    variants: [],
+    favorite: false,
+  },
+];
+
 /**
  * IMPORTANT:
  * - Nothing here should touch Firebase at import time.
@@ -177,11 +232,50 @@ export interface ListMediaResult {
  * List media from Firestore. If admin is not configured, return an empty result
  * instead of throwing (keeps builds/preview envs stable).
  */
-export async function listMedia(options: ListMediaOptions | number = 50): Promise<ListMediaResult> {
-  const collection = tryGetCollection();
-  if (!collection) {
-    return { media: [], cursor: null };
+function listFallbackMedia(
+  params: Pick<ListMediaOptions, "limit" | "search" | "type" | "order" | "startAfter">
+): ListMediaResult {
+  const { limit = 50, search, type, order = "desc", startAfter } = params;
+
+  let media = FALLBACK_MEDIA.slice();
+
+  if (type) {
+    media = media.filter((item) => item.mime === type || item.mimeType === type);
   }
+
+  if (search) {
+    const term = search.toLowerCase();
+    media = media.filter((item) => {
+      const haystack = (item.basename || item.filename || item.name || "").toLowerCase();
+      return haystack.includes(term);
+    });
+  }
+
+  media.sort((a, b) => {
+    const aDate = typeof a.createdAt === "number" ? a.createdAt : Number(a.createdAt) || 0;
+    const bDate = typeof b.createdAt === "number" ? b.createdAt : Number(b.createdAt) || 0;
+    return order === "asc" ? aDate - bDate : bDate - aDate;
+  });
+
+  if (typeof startAfter === "number") {
+    media = media.filter((item) => {
+      const createdAt = typeof item.createdAt === "number" ? item.createdAt : Number(item.createdAt) || 0;
+      return order === "asc" ? createdAt > startAfter : createdAt < startAfter;
+    });
+  }
+
+  const hasMore = media.length > limit;
+  const limited = media.slice(0, limit);
+  const last = limited[limited.length - 1];
+  const lastCreatedAtValue =
+    typeof last?.createdAt === "number" ? last.createdAt : last?.createdAt ?? NaN;
+  const numericLastCreatedAt = Number(lastCreatedAtValue);
+  const cursor = hasMore && Number.isFinite(numericLastCreatedAt) ? numericLastCreatedAt : null;
+
+  return { media: limited, cursor };
+}
+
+export async function listMedia(options: ListMediaOptions | number = 50): Promise<ListMediaResult> {
 
   // Legacy signature support: listMedia(25)
   let limit = 50;
@@ -198,6 +292,11 @@ export async function listMedia(options: ListMediaOptions | number = 50): Promis
     type = options.type;
     order = options.order ?? "desc";
     startAfter = options.startAfter;
+  }
+
+  const collection = tryGetCollection();
+  if (!collection) {
+    return listFallbackMedia({ limit, search, type, order, startAfter });
   }
 
   let query: FirebaseFirestore.Query<MediaDoc> = collection.orderBy("createdAt", order);

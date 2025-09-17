@@ -243,10 +243,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
       >
         {/* Skip link for keyboard and pointer users */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] bg-white p-2 text-sm shadow rounded"
-        >
+        <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
         

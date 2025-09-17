@@ -90,7 +90,7 @@ const NAV: { id: SectionId; href: string; title: string }[] = [
   { id: "comments", href: "/admin/dashboard/comments", title: "Comments" },
   { id: "applications", href: "/admin/dashboard/applications", title: "Applications" },
   { id: "inbox", href: "/admin/dashboard/inbox", title: "Inbox" },
-  { id: "users", href: "/admin/dashboard/users", title: "Users" },
+  { id: "users", href: "/admin/dashboard/users", title: "User Management" },
   { id: "settings", href: "/admin/dashboard/settings", title: "Settings" },
   { id: "system", href: "/admin/dashboard/system", title: "System Tools" },
 ] as const;
@@ -404,10 +404,7 @@ export default function AdminDashboardPageClient({
   return (
     <RoleProvider>
           {/* Accessible skip link */}
-          <a
-            href="#main"
-            className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:text-black focus:px-3 focus:py-2 focus:rounded"
-          >
+          <a href="#main" className="skip-link">
             Skip to main content
           </a>
 

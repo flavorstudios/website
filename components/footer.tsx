@@ -39,7 +39,7 @@ export function Footer() {
     { name: "DMCA", href: "/dmca" },
     { name: "Cookie Policy", href: "/cookie-policy" },
     { name: "Disclaimer", href: "/disclaimer" },
-    { name: "Usage Policy", href: "/media-usage-policy", ariaLabel: "Media Usage Policy" },
+    { name: "Usage Policy", href: "/media-usage-policy", ariaLabel: "Usage Policy" },
   ]
 
   return (

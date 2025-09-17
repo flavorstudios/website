@@ -1,7 +1,7 @@
 // app/admin/dashboard/components/dashboard-overview.tsx
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -113,6 +113,12 @@ const quickActions: QuickAction[] = [
 ];
 
 export default function DashboardOverview() {
+  useEffect(() => {
+    if (typeof window !== "undefined" && !(window as any).Chart) {
+      (window as any).Chart = ChartJS;
+    }
+  }, []);
+  
   const { theme } = useTheme();
   const router = useRouter();
   const { hasPermission } = useRole();
@@ -120,12 +126,24 @@ export default function DashboardOverview() {
 
   // Live toggle controls polling interval
   const [live, setLive] = useState(false);
+  const [showInitialSpinner, setShowInitialSpinner] = useState(true);
 
   // React Query: stats are the single source of truth
   const statsQuery = useDashboardStats(live, canViewAnalytics);
   const stats = statsQuery.data as DashboardStats | undefined;
   const statsError = statsQuery.error as unknown;
   const statsLoading = statsQuery.isLoading;
+
+  useEffect(() => {
+    if (!showInitialSpinner) return;
+    if (statsLoading) return;
+
+    const hasResolved = Boolean(stats) || Boolean(statsError) || !statsLoading;
+    if (!hasResolved) return;
+
+    const timeout = window.setTimeout(() => setShowInitialSpinner(false), 150);
+    return () => window.clearTimeout(timeout);
+  }, [showInitialSpinner, statsLoading, stats, statsError]);
 
   // SWR: keep activity separate for now (can migrate later)
   const {
@@ -240,8 +258,8 @@ export default function DashboardOverview() {
     );
   }
 
-  // First-load spinner only when no cached data yet
-  if (statsLoading && !stats) {
+  // First-load spinner stays mounted until the first stats request settles
+  if (showInitialSpinner || (statsLoading && !stats)) {
     return (
       <div className="flex items-center justify-center h-64" data-testid="dashboard-loading">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
@@ -592,15 +610,15 @@ export default function DashboardOverview() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm">Total Posts</span>
+                    <span className="text-sm">Posts total (all time)</span>
                     <span className="text-sm font-medium">{stats.totalPosts}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm">Total Videos</span>
+                    <span className="text-sm">Videos created overall</span>
                     <span className="text-sm font-medium">{stats.totalVideos}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm">Total Views</span>
+                    <span className="text-sm">Views accumulated</span>
                     <span className="text-sm font-medium">{stats.totalViews.toLocaleString()}</span>
                   </div>
                 </div>

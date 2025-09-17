@@ -1,6 +1,7 @@
 import "server-only";
 import { load } from "cheerio";
-import type { CheerioAPI, Element as CheerioElement } from "cheerio";
+import type { CheerioAPI } from "cheerio";
+import type { Element as CheerioElement } from "domhandler";
 
 const BLOCKED_TAGS = [
   "script",

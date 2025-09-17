@@ -21,7 +21,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import BlogPostRenderer from "@/components/BlogPostRenderer";
+import BlogPostPreview from "./BlogPostPreview";
 import { RichTextEditor } from "./rich-text-editor";
 import Image from "next/image";
 import {
@@ -1066,7 +1066,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       {/* Preview Modal */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="max-w-5xl overflow-y-auto max-h-screen">
-          <BlogPostRenderer post={previewPost} />
+          <BlogPostPreview post={previewPost} />
         </DialogContent>
       </Dialog>
 

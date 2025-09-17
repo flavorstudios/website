@@ -20,6 +20,18 @@ type DomPurifyModule = typeof import("isomorphic-dompurify");
 let domPurifyInstance: DomPurifyModule["default"] | null = null;
 let domPurifyLoading: Promise<void> | null = null;
 
+type DomPurifyFactory = (
+  window: Window & typeof globalThis,
+) => DomPurifyModule["default"];
+
+function hasSanitize(value: unknown): value is DomPurifyModule["default"] {
+  return (
+    (typeof value === "object" || typeof value === "function") &&
+    value !== null &&
+    typeof (value as { sanitize?: unknown }).sanitize === "function"
+  );
+}
+
 function ensureDomPurify() {
   if (typeof window === "undefined" || domPurifyInstance || domPurifyLoading) {
     return;
@@ -27,7 +39,12 @@ function ensureDomPurify() {
 
   domPurifyLoading = import("isomorphic-dompurify")
     .then((module) => {
-      domPurifyInstance = module.default ?? (module as DomPurifyModule["default"]);
+      const imported = module.default ?? module;
+      const resolved = hasSanitize(imported)
+        ? imported
+        : (imported as DomPurifyFactory)(window);
+
+      domPurifyInstance = resolved;
     })
     .catch(() => {
       domPurifyInstance = null;

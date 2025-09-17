@@ -1,7 +1,7 @@
 import "server-only";
 import { load } from "cheerio";
 import type { CheerioAPI } from "cheerio";
-import type { Element as CheerioElement } from "domhandler";
+import type { AnyNode, Element as CheerioElement } from "domhandler";
 
 const BLOCKED_TAGS = [
   "script",
@@ -39,6 +39,10 @@ function isSafeUrl(value: string) {
   }
 }
 
+function isElement(node: AnyNode): node is CheerioElement {
+  return node.type === "tag" || node.type === "script" || node.type === "style";
+}
+
 function sanitizeAttributes(element: CheerioElement, $: CheerioAPI) {
   const attribs = element.attribs ?? {};
 
@@ -71,6 +75,10 @@ export function sanitizeHtmlServer(html: string) {
   $(BLOCKED_TAGS.join(",")).remove();
 
   $("*").each((_, element) => {
+    if (!isElement(element)) {
+      return;
+    }
+    
     sanitizeAttributes(element, $);
   });
 

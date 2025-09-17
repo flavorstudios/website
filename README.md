@@ -1,6 +1,6 @@
 # Flavor Studios Website
 
-This is the official website of **Flavor Studios** — your source for Anime News & Original Stories That Inspire.
+This is the official website of **Flavor Studios** | Your source for Anime News & Original Stories That Inspire.
 
 > New to this project? Jump straight to the [Quick Start](#quick-start).
 

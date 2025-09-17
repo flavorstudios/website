@@ -7,6 +7,9 @@ interface PreviewPayload {
   exp: number; // unix timestamp seconds
 }
 
+function getSecret(): string;
+function getSecret(throwOnMissing: true): string;
+function getSecret(throwOnMissing: false): string | undefined;
 function getSecret(throwOnMissing = true): string | undefined {
   const secret = serverEnv.PREVIEW_SECRET;
   if (!secret && throwOnMissing) {

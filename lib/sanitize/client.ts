@@ -17,19 +17,23 @@ const EVENT_HANDLER_REGEX = /^on/i;
 const DANGEROUS_STYLE_REGEX = /expression|url\s*\(/i;
 
 type DomPurifyModule = typeof import("isomorphic-dompurify");
-let domPurifyInstance: DomPurifyModule["default"] | null = null;
+let domPurifyInstance: DomPurifyModule | null = null;
 let domPurifyLoading: Promise<void> | null = null;
 
 type DomPurifyFactory = (
   window: Window & typeof globalThis,
-) => DomPurifyModule["default"];
+) => DomPurifyModule;
 
-function hasSanitize(value: unknown): value is DomPurifyModule["default"] {
+function hasSanitize(value: unknown): value is DomPurifyModule {
   return (
     (typeof value === "object" || typeof value === "function") &&
     value !== null &&
     typeof (value as { sanitize?: unknown }).sanitize === "function"
   );
+}
+
+function isDomPurifyFactory(value: unknown): value is DomPurifyFactory {
+  return typeof value === "function";
 }
 
 function ensureDomPurify() {
@@ -39,12 +43,19 @@ function ensureDomPurify() {
 
   domPurifyLoading = import("isomorphic-dompurify")
     .then((module) => {
-      const imported = module.default ?? module;
-      const resolved = hasSanitize(imported)
-        ? imported
-        : (imported as DomPurifyFactory)(window);
+      const imported = (module.default ?? module) as unknown;
 
-      domPurifyInstance = resolved;
+      if (hasSanitize(imported)) {
+        domPurifyInstance = imported;
+        return;
+      }
+
+      if (isDomPurifyFactory(imported)) {
+        const resolved = imported(window);
+        if (hasSanitize(resolved)) {
+          domPurifyInstance = resolved;
+        }
+      }
     })
     .catch(() => {
       domPurifyInstance = null;
@@ -109,7 +120,7 @@ function fallbackSanitize(html: string) {
 
 export function sanitizeHtmlClient(
   html: string,
-  options?: Parameters<DomPurifyModule["default"]["sanitize"]>[1],
+  options?: Parameters<DomPurifyModule["sanitize"]>[1],
 ) {
   if (!html) {
     return "";

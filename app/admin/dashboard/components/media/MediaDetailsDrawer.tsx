@@ -175,7 +175,10 @@ export default function MediaDetailsDrawer({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent className="p-4 space-y-4 max-w-md w-full" aria-label="Media details">
+      <DialogContent
+        className="p-4 space-y-4 max-w-md w-full max-h-[90vh] overflow-y-auto"
+        aria-label="Media details"
+      >
         {(onPrev || onNext) && (
           <div className="flex justify-between">
             {onPrev ? (
@@ -201,7 +204,7 @@ export default function MediaDetailsDrawer({
               width={400}
               height={400}
               sizes="(max-width: 640px) 100vw, 520px"
-              className="object-cover w-full h-auto rounded"
+              className="w-full max-h-[50vh] object-contain h-auto rounded"
             />
           ) : isVideo ? (
             <video

@@ -1,6 +1,7 @@
 // All categories are now managed dynamically—no more static arrays for seeding!
 
-import { getAdminDb } from "@/lib/firebase-admin"
+import { adminDb } from "@/lib/firebase-admin"
+import { logger } from "@/lib/logger"
 import { blogStore, videoStore, pageStore } from "./content-store"
 
 export const initialStats = {
@@ -16,7 +17,11 @@ export const initialStats = {
  * - Adds a sample blog post, video, and home page stats if collections are empty.
  */
 export async function initializeSampleData(): Promise<void> {
-  const db = getAdminDb();
+  const db = adminDb
+  if (!db) {
+    logger.debug("[Sample Data] Skipping initialization: Firebase Admin SDK unavailable.")
+    return
+  }
   const blogCheck = await db.collection("blogs").limit(1).get()
   if (blogCheck.empty) {
     const now = new Date().toISOString()

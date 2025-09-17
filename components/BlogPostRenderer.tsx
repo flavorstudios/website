@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import DOMPurify from "isomorphic-dompurify";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Eye, User, Clock } from "lucide-react";
@@ -9,6 +8,7 @@ import SocialShare from "@/app/blog/[slug]/components/social-share";
 import { SITE_URL } from "@/lib/constants";
 import type { BlogPost as StoreBlogPost } from "@/lib/content-store"; // Use your central type!
 import type { PublicBlogDetail } from "@/lib/types";
+import { sanitizeHtmlServer } from "@/lib/sanitize/server";
 
 
 const ALLOWED_IMAGE_DOMAINS = [
@@ -109,11 +109,8 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
         <CardContent className="p-8">
           <div
             className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-blue-600 prose-strong:text-gray-900"
-            // SSR-safe sanitize with a conservative profile
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(post.content || "", {
-                USE_PROFILES: { html: true },
-              }),
+              __html: sanitizeHtmlServer(post.content || ""),
             }}
           />
         </CardContent>

@@ -23,4 +23,20 @@ describe('preview token', () => {
     const tampered = token.replace(/.$/, token.endsWith('a') ? 'b' : 'a');
     expect(validatePreviewToken(tampered, 'post1', 'user1')).toBe('invalid');
   });
+
+  it('missing secret returns invalid result', () => {
+    const token = createPreviewToken('post1', 'user1', 60);
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const envModule = require("@/env/server");
+    const originalProcessSecret = process.env.PREVIEW_SECRET;
+    const originalServerSecret = envModule.serverEnv.PREVIEW_SECRET;
+    try {
+      delete process.env.PREVIEW_SECRET;
+      envModule.serverEnv.PREVIEW_SECRET = undefined;
+      expect(validatePreviewToken(token, 'post1', 'user1')).toBe('invalid');
+    } finally {
+      process.env.PREVIEW_SECRET = originalProcessSecret;
+      envModule.serverEnv.PREVIEW_SECRET = originalServerSecret;
+    }
+  });
 });

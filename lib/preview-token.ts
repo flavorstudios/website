@@ -7,9 +7,9 @@ interface PreviewPayload {
   exp: number; // unix timestamp seconds
 }
 
-function getSecret(): string {
+function getSecret(throwOnMissing = true): string | undefined {
   const secret = serverEnv.PREVIEW_SECRET;
-  if (!secret) {
+  if (!secret && throwOnMissing) {
     throw new Error("Missing PREVIEW_SECRET");
   }
   return secret;
@@ -23,8 +23,9 @@ export function createPreviewToken(
   const exp = Math.floor(Date.now() / 1000) + ttlSeconds;
   const payload: PreviewPayload = { postId, uid, exp };
   const base = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  const secret = getSecret();
   const sig = crypto
-    .createHmac("sha256", getSecret())
+    .createHmac("sha256", secret)
     .update(base)
     .digest("base64url");
   return `${base}.${sig}`;
@@ -37,8 +38,12 @@ export function validatePreviewToken(
 ): "valid" | "expired" | "invalid" {
   const [base, sig] = token.split(".");
   if (!base || !sig) return "invalid";
+  const secret = getSecret(false);
+  if (!secret) {
+    return "invalid";
+  }
   const expected = crypto
-    .createHmac("sha256", getSecret())
+    .createHmac("sha256", secret)
     .update(base)
     .digest("base64url");
   try {

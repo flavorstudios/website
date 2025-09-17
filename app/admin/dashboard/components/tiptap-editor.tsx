@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
-import DOMPurify from "isomorphic-dompurify"
+import { sanitizeHtmlClient } from "@/lib/sanitize/client"
 
 interface TiptapEditorProps {
   value: string
@@ -17,7 +17,7 @@ export function TiptapEditor({ value, onChange, placeholder, className }: Tiptap
     extensions: [StarterKit],
     content: value,
     onUpdate({ editor }) {
-      const html = DOMPurify.sanitize(editor.getHTML())
+      const html = sanitizeHtmlClient(editor.getHTML())
       onChange(html)
     },
   })

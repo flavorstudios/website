@@ -5,7 +5,9 @@ test.describe('Blog CRUD', () => {
     await page.goto('/admin/dashboard/blog');
     await page.getByRole('button', { name: /new post/i }).click();
     await page.getByLabel(/title/i).fill('Playwright Test Post');
-    await page.getByLabel(/content/i).fill('Hello world');
+    const contentEditor = page.getByLabel(/content/i);
+    await expect(contentEditor).toBeVisible();
+    await contentEditor.fill('Hello world');
     await page.getByRole('button', { name: /save/i }).click();
     await expect(page.getByText(/saved/i)).toBeVisible();
   });

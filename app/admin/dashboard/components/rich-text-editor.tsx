@@ -35,7 +35,7 @@ import Image from "@tiptap/extension-image"
 import TextAlign from "@tiptap/extension-text-align"
 import Placeholder from "@tiptap/extension-placeholder"
 import { TextStyle } from "@tiptap/extension-text-style"
-import DOMPurify from "isomorphic-dompurify"
+import { sanitizeHtmlClient } from "@/lib/sanitize/client"
 
 interface RichTextEditorProps {
   value: string
@@ -43,6 +43,8 @@ interface RichTextEditorProps {
   placeholder?: string
   className?: string
   socket?: WebSocket | null
+  ariaLabelledBy?: string
+  ariaLabel?: string
 }
 
 export function RichTextEditor({
@@ -51,6 +53,8 @@ export function RichTextEditor({
   placeholder,
   className,
   socket,
+  ariaLabelledBy,
+  ariaLabel,
 }: RichTextEditorProps) {
   const [showLinkDialog, setShowLinkDialog] = useState(false)
   const [linkUrl, setLinkUrl] = useState("")
@@ -78,7 +82,7 @@ export function RichTextEditor({
     ],
     content: value,
     onUpdate({ editor }) {
-      const html = DOMPurify.sanitize(editor.getHTML())
+      const html = sanitizeHtmlClient(editor.getHTML())
       onChange(html)
     },
   })
@@ -400,6 +404,8 @@ export function RichTextEditor({
             lineHeight: "1.7",
             fontSize: "18px",
           }}
+          aria-labelledby={ariaLabelledBy}
+          aria-label={ariaLabel}
         />
 
         {editor &&

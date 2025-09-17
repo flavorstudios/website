@@ -123,8 +123,19 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
       </AdminAuthGuard>
     );
   }
-
-  const validation = validatePreviewToken(token, id, userId);
+  let validation: "valid" | "expired" | "invalid";
+  try {
+    validation = validatePreviewToken(token, id, userId);
+  } catch (err) {
+    logFailure(500, err, userId);
+    return (
+      <AdminAuthGuard>
+        <div className="p-8 text-center">
+          <p className="text-gray-700">Invalid token.</p>
+        </div>
+      </AdminAuthGuard>
+    );
+  }
   if (validation === "invalid") {
     logFailure(403, new Error("Invalid token"), userId);
     return (

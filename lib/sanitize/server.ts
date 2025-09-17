@@ -66,7 +66,7 @@ export function sanitizeHtmlServer(html: string) {
     return "";
   }
 
-  const $ = load(html, { decodeEntities: false });
+  const $ = load(html, { xml: { decodeEntities: false } });
 
   $(BLOCKED_TAGS.join(",")).remove();
 

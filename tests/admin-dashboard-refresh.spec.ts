@@ -28,10 +28,10 @@ test('refresh updates data without page reload', async ({ page }) => {
   });
   await page.goto('/admin/dashboard');
   await expect(page.getByText('Total Posts')).toBeVisible();
-  await expect(page.getByText('1')).toBeVisible();
+  await expect(page.getByTestId('total-posts-value')).toHaveText('1');
   const before = await page.locator('text=Last updated').textContent();
   await page.getByRole('button', { name: 'Refresh' }).click();
-  await expect(page.getByText('2')).toBeVisible();
+  await expect(page.getByTestId('total-posts-value')).toHaveText('2');
   const after = await page.locator('text=Last updated').textContent();
   expect(before).not.toBe(after);
 });

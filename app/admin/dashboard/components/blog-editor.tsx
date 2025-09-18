@@ -552,7 +552,13 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                 </span>
               )
             )}
-            <Button variant="outline" onClick={() => savePost()} disabled={saving} className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => savePost()}
+              disabled={saving}
+              className="flex items-center gap-2"
+              aria-label="Draft post"
+            >
               <Save className="h-4 w-4" aria-hidden="true" />
               {saving ? "Saving..." : "Save Draft"}
             </Button>

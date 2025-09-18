@@ -299,7 +299,7 @@ export default function UserList() {
       ) : error ? (
         <div className="p-4 text-red-600">{error}</div>
       ) : users.length === 0 ? (
-        <div className="p-4 text-sm text-muted-foreground">No users found.</div>
+        <div className="p-4 text-sm text-muted-foreground">No team members found.</div>
       ) : (
         <>
           <div className="hidden sm:block overflow-x-auto">

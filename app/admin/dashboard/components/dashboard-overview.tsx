@@ -1,7 +1,7 @@
 // app/admin/dashboard/components/dashboard-overview.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -196,6 +196,8 @@ export default function DashboardOverview() {
   };
 
   // ↓↓↓ PRECOMPUTE CHART HOOKS BEFORE ANY CONDITIONAL RETURNS ↓↓↓
+  const chartRef = useRef<ChartJS<"bar"> | null>(null);
+
   const chartData = useMemo<ChartData<"bar">>(() => {
     if (!stats?.history?.length) return { labels: [], datasets: [] };
     return {
@@ -246,6 +248,13 @@ export default function DashboardOverview() {
   const hasActivity = stats?.history?.some(
     (m) => m.posts || m.videos || m.comments,
   );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    (window as any).__dashboardHistoryDatasets = hasActivity
+      ? chartRef.current?.data.datasets ?? null
+      : null;
+  }, [chartData, hasActivity]);
 
   // Permission warning (do not attempt fetching or show generic errors)
   if (!canViewAnalytics || unauthorized) {
@@ -387,7 +396,12 @@ export default function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Posts</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalPosts}</p>
+                <p
+                  className="text-3xl font-bold text-gray-900"
+                  data-testid="total-posts-value"
+                >
+                  {stats.totalPosts}
+                </p>
                 <p className={`text-sm flex items-center mt-1 ${growthColor}`}>
                   {stats.monthlyGrowth !== 0 && (
                     stats.monthlyGrowth > 0 ? (
@@ -413,7 +427,12 @@ export default function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Videos</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalVideos}</p>
+                <p
+                  className="text-3xl font-bold text-gray-900"
+                  data-testid="total-videos-value"
+                >
+                  {stats.totalVideos}
+                </p>
                 <p className="text-sm text-gray-500 mt-1">{stats.featuredVideos} featured</p>
               </div>
               <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
@@ -428,7 +447,12 @@ export default function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Comments</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalComments}</p>
+                <p
+                  className="text-3xl font-bold text-gray-900"
+                  data-testid="total-comments-value"
+                >
+                  {stats.totalComments}
+                </p>
                 {stats.pendingComments > 0 ? (
                   <p className="text-sm text-yellow-600 mt-1">{stats.pendingComments} pending review</p>
                 ) : (
@@ -447,7 +471,12 @@ export default function DashboardOverview() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Views</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.totalViews.toLocaleString()}</p>
+                <p
+                  className="text-3xl font-bold text-gray-900"
+                  data-testid="total-views-value"
+                >
+                  {stats.totalViews.toLocaleString()}
+                </p>
                 <p className="text-sm text-blue-600 mt-1">All time</p>
               </div>
               <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
@@ -469,7 +498,7 @@ export default function DashboardOverview() {
           </CardHeader>
           <CardContent>
             <div className="h-64">
-              <Bar data={chartData} options={chartOptions} />
+              <Bar ref={chartRef} data={chartData} options={chartOptions} />
             </div>
           </CardContent>
         </Card>
@@ -610,7 +639,7 @@ export default function DashboardOverview() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm">Posts total (all time)</span>
+                    <span className="text-sm">Posts total (lifetime)</span>
                     <span className="text-sm font-medium">{stats.totalPosts}</span>
                   </div>
                   <div className="flex justify-between">

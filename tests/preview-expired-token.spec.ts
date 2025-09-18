@@ -19,6 +19,18 @@ test.beforeEach(async ({ page }) => {
 
 test('shows message for expired preview token', async ({ page }) => {
   const token = createPreviewToken('1', 'bypass', -60);
+  let validateSessionCalled = false;
+
+  await page.route('**/api/admin/validate-session', async (route) => {
+    validateSessionCalled = true;
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ ok: true }),
+    });
+  });
+
   await page.goto(`/admin/preview/1?token=${token}`);
   await expect(page.getByText('Preview token expired.')).toBeVisible();
+expect(validateSessionCalled).toBe(true);
 });

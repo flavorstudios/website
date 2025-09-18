@@ -77,7 +77,9 @@ test('admin nav tabs render correct content', async ({ page }) => {
   for (const { label, expected, path } of sections) {
     await page.getByRole('link', { name: label }).click();
     await expect(page).toHaveURL(path);
-    await expect(page.getByText(expected)).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: expected, exact: false })
+    ).toBeVisible();
     await expect(page.getByText('Loading Admin Dashboard...')).not.toBeVisible();
   }
 });

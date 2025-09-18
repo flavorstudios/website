@@ -1,13 +1,28 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { RefreshCw, PlusCircle, AlertCircle, SortAsc, SortDesc } from "lucide-react";
+import {
+  RefreshCw,
+  PlusCircle,
+  AlertCircle,
+  SortAsc,
+  SortDesc,
+  MoreVertical,
+  Pencil,
+  Eye,
+  Archive,
+  Upload,
+  Trash2,
+} from "lucide-react";
 import useSWR from "swr";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CategoryDropdown } from "@/components/ui/category-dropdown";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -15,6 +30,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -29,6 +51,7 @@ import {
 import BlogTable from "@/components/admin/blog/BlogTable";
 import BlogBulkActions from "@/components/admin/blog/BlogBulkActions";
 import BlogTableSkeleton from "@/components/admin/blog/BlogTableSkeleton";
+import BlogStatusBadge from "@/components/admin/blog/BlogStatusBadge";
 
 import type { BlogPost } from "@/lib/content-store";
 import type { CategoryData } from "@/lib/dynamic-categories";
@@ -39,6 +62,7 @@ import AdminPageHeader from "@/components/AdminPageHeader";
 import { fetcher } from "@/lib/fetcher";
 import { useDebounce } from "@/hooks/use-debounce";
 import useMediaQuery from "@/hooks/use-media-query";
+import { formatDate } from "@/lib/date";
 
 export default function BlogManager() {
   const { toast } = useToast();
@@ -394,6 +418,7 @@ export default function BlogManager() {
   };
 
   const currentPosts = postsData?.posts ?? [];
+  const allSelected = currentPosts.length > 0 && currentPosts.every((p) => selected.has(p.id));
 
   const toggleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -655,6 +680,128 @@ export default function BlogManager() {
             </svg>
             <span className="text-lg font-medium">No blog posts found</span>
             <span className="text-sm mt-2">Try changing your filters or create a new post.</span>
+          </div>
+        ) : isMobile ? (
+          <div className="space-y-3" data-testid="blog-card-list">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Checkbox
+                checked={allSelected}
+                onCheckedChange={(v) => toggleSelectAll(!!v)}
+                aria-label="Select all posts"
+              />
+              <span>Select all</span>
+            </div>
+
+            {currentPosts.map((post) => {
+              const isPublished = post.status === "published";
+              return (
+                <div
+                  key={post.id}
+                  className="rounded-xl border bg-white p-4 shadow-sm"
+                  data-testid="blog-card"
+                >
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      aria-label={`Select blog post: ${post.title}`}
+                      checked={selected.has(post.id)}
+                      onCheckedChange={() => toggleSelect(post.id)}
+                    />
+
+                    <div className="flex flex-1 flex-col gap-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex flex-1 items-start gap-3">
+                          {post.featuredImage ? (
+                            <Image
+                              src={post.featuredImage}
+                              alt=""
+                              aria-hidden="true"
+                              width={64}
+                              height={40}
+                              className="h-12 w-16 flex-shrink-0 rounded object-cover"
+                            />
+                          ) : null}
+
+                          <div className="min-w-0 flex-1">
+                            <Link
+                              href={`/admin/blog/edit?id=${post.id}`}
+                              className="text-sm font-semibold leading-tight hover:underline"
+                            >
+                              {post.title}
+                            </Link>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {formatDate(post.publishedAt || post.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-9 w-9"
+                              aria-label={`Open actions for ${post.title}`}
+                              aria-haspopup="menu"
+                              data-testid="blog-card-actions"
+                            >
+                              <MoreVertical className="h-4 w-4" aria-hidden="true" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" sideOffset={4}>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/blog/edit?id=${post.id}`}>
+                                <Pencil className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <span>Edit</span>
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link
+                                href={`/admin/preview/${post.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <span>Preview</span>
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onSelect={(event) => {
+                                event.preventDefault();
+                                onTogglePublish(post.id, !isPublished);
+                              }}
+                            >
+                              {isPublished ? (
+                                <Archive className="mr-2 h-4 w-4" aria-hidden="true" />
+                              ) : (
+                                <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
+                              )}
+                              <span>{isPublished ? "Unpublish" : "Publish"}</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={(event) => {
+                                event.preventDefault();
+                                onDelete(post.id);
+                              }}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                              <span>Delete</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <span className="font-medium">{post.author}</span>
+                        <span aria-hidden="true">•</span>
+                        <span>{post.status}</span>
+                        <BlogStatusBadge status={post.status as BlogPost["status"]} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <BlogTable

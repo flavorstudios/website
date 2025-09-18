@@ -21,7 +21,7 @@ const FALLBACK_BLOG_POSTS: BlogPost[] = [
     category: "Engineering",
     categories: ["Engineering", "Culture"],
     tags: ["developer-experience", "process", "team"],
-    featuredImage: "/images/blog/dev-velocity.jpg",
+    featuredImage: "/placeholder.png",
     featured: true,
     seoTitle: "Build Developer Velocity Without Burnout",
     seoDescription:
@@ -35,7 +35,7 @@ const FALLBACK_BLOG_POSTS: BlogPost[] = [
     commentCount: 4,
     shareCount: 12,
     schemaType: "Article",
-    openGraphImage: "/images/blog/dev-velocity-og.jpg",
+    openGraphImage: "/placeholder.png",
   },
   {
     id: "fallback-product-analytics-north-star",
@@ -49,7 +49,7 @@ const FALLBACK_BLOG_POSTS: BlogPost[] = [
     category: "Product",
     categories: ["Product", "Growth"],
     tags: ["analytics", "north-star", "saas"],
-    featuredImage: "/images/blog/north-star-metric.jpg",
+    featuredImage: "/placeholder.png",
     seoTitle: "Design a North-Star Metric for SaaS Onboarding",
     seoDescription:
       "See the framework we used to craft a meaningful activation metric, align stakeholders, and improve onboarding decisions.",
@@ -62,7 +62,7 @@ const FALLBACK_BLOG_POSTS: BlogPost[] = [
     commentCount: 7,
     shareCount: 21,
     schemaType: "Article",
-    openGraphImage: "/images/blog/north-star-metric-og.jpg",
+    openGraphImage: "/placeholder.png",
   },
 ];
 

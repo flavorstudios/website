@@ -37,10 +37,13 @@ test('renders posts-only history with correct bars', async ({ page }) => {
   });
   await page.goto('/admin/dashboard');
   await page.waitForSelector('text=Posts, Videos & Comments (12 months)');
-  const datasets = await page.evaluate(() => {
-    const chart = (window as any).Chart.getChart(document.querySelector('canvas'));
-    return chart.data.datasets.map((d: any) => ({ label: d.label, data: d.data }));
-  });
+  await page.waitForFunction(() => (window as any).__dashboardHistoryDatasets);
+  const datasets = await page.evaluate(() =>
+    (window as any).__dashboardHistoryDatasets.map((d: any) => ({
+      label: d.label,
+      data: d.data,
+    })),
+  );
   expect(datasets).toEqual([
     { label: 'Posts', data: [5] },
     { label: 'Videos', data: [0] },
@@ -56,10 +59,13 @@ test('renders videos-only history with correct bars', async ({ page }) => {
   });
   await page.goto('/admin/dashboard');
   await page.waitForSelector('text=Posts, Videos & Comments (12 months)');
-  const datasets = await page.evaluate(() => {
-    const chart = (window as any).Chart.getChart(document.querySelector('canvas'));
-    return chart.data.datasets.map((d: any) => ({ label: d.label, data: d.data }));
-  });
+  await page.waitForFunction(() => (window as any).__dashboardHistoryDatasets);
+  const datasets = await page.evaluate(() =>
+    (window as any).__dashboardHistoryDatasets.map((d: any) => ({
+      label: d.label,
+      data: d.data,
+    })),
+  );
   expect(datasets).toEqual([
     { label: 'Posts', data: [0] },
     { label: 'Videos', data: [7] },

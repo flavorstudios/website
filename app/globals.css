@@ -239,7 +239,5 @@ samp {
 html, body, #app, .layout, .content { opacity: 1 !important; filter: none !important; }
 
 @media (max-width: 768px) {
-  .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 999; display: none; }
-  .drawer-open .backdrop { display: block; }
   .sidebar { position: fixed; z-index: 1000; }
 }

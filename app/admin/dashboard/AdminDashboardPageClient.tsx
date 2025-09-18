@@ -305,6 +305,21 @@ export default function AdminDashboardPageClient({
     return () => root.classList.remove("overflow-hidden");
   }, [isMobile, sidebarOpen]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isMobile && sidebarOpen) {
+        event.preventDefault();
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMobile, sidebarOpen]);
+
   // --- Toggle drawer-open class on app root ---------------------------------
   useEffect(() => {
     const appRoot =
@@ -475,9 +490,6 @@ export default function AdminDashboardPageClient({
               )}
             </div>
           </div>
-
-          {/* Mobile backdrop overlay */}
-          {isMobile && <div className="backdrop" aria-hidden="true"></div>}
 
           <Dialog open={shortcutsOpen} onOpenChange={setShortcutsOpen}>
             <DialogContent>

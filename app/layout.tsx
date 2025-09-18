@@ -21,6 +21,7 @@ import PwaServiceWorker from "@/components/PwaServiceWorker";
 import Toaster from "@/components/ui/toaster";
 import AdblockBanner from "@/components/AdblockBanner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SkipLink } from "@/components/skip-link";
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -243,9 +244,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
       >
         {/* Skip link for keyboard and pointer users */}
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a>
+        {!isAdmin && (
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
+        )}
         
         <ThemeProvider>
           {/* GTM (NOSCRIPT) — only if container id is provided */}
@@ -274,9 +277,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             />
           )}
 
-          <main id="main-content" tabIndex={-1}>
-            {children}
-          </main>
+          {isAdmin ? (
+            <div>{children}</div>
+          ) : (
+            <main id="main-content" tabIndex={-1}>
+              {children}
+            </main>
+          )}
 
           {!isAdmin && (
             <>

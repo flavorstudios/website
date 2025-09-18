@@ -83,6 +83,14 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   const reqHeaders = await headers();
   const requestId = reqHeaders.get("x-request-id") || crypto.randomUUID();
 
+  function renderMessage(message: string) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-gray-700">{message}</p>
+      </div>
+    );
+  }
+
   function logFailure(status: number, err: unknown, uid?: string) {
     const e = err instanceof Error ? err : new Error(String(err));
     const stack = e.stack?.split("\n").slice(0, 20).join("\n");
@@ -101,48 +109,24 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   
   if (!token) {
     logFailure(403, new Error("Missing token"), userId);
-    return (
-      <AdminAuthGuard>
-        <div className="p-8 text-center">
-          <p className="text-gray-700">Missing token.</p>
-        </div>
-      </AdminAuthGuard>
-    );
+    return renderMessage("Missing token.");
   }
 
   const inspection = inspectPreviewToken(token);
   if (inspection.status === "invalid") {
     logFailure(403, new Error("Invalid token"));
-    return (
-      <AdminAuthGuard>
-        <div className="p-8 text-center">
-          <p className="text-gray-700">Invalid token.</p>
-        </div>
-      </AdminAuthGuard>
-    );
+    return renderMessage("Invalid token.");
   }
   if (inspection.status === "expired") {
     logFailure(410, new Error("Expired token"));
-    return (
-      <AdminAuthGuard>
-        <div className="p-8 text-center">
-          <p className="text-gray-700">Preview token expired.</p>
-        </div>
-      </AdminAuthGuard>
-    );
+    return renderMessage("Preview token expired.");
   }
 
   const payload = inspection.payload;
 
   if (payload.postId !== id) {
     logFailure(403, new Error("Invalid token"));
-    return (
-      <AdminAuthGuard>
-        <div className="p-8 text-center">
-          <p className="text-gray-700">Invalid token.</p>
-        </div>
-      </AdminAuthGuard>
-    );
+    return renderMessage("Invalid token.");
   }
 
   try {
@@ -162,13 +146,7 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
 
   if (payload.uid !== userId) {
     logFailure(403, new Error("Invalid token"), userId);
-    return (
-      <AdminAuthGuard>
-        <div className="p-8 text-center">
-          <p className="text-gray-700">Invalid token.</p>
-        </div>
-      </AdminAuthGuard>
-    );
+    return renderMessage("Invalid token.");
   }
   let post: BlogPost | null = null;
   try {

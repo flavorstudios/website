@@ -1,4 +1,10 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { defineConfig } from '@playwright/test';
+
+const configDir = path.dirname(fileURLToPath(import.meta.url));
+const fontMockPath = path.join(configDir, 'scripts/mock-font-fetch.cjs');
 
 export default defineConfig({
   testDir: './tests',
@@ -43,6 +49,8 @@ export default defineConfig({
       NODE_ENV: 'production',
       NEXT_DISABLE_MINIFY: 'true',
       TEST_MODE: 'true',
+      NEXT_DISABLE_FONT_DOWNLOADS: '1',
+      NODE_OPTIONS: `--require ${fontMockPath}`,
     },
   },
   use: {

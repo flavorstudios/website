@@ -94,13 +94,7 @@ export function AdminHeader({
   }
 
   return (
-    <>
-      {/* Skip link for keyboard and screen reader users */}
-      <a href="#main" className="skip-link">
-        Skip to main content
-      </a>
-
-      <header
+    <header
         role="banner"
         className={cn(
           "sticky top-0 z-40",
@@ -181,7 +175,6 @@ export function AdminHeader({
           </div>
         </div>
       </header>
-    </>
   )
 }
 

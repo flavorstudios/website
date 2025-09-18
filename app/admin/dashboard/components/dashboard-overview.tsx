@@ -127,12 +127,28 @@ export default function DashboardOverview() {
   // Live toggle controls polling interval
   const [live, setLive] = useState(false);
   const [showInitialSpinner, setShowInitialSpinner] = useState(true);
+  const initialSpinnerStartedAtRef = useRef<number>(Date.now());
+  const MIN_INITIAL_SPINNER_MS = 450;
 
   // React Query: stats are the single source of truth
   const statsQuery = useDashboardStats(live, canViewAnalytics);
   const stats = statsQuery.data as DashboardStats | undefined;
   const statsError = statsQuery.error as unknown;
   const statsLoading = statsQuery.isLoading;
+  const lastUpdatedLabel = useMemo(() => {
+    if (!statsQuery.dataUpdatedAt) return "N/A";
+
+    try {
+      return new Intl.DateTimeFormat(undefined, {
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+        fractionalSecondDigits: 3,
+      }).format(new Date(statsQuery.dataUpdatedAt));
+    } catch (error) {
+      return new Date(statsQuery.dataUpdatedAt).toLocaleTimeString();
+    }
+  }, [statsQuery.dataUpdatedAt]);
 
   useEffect(() => {
     if (!showInitialSpinner) return;
@@ -141,7 +157,11 @@ export default function DashboardOverview() {
     const hasResolved = Boolean(stats) || Boolean(statsError) || !statsLoading;
     if (!hasResolved) return;
 
-    const timeout = window.setTimeout(() => setShowInitialSpinner(false), 150);
+    const startedAt = initialSpinnerStartedAtRef.current ?? Date.now();
+    const elapsed = Date.now() - startedAt;
+    const remaining = Math.max(MIN_INITIAL_SPINNER_MS - elapsed, 0);
+
+    const timeout = window.setTimeout(() => setShowInitialSpinner(false), remaining);
     return () => window.clearTimeout(timeout);
   }, [showInitialSpinner, statsLoading, stats, statsError]);
 
@@ -301,7 +321,7 @@ export default function DashboardOverview() {
           )}
           <Button
             onClick={refresh}
-            className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+            className="rounded-xl bg-orange-800 hover:bg-orange-900 text-white"
           >
             Retry Dashboard
           </Button>
@@ -317,7 +337,7 @@ export default function DashboardOverview() {
           <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
           <Button
             onClick={refresh}
-            className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+            className="rounded-xl bg-orange-800 hover:bg-orange-900 text-white"
           >
             Refresh Dashboard
           </Button>
@@ -341,7 +361,7 @@ export default function DashboardOverview() {
           onClick={refresh}
           disabled={statsQuery.isFetching}
           size="sm"
-          className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+          className="rounded-xl bg-orange-800 hover:bg-orange-900 text-white"
         >
           Refresh
         </Button>
@@ -355,10 +375,7 @@ export default function DashboardOverview() {
           Live
         </label>
         <span aria-live="polite" className="text-sm text-gray-600">
-          Last updated:{" "}
-          {statsQuery.dataUpdatedAt
-            ? new Date(statsQuery.dataUpdatedAt).toLocaleTimeString()
-            : "N/A"}
+          Last updated: {lastUpdatedLabel}
         </span>
       </div>
 
@@ -563,7 +580,7 @@ export default function DashboardOverview() {
                 <div className="text-center py-8">
                   <Activity className="h-8 w-8 mx-auto mb-2 opacity-50 text-gray-400" />
                   <p className="text-gray-500">No recent activity</p>
-                  <p className="text-xs text-gray-400 mt-1">Activity will appear here as you use the dashboard</p>
+                  <p className="text-xs text-gray-600 mt-1">Activity will appear here as you use the dashboard</p>
                 </div>
               ) : (
                 recentActivity.slice(0, 4).map((activity) => (

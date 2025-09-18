@@ -38,8 +38,11 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
         return
       }
       router.push("/admin/dashboard")
-    } catch {
-      setError("Authentication failed. Please try again.")
+    } catch (error) {
+      if (process.env.NODE_ENV !== "production") {
+        console.error("Email login network error:", error)
+      }
+      setError("Authentication failed.")
     } finally {
       setLoading(false)
     }

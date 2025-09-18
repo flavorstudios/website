@@ -350,7 +350,7 @@ export default function BlogManager() {
   const hasActiveFilters =
     Boolean(search || author || from || to) || category !== "all" || status !== "all";
   const hasPostsPayload = Array.isArray(postsData?.posts) && postsData.posts.length > 0;
-  const useFallbackPosts = !loading && !displayError && !hasActiveFilters && !hasPostsPayload;
+  const useFallbackPosts = !displayError && !hasActiveFilters && !hasPostsPayload;
   const currentPosts = useFallbackPosts ? FALLBACK_POSTS : postsData?.posts ?? [];
   const totalPostsCount = useFallbackPosts
     ? FALLBACK_POSTS.length
@@ -544,7 +544,7 @@ export default function BlogManager() {
     return () => window.removeEventListener("keydown", onKey);
   }, [handleRevalidateBlog, handleCreatePost]);
 
-  if (loading) {
+  if (loading && !useFallbackPosts) {
     return (
       <div>
         <AdminPageHeader

@@ -1,7 +1,7 @@
 // app/admin/dashboard/AdminDashboardPageClient.tsx
 "use client";
 
-import { useState, useEffect, useCallback, Suspense, useMemo } from "react";
+import { useState, useEffect, useCallback, Suspense, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { signOut } from "firebase/auth";
@@ -144,6 +144,7 @@ export default function AdminDashboardPageClient({
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const mainWrapperRef = useRef<HTMLDivElement | null>(null);
 
   // --- Hotkeys --------------------------------------------------------------
   useHotkeys("n", () => router.push("/admin/blog/create"), undefined, [router]);
@@ -306,6 +307,21 @@ export default function AdminDashboardPageClient({
   }, [isMobile, sidebarOpen]);
 
   useEffect(() => {
+    const wrapper = mainWrapperRef.current;
+    if (!wrapper) return;
+
+    if (isMobile && sidebarOpen) {
+      wrapper.style.pointerEvents = "none";
+    } else {
+      wrapper.style.pointerEvents = "";
+    }
+
+    return () => {
+      wrapper.style.pointerEvents = "";
+    };
+  }, [isMobile, sidebarOpen]);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isMobile && sidebarOpen) {
         event.preventDefault();
@@ -419,7 +435,7 @@ export default function AdminDashboardPageClient({
   return (
     <RoleProvider>
           {/* Accessible skip link */}
-          <a href="#main" className="skip-link">
+          <a href="#main-content" className="skip-link">
             Skip to main content
           </a>
 
@@ -437,7 +453,11 @@ export default function AdminDashboardPageClient({
               setSidebarOpen={setSidebarOpen}
             />
 
-            <div id="admin-main" className="flex min-w-0 flex-col bg-background">
+            <div
+              id="admin-main"
+              ref={mainWrapperRef}
+              className="flex min-w-0 flex-col bg-background"
+            >
               <AdminHeader
                 onLogout={handleLogout}
                 sidebarOpen={sidebarOpen}
@@ -446,7 +466,7 @@ export default function AdminDashboardPageClient({
               />
 
               <main
-                id="main"
+                id="main-content"
                 className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-4 pt-4
                            pb-[calc(var(--mobile-nav-h,64px)+env(safe-area-inset-bottom,0px))] lg:pb-6"
                 role="main"

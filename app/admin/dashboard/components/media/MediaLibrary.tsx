@@ -52,10 +52,13 @@ export default function MediaLibrary({
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState<"grid" | "list">(() => {
-    if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
-      return window.matchMedia("(min-width: 768px)").matches ? "list" : "grid";
+    if (typeof window !== "undefined") {
+      if (typeof window.matchMedia === "function") {
+        return window.matchMedia("(min-width: 768px)").matches ? "list" : "grid";
+      }
+      return "list";
     }
-    return "grid";
+    return "list";
   });
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");

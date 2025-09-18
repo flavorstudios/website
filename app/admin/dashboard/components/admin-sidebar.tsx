@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Edit,
   Settings,
+  Server,
   ChevronLeft,
   ChevronRight,
   Mail,
@@ -21,7 +22,7 @@ import {
 } from "lucide-react"
 import { useRole } from "../contexts/role-context"
 import type React from "react"
-import { useEffect, useMemo, Dispatch, SetStateAction } from "react"
+import { useEffect, useMemo, Dispatch, SetStateAction, useRef } from "react"
 import useMediaQuery from "@/hooks/use-media-query"
 import { ADMIN_HEADER_HEIGHT } from "@/lib/constants"
 import { SectionId } from "../sections"
@@ -54,6 +55,23 @@ export function AdminSidebar({
   const { accessibleSections } = useRole()
   const isMobile = useMediaQuery("(max-width: 767px)")
   const pathname = usePathname()
+  const sidebarRef = useRef<HTMLElement | null>(null)
+  const isHidden = isMobile && !sidebarOpen
+
+  useEffect(() => {
+    const sidebarEl = sidebarRef.current
+    if (!sidebarEl) return
+
+    if (isHidden) {
+      sidebarEl.setAttribute("inert", "")
+    } else {
+      sidebarEl.removeAttribute("inert")
+    }
+
+    return () => {
+      sidebarEl.removeAttribute("inert")
+    }
+  }, [isHidden])
 
   const menuItems: MenuItem[] = [
     { id: "overview", label: "Dashboard", icon: LayoutDashboard, count: null, href: "/admin/dashboard" },
@@ -72,6 +90,7 @@ export function AdminSidebar({
       count: null,
       href: "/admin/dashboard/users",
     },
+    { id: "system", label: "System Tools", icon: Server, count: null, href: "/admin/dashboard/system" },
     { id: "settings", label: "Settings", icon: Settings, count: null, href: "/admin/dashboard/settings" },
   ]
 
@@ -99,9 +118,11 @@ export function AdminSidebar({
   return (
     <>
       <aside
+      ref={sidebarRef}
         id={id}
         role="complementary"
-        aria-hidden={isMobile && !sidebarOpen}
+        aria-hidden={isHidden}
+        tabIndex={isHidden ? -1 : undefined}
         className={`
           h-full md:h-screen overflow-y-auto bg-background border-r
           ${isMobile

@@ -768,7 +768,7 @@ export default function BlogManager() {
                             <DropdownMenuItem
                               onSelect={(event) => {
                                 event.preventDefault();
-                                onTogglePublish(post.id, !isPublished);
+                                togglePublish(post.id, !isPublished);
                               }}
                             >
                               {isPublished ? (

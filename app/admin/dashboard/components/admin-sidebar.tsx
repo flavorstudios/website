@@ -107,7 +107,9 @@ export function AdminSidebar({
           ${isMobile
             ? "fixed left-0 top-0 z-40 transition-transform duration-300 ease-in-out"
             : "sticky top-0 z-40"}
-          ${sidebarOpen ? "" : "-translate-x-full md:translate-x-0"}
+          ${sidebarOpen
+            ? "translate-x-0 pointer-events-auto"
+            : "-translate-x-full md:translate-x-0 pointer-events-none md:pointer-events-auto"}
           w-64 ${sidebarOpen ? "md:w-64" : "md:w-20"}
           flex flex-col md:relative
         `}

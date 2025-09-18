@@ -296,29 +296,29 @@ body {
 /* Skip link helper (used by the header component) */
 .skip-link {
   position: absolute;
-  left: -9999px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.skip-link:focus,
-.skip-link:focus-visible {
-  left: 1rem;
   top: 1rem;
-  width: auto;
-  height: auto;
-  clip: auto;
-  overflow: visible;
-  white-space: normal;
+  left: 1rem;
   z-index: 50;
   padding: 0.5rem 0.75rem;
   border-radius: 0.375rem;
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   box-shadow: 0 0 0 3px hsl(var(--ring));
+}
+
+.skip-link:not(:focus):not(:focus-visible) {
+  width: 1px;
+  height: 1px;
+  clip: rect(0 0 0 0);
+  clip-path: inset(100%);
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 0;
+  border: 0;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
 }

@@ -30,7 +30,10 @@ export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
       })
       if (!res.ok) {
         const data = await res.json().catch(() => null)
-        setError(data?.error || "Authentication failed.")
+        if (process.env.NODE_ENV !== "production" && data?.error) {
+          console.error("Email login failed:", data.error)
+        }
+        setError("Authentication failed.")
         setLoading(false)
         return
       }

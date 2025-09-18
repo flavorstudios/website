@@ -100,30 +100,31 @@ samp {
 /* Skip link utility */
 .skip-link {
   position: absolute;
-  left: -9999px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.skip-link:focus {
-  left: 1rem;
   top: 1rem;
-  width: auto;
-  height: auto;
-  clip: auto;
-  overflow: visible;
-  white-space: normal;
+  left: 1rem;
   z-index: 999;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   box-shadow: 0 10px 25px -15px rgba(15, 23, 42, 0.6);
+}
+
+.skip-link:not(:focus):not(:focus-visible) {
+  width: 1px;
+  height: 1px;
+  clip: rect(0 0 0 0);
+  clip-path: inset(100%);
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 0;
+  border: 0;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
 }
 
 /* Admin Panel Specific Styles */

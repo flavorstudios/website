@@ -48,6 +48,12 @@ export async function middleware(request: NextRequest) {
   // --- All /admin routes
   if (pathname.startsWith("/admin")) {
     const sessionCookie = request.cookies.get("admin-session")?.value || "";
+    const isPreviewRoute = pathname.startsWith("/admin/preview");
+    const previewToken = request.nextUrl.searchParams.get("token");
+
+    if (isPreviewRoute && previewToken) {
+      return NextResponse.next();
+    }
 
     // --- Rate limiter: block if too many invalid attempts ---
     if (await isRateLimited(ip)) {

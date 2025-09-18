@@ -16,6 +16,24 @@ import type {
 } from "@/types/media";
 import { useToast } from "@/hooks/use-toast";
 
+const FALLBACK_MEDIA: MediaDoc[] = [
+  {
+    id: "fallback-media-1",
+    url: "/placeholder.png",
+    filename: "placeholder.png",
+    name: "Placeholder image",
+    alt: "Placeholder media item",
+    mime: "image/png",
+    size: 20480,
+    tags: ["fallback"],
+    attachedTo: [],
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
+  },
+];
+
+const getFallbackMedia = () => FALLBACK_MEDIA.map((item) => ({ ...item }));
+
 interface MediaLibraryProps {
   onSelect?: (url: string) => void;
   detailsOpen?: boolean;
@@ -179,6 +197,11 @@ export default function MediaLibrary({
   }, []);
 
   // Load media with pagination support and abort safety
+  const applyFallback = () => {
+    setItems(getFallbackMedia());
+    setCursor(null);
+  };
+
   const loadMedia = async (nextCursor?: number | null) => {
     if (loading) return;
     setLoading(true);
@@ -194,6 +217,12 @@ export default function MediaLibrary({
       const res = await fetch(`/api/media/list?${params.toString()}`, {
         signal: controller.signal,
       });
+      if (!res.ok) {
+        applyFallback();
+        toast.error?.("Failed to load media");
+        return;
+      }
+
       const data = await res.json();
 
       if (typeof nextCursor === "number") {
@@ -202,10 +231,13 @@ export default function MediaLibrary({
         setItems((data.media as MediaDoc[]) || []);
       }
       setCursor((data.cursor as number | null) ?? null);
-    } catch {
+    } catch (error) {
+      if ((error as DOMException)?.name === "AbortError") return;
+      applyFallback();
       // keep your existing toast API
       toast.error?.("Failed to load media");
     } finally {
+      activeRequestRef.current = null;
       setLoading(false);
     }
   };

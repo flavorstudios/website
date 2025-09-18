@@ -251,9 +251,19 @@ export default function DashboardOverview() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    (window as any).__dashboardHistoryDatasets = hasActivity
-      ? chartRef.current?.data.datasets ?? null
-      : null;
+    if (!hasActivity) {
+      (window as any).__dashboardHistoryDatasets = null;
+      return;
+    }
+
+    const datasets =
+      chartData?.datasets?.length ? chartData.datasets : chartRef.current?.data.datasets;
+
+    if (!datasets || datasets.length === 0) {
+      return;
+    }
+
+    (window as any).__dashboardHistoryDatasets = datasets;
   }, [chartData, hasActivity]);
 
   // Permission warning (do not attempt fetching or show generic errors)

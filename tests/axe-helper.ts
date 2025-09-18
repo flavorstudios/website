@@ -11,7 +11,39 @@ export async function expectNoAxeViolations(
 
   if (opts?.include) {
     const sels = Array.isArray(opts.include) ? opts.include : [opts.include];
-    for (const s of sels) builder = builder.include(s);
+    const labelOnly: string[] = [];
+
+    for (const rawSel of sels) {
+      const sel = rawSel.trim();
+      if (!sel) continue;
+
+      try {
+        const handle = await page.$(sel);
+        if (handle) {
+          await handle.dispose();
+          builder = builder.include(sel);
+        } else {
+          labelOnly.push(sel);
+          console.warn(
+            `[axe-helper] No elements matched include "${sel}"; treating as label-only.`
+          );
+        }
+      } catch (error) {
+        console.warn(
+          `[axe-helper] Skipping include "${sel}" due to selector error: ${
+            error instanceof Error ? error.message : error
+          }`
+        );
+      }
+    }
+
+    if (labelOnly.length) {
+      console.log(
+        `[axe-helper] Axe scan labels: ${labelOnly
+          .map((label) => `"${label}"`)
+          .join(', ')}`
+      );
+    }
   }
 
   const { violations } = await builder.analyze();

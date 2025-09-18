@@ -85,6 +85,8 @@ export function getAccessibleSections(userRole: UserRole): string[] {
   if (permissions.canHandleContacts)
     sections.push("inbox", "applications") // <-- Applications slug now!
   if (permissions.canManageSystem) sections.push("pages", "system")
+  if (permissions.canManageSystem || permissions.canManageUsers)
+    sections.push("settings")
 
   return sections
 }

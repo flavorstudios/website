@@ -64,6 +64,63 @@ import { useDebounce } from "@/hooks/use-debounce";
 import useMediaQuery from "@/hooks/use-media-query";
 import { formatDate } from "@/lib/date";
 
+const FALLBACK_POSTS: BlogPost[] = [
+  {
+    id: "fallback-smooth-launch",
+    title: "Preview: Populate Your First Blog Post",
+    slug: "preview-populate-your-first-blog-post",
+    content:
+      "<p>Add your first article in the admin dashboard to replace this preview content. The interface automatically adapts across breakpoints so you can review posts on any device.</p>",
+    excerpt:
+      "A sample entry that appears when Firestore has not returned any posts yet.",
+    status: "published",
+    category: "Announcements",
+    categories: ["Announcements"],
+    tags: ["preview", "demo"],
+    featuredImage: "/placeholder.png",
+    seoTitle: "Preview: Populate Your First Blog Post",
+    seoDescription:
+      "This lightweight placeholder helps preview the mobile card layout before real content exists.",
+    author: "Content Team",
+    publishedAt: "2024-01-01T08:00:00.000Z",
+    createdAt: "2024-01-01T08:00:00.000Z",
+    updatedAt: "2024-01-01T08:00:00.000Z",
+    views: 0,
+    readTime: "3 min",
+    commentCount: 0,
+    shareCount: 0,
+    schemaType: "Article",
+    openGraphImage: "/placeholder.png",
+  },
+  {
+    id: "fallback-culture-notes",
+    title: "Preview: Editorial Workflow Tips",
+    slug: "preview-editorial-workflow-tips",
+    content:
+      "<p>Use the bulk actions to publish, archive, or delete items. Filters help you locate drafts quickly while keeping the review experience tidy.</p>",
+    excerpt: "Guidance on using the dashboard tools while content is bootstrapping.",
+    status: "draft",
+    category: "Guides",
+    categories: ["Guides"],
+    tags: ["workflow", "demo"],
+    featuredImage: "/placeholder.png",
+    featured: false,
+    seoTitle: "Preview: Editorial Workflow Tips",
+    seoDescription:
+      "Explore how to manage drafts, publishing, and previews directly inside the dashboard UI.",
+    author: "Editorial Ops",
+    publishedAt: "2024-01-08T10:30:00.000Z",
+    createdAt: "2024-01-05T10:30:00.000Z",
+    updatedAt: "2024-01-08T10:30:00.000Z",
+    views: 0,
+    readTime: "4 min",
+    commentCount: 0,
+    shareCount: 0,
+    schemaType: "Article",
+    openGraphImage: "/placeholder.png",
+  },
+];
+
 export default function BlogManager() {
   const { toast } = useToast();
   const [isRevalidating, setIsRevalidating] = useState(false);
@@ -290,6 +347,17 @@ export default function BlogManager() {
   const loading = postsLoading || categoriesLoading;
   const displayError = postsError || categoriesError ? "Failed to load blog posts." : null;
 
+  const hasActiveFilters =
+    Boolean(search || author || from || to) || category !== "all" || status !== "all";
+  const hasPostsPayload = Array.isArray(postsData?.posts) && postsData.posts.length > 0;
+  const useFallbackPosts = !loading && !displayError && !hasActiveFilters && !hasPostsPayload;
+  const currentPosts = useFallbackPosts ? FALLBACK_POSTS : postsData?.posts ?? [];
+  const totalPostsCount = useFallbackPosts
+    ? FALLBACK_POSTS.length
+    : typeof postsData?.total === "number"
+    ? postsData.total
+    : postsData?.posts?.length ?? 0;
+
   const refreshData = useCallback(async () => {
     await Promise.all([mutatePosts(), mutateCategories()]);
   }, [mutatePosts, mutateCategories]);
@@ -417,7 +485,6 @@ export default function BlogManager() {
     });
   };
 
-  const currentPosts = postsData?.posts ?? [];
   const allSelected = currentPosts.length > 0 && currentPosts.every((p) => selected.has(p.id));
 
   const toggleSelectAll = (checked: boolean) => {
@@ -817,7 +884,7 @@ export default function BlogManager() {
         {/* Pagination (server-driven) */}
         <Pagination
           currentPage={currentPage}
-          totalCount={postsData?.total ?? 0}
+          totalCount={totalPostsCount}
           perPage={perPage}
           onPageChange={handlePageChange}
         />

@@ -345,18 +345,21 @@ export default function BlogManager() {
   }, [mutatePosts, mutateCategories]);
 
   const loading = postsLoading || categoriesLoading;
+  const postsRequestFailed = Boolean(postsError);
   const displayError = postsError || categoriesError ? "Failed to load blog posts." : null;
 
   const hasActiveFilters =
     Boolean(search || author || from || to) || category !== "all" || status !== "all";
   const hasPostsPayload = Array.isArray(postsData?.posts) && postsData.posts.length > 0;
-  const useFallbackPosts = !displayError && !hasActiveFilters && !hasPostsPayload;
+  const useFallbackPosts =
+    !hasActiveFilters && (postsRequestFailed || (!displayError && !hasPostsPayload));
   const currentPosts = useFallbackPosts ? FALLBACK_POSTS : postsData?.posts ?? [];
   const totalPostsCount = useFallbackPosts
     ? FALLBACK_POSTS.length
     : typeof postsData?.total === "number"
     ? postsData.total
     : postsData?.posts?.length ?? 0;
+  const showFallbackWarning = useFallbackPosts && postsRequestFailed;
 
   const refreshData = useCallback(async () => {
     await Promise.all([mutatePosts(), mutateCategories()]);
@@ -559,7 +562,7 @@ export default function BlogManager() {
   }
 
   // --- Error state (from SWR or actions) ---
-  if (displayError) {
+  if (displayError && !useFallbackPosts) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
@@ -605,8 +608,22 @@ export default function BlogManager() {
         </div>
       </div>
 
+      {showFallbackWarning ? (
+        <div
+          role="status"
+          className="mb-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+          data-testid="blog-fallback-warning"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <div>
+            <p className="font-medium">Live data is temporarily unavailable.</p>
+            <p>Preview posts are shown so you can review the layout until the feed reconnects.</p>
+          </div>
+        </div>
+      ) : null}
+
       {/* Blog management UI section */}
-      <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}> 
+      <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}>
         {/* Filters */}
         {isMobile && (
           <Button

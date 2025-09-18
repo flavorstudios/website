@@ -28,7 +28,7 @@ export default function SystemTools() {
     <div>
       <Card>
         <CardHeader>
-          <CardTitle>Revalidate Entire Website</CardTitle>
+          <CardTitle as="h2">Revalidate Entire Website</CardTitle>
           <CardDescription>
             Force a revalidation of all cached content across the entire public website. Use this after major content
             updates.

@@ -14,14 +14,8 @@ import {
   JetBrains_Mono,
 } from "next/font/google";
 
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { BackToTop } from "@/components/back-to-top";
-import PwaServiceWorker from "@/components/PwaServiceWorker";
 import Toaster from "@/components/ui/toaster";
-import AdblockBanner from "@/components/AdblockBanner";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SkipLink } from "@/components/skip-link";
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -92,14 +86,7 @@ const orgSchema = getSchema({
   ],
 });
 
-import { getDynamicCategories } from "@/lib/dynamic-categories";
-import { headers } from "next/headers";
 import Script from "next/script"; // for GTM + bootstrap
-import { isAdminRoute } from "@/lib/cookie-consent";
-
-// --- Type "Category" should have id, title, type, postCount, name, slug, tooltip, etc. ---
-import type { Category } from "@/types/category";
-import type { CategoryData } from "@/lib/dynamic-categories";
 
 // Ensure this layout is always dynamic (no static caching surprises)
 export const dynamic = "force-dynamic";
@@ -116,97 +103,10 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora", display: "swap" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
-// 🟩 UPDATED GUARD: All fields properly checked!
-function mapCategoryDataToCategory(
-  cat: CategoryData,
-  fallbackType: "blog" | "video",
-): Category {
-  return {
-    id:
-      typeof cat.id === "string"
-        ? cat.id
-        : typeof cat.slug === "string"
-        ? `${fallbackType}-${cat.slug}`
-        : `${fallbackType}-unknown`,
-    name: typeof cat.name === "string" ? cat.name : "",
-    slug: typeof cat.slug === "string" ? cat.slug : "",
-    title:
-      typeof cat.title === "string"
-        ? cat.title
-        : typeof cat.name === "string"
-        ? cat.name
-        : "",
-    type: cat.type === "blog" || cat.type === "video" ? cat.type : fallbackType,
-    postCount: Number(
-      typeof cat.postCount !== "undefined"
-        ? cat.postCount
-        : typeof cat.count !== "undefined"
-        ? cat.count
-        : 0,
-    ),
-    order: typeof cat.order === "number" ? cat.order : 0,
-    isActive: typeof cat.isActive === "boolean" ? cat.isActive : true,
-    tooltip: typeof cat.tooltip === "string" ? cat.tooltip : "",
-  };
-}
-
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  // ✅ Next 15+ requires awaiting these
-  const h = await headers();
-
-  // Derive pathname from headers; prioritize x-url if middleware sets it.
-  const rawPath =
-    h.get("x-url") ||
-    h.get("x-invoke-path") ||
-    h.get("next-url") ||
-    h.get("x-matched-path") ||
-    h.get("x-pathname") ||
-    "/";
-
-  // Normalize to a pathname (handle full URLs defensively)
-  let pathname = "/";
-  try {
-    pathname = rawPath.startsWith("/")
-      ? rawPath
-      : new URL(rawPath, `http://${h.get("host") || "localhost"}`).pathname;
-  } catch {
-    pathname = "/";
-  }
-
-  // Admin route prefixes from env (comma-separated)
-  const adminPrefixesEnv =
-    serverEnv.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES ||
-    "/admin,/wp-admin,/dashboard,/backend";
-  const adminPrefixes = adminPrefixesEnv
-    .split(",")
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-  const isAdmin = isAdminRoute(
-    pathname,
-    adminPrefixes.length ? adminPrefixes : undefined,
-  );
-
-  // (Intentionally no admin session verification here; handled in admin-only routes)
+export default function RootLayout({ children }: { children: ReactNode }) {
 
   // GTM env flags
   const gtmId = serverEnv.NEXT_PUBLIC_GTM_CONTAINER_ID || "";
-  const cookieYesId = serverEnv.NEXT_PUBLIC_COOKIEYES_ID || "";
-
-  let blogCategories: Category[] = [];
-  let videoCategories: Category[] = [];
-
-  if (!isAdmin) {
-    const categories = await getDynamicCategories();
-    // Map to full Category type expected by Header
-    blogCategories = (categories.blogCategories || []).map((cat: CategoryData) =>
-      mapCategoryDataToCategory(cat, "blog"),
-    );
-    videoCategories = (categories.videoCategories || []).map((cat: CategoryData) =>
-      mapCategoryDataToCategory(cat, "video"),
-    );
-  }
-
   return (
     <html
       lang="en"
@@ -242,14 +142,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </head>
       <body
         className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
-      >
-        {/* Skip link for keyboard and pointer users */}
-        {!isAdmin && (
-          <a href="#main-content" className="skip-link">
-            Skip to main content
-          </a>
-        )}
-        
+      >        
         <ThemeProvider>
           {/* GTM (NOSCRIPT) — only if container id is provided */}
           {gtmId && (
@@ -267,40 +160,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
           <Toaster />
 
-          {/* ⭐️ AdBlock Support Banner (only for non-admin routes) */}
-          {!isAdmin && <AdblockBanner />}
-
-          {!isAdmin && (
-            <Header
-              blogCategories={blogCategories}
-              videoCategories={videoCategories}
-            />
-          )}
-
-          {isAdmin ? (
-            <div>{children}</div>
-          ) : (
-            <main id="main-content" tabIndex={-1}>
-              {children}
-            </main>
-          )}
-
-          {!isAdmin && (
-            <>
-              <Footer />
-              <BackToTop />
-              <PwaServiceWorker />
-              {/* ⭐️ LOAD the stealth detection script only for non-admin */}
-              <Script src="/js/_support_banner.js" strategy="afterInteractive" />
-              {cookieYesId && (
-                <Script
-                  id="cookieyes"
-                  src={`https://cdn-cookieyes.com/client_data/${cookieYesId}/script.js`}
-                  strategy="afterInteractive"
-                />
-              )}
-            </>
-          )}
+          {children}
         </ThemeProvider>
       </body>
     </html>

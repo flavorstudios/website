@@ -15,6 +15,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 import EmailLoginForm from "./EmailLoginForm"
+import FirebaseEmailLoginForm from "./FirebaseEmailLoginForm"
 import useAuthError from "@/hooks/useAuthError"
 import { clientEnv } from "@/env.client"
 
@@ -27,6 +28,7 @@ import {
   User,
   signOut,
 } from "firebase/auth"
+import { FirebaseError } from "firebase/app"
 
 // Safe client-side error logger (dev only)
 function safeLogError(...args: unknown[]) {
@@ -209,7 +211,19 @@ export default function AdminLoginForm() {
       }
     } catch (error: unknown) {
       safeLogError("Google sign-in error:", error)
-      setError("Authentication failed. Please try again.")
+      if (error instanceof FirebaseError) {
+        if (error.code === "auth/account-exists-with-different-credential") {
+          setError(
+            "An account with this email already exists. Sign in with email and password, then link Google from your profile."
+          )
+        } else if (error.code === "auth/popup-closed-by-user") {
+          setError("Google sign-in was closed before completing. Try again or use email login.")
+        } else {
+          setError("Authentication failed. Please try again.")
+        }
+      } else {
+        setError("Authentication failed. Please try again.")
+      }
     } finally {
       setLoading(false)
     }
@@ -227,12 +241,21 @@ export default function AdminLoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 pt-0">
-          <div className="flex flex-col gap-6">
-            <EmailLoginForm
-              error={error}
-              setError={setError}
-              notice={passwordResetNotice ?? undefined}
-            />
+          <div className="flex flex-col gap-6 text-left">
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold text-slate-900">Sign in with email</h2>
+                <p className="text-sm text-slate-600">
+                  Use the credentials you created during admin signup. This uses Firebase Authentication and keeps your session in sync across devices.
+                </p>
+              </div>
+              <FirebaseEmailLoginForm
+                error={error}
+                setError={setError}
+                notice={passwordResetNotice ?? undefined}
+                onSuccess={finalizeLogin}
+              />
+            </div>
             <div className="relative py-2">
               <div className="absolute inset-0 flex items-center" aria-hidden="true">
                 <div className="w-full border-t border-slate-200" />
@@ -258,6 +281,24 @@ export default function AdminLoginForm() {
                 </>
               )}
             </Button>
+            <details className="rounded-md border border-slate-200 bg-slate-50/80 p-4">
+              <summary
+                className="cursor-pointer text-sm font-semibold text-slate-700"
+                data-testid="legacy-login-toggle"
+              >
+                Use legacy admin password (env-based)
+              </summary>
+              <div className="mt-3 space-y-3 text-sm text-slate-600">
+                <p>
+                  This fallback relies on <code>ADMIN_PASSWORD_HASH</code> and <code>ADMIN_JWT_SECRET</code>. Use it only if you are still migrating accounts.
+                </p>
+                <EmailLoginForm
+                  error={error}
+                  setError={setError}
+                  notice={passwordResetNotice ?? undefined}
+                />
+              </div>
+            </details>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col gap-3 p-6 pt-0 text-center w-full">

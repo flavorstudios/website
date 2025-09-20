@@ -3,10 +3,22 @@ import { runA11yScan } from './axe-helper';
 
 test.describe('Login form', () => {
   test('invalid login announces error via aria-live', async ({ page }) => {
+    await page.route('**/api/admin/email-login', async (route) => {
+      if (route.request().method() === 'POST') {
+        await route.fulfill({
+          status: 401,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'Authentication failed.' }),
+        });
+        return;
+      }
+      await route.continue();
+    });
+
     await page.goto('/admin/login');
     await page.getByLabel('Email').fill('fake@example.com');
     await page.getByLabel('Password').fill('wrong-password');
-    await page.getByRole('button', { name: 'Login' }).click();
+    await page.getByRole('button', { name: /^sign in$/i }).click();
 
     const error = page.getByRole('alert', { name: 'Authentication failed.' });
     await expect(error).toBeVisible();
@@ -30,6 +42,8 @@ test.describe('Login form', () => {
     });
 
     await page.goto('/admin/login');
+
+    await page.getByTestId('legacy-login-toggle').click();
 
     await expect(page.getByRole('button', { name: /verification code/i })).toHaveCount(0);
     await expect(page.getByLabel('Password')).toBeVisible();
@@ -73,6 +87,8 @@ test.describe('Login form', () => {
     });
 
     await page.goto('/admin/login');
+
+    await page.getByTestId('legacy-login-toggle').click();
 
     const verificationInput = page.getByLabel('Verification code');
     await expect(verificationInput).toBeVisible();

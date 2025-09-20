@@ -10,6 +10,21 @@ After updating `ADMIN_EMAILS` or `ADMIN_EMAIL` in Vercel, trigger a new deployme
 
 * The admin password must be provided as `ADMIN_PASSWORD_HASH` (bcrypt). `ADMIN_PASSWORD` is ignored.
 
+## Firebase email login (recommended)
+
+The admin UI now surfaces Firebase email/password login by default. The full onboarding flow is:
+
+1. Configure `ADMIN_EMAILS`/`ADMIN_EMAIL` with the addresses you want to allow.
+2. Direct the admin to `/admin/signup`. The form calls `POST /api/admin/signup`, which creates a Firebase Auth user, provisions the session cookie, and (optionally) triggers email verification.
+3. The user can immediately access `/admin/dashboard` if verification is not required. Otherwise, they are routed to `/admin/verify-email` until their Firebase mailbox is confirmed.
+4. Subsequent logins happen at `/admin/login`. The “Sign in with email” form uses Firebase Auth on the client, then exchanges the ID token with `POST /api/admin/email-login` to set the server `admin-session` cookie.
+5. If Google SSO is enabled, users can link providers after signing in with email/password. Attempting Google sign-in on an account that already exists now prompts the user to complete the email login and link their providers from settings.
+
+### Legacy env-based login
+
+The old environment-variable password flow is still available under the “Use legacy admin password (env-based)” disclosure on the login page. It relies on `ADMIN_PASSWORD_HASH` and `ADMIN_JWT_SECRET` and should only be used as a fallback while migrating existing operators.
+
+
 ## Email verification & signup hardening
 
 * Set `ADMIN_REQUIRE_EMAIL_VERIFICATION=true` to force newly created admins to verify their mailbox before accessing privileged routes. Mirror the flag client-side with `NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION=true` so the UI surfaces the correct prompts.

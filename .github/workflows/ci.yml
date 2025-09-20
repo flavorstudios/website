@@ -74,6 +74,7 @@ jobs:
 
       - name: Build
         env:
+          CRON_SECRET: test-secret
           SKIP_ENV_VALIDATION: "true"
           NEXT_PUBLIC_FIREBASE_API_KEY: stub
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: stub.firebaseapp.com
@@ -89,6 +90,8 @@ jobs:
         run: pnpm dlx playwright install --with-deps
 
       - name: Playwright tests
+        env:
+          CRON_SECRET: test-secret
         run: pnpm e2e
 
       - name: Clean up service account key

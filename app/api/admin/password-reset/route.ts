@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
   if (allowed && adminAuth && serverEnv.TEST_MODE !== "true") {
     try {
       firebaseLink = await adminAuth.generatePasswordResetLink(rawEmail, {
-        continueUrl,
+        url: continueUrl,
         handleCodeInApp: false,
       });
     } catch (error) {

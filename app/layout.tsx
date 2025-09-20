@@ -243,12 +243,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <body
         className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
       >
-        {/* Skip link for keyboard and pointer users */}
-        {!isAdmin && (
-          <a href="#main-content" className="skip-link">
-            Skip to main content
-          </a>
-        )}
+        {!isAdmin && <SkipLink />}
         
         <ThemeProvider>
           {/* GTM (NOSCRIPT) — only if container id is provided */}

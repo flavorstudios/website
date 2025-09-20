@@ -234,6 +234,8 @@ export default function AdminLoginForm() {
               </>
             ) : (
               <EmailLoginForm
+                error={error}
+                setError={setError}
                 onCancel={() => {
                   clearError()
                   setLoading(false)

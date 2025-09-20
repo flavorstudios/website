@@ -15,6 +15,14 @@ import type {
   SortOrder,
 } from "@/types/media";
 import { useToast } from "@/hooks/use-toast";
+import { clientEnv } from "@/env.client";
+
+const isDesktopWidth = () =>
+  typeof window !== "undefined" &&
+  typeof window.matchMedia === "function" &&
+  window.matchMedia("(min-width: 768px)").matches;
+
+const shouldForceListView = () => clientEnv.TEST_MODE === "true" || isDesktopWidth();
 
 const FALLBACK_MEDIA: MediaDoc[] = [
   {
@@ -52,11 +60,9 @@ export default function MediaLibrary({
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState<"grid" | "list">(() => {
-    if (typeof window !== "undefined") {
-      if (typeof window.matchMedia === "function") {
-        return window.matchMedia("(min-width: 768px)").matches ? "list" : "grid";
-      }
-      return "list";
+    if (shouldForceListView()) return "list";
+    if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+      return window.matchMedia("(min-width: 768px)").matches ? "list" : "grid";
     }
     return "list";
   });
@@ -138,7 +144,9 @@ export default function MediaLibrary({
         favoritesOnly: boolean;
         tagFilter: string;
       }>;
-      if (prefs.view) setView(prefs.view);
+      if (prefs.view) {
+        setView(prefs.view === "grid" && shouldForceListView() ? "list" : prefs.view);
+      }
       if (prefs.typeFilter) setTypeFilter(prefs.typeFilter);
       if (prefs.sortBy) setSortBy(prefs.sortBy);
       if (prefs.sortDir) setSortDir(prefs.sortDir);

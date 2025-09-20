@@ -16,6 +16,7 @@ export const clientEnvSchema = z.object({
   NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: z.string().optional(),
   NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: z.string().optional(),
   NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS: z.string().optional(),
+  TEST_MODE: z.string().optional(),
 });
 
 const skipValidation =
@@ -53,6 +54,7 @@ const _client: z.SafeParseReturnType<
           process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
         NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS:
           process.env.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS,
+        TEST_MODE: process.env.TEST_MODE,
       } as z.infer<typeof clientEnvSchema>,
     }
   : clientEnvSchema.safeParse({
@@ -71,6 +73,7 @@ const _client: z.SafeParseReturnType<
       NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
       NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
       NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS: process.env.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS,
+      TEST_MODE: process.env.TEST_MODE,
     });
 
 if (!_client.success) {

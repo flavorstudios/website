@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { cookies, headers } from "next/headers";
+import type { ReactNode } from "react";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
 import {
   blogStore,
@@ -83,11 +84,13 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   const reqHeaders = await headers();
   const requestId = reqHeaders.get("x-request-id") || crypto.randomUUID();
 
-  function renderMessage(message: string) {
+  function renderGuardedMessage(message: ReactNode) {
     return (
-      <div className="p-8 text-center">
-        <p className="text-gray-700">{message}</p>
-      </div>
+      <AdminAuthGuard>
+        <div className="p-8 text-center">
+          <p className="text-gray-700">{message}</p>
+        </div>
+      </AdminAuthGuard>
     );
   }
 
@@ -109,24 +112,24 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   
   if (!token) {
     logFailure(403, new Error("Missing token"), userId);
-    return renderMessage("Missing token.");
+    return renderGuardedMessage("Missing token.");
   }
 
   const inspection = inspectPreviewToken(token);
   if (inspection.status === "invalid") {
     logFailure(403, new Error("Invalid token"));
-    return renderMessage("Invalid token.");
+    return renderGuardedMessage("Invalid token.");
   }
   if (inspection.status === "expired") {
     logFailure(410, new Error("Expired token"));
-    return renderMessage("Preview token expired.");
+    return renderGuardedMessage("Preview token expired.");
   }
 
   const payload = inspection.payload;
 
   if (payload.postId !== id) {
     logFailure(403, new Error("Invalid token"));
-    return renderMessage("Invalid token.");
+    return renderGuardedMessage("Invalid token.");
   }
 
   try {
@@ -135,43 +138,27 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
     userId = verified.uid;
   } catch (err) {
     logFailure(403, err, payload.uid);
-    return (
-      <AdminAuthGuard>
-        <div className="p-8 text-center">
-          <p className="text-gray-700">Access denied.</p>
-        </div>
-      </AdminAuthGuard>
-    );
+    return renderGuardedMessage("Access denied.");
   }
 
   if (payload.uid !== userId) {
     logFailure(403, new Error("Invalid token"), userId);
-    return renderMessage("Invalid token.");
+    return renderGuardedMessage("Invalid token.");
   }
   let post: BlogPost | null = null;
   try {
     post = await getPost(id);
   } catch (err) {
     if (err instanceof HttpError && err.message === ADMIN_DB_UNAVAILABLE) {
-      return (
-        <AdminAuthGuard>
-          <div className="p-8 text-center">
-            <p className="text-gray-700">
-              Firestore unavailable. Set <code>FIREBASE_SERVICE_ACCOUNT_KEY</code> to enable previews.
-            </p>
-          </div>
-        </AdminAuthGuard>
+      return renderGuardedMessage(
+        <>
+          Firestore unavailable. Set <code>FIREBASE_SERVICE_ACCOUNT_KEY</code> to enable previews.
+        </>,
       );
     }
     logFailure(500, err, userId);
     console.error("Failed to load post preview:", err);
-    return (
-      <AdminAuthGuard>
-        <div className="p-8 text-center">
-          <p className="text-gray-700">Unable to load post preview.</p>
-        </div>
-      </AdminAuthGuard>
-    );
+    return renderGuardedMessage("Unable to load post preview.");
   }
   if (!post) {
     logFailure(404, new Error("Post not found"), userId);

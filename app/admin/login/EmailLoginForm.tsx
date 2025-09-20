@@ -1,21 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { Dispatch, SetStateAction, useState } from "react"
+import type { FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
-import useAuthError from "@/hooks/useAuthError"
-export default function EmailLoginForm({ onCancel }: { onCancel: () => void }) {
+type EmailLoginFormProps = {
+  onCancel: () => void
+  error: string
+  setError: Dispatch<SetStateAction<string>>
+}
+
+export default function EmailLoginForm({ onCancel, error, setError }: EmailLoginFormProps) {
   const router = useRouter()
-  const { error, setError } = useAuthError()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError("")

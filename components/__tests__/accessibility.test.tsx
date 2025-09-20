@@ -8,7 +8,12 @@ import EmailLoginForm from "@/app/admin/login/EmailLoginForm";
 
 describe("Accessibility", () => {
   it("EmailLoginForm should have no axe violations", async () => {
-    const { container } = render(<EmailLoginForm onCancel={() => {}} />);
+    const Wrapper = () => {
+      const [error, setError] = React.useState("");
+      return <EmailLoginForm onCancel={() => {}} error={error} setError={setError} />;
+    };
+
+    const { container } = render(<Wrapper />);
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });

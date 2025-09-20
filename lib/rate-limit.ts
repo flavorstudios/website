@@ -13,6 +13,12 @@ const RESET_WINDOW_SECONDS = 60 * 60; // 1 hour window per identifier
 const RESET_IP_MAX = 5;
 const RESET_EMAIL_MAX = 3;
 
+const SIGNUP_IP_PREFIX = "admin:signup:ip:";
+const SIGNUP_EMAIL_PREFIX = "admin:signup:email:";
+const SIGNUP_WINDOW_SECONDS = 60 * 60; // 1 hour window per identifier
+const SIGNUP_IP_MAX = 10;
+const SIGNUP_EMAIL_MAX = 5;
+
 const redisUrl = serverEnv.UPSTASH_REDIS_REST_URL;
 const redisToken = serverEnv.UPSTASH_REDIS_REST_TOKEN;
 
@@ -111,5 +117,55 @@ export async function incrementPasswordResetCounters(
   if (email) {
     const key = `${RESET_EMAIL_PREFIX}${email}`;
     await incrementWithExpiry(key, RESET_WINDOW_SECONDS);
+  }
+}
+
+export async function incrementSignupIpAttempts(ip: string): Promise<number> {
+  if (!ip) return 0;
+  const key = `${SIGNUP_IP_PREFIX}${ip}`;
+  return incrementWithExpiry(key, SIGNUP_WINDOW_SECONDS);
+}
+
+export async function incrementSignupEmailAttempts(
+  email: string,
+): Promise<number> {
+  if (!email) return 0;
+  const key = `${SIGNUP_EMAIL_PREFIX}${email}`;
+  return incrementWithExpiry(key, SIGNUP_WINDOW_SECONDS);
+}
+
+export async function isSignupIpRateLimited(ip: string): Promise<boolean> {
+  if (!ip) return false;
+  const key = `${SIGNUP_IP_PREFIX}${ip}`;
+  const count = await getCount(key);
+  if (count === null) return false;
+  return count >= SIGNUP_IP_MAX;
+}
+
+export async function isSignupEmailRateLimited(
+  email: string,
+): Promise<boolean> {
+  if (!email) return false;
+  const key = `${SIGNUP_EMAIL_PREFIX}${email}`;
+  const count = await getCount(key);
+  if (count === null) return false;
+  return count >= SIGNUP_EMAIL_MAX;
+}
+
+export async function resetSignupLimits(
+  ip?: string,
+  email?: string,
+): Promise<void> {
+  const operations: Promise<unknown>[] = [];
+  if (ip) {
+    const key = `${SIGNUP_IP_PREFIX}${ip}`;
+    operations.push(redisRequest("del", key));
+  }
+  if (email) {
+    const key = `${SIGNUP_EMAIL_PREFIX}${email}`;
+    operations.push(redisRequest("del", key));
+  }
+  if (operations.length > 0) {
+    await Promise.all(operations);
   }
 }

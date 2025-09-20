@@ -42,13 +42,15 @@ type SearchParams = {
   status?: string;
 };
 
-export default function AdminForgotPasswordPage({
+export default async function AdminForgotPasswordPage({
   searchParams,
 }: {
-  searchParams?: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
+  const resolvedSearchParams = await searchParams;
+  
   const notice =
-    searchParams?.status === "expired"
+    resolvedSearchParams?.status === "expired"
       ? "Your reset link expired or was already used. Please request a new one."
       : undefined;
 

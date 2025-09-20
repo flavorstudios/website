@@ -43,6 +43,35 @@ const checkServerSession = async () =>
     })
   ).ok
 
+const GoogleIcon = () => (
+  <svg
+    aria-hidden="true"
+    focusable="false"
+    width="18"
+    height="18"
+    viewBox="0 0 18 18"
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-4 w-4"
+  >
+    <path
+      d="M17.64 9.2045c0-.638-.0573-1.2518-.1636-1.8409H9v3.4814h4.8436c-.2091 1.125-.8436 2.0782-1.7968 2.7164v2.2581h2.9086c1.7018-1.5673 2.6846-3.8764 2.6846-6.6149z"
+      fill="#4285F4"
+    />
+    <path
+      d="M9 18c2.43 0 4.4673-.8059 5.9563-2.1805l-2.9086-2.2581c-.8059.54-1.8368.8591-3.0477.8591-2.3441 0-4.3282-1.5832-5.0368-3.7104H.95697v2.3318C2.43786 15.9832 5.48182 18 9 18z"
+      fill="#34A853"
+    />
+    <path
+      d="M3.96318 10.7101C3.78409 10.1705 3.68182 9.59322 3.68182 9c0-.59323.10227-1.17045.28136-1.71005V4.95818H.95697C.347727 6.17341 0 7.54364 0 9c0 1.4564.347727 2.8266.95697 4.0418l3.00621-2.3317z"
+      fill="#FBBC05"
+    />
+    <path
+      d="M9 3.54545c1.3214 0 2.5064.4541 3.4378 1.34637l2.5782-2.57819C13.464 1.01727 11.4273 0 9 0 5.48182 0 2.43786 2.01682.95697 4.95818L3.96318 7.28996C4.67182 5.16273 6.65591 3.54545 9 3.54545z"
+      fill="#EA4335"
+    />
+  </svg>
+)
+
 export default function AdminLoginForm() {
   const { error, setError, clearError } = useAuthError()
   const [loading, setLoading] = useState(false)
@@ -182,51 +211,49 @@ export default function AdminLoginForm() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-[#f5f8fd] flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <Card className="w-full max-w-sm sm:max-w-md bg-white border border-blue-100 shadow-lg rounded-2xl mx-4 relative z-10">
-        <CardHeader className="space-y-2 sm:space-y-3 text-center px-4 sm:px-6 pt-6 sm:pt-8">
-          <div className="space-y-2">
-            <CardTitle className="text-2xl sm:text-3xl font-semibold text-slate-900">
-              Welcome back
-            </CardTitle>
-            <CardDescription className="text-sm sm:text-base text-slate-600">
-              Sign in to manage Flavor Studios operations and content.
-            </CardDescription>
-          </div>
+    <div className="min-h-screen bg-[#f4f4f5] flex items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-sm bg-white border border-slate-200 shadow-sm rounded-lg">
+        <CardHeader className="p-6 text-center space-y-2">
+          <CardTitle className="text-2xl font-semibold text-slate-900">Welcome back</CardTitle>
+          <CardDescription className="text-sm text-slate-600">
+            Create, schedule, and manage your stories.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="px-4 sm:px-6 pb-6 sm:pb-8">
-          <div className="flex flex-col space-y-6">
+        <CardContent className="p-6 pt-0">
+          <div className="flex flex-col gap-6">
             <EmailLoginForm error={error} setError={setError} />
             <div className="relative py-2">
               <div className="absolute inset-0 flex items-center" aria-hidden="true">
                 <div className="w-full border-t border-slate-200" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-3 text-slate-500">Or continue with</span>
+              <div className="relative flex justify-center">
+                <span className="bg-white px-3 text-sm text-slate-500">Or continue with</span>
               </div>
             </div>
             <Button
-              variant="outline"
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full h-11 sm:h-10"
+              className="w-full h-11 sm:h-10 bg-white border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 focus-visible:ring-slate-200 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  <span className="text-sm sm:text-base">Authenticating...</span>
+                  <span className="text-sm">Authenticating...</span>
                 </>
               ) : (
-                <span className="text-sm sm:text-base">Sign in with Google</span>
+                <>
+                  <GoogleIcon />
+                  <span className="text-sm sm:text-base">Continue with Google</span>
+                </>
               )}
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col gap-3 px-4 sm:px-6 pb-6 sm:pb-8 text-center">
+        <CardFooter className="flex flex-col gap-3 p-6 pt-0 text-center">
           <p className="text-sm text-slate-600">
-            Need an account?{' '}
-            <a href="/contact" className="font-medium text-blue-600 hover:underline">
-              Request access
+            Don&apos;t have an account?{' '}
+            <a href="/admin/signup" className="font-medium text-blue-600 hover:underline">
+              Sign up
             </a>
           </p>
           <p className="text-xs text-slate-500">
@@ -237,8 +264,7 @@ export default function AdminLoginForm() {
             and{' '}
             <a href="/privacy-policy" className="font-medium text-blue-600 hover:underline">
               Privacy Policy
-            </a>
-            .
+            </a>,
           </p>
         </CardFooter>
       </Card>

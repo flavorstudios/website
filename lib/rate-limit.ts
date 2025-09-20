@@ -47,18 +47,20 @@ function ttlArgs(windowSeconds: number): string[] {
 
 async function incrementWithExpiry(
   key: string,
-  windowSeconds: number
+  windowSeconds: number,
 ): Promise<number> {
-  const count = await redisRequest<number>("incr", key);
+  const count = await redisRequest<number | string>("incr", key);
   if (count === null) return 0;
   if (redisUrl && redisToken) {
     await redisRequest("expire", key, ...ttlArgs(windowSeconds));
   }
-  return count;
+  return typeof count === "number" ? count : Number(count);
 }
 
 async function getCount(key: string): Promise<number | null> {
-  return await redisRequest<number | null>("get", key);
+  const count = await redisRequest<number | string | null>("get", key);
+  if (count === null) return null;
+  return typeof count === "number" ? count : Number(count);
 }
 
 export async function incrementAttempts(ip: string): Promise<number> {
@@ -76,24 +78,6 @@ export async function isRateLimited(ip: string): Promise<boolean> {
 export async function resetAttempts(ip: string): Promise<void> {
   const key = `${PREFIX}${ip}`;
   await redisRequest("del", key);
-}
-
-async function incrementWithExpiry(
-  key: string,
-  windowSeconds: number,
-): Promise<number> {
-  const count = await redisRequest<number>("incr", key);
-  if (count === null) return 0;
-  if (redisUrl && redisToken) {
-    await redisRequest("expire", key, windowSeconds.toString());
-  }
-  return count;
-}
-
-async function getCount(key: string): Promise<number | null> {
-  const count = await redisRequest<number | null>("get", key);
-  if (count === null) return null;
-  return typeof count === "number" ? count : Number(count);
 }
 
 export async function isPasswordResetIpRateLimited(

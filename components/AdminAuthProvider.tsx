@@ -1,5 +1,6 @@
 "use client"
 import React, { createContext, useContext, useEffect, useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { onAuthStateChanged, signOut, User } from "firebase/auth"
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -22,6 +23,11 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
+  const router = useRouter()
+  const pathname = usePathname()
+  const requiresVerification =
+    clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true"
+  const testMode = clientEnv.TEST_MODE === "true"
 
   useEffect(() => {
     // Guard: If Firebase config error, do not register listener
@@ -83,6 +89,28 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!requiresVerification || loading) {
+      return
+    }
+    const currentPath = pathname || ""
+    const testVerified =
+      testMode && typeof window !== "undefined"
+        ? window.localStorage.getItem("admin-test-email-verified") === "true"
+        : undefined
+    const isVerified = (testVerified ?? user?.emailVerified) ?? false
+    const hasSession = testMode ? true : !!user
+
+    if (hasSession && !isVerified) {
+      if (!currentPath.startsWith("/admin/verify-email") && currentPath !== "/admin/signup") {
+        router.replace("/admin/verify-email")
+      }
+    } else if (hasSession && isVerified && currentPath.startsWith("/admin/verify-email")) {
+      router.replace("/admin/dashboard")
+    }
+  }, [requiresVerification, user, loading, pathname, router, testMode])
+
 
   return (
     <AdminAuthContext.Provider value={{ user, loading, error, signOutAdmin }}>

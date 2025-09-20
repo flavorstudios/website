@@ -6,6 +6,12 @@ import { serverEnv } from "@/env/server"
 
 import { isEmailAllowed } from "@/lib/admin-allowlist"
 
+export function GET() {
+  return NextResponse.json({
+    mfaRequired: Boolean(serverEnv.ADMIN_TOTP_SECRET),
+  })
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { email, password, otp } = await req.json()

@@ -10,6 +10,11 @@ After updating `ADMIN_EMAILS` or `ADMIN_EMAIL` in Vercel, trigger a new deployme
 
 * The admin password must be provided as `ADMIN_PASSWORD_HASH` (bcrypt). `ADMIN_PASSWORD` is ignored.
 
+## Email verification & signup hardening
+
+* Set `ADMIN_REQUIRE_EMAIL_VERIFICATION=true` to force newly created admins to verify their mailbox before accessing privileged routes. Mirror the flag client-side with `NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION=true` so the UI surfaces the correct prompts.
+* Define `ADMIN_DISPOSABLE_DOMAINS` with a comma-separated list (e.g. `mailinator.com,tempmail.com`) to block throwaway inboxes during signup. Domains are matched case-insensitively.
+
 ## How `/api/admin/google-session` authorizes emails
 
 The Google admin login endpoint calls `getAllowedAdminEmails()` from `lib/firebase-admin`. That helper builds a lowercase list from `ADMIN_EMAILS` (comma-separated); if `ADMIN_EMAILS` is undefined or empty, it falls back to `ADMIN_EMAIL`. When a login request arrives, `/api/admin/google-session` verifies the decoded Google ID token and then ensures the email is included in that allowed list before issuing the `admin-session` cookie.

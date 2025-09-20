@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -77,7 +78,13 @@ export default function AdminLoginForm() {
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
+
+  const passwordResetNotice =
+    searchParams.get("reset") === "1"
+      ? "Your password has been updated. Please sign in."
+      : null
 
   const finalizeLogin = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -221,7 +228,11 @@ export default function AdminLoginForm() {
         </CardHeader>
         <CardContent className="p-6 pt-0">
           <div className="flex flex-col gap-6">
-            <EmailLoginForm error={error} setError={setError} />
+            <EmailLoginForm
+              error={error}
+              setError={setError}
+              notice={passwordResetNotice ?? undefined}
+            />
             <div className="relative py-2">
               <div className="absolute inset-0 flex items-center" aria-hidden="true">
                 <div className="w-full border-t border-slate-200" />
@@ -249,22 +260,35 @@ export default function AdminLoginForm() {
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col gap-3 p-6 pt-0 text-center">
+        <CardFooter className="flex flex-col gap-3 p-6 pt-0 text-center w-full">
           <p className="text-sm text-slate-600">
             Don&apos;t have an account?{' '}
-            <a href="/admin/signup" className="font-medium text-blue-600 hover:underline">
+            <Link
+              href="/admin/signup"
+              className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
+            >
               Sign up
-            </a>
+            </Link>
           </p>
-          <p className="text-xs text-slate-500">
-            By continuing, you agree to our{' '}
-            <a href="/terms-of-service" className="font-medium text-blue-600 hover:underline">
+          <p
+            className="text-xs text-slate-500 w-full whitespace-nowrap overflow-hidden text-ellipsis"
+            data-testid="admin-login-legal"
+          >
+            By continuing, you agree to our&nbsp;
+            <Link
+              href="/terms-of-service"
+              className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
+            >
               Terms of Service
-            </a>{' '}
-            and{' '}
-            <a href="/privacy-policy" className="font-medium text-blue-600 hover:underline">
+            </Link>
+            &nbsp;and&nbsp;
+            <Link
+              href="/privacy-policy"
+              className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
+            >
               Privacy Policy
-            </a>,
+            </Link>
+            .
           </p>
         </CardFooter>
       </Card>

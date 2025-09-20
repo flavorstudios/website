@@ -18,6 +18,12 @@ import { createHash } from "crypto";
 const debug =
   serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
 
+function getRequestIp(req: NextRequest): string {
+  const xfwd = req.headers.get("x-forwarded-for");
+  if (xfwd) return xfwd.split(",")[0]?.trim() || "unknown";
+  return "unknown";
+}
+
   // Combined flag to short-circuit all auth checks when either bypass is enabled
 // or auth is explicitly disabled via environment variable.
 export const DISABLE_AUTH =
@@ -224,6 +230,19 @@ export async function requireAdmin(
   if (!sessionCookie) return false;
   try {
     const decoded = await verifyAdminSession(sessionCookie);
+    if (serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === "true") {
+      const emailVerified =
+        (decoded as { email_verified?: boolean }).email_verified ??
+        (decoded as { emailVerified?: boolean }).emailVerified ?? false;
+      if (!emailVerified) {
+        await logAdminAuditFailure(
+          (decoded.email as string) || null,
+          getRequestIp(req),
+          "email-unverified"
+        );
+        return false;
+      }
+    }
     if (permission) {
       const { hasPermission } = await import("@/lib/role-permissions");
       if (!hasPermission(decoded.role, permission)) {
@@ -264,6 +283,19 @@ export async function requireAdminAction(
   if (!sessionCookie) return false;
   try {
     const decoded = await verifyAdminSession(sessionCookie);
+    if (serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === "true") {
+      const emailVerified =
+        (decoded as { email_verified?: boolean }).email_verified ??
+        (decoded as { emailVerified?: boolean }).emailVerified ?? false;
+      if (!emailVerified) {
+        await logAdminAuditFailure(
+          (decoded.email as string) || null,
+          "unknown",
+          "email-unverified"
+        );
+        return false;
+      }
+    }
     if (permission) {
       const { hasPermission } = await import("@/lib/role-permissions");
       if (!hasPermission(decoded.role, permission)) {

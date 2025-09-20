@@ -30,6 +30,8 @@ export const serverEnv: Record<string, string | undefined> & {
   ADMIN_DOMAIN: string | undefined;
   ADMIN_EMAIL: string | undefined;
   ADMIN_EMAILS: string | undefined;
+  ADMIN_REQUIRE_EMAIL_VERIFICATION: string | undefined;
+  ADMIN_DISPOSABLE_DOMAINS: string | undefined;
   ADMIN_API_KEY: string | undefined;
   ADMIN_JWT_SECRET: string | undefined;
   ADMIN_PASSWORD_HASH: string | undefined;
@@ -75,6 +77,9 @@ export const serverEnv: Record<string, string | undefined> & {
   ADMIN_DOMAIN: process.env.ADMIN_DOMAIN,
   ADMIN_EMAIL: process.env.ADMIN_EMAIL,
   ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+  ADMIN_REQUIRE_EMAIL_VERIFICATION:
+    process.env.ADMIN_REQUIRE_EMAIL_VERIFICATION,
+  ADMIN_DISPOSABLE_DOMAINS: process.env.ADMIN_DISPOSABLE_DOMAINS,
   ADMIN_API_KEY: process.env.ADMIN_API_KEY,
   ADMIN_JWT_SECRET: process.env.ADMIN_JWT_SECRET,
   ADMIN_PASSWORD_HASH: process.env.ADMIN_PASSWORD_HASH,

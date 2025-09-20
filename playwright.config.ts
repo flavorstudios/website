@@ -34,6 +34,8 @@ export default defineConfig({
       ADMIN_BYPASS: 'true',
       ADMIN_AUTH_DISABLED: '1',
       ADMIN_JWT_SECRET: 'test-secret',
+      ADMIN_REQUIRE_EMAIL_VERIFICATION: 'true',
+      NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION: 'true',
 
       // Public Firebase envs (test placeholders)
       NEXT_PUBLIC_FIREBASE_API_KEY: 'test',

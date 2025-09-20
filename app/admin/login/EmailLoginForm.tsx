@@ -8,12 +8,23 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
+import useSWR from "swr"
 type EmailLoginFormProps = {
   error: string
   setError: Dispatch<SetStateAction<string>>
+  notice?: string
 }
 
-export default function EmailLoginForm({ error, setError }: EmailLoginFormProps) {
+const fetchMfaStatus = async (url: string): Promise<{ mfaRequired: boolean }> => {
+  const res = await fetch(url, { credentials: "include" })
+  if (!res.ok) {
+    return { mfaRequired: false }
+  }
+  const data = (await res.json()) as { mfaRequired: boolean }
+  return data
+}
+
+export default function EmailLoginForm({ error, setError, notice }: EmailLoginFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -21,16 +32,36 @@ export default function EmailLoginForm({ error, setError }: EmailLoginFormProps)
   const [loading, setLoading] = useState(false)
   const [formError, setFormError] = useState(error)
   const [otpExpanded, setOtpExpanded] = useState(false)
+  const [infoNotice, setInfoNotice] = useState<string | null>(notice ?? null)
+  const { data: mfaStatus } = useSWR<{ mfaRequired: boolean }>(
+    "/api/admin/email-session",
+    fetchMfaStatus,
+    {
+      revalidateOnFocus: false,
+    }
+  )
+  const mfaRequired = mfaStatus?.mfaRequired ?? false
 
   useEffect(() => {
     setFormError(error)
   }, [error])
+
+  useEffect(() => {
+    setInfoNotice(notice ?? null)
+  }, [notice])
+
+  useEffect(() => {
+    if (mfaRequired) {
+      setOtpExpanded(true)
+    }
+  }, [mfaRequired])
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError("")
     setFormError("")
+    setInfoNotice(null)
     try {
       const res = await fetch("/api/admin/email-session", {
         method: "POST",
@@ -66,10 +97,21 @@ export default function EmailLoginForm({ error, setError }: EmailLoginFormProps)
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Persistent live region so SRs announce new errors */}
-      <div aria-live="assertive" className="min-h-[1.5rem]">
-        {formError && (
-          <p id="login-error" className="text-red-600 text-sm" role="alert">
-            {formError}
+      <div className="min-h-[1.5rem] space-y-2">
+        <div aria-live="assertive">
+          {formError && (
+            <p id="login-error" className="text-red-600 text-sm" role="alert">
+              {formError}
+            </p>
+          )}
+        </div>
+        {infoNotice && (
+          <p
+            className="text-sm text-slate-600"
+            role="status"
+            aria-live="polite"
+          >
+            {infoNotice}
           </p>
         )}
       </div>
@@ -91,7 +133,7 @@ export default function EmailLoginForm({ error, setError }: EmailLoginFormProps)
         <div className="flex items-center justify-between">
           <Label htmlFor="login-password">Password</Label>
           <Link
-            href="/admin/login/recovery"
+            href="/admin/forgot-password"
             className="text-sm font-medium text-primary hover:underline"
           >
             Forgot your password?
@@ -108,43 +150,61 @@ export default function EmailLoginForm({ error, setError }: EmailLoginFormProps)
         />
       </div>
 
-      <div className="space-y-2">
-        <Button
-          type="button"
-          variant="link"
-          className="h-auto px-0 text-sm font-medium"
-          aria-expanded={otpExpanded}
-          aria-controls="login-otp"
-          onClick={() => {
-            setOtpExpanded((prev) => {
-              const next = !prev
-              if (!next) {
-                setOtp("")
-              }
-              return next
-            })
-          }}
-        >
-          {otpExpanded ? "Hide 2FA code" : "Use a 2FA code"}
-        </Button>
-        {otpExpanded && (
-          <div className="space-y-2">
-            <Label htmlFor="login-otp">2FA code</Label>
-            <Input
-              id="login-otp"
-              type="text"
-              placeholder="2FA code"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              aria-describedby={formError ? "login-error" : undefined}
-            />
+      {mfaRequired && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Button
+              type="button"
+              variant="link"
+              className="h-auto px-0 text-sm font-medium"
+              aria-expanded={otpExpanded}
+              aria-controls="login-otp"
+              onClick={() => {
+                setOtpExpanded((prev) => {
+                  const next = !prev
+                  if (!next) {
+                    setOtp("")
+                  }
+                  return next
+                })
+              }}
+            >
+              {otpExpanded ? "Hide verification code" : "Use a verification code"}
+            </Button>
+            <Link
+              href="/admin/login/recovery"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              Having trouble?
+            </Link>
           </div>
-        )}
-      </div>
+        {otpExpanded && (
+            <div className="space-y-2">
+              <Label htmlFor="login-otp">Verification code</Label>
+              <Input
+                id="login-otp"
+                type="text"
+                placeholder="123456"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                aria-describedby={formError ? "login-error" : undefined}
+                required={mfaRequired}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
-      <Button type="submit" disabled={loading} className="w-full">
+      <Button
+        type="submit"
+        disabled={loading}
+        aria-busy={loading}
+        variant="brand"
+        size="prominent"
+        className="w-full"
+      >
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-        Login
+        {loading ? "Signing in…" : "Sign in"}
       </Button>
     </form>
   )

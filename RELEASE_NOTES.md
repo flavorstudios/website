@@ -7,6 +7,8 @@
 - Responsive card layouts for Media and Blog tables on small screens.
 - Configured toast placement and accessibility improvements across forms.
 - Added automated axe test and eslint a11y plugin.
+- Added admin self-service signup with inline validation, password guidance, and rate limiting.
+- Introduced mandatory email verification gate with resend flow and disposable domain blocking.
 
 ## Setup
 - Install dependencies: `pnpm install`

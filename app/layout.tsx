@@ -151,24 +151,34 @@ function mapCategoryDataToCategory(
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  // ✅ Next 15+ requires awaiting these
-  const h = await headers();
+  const headerList = headers();
 
-  // Derive pathname from headers; prioritize x-url if middleware sets it.
-  const rawPath =
-    h.get("x-url") ||
-    h.get("x-invoke-path") ||
-    h.get("next-url") ||
-    h.get("x-matched-path") ||
-    h.get("x-pathname") ||
-    "/";
+  const adminRouteHint = headerList.get("x-route-type");
+
+  // Derive pathname from headers; prioritize middleware-provided hints.
+  const rawPathSources = [
+    headerList.get("x-url"),
+    headerList.get("x-invoke-path"),
+    headerList.get("next-url"),
+    headerList.get("rsc-pathname"),
+    headerList.get("x-matched-path"),
+    headerList.get("x-pathname"),
+    headerList.get("x-request-url"),
+  ];
+  const rawPath = rawPathSources.find((value) => value && value.length) || "/";
 
   // Normalize to a pathname (handle full URLs defensively)
   let pathname = "/";
   try {
-    pathname = rawPath.startsWith("/")
-      ? rawPath
-      : new URL(rawPath, `http://${h.get("host") || "localhost"}`).pathname;
+    if (rawPath.startsWith("/")) {
+      pathname = rawPath;
+    } else {
+      const host =
+        headerList.get("x-forwarded-host") ||
+        headerList.get("host") ||
+        "localhost";
+      pathname = new URL(rawPath, `http://${host}`).pathname;
+    }
   } catch {
     pathname = "/";
   }
@@ -182,10 +192,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     .map((p) => p.trim())
     .filter(Boolean);
 
-  const isAdmin = isAdminRoute(
+  const isAdminFromPath = isAdminRoute(
     pathname,
     adminPrefixes.length ? adminPrefixes : undefined,
   );
+
+  const isAdmin = adminRouteHint === "admin" || isAdminFromPath;
 
   // (Intentionally no admin session verification here; handled in admin-only routes)
 

@@ -29,6 +29,11 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const ip = getRequestIp(request);
 
+  const markAdminRoute = <T extends NextResponse>(response: T) => {
+    response.headers.set("x-route-type", "admin");
+    return response;
+  };
+
   // --- PROTECT ALL /api/media ROUTES ---
   if (pathname.startsWith("/api/media")) {
     const sessionCookie = request.cookies.get("admin-session")?.value || "";
@@ -52,30 +57,37 @@ export async function middleware(request: NextRequest) {
     const previewToken = request.nextUrl.searchParams.get("token");
 
     if (isPreviewRoute && previewToken) {
-      return NextResponse.next();
+      return markAdminRoute(NextResponse.next());
     }
 
     // --- Rate limiter: block if too many invalid attempts ---
     if (await isRateLimited(ip)) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+      return markAdminRoute(
+        NextResponse.redirect(new URL("/admin/login", request.url)),
+      );
     }
 
     // --- Login page: redirect if and only if session cookie exists ---
     if (isLoginPage) {
       if (sessionCookie) {
         await resetAttempts(ip);
-        return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+        return markAdminRoute(
+          NextResponse.redirect(new URL("/admin/dashboard", request.url)),
+        );
       }
-      return NextResponse.next();
+      return markAdminRoute(NextResponse.next());
     }
 
     // --- Protected /admin routes: require a session cookie ---
     if (!sessionCookie) {
       await incrementAttempts(ip);
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+      return markAdminRoute(
+        NextResponse.redirect(new URL("/admin/login", request.url)),
+      );
     }
 
     await resetAttempts(ip);
+    return markAdminRoute(NextResponse.next());
   }
 
   // --- All other routes: allow through ---

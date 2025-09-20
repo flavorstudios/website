@@ -43,6 +43,7 @@ export default function AdminLoginForm() {
   const [method, setMethod] = useState<"google" | "email">("email")
   const router = useRouter()
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
+  const showGlobalError = Boolean(error) && method !== "email"
 
   const finalizeLogin = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -193,7 +194,7 @@ export default function AdminLoginForm() {
         </CardHeader>
         <CardContent className="px-4 sm:px-6 pb-6 sm:pb-8">
           <div className="flex flex-col space-y-4 sm:space-y-6">
-            {error && (
+            {showGlobalError && (
               <Alert variant="destructive" className="border-red-200 bg-red-50">
                 <AlertDescription className="text-red-700 text-sm">{error}</AlertDescription>
               </Alert>

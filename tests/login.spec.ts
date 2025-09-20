@@ -10,6 +10,7 @@ test.describe('Login form', () => {
 
     const error = page.getByRole('alert', { name: 'Authentication failed.' });
     await expect(error).toBeVisible();
+    await expect(page.locator('[role="alert"]')).toHaveCount(1);
     // Check that it sits within an aria-live region
     await expect(error.locator('xpath=ancestor::*[@aria-live="assertive"]')).toHaveCount(1);
 

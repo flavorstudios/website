@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { expectNoAxeViolations } from './axe-helper';
 
 // Ensure user-role request succeeds so dashboard can render
 const mockUserRole = async (page: Page) => {
@@ -43,6 +44,35 @@ test('shows network error when dashboard data fails to load', async ({ page }) =
     return !!el && !!el.closest('#app-sidebar');
   });
   expect(withinSidebar).toBe(true);
+});
+
+test('does not duplicate landmarks when analytics endpoints fail', async ({ page }) => {
+  await mockUserRole(page);
+
+  await page.route('**/api/admin/stats**', async (route) => {
+    await route.fulfill({ status: 500, body: 'error' });
+  });
+  await page.route('**/api/admin/activity**', async (route) => {
+    await route.fulfill({ status: 500, body: 'error' });
+  });
+
+  await page.goto('/admin/dashboard');
+
+  await expect(page.getByTestId('dashboard-error')).toBeVisible();
+
+  await page.waitForFunction(() => {
+    const bannerCount = document.querySelectorAll('[role="banner"]').length;
+    const mainCount = document.querySelectorAll('[role="main"]').length;
+    return bannerCount === 1 && mainCount === 1;
+  });
+
+  const bannerCount = await page.$$eval('[role="banner"]', (els) => els.length);
+  expect(bannerCount).toBe(1);
+
+  const mainCount = await page.$$eval('[role="main"]', (els) => els.length);
+  expect(mainCount).toBe(1);
+
+  await expectNoAxeViolations(page, { include: 'body' });
 });
 
 test("shows permission message when unauthorized", async ({ page }) => {

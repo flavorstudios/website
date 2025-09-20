@@ -1,6 +1,6 @@
 "use client"
 
-import { Dispatch, SetStateAction, useState } from "react"
+import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import type { FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
@@ -19,11 +19,17 @@ export default function EmailLoginForm({ onCancel, error, setError }: EmailLogin
   const [password, setPassword] = useState("")
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
+  const [formError, setFormError] = useState(error)
+
+  useEffect(() => {
+    setFormError(error)
+  }, [error])
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError("")
+    setFormError("")
     try {
       const res = await fetch("/api/admin/email-session", {
         method: "POST",
@@ -35,10 +41,12 @@ export default function EmailLoginForm({ onCancel, error, setError }: EmailLogin
       })
       if (!res.ok) {
         const data = await res.json().catch(() => null)
+        const failureMessage = data?.error || "Authentication failed."
         if (process.env.NODE_ENV !== "production" && data?.error) {
           console.error("Email login failed:", data.error)
         }
-        setError("Authentication failed.")
+        setError(failureMessage)
+        setFormError(failureMessage)
         setLoading(false)
         return
       }
@@ -48,6 +56,7 @@ export default function EmailLoginForm({ onCancel, error, setError }: EmailLogin
         console.error("Email login network error:", error)
       }
       setError("Authentication failed.")
+      setFormError("Authentication failed.")
     } finally {
       setLoading(false)
     }
@@ -57,9 +66,9 @@ export default function EmailLoginForm({ onCancel, error, setError }: EmailLogin
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Persistent live region so SRs announce new errors */}
       <div aria-live="assertive" className="min-h-[1.5rem]">
-        {error && (
+        {formError && (
           <p id="login-error" className="text-red-600 text-sm" role="alert">
-            {error}
+            {formError}
           </p>
         )}
       </div>
@@ -73,7 +82,7 @@ export default function EmailLoginForm({ onCancel, error, setError }: EmailLogin
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          aria-describedby={error ? "login-error" : undefined}
+          aria-describedby={formError ? "login-error" : undefined}
         />
       </div>
 
@@ -86,7 +95,7 @@ export default function EmailLoginForm({ onCancel, error, setError }: EmailLogin
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          aria-describedby={error ? "login-error" : undefined}
+          aria-describedby={formError ? "login-error" : undefined}
         />
       </div>
 
@@ -99,7 +108,7 @@ export default function EmailLoginForm({ onCancel, error, setError }: EmailLogin
         placeholder="2FA code (if enabled)"
         value={otp}
         onChange={(e) => setOtp(e.target.value)}
-        aria-describedby={error ? "login-error" : undefined}
+        aria-describedby={formError ? "login-error" : undefined}
       />
 
       <Button type="submit" disabled={loading} className="w-full">

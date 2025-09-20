@@ -235,13 +235,31 @@ export default function MediaLibrary({
       }
 
       const data = await res.json();
+      const media = Array.isArray(data.media) ? (data.media as MediaDoc[]) : [];
+      const next = (data.cursor as number | null) ?? null;
 
-      if (typeof nextCursor === "number") {
-        setItems((prev) => [...prev, ...((data.media as MediaDoc[]) || [])]);
-      } else {
-        setItems((data.media as MediaDoc[]) || []);
+      if (typeof nextCursor !== "number") {
+        if (!Array.isArray(data.media) || media.length === 0) {
+          applyFallback();
+          return;
+        }
+        setItems(media);
+        setCursor(next);
+        return;
       }
-      setCursor((data.cursor as number | null) ?? null);
+
+      if (!Array.isArray(data.media)) {
+        setCursor(null);
+        return;
+      }
+      
+      if (media.length === 0) {
+        setCursor(next);
+        return;
+      }
+
+      setItems((prev) => [...prev, ...media]);
+      setCursor(next);
     } catch (error) {
       if ((error as DOMException)?.name === "AbortError") return;
       applyFallback();

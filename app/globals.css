@@ -119,12 +119,18 @@ samp {
   white-space: nowrap;
   padding: 0;
   border: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .skip-link:focus,
 .skip-link:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 /* Admin Panel Specific Styles */

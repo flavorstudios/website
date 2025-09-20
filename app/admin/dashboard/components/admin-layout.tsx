@@ -81,7 +81,7 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
       {/* Sidebar */}
       {isMobile ? (
         <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-          <SheetContent side="left" className="p-0 w-64">
+          <SheetContent side="left" className="p-0 w-64" hideOverlay>
             <AdminSidebar
               id="app-sidebar"
               activeSection={activeSection}

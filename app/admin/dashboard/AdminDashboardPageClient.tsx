@@ -22,6 +22,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import Spinner from "@/components/ui/spinner";
 import MobileNav from "./components/mobile-nav";
 import { SectionId } from "./sections";
+import { BlogManager } from "./components";
 import {
   Dialog,
   DialogContent,
@@ -35,10 +36,6 @@ import { clientEnv } from "@/env.client";
 // Lazy sections via central registry
 const DashboardOverview = dynamic(
   () => import("./components").then((m) => m.DashboardOverview),
-  { ssr: false, loading: () => <Spinner /> }
-);
-const BlogManager = dynamic(
-  () => import("./components").then((m) => m.BlogManager),
   { ssr: false, loading: () => <Spinner /> }
 );
 const VideoManager = dynamic(
@@ -145,6 +142,52 @@ export default function AdminDashboardPageClient({
   );
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const mainWrapperRef = useRef<HTMLDivElement | null>(null);
+
+  // Defensive cleanup: if the public shell leaked into the admin DOM, strip
+  // its landmark roles/ids so we don't end up with duplicate banner/main
+  // landmarks. This only runs when the marketing layout mistakenly renders
+  // alongside the dashboard (e.g. during hydration mismatches or guard bugs).
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const adminRoot = document.getElementById("admin-main");
+    if (!adminRoot) return;
+
+    const body = document.body;
+    if (!body) return;
+
+    const cleanedElements: Element[] = [];
+
+    const stripLandmarkAttributes = (element: Element | null) => {
+      if (!element) return false;
+      let modified = false;
+      if (element.hasAttribute("role")) {
+        element.removeAttribute("role");
+        modified = true;
+      }
+      if (element.hasAttribute("id")) {
+        element.removeAttribute("id");
+        modified = true;
+      }
+      if (modified) {
+        element.setAttribute("data-admin-cleaned", "true");
+        cleanedElements.push(element);
+      }
+      return modified;
+    };
+
+    const headerStripped = stripLandmarkAttributes(
+      body.querySelector(":scope > header"),
+    );
+    const mainStripped = stripLandmarkAttributes(
+      body.querySelector(":scope > main#main-content"),
+    );
+
+    if (!headerStripped && !mainStripped) return;
+
+    return () => {
+      cleanedElements.forEach((el) => el.removeAttribute("data-admin-cleaned"));
+    };
+  }, []);
 
   // --- Hotkeys --------------------------------------------------------------
   useHotkeys("n", () => router.push("/admin/blog/create"), undefined, [router]);

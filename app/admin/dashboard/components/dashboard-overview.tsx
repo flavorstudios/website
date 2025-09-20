@@ -145,7 +145,7 @@ export default function DashboardOverview() {
         second: "numeric",
         fractionalSecondDigits: 3,
       }).format(new Date(statsQuery.dataUpdatedAt));
-    } catch (error) {
+    } catch {
       return new Date(statsQuery.dataUpdatedAt).toLocaleTimeString();
     }
   }, [statsQuery.dataUpdatedAt]);
@@ -312,6 +312,9 @@ export default function DashboardOverview() {
     return (
       <div className="flex items-center justify-center h-64" data-testid="dashboard-error">
         <div className="text-center">
+          <h1 className="text-xl font-semibold text-red-700 mb-2">
+            Dashboard data unavailable
+          </h1>
           <p className="text-red-600 mb-2">Unable to load dashboard data</p>
           <p className="text-gray-600 mb-2">Please try again.</p>
           {diagnosticCode && (
@@ -334,6 +337,9 @@ export default function DashboardOverview() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
+          <h1 className="text-xl font-semibold text-gray-800 mb-2">
+            Dashboard data unavailable
+          </h1>
           <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
           <Button
             onClick={refresh}

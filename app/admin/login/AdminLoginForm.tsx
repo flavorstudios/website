@@ -271,17 +271,17 @@ export default function AdminLoginForm() {
             </Link>
           </p>
           <p
-            className="text-xs text-slate-500 w-full whitespace-nowrap overflow-hidden text-ellipsis"
+            className="text-xs text-slate-500 w-full"
             data-testid="admin-login-legal"
           >
-            By continuing, you agree to our&nbsp;
+            By continuing, you agree to our{' '}
             <Link
               href="/terms-of-service"
               className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
             >
               Terms of Service
-            </Link>
-            &nbsp;and&nbsp;
+            </Link>{' '}
+            and{' '}
             <Link
               href="/privacy-policy"
               className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"

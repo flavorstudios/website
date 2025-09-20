@@ -151,7 +151,7 @@ function mapCategoryDataToCategory(
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const headerList = headers();
+  const headerList = await headers();
 
   const adminRouteHint = headerList.get("x-route-type");
 

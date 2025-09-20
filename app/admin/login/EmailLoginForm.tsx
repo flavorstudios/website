@@ -8,12 +8,11 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 type EmailLoginFormProps = {
-  onCancel: () => void
   error: string
   setError: Dispatch<SetStateAction<string>>
 }
 
-export default function EmailLoginForm({ onCancel, error, setError }: EmailLoginFormProps) {
+export default function EmailLoginForm({ error, setError }: EmailLoginFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -114,9 +113,6 @@ export default function EmailLoginForm({ onCancel, error, setError }: EmailLogin
       <Button type="submit" disabled={loading} className="w-full">
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
         Sign in
-      </Button>
-      <Button type="button" variant="ghost" onClick={onCancel} className="w-full">
-        Back
       </Button>
     </form>
   )

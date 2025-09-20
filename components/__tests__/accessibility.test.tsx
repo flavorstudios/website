@@ -10,7 +10,7 @@ describe("Accessibility", () => {
   it("EmailLoginForm should have no axe violations", async () => {
     const Wrapper = () => {
       const [error, setError] = React.useState("");
-      return <EmailLoginForm onCancel={() => {}} error={error} setError={setError} />;
+      return <EmailLoginForm error={error} setError={setError} />;
     };
 
     const { container } = render(<Wrapper />);

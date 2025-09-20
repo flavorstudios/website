@@ -3,9 +3,16 @@
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Shield, Loader2, Sparkles } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import EmailLoginForm from "./EmailLoginForm"
 import useAuthError from "@/hooks/useAuthError"
 import { clientEnv } from "@/env.client"
@@ -40,10 +47,8 @@ export default function AdminLoginForm() {
   const { error, setError, clearError } = useAuthError()
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [method, setMethod] = useState<"google" | "email">("email")
   const router = useRouter()
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
-  const showGlobalError = Boolean(error) && method !== "email"
 
   const finalizeLogin = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -109,7 +114,7 @@ export default function AdminLoginForm() {
   }
 
   const handleGoogleLogin = async () => {
-    setError("")
+    clearError()
     setLoading(true)
     try {
       if (firebaseInitError) {
@@ -179,73 +184,63 @@ export default function AdminLoginForm() {
   return (
     <div className="min-h-screen bg-[#f5f8fd] flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <Card className="w-full max-w-sm sm:max-w-md bg-white border border-blue-100 shadow-lg rounded-2xl mx-4 relative z-10">
-        <CardHeader className="space-y-3 sm:space-y-4 text-center px-4 sm:px-6 pt-6 sm:pt-8">
-          <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-2xl flex items-center justify-center">
-            <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
-          </div>
-          <div className="space-y-1 sm:space-y-2">
-            <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
-              Flavor Studios Admin
+        <CardHeader className="space-y-2 sm:space-y-3 text-center px-4 sm:px-6 pt-6 sm:pt-8">
+          <div className="space-y-2">
+            <CardTitle className="text-2xl sm:text-3xl font-semibold text-slate-900">
+              Welcome back
             </CardTitle>
-            <CardDescription className="text-sm sm:text-base text-gray-600 px-2">
-              Access your creative command center
+            <CardDescription className="text-sm sm:text-base text-slate-600">
+              Sign in to manage Flavor Studios operations and content.
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent className="px-4 sm:px-6 pb-6 sm:pb-8">
-          <div className="flex flex-col space-y-4 sm:space-y-6">
-            {showGlobalError && (
-              <Alert variant="destructive" className="border-red-200 bg-red-50">
-                <AlertDescription className="text-red-700 text-sm">{error}</AlertDescription>
-              </Alert>
-            )}
-            {method === "google" ? (
-              <>
-                <Button
-                  onClick={handleGoogleLogin}
-                  disabled={loading}
-                  className="w-full min-h-[48px] h-12 sm:h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow transition-all duration-200 text-base sm:text-sm"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      <span className="text-sm sm:text-base">Authenticating...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      <span className="text-sm sm:text-base">Sign in with Google</span>
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    clearError()
-                    setLoading(false)
-                    setMethod("email")
-                  }}
-                  className="w-full"
-                >
-                  Use Email &amp; Password
-                </Button>
-                <div className="mt-4 sm:mt-6 text-center">
-                  <p className="text-xs text-gray-500 px-2">Secured with enterprise-grade encryption</p>
-                </div>
-              </>
-            ) : (
-              <EmailLoginForm
-                error={error}
-                setError={setError}
-                onCancel={() => {
-                  clearError()
-                  setLoading(false)
-                  setMethod("google")
-                }}
-              />
-            )}
+          <div className="flex flex-col space-y-6">
+            <EmailLoginForm error={error} setError={setError} />
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <div className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-3 text-slate-500">Or continue with</span>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              className="w-full h-11 sm:h-10"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span className="text-sm sm:text-base">Authenticating...</span>
+                </>
+              ) : (
+                <span className="text-sm sm:text-base">Sign in with Google</span>
+              )}
+            </Button>
           </div>
         </CardContent>
+        <CardFooter className="flex flex-col gap-3 px-4 sm:px-6 pb-6 sm:pb-8 text-center">
+          <p className="text-sm text-slate-600">
+            Need an account?{' '}
+            <a href="/contact" className="font-medium text-blue-600 hover:underline">
+              Request access
+            </a>
+          </p>
+          <p className="text-xs text-slate-500">
+            By continuing, you agree to our{' '}
+            <a href="/terms-of-service" className="font-medium text-blue-600 hover:underline">
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="/privacy-policy" className="font-medium text-blue-600 hover:underline">
+              Privacy Policy
+            </a>
+            .
+          </p>
+        </CardFooter>
       </Card>
     </div>
   )

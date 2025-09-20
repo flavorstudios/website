@@ -3,6 +3,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react"
 import type { FormEvent } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
@@ -19,6 +20,7 @@ export default function EmailLoginForm({ error, setError }: EmailLoginFormProps)
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
   const [formError, setFormError] = useState(error)
+  const [otpExpanded, setOtpExpanded] = useState(false)
 
   useEffect(() => {
     setFormError(error)
@@ -77,7 +79,7 @@ export default function EmailLoginForm({ error, setError }: EmailLoginFormProps)
         <Input
           id="login-email"
           type="email"
-          placeholder="Email"
+          placeholder="m@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -86,7 +88,15 @@ export default function EmailLoginForm({ error, setError }: EmailLoginFormProps)
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="login-password">Password</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="login-password">Password</Label>
+          <Link
+            href="/admin/login/recovery"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Forgot your password?
+          </Link>
+        </div>
         <Input
           id="login-password"
           type="password"
@@ -98,21 +108,43 @@ export default function EmailLoginForm({ error, setError }: EmailLoginFormProps)
         />
       </div>
 
-      <label htmlFor="login-otp" className="sr-only">
-        2FA code (if enabled)
-      </label>
-      <Input
-        id="login-otp"
-        type="text"
-        placeholder="2FA code (if enabled)"
-        value={otp}
-        onChange={(e) => setOtp(e.target.value)}
-        aria-describedby={formError ? "login-error" : undefined}
-      />
+      <div className="space-y-2">
+        <Button
+          type="button"
+          variant="link"
+          className="h-auto px-0 text-sm font-medium"
+          aria-expanded={otpExpanded}
+          aria-controls="login-otp"
+          onClick={() => {
+            setOtpExpanded((prev) => {
+              const next = !prev
+              if (!next) {
+                setOtp("")
+              }
+              return next
+            })
+          }}
+        >
+          {otpExpanded ? "Hide 2FA code" : "Use a 2FA code"}
+        </Button>
+        {otpExpanded && (
+          <div className="space-y-2">
+            <Label htmlFor="login-otp">2FA code</Label>
+            <Input
+              id="login-otp"
+              type="text"
+              placeholder="2FA code"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              aria-describedby={formError ? "login-error" : undefined}
+            />
+          </div>
+        )}
+      </div>
 
       <Button type="submit" disabled={loading} className="w-full">
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-        Sign in
+        Login
       </Button>
     </form>
   )

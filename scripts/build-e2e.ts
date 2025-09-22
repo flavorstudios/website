@@ -29,12 +29,12 @@ const env = {
   FIREBASE_STORAGE_BUCKET: 'test',
 
   NEXT_TELEMETRY_DISABLED: '1',
-  NODE_ENV: 'production',
+  NODE_ENV: 'production' satisfies NodeJS.ProcessEnv['NODE_ENV'],
   NEXT_DISABLE_MINIFY: 'true',
   TEST_MODE: 'true',
   NEXT_DISABLE_FONT_DOWNLOADS: '1',
   NODE_OPTIONS: `--require ${fontMockPath}`,
-};
+} satisfies NodeJS.ProcessEnv;
 
 const build = spawn('pnpm', ['-s', 'build'], {
   stdio: 'inherit',

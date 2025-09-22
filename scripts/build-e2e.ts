@@ -36,23 +36,30 @@ const env = {
   NODE_OPTIONS: `--require ${fontMockPath}`,
 } satisfies NodeJS.ProcessEnv;
 
-const build = spawn('pnpm', ['-s', 'build'], {
-  stdio: 'inherit',
-  env,
-});
+try {
+  await new Promise<void>((resolve, reject) => {
+    const build = spawn('pnpm', ['-s', 'build'], {
+      stdio: 'inherit',
+      env,
+    });
 
-build.on('close', (code, signal) => {
-  if (signal) {
-    console.error(`build process terminated with signal ${signal}`);
-    process.exit(1);
-  }
+    build.on('close', (code, signal) => {
+      if (signal) {
+        reject(new Error(`build process terminated with signal ${signal}`));
+        return;
+      }
 
-  if (code !== 0) {
-    process.exit(code ?? 1);
-  }
-});
+      if (code !== 0) {
+        reject(new Error(`build process exited with code ${code ?? 'unknown'}`));
+        return;
+      }
 
-build.on('error', (error) => {
+      resolve();
+    });
+
+    build.on('error', reject);
+  });
+} catch (error) {
   console.error(error);
   process.exit(1);
-});
+}

@@ -1,12 +1,25 @@
 "use client"
 
-import { LayoutDashboard, FileText, Image, Settings } from "lucide-react"
+import {
+  LayoutDashboard,
+  FileText,
+  Image,
+  Settings,
+  Video,
+  MessageSquare,
+  Edit,
+  Server,
+  Mail,
+  ClipboardList,
+  Users,
+} from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import type React from "react"
 import { useEffect, useRef } from "react"
 import type { Dispatch, SetStateAction } from "react"
 import type { SectionId } from "../sections"
+import { useRole } from "../contexts/role-context"
 
 interface MobileNavProps {
   activeSection: SectionId
@@ -16,6 +29,7 @@ interface MobileNavProps {
 export default function MobileNav({ activeSection, setActiveSection }: MobileNavProps) {
   const pathname = usePathname()
   const navRef = useRef<HTMLElement>(null)
+  const { accessibleSections } = useRole()
 
   // Sync CSS variable so main content can pad for the exact nav height
   useEffect(() => {
@@ -33,12 +47,27 @@ export default function MobileNav({ activeSection, setActiveSection }: MobileNav
     }
   }, [])
 
-  const items: { id: SectionId; label: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; href: string }[] = [
+  const items: {
+    id: SectionId
+    label: string
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+    href: string
+  }[] = [
     { id: "overview", label: "Dashboard", icon: LayoutDashboard, href: "/admin/dashboard" },
-    { id: "blogs", label: "Posts", icon: FileText, href: "/admin/dashboard/blog-posts" },
+    { id: "blogs", label: "Blog Posts", icon: FileText, href: "/admin/dashboard/blog-posts" },
+    { id: "videos", label: "Videos", icon: Video, href: "/admin/dashboard/videos" },
     { id: "media", label: "Media", icon: Image, href: "/admin/dashboard/media" },
+    { id: "categories", label: "Categories", icon: Edit, href: "/admin/dashboard/categories" },
+    { id: "comments", label: "Comments", icon: MessageSquare, href: "/admin/dashboard/comments" },
+    { id: "applications", label: "Applications", icon: ClipboardList, href: "/admin/dashboard/applications" },
+    { id: "inbox", label: "Email Inbox", icon: Mail, href: "/admin/dashboard/inbox" },
+    { id: "users", label: "Users", icon: Users, href: "/admin/dashboard/users" },
+    { id: "system", label: "System Tools", icon: Server, href: "/admin/dashboard/system" },
     { id: "settings", label: "Settings", icon: Settings, href: "/admin/dashboard/settings" },
   ]
+
+  const filteredItems = items.filter((item) => accessibleSections.includes(item.id) || item.id === "overview")
+  const navItems = filteredItems.length > 0 ? filteredItems : items.filter((item) => item.id === "overview")
 
   return (
     <nav
@@ -47,7 +76,7 @@ export default function MobileNav({ activeSection, setActiveSection }: MobileNav
       className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] z-50 md:hidden"
     >
       <ul className="flex justify-around">
-        {items.map((item) => {
+        {navItems.map((item) => {
           const Icon = item.icon
           const active = activeSection === item.id
           const isCurrent = pathname === item.href

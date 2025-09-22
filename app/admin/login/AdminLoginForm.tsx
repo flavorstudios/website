@@ -243,7 +243,7 @@ export default function AdminLoginForm() {
               Welcome back
             </h1>
             <p className="text-base text-slate-600 md:text-lg">
-              Create, schedule, and manage your stories with the admin tools you know.
+              Create, schedule, and manage your stories.
             </p>
           </div>
         </div>

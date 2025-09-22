@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import useSWR from "swr"
-import { signInWithEmailAndPassword } from "firebase/auth"
-import { getFirebaseAuth } from "@/lib/firebase"
 type EmailLoginFormProps = {
   error: string
   setError: Dispatch<SetStateAction<string>>
@@ -64,16 +62,12 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
     setError("")
     setFormError("")
     try {
-      const auth = getFirebaseAuth()
-      const credentials = await signInWithEmailAndPassword(auth, email, password)
-      const idToken = await credentials.user.getIdToken()
-
       const res = await fetch("/api/admin/email-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ idToken, otp: otp || undefined }),
+        body: JSON.stringify({ email, password, otp: otp || undefined }),
         credentials: "include",
       })
       if (!res.ok) {

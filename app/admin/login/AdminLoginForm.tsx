@@ -2,16 +2,9 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 import EmailLoginForm from "./EmailLoginForm"
@@ -232,16 +225,30 @@ export default function AdminLoginForm() {
   if (!mounted) return null
 
   return (
-    <div className="min-h-screen bg-[#f4f4f5] flex items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-sm bg-white border border-slate-200 shadow-sm rounded-lg">
-        <CardHeader className="p-6 text-center space-y-2">
-          <CardTitle className="text-2xl font-semibold text-slate-900">Welcome back</CardTitle>
-          <CardDescription className="text-sm text-slate-600">
-            Create, schedule, and manage your stories.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-6 pt-0">
-          <div className="flex flex-col gap-6 text-left">
+    <div className="min-h-screen bg-[#e8f0fe] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-4xl bg-white shadow-xl rounded-[32px] overflow-hidden md:grid md:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="flex flex-col gap-6 px-8 py-10 md:px-12 md:py-16 bg-gradient-to-br from-white via-white to-[#f2f6ff] text-left">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo.png"
+              alt="Site logo"
+              width={64}
+              height={64}
+              className="h-10 w-auto"
+              priority
+            />
+          </div>
+          <div className="space-y-4">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
+              Welcome back
+            </h1>
+            <p className="text-base text-slate-600 md:text-lg">
+              Create, schedule, and manage your stories with the admin tools you know.
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col gap-8 bg-white px-6 py-8 md:px-10 md:py-12 text-left">
+          <div className="flex flex-col gap-6">
             <div className="space-y-4">
               <div className="space-y-1">
                 <h2 className="text-lg font-semibold text-slate-900">Sign in with email</h2>
@@ -300,39 +307,39 @@ export default function AdminLoginForm() {
               </div>
             </details>
           </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-3 p-6 pt-0 text-center w-full">
-          <p className="text-sm text-slate-600">
-            Don&apos;t have an account?{' '}
-            <Link
-              href="/admin/signup"
-              className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
+        <div className="flex flex-col gap-3 text-left">
+            <p className="text-sm text-slate-600">
+              Don&apos;t have an account?{' '}
+              <Link
+                href="/admin/signup"
+                className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
+              >
+                Sign up
+              </Link>
+            </p>
+            <p
+              className="text-xs text-slate-500"
+              data-testid="admin-login-legal"
             >
-              Sign up
-            </Link>
-          </p>
-          <p
-            className="text-xs text-slate-500 w-full"
-            data-testid="admin-login-legal"
-          >
-            By continuing, you agree to our{' '}
-            <Link
-              href="/terms-of-service"
-              className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
-            >
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link
-              href="/privacy-policy"
-              className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
-            >
-              Privacy Policy
-            </Link>
-            .
-          </p>
-        </CardFooter>
-      </Card>
+              By continuing, you agree to our{' '}
+              <Link
+                href="/terms-of-service"
+                className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
+              >
+                Terms of Service
+              </Link>{' '}
+              and{' '}
+              <Link
+                href="/privacy-policy"
+                className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

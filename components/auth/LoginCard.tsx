@@ -66,7 +66,7 @@ export function LoginCard({ siteName }: LoginCardProps) {
 
   const validateEmail = (value: string) => {
     if (!value.trim()) {
-      return "Enter the email address associated with your account."
+      return "Enter a valid email address."
     }
 
     const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -79,7 +79,7 @@ export function LoginCard({ siteName }: LoginCardProps) {
 
   const validatePassword = (value: string) => {
     if (!value.trim()) {
-      return "Enter your password to continue."
+      return "Enter your password."
     }
 
     if (value.length < 8) {
@@ -145,7 +145,7 @@ export function LoginCard({ siteName }: LoginCardProps) {
           Welcome back
         </CardTitle>
         <CardDescription className="text-base text-muted-foreground">
-          Sign in to continue to {siteName}.
+          Create, schedule, and manage your stories.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8 px-6 pb-6 sm:space-y-10 sm:px-10 sm:pb-10 lg:space-y-12 lg:px-12">
@@ -175,7 +175,7 @@ export function LoginCard({ siteName }: LoginCardProps) {
         >
           <div className="space-y-2">
             <Label htmlFor="login-email" className="text-sm font-semibold text-foreground">
-              Email address
+              Email
             </Label>
             <Input
               id="login-email"
@@ -239,7 +239,7 @@ export function LoginCard({ siteName }: LoginCardProps) {
               aria-describedby={passwordDescribedBy}
               aria-invalid={errors.password ? true : undefined}
               placeholder="Enter your password"
-              size="lg"
+              variantSize="lg"
               className="rounded-2xl"
             />
             <p id={passwordHelperId} className="text-sm text-muted-foreground">

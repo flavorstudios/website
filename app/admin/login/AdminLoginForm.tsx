@@ -231,9 +231,9 @@ export default function AdminLoginForm() {
             <Image
               src="/logo.png"
               alt="Site logo"
-              width={64}
-              height={64}
-              className="h-10 w-10 rounded-full object-cover border border-slate-200"
+              width={96}
+              height={96}
+              className="h-16 w-16 md:h-20 md:w-20 rounded-full object-cover border border-slate-200"
               priority
             />
           </div>

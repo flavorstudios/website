@@ -545,7 +545,7 @@ export default function AdminDashboardPageClient({
                 </div>
               </main>
 
-              {isMobile && !keyboardOpen && (
+              {isMobile && !keyboardOpen && !sidebarOpen && (
                 <MobileNav
                   activeSection={activeSection}
                   setActiveSection={setActiveSection}

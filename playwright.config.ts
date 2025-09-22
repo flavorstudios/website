@@ -1,10 +1,8 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import { defineConfig } from '@playwright/test';
 
-const configDir = path.dirname(fileURLToPath(import.meta.url));
-const fontMockPath = path.join(configDir, 'scripts/mock-font-fetch.cjs');
+const repoRoot = process.cwd();
+const fontMockPath = path.join(repoRoot, 'scripts/mock-font-fetch.cjs');
 
 export default defineConfig({
   testDir: './tests',
@@ -20,7 +18,7 @@ export default defineConfig({
   webServer: {
     // Run the app in PRODUCTION for stable e2e (no dev overlay, proper metadata)
     command: 'pnpm -s start',
-    cwd: configDir,
+    cwd: repoRoot,
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: false, // always use the prod server started above
     timeout: 120_000, // give Next.js extra time to boot

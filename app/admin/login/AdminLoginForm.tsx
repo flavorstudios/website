@@ -43,28 +43,25 @@ const GoogleIcon = () => (
   <svg
     aria-hidden="true"
     focusable="false"
-    width="18"
-    height="18"
-    viewBox="0 0 18 18"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
-    className="h-4 w-4"
+    className="h-4 w-4 text-slate-900"
   >
-    <path
-      d="M17.64 9.2045c0-.638-.0573-1.2518-.1636-1.8409H9v3.4814h4.8436c-.2091 1.125-.8436 2.0782-1.7968 2.7164v2.2581h2.9086c1.7018-1.5673 2.6846-3.8764 2.6846-6.6149z"
-      fill="#4285F4"
-    />
-    <path
-      d="M9 18c2.43 0 4.4673-.8059 5.9563-2.1805l-2.9086-2.2581c-.8059.54-1.8368.8591-3.0477.8591-2.3441 0-4.3282-1.5832-5.0368-3.7104H.95697v2.3318C2.43786 15.9832 5.48182 18 9 18z"
-      fill="#34A853"
-    />
-    <path
-      d="M3.96318 10.7101C3.78409 10.1705 3.68182 9.59322 3.68182 9c0-.59323.10227-1.17045.28136-1.71005V4.95818H.95697C.347727 6.17341 0 7.54364 0 9c0 1.4564.347727 2.8266.95697 4.0418l3.00621-2.3317z"
-      fill="#FBBC05"
-    />
-    <path
-      d="M9 3.54545c1.3214 0 2.5064.4541 3.4378 1.34637l2.5782-2.57819C13.464 1.01727 11.4273 0 9 0 5.48182 0 2.43786 2.01682.95697 4.95818L3.96318 7.28996C4.67182 5.16273 6.65591 3.54545 9 3.54545z"
-      fill="#EA4335"
-    />
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <text
+      x="12"
+      y="12"
+      textAnchor="middle"
+      dominantBaseline="middle"
+      fontSize="11"
+      fontFamily="'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif"
+      fontWeight="600"
+      fill="currentColor"
+    >
+      G
+    </text>
   </svg>
 )
 
@@ -274,7 +271,7 @@ export default function AdminLoginForm() {
             <Button
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full h-11 sm:h-10 bg-white border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 focus-visible:ring-slate-200 flex items-center justify-center gap-2"
+              className="w-full h-11 sm:h-10 bg-white border border-slate-300 text-slate-900 font-medium transition-colors hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:bg-slate-100 disabled:text-slate-400 disabled:border-slate-200 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>

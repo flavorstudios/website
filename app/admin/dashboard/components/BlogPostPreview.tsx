@@ -12,20 +12,7 @@ import { SITE_URL } from "@/lib/constants";
 import type { BlogPost as StoreBlogPost } from "@/lib/content-store";
 import type { PublicBlogDetail } from "@/lib/types";
 import { sanitizeHtmlClient } from "@/lib/sanitize/client";
-
-const ALLOWED_IMAGE_DOMAINS = [
-  "storage.googleapis.com",
-  "firebasestorage.googleapis.com",
-  "flavorstudios.in",
-];
-
-function isAllowedImageDomain(url: string) {
-  try {
-    return ALLOWED_IMAGE_DOMAINS.includes(new URL(url).hostname);
-  } catch {
-    return false;
-  }
-}
+import { isAllowedImageUrl } from "@/lib/image-domains";
 
 interface BlogPostPreviewProps {
   post: PublicBlogDetail | StoreBlogPost;
@@ -38,7 +25,7 @@ export default function BlogPostPreview({ post }: BlogPostPreviewProps) {
       : post.category;
 
   const image = post.openGraphImage || post.featuredImage;
-  const isAllowedImage = image ? isAllowedImageDomain(image) : false;
+  const isAllowedImage = image ? isAllowedImageUrl(image) : false;
 
   const sanitizedContent = useMemo(
     () => sanitizeHtmlClient(post.content || ""),
@@ -100,13 +87,12 @@ export default function BlogPostPreview({ post }: BlogPostPreviewProps) {
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <Image
+            <img
               src={image}
               alt={post.title || "Blog post cover image"}
-              fill
-              className="object-cover"
-              unoptimized
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 1024px"
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           )}
         </div>

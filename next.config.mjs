@@ -2,6 +2,7 @@
 
 // Import the necessary modules
 import bundleAnalyzer from '@next/bundle-analyzer';
+import imageDomains from './config/image-domains.json' with { type: 'json' };
 // Access server-only environment variables directly
 const { ANALYZE } = process.env;
 
@@ -15,11 +16,7 @@ const nextConfig = {
   images: {
     // Next.js image optimization is enabled.
     // For static hosting, use a CDN (e.g., Cloudflare Images) or a custom loader.
-    domains: [
-      'storage.googleapis.com',
-      'firebasestorage.googleapis.com',
-      'flavorstudios.in',
-    ],
+    domains: imageDomains,
   },
 
   async headers() {

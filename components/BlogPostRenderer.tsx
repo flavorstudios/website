@@ -9,21 +9,7 @@ import { SITE_URL } from "@/lib/constants";
 import type { BlogPost as StoreBlogPost } from "@/lib/content-store"; // Use your central type!
 import type { PublicBlogDetail } from "@/lib/types";
 import { sanitizeHtmlServer } from "@/lib/sanitize/server";
-
-
-const ALLOWED_IMAGE_DOMAINS = [
-  "storage.googleapis.com",
-  "firebasestorage.googleapis.com",
-  "flavorstudios.in",
-];
-
-function isAllowedImageDomain(url: string) {
-  try {
-    return ALLOWED_IMAGE_DOMAINS.includes(new URL(url).hostname);
-  } catch {
-    return false;
-  }
-}
+import { isAllowedImageUrl } from "@/lib/image-domains";
 
 interface BlogPostRendererProps {
   post: PublicBlogDetail | StoreBlogPost;
@@ -36,7 +22,7 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
       : post.category;
 
   const image = post.openGraphImage || post.featuredImage; // UPDATED
-  const isAllowedImage = image ? isAllowedImageDomain(image) : false;
+  const isAllowedImage = image ? isAllowedImageUrl(image) : false;
 
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -93,13 +79,12 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
-            <Image
+            <img
               src={image}
               alt={post.title || "Blog post cover image"}
-              fill
-              className="object-cover"
-              unoptimized
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 1024px"
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+              decoding="async"
             />
           )}
         </div>

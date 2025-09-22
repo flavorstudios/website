@@ -1,6 +1,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
+import { access, constants, rm } from 'node:fs/promises';
 
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const fontMockPath = path.join(scriptsDir, 'mock-font-fetch.cjs');
@@ -36,6 +37,17 @@ const env = {
   NODE_OPTIONS: `--require ${fontMockPath}`,
 } satisfies NodeJS.ProcessEnv;
 
+const repoRoot = path.resolve(scriptsDir, '..');
+const nextDir = path.join(repoRoot, '.next');
+
+const cleanBuildOutput = async () => {
+  try {
+    await rm(nextDir, { recursive: true, force: true });
+  } catch (cleanupError) {
+    console.warn('Failed to clean .next directory after build failure:', cleanupError);
+  }
+};
+
 try {
   await new Promise<void>((resolve, reject) => {
     const build = spawn('pnpm', ['-s', 'build'], {
@@ -57,9 +69,39 @@ try {
       resolve();
     });
 
+    const buildIdPath = path.join(nextDir, 'BUILD_ID');
+  const expectedArtifactPaths = [
+    path.join(nextDir, 'server'),
+    path.join(nextDir, 'server/app'),
+    path.join(nextDir, 'server/pages'),
+    path.join(nextDir, 'standalone'),
+    path.join(nextDir, 'app'),
+    path.join(nextDir, 'static'),
+  ];
+
+  const buildIdExists = await access(buildIdPath, constants.F_OK)
+    .then(() => true)
+    .catch(() => false);
+
+  const hasExpectedArtifacts = await Promise.all(
+    expectedArtifactPaths.map(async (artifactPath) =>
+      access(artifactPath, constants.F_OK)
+        .then(() => true)
+        .catch(() => false),
+    ),
+  ).then((results) => results.some(Boolean));
+
+  if (!buildIdExists || !hasExpectedArtifacts) {
+    await cleanBuildOutput();
+    throw new Error(
+      'Next.js build artifacts are missing. Inspect the font mock or build logs before running Playwright.',
+    );
+  }
+
     build.on('error', reject);
   });
 } catch (error) {
+  await cleanBuildOutput();
   console.error(error);
   process.exit(1);
 }

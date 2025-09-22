@@ -367,7 +367,7 @@ export default function DashboardOverview() {
           onClick={refresh}
           disabled={statsQuery.isFetching}
           size="sm"
-          className="rounded-xl bg-orange-800 hover:bg-orange-900 text-white"
+          className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
         >
           Refresh
         </Button>

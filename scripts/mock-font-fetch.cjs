@@ -20,8 +20,50 @@ if (typeof originalFetch === 'function') {
 @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; src: local('Courier New'); }
 `;
 
-  const isFontUrl = (url) =>
-    typeof url === 'string' && url.startsWith('https://fonts.googleapis.com/');
+  const fontCssBuffer = Buffer.from(fontCss);
+  const mockFontBinary = Buffer.from('Mock font data');
+
+  const classifyFontRequest = (url) => {
+    if (typeof url !== 'string') {
+      return undefined;
+    }
+
+    try {
+      const parsed = new URL(url);
+      const host = parsed.hostname;
+      const path = (parsed.pathname || '').toLowerCase();
+
+      if (host === 'fonts.googleapis.com') {
+        return {
+          type: 'stylesheet',
+          body: fontCss,
+          buffer: fontCssBuffer,
+          headers: {
+            'Content-Type': 'text/css',
+          },
+        };
+      }
+
+      const isFontHost = host === 'fonts.gstatic.com';
+      const isWoff2 = path.endsWith('.woff2');
+      const isWoff = path.endsWith('.woff') || isWoff2;
+
+      if (isFontHost && isWoff) {
+        return {
+          type: 'font',
+          body: mockFontBinary,
+          buffer: mockFontBinary,
+          headers: {
+            'Content-Type': isWoff2 ? 'application/font-woff2' : 'application/font-woff',
+          },
+        };
+      }
+    } catch (error) {
+      // Ignore invalid URL parsing errors and fall through to undefined return.
+    }
+
+    return undefined;
+  };
 
   const resolveUrl = (input) => {
     if (typeof input === 'string') {
@@ -44,14 +86,20 @@ if (typeof originalFetch === 'function') {
     return undefined;
   };
 
-  const createMockFontResponse = (callback) => {
+  const createMockRequest = (asset, callback) => {
     const response = new EventEmitter();
     response.statusCode = 200;
-    response.headers = { 'content-type': 'text/css' };
+    const dataBuffer = Buffer.isBuffer(asset.buffer)
+      ? asset.buffer
+      : Buffer.from(asset.buffer || asset.body || '');
+    response.headers = {
+      ...asset.headers,
+      'content-length': String(dataBuffer.length),
+    };
     response.setEncoding = () => {};
     response.resume = () => {};
     response.pipe = (destination) => {
-      destination.write(fontCss);
+      destination.write(dataBuffer);
       destination.end();
       return destination;
     };
@@ -72,7 +120,7 @@ if (typeof originalFetch === 'function') {
           callback(response);
         }
         request.emit('response', response);
-        response.emit('data', Buffer.from(fontCss));
+        response.emit('data', dataBuffer);
         response.emit('end');
         response.emit('close');
         request.emit('finish');
@@ -87,14 +135,31 @@ if (typeof originalFetch === 'function') {
   global.fetch = async (input, init) => {
     const url = resolveUrl(input);
 
-    if (isFontUrl(url)) {
-      return new Response(fontCss, {
+    const asset = classifyFontRequest(url);
+
+    if (asset) {
+      const headers = {
+        ...asset.headers,
+        'Content-Length': String(asset.buffer.length),
+      };
+      const body = asset.type === 'stylesheet' ? asset.body : asset.buffer;
+      return new Response(body, {
         status: 200,
-        headers: { 'Content-Type': 'text/css' },
+        headers,
       });
     }
 
     return originalFetch(input, init);
+  };
+
+  const resolveCallback = (options, callback) => {
+    if (typeof options === 'function') {
+      return options;
+    }
+    if (typeof callback === 'function') {
+      return callback;
+    }
+    return undefined;
   };
 
   https.request = (input, options, callback) => {
@@ -102,9 +167,11 @@ if (typeof originalFetch === 'function') {
     const candidate = hasExplicitUrl ? input : options;
     const url = resolveUrl(hasExplicitUrl ? input : candidate);
 
-    if (isFontUrl(url)) {
-      const cb = hasExplicitUrl ? options : callback;
-      return createMockFontResponse(cb);
+    const asset = classifyFontRequest(url);
+
+    if (asset) {
+      const cb = resolveCallback(options, callback);
+      return createMockRequest(asset, cb);
     }
 
     return originalHttpsRequest(input, options, callback);
@@ -115,7 +182,9 @@ if (typeof originalFetch === 'function') {
     const candidate = hasExplicitUrl ? input : options;
     const url = resolveUrl(hasExplicitUrl ? input : candidate);
 
-    if (isFontUrl(url)) {
+    const asset = classifyFontRequest(url);
+
+    if (asset) {
       const req = https.request(input, options, callback);
       req.end();
       return req;

@@ -1,8 +1,36 @@
 // lib/formatters.ts
 
 import type { BlogPost } from "./content-store"; // Adjust path if needed
-import type { Video } from "./content-store";    // Adjust path if needed
+import type { Video } from "./content-store"; // Adjust path if needed
 import type { PublicBlogSummary, PublicBlogDetail } from "./types";
+
+function extractAuthorValue(value: unknown): string | null {
+  if (!value) return null;
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || null;
+  }
+
+  if (Array.isArray(value)) {
+    const parts = value
+      .map((item) => extractAuthorValue(item))
+      .filter((item): item is string => typeof item === "string" && item.length > 0);
+
+    return parts.length > 0 ? parts.join(", ") : null;
+  }
+
+  if (typeof value === "object") {
+    const candidate = (value as { name?: unknown }).name;
+    return extractAuthorValue(candidate);
+  }
+
+  return null;
+}
+
+export function normalizeAuthor(author: unknown): string {
+  return extractAuthorValue(author) ?? "Flavor Studios";
+}
 
 /**
  * Formats a blog object for safe public API responses in list views.
@@ -30,7 +58,7 @@ export function formatPublicBlogSummary(blog: BlogPost): PublicBlogSummary {
     featured: blog.featured,
     commentCount: typeof blog.commentCount === "number" ? blog.commentCount : 0,
     shareCount: typeof blog.shareCount === "number" ? blog.shareCount : 0,
-    author: blog.author,
+    author: normalizeAuthor(blog.author),
   };
 }
 
@@ -52,7 +80,7 @@ export function formatPublicBlogDetail(blog: BlogPost): PublicBlogDetail {
       ? blog.categories
       : [blog.category],
     tags: blog.tags,
-    author: blog.author,
+    author: normalizeAuthor(blog.author),
     publishedAt: blog.publishedAt,
     createdAt: blog.createdAt,
     updatedAt: blog.updatedAt,

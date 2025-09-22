@@ -13,6 +13,7 @@ import type { BlogPost as StoreBlogPost } from "@/lib/content-store";
 import type { PublicBlogDetail } from "@/lib/types";
 import { sanitizeHtmlClient } from "@/lib/sanitize/client";
 import { isAllowedImageUrl } from "@/lib/image-domains";
+import { safeDateLabel } from "@/lib/safe-date";
 
 interface BlogPostPreviewProps {
   post: PublicBlogDetail | StoreBlogPost;
@@ -26,6 +27,11 @@ export default function BlogPostPreview({ post }: BlogPostPreviewProps) {
 
   const image = post.openGraphImage || post.featuredImage;
   const isAllowedImage = image ? isAllowedImageUrl(image) : false;
+  const publishedAtLabel = safeDateLabel(post.publishedAt, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   const sanitizedContent = useMemo(
     () => sanitizeHtmlClient(post.content || ""),
@@ -39,14 +45,10 @@ export default function BlogPostPreview({ post }: BlogPostPreviewProps) {
           {primaryCategory && (
             <Badge variant="outline">{primaryCategory}</Badge>
           )}
-          {post.publishedAt && (
+          {publishedAtLabel && (
             <span className="text-sm text-gray-500 flex items-center gap-1">
               <Calendar className="h-3 w-3" aria-hidden="true" />
-              {new Date(post.publishedAt).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {publishedAtLabel}
             </span>
           )}
         </div>

@@ -10,6 +10,7 @@ import type { BlogPost as StoreBlogPost } from "@/lib/content-store"; // Use you
 import type { PublicBlogDetail } from "@/lib/types";
 import { sanitizeHtmlServer } from "@/lib/sanitize/server";
 import { isAllowedImageUrl } from "@/lib/image-domains";
+import { safeDateLabel } from "@/lib/safe-date";
 
 interface BlogPostRendererProps {
   post: PublicBlogDetail | StoreBlogPost;
@@ -23,6 +24,11 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
 
   const image = post.openGraphImage || post.featuredImage; // UPDATED
   const isAllowedImage = image ? isAllowedImageUrl(image) : false;
+  const publishedAtLabel = safeDateLabel(post.publishedAt, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -31,14 +37,10 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
           {primaryCategory && (
             <Badge variant="outline">{primaryCategory}</Badge>
           )}
-          {post.publishedAt && (
+          {publishedAtLabel && (
             <span className="text-sm text-gray-500 flex items-center gap-1">
               <Calendar className="h-3 w-3" aria-hidden="true" />
-              {new Date(post.publishedAt).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {publishedAtLabel}
             </span>
           )}
         </div>

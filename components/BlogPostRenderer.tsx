@@ -11,6 +11,7 @@ import type { PublicBlogDetail } from "@/lib/types";
 import { sanitizeHtmlServer } from "@/lib/sanitize/server";
 import { isAllowedImageUrl } from "@/lib/image-domains";
 import { safeDateLabel } from "@/lib/safe-date";
+import { normalizeAuthor } from "@/lib/formatters";
 
 interface BlogPostRendererProps {
   post: PublicBlogDetail | StoreBlogPost;
@@ -29,6 +30,12 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
     month: "long",
     day: "numeric",
   });
+  const normalizedAuthor = normalizeAuthor(post.author);
+  const fallbackAuthor = normalizeAuthor(undefined);
+  const authorLabel =
+    normalizedAuthor && normalizedAuthor !== fallbackAuthor
+      ? normalizedAuthor
+      : null;
 
   return (
     <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -49,10 +56,10 @@ export default function BlogPostRenderer({ post }: BlogPostRendererProps) {
         </h1>
         <p className="text-xl text-gray-600 mb-6">{post.excerpt}</p>
         <div className="flex items-center gap-4 text-sm text-gray-500">
-          {post.author && (
+          {authorLabel && (
             <span className="flex items-center gap-1">
               <User className="h-4 w-4" aria-hidden="true" />
-              {post.author}
+              {authorLabel}
             </span>
           )}
           <span className="flex items-center gap-1">

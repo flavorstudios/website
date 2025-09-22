@@ -22,7 +22,7 @@ const SheetOverlay = React.forwardRef<
   <SheetPrimitive.Overlay asChild {...props} ref={ref}>
     <div
       className={cn(
-        "fixed inset-0 pointer-events-none bg-transparent",
+        "fixed inset-0 pointer-events-auto bg-background/70",
         className
       )}
       aria-hidden="true"

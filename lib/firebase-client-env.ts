@@ -2,6 +2,7 @@
 
 import { FIREBASE_REQUIRED_ENV_VARS } from "./firebase-env";
 import { clientEnv } from "@/env.client";
+import type { ClientEnvShape } from "@/env.client";
 
 /**
  * Public Firebase config sourced from NEXT_PUBLIC_* environment variables.
@@ -25,7 +26,9 @@ export const PUBLIC_FIREBASE_CONFIG = {
  */
 export function getMissingFirebaseEnv(): string[] {
   return FIREBASE_REQUIRED_ENV_VARS.filter(
-    v => v.startsWith("NEXT_PUBLIC_") && !clientEnv[v as keyof typeof clientEnv]
+    v =>
+      v.startsWith("NEXT_PUBLIC_") &&
+      clientEnv.isValueMissing(v as keyof ClientEnvShape)
   );
 }
 

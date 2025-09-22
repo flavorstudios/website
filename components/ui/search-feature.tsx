@@ -18,7 +18,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge" // Added for multi-category support
 import { formatDate } from "@/lib/date" // <-- Added
-import type { BlogPost } from "@/lib/content-store"
+import type { PublicBlogSummary } from "@/lib/types"
 import { clientEnv } from "@/env.client"
 
 interface Video {
@@ -32,7 +32,7 @@ interface Video {
 }
 
 interface SearchResults {
-  blogs: BlogPost[]
+  blogs: PublicBlogSummary[]
   videos: Video[]
 }
 
@@ -92,14 +92,14 @@ export function SearchFeature() {
         fetch("/api/blogs"),
         fetch("/api/videos"),
       ])
-      let blogs: BlogPost[] = []
+      let blogs: PublicBlogSummary[] = []
       let videos: Video[] = []
 
       // Process blogs
       if (blogsResponse.status === "fulfilled" && blogsResponse.value.ok) {
-        const blogsData = await blogsResponse.value.json()
+        const blogsData: PublicBlogSummary[] = await blogsResponse.value.json()
         blogs = blogsData
-          .filter((blog: BlogPost) => {
+          .filter((blog: PublicBlogSummary) => {
             const search = query.toLowerCase()
             const title = blog.title.toLowerCase()
             const slug = blog.slug.toLowerCase()
@@ -109,11 +109,10 @@ export function SearchFeature() {
                 ? blog.categories.map((c) => c.toLowerCase())
                 : [blog.category?.toLowerCase()]
             return (
-              blog.status === "published" &&
-              (title.includes(search) ||
-                slug.includes(search) ||
-                excerpt.includes(search) ||
-                categories.some((cat) => cat.includes(search)))
+              title.includes(search) ||
+              slug.includes(search) ||
+              excerpt.includes(search) ||
+              categories.some((cat) => cat.includes(search))
             )
           })
           .slice(0, 5)

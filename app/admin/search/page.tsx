@@ -7,7 +7,7 @@ import { SITE_URL, SITE_NAME, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { getMetadata } from "@/lib/seo-utils";
 
 interface PageProps {
-  searchParams?: { q?: string };
+  searchParams?: Promise<{ q?: string }>;
 }
 
 export const metadata = getMetadata({
@@ -40,7 +40,8 @@ export const metadata = getMetadata({
 });
 
 export default async function AdminSearchPage({ searchParams }: PageProps) {
-  const query = typeof searchParams?.q === "string" ? searchParams.q : "";
+  const params = await searchParams;
+  const query = typeof params?.q === "string" ? params.q : "";
 
   const h = await headers();
   const cookie = h.get("cookie") ?? "";

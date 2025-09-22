@@ -55,50 +55,55 @@ try {
       env,
     });
 
-    build.on('close', (code, signal) => {
-      if (signal) {
-        reject(new Error(`build process terminated with signal ${signal}`));
-        return;
-      }
+    build.on('close', async (code, signal) => {
+      try {
+        if (signal) {
+          throw new Error(`build process terminated with signal ${signal}`);
+        }
 
-      if (code !== 0) {
-        reject(new Error(`build process exited with code ${code ?? 'unknown'}`));
-        return;
-      }
+        if (code !== 0) {
+          throw new Error(`build process exited with code ${code ?? 'unknown'}`);
+        }
 
-      resolve();
+        const buildIdPath = path.join(nextDir, 'BUILD_ID');
+        const expectedArtifactPaths = [
+          path.join(nextDir, 'server'),
+          path.join(nextDir, 'server/app'),
+          path.join(nextDir, 'server/pages'),
+          path.join(nextDir, 'standalone'),
+          path.join(nextDir, 'app'),
+          path.join(nextDir, 'static'),
+        ];
+
+        const buildIdExists = await access(buildIdPath, constants.F_OK)
+          .then(() => true)
+          .catch(() => false);
+
+        const hasExpectedArtifacts = await Promise.all(
+          expectedArtifactPaths.map(async (artifactPath) =>
+            access(artifactPath, constants.F_OK)
+              .then(() => true)
+              .catch(() => false),
+          ),
+        ).then((results) => results.some(Boolean));
+
+        if (!buildIdExists || !hasExpectedArtifacts) {
+          throw new Error(
+            'Next.js build artifacts are missing. Inspect the font mock or build logs before running Playwright.',
+          );
+        }
+
+        resolve();
+      } catch (closeError) {
+        await cleanBuildOutput();
+        reject(closeError);
+      }
     });
 
-    const buildIdPath = path.join(nextDir, 'BUILD_ID');
-  const expectedArtifactPaths = [
-    path.join(nextDir, 'server'),
-    path.join(nextDir, 'server/app'),
-    path.join(nextDir, 'server/pages'),
-    path.join(nextDir, 'standalone'),
-    path.join(nextDir, 'app'),
-    path.join(nextDir, 'static'),
-  ];
-
-  const buildIdExists = await access(buildIdPath, constants.F_OK)
-    .then(() => true)
-    .catch(() => false);
-
-  const hasExpectedArtifacts = await Promise.all(
-    expectedArtifactPaths.map(async (artifactPath) =>
-      access(artifactPath, constants.F_OK)
-        .then(() => true)
-        .catch(() => false),
-    ),
-  ).then((results) => results.some(Boolean));
-
-  if (!buildIdExists || !hasExpectedArtifacts) {
-    await cleanBuildOutput();
-    throw new Error(
-      'Next.js build artifacts are missing. Inspect the font mock or build logs before running Playwright.',
-    );
-  }
-
-    build.on('error', reject);
+    build.on('error', async (error) => {
+      await cleanBuildOutput();
+      reject(error);
+    });
   });
 } catch (error) {
   await cleanBuildOutput();

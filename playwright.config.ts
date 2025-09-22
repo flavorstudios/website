@@ -20,6 +20,7 @@ export default defineConfig({
   webServer: {
     // Run the app in PRODUCTION for stable e2e (no dev overlay, proper metadata)
     command: 'pnpm -s start',
+    cwd: configDir,
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: false, // always use the prod server started above
     timeout: 120_000, // give Next.js extra time to boot

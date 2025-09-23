@@ -73,7 +73,7 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
           onSelect={onLogout}
           className="text-destructive focus:text-destructive"
         >
-          <LogOut className="h-4 w-4 mr-2" /> Log out
+          <LogOut className="h-4 w-4 mr-2" /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

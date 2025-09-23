@@ -134,17 +134,19 @@ export async function POST(request: NextRequest) {
     return createErrorResponse("Disposable email domains are not allowed.");
   }
 
-  if (!isEmailAllowed(email)) {
-    await logAdminAuditFailure(email, ip, "email-not-allowlisted");
-    await incrementSignupEmailAttempts(emailHash);
-    await incrementSignupIpAttempts(ip);
-    return createErrorResponse("Email is not allowed for admin access.", 403);
-  }
-
   const bypass =
     serverEnv.ADMIN_AUTH_DISABLED === "1" || serverEnv.ADMIN_BYPASS === "true";
 
   const requiresVerification = requiresEmailVerification();
+
+  if (!bypass) {
+    if (!isEmailAllowed(email)) {
+      await logAdminAuditFailure(email, ip, "email-not-allowlisted");
+      await incrementSignupEmailAttempts(emailHash);
+      await incrementSignupIpAttempts(ip);
+      return createErrorResponse("Email is not allowed for admin access.", 403);
+    }
+  }
 
   try {
     let idToken = "";

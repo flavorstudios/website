@@ -45,6 +45,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import AdminPageHeader from "@/components/AdminPageHeader"
+import { logClientError } from "@/lib/log-client"
 
 interface ContactMessage {
   id: string
@@ -136,7 +137,7 @@ export default function EmailInbox() {
       const data = await response.json()
       setMessages(data.messages || [])
     } catch (error) {
-      console.error("Failed to load messages:", error)
+      logClientError("Failed to load messages:", error)
     } finally {
       setLoadingState(false)
     }
@@ -299,7 +300,7 @@ export default function EmailInbox() {
         body: JSON.stringify({ id, status }),
       })
     } catch (err) {
-      console.error("Failed to update message status", err)
+      logClientError("Failed to update message status", err)
     }
   }
 
@@ -337,7 +338,7 @@ export default function EmailInbox() {
           body: JSON.stringify({ ids }),
         })
       } catch (err) {
-        console.error("Failed to delete messages", err)
+        logClientError("Failed to delete messages", err)
       } finally {
         setSelectedMessages(new Set())
       }
@@ -360,7 +361,7 @@ export default function EmailInbox() {
         )
       )
     } catch (err) {
-      console.error("Failed to update stars", err)
+      logClientError("Failed to update stars", err)
     } finally {
       setSelectedMessages(new Set())
     }
@@ -377,7 +378,7 @@ export default function EmailInbox() {
         body: JSON.stringify({ id, starred }),
       })
     } catch (err) {
-      console.error("Failed to update star", err)
+      logClientError("Failed to update star", err)
     }
   }
 
@@ -397,7 +398,7 @@ export default function EmailInbox() {
           )
         )
       } catch (err) {
-        console.error("Failed to update flags", err)
+        logClientError("Failed to update flags", err)
       } finally {
         setSelectedMessages(new Set())
       }
@@ -417,7 +418,7 @@ export default function EmailInbox() {
           body: JSON.stringify({ id, flagged }),
         })
       } catch (err) {
-        console.error("Failed to update flag", err)
+        logClientError("Failed to update flag", err)
       }
     },
     []
@@ -444,7 +445,7 @@ export default function EmailInbox() {
         body: JSON.stringify({ id, labels: updatedLabels }),
       })
     } catch (err) {
-      console.error("Failed to update labels", err)
+      logClientError("Failed to update labels", err)
     }
   }
 

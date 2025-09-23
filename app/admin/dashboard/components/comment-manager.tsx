@@ -56,6 +56,7 @@ import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
 import CommentStatsChart from "@/components/admin/comment/CommentStatsChart"
 import AdminPageHeader from "@/components/AdminPageHeader"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { logClientError } from "@/lib/log-client"
 
 const QUICK_REPLIES = [
   { label: "Thanks for your feedback!", value: "Thanks for your feedback!" },
@@ -121,8 +122,8 @@ export default function CommentManager() {
       const response = await fetch("/api/admin/comments", { credentials: "include" })
       const data = await response.json()
       setComments(data.comments || [])
-    } catch {
-      console.error("Failed to load comments")
+    } catch (error) {
+      logClientError("Failed to load comments", error)
       toast("Failed to load comments")
     } finally {
       setLoading(false)
@@ -162,8 +163,8 @@ export default function CommentManager() {
           const data = await response.json()
           toast(data.error || "Failed to update comment")
         }
-      } catch {
-        console.error("Failed to update comment")
+      } catch (error) {
+        logClientError("Failed to update comment", error)
         toast("Failed to update comment")
       }
     },

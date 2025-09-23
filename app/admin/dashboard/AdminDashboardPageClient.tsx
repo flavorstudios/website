@@ -7,6 +7,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase";
 import { fetchJson } from "@/lib/http";
+import { logClientError } from "@/lib/log-client";
 import useHotkeys from "./hooks/use-hotkeys";
 import { SITE_NAME } from "@/lib/constants";
 import {
@@ -143,52 +144,6 @@ export default function AdminDashboardPageClient({
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const mainWrapperRef = useRef<HTMLDivElement | null>(null);
 
-  // Defensive cleanup: if the public shell leaked into the admin DOM, strip
-  // its landmark roles/ids so we don't end up with duplicate banner/main
-  // landmarks. This only runs when the marketing layout mistakenly renders
-  // alongside the dashboard (e.g. during hydration mismatches or guard bugs).
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const adminRoot = document.getElementById("admin-main");
-    if (!adminRoot) return;
-
-    const body = document.body;
-    if (!body) return;
-
-    const cleanedElements: Element[] = [];
-
-    const stripLandmarkAttributes = (element: Element | null) => {
-      if (!element) return false;
-      let modified = false;
-      if (element.hasAttribute("role")) {
-        element.removeAttribute("role");
-        modified = true;
-      }
-      if (element.hasAttribute("id")) {
-        element.removeAttribute("id");
-        modified = true;
-      }
-      if (modified) {
-        element.setAttribute("data-admin-cleaned", "true");
-        cleanedElements.push(element);
-      }
-      return modified;
-    };
-
-    const headerStripped = stripLandmarkAttributes(
-      body.querySelector(":scope > header"),
-    );
-    const mainStripped = stripLandmarkAttributes(
-      body.querySelector(":scope > main#main-content"),
-    );
-
-    if (!headerStripped && !mainStripped) return;
-
-    return () => {
-      cleanedElements.forEach((el) => el.removeAttribute("data-admin-cleaned"));
-    };
-  }, []);
-
   // --- Hotkeys --------------------------------------------------------------
   useHotkeys("n", () => router.push("/admin/blog/create"), undefined, [router]);
   useHotkeys("shift+u", () =>
@@ -222,8 +177,7 @@ export default function AdminDashboardPageClient({
 
     // init ping (with credentials)
     fetchJson("/api/admin/init", { method: "POST", credentials: "include" }).catch((err) => {
-      if (clientEnv.NODE_ENV !== "production")
-        console.error("Admin init failed:", err);
+      logClientError("Admin init failed:", err);
     });
 
     // Prefetch main routes for snappier nav
@@ -419,8 +373,7 @@ export default function AdminDashboardPageClient({
       window.location.href = "/admin/login";
     } catch (error) {
       setError("Logout failed. Please try again.");
-      if (clientEnv.NODE_ENV !== "production")
-        console.error("Logout failed:", error);
+      logClientError("Logout failed:", error);
     }
   }, []);
   const currentTitle = useMemo(
@@ -435,7 +388,10 @@ export default function AdminDashboardPageClient({
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div
+        className="min-h-screen bg-gray-50 flex items-center justify-center"
+        data-testid="dashboard-loading"
+      >
         <div className="flex items-center space-x-3" role="status" aria-live="polite">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
           <span className="text-lg font-medium text-gray-700">

@@ -29,8 +29,26 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const ip = getRequestIp(request);
 
-  const markAdminRoute = <T extends NextResponse>(response: T) => {
-    response.headers.set("x-route-type", "admin");
+  const isAdminRequest = pathname.startsWith("/admin");
+  const adminHeaders = isAdminRequest ? new Headers(request.headers) : null;
+  if (adminHeaders) {
+    adminHeaders.set("x-route-type", "admin");
+  }
+
+  const nextWithAdminHeaders = () =>
+    adminHeaders
+      ? NextResponse.next({
+          request: {
+            headers: adminHeaders,
+          },
+        })
+      : NextResponse.next();
+
+  const redirectWithAdminHeaders = (url: URL) => {
+    const response = NextResponse.redirect(url);
+    if (adminHeaders) {
+      response.headers.set("x-route-type", "admin");
+    }
     return response;
   };
 
@@ -51,43 +69,39 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/admin/login?");
 
   // --- All /admin routes
-  if (pathname.startsWith("/admin")) {
+  if (isAdminRequest) {
     const sessionCookie = request.cookies.get("admin-session")?.value || "";
     const isPreviewRoute = pathname.startsWith("/admin/preview");
     const previewToken = request.nextUrl.searchParams.get("token");
 
     if (isPreviewRoute && previewToken) {
-      return markAdminRoute(NextResponse.next());
+      return nextWithAdminHeaders();
     }
 
     // --- Rate limiter: block if too many invalid attempts ---
     if (await isRateLimited(ip)) {
-      return markAdminRoute(
-        NextResponse.redirect(new URL("/admin/login", request.url)),
-      );
+      return redirectWithAdminHeaders(new URL("/admin/login", request.url));
     }
 
     // --- Login page: redirect if and only if session cookie exists ---
     if (isLoginPage) {
       if (sessionCookie) {
         await resetAttempts(ip);
-        return markAdminRoute(
-          NextResponse.redirect(new URL("/admin/dashboard", request.url)),
+        return redirectWithAdminHeaders(
+          new URL("/admin/dashboard", request.url),
         );
       }
-      return markAdminRoute(NextResponse.next());
+      return nextWithAdminHeaders();
     }
 
     // --- Protected /admin routes: require a session cookie ---
     if (!sessionCookie) {
       await incrementAttempts(ip);
-      return markAdminRoute(
-        NextResponse.redirect(new URL("/admin/login", request.url)),
-      );
+      return redirectWithAdminHeaders(new URL("/admin/login", request.url));
     }
 
     await resetAttempts(ip);
-    return markAdminRoute(NextResponse.next());
+    return nextWithAdminHeaders();
   }
 
   // --- All other routes: allow through ---

@@ -28,7 +28,10 @@ export async function GET(req: NextRequest) {
     ? "/admin/forgot-password?status=expired"
     : "/admin/login?reset=1";
 
-  const response = NextResponse.redirect(new URL(targetPath, req.nextUrl.origin));
+  const response = NextResponse.redirect(
+    new URL(targetPath, req.nextUrl.origin),
+    302,
+  );
   response.headers.set("Cache-Control", "no-store");
   return response;
 }

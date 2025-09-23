@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import type { UserRole } from "@/lib/role-permissions"
 import AdminPageHeader from "@/components/AdminPageHeader"
+import { logClientError } from "@/lib/log-client"
 
 export function UserRoleManager() {
   const { toast } = useToast()
@@ -32,7 +33,7 @@ export function UserRoleManager() {
         toast(data.error || "Error")
       }
     } catch (err) {
-      console.error("Failed to update role", err)
+      logClientError("Failed to update role", err)
       toast("Update failed")
     } finally {
       setSaving(false)

@@ -197,7 +197,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     adminPrefixes.length ? adminPrefixes : undefined,
   );
 
-  const isAdmin = adminRouteHint === "admin" || isAdminFromPath;
+  const isAdmin = adminRouteHint
+    ? adminRouteHint === "admin"
+    : isAdminFromPath;
 
   // (Intentionally no admin session verification here; handled in admin-only routes)
 
@@ -285,7 +287,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           )}
 
           {isAdmin ? (
-            <div>{children}</div>
+            <>{children}</>
           ) : (
             <main id="main-content" tabIndex={-1}>
               {children}

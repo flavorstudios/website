@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Trash2, RefreshCw, CheckCircle, AlertCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { ADMIN_REFRESH } from "@/lib/admin-events"
+import { logClientError } from "@/lib/log-client"
 
 export function CacheCleaner() {
   const { toast } = useToast()
@@ -39,7 +40,7 @@ export function CacheCleaner() {
       // Trigger data refresh
       window.dispatchEvent(new CustomEvent(ADMIN_REFRESH))
     } catch (error) {
-      console.error("Failed to clear frontend cache:", error)
+      logClientError("Failed to clear frontend cache:", error)
       toast("Cache Clear Failed")
     } finally {
       setLoading(false)
@@ -62,7 +63,7 @@ export function CacheCleaner() {
         throw new Error("Backend cache clear failed")
       }
     } catch (error) {
-      console.error("Failed to clear backend cache:", error)
+      logClientError("Failed to clear backend cache:", error)
       toast("Backend Cache Clear Failed")
     } finally {
       setLoading(false)
@@ -81,7 +82,7 @@ export function CacheCleaner() {
         window.location.reload()
       }, 1000)
     } catch (error) {
-      console.error("Failed to clear all caches:", error)
+      logClientError("Failed to clear all caches:", error)
     } finally {
       setLoading(false)
     }

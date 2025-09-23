@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
 import FirebaseEmailLoginForm from "./FirebaseEmailLoginForm"
+import EmailLoginForm from "./EmailLoginForm"
 import useAuthError from "@/hooks/useAuthError"
 import { clientEnv } from "@/env.client"
 
@@ -71,6 +72,7 @@ export default function AdminLoginForm() {
   const { error, setError, clearError } = useAuthError()
   const [loading, setLoading] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [showLegacyLogin, setShowLegacyLogin] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
@@ -248,12 +250,35 @@ export default function AdminLoginForm() {
         </div>
         <div className="flex flex-col gap-8 bg-white px-6 py-8 md:px-10 md:py-12 text-left">
           <div className="flex flex-col gap-6">
-            <FirebaseEmailLoginForm
-              error={error}
-              setError={setError}
-              notice={passwordResetNotice ?? undefined}
-              onSuccess={finalizeLogin}
-            />
+            <Button
+              type="button"
+              variant="ghost"
+              className="self-start px-0 text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
+              data-testid="legacy-login-toggle"
+              aria-pressed={showLegacyLogin}
+              onClick={() => {
+                clearError()
+                setShowLegacyLogin((prev) => !prev)
+              }}
+            >
+              {showLegacyLogin
+                ? "Use modern admin login (Firebase)"
+                : "Use legacy admin password (env-based)"}
+            </Button>
+            {showLegacyLogin ? (
+              <EmailLoginForm
+                error={error}
+                setError={setError}
+                notice={passwordResetNotice ?? undefined}
+              />
+            ) : (
+              <FirebaseEmailLoginForm
+                error={error}
+                setError={setError}
+                notice={passwordResetNotice ?? undefined}
+                onSuccess={finalizeLogin}
+              />
+            )}
             <div className="relative py-2">
               <div className="absolute inset-0 flex items-center" aria-hidden="true">
                 <div className="w-full border-t border-slate-200" />
@@ -291,7 +316,7 @@ export default function AdminLoginForm() {
               </Link>
             </p>
             <p
-              className="text-xs text-slate-500"
+              className="text-xs text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis"
               data-testid="admin-login-legal"
             >
               By continuing, you agree to our{' '}

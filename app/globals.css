@@ -120,7 +120,6 @@ samp {
   padding: 0;
   border: 0;
   opacity: 0;
-  visibility: hidden;
   pointer-events: none;
 }
 

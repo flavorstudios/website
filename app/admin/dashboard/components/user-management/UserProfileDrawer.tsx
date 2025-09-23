@@ -12,6 +12,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { logClientError } from "@/lib/log-client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -84,8 +85,7 @@ export default function UserProfileDrawer({ uid, open, onClose, onDeleted }: Use
         toast.error(data.error || "Action failed");
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("User action failed", err);
+      logClientError("User action failed", err);
       toast.error("Action failed");
     }
   };
@@ -125,8 +125,7 @@ export default function UserProfileDrawer({ uid, open, onClose, onDeleted }: Use
         toast.error(data.error || "Update failed");
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to update user", err);
+      logClientError("Failed to update user", err);
       toast.error("Update failed");
     } finally {
       setSaving(false);
@@ -147,8 +146,7 @@ export default function UserProfileDrawer({ uid, open, onClose, onDeleted }: Use
         toast.error(data.error || "Delete failed");
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to delete user", err);
+      logClientError("Failed to delete user", err);
       toast.error("Delete failed");
     } finally {
       setSaving(false);

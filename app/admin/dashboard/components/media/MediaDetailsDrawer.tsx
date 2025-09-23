@@ -8,6 +8,7 @@ import Image from "next/image";
 import type { MediaDoc } from "@/types/media";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { logClientError } from "@/lib/log-client";
 
 interface MediaDetailsDrawerProps {
   media: MediaDoc;
@@ -75,7 +76,7 @@ export default function MediaDetailsDrawer({
       const data = await res.json();
       onUpdate?.(data.media as MediaDoc);
     } catch (err) {
-      console.error(err);
+      logClientError("Failed to save alt text", err);
       toast.error?.("Failed to save alt text");
     } finally {
       setSavingAlt(false);
@@ -97,7 +98,7 @@ export default function MediaDetailsDrawer({
       const data = await res.json();
       onUpdate?.(data.media as MediaDoc);
     } catch (err) {
-      console.error(err);
+      logClientError("Failed to save name", err);
       toast.error?.("Failed to save name");
     } finally {
       setSavingName(false);
@@ -153,7 +154,7 @@ export default function MediaDetailsDrawer({
       }
       onOpenChange(false);
     } catch (err) {
-      console.error(err);
+      logClientError("Failed to delete media", err);
       toast.error?.("Failed to delete media");
     } finally {
       setDeleting(false);

@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     target: redirectUrl.toString(),
   });
 
-  const response = NextResponse.redirect(redirectUrl);
+  const response = NextResponse.redirect(redirectUrl, 302);
   response.headers.set("Cache-Control", "no-store");
   return response;
 }

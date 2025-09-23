@@ -6,6 +6,7 @@ import { RefreshCw } from "lucide-react"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { revalidateEntireWebsite } from "@/app/admin/actions/system"
+import { logClientError } from "@/lib/log-client"
 
 export default function SystemTools() {
   const { toast } = useToast()
@@ -17,7 +18,7 @@ export default function SystemTools() {
       const result = await revalidateEntireWebsite()
       toast(result.message)
     } catch (error) {
-      console.error("Failed to revalidate website:", error)
+      logClientError("Failed to revalidate website:", error)
       toast("Failed to revalidate entire website.")
     } finally {
       setIsRevalidatingWebsite(false)

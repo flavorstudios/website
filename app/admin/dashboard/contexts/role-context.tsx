@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import { type UserRole, hasPermission, getAccessibleSections, type RolePermissions } from "@/lib/role-permissions"
 import { clientEnv } from "@/env.client"
+import { logClientError } from "@/lib/log-client"
 
 interface RoleContextType {
   userRole: UserRole
@@ -57,7 +58,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch user role:", error)
+      logClientError("Failed to fetch user role:", error)
       setError("Network error")
     } finally {
       setIsLoading(false)

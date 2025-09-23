@@ -32,6 +32,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { authors } from "@/lib/authors";
 import { slugify } from "@/lib/slugify";
+import { logClientError } from "@/lib/log-client";
 import MediaPickerDialog from "./media/MediaPickerDialog";
 import type {
   BlogPost as StoreBlogPost,
@@ -205,8 +206,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
           }));
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error("Failed to load categories:", error);
+        logClientError("Failed to load categories:", error);
         toast.error("Failed to load categories");
       }
     };
@@ -336,8 +336,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         toast.success("Post saved successfully!");
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to save post:", error);
+      logClientError("Failed to save post:", error);
       // No autosave toast noise; manual saves show a toast
       if (!isAutoSave) toast.error((error as Error).message || "Failed to save post");
     } finally {
@@ -376,8 +375,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         setRevisions(data.revisions || []);
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to load revisions:", err);
+      logClientError("Failed to restore revision:", err);
     }
   };
 
@@ -405,8 +403,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         toast.error("Failed to restore revision");
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to restore revision:", err);
+      logClientError("Failed to restore revision:", err);
       toast.error("Failed to restore revision");
     }
   };

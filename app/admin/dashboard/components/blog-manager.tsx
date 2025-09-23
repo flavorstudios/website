@@ -63,6 +63,7 @@ import { fetcher } from "@/lib/fetcher";
 import { useDebounce } from "@/hooks/use-debounce";
 import useMediaQuery from "@/hooks/use-media-query";
 import { formatDate } from "@/lib/date";
+import { logClientError } from "@/lib/log-client";
 
 const FALLBACK_POSTS: BlogPost[] = [
   {
@@ -372,7 +373,7 @@ export default function BlogManager() {
       toast(result.message);
       await refreshData();
     } catch (error) {
-      console.error("Failed to revalidate blog:", error);
+      logClientError("Failed to revalidate blog:", error);
       toast("Failed to revalidate blog section.");
     } finally {
       setIsRevalidating(false);
@@ -405,7 +406,7 @@ export default function BlogManager() {
           const data = await res.json().catch(() => ({}));
           return { id, ok: false as const, error: data.error || "Failed to delete" };
         } catch (err) {
-          console.error("Delete failed", err);
+          logClientError("Delete failed", err);
           return { id, ok: false as const, error: "Failed to delete" };
         }
       }),
@@ -460,7 +461,7 @@ export default function BlogManager() {
         toast(data.error || "Update failed");
       }
     } catch (err) {
-      console.error("Publish toggle failed", err);
+      logClientError("Publish toggle failed", err);
       toast("Update failed");
     }
   };
@@ -551,8 +552,8 @@ export default function BlogManager() {
     return (
       <div>
         <AdminPageHeader
-          title="Blog Management"
-          subtitle="Manage all blog posts and editorial actions"
+          title="Blog Posts"
+          subtitle="Create, edit and publish blog posts for Flavor Studios"
         />
         <div className="mt-4">
           <BlogTableSkeleton />
@@ -580,8 +581,8 @@ export default function BlogManager() {
       {/* Header with right-aligned action buttons */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <AdminPageHeader
-          title="Blog Management"
-          subtitle="Manage all blog posts and editorial actions"
+          title="Blog Posts"
+          subtitle="Create, edit and publish blog posts for Flavor Studios"
         />
         <div className="flex gap-2">
           <Button

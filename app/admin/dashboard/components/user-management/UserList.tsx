@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { logClientError } from "@/lib/log-client";
 
 interface UserRow {
   uid: string;
@@ -68,8 +69,7 @@ export default function UserList() {
         setUsers([]);
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to load users", err);
+      logClientError("Failed to load users", err);
       setError("Failed to load users");
       setUsers([]);
     } finally {
@@ -156,8 +156,7 @@ export default function UserList() {
         toast.error(d.error || "Update failed");
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Bulk update failed", err);
+      logClientError("Bulk update failed", err);
       toast.error("Update failed");
     } finally {
       setSelected([]);
@@ -179,8 +178,7 @@ export default function UserList() {
         toast.error(d.error || "Update failed");
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Bulk update failed", err);
+      logClientError("Bulk update failed", err);
       toast.error("Update failed");
     } finally {
       setSelected([]);
@@ -202,8 +200,7 @@ export default function UserList() {
         toast.error(d.error || "Delete failed");
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Bulk delete failed", err);
+      logClientError("Bulk delete failed", err);
       toast.error("Delete failed");
     } finally {
       setSelected([]);

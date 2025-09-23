@@ -8,6 +8,7 @@ import { AdminHeader } from "./admin-header"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import BottomNav from "./bottom-nav"
 import { SectionId } from "../sections"
+import { logClientError } from "@/lib/log-client"
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -61,7 +62,7 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
       await fetch("/api/admin/logout", { method: "POST" }) // <<--- UPDATED ENDPOINT
       window.location.href = "/admin/login"
     } catch (error) {
-      console.error("Logout failed:", error)
+      logClientError("Logout failed:", error)
     }
   }
 

@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { fetcher } from "@/lib/fetcher";
+import { logClientError } from "@/lib/log-client";
 
 interface Notification {
   id: string;
@@ -171,7 +172,7 @@ export function NotificationBell() {
       optimisticUpdate((prev) =>
         prev.map((n) => (n.id === id ? { ...n, read: false } : n))
       );
-      console.error("Failed to mark notification as read:", err);
+      logClientError("Failed to mark notification as read:", err);
     }
   };
 
@@ -185,7 +186,7 @@ export function NotificationBell() {
       });
       await mutate();
     } catch (err) {
-      console.error("Failed to mark all notifications as read:", err);
+      logClientError("Failed to mark all notifications as read:", err);
       // Revalidate to restore correct state
       await mutate();
     }
@@ -228,7 +229,7 @@ export function NotificationBell() {
       );
       await mutate();
     } catch (err) {
-      console.error("Failed to mark notifications as read:", err);
+      logClientError("Failed to mark notifications as read:", err);
       await mutate();
     }
     clearSelection();
@@ -254,7 +255,7 @@ export function NotificationBell() {
       );
       await mutate();
     } catch (err) {
-      console.error("Failed to mark notifications as unread:", err);
+      logClientError("Failed to mark notifications as unread:", err);
       await mutate();
     }
     clearSelection();
@@ -276,7 +277,7 @@ export function NotificationBell() {
       );
       await mutate();
     } catch (err) {
-      console.error("Failed to delete notifications:", err);
+      logClientError("Failed to delete notifications:", err);
       await mutate();
     }
     clearSelection();
@@ -298,7 +299,7 @@ export function NotificationBell() {
       );
       await mutate();
     } catch (err) {
-      console.error("Failed to clear all notifications:", err);
+      logClientError("Failed to clear all notifications:", err);
       await mutate();
     }
     clearSelection();

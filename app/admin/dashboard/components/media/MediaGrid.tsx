@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import type { MediaDoc } from "@/types/media";
 import { File, Video, Star, Music } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { logClientError } from "@/lib/log-client";
 
 interface Props {
   items: MediaDoc[];
@@ -50,8 +51,7 @@ export default function MediaGrid({
       }
     } catch (err) {
       status = 0;
-      // eslint-disable-next-line no-console
-      console.error("Error checking media status", {
+      logClientError("Error checking media status", {
         url: item.url,
         err,
       });
@@ -76,8 +76,7 @@ export default function MediaGrid({
     else if (status === 401 || status === 403) message = "URL expired";
     else if (status === 0) message = "Network error";
 
-    // eslint-disable-next-line no-console
-    console.error("Failed to load media", {
+    logClientError("Failed to load media", {
       url: item.url,
       status,
       event,

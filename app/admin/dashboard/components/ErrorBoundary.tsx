@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { clientEnv } from '@/env.client';
+import { logClientError } from '@/lib/log-client';
 
 export class ErrorBoundary extends React.Component<
   { children: React.ReactNode; fallback?: React.ReactNode },
@@ -14,7 +15,7 @@ export class ErrorBoundary extends React.Component<
     return { error };
   }
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[ui-error]', error, info);
+    logClientError('[ui-error]', error, info);
   }
   render() {
     if (this.state.error) {

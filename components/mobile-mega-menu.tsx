@@ -3,7 +3,7 @@
 import { useState, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ChevronDown, Coffee, Sparkles, Grid3X3 } from "lucide-react"
+import { ChevronDown, Coffee, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { slugify } from "@/lib/slugify"
 import { isActive } from "@/lib/nav-utils"
@@ -86,7 +86,6 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div className="flex items-center space-x-3 relative z-10">
-                    <Grid3X3 className="w-5 h-5 opacity-70" />
                     <span>{item.label}</span>
                   </div>
                   {item.subItems && (

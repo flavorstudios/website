@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useRef, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { ChevronDown, Sparkles, Grid3X3 } from "lucide-react"
+import { ChevronDown, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { isActive } from "@/lib/nav-utils"
 
@@ -242,8 +242,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               {/* ---- This block is now WITHOUT the count bubble ---- */}
-              <div className="flex items-center space-x-2 relative z-10">
-                <Grid3X3 className="w-4 h-4 opacity-70" />
+              <div className="flex items-center relative z-10">
                 <span>{item.label}</span>
               </div>
               {/* ---- END UPDATED block ---- */}

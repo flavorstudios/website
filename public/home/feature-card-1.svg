@@ -1,0 +1,20 @@
+<svg width="720" height="480" viewBox="0 0 720 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title1 desc1">
+  <title id="title1">Studio Showcase Neon Grid</title>
+  <desc id="desc1">Geometric neon grid artwork representing futuristic city lights.</desc>
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="50%" stop-color="#1D4ED8" />
+      <stop offset="100%" stop-color="#F472B6" />
+    </linearGradient>
+  </defs>
+  <rect width="720" height="480" rx="36" fill="url(#grad1)" />
+  <g stroke="rgba(255,255,255,0.2)" stroke-width="2">
+    <path d="M80 80L640 400" />
+    <path d="M640 120L120 440" />
+    <path d="M360 40L360 440" />
+    <path d="M120 200L600 200" />
+  </g>
+  <circle cx="540" cy="120" r="72" fill="rgba(59,130,246,0.45)" />
+  <circle cx="200" cy="360" r="96" fill="rgba(244,114,182,0.35)" />
+</svg>

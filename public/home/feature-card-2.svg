@@ -1,0 +1,17 @@
+<svg width="720" height="480" viewBox="0 0 720 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title2 desc2">
+  <title id="title2">Hero Spotlight Burst</title>
+  <desc id="desc2">Stylized burst of light with glowing rings symbolizing action sequences.</desc>
+  <defs>
+    <radialGradient id="grad2" cx="50%" cy="45%" r="70%">
+      <stop offset="0%" stop-color="#FACC15" />
+      <stop offset="40%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#7C2D12" />
+    </radialGradient>
+  </defs>
+  <rect width="720" height="480" rx="36" fill="#0F172A" />
+  <circle cx="360" cy="200" r="160" fill="url(#grad2)" />
+  <circle cx="360" cy="200" r="200" stroke="rgba(250,204,21,0.5)" stroke-width="8" fill="none" />
+  <circle cx="360" cy="200" r="240" stroke="rgba(148,163,184,0.35)" stroke-width="4" fill="none" />
+  <path d="M100 360L620 140" stroke="rgba(249,250,251,0.2)" stroke-width="4" stroke-linecap="round" />
+  <path d="M140 120L520 420" stroke="rgba(148,163,184,0.25)" stroke-width="3" stroke-linecap="round" />
+</svg>

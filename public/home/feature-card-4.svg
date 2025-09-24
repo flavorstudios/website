@@ -1,0 +1,21 @@
+<svg width="720" height="480" viewBox="0 0 720 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title4 desc4">
+  <title id="title4">Digital Neon Metropolis</title>
+  <desc id="desc4">Neon skyline with abstract skyscrapers in magenta and cyan.</desc>
+  <defs>
+    <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#EC4899" />
+      <stop offset="100%" stop-color="#8B5CF6" />
+    </linearGradient>
+  </defs>
+  <rect width="720" height="480" rx="36" fill="#0B1120" />
+  <g fill="url(#grad4)">
+    <rect x="80" y="200" width="60" height="220" rx="20" />
+    <rect x="160" y="160" width="68" height="260" rx="18" />
+    <rect x="260" y="120" width="72" height="300" rx="18" />
+    <rect x="360" y="180" width="64" height="240" rx="20" />
+    <rect x="440" y="140" width="80" height="280" rx="18" />
+    <rect x="540" y="200" width="72" height="220" rx="18" />
+  </g>
+  <rect x="60" y="380" width="600" height="36" rx="18" fill="rgba(236,72,153,0.25)" />
+  <circle cx="620" cy="120" r="48" fill="rgba(250,204,21,0.35)" />
+</svg>

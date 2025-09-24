@@ -1,0 +1,19 @@
+<svg width="720" height="480" viewBox="0 0 720 480" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title3 desc3">
+  <title id="title3">Mystic Forest Dream</title>
+  <desc id="desc3">Dreamy forest gradient representing cinematic landscapes.</desc>
+  <defs>
+    <linearGradient id="grad3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0EA5E9" />
+      <stop offset="50%" stop-color="#1E40AF" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+  </defs>
+  <rect width="720" height="480" rx="36" fill="url(#grad3)" />
+  <g fill="rgba(255,255,255,0.15)">
+    <path d="M120 380L200 200L280 380Z" />
+    <path d="M260 420L340 240L420 420Z" />
+    <path d="M380 380L460 220L540 380Z" />
+  </g>
+  <rect x="60" y="340" width="600" height="40" rx="18" fill="rgba(15,23,42,0.5)" />
+  <rect x="120" y="320" width="480" height="18" rx="9" fill="rgba(14,165,233,0.45)" />
+</svg>

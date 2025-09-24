@@ -1,0 +1,26 @@
+<svg width="640" height="840" viewBox="0 0 640 840" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Flavor Studios Spotlight Artwork</title>
+  <desc id="desc">Abstract illustration with gradients inspired by anime lighting.</desc>
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E3A8A" />
+      <stop offset="50%" stop-color="#9333EA" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+    <radialGradient id="radial" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.95)" />
+      <stop offset="70%" stop-color="rgba(255,255,255,0.1)" />
+      <stop offset="100%" stop-color="rgba(15,23,42,0.4)" />
+    </radialGradient>
+  </defs>
+  <rect width="640" height="840" rx="48" fill="url(#gradient)" />
+  <circle cx="180" cy="200" r="160" fill="url(#radial)" />
+  <circle cx="500" cy="360" r="220" fill="rgba(15,23,42,0.3)" />
+  <path d="M120 720L520 180" stroke="rgba(255,255,255,0.3)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M560 640L180 260" stroke="rgba(255,255,255,0.18)" stroke-width="4" stroke-linecap="round"/>
+  <g fill="rgba(255,255,255,0.08)">
+    <rect x="80" y="120" width="64" height="64" rx="12" />
+    <rect x="500" y="560" width="56" height="56" rx="12" />
+    <rect x="300" y="700" width="72" height="72" rx="16" />
+  </g>
+</svg>

@@ -11,17 +11,19 @@
       --red: #e50914;
       --chip: #2a2a2a;
       --radius-pill: 999px;
-      --space-xs: clamp(0.5rem, 1vw, 0.75rem);
-      --space-sm: clamp(0.75rem, 1.25vw, 1rem);
-      --space-md: clamp(1.25rem, 1.5vw, 1.75rem);
+      --space-2xs: clamp(0.35rem, 0.9vw, 0.6rem);
+      --space-xs: clamp(0.6rem, 1vw, 0.85rem);
+      --space-sm: clamp(0.75rem, 1.25vw, 1.15rem);
+      --space-md: clamp(1.1rem, 2vw, 1.75rem);
       --space-lg: clamp(2rem, 4vw, 4rem);
-      --logo-size: clamp(1.75rem, 4vw, 3rem);
-      --nav-size: clamp(0.875rem, 1.6vw, 1.1rem);
-      --legal-size: clamp(0.75rem, 1vw, 0.875rem);
+      --logo-size: clamp(2.25rem, 5vw, 3.5rem);
+      --nav-heading: clamp(0.9rem, 1.6vw, 1.1rem);
+      --nav-size: clamp(0.8rem, 1.4vw, 1rem);
+      --legal-size: clamp(0.7rem, 1vw, 0.85rem);
       background: var(--bg);
       color: var(--text);
       position: relative;
-      padding-top: calc(var(--space-lg) + 2.5rem);
+      padding-top: calc(var(--space-lg) + 3rem);
       padding-bottom: var(--space-lg);
       overflow: hidden;
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -33,12 +35,12 @@
       left: 50%;
       top: calc(var(--space-lg) * -1.75);
       transform: translateX(-50%);
-      width: 160%;
-      height: clamp(8rem, 22vw, 12rem);
+      width: 170%;
+      height: clamp(10rem, 28vw, 14rem);
       background: var(--bg);
-      border-bottom-left-radius: 50% 100%;
-      border-bottom-right-radius: 50% 100%;
-      box-shadow: 0 32px 80px rgba(229, 9, 20, 0.35);
+      border-bottom-left-radius: 55% 100%;
+      border-bottom-right-radius: 55% 100%;
+      box-shadow: 0 36px 90px rgba(229, 9, 20, 0.35);
       pointer-events: none;
     }
 
@@ -46,7 +48,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 50% -20%, rgba(229, 9, 20, 0.35), rgba(0, 0, 0, 0) 60%);
+      background: radial-gradient(circle at 50% -15%, rgba(229, 9, 20, 0.45), rgba(0, 0, 0, 0) 62%);
       opacity: 0.75;
       pointer-events: none;
     }
@@ -66,8 +68,9 @@
       align-self: center;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.75rem;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.85rem 2.4rem;
       border-radius: var(--radius-pill);
       background: var(--red);
       color: var(--text);
@@ -81,7 +84,8 @@
 
     .back-to-top::before {
       content: "\02C4";
-      font-size: 1.1em;
+      font-size: 1.15em;
+      line-height: 1;
     }
 
     .back-to-top:hover,
@@ -110,14 +114,14 @@
     .brand-logo {
       font-size: var(--logo-size);
       font-weight: 800;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
     }
 
     .brand-subtitle {
-      font-size: clamp(0.9rem, 1.1vw, 1rem);
+      font-size: clamp(0.95rem, 1.4vw, 1.05rem);
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.65;
       margin: 0;
     }
 
@@ -125,7 +129,7 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: var(--space-xs);
+      gap: var(--space-2xs);
       list-style: none;
       padding: 0;
       margin: var(--space-sm) 0 0;
@@ -136,7 +140,7 @@
       align-items: center;
       justify-content: center;
       min-width: 2.5rem;
-      padding: 0.5rem 0.75rem;
+      padding: 0.5rem 0.85rem;
       border-radius: var(--radius-pill);
       background: var(--chip);
       color: var(--text);
@@ -157,7 +161,7 @@
       outline-offset: 3px;
     }
 
-    .nav-cta {
+    .nav-stack {
       display: flex;
       flex-direction: column;
       gap: var(--space-md);
@@ -165,27 +169,31 @@
       text-align: center;
     }
 
-    .footer-nav {
+    .nav-groups {
+      display: grid;
+      gap: var(--space-md);
       width: 100%;
     }
 
-    .footer-nav-heading {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
+    .nav-group {
+      display: grid;
+      gap: var(--space-xs);
+    }
+
+    .nav-heading {
+      font-size: var(--nav-heading);
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin: 0;
     }
 
     .footer-nav-list {
-      display: grid;
-      gap: var(--space-xs);
       list-style: none;
-      padding: 0;
       margin: 0;
+      padding: 0;
+      display: grid;
+      gap: var(--space-2xs);
     }
 
     .footer-nav-link {
@@ -212,7 +220,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.75rem 1.75rem;
+      padding: 0.85rem 2.5rem;
       border-radius: var(--radius-pill);
       background: var(--chip);
       color: var(--text);
@@ -221,6 +229,7 @@
       text-transform: uppercase;
       text-decoration: none;
       transition: background-color 0.2s ease, opacity 0.2s ease;
+      min-width: max-content;
     }
 
     .cta-pill:hover,
@@ -243,7 +252,7 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: var(--space-xs);
+      gap: var(--space-2xs);
       list-style: none;
       padding: 0;
       margin: 0;
@@ -275,7 +284,7 @@
 
     @media (min-width: 64rem) {
       .footer-main {
-        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
         align-items: start;
       }
 
@@ -288,19 +297,25 @@
         justify-content: flex-start;
       }
 
-      .nav-cta {
-        align-items: flex-end;
-        text-align: right;
+      .nav-stack {
+        align-items: stretch;
+        text-align: left;
+        justify-content: flex-end;
+        gap: var(--space-sm);
       }
 
-      .footer-nav-list {
-        align-items: flex-end;
+      .nav-groups {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-sm);
       }
-    }
 
-    @media (max-width: 63.9375rem) {
-      .footer-main {
-        text-align: center;
+      .nav-group {
+        align-items: flex-start;
+      }
+
+      .cta-pill {
+        align-self: center;
+        margin-left: auto;
       }
     }
   </style>
@@ -312,9 +327,9 @@
       <div class="brand-block">
         <div class="brand-logo" aria-label="Flavor Studios logo">Flavor Studios</div>
         <p class="brand-subtitle">
-          Crafting stories with soul, one frame at a time. Flavor Studios is a global animation studio dedicated to
-          creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth, we aim
-          to inspire, heal, and connect audiences worldwide.
+          Crafting stories with soul, one frame at a time. Flavor Studios is a global animation studio dedicated to creating
+          meaningful 3D animations and original anime. Through powerful storytelling and emotional depth, we aim to inspire,
+          heal, and connect audiences worldwide.
         </p>
         <ul class="social-list" aria-label="Social media">
           <li><a class="social-link" href="https://www.youtube.com/@flavorstudios">YouTube</a></li>
@@ -327,19 +342,37 @@
           <li><a class="social-link" href="https://www.reddit.com/r/flavorstudios/">Reddit</a></li>
         </ul>
       </div>
-      <div class="nav-cta">
-        <nav class="footer-nav" aria-label="Footer primary">
-          <h2 class="footer-nav-heading">Footer navigation</h2>
-          <ul class="footer-nav-list">
-            <li><a class="footer-nav-link" href="/">Home</a></li>
-            <li><a class="footer-nav-link" href="/career">Career</a></li>
-            <li><a class="footer-nav-link" href="/contact">Contact</a></li>
-            <li><a class="footer-nav-link" href="/blog">Blog</a></li>
-            <li><a class="footer-nav-link" href="/watch">Watch</a></li>
-            <li><a class="footer-nav-link" href="/play">Play</a></li>
-            <li><a class="footer-nav-link" href="/faq">FAQ</a></li>
-            <li><a class="footer-nav-link" href="/support">Support</a></li>
-          </ul>
+      <div class="nav-stack">
+        <nav class="nav-groups" aria-label="Footer primary">
+          <section class="nav-group">
+            <h2 class="nav-heading">Company</h2>
+            <ul class="footer-nav-list">
+              <li><a class="footer-nav-link" href="/">Home</a></li>
+              <li><a class="footer-nav-link" href="/career">Career</a></li>
+              <li><a class="footer-nav-link" href="/contact">Contact</a></li>
+            </ul>
+          </section>
+          <section class="nav-group">
+            <h2 class="nav-heading">Discover</h2>
+            <ul class="footer-nav-list">
+              <li><a class="footer-nav-link" href="/blog">Blog</a></li>
+              <li><a class="footer-nav-link" href="/watch">Watch</a></li>
+              <li><a class="footer-nav-link" href="/play">Play</a></li>
+              <li><a class="footer-nav-link" href="/faq">FAQ</a></li>
+              <li><a class="footer-nav-link" href="/support">Support</a></li>
+            </ul>
+          </section>
+          <section class="nav-group">
+            <h2 class="nav-heading">Legal</h2>
+            <ul class="footer-nav-list">
+              <li><a class="footer-nav-link" href="/privacy-policy">Privacy Policy</a></li>
+              <li><a class="footer-nav-link" href="/terms-of-service">Terms of Service</a></li>
+              <li><a class="footer-nav-link" href="/dmca">DMCA</a></li>
+              <li><a class="footer-nav-link" href="/cookie-policy">Cookie Policy</a></li>
+              <li><a class="footer-nav-link" href="/disclaimer">Disclaimer</a></li>
+              <li><a class="footer-nav-link" href="/media-usage-policy" aria-label="Usage Policy">Usage Policy</a></li>
+            </ul>
+          </section>
         </nav>
         <a class="cta-pill" href="/signin">Sign In</a>
       </div>

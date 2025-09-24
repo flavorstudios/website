@@ -1,23 +1,22 @@
-import Link from "next/link"
+"use client"
 
-import { Youtube, Facebook, Instagram, Twitter, MessageCircle, Send, Users } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { useCallback } from "react"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
 
   const socialLinks = [
-    { name: "YouTube", href: "https://www.youtube.com/@flavorstudios", icon: Youtube },
-    { name: "Facebook", href: "https://www.facebook.com/flavourstudios", icon: Facebook },
-    { name: "Instagram", href: "https://www.instagram.com/flavorstudios", icon: Instagram },
-    { name: "Twitter", href: "https://twitter.com/flavor_studios", icon: Twitter },
-    { name: "Discord", href: "https://discord.com/channels/@flavorstudios", icon: MessageCircle },
-    { name: "Telegram", href: "https://t.me/flavorstudios", icon: Send },
-    { name: "Threads", href: "https://www.threads.net/@flavorstudios", icon: MessageCircle },
-    { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/", icon: Users },
+    { name: "YouTube", href: "https://www.youtube.com/@flavorstudios" },
+    { name: "Facebook", href: "https://www.facebook.com/flavourstudios" },
+    { name: "Instagram", href: "https://www.instagram.com/flavorstudios" },
+    { name: "Twitter", href: "https://twitter.com/flavor_studios" },
+    { name: "Discord", href: "https://discord.com/channels/@flavorstudios" },
+    { name: "Telegram", href: "https://t.me/flavorstudios" },
+    { name: "Threads", href: "https://www.threads.net/@flavorstudios" },
+    { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/" },
   ]
 
-  // UPDATED: Changed first link to Home, and Studio -> Company below
   const companyLinks = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
@@ -42,82 +41,161 @@ export function Footer() {
     { name: "Usage Policy", href: "/media-usage-policy", ariaLabel: "Usage Policy" },
   ]
 
+  const legalRowLinks = [
+    { name: "Home", href: "/" },
+    { name: "Privacy Policy", href: "/privacy-policy" },
+    { name: "Terms of Service", href: "/terms-of-service" },
+    { name: "Cookie Policy", href: "/cookie-policy" },
+    { name: "DMCA", href: "/dmca" },
+    { name: "Disclaimer", href: "/disclaimer" },
+    { name: "Usage Policy", href: "/media-usage-policy", ariaLabel: "Usage Policy" },
+  ]
+
+  const handleBackToTop = useCallback(() => {
+    const target = document.getElementById("top")
+
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth" })
+      return
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }, [])
+
   return (
-    <footer className="bg-black text-white">
-      <div className="container mx-auto max-w-7xl px-4 py-10 md:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-6 md:gap-8 lg:gap-10">
-          {/* Brand Section - Takes more space */}
-          <div className="space-y-5 lg:pr-8">
-            <Link href="/" className="flex items-center space-x-2">
-              <span className="font-bold text-xl">Flavor Studios</span>
-            </Link>
-            <p className="text-white text-sm leading-relaxed">
-              Crafting stories with soul, one frame at a time. Flavor Studios is a global animation studio dedicated to
-              creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth,
-              we aim to inspire, heal, and connect audiences worldwide.
-            </p>
-            <div className="flex flex-wrap gap-2 pt-2">
-              {socialLinks.map((social) => (
-                <Button key={social.name} variant="ghost" size="icon" asChild className="hover:bg-blue-600 h-8 w-8">
-                  <Link href={social.href} target="_blank" rel="noopener noreferrer">
-                    <social.icon className="h-4 w-4 text-white" />
-                    <span className="sr-only">{social.name}</span>
-                  </Link>
-                </Button>
-              ))}
+    <footer
+      role="contentinfo"
+      aria-label="Site footer"
+      className="relative overflow-hidden bg-black text-white"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 -top-60 h-[14rem] w-[170%] -translate-x-1/2"
+        style={{
+          borderBottomLeftRadius: "55% 100%",
+          borderBottomRightRadius: "55% 100%",
+          backgroundColor: "#000",
+          boxShadow: "0 36px 90px rgba(229, 9, 20, 0.35)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: "radial-gradient(circle at 50% -15%, rgba(229, 9, 20, 0.45), rgba(0, 0, 0, 0) 62%)",
+          opacity: 0.75,
+        }}
+      />
+      <div className="relative mx-auto flex w-full max-w-[1200px] flex-col gap-16 px-6 pb-16 pt-32 md:px-10 lg:px-12">
+        <button
+          type="button"
+          onClick={handleBackToTop}
+          className="mx-auto inline-flex items-center gap-1.5 rounded-full bg-[#e50914] px-10 py-3 text-sm font-semibold uppercase tracking-[0.2em] transition duration-200 hover:-translate-y-0.5 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+          aria-label="Back to top"
+        >
+          <span aria-hidden="true" className="text-base">
+            ˄
+          </span>
+          Back To Top
+        </button>
+        <div className="grid gap-16 lg:grid-cols-[1.2fr_1fr] lg:items-start">
+          <div className="flex flex-col items-center gap-6 text-center lg:items-start lg:text-left">
+            <div className="text-[clamp(2.25rem,5vw,3.5rem)] font-extrabold uppercase tracking-[0.2em]">
+              Flavor Studios
             </div>
-          </div>
-
-          {/* Company Links (was Studio) */}
-          <div>
-            <h3 className="font-semibold text-lg mb-4 text-white">Company</h3>
-            <ul className="space-y-3">
-              {companyLinks.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-white hover:text-gray-400 transition-colors text-sm">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Discover Links */}
-          <div>
-            <h3 className="font-semibold text-lg mb-4 text-white">Discover</h3>
-            <ul className="space-y-3">
-              {discoverLinks.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-white hover:text-gray-400 transition-colors text-sm">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h3 className="font-semibold text-lg mb-4 text-white">Legal</h3>
-            <ul className="space-y-3">
-              {legalLinks.map((link) => (
-                <li key={link.name}>
+            <p className="max-w-2xl text-[clamp(0.95rem,1.4vw,1.05rem)] leading-relaxed text-[#9ca3af]">
+              creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth, we
+              aim to inspire, heal, and connect audiences worldwide.
+            </p>
+            <ul className="flex flex-wrap items-center justify-center gap-2 lg:justify-start" aria-label="Social media">
+              {socialLinks.map((social) => (
+                <li key={social.name}>
                   <Link
-                    href={link.href}
-                    className="text-white hover:text-gray-400 transition-colors text-sm"
-                    aria-label={link.ariaLabel}
+                    href={social.href}
+                    className="inline-flex min-w-[2.75rem] items-center justify-center rounded-full bg-[#2a2a2a] px-3 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white transition-opacity duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    {link.name}
+                    {social.name}
                   </Link>
                 </li>
               ))}
             </ul>
+          </div>
+          <div className="flex flex-col items-center gap-10 text-center lg:items-stretch lg:text-left">
+            <nav className="grid w-full gap-8 lg:grid-cols-3" aria-label="Footer primary">
+              <section className="grid gap-4">
+                <h2 className="text-[clamp(0.9rem,1.6vw,1.1rem)] font-bold uppercase tracking-[0.18em]">Company</h2>
+                <ul className="grid gap-3">
+                  {companyLinks.map((link) => (
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
+                        className="text-[clamp(0.8rem,1.4vw,1rem)] font-semibold uppercase tracking-[0.22em] text-white transition-opacity duration-200 hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+              <section className="grid gap-4">
+                <h2 className="text-[clamp(0.9rem,1.6vw,1.1rem)] font-bold uppercase tracking-[0.18em]">Discover</h2>
+                <ul className="grid gap-3">
+                  {discoverLinks.map((link) => (
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
+                        className="text-[clamp(0.8rem,1.4vw,1rem)] font-semibold uppercase tracking-[0.22em] text-white transition-opacity duration-200 hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+              <section className="grid gap-4">
+                <h2 className="text-[clamp(0.9rem,1.6vw,1.1rem)] font-bold uppercase tracking-[0.18em]">Legal</h2>
+                <ul className="grid gap-3">
+                  {legalLinks.map((link) => (
+                    <li key={link.name}>
+                      <Link
+                        href={link.href}
+                        aria-label={link.ariaLabel}
+                        className="text-[clamp(0.8rem,1.4vw,1rem)] font-semibold uppercase tracking-[0.22em] text-white transition-opacity duration-200 hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                      >
+                        {link.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </nav>
+            <Link
+              href="/signin"
+              className="inline-flex items-center justify-center rounded-full bg-[#2a2a2a] px-10 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition-opacity duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+            >
+              Sign In
+            </Link>
           </div>
         </div>
 
-        <div className="border-t border-white mt-8 pt-6 text-center space-y-2">
-          <p className="text-white text-sm">© {currentYear} Flavor Studios. All rights reserved.</p>
-          <p className="text-white text-xs">Built with Passion. Powered by Dreams.</p>
+        <div className="grid gap-4 text-center">
+          <ul className="flex flex-wrap items-center justify-center gap-3 text-[clamp(0.7rem,1vw,0.85rem)] text-[#9ca3af]" aria-label="Legal">
+            {legalRowLinks.map((link) => (
+              <li key={link.name}>
+                <Link
+                  href={link.href}
+                  aria-label={link.ariaLabel}
+                  className="transition-opacity duration-200 hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-white"
+                >
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <p className="text-[clamp(0.7rem,1vw,0.85rem)] text-[#9ca3af]">© {currentYear} Flavor Studios. All rights reserved.</p>
+          <p className="text-[clamp(0.7rem,1vw,0.85rem)] text-[#9ca3af]">Built with Passion. Powered by Dreams.</p>
         </div>
       </div>
     </footer>

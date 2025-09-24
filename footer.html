@@ -30,23 +30,24 @@
     footer[aria-label="Site footer"]::before {
       content: "";
       position: absolute;
-      inset: 0;
-      top: -70%;
-      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.16), transparent 60%);
-      transform: scaleY(0.45);
+      left: 50%;
+      top: calc(var(--space-lg) * -1.75);
+      transform: translateX(-50%);
+      width: 160%;
+      height: clamp(8rem, 22vw, 12rem);
+      background: var(--bg);
+      border-bottom-left-radius: 50% 100%;
+      border-bottom-right-radius: 50% 100%;
+      box-shadow: 0 32px 80px rgba(229, 9, 20, 0.35);
       pointer-events: none;
     }
 
     footer[aria-label="Site footer"]::after {
       content: "";
       position: absolute;
-      left: 50%;
-      top: 0;
-      transform: translate(-50%, -55%);
-      width: 170%;
-      height: clamp(6rem, 18vw, 12rem);
-      background: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 35%, rgba(0, 0, 0, 0) 65%);
-      clip-path: ellipse(75% 55% at 50% 100%);
+      inset: 0;
+      background: radial-gradient(circle at 50% -20%, rgba(229, 9, 20, 0.35), rgba(0, 0, 0, 0) 60%);
+      opacity: 0.75;
       pointer-events: none;
     }
 
@@ -66,7 +67,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
+      padding: 0.75rem 1.75rem;
       border-radius: var(--radius-pill);
       background: var(--red);
       color: var(--text);
@@ -114,9 +115,10 @@
     }
 
     .brand-subtitle {
-      font-size: clamp(0.875rem, 1.1vw, 1rem);
+      font-size: clamp(0.9rem, 1.1vw, 1rem);
       color: var(--muted);
       line-height: 1.6;
+      margin: 0;
     }
 
     .social-list {
@@ -155,8 +157,16 @@
       outline-offset: 3px;
     }
 
-    .footer-nav {
+    .nav-cta {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      align-items: center;
       text-align: center;
+    }
+
+    .footer-nav {
+      width: 100%;
     }
 
     .footer-nav-heading {
@@ -196,11 +206,6 @@
     .footer-nav-link:focus-visible {
       outline: 2px solid #fff;
       outline-offset: 4px;
-    }
-
-    .cta-wrapper {
-      display: flex;
-      justify-content: center;
     }
 
     .cta-pill {
@@ -270,7 +275,7 @@
 
     @media (min-width: 64rem) {
       .footer-main {
-        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr) auto;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
         align-items: start;
       }
 
@@ -283,29 +288,19 @@
         justify-content: flex-start;
       }
 
-      .footer-nav {
-        text-align: left;
-        display: flex;
-        justify-content: center;
+      .nav-cta {
+        align-items: flex-end;
+        text-align: right;
       }
 
       .footer-nav-list {
-        align-items: flex-start;
-      }
-
-      .cta-wrapper {
-        align-items: flex-start;
-        justify-content: flex-end;
+        align-items: flex-end;
       }
     }
 
     @media (max-width: 63.9375rem) {
       .footer-main {
         text-align: center;
-      }
-
-      .cta-wrapper {
-        margin-top: -0.5rem;
       }
     }
   </style>
@@ -318,8 +313,8 @@
         <div class="brand-logo" aria-label="Flavor Studios logo">Flavor Studios</div>
         <p class="brand-subtitle">
           Crafting stories with soul, one frame at a time. Flavor Studios is a global animation studio dedicated to
-          creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth, we
-          aim to inspire, heal, and connect audiences worldwide.
+          creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth, we aim
+          to inspire, heal, and connect audiences worldwide.
         </p>
         <ul class="social-list" aria-label="Social media">
           <li><a class="social-link" href="https://www.youtube.com/@flavorstudios">YouTube</a></li>
@@ -332,20 +327,20 @@
           <li><a class="social-link" href="https://www.reddit.com/r/flavorstudios/">Reddit</a></li>
         </ul>
       </div>
-      <nav class="footer-nav" aria-label="Footer primary">
-        <h2 class="footer-nav-heading">Footer navigation</h2>
-        <ul class="footer-nav-list">
-          <li><a class="footer-nav-link" href="/">Home</a></li>
-          <li><a class="footer-nav-link" href="/career">Career</a></li>
-          <li><a class="footer-nav-link" href="/contact">Contact</a></li>
-          <li><a class="footer-nav-link" href="/blog">Blog</a></li>
-          <li><a class="footer-nav-link" href="/watch">Watch</a></li>
-          <li><a class="footer-nav-link" href="/play">Play</a></li>
-          <li><a class="footer-nav-link" href="/faq">FAQ</a></li>
-          <li><a class="footer-nav-link" href="/support">Support</a></li>
-        </ul>
-      </nav>
-      <div class="cta-wrapper">
+      <div class="nav-cta">
+        <nav class="footer-nav" aria-label="Footer primary">
+          <h2 class="footer-nav-heading">Footer navigation</h2>
+          <ul class="footer-nav-list">
+            <li><a class="footer-nav-link" href="/">Home</a></li>
+            <li><a class="footer-nav-link" href="/career">Career</a></li>
+            <li><a class="footer-nav-link" href="/contact">Contact</a></li>
+            <li><a class="footer-nav-link" href="/blog">Blog</a></li>
+            <li><a class="footer-nav-link" href="/watch">Watch</a></li>
+            <li><a class="footer-nav-link" href="/play">Play</a></li>
+            <li><a class="footer-nav-link" href="/faq">FAQ</a></li>
+            <li><a class="footer-nav-link" href="/support">Support</a></li>
+          </ul>
+        </nav>
         <a class="cta-pill" href="/signin">Sign In</a>
       </div>
     </div>
@@ -364,13 +359,19 @@
     </div>
   </div>
   <script>
-    (function () {
-      const trigger = document.querySelector('[data-back-to-top]');
-      if (!trigger) return;
+    ;(function () {
+      const trigger = document.querySelector('[data-back-to-top]')
+      if (!trigger) return
+
       trigger.addEventListener('click', function (event) {
-        event.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-    })();
+        event.preventDefault()
+        const target = document.getElementById('top')
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' })
+          return
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
+    })()
   </script>
 </footer>

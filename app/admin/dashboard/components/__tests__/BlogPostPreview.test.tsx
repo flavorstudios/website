@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import BlogPostPreview from "../BlogPostPreview";
 
-jest.mock("@/app/blog/[slug]/components/comment-section", () => () => null);
-jest.mock("@/app/blog/[slug]/components/social-share", () => () => null);
+jest.mock("@/app/(marketing)/blog/[slug]/components/comment-section", () => () => null);
+jest.mock("@/app/(marketing)/blog/[slug]/components/social-share", () => () => null);
 
 const basePreviewPost = {
   id: "preview-id",

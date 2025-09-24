@@ -1,0 +1,376 @@
+<footer role="contentinfo" aria-label="Site footer">
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    footer[aria-label="Site footer"] {
+      --bg: #000;
+      --text: #fff;
+      --muted: #9ca3af;
+      --red: #e50914;
+      --chip: #2a2a2a;
+      --radius-pill: 999px;
+      --space-xs: clamp(0.5rem, 1vw, 0.75rem);
+      --space-sm: clamp(0.75rem, 1.25vw, 1rem);
+      --space-md: clamp(1.25rem, 1.5vw, 1.75rem);
+      --space-lg: clamp(2rem, 4vw, 4rem);
+      --logo-size: clamp(1.75rem, 4vw, 3rem);
+      --nav-size: clamp(0.875rem, 1.6vw, 1.1rem);
+      --legal-size: clamp(0.75rem, 1vw, 0.875rem);
+      background: var(--bg);
+      color: var(--text);
+      position: relative;
+      padding-top: calc(var(--space-lg) + 2.5rem);
+      padding-bottom: var(--space-lg);
+      overflow: hidden;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    footer[aria-label="Site footer"]::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      top: -70%;
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.16), transparent 60%);
+      transform: scaleY(0.45);
+      pointer-events: none;
+    }
+
+    footer[aria-label="Site footer"]::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 0;
+      transform: translate(-50%, -55%);
+      width: 170%;
+      height: clamp(6rem, 18vw, 12rem);
+      background: radial-gradient(ellipse at top, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.08) 35%, rgba(0, 0, 0, 0) 65%);
+      clip-path: ellipse(75% 55% at 50% 100%);
+      pointer-events: none;
+    }
+
+    .footer-inner {
+      position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-inline: clamp(1rem, 4vw, 3rem);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      z-index: 1;
+    }
+
+    .back-to-top {
+      align-self: center;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--radius-pill);
+      background: var(--red);
+      color: var(--text);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+
+    .back-to-top::before {
+      content: "\02C4";
+      font-size: 1.1em;
+    }
+
+    .back-to-top:hover,
+    .back-to-top:focus-visible {
+      opacity: 0.85;
+      transform: translateY(-2px);
+    }
+
+    .back-to-top:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 4px;
+    }
+
+    .footer-main {
+      display: grid;
+      gap: var(--space-lg);
+    }
+
+    .brand-block {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      text-align: center;
+    }
+
+    .brand-logo {
+      font-size: var(--logo-size);
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .brand-subtitle {
+      font-size: clamp(0.875rem, 1.1vw, 1rem);
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .social-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--space-xs);
+      list-style: none;
+      padding: 0;
+      margin: var(--space-sm) 0 0;
+    }
+
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.5rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius-pill);
+      background: var(--chip);
+      color: var(--text);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background-color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .social-link:hover,
+    .social-link:focus-visible {
+      opacity: 0.85;
+    }
+
+    .social-link:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+    }
+
+    .footer-nav {
+      text-align: center;
+    }
+
+    .footer-nav-heading {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    .footer-nav-list {
+      display: grid;
+      gap: var(--space-xs);
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .footer-nav-link {
+      font-size: var(--nav-size);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text);
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .footer-nav-link:hover,
+    .footer-nav-link:focus-visible {
+      opacity: 0.75;
+    }
+
+    .footer-nav-link:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 4px;
+    }
+
+    .cta-wrapper {
+      display: flex;
+      justify-content: center;
+    }
+
+    .cta-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.75rem;
+      border-radius: var(--radius-pill);
+      background: var(--chip);
+      color: var(--text);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background-color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .cta-pill:hover,
+    .cta-pill:focus-visible {
+      opacity: 0.85;
+    }
+
+    .cta-pill:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 4px;
+    }
+
+    .footer-bottom {
+      display: grid;
+      gap: var(--space-sm);
+      text-align: center;
+    }
+
+    .legal-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--space-xs);
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      font-size: var(--legal-size);
+    }
+
+    .legal-link {
+      color: var(--muted);
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .legal-link:hover,
+    .legal-link:focus-visible {
+      opacity: 0.75;
+    }
+
+    .legal-link:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+    }
+
+    .footer-copy,
+    .footer-note {
+      font-size: var(--legal-size);
+      color: var(--muted);
+      margin: 0;
+    }
+
+    @media (min-width: 64rem) {
+      .footer-main {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr) auto;
+        align-items: start;
+      }
+
+      .brand-block {
+        text-align: left;
+        align-items: flex-start;
+      }
+
+      .social-list {
+        justify-content: flex-start;
+      }
+
+      .footer-nav {
+        text-align: left;
+        display: flex;
+        justify-content: center;
+      }
+
+      .footer-nav-list {
+        align-items: flex-start;
+      }
+
+      .cta-wrapper {
+        align-items: flex-start;
+        justify-content: flex-end;
+      }
+    }
+
+    @media (max-width: 63.9375rem) {
+      .footer-main {
+        text-align: center;
+      }
+
+      .cta-wrapper {
+        margin-top: -0.5rem;
+      }
+    }
+  </style>
+  <div class="footer-inner">
+    <button type="button" class="back-to-top" data-back-to-top aria-label="Back to top">
+      Back To Top
+    </button>
+    <div class="footer-main">
+      <div class="brand-block">
+        <div class="brand-logo" aria-label="Flavor Studios logo">Flavor Studios</div>
+        <p class="brand-subtitle">
+          Crafting stories with soul, one frame at a time. Flavor Studios is a global animation studio dedicated to
+          creating meaningful 3D animations and original anime. Through powerful storytelling and emotional depth, we
+          aim to inspire, heal, and connect audiences worldwide.
+        </p>
+        <ul class="social-list" aria-label="Social media">
+          <li><a class="social-link" href="https://www.youtube.com/@flavorstudios">YouTube</a></li>
+          <li><a class="social-link" href="https://www.facebook.com/flavourstudios">Facebook</a></li>
+          <li><a class="social-link" href="https://www.instagram.com/flavorstudios">Instagram</a></li>
+          <li><a class="social-link" href="https://twitter.com/flavor_studios">Twitter</a></li>
+          <li><a class="social-link" href="https://discord.com/channels/@flavorstudios">Discord</a></li>
+          <li><a class="social-link" href="https://t.me/flavorstudios">Telegram</a></li>
+          <li><a class="social-link" href="https://www.threads.net/@flavorstudios">Threads</a></li>
+          <li><a class="social-link" href="https://www.reddit.com/r/flavorstudios/">Reddit</a></li>
+        </ul>
+      </div>
+      <nav class="footer-nav" aria-label="Footer primary">
+        <h2 class="footer-nav-heading">Footer navigation</h2>
+        <ul class="footer-nav-list">
+          <li><a class="footer-nav-link" href="/">Home</a></li>
+          <li><a class="footer-nav-link" href="/career">Career</a></li>
+          <li><a class="footer-nav-link" href="/contact">Contact</a></li>
+          <li><a class="footer-nav-link" href="/blog">Blog</a></li>
+          <li><a class="footer-nav-link" href="/watch">Watch</a></li>
+          <li><a class="footer-nav-link" href="/play">Play</a></li>
+          <li><a class="footer-nav-link" href="/faq">FAQ</a></li>
+          <li><a class="footer-nav-link" href="/support">Support</a></li>
+        </ul>
+      </nav>
+      <div class="cta-wrapper">
+        <a class="cta-pill" href="/signin">Sign In</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <ul class="legal-links">
+        <li><a class="legal-link" href="/">Home</a></li>
+        <li><a class="legal-link" href="/privacy-policy">Privacy Policy</a></li>
+        <li><a class="legal-link" href="/terms-of-service">Terms of Service</a></li>
+        <li><a class="legal-link" href="/dmca">DMCA</a></li>
+        <li><a class="legal-link" href="/cookie-policy">Cookie Policy</a></li>
+        <li><a class="legal-link" href="/disclaimer">Disclaimer</a></li>
+        <li><a class="legal-link" href="/media-usage-policy" aria-label="Usage Policy">Usage Policy</a></li>
+      </ul>
+      <p class="footer-copy">© 2024 Flavor Studios. All rights reserved.</p>
+      <p class="footer-note">Built with Passion. Powered by Dreams.</p>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const trigger = document.querySelector('[data-back-to-top]');
+      if (!trigger) return;
+      trigger.addEventListener('click', function (event) {
+        event.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    })();
+  </script>
+</footer>

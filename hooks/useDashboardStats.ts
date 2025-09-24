@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { HttpError } from '@/lib/http';
 
@@ -24,6 +25,13 @@ const etags: Record<string, string | undefined> = {};
 
 export function useDashboardStats(live = false, enabled = true, range = '12mo') {
   const queryClient = useQueryClient();
+  const lastRangeRef = useRef(range);
+
+  if (lastRangeRef.current !== range) {
+    delete etags[range];
+    lastRangeRef.current = range;
+  }
+
   return useQuery<DashboardStats>({
     queryKey: ['dashboard', range],
     queryFn: async () => {
@@ -46,7 +54,8 @@ export function useDashboardStats(live = false, enabled = true, range = '12mo') 
     staleTime: 60_000,
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
-    refetchInterval: live ? 15_000 : 60_000,
+    refetchOnMount: false,
+    refetchInterval: live ? 15_000 : undefined,
     refetchIntervalInBackground: false,
     enabled,
   });

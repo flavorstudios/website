@@ -22,7 +22,7 @@ describe("UserMenu", () => {
     expect(screen.getByText("User Roles")).toBeInTheDocument()
     expect(screen.getByText("Activity Log")).toBeInTheDocument()
     expect(screen.getByText("Switch Account")).toBeInTheDocument()
-    expect(screen.getByText("Sign out")).toBeInTheDocument()
+    expect(screen.getByText("Log out")).toBeInTheDocument()
   })
 
   it("navigates to profile settings", async () => {

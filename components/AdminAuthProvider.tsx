@@ -1,5 +1,11 @@
 "use client"
-import React, { createContext, useContext, useEffect, useState } from "react"
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { onAuthStateChanged, signOut, User } from "firebase/auth"
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
@@ -12,6 +18,8 @@ interface AdminAuthContextType {
   loading: boolean
   error: string | null
   signOutAdmin: () => Promise<void>
+  testEmailVerified: boolean | null
+  setTestEmailVerified: (value: boolean | null) => void
 }
 
 // ---- Create Context ----
@@ -22,12 +30,60 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [testEmailVerified, setTestEmailVerifiedState] = useState<
+    boolean | null
+  >(() => {
+    if (typeof window === "undefined") {
+      return null
+    }
+    const stored = window.localStorage.getItem("admin-test-email-verified")
+    if (stored === null) {
+      return null
+    }
+    return stored === "true"
+  })
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
   const router = useRouter()
   const pathname = usePathname()
   const requiresVerification =
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true"
   const testMode = clientEnv.TEST_MODE === "true"
+
+  const persistTestEmailVerified = useCallback(
+    (value: boolean | null) => {
+      if (typeof window !== "undefined") {
+        if (value === null) {
+          window.localStorage.removeItem("admin-test-email-verified")
+        } else {
+          window.localStorage.setItem(
+            "admin-test-email-verified",
+            value ? "true" : "false"
+          )
+        }
+      }
+      setTestEmailVerifiedState(value)
+    },
+    []
+  )
+
+  useEffect(() => {
+    if (!testMode || typeof window === "undefined") {
+      return
+    }
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key !== "admin-test-email-verified") {
+        return
+      }
+      const nextValue = event.newValue === null ? null : event.newValue === "true"
+      setTestEmailVerifiedState(nextValue)
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+    }
+  }, [testMode])
 
   useEffect(() => {
     // Guard: If Firebase config error, do not register listener
@@ -78,12 +134,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       const auth = getFirebaseAuth()
       await signOut(auth)
       setUser(null)
+      persistTestEmailVerified(null)
       // Call backend to clear the admin-session cookie server-side
       await fetch("/api/admin/logout", { method: "POST" })
     } catch (err: unknown) {
-      setError("Failed to sign out. Please try again.")
+      setError("Failed to log out. Please try again.")
       if (clientEnv.NODE_ENV !== "production") {
-        console.error("[AdminAuthProvider] Sign out error:", err)
+        console.error("[AdminAuthProvider] Log out error:", err)
       }
     } finally {
       setLoading(false)
@@ -91,14 +148,15 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    if (!requiresVerification || loading) {
+    if (!requiresVerification) {
+      return
+    }
+
+    if (!testMode && loading) {
       return
     }
     const currentPath = pathname || ""
-    const testVerified =
-      testMode && typeof window !== "undefined"
-        ? window.localStorage.getItem("admin-test-email-verified") === "true"
-        : undefined
+    const testVerified = testMode ? testEmailVerified ?? false : undefined
     const isVerified = (testVerified ?? user?.emailVerified) ?? false
     const hasSession = testMode ? true : !!user
 
@@ -109,11 +167,28 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     } else if (hasSession && isVerified && currentPath.startsWith("/admin/verify-email")) {
       router.replace("/admin/dashboard")
     }
-  }, [requiresVerification, user, loading, pathname, router, testMode])
+  }, [
+    requiresVerification,
+    user,
+    loading,
+    pathname,
+    router,
+    testMode,
+    testEmailVerified,
+  ])
 
 
   return (
-    <AdminAuthContext.Provider value={{ user, loading, error, signOutAdmin }}>
+    <AdminAuthContext.Provider
+      value={{
+        user,
+        loading,
+        error,
+        signOutAdmin,
+        testEmailVerified,
+        setTestEmailVerified: persistTestEmailVerified,
+      }}
+    >
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription className="text-red-700 text-sm">

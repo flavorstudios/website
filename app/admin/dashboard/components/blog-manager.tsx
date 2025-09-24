@@ -347,7 +347,7 @@ export default function BlogManager() {
 
   const loading = postsLoading || categoriesLoading;
   const postsRequestFailed = Boolean(postsError);
-  const displayError = postsError || categoriesError ? "Failed to load blog posts." : null;
+  const displayError = postsError ? "Failed to load blog posts." : null;
 
   const hasActiveFilters =
     Boolean(search || author || from || to) || category !== "all" || status !== "all";
@@ -552,7 +552,7 @@ export default function BlogManager() {
     return (
       <div>
         <AdminPageHeader
-          title="Blog Posts"
+          title="Blog Management"
           subtitle="Create, edit and publish blog posts for Flavor Studios"
         />
         <div className="mt-4">
@@ -581,7 +581,7 @@ export default function BlogManager() {
       {/* Header with right-aligned action buttons */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <AdminPageHeader
-          title="Blog Posts"
+          title="Blog Management"
           subtitle="Create, edit and publish blog posts for Flavor Studios"
         />
         <div className="flex gap-2">

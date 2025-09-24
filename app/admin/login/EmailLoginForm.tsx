@@ -203,7 +203,7 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
         className="w-full"
       >
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-        {loading ? "Signing in…" : "Sign in"}
+        {loading ? "Logging in…" : "Login"}
       </Button>
     </form>
   )

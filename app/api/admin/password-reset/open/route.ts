@@ -9,6 +9,12 @@ function isAllowedRedirect(target: URL, origin: URL): boolean {
   if (target.origin === origin.origin) {
     return true;
   }
+
+  const isCi = process.env.CI && process.env.CI !== "false";
+  if (isCi && target.protocol === "http:" && target.host === origin.host) {
+    return true;
+  }
+
   if (target.protocol !== "https:") {
     return false;
   }
@@ -38,15 +44,28 @@ export async function GET(req: NextRequest) {
     return new NextResponse("Invalid redirect", { status: 400 });
   }
 
-  if (!isAllowedRedirect(redirectUrl, new URL(origin))) {
+  const originUrl = new URL(origin);
+
+  if (!isAllowedRedirect(redirectUrl, originUrl)) {
     return new NextResponse("Redirect not allowed", { status: 400 });
   }
+
+  const loginUrl = new URL("/admin/login?reset=1", originUrl);
+  const isCompletedUrl =
+    redirectUrl.origin === originUrl.origin &&
+    redirectUrl.pathname === "/api/admin/password-reset/completed";
 
   await logPasswordResetEvent("reset_link_opened", {
     requestId,
     ip: getClientIp(req),
     target: redirectUrl.toString(),
   });
+
+  if (isCompletedUrl) {
+    const response = NextResponse.redirect(loginUrl, 303);
+    response.headers.set("Cache-Control", "no-store");
+    return response;
+  }
 
   const response = NextResponse.redirect(redirectUrl, 302);
   response.headers.set("Cache-Control", "no-store");

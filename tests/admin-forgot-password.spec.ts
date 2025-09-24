@@ -22,7 +22,17 @@ test.describe('Admin password reset', () => {
     const body = await response.json();
     expect(body.emailLink).toBeTruthy();
 
-    await page.goto(body.emailLink);
+    expect(new URL(body.emailLink).protocol).toBe('http:');
+
+    const [openResponse] = await Promise.all([
+      page.waitForResponse((res) =>
+        res.url().includes('/api/admin/password-reset/open') && res.request().method() === 'GET',
+      ),
+      page.goto(body.emailLink),
+    ]);
+
+    expect(openResponse.status()).toBe(303);
+    expect(openResponse.headers()['location']).toContain('/admin/login?reset=1');
 
     await expect(page).toHaveURL(/\/admin\/login/);
     await expect(page.getByText('Your password has been updated. Please sign in.')).toBeVisible();

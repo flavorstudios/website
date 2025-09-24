@@ -35,8 +35,8 @@ test('media pagination loads additional rows', async ({ page }) => {
           media: [
             {
               id: 'media-1',
-              url: '/media-1.png',
-              filename: 'media-1.png',
+              url: '/placeholder.png',
+              filename: 'placeholder.png',
               name: 'First Media Item',
               alt: 'First Media Item',
               mime: 'image/png',
@@ -59,8 +59,8 @@ test('media pagination loads additional rows', async ({ page }) => {
         media: [
           {
             id: 'media-2',
-            url: '/media-2.png',
-            filename: 'media-2.png',
+            url: '/placeholder.png',
+            filename: 'placeholder.png',
             name: 'Second Media Item',
             alt: 'Second Media Item',
             mime: 'image/png',

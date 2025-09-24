@@ -2,6 +2,12 @@ const https = require('node:https');
 const { EventEmitter } = require('node:events');
 const { Buffer } = require('node:buffer');
 
+// Ensure CommonJS helpers remain available when the Next.js build executes ESM bundles.
+// This prevents ReferenceError: require is not defined when Next evaluates compiled files.
+if (typeof globalThis.require !== 'function') {
+  globalThis.require = require;
+}
+
 const originalFetch = global.fetch;
 const originalHttpsRequest = https.request.bind(https);
 const originalHttpsGet = https.get.bind(https);

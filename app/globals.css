@@ -108,6 +108,8 @@ samp {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   box-shadow: 0 10px 25px -15px rgba(15, 23, 42, 0.6);
+  visibility: hidden;
+  transform: translateY(-200%);
 }
 
 .skip-link:not(:focus):not(:focus-visible) {
@@ -121,6 +123,8 @@ samp {
   border: 0;
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
+  transform: translateY(-200%);
 }
 
 .skip-link:focus,
@@ -130,6 +134,7 @@ samp {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+  transform: translateY(0);
 }
 
 /* Admin Panel Specific Styles */

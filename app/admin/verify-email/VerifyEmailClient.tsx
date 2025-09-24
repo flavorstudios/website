@@ -7,6 +7,7 @@ import { Loader2, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { clientEnv } from "@/env.client";
+import { useAdminAuth } from "@/components/AdminAuthProvider";
 
 type StatusMessage = {
   tone: "neutral" | "success" | "error";
@@ -18,6 +19,7 @@ export default function VerifyEmailClient() {
   const [status, setStatus] = useState<StatusMessage | null>(null);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const { testEmailVerified, setTestEmailVerified } = useAdminAuth();
 
   const requireVerification =
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
@@ -25,9 +27,7 @@ export default function VerifyEmailClient() {
 
   const refreshUser = useCallback(async () => {
     if (testMode) {
-      const verified =
-        typeof window !== "undefined" &&
-        window.localStorage.getItem("admin-test-email-verified") === "true";
+      const verified = testEmailVerified ?? false;
       if (verified) {
         setStatus({
           tone: "success",
@@ -76,7 +76,7 @@ export default function VerifyEmailClient() {
     } finally {
       setLoading(false);
     }
-  }, [requireVerification, router, testMode]);
+  }, [requireVerification, router, testMode, testEmailVerified]);
 
   useEffect(() => {
     setLoading(true);
@@ -126,9 +126,7 @@ export default function VerifyEmailClient() {
 
   const handleCheck = async () => {
     if (testMode) {
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("admin-test-email-verified", "true");
-      }
+      setTestEmailVerified(true);
       setStatus({
         tone: "success",
         message: "Test mode: verification marked complete. Redirecting…",

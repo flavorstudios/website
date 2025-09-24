@@ -45,7 +45,7 @@ async function prefetchDashboard(qc: QueryClient, cookie: string) {
   const url = `${SITE_URL}/api/admin/stats?range=12mo`;
 
   await qc.prefetchQuery({
-    queryKey: ["dashboard"],
+    queryKey: ["dashboard", "12mo"],
     queryFn: async () => {
       const res = await fetch(url, {
         cache: "no-store",

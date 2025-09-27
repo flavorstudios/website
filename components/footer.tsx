@@ -3,16 +3,22 @@
 import Link from "next/link"
 import { useCallback } from "react"
 
+type FooterLink = {
+  name: string
+  href: string
+  ariaLabel?: string
+}
+
 export function Footer() {
   const currentYear = new Date().getFullYear()
 
-  const companyLinks = [
+  const companyLinks: FooterLink[] = [
     { name: "Home", href: "/" },
     { name: "Career", href: "/career" },
     { name: "Contact", href: "/contact" },
   ]
 
-  const discoverLinks = [
+  const discoverLinks: FooterLink[] = [
     { name: "About Flavor Studios", href: "/about" },
     { name: "Watch", href: "/watch" },
     { name: "Play", href: "/play" },
@@ -21,7 +27,7 @@ export function Footer() {
     { name: "Support", href: "/support" },
   ]
 
-  const legalLinks = [
+  const legalLinks: FooterLink[] = [
     { name: "Privacy Policy", href: "/privacy-policy" },
     { name: "Terms of Service", href: "/terms-of-service" },
     { name: "Cookie Policy", href: "/cookie-policy" },
@@ -30,7 +36,7 @@ export function Footer() {
     { name: "Usage Policy", href: "/media-usage-policy", ariaLabel: "Usage Policy" },
   ]
 
-  const navGroups = [
+  const navGroups: { title: string; links: FooterLink[] }[] = [
     { title: "Company", links: companyLinks },
     { title: "Discover", links: discoverLinks },
     { title: "Legal", links: legalLinks },
@@ -47,7 +53,7 @@ export function Footer() {
     { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/" },
   ]
 
-  const footerBottomLinks = [{ name: "Home", href: "/" }, ...legalLinks]
+  const footerBottomLinks: FooterLink[] = [{ name: "Home", href: "/" }, ...legalLinks]
 
   const handleBackToTop = useCallback(() => {
     const target = document.getElementById("top")
@@ -138,7 +144,7 @@ export function Footer() {
                       <li key={link.name}>
                         <Link
                           href={link.href}
-                          aria-label={link.ariaLabel}
+                          aria-label={link.ariaLabel ?? link.name}
                           className="text-[clamp(0.8rem,1.4vw,1rem)] font-semibold uppercase tracking-[0.18em] text-white transition duration-200 hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                         >
                           {link.name}
@@ -167,7 +173,7 @@ export function Footer() {
               <li key={link.name}>
                 <Link
                   href={link.href}
-                  aria-label={link.ariaLabel}
+                  aria-label={link.ariaLabel ?? link.name}
                   className="transition duration-200 hover:opacity-75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-white"
                 >
                   {link.name}

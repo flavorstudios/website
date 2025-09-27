@@ -26,7 +26,6 @@ export function Footer() {
   ]
 
   const legalRowLinks = [
-    { name: "Home", href: "/" },
     { name: "Privacy Policy", href: "/privacy-policy" },
     { name: "Terms of Service", href: "/terms-of-service" },
     { name: "Cookie Policy", href: "/cookie-policy" },
@@ -54,11 +53,10 @@ export function Footer() {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 -top-52 h-[18rem] w-[175%] -translate-x-1/2 bg-white"
+        className="pointer-events-none absolute inset-x-0 -top-32 h-[14rem] bg-white"
         style={{
-          borderBottomLeftRadius: "58% 100%",
-          borderBottomRightRadius: "58% 100%",
-          boxShadow: "0 40px 110px rgba(0, 0, 0, 0.28)",
+          clipPath: "ellipse(88% 100% at 50% 0%)",
+          boxShadow: "0 36px 110px rgba(0,0,0,0.3)",
         }}
       />
       <div
@@ -69,11 +67,11 @@ export function Footer() {
           opacity: 0.8,
         }}
       />
-      <div className="relative z-10 mx-auto flex w-full max-w-[1100px] flex-col items-center gap-12 px-6 pb-16 pt-40 text-center md:px-10 lg:px-12">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1100px] flex-col items-center gap-9 px-6 pb-12 pt-28 text-center md:px-10 lg:px-12">
         <button
           type="button"
           onClick={handleBackToTop}
-          className="inline-flex items-center gap-2 rounded-full bg-[#e50914] px-10 py-3 text-xs font-semibold uppercase tracking-[0.38em] transition duration-200 hover:-translate-y-0.5 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+          className="inline-flex items-center gap-2 rounded-full bg-[#e50914] px-8 py-2.5 text-xs font-semibold uppercase tracking-[0.38em] transition duration-200 hover:-translate-y-0.5 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           aria-label="Back to top"
         >
           <span aria-hidden="true" className="text-base leading-none">
@@ -82,9 +80,9 @@ export function Footer() {
           Back To Top
         </button>
 
-        <div className="flex flex-col items-center gap-8">
-          <div className="flex flex-col items-center gap-3">
-            <span className="rounded-full border border-white/15 px-4 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.5em] text-white/70">
+        <div className="flex flex-col items-center gap-7">
+          <div className="flex flex-col items-center gap-2.5">
+            <span className="rounded-full border border-white/15 px-3.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.5em] text-white/70">
               Flavor Studios Presents
             </span>
             <div className="text-[clamp(3rem,7vw,4.75rem)] font-black uppercase tracking-[0.24em]">
@@ -100,12 +98,12 @@ export function Footer() {
           </div>
 
           <nav aria-label="Footer primary navigation" className="w-full max-w-[320px]">
-            <ul className="flex flex-col gap-4 text-center">
+            <ul className="flex flex-col gap-3 text-center">
               {primaryLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="block rounded-full bg-white/5 px-6 py-3 text-[clamp(0.9rem,1.9vw,1.1rem)] font-semibold uppercase tracking-[0.28em] text-white transition duration-200 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                    className="block rounded-full bg-white/5 px-5 py-2.5 text-[clamp(0.9rem,1.9vw,1.1rem)] font-semibold uppercase tracking-[0.28em] text-white transition duration-200 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                   >
                     {link.name}
                   </Link>
@@ -114,19 +112,12 @@ export function Footer() {
             </ul>
           </nav>
 
-          <Link
-            href="/signin"
-            className="inline-flex items-center justify-center rounded-full bg-white text-sm font-semibold uppercase tracking-[0.28em] text-black transition duration-200 hover:translate-y-[-2px] hover:bg-white/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-          >
-            Sign Into Flavor
-          </Link>
-
           <ul className="flex flex-wrap items-center justify-center gap-2 text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-white/80" aria-label="Social media">
             {socialLinks.map((social) => (
               <li key={social.name}>
                 <Link
                   href={social.href}
-                  className="inline-flex items-center justify-center rounded-full border border-white/15 px-3 py-2 transition duration-200 hover:border-white/40 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                  className="inline-flex items-center justify-center rounded-full bg-white px-6 py-2.5 text-sm font-semibold uppercase tracking-[0.28em] text-black transition duration-200 hover:translate-y-[-2px] hover:bg-white/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -137,8 +128,8 @@ export function Footer() {
           </ul>
         </div>
 
-        <div className="mt-12 w-full border-t border-white/10 pt-8">
-          <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[clamp(0.68rem,1vw,0.85rem)] text-white/60" aria-label="Legal">
+        <div className="mt-10 w-full border-t border-white/10 pt-6">
+          <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[clamp(0.68rem,1vw,0.85rem)] text-white/60" aria-label="Legal">
             {legalRowLinks.map((link) => (
               <li key={link.name}>
                 <Link
@@ -151,7 +142,7 @@ export function Footer() {
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-[clamp(0.68rem,1vw,0.85rem)] text-white/60">© {currentYear} Flavor Studios. All rights reserved.</p>
+          <p className="mt-3 text-[clamp(0.68rem,1vw,0.85rem)] text-white/60">© {currentYear} Flavor Studios. All rights reserved.</p>
           <p className="text-[clamp(0.68rem,1vw,0.85rem)] text-white/60">Built with passion. Powered by dreams.</p>
         </div>
       </div>

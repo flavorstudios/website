@@ -62,8 +62,8 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
           <DropdownMenuItem onSelect={() => handleNavigate("/admin/dashboard/settings")}>
             <User className="h-4 w-4 mr-2" /> Profile Settings
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => handleNavigate("/admin/dashboard/users")}>
-            <Shield className="h-4 w-4 mr-2" /> Manage Roles
+          <DropdownMenuItem onSelect={() => handleNavigate("/admin/dashboard/users")}> 
+            <Shield className="h-4 w-4 mr-2" /> User Roles
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => handleNavigate("/admin/dashboard/system")}>
             <History className="h-4 w-4 mr-2" /> Activity Log

@@ -210,11 +210,10 @@ export default function HomePage() {
         description="Every universe comes alive with animated shorts, lore galleries, and community forums to dive deeper than ever."
         background="gradient"
       >
-        <div className="-mx-4 flex gap-6 overflow-x-auto px-4 pb-4 pt-2 scroll-smooth" role="list">
+        <ul className="-mx-4 flex gap-6 overflow-x-auto px-4 pb-4 pt-2 scroll-smooth">
           {trendingWorlds.map((world) => (
+            <li key={world.id} className="shrink-0"></li>
               <article
-                key={world.id}
-                role="listitem"
                 className="group relative h-[360px] w-[280px] shrink-0 overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-900/60 text-left shadow-xl transition-transform duration-500 hover:-translate-y-3 hover:shadow-2xl sm:h-[400px] sm:w-[320px]"
               >
                 <div className="absolute inset-0">
@@ -236,8 +235,9 @@ export default function HomePage() {
                   <span className="sr-only">View details for {world.title}</span>
                 </Link>
               </article>
+              </li>
           ))}
-        </div>
+        </ul>
       </SectionBlock>
 
       <SectionBlock

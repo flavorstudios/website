@@ -25,6 +25,22 @@ export default function VerifyEmailClient() {
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
   const testMode = clientEnv.TEST_MODE === "true";
 
+  const waitForNextFrame = useCallback(
+    () =>
+      new Promise<void>((resolve) => {
+        if (typeof window === "undefined") {
+          resolve();
+          return;
+        }
+        if (typeof window.requestAnimationFrame === "function") {
+          window.requestAnimationFrame(() => resolve());
+        } else {
+          window.setTimeout(() => resolve(), 0);
+        }
+      }),
+    []
+  );
+
   const refreshUser = useCallback(async () => {
     if (testMode) {
       const verified = testEmailVerified ?? false;
@@ -33,6 +49,7 @@ export default function VerifyEmailClient() {
           tone: "success",
           message: "Email verified! Redirecting to the dashboard…",
         });
+        await waitForNextFrame();
         router.replace("/admin/dashboard");
       } else {
         setStatus({
@@ -58,6 +75,7 @@ export default function VerifyEmailClient() {
           tone: "success",
           message: "Email verified! Redirecting to the dashboard…",
         });
+        await waitForNextFrame();
         router.replace("/admin/dashboard");
         return;
       }
@@ -102,6 +120,7 @@ export default function VerifyEmailClient() {
       }
       await user.reload();
       if (user.emailVerified) {
+        await waitForNextFrame();
         router.replace("/admin/dashboard");
         return;
       }
@@ -126,11 +145,13 @@ export default function VerifyEmailClient() {
 
   const handleCheck = async () => {
     if (testMode) {
+      setLoading(true);
       setTestEmailVerified(true);
       setStatus({
         tone: "success",
         message: "Test mode: verification marked complete. Redirecting…",
       });
+      await waitForNextFrame();
       router.replace("/admin/dashboard");
       return;
     }

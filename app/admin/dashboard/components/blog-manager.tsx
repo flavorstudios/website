@@ -37,6 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -362,6 +363,12 @@ export default function BlogManager() {
     : postsData?.posts?.length ?? 0;
   const showFallbackWarning = useFallbackPosts && postsRequestFailed;
 
+  const categoryErrorMessage =
+    categoriesError instanceof Error
+      ? categoriesError.message
+      : categoriesError
+      ? "Failed to load categories."
+      : null;
   const refreshData = useCallback(async () => {
     await Promise.all([mutatePosts(), mutateCategories()]);
   }, [mutatePosts, mutateCategories]);
@@ -622,6 +629,14 @@ export default function BlogManager() {
           </div>
         </div>
       ) : null}
+
+      {categoryErrorMessage && (
+        <Alert variant="destructive" className="mb-4" role="status">
+          <AlertDescription>
+            {categoryErrorMessage || 'Failed to load categories. Filters may be limited until the feed recovers.'}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Blog management UI section */}
       <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}>

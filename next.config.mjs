@@ -8,6 +8,11 @@ const { ANALYZE } = process.env;
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: ANALYZE === 'true' });
 
+const remoteImagePatterns = imageDomains.map((hostname) => ({
+  protocol: 'https',
+  hostname,
+}));
+
 // Next.js configuration
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -16,7 +21,7 @@ const nextConfig = {
   images: {
     // Next.js image optimization is enabled.
     // For static hosting, use a CDN (e.g., Cloudflare Images) or a custom loader.
-    domains: imageDomains,
+    remotePatterns: remoteImagePatterns,
   },
 
   async headers() {

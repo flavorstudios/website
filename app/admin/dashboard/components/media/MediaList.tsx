@@ -3,6 +3,7 @@ import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
 import type { MediaDoc } from "@/types/media"
 import { File as FileIcon, Video as VideoIcon, Star, Music } from "lucide-react"
+import { ADMIN_OPEN_MEDIA_UPLOAD } from "@/lib/admin-events"
 
 interface Props {
   items: MediaDoc[]
@@ -57,6 +58,13 @@ export default function MediaList({
 
   const formatSizeKb = (size?: number) => (typeof size === "number" ? (size / 1024).toFixed(1) : "—")
 
+  const openUploader = () => {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event(ADMIN_OPEN_MEDIA_UPLOAD));
+    }
+  };
+  const hasItems = items.length > 0;
+
   return (
     <>
       {/* Cards for small screens */}
@@ -70,44 +78,52 @@ export default function MediaList({
           <span className="text-xs">Select all</span>
         </div>
 
-        {items.map((m) => (
-          <div key={m.id} className="border rounded p-3 flex gap-3 items-center">
-            <Checkbox
-              aria-label={`Select ${m.filename || m.name}`}
-              checked={selected.has(m.id)}
-              onClick={(e) => toggleSelect(m.id, e.shiftKey)}
-            />
-            <Preview m={m} />
-            {onToggleFavorite && (
+        {hasItems ? (
+          items.map((m) => (
+            <div key={m.id} className="border rounded p-3 flex gap-3 items-center">
+              <Checkbox
+                aria-label={`Select ${m.filename || m.name}`}
+                checked={selected.has(m.id)}
+                onClick={(e) => toggleSelect(m.id, e.shiftKey)}
+              />
+              <Preview m={m} />
+              {onToggleFavorite && (
+                <button
+                  type="button"
+                  className="p-1"
+                  aria-label="Toggle favorite"
+                  aria-pressed={!!m.favorite}
+                  onClick={() => onToggleFavorite(m)}
+                >
+                  <Star className={m.favorite ? "w-4 h-4 text-yellow-400 fill-yellow-400" : "w-4 h-4 text-gray-500"} />
+                </button>
+              )}
               <button
                 type="button"
-                className="p-1"
-                aria-label="Toggle favorite"
-                aria-pressed={!!m.favorite}
+                onClick={() => onRowClick(m)}
+                className="text-left flex-1 min-w-0 focus:outline-none focus:ring-2 focus:ring-primary rounded"
+                aria-label={`View details for ${m.filename || m.name}`}
                 onClick={() => onToggleFavorite(m)}
               >
-                <Star className={m.favorite ? "w-4 h-4 text-yellow-400 fill-yellow-400" : "w-4 h-4 text-gray-500"} />
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => onRowClick(m)}
-              className="text-left flex-1 min-w-0 focus:outline-none focus:ring-2 focus:ring-primary rounded"
-              aria-label={`View details for ${m.filename || m.name}`}
-            >
-              <p className="font-medium truncate text-sm">{m.filename || m.name}</p>
-              <p className="text-xs text-gray-500">{formatDate(m.createdAt)}</p>
-              {m.tags?.length ? (
-                <p className="text-xs text-gray-400 truncate">
-                  {m.tags.join(", ")}
+                <p className="font-medium truncate text-sm">{m.filename || m.name}</p>
+                <p className="text-xs text-gray-500">{formatDate(m.createdAt)}</p>
+                {m.tags?.length ? (
+                  <p className="text-xs text-gray-400 truncate">
+                    {m.tags.join(", ")}
+                  </p>
+                ) : null}
+                <p className="text-xs text-gray-400">
+                  Used in {m.attachedTo?.length ?? 0} item(s)
                 </p>
-              ) : null}
-              <p className="text-xs text-gray-400">
-                Used in {m.attachedTo?.length ?? 0} item(s)
-              </p>
-            </button>
+              </button>
+            </div>
+          ))
+        ) : (
+          <div className="flex flex-col gap-3 rounded border border-dashed border-muted-foreground/40 bg-muted/40 p-4 text-left">
+            <p className="text-sm text-muted-foreground">No media available yet. Upload your first file to get started.</p>
+            <button type="button" className="self-start text-sm font-medium text-primary underline-offset-2 hover:underline" onClick={openUploader}>Upload media</button>
           </div>
-        ))}
+        )}
       </div>
 
       {/* Table for md and up */}
@@ -132,49 +148,64 @@ export default function MediaList({
             </tr>
           </thead>
           <tbody>
-            {items.map((m) => (
-              <tr key={m.id} className="border-t">
-                <td className="p-2">
-                  <Checkbox
-                    aria-label={`Select ${m.filename || m.name}`}
-                    checked={selected.has(m.id)}
-                    onClick={(e) => toggleSelect(m.id, e.shiftKey)}
-                  />
-                </td>
-                <td className="p-2">
-                  {/* Reuse the same preview logic for consistency */}
-                  <div className="w-10 h-10">
-                    <Preview m={m} />
-                  </div>
-                </td>
-                <td className="p-2">
-                  {onToggleFavorite && (
+            {hasItems ? (
+              items.map((m) => (
+                <tr key={m.id} className="border-t">
+                  <td className="p-2">
+                    <Checkbox
+                      aria-label={`Select ${m.filename || m.name}`}
+                      checked={selected.has(m.id)}
+                      onClick={(e) => toggleSelect(m.id, e.shiftKey)}
+                    />
+                  </td>
+                  <td className="p-2">
+                    {/* Reuse the same preview logic for consistency */}
+                    <div className="w-10 h-10">
+                      <Preview m={m} />
+                    </div>
+                  </td>
+                  <td className="p-2">
+                    {onToggleFavorite && (
+                      <button
+                        type="button"
+                        className="mr-2"
+                        aria-label="Toggle favorite"
+                        aria-pressed={!!m.favorite}
+                        onClick={() => onToggleFavorite(m)}
+                      >
+                        <Star className={m.favorite ? "w-4 h-4 text-yellow-400 fill-yellow-400" : "w-4 h-4 text-gray-500"} />
+                      </button>
+                    )}
                     <button
                       type="button"
-                      className="mr-2"
-                      aria-label="Toggle favorite"
-                      aria-pressed={!!m.favorite}
-                      onClick={() => onToggleFavorite(m)}
+                     onClick={() => onRowClick(m)}
+                      className="text-left w-full focus:outline-none focus:ring-2 focus:ring-primary rounded"
+                      aria-label={`View details for ${m.filename || m.name}`}
                     >
-                      <Star className={m.favorite ? "w-4 h-4 text-yellow-400 fill-yellow-400" : "w-4 h-4 text-gray-500"} />
+                      {m.filename || m.name}
                     </button>
-                  )}
+                  </td>
+                  <td className="p-2">{(m.tags ?? []).join(", ")}</td>
+                  <td className="p-2">{m.attachedTo?.length ?? 0}</td>
+                  <td className="p-2">{m.mime || m.mimeType}</td>
+                  <td className="p-2">{formatDate(m.createdAt)}</td>
+                  <td className="p-2">{formatSizeKb(m.size)} KB</td>
+                </tr>
+              ))
+            ) : (
+              <tr className="border-t">
+                <td colSpan={8} className="p-6 text-center text-sm text-muted-foreground">
+                  No media available yet.
                   <button
                     type="button"
-                    onClick={() => onRowClick(m)}
-                    className="text-left w-full focus:outline-none focus:ring-2 focus:ring-primary rounded"
-                    aria-label={`View details for ${m.filename || m.name}`}
+                    className="ml-2 inline-flex items-center gap-1 text-primary underline-offset-2 hover:underline"
+                    onClick={openUploader}
                   >
-                    {m.filename || m.name}
+                    Upload media
                   </button>
                 </td>
-                <td className="p-2">{(m.tags ?? []).join(", ")}</td>
-                <td className="p-2">{m.attachedTo?.length ?? 0}</td>
-                <td className="p-2">{m.mime || m.mimeType}</td>
-                <td className="p-2">{formatDate(m.createdAt)}</td>
-                <td className="p-2">{formatSizeKb(m.size)} KB</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

@@ -5,13 +5,40 @@ import getClientIp from "@/lib/request-ip";
 
 export const dynamic = "force-dynamic";
 
+function normalizeHost(host: string): string {
+  if (host === "localhost") return "127.0.0.1";
+  return host;
+}
+
+function normalizeHostPort(url: URL): string {
+  const normalizedHost = normalizeHost(url.hostname);
+  const port = url.port || (url.protocol === "https:" ? "443" : url.protocol === "http:" ? "80" : "");
+  return `${normalizedHost}:${port}`;
+}
+
+function normalizeOrigin(url: URL): string {
+  const clone = new URL(url.toString());
+  clone.hostname = normalizeHost(clone.hostname);
+  if (!clone.port) {
+    clone.port = clone.protocol === "https:" ? "443" : clone.protocol === "http:" ? "80" : clone.port;
+  }
+  return clone.origin;
+}
+
 function isAllowedRedirect(target: URL, origin: URL): boolean {
-  if (target.origin === origin.origin) {
+  const normalizedTargetOrigin = normalizeOrigin(target);
+  const normalizedOrigin = normalizeOrigin(origin);
+
+  if (normalizedTargetOrigin === normalizedOrigin) {
     return true;
   }
 
   const isCi = process.env.CI && process.env.CI !== "false";
-  if (isCi && target.protocol === "http:" && target.host === origin.host) {
+  if (
+    isCi &&
+    target.protocol === "http:" &&
+    normalizeHostPort(target) === normalizeHostPort(origin)
+  ) {
     return true;
   }
 

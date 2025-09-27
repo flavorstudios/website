@@ -71,7 +71,6 @@ const GoogleIcon = () => (
 export default function AdminLoginForm() {
   const { error, setError, clearError } = useAuthError()
   const [loading, setLoading] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const [showLegacyLogin, setShowLegacyLogin] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -101,8 +100,6 @@ export default function AdminLoginForm() {
 
   // --- FIX: Always call hooks first, never after a conditional return ---
   useEffect(() => {
-    setMounted(true)
-
     if (firebaseInitError) {
       setError(
         firebaseErrorMessage ||
@@ -222,8 +219,6 @@ export default function AdminLoginForm() {
       setLoading(false)
     }
   }
-
-  if (!mounted) return null
 
   return (
     <div className="min-h-screen bg-[#e8f0fe] flex items-center justify-center px-4 py-12">

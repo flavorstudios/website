@@ -30,6 +30,10 @@ interface UserMenuProps {
 export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
   const router = useRouter()
 
+  const handleNavigate = (href: string) => {
+    router.push(href)
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -55,18 +59,18 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/settings")}>  
+          <DropdownMenuItem onSelect={() => handleNavigate("/admin/dashboard/settings")}>
             <User className="h-4 w-4 mr-2" /> Profile Settings
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => router.push("/admin/roles")}> 
-            <Shield className="h-4 w-4 mr-2" /> User Roles
+          <DropdownMenuItem onSelect={() => handleNavigate("/admin/dashboard/users")}>
+            <Shield className="h-4 w-4 mr-2" /> Manage Roles
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => router.push("/admin/activity")}> 
+          <DropdownMenuItem onSelect={() => handleNavigate("/admin/dashboard/system")}>
             <History className="h-4 w-4 mr-2" /> Activity Log
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => router.push("/admin/accounts")}>
+        <DropdownMenuItem onSelect={() => handleNavigate("/admin/login")}>
           <ArrowLeftRight className="h-4 w-4 mr-2" /> Switch Account
         </DropdownMenuItem>
         <DropdownMenuSeparator />

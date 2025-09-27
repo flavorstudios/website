@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import AdminDashboardPageClient from "../AdminDashboardPageClient";
 
 export default function BlogPage() {
-  redirect("/admin/dashboard/blog-posts");
+  return <AdminDashboardPageClient initialSection="blogs" />;
 }

@@ -16,6 +16,7 @@ import {
 
 import Toaster from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SkipLink } from "@/components/skip-link";
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -142,6 +143,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
       >
+        <SkipLink />
         <ThemeProvider>
           {/* GTM (NOSCRIPT) — only if container id is provided */}
           {gtmId && (

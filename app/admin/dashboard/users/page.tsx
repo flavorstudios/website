@@ -3,13 +3,13 @@ import { getMetadata } from "@/lib/seo-utils"
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"
 
 export const metadata = getMetadata({
-  title: `User Management – ${SITE_NAME} Admin`,
-  description: `Manage admin user roles for ${SITE_NAME}.`,
+  title: `Profile – ${SITE_NAME} Admin`,
+  description: `Manage admin profiles for ${SITE_NAME}.`,
   path: "/admin/dashboard/users",
   robots: "noindex, nofollow",
   openGraph: {
-    title: `User Management – ${SITE_NAME} Admin`,
-    description: `Manage admin user roles for ${SITE_NAME}.`,
+    title: `Profile – ${SITE_NAME} Admin`,
+    description: `Manage admin profiles for ${SITE_NAME}.`,
     url: `${SITE_URL}/admin/dashboard/users`,
     siteName: SITE_NAME,
     type: "website",
@@ -26,8 +26,8 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: SITE_BRAND_TWITTER,
     creator: SITE_BRAND_TWITTER,
-    title: `User Management – ${SITE_NAME} Admin`,
-    description: `Manage admin user roles for ${SITE_NAME}.`,
+    title: `Profile – ${SITE_NAME} Admin`,
+    description: `Manage admin profiles for ${SITE_NAME}.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
 })

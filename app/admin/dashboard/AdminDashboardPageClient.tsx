@@ -87,7 +87,7 @@ const NAV: { id: SectionId; href: string; title: string }[] = [
   { id: "comments", href: "/admin/dashboard/comments", title: "Comments" },
   { id: "applications", href: "/admin/dashboard/applications", title: "Applications" },
   { id: "inbox", href: "/admin/dashboard/inbox", title: "Inbox" },
-  { id: "users", href: "/admin/dashboard/users", title: "User Management" },
+  { id: "users", href: "/admin/dashboard/users", title: "Profile" },
   { id: "settings", href: "/admin/dashboard/settings", title: "Settings" },
   { id: "system", href: "/admin/dashboard/system", title: "System Tools" },
 ] as const;

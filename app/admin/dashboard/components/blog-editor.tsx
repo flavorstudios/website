@@ -134,6 +134,10 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const [tagInput, setTagInput] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const slugEditedRef = useRef(Boolean(initialPost?.slug?.trim()));
+  const setSlugEdited = (value: boolean) => {
+    slugEditedRef.current = value;
+  };
 
   // New: revision history + ws state
   const [revisions, setRevisions] = useState<BlogRevision[]>([]);
@@ -230,11 +234,11 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   useEffect(() => {
     if (!post.title) return;
     const autoSlug = slugify(post.title);
-    const shouldSyncSlug = !post.slug || !slugEdited;
+    const shouldSyncSlug = !post.slug || !slugEditedRef.current;
     if (shouldSyncSlug && autoSlug !== post.slug) {
       setPost((prev) => ({ ...prev, slug: autoSlug }));
     }
-    }, [post.title, post.slug, slugEdited]);
+    }, [post.title, post.slug]);
 
   // Auto-generate excerpt + derived fields (idempotent)
   useEffect(() => {
@@ -290,29 +294,39 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
-  const savePost = useCallback(async (isAutoSave = false) => {
-    // Prevent overlapping saves
-    if (saveInFlight.current) return;
-    if (!isAutoSave) setSaving(true);
-    saveInFlight.current = true;
+  const savePost = useCallback(
+    async (overrides: Partial<BlogPost> = {}, isAutoSave = false) => {
+      // Prevent overlapping saves
+      if (saveInFlight.current) return;
+      if (!isAutoSave) setSaving(true);
+      saveInFlight.current = true;
 
     try {
-      const method = post.id ? "PUT" : "POST";
-      const url = post.id ? `/api/admin/blogs/${post.id}` : "/api/admin/blogs";
-      const normalizedSlug = slugify(post.slug || post.title);
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...post,
-          slug: normalizedSlug,
-          category: post.categories?.[0] || post.category || "",
-          // send ISO strings to the server
-          publishedAt: post.status === "published" ? new Date().toISOString() : undefined,
-          scheduledFor: post.status === "scheduled" ? getScheduledDateTime()?.toISOString() : undefined,
-        }),
-        credentials: "include",
-      });
+        const mergedPost = { ...post, ...overrides } as BlogPost;
+        const method = mergedPost.id ? "PUT" : "POST";
+        const url = mergedPost.id ? `/api/admin/blogs/${mergedPost.id}` : "/api/admin/blogs";
+        const normalizedSlug = slugify(mergedPost.slug || mergedPost.title);
+        const scheduledDateTime =
+          mergedPost.status === "scheduled"
+            ? mergedPost.scheduledFor instanceof Date
+              ? mergedPost.scheduledFor
+              : mergedPost.scheduledFor
+              ? new Date(mergedPost.scheduledFor)
+              : getScheduledDateTime()
+            : undefined;
+        const response = await fetch(url, {
+          method,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...mergedPost,
+            slug: normalizedSlug,
+            category: mergedPost.categories?.[0] || mergedPost.category || "",
+            // send ISO strings to the server
+            publishedAt: mergedPost.status === "published" ? new Date().toISOString() : undefined,
+            scheduledFor: scheduledDateTime ? scheduledDateTime.toISOString() : undefined,
+          }),
+          credentials: "include",
+        });
 
       if (!response.ok) {
         let message = `Save failed: ${response.status}`;
@@ -328,7 +342,20 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       const savedPost = await response.json();
       // prevent the next post state write from marking dirty
       skipDraftRef.current = true;
-      setPost((prev) => ({ ...prev, id: savedPost.id, slug: normalizedSlug }));
+      const stateUpdates: Partial<BlogPost> = {
+        ...overrides,
+        id: savedPost.id,
+        slug: normalizedSlug,
+      };
+      if (mergedPost.status === "published") {
+        stateUpdates.status = "published";
+        stateUpdates.publishedAt = new Date();
+      }
+      if (mergedPost.status === "scheduled" && scheduledDateTime) {
+        stateUpdates.status = "scheduled";
+        stateUpdates.scheduledFor = scheduledDateTime;
+      }
+      setPost((prev) => ({ ...prev, ...stateUpdates }));
       setLastSaved(new Date());
       setIsDirty(false);
 
@@ -438,8 +465,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     }
 
     const normalizedSlug = slugify(post.slug || post.title);
-    setPost((prev) => ({ ...prev, status: "published", slug: normalizedSlug }));
-    await savePost();
+    await savePost({ status: "published", slug: normalizedSlug });
     router.push(normalizedSlug ? `/blog/${normalizedSlug}` : "/blog");
   };
 
@@ -449,8 +475,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       toast.error("Scheduled time must be in the future");
       return;
     }
-    setPost((prev) => ({ ...prev, status: "scheduled", scheduledFor: dt }));
-    await savePost();
+    await savePost({ status: "scheduled", scheduledFor: dt });
     setShowScheduler(false);
   };
 

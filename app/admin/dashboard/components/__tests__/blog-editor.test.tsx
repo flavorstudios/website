@@ -34,7 +34,11 @@ jest.mock("@/hooks/useAutosave", () => ({
   useAutosave: (...args: unknown[]) => useAutosaveMock(...args),
 }));
 
-jest.mock("../BlogPostPreview", () => () => <div data-testid="blog-post-preview" />);
+jest.mock("../BlogPostPreview", () => {
+  const MockBlogPostPreview = () => <div data-testid="blog-post-preview" />;
+  MockBlogPostPreview.displayName = "MockBlogPostPreview";
+  return MockBlogPostPreview;
+});
 
 jest.mock("../media/MediaPickerDialog", () => () => null);
 

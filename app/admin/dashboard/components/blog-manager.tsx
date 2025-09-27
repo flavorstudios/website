@@ -66,63 +66,6 @@ import useMediaQuery from "@/hooks/use-media-query";
 import { formatDate } from "@/lib/date";
 import { logClientError } from "@/lib/log-client";
 
-const FALLBACK_POSTS: BlogPost[] = [
-  {
-    id: "fallback-smooth-launch",
-    title: "Preview: Populate Your First Blog Post",
-    slug: "preview-populate-your-first-blog-post",
-    content:
-      "<p>Add your first article in the admin dashboard to replace this preview content. The interface automatically adapts across breakpoints so you can review posts on any device.</p>",
-    excerpt:
-      "A sample entry that appears when Firestore has not returned any posts yet.",
-    status: "published",
-    category: "Announcements",
-    categories: ["Announcements"],
-    tags: ["preview", "demo"],
-    featuredImage: "/placeholder.png",
-    seoTitle: "Preview: Populate Your First Blog Post",
-    seoDescription:
-      "This lightweight placeholder helps preview the mobile card layout before real content exists.",
-    author: "Content Team",
-    publishedAt: "2024-01-01T08:00:00.000Z",
-    createdAt: "2024-01-01T08:00:00.000Z",
-    updatedAt: "2024-01-01T08:00:00.000Z",
-    views: 0,
-    readTime: "3 min",
-    commentCount: 0,
-    shareCount: 0,
-    schemaType: "Article",
-    openGraphImage: "/placeholder.png",
-  },
-  {
-    id: "fallback-culture-notes",
-    title: "Preview: Editorial Workflow Tips",
-    slug: "preview-editorial-workflow-tips",
-    content:
-      "<p>Use the bulk actions to publish, archive, or delete items. Filters help you locate drafts quickly while keeping the review experience tidy.</p>",
-    excerpt: "Guidance on using the dashboard tools while content is bootstrapping.",
-    status: "draft",
-    category: "Guides",
-    categories: ["Guides"],
-    tags: ["workflow", "demo"],
-    featuredImage: "/placeholder.png",
-    featured: false,
-    seoTitle: "Preview: Editorial Workflow Tips",
-    seoDescription:
-      "Explore how to manage drafts, publishing, and previews directly inside the dashboard UI.",
-    author: "Editorial Ops",
-    publishedAt: "2024-01-08T10:30:00.000Z",
-    createdAt: "2024-01-05T10:30:00.000Z",
-    updatedAt: "2024-01-08T10:30:00.000Z",
-    views: 0,
-    readTime: "4 min",
-    commentCount: 0,
-    shareCount: 0,
-    schemaType: "Article",
-    openGraphImage: "/placeholder.png",
-  },
-];
-
 export default function BlogManager() {
   const { toast } = useToast();
   const [isRevalidating, setIsRevalidating] = useState(false);
@@ -347,21 +290,13 @@ export default function BlogManager() {
   }, [mutatePosts, mutateCategories]);
 
   const loading = postsLoading || categoriesLoading;
-  const postsRequestFailed = Boolean(postsError);
   const displayError = postsError ? "Failed to load blog posts." : null;
 
   const hasActiveFilters =
     Boolean(search || author || from || to) || category !== "all" || status !== "all";
-  const hasPostsPayload = Array.isArray(postsData?.posts) && postsData.posts.length > 0;
-  const useFallbackPosts =
-    !hasActiveFilters && (postsRequestFailed || (!displayError && !hasPostsPayload));
-  const currentPosts = useFallbackPosts ? FALLBACK_POSTS : postsData?.posts ?? [];
-  const totalPostsCount = useFallbackPosts
-    ? FALLBACK_POSTS.length
-    : typeof postsData?.total === "number"
-    ? postsData.total
-    : postsData?.posts?.length ?? 0;
-  const showFallbackWarning = useFallbackPosts && postsRequestFailed;
+  const currentPosts = postsData?.posts ?? [];
+  const totalPostsCount =
+    typeof postsData?.total === "number" ? postsData.total : postsData?.posts?.length ?? 0;
 
   const categoryErrorMessage =
     categoriesError instanceof Error
@@ -555,7 +490,7 @@ export default function BlogManager() {
     return () => window.removeEventListener("keydown", onKey);
   }, [handleRevalidateBlog, handleCreatePost]);
 
-  if (loading && !useFallbackPosts) {
+  if (loading) {
     return (
       <div>
         <AdminPageHeader
@@ -570,7 +505,7 @@ export default function BlogManager() {
   }
 
   // --- Error state (from SWR or actions) ---
-  if (displayError && !useFallbackPosts) {
+  if (displayError) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
@@ -615,20 +550,6 @@ export default function BlogManager() {
           </Button>
         </div>
       </div>
-
-      {showFallbackWarning ? (
-        <div
-          role="status"
-          className="mb-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
-          data-testid="blog-fallback-warning"
-        >
-          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-          <div>
-            <p className="font-medium">Live data is temporarily unavailable.</p>
-            <p>Preview posts are shown so you can review the layout until the feed reconnects.</p>
-          </div>
-        </div>
-      ) : null}
 
       {categoryErrorMessage && (
         <Alert variant="destructive" className="mb-4" role="status">
@@ -758,28 +679,28 @@ export default function BlogManager() {
 
         {/* Table or Empty State */}
         {currentPosts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-            <svg
-              width="56"
-              height="56"
-              viewBox="0 0 56 56"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="mb-2"
-              aria-hidden
-            >
-              <rect width="56" height="56" rx="12" fill="#F3F4F6" />
-              <path
-                d="M19 29V35C19 35.5523 19.4477 36 20 36H36C36.5523 36 37 35.5523 37 35V29"
-                stroke="#A1A1AA"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <rect x="15" y="19" width="26" height="10" rx="2" stroke="#A1A1AA" strokeWidth="2" />
-              <circle cx="28" cy="24" r="1.5" fill="#A1A1AA" />
-            </svg>
-            <span className="text-lg font-medium">No blog posts found</span>
-            <span className="text-sm mt-2">Try changing your filters or create a new post.</span>
+          <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-muted-foreground/30 bg-muted/40 py-16 text-center">
+            <AlertCircle className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
+            <div className="space-y-1">
+              <p className="text-lg font-semibold text-foreground">
+                {hasActiveFilters ? "No posts match your filters" : "No blog posts yet"}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {hasActiveFilters
+                  ? "Try adjusting or clearing your filters to see more results."
+                  : "Get started by creating your first blog post for Flavor Studios."}
+              </p>
+            </div>
+            {!hasActiveFilters ? (
+              <Button onClick={handleCreatePost} size="sm" aria-label="Create your first post">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Create your first post
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={clearFilters} aria-label="Clear filters">
+                Clear filters
+              </Button>
+            )}
           </div>
         ) : (
           <>

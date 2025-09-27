@@ -12,6 +12,7 @@ interface Props {
   toggleSelectAll: (checked: boolean) => void
   onRowClick: (item: MediaDoc) => void
   onToggleFavorite?: (item: MediaDoc) => void
+  hasAnyItems?: boolean
 }
 
 export default function MediaList({
@@ -21,6 +22,7 @@ export default function MediaList({
   toggleSelectAll,
   onRowClick,
   onToggleFavorite,
+  hasAnyItems = false,
 }: Props) {
   const allSelected = items.length > 0 && items.every((m) => selected.has(m.id))
 
@@ -54,7 +56,7 @@ export default function MediaList({
     if (!val) return "—"
     const n = typeof val === "number" || typeof val === "string" ? new Date(val) : null
     return n && !isNaN(n.getTime()) ? n.toLocaleDateString() : "—"
-    }
+  }
 
   const formatSizeKb = (size?: number) => (typeof size === "number" ? (size / 1024).toFixed(1) : "—")
 
@@ -62,8 +64,10 @@ export default function MediaList({
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event(ADMIN_OPEN_MEDIA_UPLOAD));
     }
-  };
-  const hasItems = items.length > 0;
+  }
+
+  const hasItems = items.length > 0
+  const showFilteredEmpty = hasAnyItems && !hasItems
 
   return (
     <>
@@ -119,8 +123,20 @@ export default function MediaList({
           ))
         ) : (
           <div className="flex flex-col gap-3 rounded border border-dashed border-muted-foreground/40 bg-muted/40 p-4 text-left">
-            <p className="text-sm text-muted-foreground">No media available yet. Upload your first file to get started.</p>
-            <button type="button" className="self-start text-sm font-medium text-primary underline-offset-2 hover:underline" onClick={openUploader}>Upload media</button>
+            <p className="text-sm text-muted-foreground">
+              {showFilteredEmpty
+                ? "No media match your current filters. Try adjusting search or filters."
+                : "No media available yet. Upload your first file to get started."}
+            </p>
+            {!showFilteredEmpty && (
+              <button
+                type="button"
+                className="self-start text-sm font-medium text-primary underline-offset-2 hover:underline"
+                onClick={openUploader}
+              >
+                Upload media
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -194,14 +210,20 @@ export default function MediaList({
             ) : (
               <tr className="border-t">
                 <td colSpan={8} className="p-6 text-center text-sm text-muted-foreground">
-                  No media available yet.
-                  <button
-                    type="button"
-                    className="ml-2 inline-flex items-center gap-1 text-primary underline-offset-2 hover:underline"
-                    onClick={openUploader}
-                  >
-                    Upload media
-                  </button>
+                  {showFilteredEmpty ? (
+                    "No media match your current filters."
+                  ) : (
+                    <>
+                      No media available yet.
+                      <button
+                        type="button"
+                        className="ml-2 inline-flex items-center gap-1 text-primary underline-offset-2 hover:underline"
+                        onClick={openUploader}
+                      >
+                        Upload media
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             )}

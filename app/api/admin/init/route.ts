@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/admin-auth";
 import { type NextRequest, NextResponse } from "next/server";
-import { initializeSampleData } from "@/lib/sample-data";
+import { initializeHomeStats } from "@/lib/sample-data";
 import { isAdminSdkAvailable } from "@/lib/firebase-admin";
 import { logger } from "@/lib/logger";
 
@@ -10,16 +10,19 @@ export async function POST(request: NextRequest) {
   }
   if (!isAdminSdkAvailable()) {
     logger.debug(
-      "[Admin Init] Skipping sample data initialization: Firebase Admin SDK unavailable."
+      "[Admin Init] Skipping stats initialization: Firebase Admin SDK unavailable."
     );
     return NextResponse.json({
       success: true,
-      message: "Admin SDK unavailable; skipping sample data initialization.",
+      message: "Admin SDK unavailable; skipping stats initialization.",
     });
   }
   try {
-    await initializeSampleData();
-    return NextResponse.json({ success: true, message: "Data initialized successfully" });
+    await initializeHomeStats();
+    return NextResponse.json({
+      success: true,
+      message: "Site stats initialized successfully (no sample content created).",
+    });
   } catch {
     return NextResponse.json({ error: "Failed to initialize data" }, { status: 500 });
   }

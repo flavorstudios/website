@@ -24,24 +24,6 @@ const isDesktopWidth = () =>
 
 const shouldForceListView = () => clientEnv.TEST_MODE === "true" || isDesktopWidth();
 
-const FALLBACK_MEDIA: MediaDoc[] = [
-  {
-    id: "fallback-media-1",
-    url: "/placeholder.png",
-    filename: "placeholder.png",
-    name: "Placeholder image",
-    alt: "Placeholder media item",
-    mime: "image/png",
-    size: 20480,
-    tags: ["fallback"],
-    attachedTo: [],
-    createdAt: "2024-01-01T00:00:00.000Z",
-    updatedAt: "2024-01-01T00:00:00.000Z",
-  },
-];
-
-const getFallbackMedia = () => FALLBACK_MEDIA.map((item) => ({ ...item }));
-
 interface MediaLibraryProps {
   onSelect?: (url: string) => void;
   detailsOpen?: boolean;
@@ -59,6 +41,8 @@ export default function MediaLibrary({
   const [selectedItem, setSelectedItem] = useState<MediaDoc | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [view, setView] = useState<"grid" | "list">(() => {
     if (shouldForceListView()) return "list";
     if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
@@ -208,11 +192,6 @@ export default function MediaLibrary({
   }, []);
 
   // Load media with pagination support and abort safety
-  const applyFallback = () => {
-    setItems(getFallbackMedia());
-    setCursor(null);
-  };
-
   const loadMedia = async (nextCursor?: number | null) => {
     if (loading) return;
     setLoading(true);
@@ -229,7 +208,9 @@ export default function MediaLibrary({
         signal: controller.signal,
       });
       if (!res.ok) {
-        applyFallback();
+        setItems([]);
+        setCursor(null);
+        setLoadError(true);
         toast.error?.("Failed to load media");
         return;
       }
@@ -238,11 +219,9 @@ export default function MediaLibrary({
       const media = Array.isArray(data.media) ? (data.media as MediaDoc[]) : [];
       const next = (data.cursor as number | null) ?? null;
 
+      setLoadError(false);
+
       if (typeof nextCursor !== "number") {
-        if (!Array.isArray(data.media) || media.length === 0) {
-          applyFallback();
-          return;
-        }
         setItems(media);
         setCursor(next);
         return;
@@ -252,7 +231,7 @@ export default function MediaLibrary({
         setCursor(null);
         return;
       }
-      
+
       if (media.length === 0) {
         setCursor(next);
         return;
@@ -262,12 +241,15 @@ export default function MediaLibrary({
       setCursor(next);
     } catch (error) {
       if ((error as DOMException)?.name === "AbortError") return;
-      applyFallback();
+      setItems([]);
+      setCursor(null);
+      setLoadError(true);
       // keep your existing toast API
       toast.error?.("Failed to load media");
     } finally {
       activeRequestRef.current = null;
       setLoading(false);
+      setInitialized(true);
     }
   };
 
@@ -489,6 +471,23 @@ export default function MediaLibrary({
   const showPrev = selectedIndex !== null && selectedIndex > 0;
   const showNext = selectedIndex !== null && selectedIndex < filtered.length - 1;
 
+  const hasAnyItems = items.length > 0;
+  const hasFilteredItems = filtered.length > 0;
+  const showInitialEmpty = initialized && !loading && !hasAnyItems;
+  const showFilteredEmpty = initialized && !loading && hasAnyItems && !hasFilteredItems;
+
+  const renderEmptyState = (message: string) => (
+    <div
+      className="flex flex-col items-center justify-center gap-3 rounded border border-dashed border-muted-foreground/40 bg-muted/40 p-6 text-center"
+      role="status"
+    >
+      <p className="text-sm text-muted-foreground">{message}</p>
+      {loadError ? (
+        <p className="text-xs text-destructive">Check your connection and try again.</p>
+      ) : null}
+    </div>
+  );
+
   const goPrev = () => {
     if (!showPrev || selectedIndex === null) return;
     const idx = selectedIndex - 1;
@@ -530,15 +529,21 @@ export default function MediaLibrary({
       />
 
       {view === "grid" ? (
-        <MediaGrid
-          items={filtered}
-          onSelect={handleSelectItem}
-          onPick={onSelect}
-          selected={selectedIds}
-          toggleSelect={toggleSelect}
-          onToggleFavorite={handleToggleFavorite}
-          onRefresh={(item) => refreshItem(item.id)}
-        />
+        hasFilteredItems ? (
+          <MediaGrid
+            items={filtered}
+            onSelect={handleSelectItem}
+            onPick={onSelect}
+            selected={selectedIds}
+            toggleSelect={toggleSelect}
+            onToggleFavorite={handleToggleFavorite}
+            onRefresh={(item) => refreshItem(item.id)}
+          />
+        ) : showInitialEmpty ? (
+          renderEmptyState("No media available yet. Upload your first file to get started.")
+        ) : showFilteredEmpty ? (
+          renderEmptyState("No media match your current filters. Try adjusting search or filters.")
+        ) : null
       ) : (
         <MediaList
           items={filtered}
@@ -547,6 +552,7 @@ export default function MediaLibrary({
           toggleSelect={toggleSelect}
           toggleSelectAll={toggleSelectAll}
           onToggleFavorite={handleToggleFavorite}
+          hasAnyItems={hasAnyItems}
         />
       )}
 

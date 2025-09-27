@@ -103,7 +103,6 @@ export default function MediaList({
                 onClick={() => onRowClick(m)}
                 className="text-left flex-1 min-w-0 focus:outline-none focus:ring-2 focus:ring-primary rounded"
                 aria-label={`View details for ${m.filename || m.name}`}
-                onClick={() => onToggleFavorite(m)}
               >
                 <p className="font-medium truncate text-sm">{m.filename || m.name}</p>
                 <p className="text-xs text-gray-500">{formatDate(m.createdAt)}</p>

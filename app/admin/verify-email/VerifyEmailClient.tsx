@@ -94,7 +94,13 @@ export default function VerifyEmailClient() {
     } finally {
       setLoading(false);
     }
-  }, [requireVerification, router, testMode, testEmailVerified]);
+  }, [
+    requireVerification,
+    router,
+    testMode,
+    testEmailVerified,
+    waitForNextFrame,
+  ]);
 
   useEffect(() => {
     setLoading(true);

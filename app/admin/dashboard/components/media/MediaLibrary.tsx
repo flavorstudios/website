@@ -548,6 +548,7 @@ export default function MediaLibrary({
         <MediaList
           items={filtered}
           onRowClick={handleSelectItem}
+          onPick={onSelect}
           selected={selectedIds}
           toggleSelect={toggleSelect}
           toggleSelectAll={toggleSelectAll}

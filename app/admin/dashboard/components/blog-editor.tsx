@@ -228,12 +228,13 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
 
   // Slug generation (improved)
   useEffect(() => {
-    if (post.title && (!post.slug || post.slug === "")) {
-      const s = slugify(post.title);
-      if (s !== post.slug) setPost((prev) => ({ ...prev, slug: s }));
+    if (!post.title) return;
+    const autoSlug = slugify(post.title);
+    const shouldSyncSlug = !post.slug || !slugEdited;
+    if (shouldSyncSlug && autoSlug !== post.slug) {
+      setPost((prev) => ({ ...prev, slug: autoSlug }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [post.title]);
+    }, [post.title, post.slug, slugEdited]);
 
   // Auto-generate excerpt + derived fields (idempotent)
   useEffect(() => {
@@ -435,9 +436,11 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       toast.error("Add a title and content before publishing");
       return;
     }
-    setPost((prev) => ({ ...prev, status: "published" }));
+
+    const normalizedSlug = slugify(post.slug || post.title);
+    setPost((prev) => ({ ...prev, status: "published", slug: normalizedSlug }));
     await savePost();
-    router.push("/admin/dashboard?tab=blogs");
+    router.push(normalizedSlug ? `/blog/${normalizedSlug}` : "/blog");
   };
 
   const schedulePost = async () => {
@@ -640,8 +643,16 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   <label className="block text-sm font-medium mb-2">Slug</label>
                   <Input
                     value={post.slug}
-                    onChange={(e) => setPost((prev) => ({ ...prev, slug: e.target.value }))}
-                    onBlur={() => setPost((prev) => ({ ...prev, slug: slugify(prev.slug) }))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setPost((prev) => ({ ...prev, slug: value }));
+                      setSlugEdited(value.trim().length > 0);
+                    }}
+                    onBlur={() => {
+                      const normalizedSlug = slugify(post.slug);
+                      setSlugEdited(Boolean(normalizedSlug));
+                      setPost((prev) => ({ ...prev, slug: normalizedSlug }));
+                    }}
                     placeholder="url-friendly-slug"
                   />
                 </div>

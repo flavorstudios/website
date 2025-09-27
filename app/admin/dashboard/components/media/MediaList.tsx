@@ -11,6 +11,7 @@ interface Props {
   toggleSelect: (id: string, shiftKey?: boolean) => void
   toggleSelectAll: (checked: boolean) => void
   onRowClick: (item: MediaDoc) => void
+  onPick?: (item: MediaDoc) => void
   onToggleFavorite?: (item: MediaDoc) => void
   hasAnyItems?: boolean
 }
@@ -21,10 +22,16 @@ export default function MediaList({
   toggleSelect,
   toggleSelectAll,
   onRowClick,
+  onPick,
   onToggleFavorite,
   hasAnyItems = false,
 }: Props) {
   const allSelected = items.length > 0 && items.every((m) => selected.has(m.id))
+
+  const handleActivate = (media: MediaDoc) => {
+    onRowClick(media)
+    onPick?.(media)
+  }
 
   const Preview = ({ m }: { m: MediaDoc }) => {
     const isImage = m.mime?.startsWith("image/")
@@ -104,7 +111,7 @@ export default function MediaList({
               )}
               <button
                 type="button"
-                onClick={() => onRowClick(m)}
+                onClick={() => handleActivate(m)}
                 className="text-left flex-1 min-w-0 focus:outline-none focus:ring-2 focus:ring-primary rounded"
                 aria-label={`View details for ${m.filename || m.name}`}
               >

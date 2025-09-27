@@ -11,7 +11,7 @@ interface Props {
   toggleSelect: (id: string, shiftKey?: boolean) => void
   toggleSelectAll: (checked: boolean) => void
   onRowClick: (item: MediaDoc) => void
-  onPick?: (item: MediaDoc) => void
+  onPick?: (url: string) => void
   onToggleFavorite?: (item: MediaDoc) => void
   hasAnyItems?: boolean
 }
@@ -30,7 +30,9 @@ export default function MediaList({
 
   const handleActivate = (media: MediaDoc) => {
     onRowClick(media)
-    onPick?.(media)
+    if (media.url) {
+      onPick?.(media.url)
+    }
   }
 
   const Preview = ({ m }: { m: MediaDoc }) => {

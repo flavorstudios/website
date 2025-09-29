@@ -33,3 +33,12 @@ export function logError(
     console.error(`[${time}] [${context}]${metaString}`, error);
   }
 }
+
+export function logBreadcrumb(
+  context: string,
+  meta?: Record<string, unknown>,
+) {
+  const time = new Date().toISOString();
+  const metaString = meta ? ` ${JSON.stringify(meta)}` : "";
+  console.info(`[${time}] [${context}]${metaString}`);
+}

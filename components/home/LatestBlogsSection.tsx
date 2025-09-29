@@ -21,8 +21,12 @@ export default function LatestBlogsSection({ posts }: { posts: BlogPost[] }) {
         </div>
         {posts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {posts.map((post) => (
-              <Link key={post.id} href={`/blog/${normalizeSlug(post.slug)}`}>
+            {posts.map((post, index) => {
+              const slugSource = post.slug ?? post.id;
+              const safeSlug = normalizeSlug(slugSource);
+              const key = post.id ?? post.slug ?? `post-${index}`;
+
+              const card = (
                 <Card className="h-full hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden">
                   <div className="relative h-48 overflow-hidden">
                     <Image
@@ -65,8 +69,22 @@ export default function LatestBlogsSection({ posts }: { posts: BlogPost[] }) {
                     <p className="text-gray-600 line-clamp-3 text-sm leading-relaxed">{post.excerpt}</p>
                   </CardContent>
                 </Card>
-              </Link>
-            ))}
+              );
+
+              if (!safeSlug) {
+                return (
+                  <div key={key} className="group cursor-default">
+                    {card}
+                  </div>
+                );
+              }
+
+              return (
+                <Link key={key} href={`/blog/${safeSlug}`} className="group">
+                  {card}
+                </Link>
+              );
+            })}
           </div>
         ) : (
           <ErrorFallback section="blog posts" />

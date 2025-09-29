@@ -16,6 +16,8 @@ interface CategoryTabsProps {
   className?: string
 }
 
+const ALL_CATEGORY_SLUGS = new Set(["all", "all-posts", "all-videos"])
+
 export function CategoryTabs({
   categories,
   selectedCategory,
@@ -27,6 +29,16 @@ export function CategoryTabs({
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  const normalizedSelected = selectedCategory.toLowerCase()
+
+  const isCategorySelected = (slug: string) => {
+    const normalizedSlug = slug.toLowerCase()
+    if (ALL_CATEGORY_SLUGS.has(normalizedSelected) && ALL_CATEGORY_SLUGS.has(normalizedSlug)) {
+      return true
+    }
+    return normalizedSlug === normalizedSelected
+  }
 
   // Only add a generic "All" tab if there isn't already a context-aware all-tab
   const allSlugs = ["all", "all-posts", "all-videos"]
@@ -93,37 +105,43 @@ export function CategoryTabs({
           className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth px-8 md:px-0 py-2"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {allCategories.map((category) =>
-            onCategoryChange ? (
+          {allCategories.map((category) => {
+            const active = isCategorySelected(category.slug)
+
+            if (onCategoryChange) {
+              return (
+                <Button
+                  key={category.slug}
+                  title={(category as CategoryData).tooltip}
+                  variant={active ? "default" : "outline"}
+                  size="sm"
+                  className={cn(
+                    "whitespace-nowrap flex-shrink-0 transition-all duration-200 min-h-[36px] px-4",
+                    active
+                      ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                      : "hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300",
+                  )}
+                  onClick={() => onCategoryChange(category.slug)}
+                >
+                  {category.name}
+                  {category.count > 0 && (
+                    <span className="ml-2 text-xs opacity-70 bg-white/20 px-1.5 py-0.5 rounded-full">
+                      {category.count}
+                    </span>
+                  )}
+                </Button>
+              )
+            }
+
+            return (
               <Button
                 key={category.slug}
                 title={(category as CategoryData).tooltip}
-                variant={selectedCategory === category.slug ? "default" : "outline"}
+                variant={active ? "default" : "outline"}
                 size="sm"
                 className={cn(
                   "whitespace-nowrap flex-shrink-0 transition-all duration-200 min-h-[36px] px-4",
-                  selectedCategory === category.slug
-                    ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
-                    : "hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300",
-                )}
-                onClick={() => onCategoryChange(category.slug)}
-              >
-                {category.name}
-                {category.count > 0 && (
-                  <span className="ml-2 text-xs opacity-70 bg-white/20 px-1.5 py-0.5 rounded-full">
-                    {category.count}
-                  </span>
-                )}
-              </Button>
-            ) : (
-              <Button
-                key={category.slug}
-                title={(category as CategoryData).tooltip}
-                variant={selectedCategory === category.slug ? "default" : "outline"}
-                size="sm"
-                className={cn(
-                  "whitespace-nowrap flex-shrink-0 transition-all duration-200 min-h-[36px] px-4",
-                  selectedCategory === category.slug
+                  active
                     ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md"
                     : "hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300",
                 )}
@@ -146,7 +164,7 @@ export function CategoryTabs({
                 </Link>
               </Button>
             )
-          )}
+          })}
         </div>
 
         {/* Right scroll button */}

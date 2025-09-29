@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="320" viewBox="0 0 512 320" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Placeholder image</title>
+  <desc id="desc">Decorative gradient background with stylised mountains used when no media is provided.</desc>
+  <defs>
+    <linearGradient id="placeholder-gradient" x1="256" y1="0" x2="256" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="55%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#334155" />
+    </linearGradient>
+    <linearGradient id="placeholder-highlight" x1="256" y1="120" x2="256" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#0EA5E9" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="320" rx="24" fill="url(#placeholder-gradient)" />
+  <g opacity="0.9">
+    <path d="M66 252C104 196 150 180 186 204C215 223 250 227 289 208C345 181 396 187 446 238V320H66V252Z" fill="url(#placeholder-highlight)" />
+    <path d="M96 230C128 180 178 172 214 198C244 220 282 224 326 202C372 178 412 186 454 226" stroke="#38BDF8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.4" />
+    <path d="M168 214L208 156L252 214L296 162L344 214" stroke="#BAE6FD" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" opacity="0.6" />
+    <circle cx="360" cy="108" r="36" fill="#38BDF8" opacity="0.35" />
+    <circle cx="360" cy="108" r="18" fill="#E0F2FE" opacity="0.9" />
+  </g>
+  <rect x="88" y="64" width="336" height="184" rx="20" stroke="#E2E8F0" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="14 12" />
+  <g transform="translate(168 120)" fill="#E2E8F0" opacity="0.7">
+    <path d="M48 0C21.49 0 0 21.49 0 48C0 74.51 21.49 96 48 96C74.51 96 96 74.51 96 48C96 21.49 74.51 0 48 0ZM48 14C66.12 14 81 28.88 81 47C81 65.12 66.12 80 48 80C29.88 80 15 65.12 15 47C15 28.88 29.88 14 48 14Z" />
+    <path d="M71.5 45C71.5 56.3218 62.3218 65.5 51 65.5C39.6782 65.5 30.5 56.3218 30.5 45C30.5 33.6782 39.6782 24.5 51 24.5C62.3218 24.5 71.5 33.6782 71.5 45Z" />
+  </g>
+</svg>

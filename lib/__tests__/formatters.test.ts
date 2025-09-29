@@ -1,3 +1,7 @@
+jest.mock('../media', () => ({
+  ensureFreshMediaUrl: jest.fn(async (url: string | null | undefined) => url ?? undefined),
+}));
+
 import { formatPublicBlogSummary, formatPublicBlogDetail } from '../formatters';
 import type { BlogPost } from '../content-store';
 
@@ -23,8 +27,8 @@ describe('formatPublicBlog', () => {
     readTime: '5 min',
   };
 
-  it('formats summary without content', () => {
-    const out = formatPublicBlogSummary(baseBlog);
+  it('formats summary without content', async () => {
+    const out = await formatPublicBlogSummary(baseBlog);
     expect(out).toMatchObject({
       id: '1',
       title: 'Test',
@@ -43,8 +47,8 @@ describe('formatPublicBlog', () => {
     expect((out as any).content).toBeUndefined();
   });
 
-  it('formats detail with content', () => {
-    const out = formatPublicBlogDetail(baseBlog);
+  it('formats detail with content', async () => {
+    const out = await formatPublicBlogDetail(baseBlog);
     expect(out.content).toBe('<p>content</p>');
     expect(out.categories).toEqual(['cat']);
     expect(out.commentCount).toBe(0);

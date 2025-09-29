@@ -4,6 +4,7 @@ export const serverEnvSchema = z.object({
   BASE_URL: z.string().min(1),
   NEXT_PUBLIC_BASE_URL: z.string().min(1),
   CRON_SECRET: z.string().min(1),
+  PREVIEW_SECRET: z.string().min(1),
   FIREBASE_SERVICE_ACCOUNT_KEY: z.string().optional(),
   FIREBASE_SERVICE_ACCOUNT_JSON: z.string().optional(),
   FIREBASE_STORAGE_BUCKET: z.string().optional(),
@@ -44,22 +45,24 @@ const _server: z.SafeParseReturnType<
         BASE_URL: process.env.BASE_URL,
         NEXT_PUBLIC_BASE_URL: process.env["NEXT_PUBLIC_BASE_URL"],
         CRON_SECRET: process.env.CRON_SECRET,
+        PREVIEW_SECRET: process.env.PREVIEW_SECRET,
         FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
         FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
         FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
       NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:
-        process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      ADMIN_EMAILS: process.env.ADMIN_EMAILS,
-      ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-      ADMIN_REQUIRE_EMAIL_VERIFICATION:
-        process.env.ADMIN_REQUIRE_EMAIL_VERIFICATION,
-      ADMIN_DISPOSABLE_DOMAINS: process.env.ADMIN_DISPOSABLE_DOMAINS,
+          process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+        ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+        ADMIN_REQUIRE_EMAIL_VERIFICATION:
+          process.env.ADMIN_REQUIRE_EMAIL_VERIFICATION,
+        ADMIN_DISPOSABLE_DOMAINS: process.env.ADMIN_DISPOSABLE_DOMAINS,
     } as z.infer<typeof serverEnvSchema>,
     }
   : serverEnvSchema.safeParse({
       BASE_URL: process.env.BASE_URL,
       NEXT_PUBLIC_BASE_URL: process.env["NEXT_PUBLIC_BASE_URL"],
       CRON_SECRET: process.env.CRON_SECRET,
+      PREVIEW_SECRET: process.env.PREVIEW_SECRET,
       FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
       FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
       FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
@@ -142,7 +145,7 @@ export const serverEnv: Record<string, string | undefined> & {
   ADMIN_REQUIRE_EMAIL_VERIFICATION:
     _server.data.ADMIN_REQUIRE_EMAIL_VERIFICATION,
   ADMIN_DISPOSABLE_DOMAINS: _server.data.ADMIN_DISPOSABLE_DOMAINS,
-  PREVIEW_SECRET: process.env.PREVIEW_SECRET,
+  PREVIEW_SECRET: _server.data.PREVIEW_SECRET,
   ANALYZE: process.env.ANALYZE,
   BASE_URL: _server.data.BASE_URL,
   BING_API_KEY: process.env.BING_API_KEY,

@@ -4,6 +4,8 @@ import type { BlogPost } from "./content-store"; // Adjust path if needed
 import type { Video } from "./content-store"; // Adjust path if needed
 import type { PublicBlogSummary, PublicBlogDetail } from "./types";
 
+let mediaModulePromise: Promise<typeof import("./media")> | null = null;
+
 function extractAuthorValue(value: unknown): string | null {
   if (!value) return null;
 
@@ -38,13 +40,32 @@ export function normalizeAuthor(author: unknown): string {
  * Adds .categories[] for multi-category support (fallbacks to [category]).
  * Adds .commentCount and .shareCount for badge support.
  */
-export function formatPublicBlogSummary(blog: BlogPost): PublicBlogSummary {
+async function maybeEnsureFreshMediaUrl(
+  url: string | null | undefined,
+): Promise<string | null | undefined> {
+  if (url == null) return url;
+  if (typeof window !== "undefined") {
+    return url;
+  }
+  if (!mediaModulePromise) {
+    mediaModulePromise = import("./media");
+  }
+  const { ensureFreshMediaUrl } = await mediaModulePromise;
+  return ensureFreshMediaUrl(url);
+}
+
+export async function formatPublicBlogSummary(
+  blog: BlogPost,
+): Promise<PublicBlogSummary> {
+  const featuredImage =
+    (await maybeEnsureFreshMediaUrl(blog.featuredImage)) ?? blog.featuredImage;
+
   return {
     id: blog.id,
     title: blog.title,
     slug: blog.slug,
     excerpt: blog.excerpt,
-    featuredImage: blog.featuredImage,
+    featuredImage,
     category: blog.category,
     categories: Array.isArray(blog.categories) && blog.categories.length > 0
       ? blog.categories
@@ -67,14 +88,23 @@ export function formatPublicBlogSummary(blog: BlogPost): PublicBlogSummary {
  * Includes full content and SEO fields while still omitting admin-only
  * properties like status. Ensures categories array and default counts.
  */
-export function formatPublicBlogDetail(blog: BlogPost): PublicBlogDetail {
+export async function formatPublicBlogDetail(
+  blog: BlogPost,
+): Promise<PublicBlogDetail> {
+  const [featuredImage, openGraphImage] = await Promise.all([
+    maybeEnsureFreshMediaUrl(blog.featuredImage),
+    blog.openGraphImage
+      ? maybeEnsureFreshMediaUrl(blog.openGraphImage)
+      : Promise.resolve(blog.openGraphImage),
+  ]);
+
   return {
     id: blog.id,
     title: blog.title,
     slug: blog.slug,
     content: blog.content,
     excerpt: blog.excerpt,
-    featuredImage: blog.featuredImage,
+    featuredImage: featuredImage ?? blog.featuredImage,
     category: blog.category,
     categories: Array.isArray(blog.categories) && blog.categories.length > 0
       ? blog.categories
@@ -92,7 +122,7 @@ export function formatPublicBlogDetail(blog: BlogPost): PublicBlogDetail {
     commentCount: typeof blog.commentCount === "number" ? blog.commentCount : 0,
     shareCount: typeof blog.shareCount === "number" ? blog.shareCount : 0,
     schemaType: blog.schemaType,
-    openGraphImage: blog.openGraphImage,
+    openGraphImage: openGraphImage ?? blog.openGraphImage,
   };
 }
 

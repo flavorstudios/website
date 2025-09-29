@@ -30,6 +30,47 @@ import { DateRangePicker } from "@/components/ui/date-range-picker"; // <-- NEW
 import { serverEnv } from "@/env/server";
 import { normalizeSlug } from "@/lib/slugify";
 
+const ALL_CATEGORY_CANONICAL_SLUG = "all-posts";
+
+const CATEGORY_ALIAS_LOOKUP: Record<string, string> = {
+  all: "all",
+  "all posts": "all",
+  "all-posts": "all",
+  allposts: "all",
+  "all articles": "all",
+  "all-articles": "all",
+  "all blogs": "all",
+  "all-blogs": "all",
+  "all blog": "all",
+  "all-blog": "all",
+  everything: "all",
+};
+
+function resolveCategory(value?: string | null) {
+  if (!value) {
+    return { normalized: "all", canonical: ALL_CATEGORY_CANONICAL_SLUG };
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return { normalized: "all", canonical: ALL_CATEGORY_CANONICAL_SLUG };
+  }
+
+  const lower = trimmed.toLowerCase();
+  const aliasFromLower = CATEGORY_ALIAS_LOOKUP[lower];
+  if (aliasFromLower) {
+    return { normalized: aliasFromLower, canonical: ALL_CATEGORY_CANONICAL_SLUG };
+  }
+
+  const slug = normalizeSlug(trimmed);
+  const aliasFromSlug = CATEGORY_ALIAS_LOOKUP[slug];
+  if (aliasFromSlug) {
+    return { normalized: aliasFromSlug, canonical: ALL_CATEGORY_CANONICAL_SLUG };
+  }
+
+  return { normalized: slug, canonical: slug };
+}
+
 // --- SEO METADATA (centralized, canonical, modular) ---
 export const metadata = getMetadata({
   title: `${SITE_NAME} Blog | Anime News, Insights & Studio Stories`,
@@ -133,15 +174,20 @@ export default async function BlogPage({
     endDate?: string;     // <-- NEW
   }>;
 }) {
-  const {
-    category: selectedCategory = "all",
-    page = "1",
-    search = "",
-    sort = "date",
-    author: selectedAuthor = "all",
-    startDate = "",
-    endDate = "",
-  } = await searchParams;
+  const params = await searchParams;
+
+  const rawCategoryParam = params?.category;
+  const page = params?.page ?? "1";
+  const search = params?.search ?? "";
+  const sort = params?.sort ?? "date";
+  const selectedAuthor = params?.author ?? "all";
+  const startDate = params?.startDate ?? "";
+  const endDate = params?.endDate ?? "";
+
+  const { normalized: selectedCategory, canonical: selectedCategoryCanonical } =
+    resolveCategory(rawCategoryParam);
+  const shouldPersistCategoryParam =
+    selectedCategory !== "all" || Boolean(rawCategoryParam);
 
   const { posts, categories } = await getBlogData({
     author: selectedAuthor,
@@ -164,9 +210,10 @@ export default async function BlogPage({
               ? post.categories
               : [post.category];
           // FIX: handle category possibly undefined
-          return postCategories.some(
-            (cat) => cat && normalizeSlug(cat) === selectedCategory
-          );
+          return postCategories.some((cat) => {
+            const normalizedCategory = normalizeSlug(cat);
+            return normalizedCategory && normalizedCategory === selectedCategory;
+          });
         });
 
   // --- SEARCH FILTER ---
@@ -223,7 +270,8 @@ export default async function BlogPage({
 
   // --- Category Name for clean heading ---
   const categoryName =
-    categories.find((c) => c.slug === selectedCategory)?.name || selectedCategory;
+    categories.find((c) => normalizeSlug(c.slug) === selectedCategoryCanonical)?.name ||
+    selectedCategory;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -314,8 +362,12 @@ export default async function BlogPage({
             method="get"
             action="/blog"
           >
-            {selectedCategory !== "all" && (
-              <input type="hidden" name="category" value={selectedCategory} />
+            {shouldPersistCategoryParam && (
+              <input
+                type="hidden"
+                name="category"
+                value={selectedCategoryCanonical}
+              />
             )}
 
             <Input
@@ -365,6 +417,8 @@ export default async function BlogPage({
                   currentPage={currentPage}
                   totalPages={totalPages}
                   selectedCategory={selectedCategory}
+                  categorySlug={selectedCategoryCanonical}
+                  shouldIncludeCategoryParam={shouldPersistCategoryParam}
                   search={search}
                   sort={sortOption}
                   author={selectedAuthor}     // <-- NEW
@@ -428,71 +482,82 @@ function FeaturedPostCard({
     post.categories && post.categories.length > 0
       ? post.categories[0]
       : post.category;
-  return (
-    <Link href={`/blog/${normalizeSlug(post.slug)}`} className="group">
-      <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full bg-gradient-to-br from-white to-gray-50">
-        <div className="relative h-40 sm:h-48 lg:h-56 overflow-hidden">
-          <Image
-            src={post.featuredImage || "/placeholder.svg?height=256&width=512&text=Featured+Post"}
-            alt={post.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            loading={priority ? "eager" : "lazy"}
-            fill
-            sizes="(max-width: 1024px) 100vw, 33vw"
-            priority={priority}
-          />
-          <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
-            <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-900 shadow-lg text-xs">
-              ⭐ Featured
-            </Badge>
+  const slugSource = post.slug ?? post.id;
+  const safeSlug = normalizeSlug(slugSource);
+
+  const card = (
+    <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 h-full bg-gradient-to-br from-white to-gray-50">
+      <div className="relative h-40 sm:h-48 lg:h-56 overflow-hidden">
+        <Image
+          src={post.featuredImage || "/placeholder.svg?height=256&width=512&text=Featured+Post"}
+          alt={post.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          loading={priority ? "eager" : "lazy"}
+          fill
+          sizes="(max-width: 1024px) 100vw, 33vw"
+          priority={priority}
+        />
+        <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
+          <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-900 shadow-lg text-xs">
+            ⭐ Featured
+          </Badge>
           </div>
         </div>
-        <CardHeader className="pb-3 p-4 sm:p-6">
-          <CardTitle className="text-lg sm:text-xl line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
-            {post.title}
-          </CardTitle>
-          <p className="text-gray-600 line-clamp-2 text-sm leading-relaxed">{post.excerpt}</p>
-        </CardHeader>
-        <CardContent className="pt-0 p-4 sm:p-6">
-          <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <span className="flex items-center gap-1">
-                <User className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="truncate">{post.author}</span>
+      <CardHeader className="pb-3 p-4 sm:p-6">
+        <CardTitle className="text-lg sm:text-xl line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
+          {post.title}
+        </CardTitle>
+        <p className="text-gray-600 line-clamp-2 text-sm leading-relaxed">{post.excerpt}</p>
+      </CardHeader>
+      <CardContent className="pt-0 p-4 sm:p-6">
+        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="flex items-center gap-1">
+              <User className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="truncate">{post.author}</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 text-xs">
+                {mainCategory}
+              </Badge>
+            </span>
+            <span className="flex items-center gap-1">
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">
+                {post.publishedAt ? formatDate(post.publishedAt) : "—"}
               </span>
-              <span className="flex items-center gap-1">
-                <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 text-xs">
-                  {mainCategory}
-                </Badge>
+              <span className="sm:hidden">
+                {post.publishedAt ? formatDate(post.publishedAt, { month: "short", day: "numeric" }) : "—"}
               </span>
-              <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">
-                  {post.publishedAt ? formatDate(post.publishedAt) : "—"}
-                </span>
-                <span className="sm:hidden">
-                  {post.publishedAt ? formatDate(post.publishedAt, { month: "short", day: "numeric" }) : "—"}
-                </span>
-              </span>
-            </div>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <span className="flex items-center gap-1">
-                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                {post.views?.toLocaleString() || 0}
-              </span>
-              {/* --- COMMENT COUNT BADGE --- */}
-              <span className="flex items-center gap-1">
-                <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                {post.commentCount ?? 0}
-              </span>
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                {post.readTime || "5 min"}
-              </span>
-            </div>
+            </span>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="flex items-center gap-1">
+              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+              {post.views?.toLocaleString() || 0}
+            </span>
+            {/* --- COMMENT COUNT BADGE --- */}
+            <span className="flex items-center gap-1">
+              <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+              {post.commentCount ?? 0}
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+              {post.readTime || "5 min"}
+            </span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  if (!safeSlug) {
+    return <div className="group">{card}</div>;
+  }
+
+  return (
+    <Link href={`/blog/${safeSlug}`} className="group">
+      {card}
     </Link>
   );
 }
@@ -502,72 +567,83 @@ function BlogPostCard({ post }: { post: PublicBlogSummary }) {
     post.categories && post.categories.length > 0
       ? post.categories[0]
       : post.category;
-  return (
-    <Link href={`/blog/${normalizeSlug(post.slug)}`} className="group">
-      <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 bg-white">
-        <div className="relative h-40 sm:h-48 overflow-hidden">
-          <Image
-            src={post.featuredImage || "/placeholder.svg?height=192&width=384&text=Blog+Post"}
-            alt={post.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-            loading="lazy"
-            fill
-            sizes="(max-width: 1024px) 100vw, 33vw"
-            priority={false}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          {post.featured && (
-            <div className="absolute top-3 left-3">
-              <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-900 shadow-lg text-xs">
-                ⭐ Featured
-              </Badge>
-            </div>
-          )}
-        </div>
-        <CardHeader className="pb-3 p-4 sm:p-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 text-xs">
-              {mainCategory}
+  const slugSource = post.slug ?? post.id;
+  const safeSlug = normalizeSlug(slugSource);
+
+  const card = (
+    <Card className="h-full overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2 group-hover:shadow-blue-500/25 bg-white">
+      <div className="relative h-40 sm:h-48 overflow-hidden">
+        <Image
+          src={post.featuredImage || "/placeholder.svg?height=192&width=384&text=Blog+Post"}
+          alt={post.title}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          loading="lazy"
+          fill
+          sizes="(max-width: 1024px) 100vw, 33vw"
+          priority={false}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {post.featured && (
+          <div className="absolute top-3 left-3">
+            <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-yellow-900 shadow-lg text-xs">
+              ⭐ Featured
             </Badge>
-            <span className="text-xs text-gray-500 flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <span className="hidden sm:inline">
-                {post.publishedAt ? formatDate(post.publishedAt) : "—"}
-              </span>
-              <span className="sm:hidden">
-                {post.publishedAt ? formatDate(post.publishedAt, { month: "short", day: "numeric" }) : "—"}
-              </span>
+          </div>
+          )}
+      </div>
+      <CardHeader className="pb-3 p-4 sm:p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50 text-xs">
+            {mainCategory}
+          </Badge>
+          <span className="text-xs text-gray-500 flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            <span className="hidden sm:inline">
+              {post.publishedAt ? formatDate(post.publishedAt) : "—"}
+            </span>
+            <span className="sm:hidden">
+              {post.publishedAt ? formatDate(post.publishedAt, { month: "short", day: "numeric" }) : "—"}
+            </span>
+          </span>
+        </div>
+        <CardTitle className="text-base sm:text-lg lg:text-xl line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
+          {post.title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0 p-4 sm:p-6">
+        <p className="text-gray-600 line-clamp-3 mb-4 leading-relaxed text-sm">{post.excerpt}</p>
+        <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
+          <span className="flex items-center gap-1 font-medium">
+            <User className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="truncate">{post.author}</span>
+          </span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="flex items-center gap-1">
+              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+              {post.views?.toLocaleString() || 0}
+            </span>
+            {/* --- COMMENT COUNT BADGE --- */}
+            <span className="flex items-center gap-1">
+              <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+              {post.commentCount ?? 0}
+            </span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+              {post.readTime || "5 min"}
             </span>
           </div>
-          <CardTitle className="text-base sm:text-lg lg:text-xl line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
-            {post.title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0 p-4 sm:p-6">
-          <p className="text-gray-600 line-clamp-3 mb-4 leading-relaxed text-sm">{post.excerpt}</p>
-          <div className="flex items-center justify-between text-xs sm:text-sm text-gray-500">
-            <span className="flex items-center gap-1 font-medium">
-              <User className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="truncate">{post.author}</span>
-            </span>
-            <div className="flex items-center gap-2 sm:gap-3">
-              <span className="flex items-center gap-1">
-                <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                {post.views?.toLocaleString() || 0}
-              </span>
-              {/* --- COMMENT COUNT BADGE --- */}
-              <span className="flex items-center gap-1">
-                <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4" />
-                {post.commentCount ?? 0}
-              </span>
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
-                {post.readTime || "5 min"}
-              </span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  if (!safeSlug) {
+    return <div className="group">{card}</div>;
+  }
+
+  return (
+    <Link href={`/blog/${safeSlug}`} className="group">
+      {card}
     </Link>
   );
 }
@@ -578,6 +654,8 @@ function Pagination({
   currentPage,
   totalPages,
   selectedCategory,
+  categorySlug,
+  shouldIncludeCategoryParam,
   search,
   sort,
   author,     // <-- NEW
@@ -587,6 +665,8 @@ function Pagination({
   currentPage: number;
   totalPages: number;
   selectedCategory: string;
+  categorySlug?: string;
+  shouldIncludeCategoryParam?: boolean;
   search?: string;
   sort?: string;
   author?: string;     // <-- NEW
@@ -595,7 +675,15 @@ function Pagination({
 }) {
   const getPageUrl = (page: number) => {
     const params = new URLSearchParams();
-    if (selectedCategory !== "all") params.set("category", selectedCategory);
+    const categoryValue = categorySlug ?? selectedCategory;
+    const includeCategory =
+      typeof shouldIncludeCategoryParam === "boolean"
+        ? shouldIncludeCategoryParam
+        : selectedCategory !== "all";
+
+    if (includeCategory && categoryValue) {
+      params.set("category", categoryValue);
+    }
     if (page > 1) params.set("page", page.toString());
     if (search) params.set("search", search);
     if (sort) params.set("sort", sort);

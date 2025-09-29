@@ -3,8 +3,14 @@ import type { Firestore } from "firebase-admin/firestore";
 import { FieldValue } from "firebase-admin/firestore";
 import { z } from "zod";
 import { HttpError } from "@/lib/http";
-import { extractMediaIds, linkMediaToPost, unlinkMediaFromPost } from "@/lib/media";
+import {
+  ensureFreshMediaUrl,
+  extractMediaIds,
+  linkMediaToPost,
+  unlinkMediaFromPost,
+} from "@/lib/media";
 import type { BlogPost } from "@/lib/types";
+import { logBreadcrumb, logError } from "@/lib/log";
 
 export type { BlogPost };
 
@@ -75,6 +81,121 @@ const normalizeBlogPost = (post: BlogPost): BlogPost => ({
   commentCount: typeof post.commentCount === "number" ? post.commentCount : 0,
   shareCount: typeof post.shareCount === "number" ? post.shareCount : 0,
 });
+
+const FALLBACK_MARKER = Symbol("content-store:fallback");
+
+type FallbackMarkable = { [FALLBACK_MARKER]?: boolean };
+
+function attachFallbackMarker<T>(value: T): T {
+  if (value && typeof value === "object") {
+    const target = value as FallbackMarkable;
+    if (!Object.prototype.hasOwnProperty.call(target, FALLBACK_MARKER)) {
+      Object.defineProperty(target, FALLBACK_MARKER, {
+        value: true,
+        enumerable: false,
+        configurable: true,
+        writable: true,
+      });
+    } else {
+      target[FALLBACK_MARKER] = true;
+    }
+  }
+  return value;
+}
+
+function cloneFallbackPosts(): BlogPost[] {
+  return FALLBACK_BLOG_POSTS.map((post) => normalizeBlogPost({ ...post }));
+}
+
+function fallbackCollection(): BlogPost[] {
+  return attachFallbackMarker(cloneFallbackPosts());
+}
+
+function fallbackById(id: string): BlogPost | null {
+  const fallbackPost = FALLBACK_BLOG_POSTS.find((post) => post.id === id);
+  return fallbackPost
+    ? attachFallbackMarker(normalizeBlogPost({ ...fallbackPost }))
+    : null;
+}
+
+function fallbackBySlug(slug: string): BlogPost | null {
+  const fallbackPost = FALLBACK_BLOG_POSTS.find((post) => post.slug === slug);
+  return fallbackPost
+    ? attachFallbackMarker(normalizeBlogPost({ ...fallbackPost }))
+    : null;
+}
+
+export function isFallbackResult(value: unknown): boolean {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      (value as FallbackMarkable)[FALLBACK_MARKER] === true,
+  );
+}
+
+export function getFallbackBlogPosts(): BlogPost[] {
+  return fallbackCollection();
+}
+
+export function getFallbackBlogPostBySlug(slug: string): BlogPost | null {
+  return fallbackBySlug(slug);
+}
+
+export function getFallbackBlogPostById(id: string): BlogPost | null {
+  return fallbackById(id);
+}
+
+async function applyFreshMediaToPosts(posts: BlogPost[]): Promise<BlogPost[]> {
+  if (posts.length === 0) return posts;
+
+  const idToUrl = new Map<string, string>();
+  for (const post of posts) {
+    const candidates = [post.featuredImage, post.openGraphImage];
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+      const [id] = extractMediaIds(candidate);
+      if (id && !idToUrl.has(id)) {
+        idToUrl.set(id, candidate);
+      }
+    }
+  }
+
+  if (idToUrl.size === 0) return posts;
+
+  const replacements = new Map<string, string>();
+  await Promise.all(
+    Array.from(idToUrl.entries()).map(async ([id, currentUrl]) => {
+      const refreshed = await ensureFreshMediaUrl(currentUrl);
+      if (typeof refreshed === "string") {
+        replacements.set(id, refreshed);
+      }
+    }),
+  );
+
+  if (replacements.size === 0) return posts;
+
+  return posts.map((post) => {
+    let changed = false;
+    const next: BlogPost = { ...post };
+
+    const updateField = (field: "featuredImage" | "openGraphImage") => {
+      const value = post[field];
+      if (!value) return;
+      const [mediaId] = extractMediaIds(value);
+      if (!mediaId) return;
+      const replacement = replacements.get(mediaId);
+      if (replacement && replacement !== value) {
+        next[field] = replacement;
+        changed = true;
+      }
+    };
+
+    updateField("featuredImage");
+    updateField("openGraphImage");
+
+    return changed ? next : post;
+  });
+}
 
 /**
  * Retrieve the Firebase Admin Firestore instance or return `null` if the
@@ -198,20 +319,27 @@ export const VideoSchema = z.object({
 export const blogStore = {
   async getAll(): Promise<BlogPost[]> {
     const db = getDbOrNull();
-    if (!db) return FALLBACK_BLOG_POSTS.map(normalizeBlogPost);
+    if (!db)
+      return applyFreshMediaToPosts(FALLBACK_BLOG_POSTS.map(normalizeBlogPost));
     const snap = await db.collection("blogs").orderBy("createdAt", "desc").get();
-    return snap.docs.map((d) => normalizeBlogPost(d.data() as BlogPost));
+    const posts = snap.docs.map((d) => normalizeBlogPost(d.data() as BlogPost));
+    return applyFreshMediaToPosts(posts);
   },
 
   async getById(id: string): Promise<BlogPost | null> {
     const db = getDbOrNull();
     if (!db) {
       const fallbackPost = FALLBACK_BLOG_POSTS.find((post) => post.id === id);
-      return fallbackPost ? normalizeBlogPost(fallbackPost) : null;
+      if (!fallbackPost) return null;
+      const [post] = await applyFreshMediaToPosts([normalizeBlogPost(fallbackPost)]);
+      return post ?? null;
     }
     const doc = await db.collection("blogs").doc(id).get();
     if (!doc.exists) return null;
-    return normalizeBlogPost(doc.data() as BlogPost);
+    const [post] = await applyFreshMediaToPosts([
+      normalizeBlogPost(doc.data() as BlogPost),
+    ]);
+    return post ?? null;
   },
 
   // Fetch a post by slug for edit/preview workflows
@@ -219,7 +347,9 @@ export const blogStore = {
     const db = getDbOrNull();
     if (!db) {
       const fallbackPost = FALLBACK_BLOG_POSTS.find((post) => post.slug === slug);
-      return fallbackPost ? normalizeBlogPost(fallbackPost) : null;
+      if (!fallbackPost) return null;
+      const [post] = await applyFreshMediaToPosts([normalizeBlogPost(fallbackPost)]);
+      return post ?? null;
     }
     const snap = await db
       .collection("blogs")
@@ -227,7 +357,10 @@ export const blogStore = {
       .limit(1)
       .get();
     if (snap.empty) return null;
-    return normalizeBlogPost(snap.docs[0].data() as BlogPost);
+    const [post] = await applyFreshMediaToPosts([
+      normalizeBlogPost(snap.docs[0].data() as BlogPost),
+    ]);
+    return post ?? null;
   },
 
   async create(

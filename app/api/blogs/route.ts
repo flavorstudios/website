@@ -1,9 +1,13 @@
 // app/api/blogs/route.ts
 
 import { type NextRequest, NextResponse } from "next/server";
-import { blogStore } from "@/lib/content-store"; // Firestore-backed store
+import {
+  blogStore,
+  getFallbackBlogPosts,
+  isFallbackResult,
+} from "@/lib/content-store"; // Firestore-backed store
 import { formatPublicBlogSummary } from "@/lib/formatters"; // Summary formatter
-import { logError } from "@/lib/log"; // Add error logging
+import { logBreadcrumb, logError } from "@/lib/log"; // Add error logging
 import { BlogPost } from "@/lib/content-store";
 
 function parseDate(value: string | null): Date | null {
@@ -28,6 +32,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch all blogs from Firestore (via blogStore)
     const blogs = await blogStore.getAll();
+    const usingFallback = isFallbackResult(blogs);
 
     // Only published blogs (same as before)
     let published: BlogPost[] = blogs.filter(
@@ -73,9 +78,17 @@ export async function GET(request: NextRequest) {
     }
 
     // Format for the public API response using summary shape
-    const result = published.map(formatPublicBlogSummary);
+    const result = await Promise.all(
+      published.map((blog) => formatPublicBlogSummary(blog)),
+    );
 
     // Send response with cache headers
+    if (usingFallback) {
+      logBreadcrumb("api/blogs:GET:fallback-response", {
+        reason: "store-fallback",
+      });
+    }
+
     const res = NextResponse.json(result);
     res.headers.set("Cache-Control", "public, max-age=300");
     return res;
@@ -85,6 +98,20 @@ export async function GET(request: NextRequest) {
       logError("blogs:GET", error);
     } catch {
       // no-op if logger throws
+    }
+
+    const fallbackBlogs = getFallbackBlogPosts();
+    if (fallbackBlogs.length > 0) {
+      logBreadcrumb("api/blogs:GET:fallback-response", {
+        reason: "handler-error",
+      });
+      const publishedFallback = fallbackBlogs.filter(
+        (b: BlogPost) => b.status === "published",
+      );
+      const result = publishedFallback.map(formatPublicBlogSummary);
+      const res = NextResponse.json(result);
+      res.headers.set("Cache-Control", "public, max-age=300");
+      return res;
     }
 
     // Return a safe error response

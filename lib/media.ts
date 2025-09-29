@@ -327,6 +327,58 @@ export async function refreshMediaUrl(id: string): Promise<MediaDoc | null> {
 }
 
 /**
+ * Ensure that a stored media URL is still valid. If its backing document lacks a
+ * future `urlExpiresAt`, the URL is refreshed via {@link refreshMediaUrl}.
+ */
+interface EnsureFreshOptions {
+  refresh?: typeof refreshMediaUrl;
+}
+
+export async function ensureFreshMediaUrl(
+  url: string | null | undefined,
+  options: EnsureFreshOptions = {},
+): Promise<string | null | undefined> {
+  if (url == null) return url;
+
+  const [id] = extractMediaIds(url);
+  if (!id) {
+    return url;
+  }
+
+  const collection = tryGetCollection();
+  if (!collection) {
+    return url;
+  }
+
+  const refresh = options.refresh ?? refreshMediaUrl;
+
+  try {
+    const snap = await collection.doc(id).get();
+    if (!snap.exists) {
+      return url;
+    }
+
+    const data = snap.data() as MediaDoc;
+    const now = Date.now();
+
+    if (!data.urlExpiresAt || data.urlExpiresAt <= now) {
+      try {
+        const refreshed = await refresh(id);
+        return refreshed?.url ?? data.url ?? url;
+      } catch (error) {
+        logger.warn("Failed to refresh media URL", id, error);
+        return data.url ?? url;
+      }
+    }
+
+    return data.url ?? url;
+  } catch (error) {
+    logger.warn("Failed to ensure media freshness", { url, error });
+    return url;
+  }
+}
+
+/**
  * Delete a media object from Storage (if possible) and remove its Firestore doc.
  * If the bucket is not configured, still remove the Firestore doc to avoid blocking.
  */

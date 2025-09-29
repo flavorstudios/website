@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
+import { logError } from "@/lib/log";
 import { createPreviewToken } from "@/lib/preview-token";
 
 interface PreviewTokenRequestBody {
@@ -28,6 +29,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "postId is required" }, { status: 400 });
   }
 
-  const token = createPreviewToken(postId, session.uid);
-  return NextResponse.json({ token });
+  try {
+    const token = createPreviewToken(postId, session.uid);
+    return NextResponse.json({ token });
+  } catch (error) {
+    logError("preview-token: failed to create preview token", error, {
+      postId,
+      uid: session.uid,
+    });
+    return NextResponse.json(
+      { error: "Preview secret not configured" },
+      { status: 500 },
+    );
+  }
 }

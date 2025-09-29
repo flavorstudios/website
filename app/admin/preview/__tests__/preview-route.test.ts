@@ -3,13 +3,16 @@
  */
 import React from 'react';
 import PreviewPage from '../[id]/page';
-import { verifyAdminSession } from '@/lib/admin-auth';
+import { verifyAdminSession, requireAdmin, getSessionInfo } from '@/lib/admin-auth';
 import { blogStore } from '@/lib/content-store';
 import { inspectPreviewToken } from '@/lib/preview-token';
+import { logError } from '@/lib/log';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 jest.mock('@/lib/admin-auth', () => ({
   verifyAdminSession: jest.fn(),
+  requireAdmin: jest.fn(),
+  getSessionInfo: jest.fn(),
 }));
 
 jest.mock('@/lib/content-store', () => ({
@@ -30,6 +33,7 @@ jest.mock('next/headers', () => ({
 
 jest.mock('@/lib/preview-token', () => ({
   inspectPreviewToken: jest.fn(),
+  createPreviewToken: jest.fn(),
 }));
 
 jest.mock('next/navigation', () => ({
@@ -42,8 +46,13 @@ jest.mock('next/navigation', () => ({
 let server: { close: () => void } | null = null;
 
 const mockedVerify = verifyAdminSession as jest.Mock;
+const mockedRequireAdmin = requireAdmin as jest.Mock;
+const mockedGetSessionInfo = getSessionInfo as jest.Mock;
 const mockedGetById = (blogStore.getById as unknown) as jest.Mock;
 const mockedInspect = inspectPreviewToken as jest.Mock;
+const mockedCreatePreviewToken = jest.requireMock('@/lib/preview-token')
+  .createPreviewToken as jest.Mock;
+const mockedLogError = logError as jest.Mock;
 
 type BlogPost = import('@/lib/content-store').BlogPost;
 
@@ -77,6 +86,8 @@ describe('preview route', () => {
   
   beforeEach(() => {
     mockedVerify.mockResolvedValue({ uid: 'user1' });
+    mockedRequireAdmin.mockResolvedValue(true);
+    mockedGetSessionInfo.mockResolvedValue({ uid: 'user1' });
     mockedGetById.mockResolvedValue(mockPost);
     cookieValue = 'session';
     headerStore = new Headers({ 'x-request-id': 'req' });
@@ -85,6 +96,8 @@ describe('preview route', () => {
       status: 'valid',
       payload: { postId: '1', uid: 'user1', exp: Math.floor(Date.now() / 1000) + 60 },
     });
+    mockedCreatePreviewToken.mockReset();
+    mockedLogError.mockReset();
   });
 
   it('returns element for valid token', async () => {
@@ -139,5 +152,29 @@ describe('preview route', () => {
     expect(renderToStaticMarkup(result.props.children as React.ReactElement)).toContain(
       'Access denied.'
     );
+  });
+  
+describe('POST /api/admin/preview-token', () => {
+    it('returns JSON error when preview token creation fails', async () => {
+      const { POST } = await import('@/app/api/admin/preview-token/route');
+
+      mockedCreatePreviewToken.mockImplementation(() => {
+        throw new Error('missing secret');
+      });
+
+      const request = {
+        json: jest.fn().mockResolvedValue({ postId: '1' }),
+      } as any;
+
+      const response = await POST(request as any);
+
+      expect(response.status).toBe(500);
+      await expect(response.json()).resolves.toEqual({ error: 'Preview secret not configured' });
+      expect(mockedLogError).toHaveBeenCalledWith(
+        'preview-token: failed to create preview token',
+        expect.any(Error),
+        expect.objectContaining({ postId: '1', uid: 'user1' })
+      );
+    });
   });
 });

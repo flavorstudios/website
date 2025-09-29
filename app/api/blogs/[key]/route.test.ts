@@ -1,10 +1,35 @@
 /**
  * @jest-environment node
  */
-import { blogStore } from "@/lib/content-store";
+import {
+  blogStore,
+  getFallbackBlogPostBySlug,
+  getFallbackBlogPostById,
+  isFallbackResult,
+} from "@/lib/content-store";
 
-jest.mock("@/lib/content-store", () => ({
-  blogStore: { getBySlug: jest.fn(), getById: jest.fn() },
+jest.mock("@/lib/content-store", () => {
+  const actual = jest.requireActual<typeof import("@/lib/content-store")>(
+    "@/lib/content-store",
+  );
+  const mockModule = Object.create(null);
+  const descriptors = Object.getOwnPropertyDescriptors(actual);
+  delete descriptors.blogStore;
+  Object.defineProperties(mockModule, descriptors);
+  Object.defineProperty(mockModule, "blogStore", {
+    value: { getBySlug: jest.fn(), getById: jest.fn() },
+    enumerable: true,
+    configurable: true,
+    writable: true,
+  });
+  Object.defineProperty(mockModule, "__esModule", {
+    value: true,
+  });
+  return mockModule;
+});
+  getFallbackBlogPostBySlug: jest.fn(),
+  getFallbackBlogPostById: jest.fn(),
+  isFallbackResult: jest.fn(),
 }));
 
 describe("GET /api/blogs/:key", () => {
@@ -36,6 +61,12 @@ describe("GET /api/blogs/:key", () => {
   beforeEach(() => {
     (blogStore.getBySlug as jest.Mock).mockReset();
     (blogStore.getById as jest.Mock).mockReset();
+    (getFallbackBlogPostBySlug as jest.Mock).mockReset();
+    (getFallbackBlogPostById as jest.Mock).mockReset();
+    (isFallbackResult as jest.Mock).mockReset();
+    (getFallbackBlogPostBySlug as jest.Mock).mockReturnValue(null);
+    (getFallbackBlogPostById as jest.Mock).mockReturnValue(null);
+    (isFallbackResult as jest.Mock).mockReturnValue(false);
     delete process.env.ACCEPT_ID_FALLBACK;
   });
 
@@ -73,5 +104,24 @@ describe("GET /api/blogs/:key", () => {
     const res = await GET({} as Request, { params: Promise.resolve({ key: "1" }) });
     expect(res.status).toBe(404);
     expect(blogStore.getById).not.toHaveBeenCalled();
+  });
+  
+  it("returns formatted fallback content when handler throws", async () => {
+    (blogStore.getBySlug as jest.Mock).mockImplementation(() => {
+      throw new Error("store failure");
+    });
+    const fallbackPost = { ...mockPost, content: "Fallback content" };
+    (getFallbackBlogPostBySlug as jest.Mock).mockReturnValue(fallbackPost);
+
+    const { GET } = await import("./route");
+
+    const res = await GET({} as Request, {
+      params: Promise.resolve({ key: "test" }),
+    });
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.content).toBe("Fallback content");
+    expect(data.slug).toBe("test");
   });
 });

@@ -78,3 +78,49 @@ await bucket.upload("./local-file.png", { destination: "media/local-file.png" })
 
 Client code should never attempt direct writes; browser uploads will fail due to
 the restrictive `storage.rules`.
+
+## Refreshing signed media URLs
+
+Storage reads are limited to authenticated admins (`allow read` in
+[`storage.rules`](./storage.rules) checks for admin claims), so public media
+must use either public ACLs or signed URLs. Legacy media documents that lack a
+`urlExpiresAt` timestamp will eventually return 403/404 responses once their
+signed URLs lapse.
+
+To migrate older entries, run the helper script below. It iterates the `media`
+collection, refreshes any expired or missing URLs via `refreshMediaUrl`, and
+persists fresh `url`/`urlExpiresAt` values:
+
+```bash
+pnpm tsx scripts/refresh-media-urls.ts
+```
+
+The script logs each refreshed document and exits with a non-zero status if any
+updates fail so you can rerun or investigate as needed.
+
+### Restoring missing media objects
+
+If a tile in the Media Library shows an **Error** badge, the signed URL in
+Firestore likely points to an object that has been moved or renamed in Firebase
+Storage. Use the following workflow to reconnect the document with its backing
+file:
+
+1. Locate the document in Firestore and note its `id` and `filename` fields.
+2. Inspect the Storage bucket to confirm that an object exists at
+   `media/<doc.id>/<doc.filename>` (for example, with the Firebase console or
+   `gsutil ls gs://<bucket>/media/<doc.id>/`).
+3. If the object is missing, search the bucket for the original upload. Move or
+   copy it back into `media/<doc.id>/` and restore the original filename. If the
+   stored filename has intentionally changed, update the document’s `filename`
+   field in Firestore so it matches the object that now lives under
+   `media/<doc.id>/`.
+4. Once the storage layout is corrected, trigger a manual refresh by calling
+   `POST /api/media/refresh` with the document ID (the admin Media Library can
+   do this via the “Refresh URL” action). This step records a fresh signed
+   download URL and clears any stale expiry metadata.
+5. Reload the Media Library. The tile should render normally once the signed URL
+   is valid again.
+
+Keeping Storage and Firestore in sync avoids repeated refresh attempts and
+prevents future uploads with the same basename from colliding.
+

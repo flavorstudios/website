@@ -70,7 +70,8 @@ export async function GET(
         reason: "handler-error",
         key: normalizedKey,
       });
-      const res = NextResponse.json(formatPublicBlogDetail(fallback));
+      const formattedFallback = await formatPublicBlogDetail(fallback);
+      const res = NextResponse.json(formattedFallback);
       res.headers.set("Cache-Control", "public, max-age=300");
       return res;
     }

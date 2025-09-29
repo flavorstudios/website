@@ -14,8 +14,9 @@ export async function GET(
   { params }: { params: Promise<{ key: string }> },
 ) {
   const { key } = await params;
+  let normalizedKey: string | null = null;
   try {
-    const normalizedKey = normalizeSlug(key);
+    normalizedKey = normalizeSlug(key);
 
     if (!normalizedKey) {
       return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
@@ -57,7 +58,9 @@ export async function GET(
     } catch {
       // ignore logging errors
     }
-    const fallbackViaSlug = getFallbackBlogPostBySlug(normalizedKey);
+    const fallbackViaSlug = normalizedKey
+      ? getFallbackBlogPostBySlug(normalizedKey)
+      : null;
     const allowIdFallback = (process.env.ACCEPT_ID_FALLBACK || "").toLowerCase() === "true";
     const fallbackViaId = allowIdFallback ? getFallbackBlogPostById(key) : null;
     const fallback = fallbackViaSlug ?? fallbackViaId;

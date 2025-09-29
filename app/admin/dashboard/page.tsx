@@ -39,10 +39,24 @@ export const metadata = getMetadata({
   // No schema for admin/noindex pages
 });
 
-async function prefetchDashboard(qc: QueryClient, cookie: string) {
+function resolveRequestOrigin(headerList: { get(name: string): string | null }): string {
+  const forwardedProto = headerList.get("x-forwarded-proto")?.split(",")[0]?.trim() ?? null;
+  const forwardedHost = headerList.get("x-forwarded-host")?.split(",")[0]?.trim() ?? null;
+  const host = forwardedHost ?? headerList.get("host");
+
+  if (host) {
+    const proto = forwardedProto ??
+      (host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https");
+    return `${proto}://${host}`;
+  }
+
+  return process.env.NEXT_PUBLIC_BASE_URL ?? SITE_URL;
+}
+
+async function prefetchDashboard(qc: QueryClient, cookie: string, origin: string) {
   // Forward cookies for admin-only API
   // Prefer absolute URL to ensure cookies are sent in all envs
-  const url = `${SITE_URL}/api/admin/stats?range=12mo`;
+  const url = `${origin}/api/admin/stats?range=12mo`;
 
   await qc.prefetchQuery({
     queryKey: ["dashboard", "12mo"],
@@ -65,8 +79,18 @@ async function prefetchDashboard(qc: QueryClient, cookie: string) {
 export default async function AdminDashboardPage() {
   const h = await headers();
   const cookie = h.get("cookie") ?? "";
-  const req = new NextRequest(`${SITE_URL}/admin/dashboard`, {
-    headers: { cookie },
+  const origin = resolveRequestOrigin(h);
+  const reqHeaders = new Headers();
+  for (const [key, value] of h.entries()) {
+    reqHeaders.append(key, value);
+  }
+  if (cookie) {
+    reqHeaders.set("cookie", cookie);
+  } else {
+    reqHeaders.delete("cookie");
+  }
+  const req = new NextRequest(new URL("/admin/dashboard", origin), {
+    headers: reqHeaders,
   });
   const isAdmin = await requireAdmin(req);
   if (!isAdmin) {
@@ -77,7 +101,7 @@ export default async function AdminDashboardPage() {
 
   // Don’t block rendering if SSR fetch fails—client will recover
   try {
-    await prefetchDashboard(queryClient, cookie);
+    await prefetchDashboard(queryClient, cookie, origin);
   } catch {
     // noop: keeps page resilient when API or auth is unavailable on the server
   }

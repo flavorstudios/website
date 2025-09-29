@@ -114,6 +114,7 @@ export function SystemSettings() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <AdminPageHeader
+          as="h2"
           title="Settings"
           subtitle="Manage your profile, notifications, and appearance preferences"
         />

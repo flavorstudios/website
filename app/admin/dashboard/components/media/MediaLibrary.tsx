@@ -261,9 +261,19 @@ export default function MediaLibrary({
   };
 
   // Infinite scroll using IntersectionObserver with duplicate-fire guard
+  const pageIsScrollable = useCallback(() => {
+    if (typeof window === "undefined") return false;
+    const root = document.scrollingElement || document.documentElement;
+    if (!root) return false;
+    return root.scrollHeight > root.clientHeight + 1;
+  }, []);
+
   useEffect(() => {
+    if (clientEnv.TEST_MODE === "true") return;
+    if (!initialized) return;
     const node = loadMoreRef.current;
     if (!node || cursor === null) return;
+    if (!pageIsScrollable() && items.length < 2) return;
 
     let pending = false;
     const observer = new IntersectionObserver(
@@ -282,7 +292,7 @@ export default function MediaLibrary({
     observer.observe(node);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cursor, loading]);
+  }, [cursor, initialized, items.length, loading, pageIsScrollable]);
 
   // Filter, search, and sort logic (null-safe)
   const q = search.trim().toLowerCase();

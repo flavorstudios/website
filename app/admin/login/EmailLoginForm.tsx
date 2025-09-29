@@ -62,12 +62,19 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
     setError("")
     setFormError("")
     try {
-      const res = await fetch("/api/admin/email-session", {
+      const hasOtp = Boolean(otp)
+      const endpoint = hasOtp ? "/api/admin/email-session" : "/api/admin/email-login"
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password, otp: otp || undefined }),
+        body: JSON.stringify({
+          email,
+          password,
+          ...(hasOtp ? { otp } : {}),
+        }),
         credentials: "include",
       })
       if (!res.ok) {

@@ -497,11 +497,64 @@ export default function BlogManager() {
     return (
       <div>
         <AdminPageHeader
+          as="h2"
           title="Blog Management"
           subtitle="Create, edit and publish blog posts for Flavor Studios"
         />
-        <div className="mt-4">
-          <BlogTableSkeleton />
+        <div className="mt-4 space-y-4">
+          <div className="sm:hidden space-y-3" data-testid="blog-card-list">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <div className="h-4 w-4 rounded border border-muted bg-muted/60 animate-pulse" aria-hidden="true" />
+              <div className="h-3 w-20 rounded bg-muted animate-pulse" aria-hidden="true" />
+            </div>
+
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="rounded-xl border bg-white p-4 shadow-sm"
+                data-testid="blog-card"
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className="mt-1 h-4 w-4 rounded border border-muted bg-muted/60 animate-pulse"
+                    aria-hidden="true"
+                  />
+
+                  <div className="flex flex-1 flex-col gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex flex-1 items-start gap-3">
+                        <div
+                          className="h-12 w-16 flex-shrink-0 rounded bg-muted animate-pulse"
+                          aria-hidden="true"
+                        />
+
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <div className="h-4 w-3/4 rounded bg-muted animate-pulse" aria-hidden="true" />
+                          <div className="h-3 w-1/2 rounded bg-muted animate-pulse" aria-hidden="true" />
+                        </div>
+                      </div>
+
+                      <div
+                        className="h-9 w-9 rounded bg-muted animate-pulse"
+                        aria-hidden="true"
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <div className="h-3 w-16 rounded bg-muted animate-pulse" aria-hidden="true" />
+                      <div className="h-3 w-3 rounded-full bg-muted animate-pulse" aria-hidden="true" />
+                      <div className="h-3 w-12 rounded bg-muted animate-pulse" aria-hidden="true" />
+                      <div className="h-5 w-16 rounded-full bg-muted animate-pulse" aria-hidden="true" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="hidden sm:block">
+            <BlogTableSkeleton />
+          </div>
         </div>
       </div>
     );
@@ -526,6 +579,7 @@ export default function BlogManager() {
       {/* Header with right-aligned action buttons */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <AdminPageHeader
+          as="h2"
           title="Blog Management"
           subtitle="Create, edit and publish blog posts for Flavor Studios"
         />

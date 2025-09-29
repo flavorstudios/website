@@ -65,6 +65,7 @@ export default function MediaToolbar({
   return (
     <div className="space-y-4 mb-4">
       <AdminPageHeader
+        as="h2"
         title="Media Library"
         subtitle="Manage and organize your uploaded media files"
       />

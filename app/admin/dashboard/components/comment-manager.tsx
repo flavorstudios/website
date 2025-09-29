@@ -634,6 +634,7 @@ export default function CommentManager() {
     <div className="space-y-6">
       {/* --- Standardized Admin Section Header --- */}
       <AdminPageHeader
+        as="h2"
         title="Comments & Reviews"
         subtitle="Moderate user comments and feedback"
       />

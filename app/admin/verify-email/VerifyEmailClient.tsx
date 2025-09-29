@@ -41,7 +41,23 @@ export default function VerifyEmailClient() {
     []
   );
 
+  const startRedirect = useCallback(
+    (path: string) => {
+      void waitForNextFrame().then(() => {
+        router.replace(path);
+      });
+    },
+    [router, waitForNextFrame]
+  );
+
   const refreshUser = useCallback(async () => {
+    let shouldResetLoading = true;
+
+    const scheduleRedirect = (path: string) => {
+      shouldResetLoading = false;
+      startRedirect(path);
+    };
+
     if (testMode) {
       const verified = testEmailVerified ?? false;
       if (verified) {
@@ -49,8 +65,7 @@ export default function VerifyEmailClient() {
           tone: "success",
           message: "Email verified! Redirecting to the dashboard…",
         });
-        await waitForNextFrame();
-        router.replace("/admin/dashboard");
+        scheduleRedirect("/admin/dashboard");
       } else {
         setStatus({
           tone: "neutral",
@@ -58,7 +73,9 @@ export default function VerifyEmailClient() {
             "Test mode: set admin-test-email-verified to true in localStorage or click “I have verified” once ready.",
         });
       }
-      setLoading(false);
+      if (shouldResetLoading) {
+        setLoading(false);
+      }
       return;
     }
 
@@ -66,7 +83,7 @@ export default function VerifyEmailClient() {
       const auth = getFirebaseAuth();
       const user = auth.currentUser;
       if (!user) {
-        router.replace("/admin/login");
+        scheduleRedirect("/admin/login");
         return;
       }
       await user.reload();
@@ -75,8 +92,7 @@ export default function VerifyEmailClient() {
           tone: "success",
           message: "Email verified! Redirecting to the dashboard…",
         });
-        await waitForNextFrame();
-        router.replace("/admin/dashboard");
+        scheduleRedirect("/admin/dashboard");
         return;
       }
       setStatus({
@@ -92,14 +108,15 @@ export default function VerifyEmailClient() {
         message: "We couldn't verify your status. Please try again shortly.",
       });
     } finally {
-      setLoading(false);
+      if (shouldResetLoading) {
+        setLoading(false);
+      }
     }
   }, [
     requireVerification,
-    router,
+    startRedirect,
     testMode,
     testEmailVerified,
-    waitForNextFrame,
   ]);
 
   useEffect(() => {
@@ -116,18 +133,20 @@ export default function VerifyEmailClient() {
       });
       return;
     }
+    let shouldResetSending = true;
     try {
       setSending(true);
       const auth = getFirebaseAuth();
       const user = auth.currentUser;
       if (!user) {
-        router.replace("/admin/login");
+        shouldResetSending = false;
+        startRedirect("/admin/login");
         return;
       }
       await user.reload();
       if (user.emailVerified) {
-        await waitForNextFrame();
-        router.replace("/admin/dashboard");
+        shouldResetSending = false;
+        startRedirect("/admin/dashboard");
         return;
       }
       const { sendEmailVerification } = await import("firebase/auth");
@@ -145,20 +164,23 @@ export default function VerifyEmailClient() {
         message: "Failed to send verification email. Try again in a minute.",
       });
     } finally {
-      setSending(false);
+      if (shouldResetSending) {
+        setSending(false);
+      }
     }
   };
 
   const handleCheck = async () => {
     if (testMode) {
       setLoading(true);
-      setTestEmailVerified(true);
+      void Promise.resolve().then(() => {
+        setTestEmailVerified(true);
+      });
       setStatus({
         tone: "success",
         message: "Test mode: verification marked complete. Redirecting…",
       });
-      await waitForNextFrame();
-      router.replace("/admin/dashboard");
+      startRedirect("/admin/dashboard");
       return;
     }
     setLoading(true);

@@ -12,6 +12,9 @@ import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { clientEnv } from "@/env.client"
 
+const TEST_EMAIL_VERIFIED_STORAGE_KEY = "admin-test-email-verified"
+const TEST_EMAIL_VERIFIED_EVENT_NAME = "admin-test-email-verified-change"
+
 // ---- Define Context Shape ----
 interface AdminAuthContextType {
   user: User | null
@@ -36,7 +39,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") {
       return null
     }
-    const stored = window.localStorage.getItem("admin-test-email-verified")
+    const stored = window.localStorage.getItem(
+      TEST_EMAIL_VERIFIED_STORAGE_KEY
+    )
     if (stored === null) {
       return null
     }
@@ -53,13 +58,22 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     (value: boolean | null) => {
       if (typeof window !== "undefined") {
         if (value === null) {
-          window.localStorage.removeItem("admin-test-email-verified")
+          window.localStorage.removeItem(TEST_EMAIL_VERIFIED_STORAGE_KEY)
         } else {
           window.localStorage.setItem(
-            "admin-test-email-verified",
+            TEST_EMAIL_VERIFIED_STORAGE_KEY,
             value ? "true" : "false"
           )
         }
+
+        window.dispatchEvent(
+          new CustomEvent<{ value: boolean | null }>(
+            TEST_EMAIL_VERIFIED_EVENT_NAME,
+            {
+              detail: { value },
+            }
+          )
+        )
       }
       setTestEmailVerifiedState(value)
     },
@@ -67,21 +81,52 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   )
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    if (!testMode) {
+      setTestEmailVerifiedState(null)
+      return
+    }
+
+    const stored = window.localStorage.getItem(TEST_EMAIL_VERIFIED_STORAGE_KEY)
+    if (stored === null) {
+      setTestEmailVerifiedState(null)
+      return
+    }
+    setTestEmailVerifiedState(stored === "true")
+  }, [testMode])
+
+  useEffect(() => {
     if (!testMode || typeof window === "undefined") {
       return
     }
 
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key !== "admin-test-email-verified") {
+      if (event.key !== TEST_EMAIL_VERIFIED_STORAGE_KEY) {
         return
       }
       const nextValue = event.newValue === null ? null : event.newValue === "true"
       setTestEmailVerifiedState(nextValue)
     }
 
+    const handleCustomEvent = (event: Event) => {
+      const customEvent = event as CustomEvent<{ value: boolean | null }>
+      setTestEmailVerifiedState(customEvent.detail?.value ?? null)
+    }
+
     window.addEventListener("storage", handleStorageChange)
+    window.addEventListener(
+      TEST_EMAIL_VERIFIED_EVENT_NAME,
+      handleCustomEvent as EventListener
+    )
     return () => {
       window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener(
+        TEST_EMAIL_VERIFIED_EVENT_NAME,
+        handleCustomEvent as EventListener
+      )
     }
   }, [testMode])
 

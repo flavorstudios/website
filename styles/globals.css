@@ -196,6 +196,21 @@ body {
   background: linear-gradient(180deg, rgba(79, 70, 229, 1), rgba(124, 58, 237, 1));
 }
 
+.admin-shell--with-overlay {
+  position: relative;
+  isolation: isolate;
+}
+
+.admin-shell--with-overlay::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  pointer-events: none;
+  z-index: 35;
+  transition: opacity 0.2s ease-in-out;
+}
+
 /* ========== Mobile Touch Scrolling Improvements ========== */
 @supports (-webkit-overflow-scrolling: touch) {
   .mobile-elegant-scrollbar {

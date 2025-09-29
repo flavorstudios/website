@@ -166,6 +166,14 @@ export function AdminHeader({
             <NotificationBell />
             <HelpMenu />
             <ThemeToggle aria-label="Toggle theme" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="px-3 2xl:hidden"
+              onClick={onLogout}
+            >
+              Log out
+            </Button>
             <UserMenu
               avatar={avatar}
               name="Admin"

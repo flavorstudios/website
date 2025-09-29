@@ -255,6 +255,7 @@ export default function Applications() {
     <div className="space-y-6">
       {/* --- Standardized Admin Section Header --- */}
       <AdminPageHeader
+        as="h2"
         title="Applications"
         subtitle="Manage all user submissions and job applications"
       />

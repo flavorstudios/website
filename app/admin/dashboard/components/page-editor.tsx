@@ -81,6 +81,7 @@ export function PageEditor() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <AdminPageHeader
+          as="h2"
           title="Page Editor"
           subtitle="Edit and manage your website pages"
         />

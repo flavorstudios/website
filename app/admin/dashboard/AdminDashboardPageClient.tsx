@@ -32,6 +32,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { cn } from "@/lib/utils";
 
 // Lazy sections via central registry
 const DashboardOverview = dynamic(
@@ -308,12 +309,18 @@ export default function AdminDashboardPageClient({
 
     if (isMobile && sidebarOpen) {
       wrapper.style.pointerEvents = "none";
+      wrapper.style.position = "relative";
+      wrapper.style.zIndex = "0";
     } else {
       wrapper.style.pointerEvents = "";
+      wrapper.style.position = "";
+      wrapper.style.zIndex = "";
     }
 
     return () => {
       wrapper.style.pointerEvents = "";
+      wrapper.style.position = "";
+      wrapper.style.zIndex = "";
     };
   }, [isMobile, sidebarOpen]);
 
@@ -439,9 +446,12 @@ export default function AdminDashboardPageClient({
 
           {/* Shell: stack on mobile; sidebar column only from lg+ */}
           <div
-            className="admin-shell grid min-h-screen supports-[height:100dvh]:min-h-[100dvh]
+            className={cn(
+              "admin-shell grid min-h-screen supports-[height:100dvh]:min-h-[100dvh]
                        grid-cols-1 lg:grid-cols-[var(--sidebar-w,16rem)_1fr]
-                       transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden"
+                       transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden",
+              isMobile && sidebarOpen && "admin-shell--with-overlay"
+            )}
             data-sidebar-open={isMobile && sidebarOpen ? "true" : "false"}
           >
             <AdminSidebar
@@ -468,12 +478,13 @@ export default function AdminDashboardPageClient({
                 className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-4 pt-4
                            pb-[calc(var(--mobile-nav-h,64px)+env(safe-area-inset-bottom,0px))] lg:pb-6"
                 role="main"
-                aria-label={currentTitle}
+                aria-labelledby="admin-dashboard-page-title"
                 aria-hidden={isMobile && sidebarOpen ? true : undefined}
               >
                 <div className="max-w-7xl mx-auto">
                   <h1
                     className="sr-only"
+                    id="admin-dashboard-page-title"
                     data-testid="dashboard-page-heading"
                   >
                     {currentTitle}

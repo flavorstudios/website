@@ -44,6 +44,7 @@ export function UserRoleManager() {
     <div className="space-y-6">
       {/* Page Heading and Subheading */}
       <AdminPageHeader
+        as="h2"
         title="User management"
         subtitle="Manage all users, roles, and permissions"
       />

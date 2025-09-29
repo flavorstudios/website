@@ -698,7 +698,11 @@ export default function EmailInbox() {
         </DialogContent>
       </Dialog>
       {/* --- Standardized Admin Section Header --- */}
-      <AdminPageHeader title="Email Inbox" subtitle="View and respond to contact messages" />
+      <AdminPageHeader
+        as="h2"
+        title="Email Inbox"
+        subtitle="View and respond to contact messages"
+      />
       <div className="flex items-center justify-between">
         <Badge variant="secondary" className="bg-blue-100 text-blue-700">
           {messages.filter((m) => m.status === "unread").length} unread

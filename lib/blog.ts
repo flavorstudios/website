@@ -7,9 +7,9 @@ export async function getBlogPost(key: string): Promise<PublicBlogDetail | null>
   try {
     const encodedKey = encodeURIComponent(key)
     const response = await fetch(
-    baseUrl ? `${baseUrl}/api/blogs/${encodedKey}` : `/api/blogs/${encodedKey}`,
+      baseUrl ? `${baseUrl}/api/blogs/${encodedKey}` : `/api/blogs/${encodedKey}`,
       {
-        next: { revalidate: 3600 },
+        next: { revalidate: 300 },
       },
     )
 

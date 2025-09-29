@@ -12,25 +12,14 @@ jest.mock("@/lib/content-store", () => {
   const actual = jest.requireActual<typeof import("@/lib/content-store")>(
     "@/lib/content-store",
   );
-  const mockModule = Object.create(null);
-  const descriptors = Object.getOwnPropertyDescriptors(actual);
-  delete descriptors.blogStore;
-  Object.defineProperties(mockModule, descriptors);
-  Object.defineProperty(mockModule, "blogStore", {
-    value: { getBySlug: jest.fn(), getById: jest.fn() },
-    enumerable: true,
-    configurable: true,
-    writable: true,
-  });
-  Object.defineProperty(mockModule, "__esModule", {
-    value: true,
-  });
-  return mockModule;
+  return {
+    ...actual,
+    blogStore: { getBySlug: jest.fn(), getById: jest.fn() },
+    getFallbackBlogPostBySlug: jest.fn(),
+    getFallbackBlogPostById: jest.fn(),
+    isFallbackResult: jest.fn(),
+  };
 });
-  getFallbackBlogPostBySlug: jest.fn(),
-  getFallbackBlogPostById: jest.fn(),
-  isFallbackResult: jest.fn(),
-}));
 
 describe("GET /api/blogs/:key", () => {
   const mockPost = {

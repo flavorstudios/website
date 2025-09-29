@@ -10,7 +10,6 @@ import {
   unlinkMediaFromPost,
 } from "@/lib/media";
 import type { BlogPost } from "@/lib/types";
-import { logBreadcrumb, logError } from "@/lib/log";
 
 export type { BlogPost };
 

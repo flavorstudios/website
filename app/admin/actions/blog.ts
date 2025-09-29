@@ -22,7 +22,7 @@ export async function createBlogPost(formData: FormData) {
   const seoDescription = formData.get("seoDescription") as string
   const publishedAt = formData.get("publishedAt") as string
 
-  await blogStore.create({
+  const post = await blogStore.create({
     title,
     slug,
     content,
@@ -38,11 +38,21 @@ export async function createBlogPost(formData: FormData) {
     publishedAt: publishedAt || new Date().toISOString(),
   })
 
+  if (post.status === "published") {
+    revalidatePath("/blog")
+    if (post.slug) {
+      revalidatePath(`/blog/${post.slug}`)
+    }
+  }
+
   revalidatePath("/admin/dashboard")
 }
 
 export async function updateBlogPost(id: string, formData: FormData) {
   if (!(await requireAdminAction())) throw new Error("Unauthorized")
+
+  const existing = await blogStore.getById(id)
+  if (!existing) throw new Error("Post not found")
 
   const category = formData.get("category") as string
   const updates = {
@@ -63,7 +73,20 @@ export async function updateBlogPost(id: string, formData: FormData) {
     publishedAt: formData.get("publishedAt") as string,
   }
 
-  await blogStore.update(id, updates)
+  const incomingSlug = updates.slug
+  if (incomingSlug && existing.slug && incomingSlug !== existing.slug) {
+    revalidatePath(`/blog/${existing.slug}`)
+  }
+
+  const updated = await blogStore.update(id, updates)
+  if (!updated) throw new Error("Failed to update post")
+
+  if (updated.status === "published" || existing.status === "published") {
+    revalidatePath("/blog")
+    if (updated.slug) {
+      revalidatePath(`/blog/${updated.slug}`)
+    }
+  }
   revalidatePath("/admin/dashboard")
 }
 

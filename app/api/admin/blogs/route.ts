@@ -1,5 +1,6 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store" // <-- Updated as per Codex
 import { publishToUser } from "@/lib/sse-broker"  // <-- Added for SSE broadcast
 import { logActivity } from "@/lib/activity-log"
@@ -178,6 +179,13 @@ export async function POST(request: NextRequest) {
       status: "success",
       user: actor?.email || actor?.uid || "unknown",
     })
+
+    if (blog.status === "published") {
+      revalidatePath("/blog")
+      if (blog.slug) {
+        revalidatePath(`/blog/${blog.slug}`)
+      }
+    }
 
     return NextResponse.json(
       {

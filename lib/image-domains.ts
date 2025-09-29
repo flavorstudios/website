@@ -36,7 +36,15 @@ export function isAllowedImageUrl(url: string): boolean {
     const parsed = new URL(trimmedUrl, siteUrl);
 
     if (parsed.hostname === siteHostname && parsed.origin === siteOrigin) {
-      return true;
+      if (parsed.protocol === "https:" || parsed.protocol === "http:") {
+        return true;
+      }
+
+      return false;
+    }
+
+    if (parsed.protocol !== "https:") {
+      return false;
     }
 
     return ALLOWED_IMAGE_DOMAINS.includes(parsed.hostname);

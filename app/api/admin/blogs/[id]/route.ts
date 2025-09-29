@@ -4,6 +4,7 @@ import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store" // Use the
 import { logError } from "@/lib/log"
 import { publishToUser } from "@/lib/sse-broker"
 import { logActivity } from "@/lib/activity-log"
+import { revalidatePath } from "next/cache"
 
 export async function PUT(
   request: NextRequest,
@@ -16,6 +17,16 @@ export async function PUT(
   try {
     const data = await request.json()
     const session = await getSessionAndRole(request)
+    const existing = await blogStore.getById(id)
+    if (!existing) {
+      return NextResponse.json({ error: "Blog not found" }, { status: 404 })
+    }
+
+    const incomingSlug = typeof data.slug === "string" ? data.slug : undefined
+    if (incomingSlug && existing.slug && incomingSlug !== existing.slug) {
+      revalidatePath(`/blog/${existing.slug}`)
+    }
+
     const blog = await blogStore.update(
       id,
       {
@@ -28,6 +39,12 @@ export async function PUT(
       return NextResponse.json({ error: "Blog not found" }, { status: 404 })
     }
     publishToUser("blog", "posts", {})
+    if (blog.status === "published" || existing.status === "published") {
+      revalidatePath("/blog")
+      if (blog.slug) {
+        revalidatePath(`/blog/${blog.slug}`)
+      }
+    }
     await logActivity({
       type: "blog.update",
       title: blog.title || id,

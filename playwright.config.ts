@@ -8,6 +8,8 @@ export default defineConfig({
   testDir: './tests',
   // Exclude Jest-only tests from Playwright runs
   testIgnore: [
+    // Ignore any Jest-style unit test filenames so Playwright only runs e2e specs
+    '**/*.test.{ts,tsx,js,jsx}',
     'validate-session.spec.ts',
     'firebase-admin.test.ts',
     'cron.spec.ts',

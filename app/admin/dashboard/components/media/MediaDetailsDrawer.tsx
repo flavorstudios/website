@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -175,9 +175,10 @@ export default function MediaDetailsDrawer({
       : undefined;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
-      <DialogContent
-        className="p-4 space-y-4 max-w-md w-full max-h-[90vh] overflow-y-auto"
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="p-4 space-y-4 max-h-[90vh] overflow-y-auto sm:max-w-md"
         aria-label="Media details"
       >
         {(onPrev || onNext) && (
@@ -389,7 +390,7 @@ export default function MediaDetailsDrawer({
             {deleting ? "Deleting…" : "Delete"}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

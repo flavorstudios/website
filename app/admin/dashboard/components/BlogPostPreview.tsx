@@ -14,7 +14,7 @@ import type { PublicBlogDetail } from "@/lib/types";
 import { sanitizeHtmlClient } from "@/lib/sanitize/client";
 import { isAllowedImageUrl } from "@/lib/image-domains";
 import { safeDateLabel } from "@/lib/safe-date";
-import { normalizeAuthor } from "@/lib/formatters";
+import { normalizeAuthor } from "@/lib/author-normalizer";
 
 interface BlogPostPreviewProps {
   post: PublicBlogDetail | StoreBlogPost;

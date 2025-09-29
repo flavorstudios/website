@@ -4,6 +4,7 @@ import "server-only";
 import { getStorage } from "firebase-admin/storage";
 import { FieldValue } from "firebase-admin/firestore";
 import { safeAdminDb } from "@/lib/firebase-admin"; // value (Firestore | undefined)
+import { logger } from "@/lib/logger";
 import type { MediaDoc, MediaVariant } from "@/types/media";
 import crypto from "node:crypto";
 import type { Sharp } from "sharp";
@@ -193,8 +194,15 @@ export async function listMedia(options: ListMediaOptions | number = 50): Promis
   }
 
   const collection = tryGetCollection();
-  if (!collection || !tryGetBucket()) {
+  if (!collection) {
     return { media: [], cursor: null };
+  }
+
+  const bucket = tryGetBucket();
+  if (!bucket) {
+    logger.warn(
+      "[Media] Cloud Storage bucket unavailable — returning Firestore results only."
+    );
   }
 
   let query: FirebaseFirestore.Query<MediaDoc> = collection.orderBy("createdAt", order);

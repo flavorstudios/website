@@ -1,10 +1,11 @@
 'use client'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Pencil, Eye, Archive, Upload, Trash2 } from 'lucide-react'
+import { Pencil, Eye, Archive, Upload, Trash2, Loader2 } from 'lucide-react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { BlogPost } from '@/lib/content-store'
 import { cn } from '@/lib/utils'
+import { usePreviewNavigation } from './usePreviewNavigation'
 
 export interface BlogRowActionsProps {
   post: BlogPost
@@ -20,6 +21,9 @@ export default function BlogRowActions({
   className,
 }: BlogRowActionsProps) {
   const isPublished = post.status === 'published'
+  const { openPreview, loadingId } = usePreviewNavigation()
+  const previewing = loadingId === post.id
+
   return (
     <div className={cn('flex gap-2', className)}>
       <Tooltip>
@@ -42,22 +46,21 @@ export default function BlogRowActions({
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            asChild
             variant="ghost"
             size="icon"
-            aria-label="Preview post"
-            title="Preview"
+            aria-label={previewing ? 'Loading preview' : 'Preview post'}
+            title={previewing ? 'Loading preview…' : 'Preview'}
+            onClick={() => openPreview(post.id)}
+            disabled={previewing}
           >
-            <Link
-              href={`/admin/preview/${post.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            {previewing ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
               <Eye className="h-4 w-4" aria-hidden="true" />
-            </Link>
+            )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent>Preview</TooltipContent>
+        <TooltipContent>{previewing ? 'Loading…' : 'Preview'}</TooltipContent>
       </Tooltip>
 
       <Tooltip>

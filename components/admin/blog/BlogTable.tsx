@@ -13,13 +13,14 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
-import { MoreVertical, Pencil, Eye, Archive, Upload, Trash2 } from "lucide-react"
+import { MoreVertical, Pencil, Eye, Archive, Upload, Trash2, Loader2 } from "lucide-react"
 import BlogStatusBadge from "./BlogStatusBadge"
 import BlogRowActions from "./BlogRowActions"
 import type { BlogPost } from "@/lib/content-store"
 import Image from "next/image"
 import { formatDate } from "@/lib/date"
 import useMediaQuery from "@/hooks/use-media-query"
+import { usePreviewNavigation } from "./usePreviewNavigation"
 
 export interface BlogTableProps {
   posts: BlogPost[]
@@ -41,6 +42,7 @@ export default function BlogTable({
   const allSelected = posts.length > 0 && posts.every((p) => selected.has(p.id))
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([])
   const isMobile = useMediaQuery("(max-width: 639px)")
+  const { openPreview, loadingId: previewLoadingId } = usePreviewNavigation()
 
   if (posts.length === 0) {
     return (
@@ -80,6 +82,7 @@ export default function BlogTable({
 
         {posts.map((post) => {
           const isPublished = post.status === "published"
+          const previewing = previewLoadingId === post.id
           return (
             <div
               key={post.id}
@@ -142,15 +145,19 @@ export default function BlogTable({
                     </Link>
                   </DropdownMenuItem>
 
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href={`/admin/preview/${post.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault()
+                      void openPreview(post.id)
+                    }}
+                    disabled={previewing}
+                  >
+                    {previewing ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" aria-hidden="true" />
+                    ) : (
                       <Eye className="h-4 w-4 mr-2" aria-hidden="true" />
-                      <span>Preview</span>
-                    </Link>
+                    )}
+                    <span>{previewing ? "Loading preview…" : "Preview"}</span>
                   </DropdownMenuItem>
 
                   <DropdownMenuSeparator />

@@ -16,6 +16,7 @@ import {
   Archive,
   Upload,
   Trash2,
+  Loader2,
 } from "lucide-react";
 import useSWR from "swr";
 
@@ -65,12 +66,14 @@ import { useDebounce } from "@/hooks/use-debounce";
 import useMediaQuery from "@/hooks/use-media-query";
 import { formatDate } from "@/lib/date";
 import { logClientError } from "@/lib/log-client";
+import { usePreviewNavigation } from "@/components/admin/blog/usePreviewNavigation";
 
 export default function BlogManager() {
   const { toast } = useToast();
   const [isRevalidating, setIsRevalidating] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { openPreview, loadingId: previewLoadingId } = usePreviewNavigation();
 
   const [categories, setCategories] = useState<CategoryData[]>([]);
 
@@ -776,15 +779,23 @@ export default function BlogManager() {
                                   <span>Edit</span>
                                 </Link>
                               </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link
-                                  href={`/admin/preview/${post.id}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
+                              <DropdownMenuItem
+                                onSelect={(event) => {
+                                  event.preventDefault();
+                                  void openPreview(post.id);
+                                }}
+                                disabled={previewLoadingId === post.id}
+                              >
+                                {previewLoadingId === post.id ? (
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                                ) : (
                                   <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
-                                  <span>Preview</span>
-                                </Link>
+                                  )}
+                                <span>
+                                  {previewLoadingId === post.id
+                                    ? "Loading preview…"
+                                    : "Preview"}
+                                </span>
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem

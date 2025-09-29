@@ -95,7 +95,8 @@ async function fileUrl(file: any): Promise<{ url: string; expiresAt?: number }> 
   const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
   const [signedUrl] = await file.getSignedUrl({
     action: "read",
-    expires: expiresAt,
+    expires: new Date(expiresAt),
+    version: "v4",
   });
   return { url: signedUrl, expiresAt };
 }
@@ -232,7 +233,14 @@ export async function uploadMedia(buffer: Buffer, name: string, mimeType: string
   const id = genId();
   const objectPath = `media/${id}/${name}`;
   const file = bucket.file(objectPath);
-  await file.save(buffer, { contentType: mimeType });
+  await file.save(buffer, {
+    contentType: mimeType,
+    resumable: false,
+    metadata: {
+      cacheControl: "public, max-age=31536000, immutable",
+      contentDisposition: "inline",
+    },
+  });
 
   const { url, expiresAt } = await fileUrl(file);
 

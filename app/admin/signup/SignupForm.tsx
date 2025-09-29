@@ -109,6 +109,10 @@ export default function SignupForm() {
 
         if (testMode) {
           setTestEmailVerified(data?.requiresVerification ? false : true);
+          if (typeof window !== "undefined") {
+            window.location.assign(redirect);
+            return;
+          }
         }
         
         router.push(redirect);

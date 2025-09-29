@@ -472,6 +472,12 @@ export default function AdminDashboardPageClient({
                 aria-hidden={isMobile && sidebarOpen ? true : undefined}
               >
                 <div className="max-w-7xl mx-auto">
+                  <h1
+                    className="sr-only"
+                    data-testid="dashboard-page-heading"
+                  >
+                    {currentTitle}
+                  </h1>
                   {/* Online/Offline indicator */}
                   {!isOnline && (
                     <Alert className="mb-4 border-amber-200 bg-amber-50">

@@ -78,8 +78,10 @@ export async function GET(req: NextRequest) {
   }
 
   const loginUrl = new URL("/admin/login?reset=1", originUrl);
+  const normalizedRedirectOrigin = normalizeOrigin(redirectUrl);
+  const normalizedOrigin = normalizeOrigin(originUrl);
   const isCompletedUrl =
-    redirectUrl.origin === originUrl.origin &&
+    normalizedRedirectOrigin === normalizedOrigin &&
     redirectUrl.pathname === "/api/admin/password-reset/completed";
 
   await logPasswordResetEvent("reset_link_opened", {

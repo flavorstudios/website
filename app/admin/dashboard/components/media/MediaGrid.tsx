@@ -57,7 +57,10 @@ export default function MediaGrid({
       });
     }
 
-    if ((status === 401 || status === 403) && onRefresh) {
+    if (
+      onRefresh &&
+      (status === 401 || status === 403 || status === 404)
+    ) {
       try {
         await onRefresh(item);
         setFailed((prev) => {

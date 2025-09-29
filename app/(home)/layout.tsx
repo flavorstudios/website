@@ -5,7 +5,6 @@ import { Footer } from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import PwaServiceWorker from "@/components/PwaServiceWorker"
 import AdblockBanner from "@/components/AdblockBanner"
-import { SkipLink } from "@/components/skip-link"
 
 import { getDynamicCategories } from "@/lib/dynamic-categories"
 import { serverEnv } from "@/env/server"
@@ -60,7 +59,6 @@ export default async function HomeLayout({ children }: { children: ReactNode }) 
 
   return (
     <>
-      <SkipLink />
       <AdblockBanner />
       <HomeNavigation blogCategories={blogCategories} videoCategories={videoCategories} />
       <main id="main-content" tabIndex={-1} className="bg-slate-950">

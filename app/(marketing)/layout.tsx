@@ -5,7 +5,6 @@ import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 import PwaServiceWorker from "@/components/PwaServiceWorker";
 import AdblockBanner from "@/components/AdblockBanner";
-import { SkipLink } from "@/components/skip-link";
 
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { serverEnv } from "@/env/server";
@@ -65,9 +64,6 @@ export default async function MarketingLayout({ children }: { children: ReactNod
 
   return (
     <>
-      {/* Skip to content link (marketing only) */}
-      <SkipLink />
-
       {/* ⭐️ AdBlock Support Banner (marketing only) */}
       <AdblockBanner />
 

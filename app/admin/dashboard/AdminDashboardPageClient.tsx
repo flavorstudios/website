@@ -447,9 +447,9 @@ export default function AdminDashboardPageClient({
           {/* Shell: stack on mobile; sidebar column only from lg+ */}
           <div
             className={cn(
-              "admin-shell grid min-h-screen supports-[height:100dvh]:min-h-[100dvh]
-                       grid-cols-1 lg:grid-cols-[var(--sidebar-w,16rem)_1fr]
-                       transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden",
+              "admin-shell grid min-h-screen supports-[height:100dvh]:min-h-[100dvh]",
+              "grid-cols-1 lg:grid-cols-[var(--sidebar-w,16rem)_1fr]",
+              "transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden",
               isMobile && sidebarOpen && "admin-shell--with-overlay"
             )}
             data-sidebar-open={isMobile && sidebarOpen ? "true" : "false"}

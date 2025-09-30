@@ -575,6 +575,10 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     updatedAt: post.updatedAt ?? new Date().toISOString(),
     views: post.views ?? 0,
     commentCount: post.commentCount ?? 0,
+    scheduledFor:
+      post.scheduledFor instanceof Date
+        ? post.scheduledFor.toISOString()
+        : post.scheduledFor ?? undefined,
   };
 
   // NEW: derive a compact autosave status label

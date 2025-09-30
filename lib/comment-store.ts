@@ -214,6 +214,3 @@ export const commentStore = {
     }
   },
 };
-
-// === ADDITIONAL EXPORTS FOR ADMIN STORES (required for API/build compatibility) ===
-export { blogStore, videoStore, pageStore } from "./content-store";

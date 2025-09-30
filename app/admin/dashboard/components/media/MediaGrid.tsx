@@ -42,7 +42,9 @@ export default function MediaGrid({
       return next;
     });
 
-    const src = event?.currentTarget?.src || item.url;
+    const rawSrc = event?.currentTarget?.src;
+    const src =
+      rawSrc && rawSrc.includes("/_next/image") ? item.url : rawSrc || item.url;
     let status: number | undefined;
     try {
       if (src) {
@@ -59,7 +61,7 @@ export default function MediaGrid({
 
     if (
       onRefresh &&
-      (status === 401 || status === 403 || status === 404)
+      (status === undefined || status === 0 || status >= 400)
     ) {
       try {
         await onRefresh(item);

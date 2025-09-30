@@ -1,6 +1,6 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
-import { videoStore } from "@/lib/comment-store"
+import { videoStore } from "@/lib/content-store"
 import { logActivity } from "@/lib/activity-log"
 
 export async function PUT(

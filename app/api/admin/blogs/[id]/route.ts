@@ -81,6 +81,7 @@ export async function PUT(
     }
 
     const blog = await blogStore.update(
+      id,
       updates,
       session?.email || "unknown"
     )

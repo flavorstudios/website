@@ -14,6 +14,7 @@ export default defineConfig({
     'firebase-admin.test.ts',
     'cron.spec.ts',
     'storage.rules.test.ts',
+    'admin-dashboard-prefetch.spec.tsx',
   ],
   timeout: 30000,
   retries: 0,

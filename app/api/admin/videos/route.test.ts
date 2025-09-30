@@ -11,7 +11,7 @@ jest.mock('@/lib/admin-auth', () => ({
 }));
 
 const create = jest.fn().mockResolvedValue({ id: '1', title: 'Test Video' });
-jest.mock('@/lib/comment-store', () => ({
+jest.mock('@/lib/content-store', () => ({
   videoStore: { create },
 }));
 

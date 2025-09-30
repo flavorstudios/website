@@ -12,7 +12,7 @@ jest.mock('@/lib/admin-auth', () => ({
 
 const update = jest.fn().mockResolvedValue({ id: '1', title: 'Updated Video' });
 const remove = jest.fn().mockResolvedValue(true);
-jest.mock('@/lib/comment-store', () => ({
+jest.mock('@/lib/content-store', () => ({
   videoStore: { update, delete: remove },
 }));
 

@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge" // Added for multi-category suppor
 import { formatDate } from "@/lib/date" // <-- Added
 import type { PublicBlogSummary } from "@/lib/types"
 import { clientEnv } from "@/env.client"
+import { cn } from "@/lib/utils"
 
 interface Video {
   id: string
@@ -62,7 +63,12 @@ function highlightText(text: string, searchTerm: string) {
   )
 }
 
-export function SearchFeature() {
+interface SearchFeatureProps {
+  triggerClassName?: string
+  iconClassName?: string
+}
+
+export function SearchFeature({ triggerClassName, iconClassName }: SearchFeatureProps = {}) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [results, setResults] = useState<SearchResults>({ blogs: [], videos: [] })
@@ -214,10 +220,10 @@ export function SearchFeature() {
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(true)}
-        className="text-sm font-medium transition-colors hover:text-blue-600"
+        className={cn("text-sm font-medium transition-colors hover:text-blue-600", triggerClassName)}
         aria-label="Search"
       >
-        <Search className="h-5 w-5" />
+        <Search className={cn("h-5 w-5", iconClassName)} />
       </Button>
 
       {/* Search Modal */}

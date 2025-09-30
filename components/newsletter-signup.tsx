@@ -32,7 +32,11 @@ export function NewsletterSignup() {
     // This 'relative' container is the key to the fix.
     // It will now reliably contain the success/error messages.
     <div className="relative w-full">
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-4 sm:flex-row"
+        aria-busy={isSubmitting}
+      >
         <Input
           type="email"
           placeholder="Enter your email address"
@@ -45,8 +49,9 @@ export function NewsletterSignup() {
         />
         <Button
           type="submit"
-          className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-8"
+          className="bg-white px-8 font-semibold text-blue-600 hover:bg-blue-50"
           disabled={isSubmitting}
+          aria-disabled={isSubmitting}
         >
           {isSubmitting ? (
             <>
@@ -59,18 +64,19 @@ export function NewsletterSignup() {
         </Button>
       </form>
 
-      {/* Messages are now outside the form but inside the relative container */}
-      {submitStatus === "success" && (
-        <div className="absolute left-0 right-0 -bottom-8 text-sm text-green-300">
-          Thank you for subscribing!
-        </div>
-      )}
+      <div
+        aria-live={submitStatus === "error" ? "assertive" : "polite"}
+        role={submitStatus === "error" ? "alert" : submitStatus === "success" ? "status" : undefined}
+        className="mt-2 min-h-[1.5rem] text-center text-sm font-medium"
+      >
+        {submitStatus === "success" && (
+          <p className="text-green-300">Thank you for subscribing!</p>
+        )}
 
       {submitStatus === "error" && (
-        <div className="absolute left-0 right-0 -bottom-8 text-sm text-red-300">
-          Something went wrong. Please try again.
-        </div>
-      )}
+          <p className="text-red-300">Something went wrong. Please try again.</p>
+        )}
+      </div>
     </div>
   );
 }

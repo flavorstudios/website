@@ -114,7 +114,10 @@ export function HomeNavigation({ blogCategories, videoCategories }: HomeNavigati
             items={menuItems}
             className="[&_a[role=menuitem]]:!text-slate-200 [&_a[role=menuitem]]:hover:!text-white [&_button[role=menuitem]]:!text-slate-200 [&_button[role=menuitem]]:hover:!text-white"
           />
-          <SearchFeature />
+          <SearchFeature
+            triggerClassName="text-white hover:text-blue-300"
+            iconClassName="text-white hover:text-blue-300"
+          />
           <Button asChild variant="default" className="bg-orange-700 text-white hover:bg-orange-800">
             <Link href="/support">
               <Coffee className="mr-2 h-4 w-4" />
@@ -124,7 +127,10 @@ export function HomeNavigation({ blogCategories, videoCategories }: HomeNavigati
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
-          <SearchFeature />
+          <SearchFeature
+            triggerClassName="text-white hover:text-blue-300"
+            iconClassName="text-white hover:text-blue-300"
+          />
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button
@@ -132,6 +138,7 @@ export function HomeNavigation({ blogCategories, videoCategories }: HomeNavigati
                 aria-controls="mobile-navigation"
                 variant="ghost"
                 size="icon"
+                className="text-white hover:text-blue-300"
               >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle navigation menu</span>

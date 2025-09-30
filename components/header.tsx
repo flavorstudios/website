@@ -93,19 +93,26 @@ export function Header({
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <MegaMenu items={menuItems} />
-            <SearchFeature />
+            <SearchFeature
+              triggerClassName="text-white hover:text-blue-300"
+              iconClassName="text-white hover:text-blue-300"
+            />
           </div>
 
           {/* Mobile Navigation */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <div className="flex items-center md:hidden">
-              <SearchFeature />
+              <SearchFeature
+                triggerClassName="text-white hover:text-blue-300"
+                iconClassName="text-white hover:text-blue-300"
+              />
               <SheetTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
                   aria-expanded={isOpen}
                   aria-controls="mobile-menu"
+                  className="text-white hover:text-blue-300"
                 >
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>

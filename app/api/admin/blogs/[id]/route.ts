@@ -1,10 +1,25 @@
 import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
+import type { BlogPost } from "@/lib/content-store"
 import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store" // Use the correct store
 import { logError } from "@/lib/log"
 import { publishToUser } from "@/lib/sse-broker"
 import { logActivity } from "@/lib/activity-log"
 import { revalidatePath } from "next/cache"
+
+function parseOptionalIsoDate(value: unknown, field: string): string | undefined {
+  if (value === null || value === undefined) return undefined
+  if (typeof value !== "string") {
+    throw new Error(`Invalid ${field} timestamp`)
+  }
+  const trimmed = value.trim()
+  if (trimmed.length === 0) return undefined
+  const date = new Date(trimmed)
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`Invalid ${field} timestamp`)
+  }
+  return date.toISOString()
+}
 
 export async function PUT(
   request: NextRequest,
@@ -16,6 +31,17 @@ export async function PUT(
   const { id } = await params
   try {
     const data = await request.json()
+    let scheduledForIso: string | undefined
+    let publishedAtIso: string | undefined
+    try {
+      scheduledForIso = parseOptionalIsoDate(data.scheduledFor, "scheduledFor")
+      publishedAtIso = parseOptionalIsoDate(data.publishedAt, "publishedAt")
+    } catch (error) {
+      return NextResponse.json({ error: (error as Error).message }, { status: 400 })
+    }
+    const rawUpdates = { ...data }
+    delete rawUpdates.scheduledFor
+    delete rawUpdates.publishedAt
     const session = await getSessionAndRole(request)
     const existing = await blogStore.getById(id)
     if (!existing) {
@@ -27,12 +53,35 @@ export async function PUT(
       revalidatePath(`/blog/${existing.slug}`)
     }
 
+    const resolvedCategories = Array.isArray(data.categories) && data.categories.length > 0
+      ? data.categories
+      : typeof data.category === "string" && data.category.trim().length > 0
+        ? [data.category]
+        : Array.isArray(existing.categories) && existing.categories.length > 0
+          ? existing.categories
+          : [existing.category]
+
+    const updates: Partial<BlogPost> = {
+      ...rawUpdates,
+      categories: resolvedCategories,
+    }
+    if (!updates.category) {
+      updates.category = existing.category
+    }
+    if (scheduledForIso !== undefined) {
+      updates.scheduledFor = scheduledForIso
+    }
+    if (publishedAtIso !== undefined) {
+      updates.publishedAt = publishedAtIso
+    } else {
+      const nextStatus = (updates.status ?? existing.status) as BlogPost["status"]
+      if (nextStatus === "scheduled") {
+        delete updates.publishedAt
+      }
+    }
+
     const blog = await blogStore.update(
-      id,
-      {
-        ...data,
-        categories: Array.isArray(data.categories) ? data.categories : [data.category],
-      },
+      updates,
       session?.email || "unknown"
     )
     if (!blog) {

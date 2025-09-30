@@ -20,6 +20,16 @@ The admin UI now surfaces Firebase email/password login by default. The full onb
 4. Subsequent logins happen at `/admin/login`. The “Sign in with email” form uses Firebase Auth on the client, then exchanges the ID token with `POST /api/admin/email-login` to set the server `admin-session` cookie.
 5. If Google SSO is enabled, users can link providers after signing in with email/password. Attempting Google sign-in on an account that already exists now prompts the user to complete the email login and link their providers from settings.
 
+### Firebase-less / test mode
+
+When any required public Firebase config (`NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`, `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`, `NEXT_PUBLIC_FIREBASE_APP_ID`) is missing, or when `NODE_ENV === test`, the client automatically enters **test mode**. In this mode:
+
+* `clientEnv.TEST_MODE` is forced to `'true'` so the UI can detect the degraded experience.
+* The admin login defaults to the legacy env-based flow and hides the toggle that normally reveals it.
+* Firebase email login short-circuits network calls to satisfy Playwright mocks without loading Firebase in the browser.
+
+To restore the Firebase experience, provide the full set of `NEXT_PUBLIC_FIREBASE_*` variables (and their server-side counterparts) and deploy with `TEST_MODE` unset or explicitly set to `'false'`. The toggle will reappear once the config is complete.
+
 ### Legacy env-based login
 
 The old environment-variable password flow is still available under the “Use legacy admin password (env-based)” disclosure on the login page. It relies on `ADMIN_PASSWORD_HASH` and `ADMIN_JWT_SECRET` and should only be used as a fallback while migrating existing operators.

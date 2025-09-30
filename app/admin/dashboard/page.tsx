@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { NextRequest } from "next/server";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
+import { isAdminSdkAvailable, ADMIN_BYPASS } from "@/lib/firebase-admin";
 
 // === SEO METADATA (ADMIN - NOINDEX) ===
 export const metadata = getMetadata({
@@ -99,11 +100,15 @@ export default async function AdminDashboardPage() {
 
   const queryClient = new QueryClient();
 
+  const canServerPrefetch = isAdminSdkAvailable() && !ADMIN_BYPASS;
+
   // Don’t block rendering if SSR fetch fails—client will recover
-  try {
-    await prefetchDashboard(queryClient, cookie, origin);
-  } catch {
-    // noop: keeps page resilient when API or auth is unavailable on the server
+  if (canServerPrefetch) {
+    try {
+      await prefetchDashboard(queryClient, cookie, origin);
+    } catch {
+      // noop: keeps page resilient when API or auth is unavailable on the server
+    }
   }
 
   return (

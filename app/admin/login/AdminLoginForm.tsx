@@ -71,7 +71,8 @@ const GoogleIcon = () => (
 export default function AdminLoginForm() {
   const { error, setError, clearError } = useAuthError()
   const [loading, setLoading] = useState(false)
-  const [showLegacyLogin, setShowLegacyLogin] = useState(false)
+  const isTestMode = clientEnv.TEST_MODE === "true"
+  const [showLegacyLogin, setShowLegacyLogin] = useState(() => isTestMode)
   const router = useRouter()
   const searchParams = useSearchParams()
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
@@ -245,21 +246,23 @@ export default function AdminLoginForm() {
         </div>
         <div className="flex flex-col gap-8 bg-white px-6 py-8 md:px-10 md:py-12 text-left">
           <div className="flex flex-col gap-6">
-            <Button
-              type="button"
-              variant="ghost"
-              className="self-start px-0 text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
-              data-testid="legacy-login-toggle"
-              aria-pressed={showLegacyLogin}
-              onClick={() => {
-                clearError()
-                setShowLegacyLogin((prev) => !prev)
-              }}
-            >
-              {showLegacyLogin
-                ? "Use modern admin login (Firebase)"
-                : "Use legacy admin password (env-based)"}
-            </Button>
+            {!isTestMode && (
+              <Button
+                type="button"
+                variant="ghost"
+                className="self-start px-0 text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                data-testid="legacy-login-toggle"
+                aria-pressed={showLegacyLogin}
+                onClick={() => {
+                  clearError()
+                  setShowLegacyLogin((prev) => !prev)
+                }}
+              >
+                {showLegacyLogin
+                  ? "Use modern admin login (Firebase)"
+                  : "Use legacy admin password (env-based)"}
+              </Button>
+            )}
             {showLegacyLogin ? (
               <EmailLoginForm
                 error={error}

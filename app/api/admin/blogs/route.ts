@@ -1,9 +1,24 @@
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
+import type { BlogPost } from "@/lib/content-store"
 import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store" // <-- Updated as per Codex
 import { publishToUser } from "@/lib/sse-broker"  // <-- Added for SSE broadcast
 import { logActivity } from "@/lib/activity-log"
+
+function parseOptionalIsoDate(value: unknown, field: string): string | undefined {
+  if (value === null || value === undefined) return undefined
+  if (typeof value !== "string") {
+    throw new Error(`Invalid ${field} timestamp`)
+  }
+  const trimmed = value.trim()
+  if (trimmed.length === 0) return undefined
+  const date = new Date(trimmed)
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`Invalid ${field} timestamp`)
+  }
+  return date.toISOString()
+}
 
 // GET: Fetch all blogs for admin dashboard (with filtering, sorting, pagination)
 export async function GET(request: NextRequest) {
@@ -89,6 +104,7 @@ export async function GET(request: NextRequest) {
       seoDescription: blog.seoDescription,
       author: blog.author,
       publishedAt: blog.publishedAt,
+      scheduledFor: blog.scheduledFor,
       createdAt: blog.createdAt,
       updatedAt: blog.updatedAt,
       views: blog.views,
@@ -148,12 +164,36 @@ export async function POST(request: NextRequest) {
     const excerpt = blogData.excerpt || generatedExcerpt
 
     // Create the blog post
+    let scheduledForIso: string | undefined
+    let publishedAtIso: string | undefined
+    try {
+      scheduledForIso = parseOptionalIsoDate(blogData.scheduledFor, "scheduledFor")
+      publishedAtIso = parseOptionalIsoDate(blogData.publishedAt, "publishedAt")
+    } catch (error) {
+      return NextResponse.json(
+        {
+          error: (error as Error).message || "Invalid timestamp",
+        },
+        { status: 400 },
+      )
+    }
+
+    const status: BlogPost["status"] =
+      blogData.status === "published" || blogData.status === "scheduled"
+        ? blogData.status
+        : "draft"
+    const nowIso = new Date().toISOString()
+    const computedPublishedAt =
+      status === "published"
+        ? publishedAtIso ?? nowIso
+        : publishedAtIso ?? (status === "scheduled" ? scheduledForIso ?? nowIso : nowIso)
+
     const blog = await blogStore.create({
       title: blogData.title,
       slug,
       content: blogData.content,
       excerpt,
-      status: blogData.status || "draft",
+      status,
       category: blogData.category || "Episodes",
       categories: Array.isArray(blogData.categories)
         ? blogData.categories
@@ -163,8 +203,9 @@ export async function POST(request: NextRequest) {
       seoTitle: blogData.seoTitle || blogData.title,
       seoDescription: blogData.seoDescription || excerpt,
       author: blogData.author || "Flavor Studios",
-      publishedAt: blogData.publishedAt || new Date().toISOString(),
+      publishedAt: computedPublishedAt,
       readTime: blogData.readTime || "5 min read",
+      scheduledFor: scheduledForIso,
       // commentCount and shareCount default to 0 by the store model
     })
 
@@ -192,6 +233,7 @@ export async function POST(request: NextRequest) {
         ...blog,
         commentCount: blog.commentCount ?? 0,
         shareCount: blog.shareCount ?? 0,
+        scheduledFor: blog.scheduledFor,
       },
       { status: 201 },
     )

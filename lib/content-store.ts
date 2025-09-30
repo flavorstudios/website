@@ -73,6 +73,10 @@ const FALLBACK_BLOG_POSTS: BlogPost[] = [
 
 const normalizeBlogPost = (post: BlogPost): BlogPost => ({
   ...post,
+  scheduledFor:
+    typeof post.scheduledFor === "string" && post.scheduledFor.trim().length > 0
+      ? post.scheduledFor
+      : undefined,
   categories:
     Array.isArray(post.categories) && post.categories.length > 0
       ? post.categories
@@ -286,6 +290,7 @@ export const BlogPostSchema = z.object({
   seoDescription: z.string(),
   author: z.string(),
   publishedAt: z.string(),
+  scheduledFor: z.string().optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
   views: z.number(),
@@ -386,6 +391,9 @@ export const blogStore = {
       commentCount: 0,
       shareCount: 0,
     };
+    if (newPost.scheduledFor === undefined) {
+      delete (newPost as Partial<BlogPost>).scheduledFor;
+    }
     const db = getDbOrNull();
     if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db.collection("blogs").doc(id).set(newPost);
@@ -417,7 +425,13 @@ export const blogStore = {
     if (!beforeSnap.exists) return null;
     const before = beforeSnap.data() as BlogPost;
 
-    const serverUpdate = { ...data, updatedAt: new Date().toISOString() };
+    const serverUpdate: Partial<BlogPost> = {
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    if (serverUpdate.scheduledFor === undefined) {
+      delete serverUpdate.scheduledFor;
+    }
     await ref.set(serverUpdate, { merge: true });
 
     const afterSnap = await ref.get();

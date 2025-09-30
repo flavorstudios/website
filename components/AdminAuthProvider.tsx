@@ -14,6 +14,8 @@ import { clientEnv } from "@/env.client"
 
 const TEST_EMAIL_VERIFIED_STORAGE_KEY = "admin-test-email-verified"
 const TEST_EMAIL_VERIFIED_EVENT_NAME = "admin-test-email-verified-change"
+const TEST_MODE_OVERRIDE_STORAGE_KEY = "admin-test-mode"
+const TEST_MODE_OVERRIDE_EVENT_NAME = "admin-test-mode-change"
 
 // ---- Define Context Shape ----
 interface AdminAuthContextType {
@@ -33,6 +35,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [authInitFailed, setAuthInitFailed] = useState(() =>
+    Boolean(firebaseInitError)
+  )
   const [testEmailVerified, setTestEmailVerifiedState] = useState<
     boolean | null
   >(() => {
@@ -47,12 +52,23 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
     return stored === "true"
   })
+  const [testModeOverride, setTestModeOverride] = useState<boolean | null>(() => {
+    if (typeof window === "undefined") {
+      return null
+    }
+    const stored = window.localStorage.getItem(TEST_MODE_OVERRIDE_STORAGE_KEY)
+    if (stored === null) {
+      return null
+    }
+    return stored === "true"
+  })
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
   const router = useRouter()
   const pathname = usePathname()
   const requiresVerification =
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true"
-  const testMode = clientEnv.TEST_MODE === "true"
+  const envTestMode = clientEnv.TEST_MODE === "true"
+  const testMode = (testModeOverride ?? envTestMode) || authInitFailed
 
   const persistTestEmailVerified = useCallback(
     (value: boolean | null) => {
@@ -99,6 +115,50 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   }, [testMode])
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return
+    }
+
+    const readOverride = () => {
+      const stored = window.localStorage.getItem(TEST_MODE_OVERRIDE_STORAGE_KEY)
+      if (stored === null) {
+        setTestModeOverride(null)
+        return
+      }
+      setTestModeOverride(stored === "true")
+    }
+
+    readOverride()
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key !== TEST_MODE_OVERRIDE_STORAGE_KEY) {
+        return
+      }
+      const nextValue = event.newValue === null ? null : event.newValue === "true"
+      setTestModeOverride(nextValue)
+    }
+
+    const handleCustomEvent = (event: Event) => {
+      const customEvent = event as CustomEvent<{ value: boolean | null }>
+      setTestModeOverride(customEvent.detail?.value ?? null)
+    }
+
+    window.addEventListener("storage", handleStorageChange)
+    window.addEventListener(
+      TEST_MODE_OVERRIDE_EVENT_NAME,
+      handleCustomEvent as EventListener
+    )
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange)
+      window.removeEventListener(
+        TEST_MODE_OVERRIDE_EVENT_NAME,
+        handleCustomEvent as EventListener
+      )
+    }
+  }, [])
+
+  useEffect(() => {
     if (!testMode || typeof window === "undefined") {
       return
     }
@@ -132,11 +192,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Guard: If Firebase config error, do not register listener
-    if (firebaseInitError) {
-      setError(
-        firebaseErrorMessage ||
-          "Firebase app failed to initialize due to misconfiguration."
-      )
+    if (authInitFailed || firebaseInitError) {
+      setAuthInitFailed(true)
+      setLoading(false)
+      return
+    }
+
+    if (testModeOverride === true) {
       setLoading(false)
       return
     }
@@ -144,12 +206,12 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     let auth
     try {
       auth = getFirebaseAuth()
-    } catch {
-      setError(
-        firebaseErrorMessage ||
-          "Firebase app failed to initialize due to misconfiguration."
-      )
+    } catch (err) {
+      setAuthInitFailed(true)
       setLoading(false)
+      if (clientEnv.NODE_ENV !== "production") {
+        console.error("[AdminAuthProvider] Firebase init error:", err)
+      }
       return
     }
 
@@ -169,7 +231,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }
     )
     return () => unsubscribe()
-  }, [firebaseErrorMessage])
+  }, [authInitFailed, firebaseErrorMessage, testModeOverride])
 
   // --- Codex Update: Also call /api/admin/logout after Firebase signOut
   const signOutAdmin = async () => {

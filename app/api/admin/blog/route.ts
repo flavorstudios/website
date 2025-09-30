@@ -3,6 +3,20 @@ import { type NextRequest, NextResponse } from "next/server"
 import type { BlogPost } from "@/lib/content-store"
 import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store"
 
+function parseOptionalIsoDate(value: unknown, field: string): string | undefined {
+  if (value === null || value === undefined) return undefined
+  if (typeof value !== "string") {
+    throw new Error(`Invalid ${field} timestamp`)
+  }
+  const trimmed = value.trim()
+  if (trimmed.length === 0) return undefined
+  const date = new Date(trimmed)
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`Invalid ${field} timestamp`)
+  }
+  return date.toISOString()
+}
+
 export async function POST(request: NextRequest) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -17,12 +31,20 @@ export async function POST(request: NextRequest) {
     // Normalize date fields on the server
     const nowIso = new Date().toISOString()
     const status: BlogPost["status"] | undefined = blogData?.status
-    const normalizedPublishedAt =
-      status === "published" ? nowIso : undefined
-    const normalizedScheduledFor =
-      status === "scheduled" && blogData?.scheduledFor
-        ? new Date(blogData.scheduledFor).toISOString()
-        : undefined
+    let normalizedScheduledFor: string | undefined
+    let normalizedPublishedAt: string | undefined
+    try {
+      normalizedScheduledFor =
+        status === "scheduled"
+          ? parseOptionalIsoDate(blogData?.scheduledFor, "scheduledFor")
+          : undefined
+      normalizedPublishedAt =
+        status === "published"
+          ? parseOptionalIsoDate(blogData?.publishedAt, "publishedAt") ?? nowIso
+          : undefined
+    } catch (error) {
+      return NextResponse.json({ error: (error as Error).message }, { status: 400 })
+    }
 
     if (blogData.id) {
       // Update existing post

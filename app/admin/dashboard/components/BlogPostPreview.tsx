@@ -59,9 +59,9 @@ export default function BlogPostPreview({ post }: BlogPostPreviewProps) {
             </span>
           )}
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
           {post.title}
-        </h1>
+        </h2>
         <p className="text-xl text-gray-600 mb-6">{post.excerpt}</p>
         <div className="flex items-center gap-4 text-sm text-gray-500">
           {authorLabel && (

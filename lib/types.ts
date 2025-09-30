@@ -14,6 +14,7 @@ export interface BlogPost {
   seoDescription?: string;
   author: string;
   publishedAt: string;
+  scheduledFor?: string;
   createdAt: string;
   updatedAt: string;
   views: number;

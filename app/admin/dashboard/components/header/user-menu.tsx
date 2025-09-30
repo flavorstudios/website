@@ -75,10 +75,16 @@ export function UserMenu({ avatar, name, userRole, onLogout }: UserMenuProps) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={onLogout}
-          className="text-destructive focus:text-destructive"
+          asChild
+          className="text-destructive focus:bg-destructive/10 focus:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2"
         >
-          <LogOut className="h-4 w-4 mr-2" /> Log out
+          <button
+            type="button"
+            onClick={onLogout}
+            className="flex w-full items-center gap-2 text-left"
+          >
+            <LogOut className="h-4 w-4" /> Log out
+          </button>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

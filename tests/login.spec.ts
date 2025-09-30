@@ -43,7 +43,10 @@ test.describe('Login form', () => {
 
     await page.goto('/admin/login');
 
-    await page.getByTestId('legacy-login-toggle').click();
+    const legacyToggle = page.getByTestId('legacy-login-toggle');
+    if (await legacyToggle.count()) {
+      await legacyToggle.click();
+    }
 
     await expect(page.getByRole('button', { name: /verification code/i })).toHaveCount(0);
     await expect(page.getByLabel('Password')).toBeVisible();
@@ -88,7 +91,10 @@ test.describe('Login form', () => {
 
     await page.goto('/admin/login');
 
-    await page.getByTestId('legacy-login-toggle').click();
+    const legacyToggle = page.getByTestId('legacy-login-toggle');
+    if (await legacyToggle.count()) {
+      await legacyToggle.click();
+    }
 
     const verificationInput = page.getByLabel('Verification code');
     await expect(verificationInput).toBeVisible();

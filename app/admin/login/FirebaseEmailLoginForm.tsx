@@ -74,26 +74,46 @@ export default function FirebaseEmailLoginForm({
     setInfoNotice(null)
 
     try {
-      let credential: UserCredential | null = null
-      let idToken = ""
+      if (isTestMode) {
+        const response = await fetch("/api/admin/email-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email, password }),
+        })
 
-      if (!isTestMode) {
-        const auth = getFirebaseAuth()
-        credential = await signInWithEmailAndPassword(auth, email, password)
-
-        if (requiresVerification && !credential.user.emailVerified) {
-          await signOut(auth)
-          const message = "Verify your email before signing in."
+        if (!response.ok) {
+          const data = await response.json().catch(() => null)
+          const message =
+            (typeof data?.error === "string" && data.error.length > 0
+              ? data.error
+              : "Authentication failed.")
           setError(message)
           setFormError(message)
           setLoading(false)
           return
         }
 
-        idToken = await credential.user.getIdToken()
-      } else {
-        idToken = "test-mode-token"
+        onSuccess()
+        return
       }
+
+      let credential: UserCredential | null = null
+      let idToken = ""
+
+      const auth = getFirebaseAuth()
+      credential = await signInWithEmailAndPassword(auth, email, password)
+
+      if (requiresVerification && !credential.user.emailVerified) {
+        await signOut(auth)
+        const message = "Verify your email before signing in."
+        setError(message)
+        setFormError(message)
+        setLoading(false)
+        return
+      }
+
+      idToken = await credential.user.getIdToken()
 
       const response = await fetch("/api/admin/email-login", {
         method: "POST",
@@ -108,9 +128,7 @@ export default function FirebaseEmailLoginForm({
           (typeof data?.error === "string" && data.error.length > 0
             ? data.error
             : "Authentication failed.")
-        if (!isTestMode) {
-          await credential?.user?.reload().catch(() => undefined)
-        }
+        await credential?.user?.reload().catch(() => undefined)
         setError(message)
         setFormError(message)
         setLoading(false)

@@ -79,6 +79,12 @@ function getLengthMessage(length: number, min: number, max: number) {
   return "Perfect length";
 }
 
+function formatTimeForInput(date: Date) {
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
+
 export interface BlogCategory {
   name: string;
   slug: string;
@@ -95,6 +101,12 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   // Using a fixed user ID since NextAuth is not in use
   const userId = "anon";
   const contentHeadingId = useId();
+
+  const initialScheduledDate = (() => {
+    if (!initialPost?.scheduledFor) return undefined;
+    const dt = new Date(initialPost.scheduledFor);
+    return Number.isNaN(dt.getTime()) ? undefined : dt;
+  })();
 
   const [post, setPost] = useState<BlogPost>(() => ({
     id: initialPost?.id ?? "",
@@ -117,7 +129,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     wordCount: initialPost?.wordCount ?? 0,
     readTime: initialPost?.readTime ?? "1 min read",
     publishedAt: initialPost?.publishedAt ? new Date(initialPost.publishedAt) : undefined,
-    scheduledFor: initialPost?.scheduledFor ? new Date(initialPost.scheduledFor) : undefined,
+    scheduledFor: initialScheduledDate,
     createdAt: initialPost?.createdAt ?? new Date().toISOString(),
     updatedAt: initialPost?.updatedAt ?? new Date().toISOString(),
     views: initialPost?.views ?? 0,
@@ -129,8 +141,10 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [showScheduler, setShowScheduler] = useState(false);
-  const [scheduledDate, setScheduledDate] = useState<Date>();
-  const [scheduledTime, setScheduledTime] = useState("");
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(initialScheduledDate);
+  const [scheduledTime, setScheduledTime] = useState(
+    initialScheduledDate ? formatTimeForInput(initialScheduledDate) : "",
+  );
   const [tagInput, setTagInput] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
@@ -186,6 +200,25 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     dt.setSeconds(0, 0);
     return dt;
   }, [scheduledDate, scheduledTime]);
+
+  useEffect(() => {
+    if (post.status === "scheduled" && post.scheduledFor) {
+      const dt =
+        post.scheduledFor instanceof Date
+          ? post.scheduledFor
+          : new Date(post.scheduledFor);
+      if (!Number.isNaN(dt.getTime())) {
+        const timeString = formatTimeForInput(dt);
+        setScheduledDate((prev) =>
+          prev?.getTime() === dt.getTime() ? prev : new Date(dt),
+        );
+        setScheduledTime((prev) => (prev === timeString ? prev : timeString));
+        return;
+      }
+    }
+    setScheduledDate((prev) => (prev === undefined ? prev : undefined));
+    setScheduledTime((prev) => (prev === "" ? prev : ""));
+  }, [post.status, post.scheduledFor]);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -308,11 +341,12 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         const normalizedSlug = slugify(mergedPost.slug || mergedPost.title);
         const scheduledDateTime =
           mergedPost.status === "scheduled"
-            ? mergedPost.scheduledFor instanceof Date
-              ? mergedPost.scheduledFor
-              : mergedPost.scheduledFor
-              ? new Date(mergedPost.scheduledFor)
-              : getScheduledDateTime()
+            ? getScheduledDateTime() ??
+              (mergedPost.scheduledFor
+                ? mergedPost.scheduledFor instanceof Date
+                  ? mergedPost.scheduledFor
+                  : new Date(mergedPost.scheduledFor)
+                : undefined)
             : undefined;
         const response = await fetch(url, {
           method,
@@ -322,8 +356,12 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
             slug: normalizedSlug,
             category: mergedPost.categories?.[0] || mergedPost.category || "",
             // send ISO strings to the server
-            publishedAt: mergedPost.status === "published" ? new Date().toISOString() : undefined,
-            scheduledFor: scheduledDateTime ? scheduledDateTime.toISOString() : undefined,
+            publishedAt:
+              mergedPost.status === "published" ? new Date().toISOString() : undefined,
+            scheduledFor:
+              mergedPost.status === "scheduled" && scheduledDateTime
+                ? scheduledDateTime.toISOString()
+                : undefined,
           }),
           credentials: "include",
         });
@@ -339,21 +377,33 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
         throw new Error(message);
       }
 
-      const savedPost = await response.json();
+      const savedPost = (await response.json()) as StoreBlogPost;
       // prevent the next post state write from marking dirty
       skipDraftRef.current = true;
+      const savedScheduled = savedPost.scheduledFor
+        ? new Date(savedPost.scheduledFor)
+        : undefined;
+      const savedPublishedAt = savedPost.publishedAt
+        ? new Date(savedPost.publishedAt)
+        : undefined;
       const stateUpdates: Partial<BlogPost> = {
         ...overrides,
         id: savedPost.id,
         slug: normalizedSlug,
+        status: savedPost.status as BlogPost["status"],
+        scheduledFor: savedScheduled,
+        publishedAt: savedPublishedAt ?? post.publishedAt,
+        updatedAt: savedPost.updatedAt ?? post.updatedAt,
+        createdAt: savedPost.createdAt ?? post.createdAt,
+        views: savedPost.views ?? post.views,
+        commentCount: savedPost.commentCount ?? post.commentCount,
+        shareCount: savedPost.shareCount ?? post.shareCount,
       };
-      if (mergedPost.status === "published") {
-        stateUpdates.status = "published";
-        stateUpdates.publishedAt = new Date();
+      if (!savedPost.publishedAt && !savedPublishedAt) {
+        delete stateUpdates.publishedAt;
       }
-      if (mergedPost.status === "scheduled" && scheduledDateTime) {
-        stateUpdates.status = "scheduled";
-        stateUpdates.scheduledFor = scheduledDateTime;
+      if (!savedPost.scheduledFor && !savedScheduled) {
+        delete stateUpdates.scheduledFor;
       }
       setPost((prev) => ({ ...prev, ...stateUpdates }));
       setLastSaved(new Date());
@@ -557,7 +607,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               Back
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{post.id ? "Edit Post" : "Create New Post"}</h1>
+              <h2 className="text-3xl font-bold text-gray-900">{post.id ? "Edit Post" : "Create New Post"}</h2>
               <p className="text-gray-600">Write and publish your blog content</p>
             </div>
           </div>

@@ -15,7 +15,7 @@ export default function AdminPageHeader({
   title,
   subtitle,
   className,
-  as = "h1",
+  as = "h2",
 }: AdminPageHeaderProps) {
   const HeadingTag = as
 

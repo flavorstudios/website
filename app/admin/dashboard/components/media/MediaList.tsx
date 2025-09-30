@@ -35,6 +35,8 @@ export default function MediaList({
     }
   }
 
+  const getPrimaryLabel = (media: MediaDoc) => media.name ?? media.filename ?? "Untitled"
+
   const Preview = ({ m }: { m: MediaDoc }) => {
     const isImage = m.mime?.startsWith("image/")
     const isVideo = m.mime?.startsWith("video/")
@@ -42,7 +44,7 @@ export default function MediaList({
     return isImage ? (
       <Image
         src={m.url}
-        alt={m.alt || m.filename || m.name || "image"}
+        alt={m.alt || getPrimaryLabel(m)}
         width={56}
         height={56}
         className="object-cover rounded w-14 h-14 flex-shrink-0"
@@ -95,7 +97,7 @@ export default function MediaList({
           items.map((m) => (
             <div key={m.id} className="border rounded p-3 flex gap-3 items-center">
               <Checkbox
-                aria-label={`Select ${m.filename || m.name}`}
+                aria-label={`Select ${getPrimaryLabel(m)}`}
                 checked={selected.has(m.id)}
                 onClick={(e) => toggleSelect(m.id, e.shiftKey)}
               />
@@ -115,9 +117,9 @@ export default function MediaList({
                 type="button"
                 onClick={() => handleActivate(m)}
                 className="text-left flex-1 min-w-0 focus:outline-none focus:ring-2 focus:ring-primary rounded"
-                aria-label={`View details for ${m.filename || m.name}`}
+                aria-label={`View details for ${getPrimaryLabel(m)}`}
               >
-                <p className="font-medium truncate text-sm">{m.filename || m.name}</p>
+                <p className="font-medium truncate text-sm">{getPrimaryLabel(m)}</p>
                 <p className="text-xs text-gray-500">{formatDate(m.createdAt)}</p>
                 {m.tags?.length ? (
                   <p className="text-xs text-gray-400 truncate">
@@ -177,7 +179,7 @@ export default function MediaList({
                 <tr key={m.id} className="border-t">
                   <td className="p-2">
                     <Checkbox
-                      aria-label={`Select ${m.filename || m.name}`}
+                      aria-label={`Select ${getPrimaryLabel(m)}`}
                       checked={selected.has(m.id)}
                       onClick={(e) => toggleSelect(m.id, e.shiftKey)}
                     />
@@ -202,11 +204,11 @@ export default function MediaList({
                     )}
                     <button
                       type="button"
-                     onClick={() => onRowClick(m)}
+                      onClick={() => onRowClick(m)}
                       className="text-left w-full focus:outline-none focus:ring-2 focus:ring-primary rounded"
-                      aria-label={`View details for ${m.filename || m.name}`}
+                      aria-label={`View details for ${getPrimaryLabel(m)}`}
                     >
-                      {m.filename || m.name}
+                      {getPrimaryLabel(m)}
                     </button>
                   </td>
                   <td className="p-2">{(m.tags ?? []).join(", ")}</td>

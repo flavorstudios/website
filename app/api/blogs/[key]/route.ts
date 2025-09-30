@@ -5,9 +5,27 @@ import {
   getFallbackBlogPostBySlug,
   isFallbackResult,
 } from "@/lib/content-store";
+import type { BlogPost } from "@/lib/content-store";
 import { formatPublicBlogDetail } from "@/lib/formatters";
 import { logBreadcrumb, logError } from "@/lib/log";
 import { normalizeSlug } from "@/lib/slugify";
+
+function isPostPubliclyVisible(post: BlogPost | null): post is BlogPost {
+  if (!post) return false;
+  if (post.status === "published") return true;
+
+  if (post.status === "scheduled") {
+    const scheduledFor = post.scheduledFor ?? post.publishedAt;
+    if (!scheduledFor) return false;
+    const scheduledDate = new Date(scheduledFor);
+    if (Number.isNaN(scheduledDate.getTime())) {
+      return false;
+    }
+    return scheduledDate.getTime() <= Date.now();
+  }
+
+  return false;
+}
 
 export async function GET(
   request: Request,
@@ -30,7 +48,7 @@ export async function GET(
       usedFallback = usedFallback || isFallbackResult(post);
     }
 
-    if (!post || post.status !== "published") {
+    if (!isPostPubliclyVisible(post)) {
       if (usedFallback) {
         logBreadcrumb("api/blogs/[key]:GET:fallback-response", {
           reason: "store-fallback-not-published",
@@ -65,7 +83,7 @@ export async function GET(
     const fallbackViaId = allowIdFallback ? getFallbackBlogPostById(key) : null;
     const fallback = fallbackViaSlug ?? fallbackViaId;
 
-    if (fallback && fallback.status === "published") {
+    if (fallback && isPostPubliclyVisible(fallback)) {
       logBreadcrumb("api/blogs/[key]:GET:fallback-response", {
         reason: "handler-error",
         key: normalizedKey,

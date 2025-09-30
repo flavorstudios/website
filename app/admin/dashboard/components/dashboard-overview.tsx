@@ -312,9 +312,9 @@ export default function DashboardOverview() {
     return (
       <div className="flex items-center justify-center h-64" data-testid="dashboard-error">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-red-700 mb-2">
+          <h2 className="text-xl font-semibold text-red-700 mb-2">
             Dashboard data unavailable
-          </h1>
+          </h2>
           <p className="text-red-600 mb-2">Unable to load dashboard data</p>
           <p className="text-gray-600 mb-2">Please try again.</p>
           {diagnosticCode && (
@@ -337,9 +337,9 @@ export default function DashboardOverview() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <h1 className="text-xl font-semibold text-gray-800 mb-2">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
             Dashboard data unavailable
-          </h1>
+          </h2>
           <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
           <Button
             onClick={refresh}
@@ -406,7 +406,7 @@ export default function DashboardOverview() {
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-8 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome back! 👋</h1>
+            <h2 className="text-3xl font-bold mb-2">Welcome back! 👋</h2>
             <p className="text-purple-100 text-lg">Here&apos;s what&apos;s happening with your Flavor Studios website today.</p>
           </div>
           <div className="hidden md:block">

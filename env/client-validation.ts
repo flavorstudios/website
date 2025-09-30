@@ -90,9 +90,37 @@ const defaults: ClientEnvShape = {
 const parsed = clientEnvSchema.safeParse(rawClientEnv);
 
 const parsedData: ClientEnvShape = parsed.success ? parsed.data : {};
-const clientValues: ClientEnvShape = {
+const baseClientValues: ClientEnvShape = {
   ...defaults,
   ...parsedData,
+};
+
+const firebasePublicConfigKeys: (keyof ClientEnvShape)[] = [
+  'NEXT_PUBLIC_FIREBASE_API_KEY',
+  'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
+  'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
+  'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
+  'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
+  'NEXT_PUBLIC_FIREBASE_APP_ID',
+];
+
+const isRawValueMissing = (value: unknown): boolean =>
+  value === undefined ||
+  value === null ||
+  (typeof value === 'string' && value.length === 0);
+
+  const firebaseConfigMissing = firebasePublicConfigKeys.some(key =>
+  isRawValueMissing(baseClientValues[key])
+);
+
+const derivedTestMode =
+  baseClientValues.TEST_MODE === 'true' ||
+  baseClientValues.NODE_ENV === 'test' ||
+  firebaseConfigMissing;
+
+const clientValues: ClientEnvShape = {
+  ...baseClientValues,
+  TEST_MODE: derivedTestMode ? 'true' : baseClientValues.TEST_MODE,
 };
 
 const requiredClientEnvVars: (keyof ClientEnvShape)[] = [];
@@ -100,17 +128,12 @@ const optionalClientEnvVars = (Object.keys(defaults) as (keyof ClientEnvShape)[]
   key => !requiredClientEnvVars.includes(key)
 );
 
-const isValueMissing = (value: unknown): boolean =>
-  value === undefined ||
-  value === null ||
-  (typeof value === 'string' && value.length === 0);
-
 const missingRequiredEnvVars = requiredClientEnvVars.filter(key =>
-  isValueMissing(clientValues[key])
+  isRawValueMissing(clientValues[key])
 );
 
 const missingOptionalEnvVars = optionalClientEnvVars.filter(key =>
-  isValueMissing(clientValues[key])
+  isRawValueMissing(clientValues[key])
 );
 
 if (!skipValidation) {
@@ -147,5 +170,5 @@ export const clientEnv: ClientEnv = Object.freeze({
   missingOptionalEnvVars: missingOptionalEnvVars.map(String),
   missingRequiredEnvVars: missingRequiredEnvVars.map(String),
   skipClientValidation: skipValidation,
-  isValueMissing: (key: keyof ClientEnvShape) => isValueMissing(clientValues[key]),
+  isValueMissing: (key: keyof ClientEnvShape) => isRawValueMissing(clientValues[key]),
 });

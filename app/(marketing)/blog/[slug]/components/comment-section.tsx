@@ -44,8 +44,16 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       setLoading(true)
       const response = await fetch(`/api/comments?postId=${postId}&postType=blog`)
       if (response.ok) {
-        const data = await response.json()
-        setComments(data.comments || [])
+        const data = (await response.json()) as Comment[] | { comments?: Comment[] }
+        let normalizedComments: Comment[] = []
+
+        if (Array.isArray(data)) {
+          normalizedComments = data
+        } else if (Array.isArray(data?.comments)) {
+          normalizedComments = data.comments
+        }
+
+        setComments(normalizedComments)
       }
     } catch (error) {
       console.error("Failed to fetch comments:", error)

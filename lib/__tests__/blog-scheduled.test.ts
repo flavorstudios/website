@@ -73,7 +73,7 @@ describe("blogStore scheduled posts", () => {
       unlinkMediaFromPost: jest.fn(),
     }));
 
-    const { blogStore } = require("@/lib/content-store") as typeof import("@/lib/content-store");
+    const { blogStore } = (await import("@/lib/content-store")) as typeof import("@/lib/content-store");
 
     const initialSchedule = new Date("2025-06-15T12:30:00.000Z").toISOString();
 

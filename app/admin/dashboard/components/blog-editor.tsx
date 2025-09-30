@@ -41,7 +41,7 @@ import type {
 
 export type BlogPost = Omit<
   StoreBlogPost,
-  "publishedAt" | "createdAt" | "updatedAt" | "views" | "commentCount"
+  "publishedAt" | "createdAt" | "updatedAt" | "views" | "commentCount" | "scheduledFor"
 > & {
   categories: string[];
   publishedAt?: Date;
@@ -53,7 +53,7 @@ export type BlogPost = Omit<
   featured: boolean;
   wordCount: number;
   readTime: string;
-  scheduledFor?: Date;
+  scheduledFor?: Date | string;
   shareCount?: number;
 };
 

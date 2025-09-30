@@ -1,9 +1,9 @@
-const mockRequireAdmin = jest.fn(async () => true);
+const mockRequireAdmin = jest.fn<Promise<boolean>, unknown[]>(async () => true);
 const mockHeaders = jest.fn(() => new Headers({ cookie: "admin-session=test", host: "localhost:3000" }));
 const mockIsAdminSdkAvailable = jest.fn(() => false);
 
 jest.mock("@/lib/admin-auth", () => ({
-  requireAdmin: (...args: unknown[]) => mockRequireAdmin(...args),
+  requireAdmin: mockRequireAdmin,
 }));
 
 jest.mock("@/app/admin/dashboard/AdminDashboardPageClient", () => () => null);

@@ -108,7 +108,9 @@ export async function GET(request: NextRequest) {
       const publishedFallback = fallbackBlogs.filter(
         (b: BlogPost) => b.status === "published",
       );
-      const result = publishedFallback.map(formatPublicBlogSummary);
+      const result = await Promise.all(
+        publishedFallback.map((blog) => formatPublicBlogSummary(blog)),
+      );
       const res = NextResponse.json(result);
       res.headers.set("Cache-Control", "public, max-age=300");
       return res;

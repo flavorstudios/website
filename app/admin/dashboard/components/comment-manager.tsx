@@ -95,7 +95,9 @@ export default function CommentManager() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [activeTab, setActiveTab] = useState("pending")
+  const [activeTab, setActiveTab] = useState<
+    "all" | "pending" | "approved" | "spam" | "flagged" | "trash"
+  >("all")
   const [deleteTargets, setDeleteTargets] = useState<{ id: string; postId: string }[] | null>(null)
   const [showFlaggedOnly, setShowFlaggedOnly] = useState(false)
   const [postTypeFilter, setPostTypeFilter] = useState<"all" | "blog" | "video">("all")

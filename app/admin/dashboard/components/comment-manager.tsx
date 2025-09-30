@@ -91,6 +91,17 @@ interface Comment {
 }
 
 type CommentTab = "all" | "pending" | "approved" | "spam" | "flagged" | "trash"
+const COMMENT_TABS: readonly CommentTab[] = [
+  "all",
+  "pending",
+  "approved",
+  "spam",
+  "flagged",
+  "trash",
+]
+
+const isCommentTab = (value: string): value is CommentTab =>
+  COMMENT_TABS.includes(value as CommentTab)
 
 export default function CommentManager() {
   const [comments, setComments] = useState<Comment[]>([])
@@ -98,7 +109,11 @@ export default function CommentManager() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState<CommentTab>("all")
-  const handleTabChange = (value: CommentTab) => setActiveTab(value)
+  const handleTabChange = (value: string) => {
+    if (isCommentTab(value)) {
+      setActiveTab(value)
+    }
+  }
   const [deleteTargets, setDeleteTargets] = useState<{ id: string; postId: string }[] | null>(null)
   const [showFlaggedOnly, setShowFlaggedOnly] = useState(false)
   const [postTypeFilter, setPostTypeFilter] = useState<"all" | "blog" | "video">("all")

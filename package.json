@@ -15,6 +15,7 @@
     "e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "audit:media": "tsx scripts/audit-media-storage.ts",
     "test:cron": "tsx scripts/test-cron.ts",
     "cron:logs": "tsx scripts/query-cron-logs.ts"
   },

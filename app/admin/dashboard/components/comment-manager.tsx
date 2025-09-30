@@ -90,14 +90,15 @@ interface Comment {
   }
 }
 
+type CommentTab = "all" | "pending" | "approved" | "spam" | "flagged" | "trash"
+
 export default function CommentManager() {
   const [comments, setComments] = useState<Comment[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [activeTab, setActiveTab] = useState<
-    "all" | "pending" | "approved" | "spam" | "flagged" | "trash"
-  >("all")
+  const [activeTab, setActiveTab] = useState<CommentTab>("all")
+  const handleTabChange = (value: CommentTab) => setActiveTab(value)
   const [deleteTargets, setDeleteTargets] = useState<{ id: string; postId: string }[] | null>(null)
   const [showFlaggedOnly, setShowFlaggedOnly] = useState(false)
   const [postTypeFilter, setPostTypeFilter] = useState<"all" | "blog" | "video">("all")
@@ -733,7 +734,7 @@ export default function CommentManager() {
         onExport={handleBulkExport}
       />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="flex flex-wrap gap-2 w-full">
           <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
           <TabsTrigger value="pending">Pending ({statusCounts.pending})</TabsTrigger>

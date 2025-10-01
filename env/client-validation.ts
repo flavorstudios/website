@@ -28,6 +28,7 @@ export const clientEnvSchema = z.object({
   NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: optionalNonEmptyString,
   NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS: optionalNonEmptyString,
   NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION: optionalNonEmptyString,
+  NEXT_PUBLIC_TEST_MODE: optionalNonEmptyString,
   TEST_MODE: optionalNonEmptyString,
 });
 
@@ -62,6 +63,7 @@ const rawClientEnv = {
     process.env.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS,
   NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION:
     process.env.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION,
+    NEXT_PUBLIC_TEST_MODE: process.env.NEXT_PUBLIC_TEST_MODE,
   TEST_MODE: process.env.TEST_MODE,
 };
 
@@ -84,6 +86,7 @@ const defaults: ClientEnvShape = {
   NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: undefined,
   NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS: undefined,
   NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION: undefined,
+  NEXT_PUBLIC_TEST_MODE: undefined,
   TEST_MODE: undefined,
 };
 
@@ -109,18 +112,27 @@ const isRawValueMissing = (value: unknown): boolean =>
   value === null ||
   (typeof value === 'string' && value.length === 0);
 
-  const firebaseConfigMissing = firebasePublicConfigKeys.some(key =>
+const firebaseConfigMissing = firebasePublicConfigKeys.some(key =>
   isRawValueMissing(baseClientValues[key])
 );
 
+const hasExplicitPublicTestMode =
+  baseClientValues.NEXT_PUBLIC_TEST_MODE !== undefined;
+
 const derivedTestMode =
-  baseClientValues.TEST_MODE === 'true' ||
+  (hasExplicitPublicTestMode
+    ? baseClientValues.NEXT_PUBLIC_TEST_MODE === 'true'
+    : baseClientValues.TEST_MODE === 'true') ||
   baseClientValues.NODE_ENV === 'test' ||
   firebaseConfigMissing;
 
+const resolvedTestModeValue = hasExplicitPublicTestMode
+  ? baseClientValues.NEXT_PUBLIC_TEST_MODE
+  : baseClientValues.TEST_MODE;
+
 const clientValues: ClientEnvShape = {
   ...baseClientValues,
-  TEST_MODE: derivedTestMode ? 'true' : baseClientValues.TEST_MODE,
+  TEST_MODE: derivedTestMode ? 'true' : resolvedTestModeValue,
 };
 
 const requiredClientEnvVars: (keyof ClientEnvShape)[] = [];

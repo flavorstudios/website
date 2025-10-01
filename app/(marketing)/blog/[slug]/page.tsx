@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
-import BlogPostRenderer from "@/components/BlogPostRenderer";
+import BlogRenderer from "@/components/blog/BlogRenderer";
+import { sanitizeHtmlServer } from "@/lib/sanitize/server";
 import { getBlogPost } from "@/lib/blog";
 // ⬇️ Use shared public type instead of declaring locally!
 import type { PublicBlogDetail } from "@/lib/types";
@@ -118,7 +119,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       {/* --- Inject Article schema (for Google/SEO) --- */}
       <StructuredData schema={articleSchema} />
       {/* --- Blog Post Renderer (unified) --- */}
-      <BlogPostRenderer post={post} />
+      <BlogRenderer post={post} sanitizeHtml={sanitizeHtmlServer} />
     </div>
   );
 }

@@ -84,8 +84,8 @@ export function AdminSidebar({
     { id: "inbox", label: "Email Inbox", icon: Mail, count: null, href: "/admin/dashboard/inbox" },
     {
       id: "users",
-      label: "Profile",
-      ariaLabel: "Profile",
+      label: "Users",
+      ariaLabel: "Users",
       icon: Users,
       count: null,
       href: "/admin/dashboard/users",

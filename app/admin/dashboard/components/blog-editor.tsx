@@ -147,6 +147,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   );
   const [tagInput, setTagInput] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [previewStatus, setPreviewStatus] = useState<
+    "idle" | "loading" | "ready" | "empty"
+  >("idle");
   const [showMediaPicker, setShowMediaPicker] = useState(false);
   const slugEditedRef = useRef(Boolean(initialPost?.slug?.trim()));
   const setSlugEdited = (value: boolean) => {
@@ -189,6 +192,31 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     // Optionally surface a conflict modal here by capturing the server copy:
     // onConflict: (server) => setConflict({ server }),
   });
+
+  useEffect(() => {
+    if (!showPreview) {
+      setPreviewStatus("idle");
+      return;
+    }
+
+    const hasContent =
+      typeof post.content === "string" && post.content.trim().length > 0;
+
+    if (!hasContent) {
+      setPreviewStatus("empty");
+      return;
+    }
+
+    setPreviewStatus("loading");
+
+    const timeout = window.setTimeout(() => {
+      setPreviewStatus("ready");
+    }, 200);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [showPreview, post.content]);
 
   // Helper to combine scheduled date + time
   const getScheduledDateTime = useCallback(() => {
@@ -1159,7 +1187,11 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       {/* Preview Modal */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="max-w-5xl overflow-y-auto max-h-screen">
-          <BlogPostPreview post={previewPost} />
+          <BlogPostPreview
+            post={previewPost}
+            isLoading={previewStatus === "loading"}
+            empty={previewStatus === "empty"}
+          />
         </DialogContent>
       </Dialog>
 

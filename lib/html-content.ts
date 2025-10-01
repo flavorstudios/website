@@ -1,9 +1,10 @@
 import "server-only";
 
 import { generateHTML, type JSONContent } from "@tiptap/core";
-import StarterKit from "@tiptap/starter-kit";
 
-const TIPTAP_EXTENSIONS = [StarterKit];
+import { createSharedTiptapExtensions } from "@/lib/tiptap-extensions";
+
+const TIPTAP_EXTENSIONS = createSharedTiptapExtensions();
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);

@@ -32,6 +32,7 @@ const env = {
   NEXT_TELEMETRY_DISABLED: '1',
   NODE_ENV: 'production' satisfies NodeJS.ProcessEnv['NODE_ENV'],
   NEXT_DISABLE_MINIFY: 'true',
+  NEXT_PUBLIC_TEST_MODE: 'true',
   TEST_MODE: 'true',
   NEXT_DISABLE_FONT_DOWNLOADS: '1',
   NODE_OPTIONS: `--require ${fontMockPath}`,

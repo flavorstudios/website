@@ -196,6 +196,10 @@ body {
   background: linear-gradient(180deg, rgba(79, 70, 229, 1), rgba(124, 58, 237, 1));
 }
 
+.admin-shell {
+  --sidebar-mobile-width: 16rem;
+}
+
 .admin-shell--with-overlay {
   position: relative;
   isolation: isolate;
@@ -210,6 +214,14 @@ body {
   z-index: 45;
   transition: opacity 0.2s ease-in-out;
 }
+
+@media (max-width: 1023.98px) {
+  .admin-shell--with-overlay::after {
+    left: var(--sidebar-mobile-width, 16rem);
+    right: 0;
+  }
+}
+
 
 /* ========== Mobile Touch Scrolling Improvements ========== */
 @supports (-webkit-overflow-scrolling: touch) {
@@ -310,36 +322,32 @@ body {
 
 /* Skip link helper (used by the header component) */
 .skip-link {
-  position: absolute;
-  top: 1rem;
+  position: fixed;
+  top: -200vh;
   left: 1rem;
   z-index: 50;
   padding: 0.5rem 0.75rem;
+  border: 0;
   border-radius: 0.375rem;
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   box-shadow: 0 0 0 3px hsl(var(--ring));
-  transform: translateY(-200%);
-  transition: transform 0.2s ease;
-}
-
-.skip-link:not(:focus):not(:focus-visible) {
-  width: 1px;
-  height: 1px;
   clip: rect(0 0 0 0);
   clip-path: inset(100%);
   overflow: hidden;
   white-space: nowrap;
-  padding: 0;
-  border: 0;
   opacity: 0;
-  transform: translateY(-200%);
+  transition: top 0.2s ease, opacity 0.2s ease;
 }
 
 .skip-link:focus,
-.skip-link:focus-visible {
+.skip-link:focus-visible,
+.skip-link[data-visible="true"] {
+  top: 1rem;
+  clip: auto;
+  clip-path: inset(0);
+  overflow: visible;
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
   opacity: 1;
-  transform: translateY(0);
 }

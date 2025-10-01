@@ -10,7 +10,8 @@ import {
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
-import BlogPostRenderer from "@/components/BlogPostRenderer";
+import BlogRenderer from "@/components/blog/BlogRenderer";
+import { sanitizeHtmlServer } from "@/lib/sanitize/server";
 import { HttpError } from "@/lib/http";
 import { ErrorBoundary } from "@/app/admin/dashboard/components/ErrorBoundary";
 import { verifyAdminSession } from "@/lib/admin-auth";
@@ -188,7 +189,7 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
       >
         <div className="min-h-screen bg-gray-50">
           <StructuredData schema={articleSchema} />
-          <BlogPostRenderer post={post} />
+          <BlogRenderer post={post} sanitizeHtml={sanitizeHtmlServer} />
         </div>
       </ErrorBoundary>
     </AdminAuthGuard>

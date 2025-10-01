@@ -18,10 +18,13 @@ jest.mock("cheerio", () => {
   return { load };
 });
 
+jest.mock("@/app/(marketing)/blog/[slug]/components/comment-section", () => () => null);
+jest.mock("@/app/(marketing)/blog/[slug]/components/social-share", () => () => null);
+
 import { load as mockedLoad } from "cheerio";
 import { render, screen } from "@testing-library/react";
 
-import BlogPostRenderer from "../BlogPostRenderer";
+import BlogRenderer from "../blog/BlogRenderer";
 import { sanitizeHtmlServer } from "@/lib/sanitize/server";
 
 describe("BlogPostRenderer", () => {
@@ -55,7 +58,9 @@ describe("BlogPostRenderer", () => {
   };
 
   it("does not throw when content is non-string", () => {
-    expect(() => render(<BlogPostRenderer post={basePost} />)).not.toThrow();
+    expect(() =>
+      render(<BlogRenderer post={basePost} sanitizeHtml={sanitizeHtmlServer} />),
+    ).not.toThrow();
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Title");
     const load = jest.mocked(mockedLoad);
     expect(load).not.toHaveBeenCalled();

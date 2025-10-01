@@ -15,7 +15,7 @@ jest.mock("@/components/StructuredData", () => ({
   StructuredData: () => null,
 }));
 
-jest.mock("@/components/BlogPostRenderer", () => ({
+jest.mock("@/components/blog/BlogRenderer", () => ({
   __esModule: true,
   default: () => null,
 }));

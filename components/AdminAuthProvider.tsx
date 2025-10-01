@@ -327,7 +327,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
       if (effectiveValue === true) {
         updateVerificationStatus("verified")
-        if (pathname?.startsWith("/admin/verify-email")) {
+        if (
+          pathname?.startsWith("/admin/verify-email") &&
+          pathname !== "/admin/verify-email"
+        ) {
           router.replace("/admin/dashboard")
         }
         return

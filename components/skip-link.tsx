@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function SkipLink() {
   const linkRef = useRef<HTMLAnchorElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -28,7 +29,14 @@ export function SkipLink() {
   }, []);
 
   return (
-    <a href="#main-content" className="skip-link" ref={linkRef}>
+    <a
+      href="#main-content"
+      className="skip-link"
+      data-visible={isVisible ? "true" : undefined}
+      onFocus={() => setIsVisible(true)}
+      onBlur={() => setIsVisible(false)}
+      ref={linkRef}
+    >
       Skip to main content
     </a>
   );

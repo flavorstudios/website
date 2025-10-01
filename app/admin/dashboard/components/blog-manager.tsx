@@ -497,8 +497,8 @@ export default function BlogManager() {
     return (
       <div>
         <AdminPageHeader
-          as="h2"
-          title="Blog Management"
+          as="h1"
+          title="Blog Posts"
           subtitle="Create, edit and publish blog posts for Flavor Studios"
         />
         <div className="mt-4 space-y-4">
@@ -579,8 +579,8 @@ export default function BlogManager() {
       {/* Header with right-aligned action buttons */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <AdminPageHeader
-          as="h2"
-          title="Blog Management"
+          as="h1"
+          title="Blog Posts"
           subtitle="Create, edit and publish blog posts for Flavor Studios"
         />
         <div className="flex gap-2">

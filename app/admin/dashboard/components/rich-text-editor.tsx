@@ -28,14 +28,9 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useEditor, EditorContent, Editor } from "@tiptap/react"
-import StarterKit from "@tiptap/starter-kit"
-import Underline from "@tiptap/extension-underline"
-import Link from "@tiptap/extension-link"
-import Image from "@tiptap/extension-image"
-import TextAlign from "@tiptap/extension-text-align"
 import Placeholder from "@tiptap/extension-placeholder"
-import { TextStyle } from "@tiptap/extension-text-style"
 import { sanitizeHtmlClient } from "@/lib/sanitize/client"
+import { createSharedTiptapExtensions } from "@/lib/tiptap-extensions"
 
 interface RichTextEditorProps {
   value: string
@@ -86,17 +81,7 @@ export function RichTextEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
-        link: false,
-        underline: false,
-      }),
-      TextStyle,
-      Underline,
-      Link.configure({ openOnClick: false }),
-      Image,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
-      Placeholder.configure({ placeholder: placeholder ?? "Start typing…" }),
+      ...createSharedTiptapExtensions(),
     ],
     content: value,
     editorProps: {

@@ -488,7 +488,6 @@ export default function AdminDashboardPageClient({
                     className="sr-only"
                     id="admin-dashboard-page-title"
                     data-testid="dashboard-page-heading"
-                    aria-hidden="true"
                   >
                     {currentTitle}
                   </h1>

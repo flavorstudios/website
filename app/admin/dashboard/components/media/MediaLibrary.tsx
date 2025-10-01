@@ -50,6 +50,14 @@ export default function MediaLibrary({
     }
     return "list";
   });
+  useEffect(() => {
+    if (shouldForceListView()) return;
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    if (!mediaQuery.matches) {
+      setView("grid");
+    }
+  }, []);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [sortBy, setSortBy] = useState<SortBy>("date");
@@ -130,7 +138,9 @@ export default function MediaLibrary({
         tagFilter: string;
       }>;
       if (prefs.view) {
-        setView(prefs.view === "grid" && shouldForceListView() ? "list" : prefs.view);
+        const shouldOverrideToList =
+          prefs.view === "grid" && shouldForceListView() && isDesktopWidth();
+        setView(shouldOverrideToList ? "list" : prefs.view);
       }
       if (prefs.typeFilter) setTypeFilter(prefs.typeFilter);
       if (prefs.sortBy) setSortBy(prefs.sortBy);

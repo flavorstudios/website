@@ -2,9 +2,36 @@ import "server-only";
 
 import { generateHTML, type JSONContent } from "@tiptap/core";
 
+import { logBreadcrumb, logError } from "@/lib/log";
 import { createSharedTiptapExtensions } from "@/lib/tiptap-extensions";
 
 const TIPTAP_EXTENSIONS = createSharedTiptapExtensions();
+const LOG_CONTEXT = "html-content";
+
+function previewSnippet(value: string, maxLength = 200): string {
+  const trimmed = value.trim();
+  if (trimmed.length <= maxLength) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, maxLength)}…`;
+}
+
+function safeStringify(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  try {
+    const json = JSON.stringify(value);
+    if (typeof json === "string" && json.length > 0) {
+      return json;
+    }
+  } catch (error) {
+    logError(`${LOG_CONTEXT}:stringify-fallback`, error);
+  }
+
+  return String(value);
+}
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -29,8 +56,18 @@ function isTiptapJson(value: unknown): value is JSONContent {
 function fromStringifiedJson(value: string): JSONContent | null {
   try {
     const parsed = JSON.parse(value) as unknown;
-    return isTiptapJson(parsed) ? (parsed as JSONContent) : null;
-  } catch {
+    if (isTiptapJson(parsed)) {
+      return parsed as JSONContent;
+    }
+
+    logBreadcrumb(`${LOG_CONTEXT}:non-tiptap-json`, {
+      preview: previewSnippet(value),
+    });
+    return null;
+  } catch (error) {
+    logError(`${LOG_CONTEXT}:parse-json`, error, {
+      preview: previewSnippet(value),
+    });
     return null;
   }
 }
@@ -38,7 +75,10 @@ function fromStringifiedJson(value: string): JSONContent | null {
 function convertTiptapJsonToHtml(doc: JSONContent): string | null {
   try {
     return generateHTML(doc, TIPTAP_EXTENSIONS);
-  } catch {
+  } catch (error) {
+    logError(`${LOG_CONTEXT}:generate-html`, error, {
+      type: doc.type,
+    });
     return null;
   }
 }
@@ -67,10 +107,18 @@ export function ensureHtmlContent(content: unknown): string {
           return html;
         }
 
-        return "";
+        logBreadcrumb(`${LOG_CONTEXT}:fallback`, {
+          reason: "string-json-conversion-failed",
+          preview: previewSnippet(trimmed),
+        });
+        return trimmed;
       }
 
-      return "";
+      logBreadcrumb(`${LOG_CONTEXT}:fallback`, {
+        reason: "string-json-not-tiptap",
+        preview: previewSnippet(trimmed),
+      });
+      return trimmed;
     }
 
     return content;
@@ -81,7 +129,15 @@ export function ensureHtmlContent(content: unknown): string {
     if (typeof html === "string") {
       return html;
     }
+
+    logBreadcrumb(`${LOG_CONTEXT}:fallback`, {
+      reason: "object-json-conversion-failed",
+    });
+    return safeStringify(content);
   }
 
-  return "";
+  logBreadcrumb(`${LOG_CONTEXT}:fallback`, {
+    reason: "unsupported-content",
+  });
+  return safeStringify(content);
 }

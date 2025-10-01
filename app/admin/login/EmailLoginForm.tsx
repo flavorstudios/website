@@ -30,7 +30,8 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
   const [password, setPassword] = useState("")
   const [otp, setOtp] = useState("")
   const [loading, setLoading] = useState(false)
-  const [formError, setFormError] = useState(error)
+  const [formError, setFormError] = useState<string | null>(error || null)
+  const [hasLocalFormError, setHasLocalFormError] = useState(false)
   const [otpExpanded, setOtpExpanded] = useState(false)
   const [infoNotice, setInfoNotice] = useState<string | null>(notice ?? null)
   const { data: mfaStatus } = useSWR<{ mfaRequired: boolean }>(
@@ -43,8 +44,18 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
   const mfaRequired = mfaStatus?.mfaRequired ?? false
 
   useEffect(() => {
-    setFormError(error)
-  }, [error])
+    if (error) {
+      setFormError((prev) => (prev === error ? prev : error))
+      if (hasLocalFormError && formError !== error) {
+        setHasLocalFormError(false)
+      }
+      return
+    }
+
+    if (!hasLocalFormError) {
+      setFormError((prev) => (prev === null ? prev : null))
+    }
+  }, [error, formError, hasLocalFormError])
 
   useEffect(() => {
     setInfoNotice(notice ?? null)
@@ -60,7 +71,8 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
     e.preventDefault()
     setLoading(true)
     setError("")
-    setFormError("")
+    setHasLocalFormError(false)
+    setFormError(null)
     try {
       const hasOtp = Boolean(otp)
       const endpoint = hasOtp ? "/api/admin/email-session" : "/api/admin/email-login"
@@ -78,12 +90,15 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
         credentials: "include",
       })
       if (!res.ok) {
-        const data = await res.json().catch(() => null)
-        const failureMessage = data?.error || "Authentication failed."
+        const data = (await res.json().catch(() => null)) as
+          | { error?: string }
+          | null
+        const failureMessage = "Authentication failed."
         if (process.env.NODE_ENV !== "production" && data?.error) {
           console.error("Email login failed:", data.error)
         }
         setError(failureMessage)
+        setHasLocalFormError(true)
         setFormError(failureMessage)
         setLoading(false)
         return
@@ -93,8 +108,10 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
       if (process.env.NODE_ENV !== "production") {
         console.error("Email login network error:", error)
       }
-      setError("Authentication failed.")
-      setFormError("Authentication failed.")
+      const failureMessage = "Authentication failed."
+      setError(failureMessage)
+      setHasLocalFormError(true)
+      setFormError(failureMessage)
     } finally {
       setLoading(false)
     }

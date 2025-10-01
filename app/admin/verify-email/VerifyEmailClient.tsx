@@ -42,10 +42,28 @@ export default function VerifyEmailClient() {
   );
 
   const startRedirect = useCallback(
-    (path: string) => {
-      void waitForNextFrame().then(() => {
+    (
+      path: string,
+      options?: {
+        delayMs?: number;
+        onBeforeNavigate?: () => void;
+      }
+    ) => {
+      void (async () => {
+        await waitForNextFrame();
+        options?.onBeforeNavigate?.();
+        if (options?.delayMs && options.delayMs > 0) {
+          await new Promise<void>((resolve) => {
+            const schedule = () => resolve();
+            if (typeof window !== "undefined") {
+              window.setTimeout(schedule, options.delayMs);
+            } else {
+              setTimeout(schedule, options.delayMs);
+            }
+          });
+        }
         router.replace(path);
-      });
+      })();
     },
     [router, waitForNextFrame]
   );
@@ -120,7 +138,6 @@ export default function VerifyEmailClient() {
   ]);
 
   useEffect(() => {
-    setLoading(true);
     refreshUser();
   }, [refreshUser]);
 
@@ -146,7 +163,13 @@ export default function VerifyEmailClient() {
       await user.reload();
       if (user.emailVerified) {
         shouldResetSending = false;
-        startRedirect("/admin/dashboard");
+        startRedirect("/admin/dashboard", {
+        delayMs: 75,
+        onBeforeNavigate: () => {
+          setLoading(false);
+        },
+      });
+      setLoading(true);
         return;
       }
       const { sendEmailVerification } = await import("firebase/auth");

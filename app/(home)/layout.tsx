@@ -59,9 +59,6 @@ export default async function HomeLayout({ children }: { children: ReactNode }) 
 
   return (
     <>
-      <a href="#main-content" className="skip-link">
-        Skip to main content
-      </a>
       <AdblockBanner />
       <HomeNavigation blogCategories={blogCategories} videoCategories={videoCategories} />
       <main id="main-content" tabIndex={-1} className="bg-slate-950">

@@ -60,6 +60,7 @@ export default function MediaLibrary({
   const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [tagFilter, setTagFilter] = useState("");
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+  const [hasPaginated, setHasPaginated] = useState(false);
 
   // Track items currently being refreshed to avoid duplicate calls
   const refreshingIds = useRef<Set<string>>(new Set());
@@ -224,6 +225,7 @@ export default function MediaLibrary({
       if (typeof nextCursor !== "number") {
         setItems(media);
         setCursor(next);
+        setHasPaginated(false);
         return;
       }
 
@@ -238,6 +240,7 @@ export default function MediaLibrary({
       }
 
       setItems((prev) => [...prev, ...media]);
+      setHasPaginated(true);
       setCursor(next);
     } catch (error) {
       if ((error as DOMException)?.name === "AbortError") return;
@@ -296,7 +299,7 @@ export default function MediaLibrary({
 
   // Filter, search, and sort logic (null-safe)
   const q = search.trim().toLowerCase();
-  const filtered = items
+  const filteredBase = items
     // Type filter
     .filter((m) => (typeFilter === "all" ? true : (m.mime?.startsWith(typeFilter) ?? false)))
     // Text search across filename, name, alt, and tags
@@ -327,33 +330,37 @@ export default function MediaLibrary({
           : new Date(m.createdAt).getTime();
       const days = dateFilter === "7d" ? 7 : 30;
       return created >= Date.now() - days * 24 * 60 * 60 * 1000;
-    })
-    // Sorting
-    .sort((a, b) => {
-      let result = 0;
-      if (sortBy === "name") {
-        const an = (a.filename || a.name || "").toString();
-        const bn = (b.filename || b.name || "").toString();
-        result = an.localeCompare(bn);
-      } else if (sortBy === "size") {
-        const as = a.size ?? 0;
-        const bs = b.size ?? 0;
-        result = as - bs;
-      } else {
-        const aDate =
-          typeof a.createdAt === "number"
-            ? a.createdAt
-            : new Date(a.createdAt).getTime();
-        const bDate =
-          typeof b.createdAt === "number"
-            ? b.createdAt
-            : new Date(b.createdAt).getTime();
-        result = aDate - bDate;
-      }
-      return sortDir === "asc" ? result : -result;
     });
 
-    const allTags = Array.from(new Set(items.flatMap((m) => m.tags ?? []))).sort();
+    const preserveServerOrder = hasPaginated && sortBy === "date" && sortDir === "desc";
+
+  const filtered = preserveServerOrder
+    ? filteredBase
+    : [...filteredBase].sort((a, b) => {
+        let result = 0;
+        if (sortBy === "name") {
+          const an = (a.filename || a.name || "").toString();
+          const bn = (b.filename || b.name || "").toString();
+          result = an.localeCompare(bn);
+        } else if (sortBy === "size") {
+          const as = a.size ?? 0;
+          const bs = b.size ?? 0;
+          result = as - bs;
+        } else {
+          const aDate =
+            typeof a.createdAt === "number"
+              ? a.createdAt
+              : new Date(a.createdAt).getTime();
+          const bDate =
+            typeof b.createdAt === "number"
+              ? b.createdAt
+              : new Date(b.createdAt).getTime();
+          result = aDate - bDate;
+        }
+        return sortDir === "asc" ? result : -result;
+      });
+
+  const allTags = Array.from(new Set(items.flatMap((m) => m.tags ?? []))).sort();
 
   // Bulk selection logic
   const toggleSelect = (id: string, shiftKey = false) => {

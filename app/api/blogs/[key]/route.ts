@@ -102,8 +102,8 @@ export async function GET(
     }
 
     return NextResponse.json(
-      { error: "Failed to fetch blog post." },
-      { status: fallback ? 404 : 500 },
+      { error: "Blog post not found" },
+      { status: 404 },
     );
   }
 }

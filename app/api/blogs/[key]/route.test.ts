@@ -153,6 +153,24 @@ describe("GET /api/blogs/:key", () => {
     expect(data.content).toBe("Fallback content");
     expect(data.slug).toBe("test");
   });
+
+  it("returns 404 when handler throws and no fallback available", async () => {
+    (blogStore.getBySlug as jest.Mock).mockImplementation(() => {
+      throw new Error("store failure");
+    });
+    (getFallbackBlogPostBySlug as jest.Mock).mockReturnValue(null);
+    (getFallbackBlogPostById as jest.Mock).mockReturnValue(null);
+
+    const { GET } = await import("./route");
+
+    const res = await GET({} as Request, {
+      params: Promise.resolve({ key: "test" }),
+    });
+
+    expect(res.status).toBe(404);
+    const data = await res.json();
+    expect(data).toEqual({ error: "Blog post not found" });
+  });
   
 it("returns scheduled fallback content when publish time has passed", async () => {
     jest.useFakeTimers({ now: new Date("2024-05-01T13:00:00.000Z") });

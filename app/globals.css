@@ -108,8 +108,8 @@ samp {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   box-shadow: 0 10px 25px -15px rgba(15, 23, 42, 0.6);
-  visibility: hidden;
   transform: translateY(-200%);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .skip-link:not(:focus):not(:focus-visible) {
@@ -122,8 +122,6 @@ samp {
   padding: 0;
   border: 0;
   opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
   transform: translateY(-200%);
 }
 
@@ -132,8 +130,6 @@ samp {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
   opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
   transform: translateY(0);
 }
 

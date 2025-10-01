@@ -203,11 +203,11 @@ body {
 
 .admin-shell--with-overlay::after {
   content: "";
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: rgba(15, 23, 42, 0.4);
   pointer-events: none;
-  z-index: 35;
+  z-index: 45;
   transition: opacity 0.2s ease-in-out;
 }
 
@@ -319,6 +319,8 @@ body {
   background: hsl(var(--primary));
   color: hsl(var(--primary-foreground));
   box-shadow: 0 0 0 3px hsl(var(--ring));
+  transform: translateY(-200%);
+  transition: transform 0.2s ease;
 }
 
 .skip-link:not(:focus):not(:focus-visible) {
@@ -331,7 +333,7 @@ body {
   padding: 0;
   border: 0;
   opacity: 0;
-  pointer-events: none;
+  transform: translateY(-200%);
 }
 
 .skip-link:focus,
@@ -339,6 +341,5 @@ body {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
   opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
+  transform: translateY(0);
 }

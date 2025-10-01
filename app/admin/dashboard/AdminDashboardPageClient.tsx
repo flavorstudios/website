@@ -449,8 +449,7 @@ export default function AdminDashboardPageClient({
             className={cn(
               "admin-shell grid min-h-screen supports-[height:100dvh]:min-h-[100dvh]",
               "grid-cols-1 lg:grid-cols-[var(--sidebar-w,16rem)_1fr]",
-              "transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden",
-              isMobile && sidebarOpen && "admin-shell--with-overlay"
+              "transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden"
             )}
             data-sidebar-open={isMobile && sidebarOpen ? "true" : "false"}
           >
@@ -464,7 +463,10 @@ export default function AdminDashboardPageClient({
             <div
               id="admin-main"
               ref={mainWrapperRef}
-              className="flex min-w-0 flex-col bg-background"
+              className={cn(
+                "flex min-w-0 flex-col bg-background",
+                isMobile && sidebarOpen && "admin-shell--with-overlay"
+              )}
             >
               <AdminHeader
                 onLogout={handleLogout}
@@ -478,7 +480,7 @@ export default function AdminDashboardPageClient({
                 className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-4 pt-4
                            pb-[calc(var(--mobile-nav-h,64px)+env(safe-area-inset-bottom,0px))] lg:pb-6"
                 role="main"
-                aria-labelledby="admin-dashboard-page-title"
+                aria-label={currentTitle}
                 aria-hidden={isMobile && sidebarOpen ? true : undefined}
               >
                 <div className="max-w-7xl mx-auto">
@@ -486,6 +488,7 @@ export default function AdminDashboardPageClient({
                     className="sr-only"
                     id="admin-dashboard-page-title"
                     data-testid="dashboard-page-heading"
+                    aria-hidden="true"
                   >
                     {currentTitle}
                   </h1>

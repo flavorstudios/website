@@ -4,6 +4,8 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
+  useMemo,
   useState,
 } from "react"
 import { usePathname, useRouter } from "next/navigation"
@@ -69,6 +71,65 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true"
   const envTestMode = clientEnv.TEST_MODE === "true"
   const testMode = (testModeOverride ?? envTestMode) || authInitFailed
+
+  const readTestEmailVerifiedSync = useCallback(() => {
+    if (typeof window === "undefined") {
+      return null
+    }
+    const stored = window.localStorage.getItem(TEST_EMAIL_VERIFIED_STORAGE_KEY)
+    if (stored === null) {
+      return null
+    }
+    return stored === "true"
+  }, [])
+
+  type VerificationStatus = "pending" | "verified" | "unverified"
+
+  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>(
+    () => {
+      if (!requiresVerification) {
+        return "verified"
+      }
+      if (testMode) {
+        const syncValue = readTestEmailVerifiedSync()
+        const effectiveValue = syncValue ?? testEmailVerified
+        if (effectiveValue === true) {
+          return "verified"
+        }
+        if (effectiveValue === false) {
+          return "unverified"
+        }
+        return "pending"
+      }
+      if (loading) {
+        return "pending"
+      }
+      if (!user) {
+        return "verified"
+      }
+      return user.emailVerified ? "verified" : "unverified"
+    }
+  )
+
+  const updateVerificationStatus = useCallback((next: VerificationStatus) => {
+    setVerificationStatus((current) => (current === next ? current : next))
+  }, [])
+
+  const isGuardedAdminRoute = useMemo(() => {
+    if (!pathname) {
+      return false
+    }
+    if (!pathname.startsWith("/admin")) {
+      return false
+    }
+    if (pathname.startsWith("/admin/verify-email")) {
+      return false
+    }
+    if (pathname === "/admin/signup") {
+      return false
+    }
+    return true
+  }, [pathname])
 
   const persistTestEmailVerified = useCallback(
     (value: boolean | null) => {
@@ -254,36 +315,79 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!requiresVerification) {
+      updateVerificationStatus("verified")
       return
     }
 
-    if (!testMode && loading) {
-      return
-    }
-    const currentPath = pathname || ""
-    const testVerified = testMode ? testEmailVerified ?? false : undefined
-    const isVerified = (testVerified ?? user?.emailVerified) ?? false
-    const hasSession = testMode ? true : !!user
+    if (testMode) {
+      const syncValue = readTestEmailVerifiedSync()
+      const effectiveValue = syncValue ?? testEmailVerified
 
-    if (hasSession && !isVerified) {
-      if (!currentPath.startsWith("/admin/verify-email") && currentPath !== "/admin/signup") {
-        router.replace("/admin/verify-email")
+      if (effectiveValue === true) {
+        updateVerificationStatus("verified")
+        if (pathname?.startsWith("/admin/verify-email")) {
+          router.replace("/admin/dashboard")
+        }
+        return
       }
-    } else if (hasSession && isVerified && currentPath.startsWith("/admin/verify-email")) {
-      router.replace("/admin/dashboard")
+
+      if (effectiveValue === false) {
+        updateVerificationStatus("unverified")
+        if (
+          pathname &&
+          !pathname.startsWith("/admin/verify-email") &&
+          pathname !== "/admin/signup"
+        ) {
+          router.replace("/admin/verify-email")
+        }
+        return
+      }
+
+      updateVerificationStatus("pending")
+      return
+    }
+
+    if (loading) {
+      updateVerificationStatus("pending")
+      return
+    }
+
+    if (!user) {
+      updateVerificationStatus("verified")
+      return
+    }
+
+    if (user.emailVerified) {
+      updateVerificationStatus("verified")
+      if (pathname?.startsWith("/admin/verify-email")) {
+        router.replace("/admin/dashboard")
+      }
+    return
+    }
+
+    updateVerificationStatus("unverified")
+    if (
+      pathname &&
+      !pathname.startsWith("/admin/verify-email") &&
+      pathname !== "/admin/signup"
+    ) {
+      router.replace("/admin/verify-email")
     }
   }, [
-    requiresVerification,
-    user,
     loading,
     pathname,
+    readTestEmailVerifiedSync,
+    requiresVerification,
     router,
-    testMode,
     testEmailVerified,
+    readTestEmailVerifiedSync,
+    requiresVerification,
   ])
 
+  const shouldBlockChildren =
+    requiresVerification && isGuardedAdminRoute && verificationStatus !== "verified"
 
   return (
     <AdminAuthContext.Provider
@@ -303,7 +407,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
           </AlertDescription>
         </Alert>
       )}
-      {children}
+      {shouldBlockChildren ? (
+        <div className="flex min-h-[50vh] w-full items-center justify-center">
+          <p className="text-sm text-muted-foreground">Checking admin access…</p>
+        </div>
+      ) : (
+        children
+      )}
     </AdminAuthContext.Provider>
   )
 }

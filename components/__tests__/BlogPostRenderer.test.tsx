@@ -18,6 +18,7 @@ jest.mock("cheerio", () => {
   return { load };
 });
 
+import { load as mockedLoad } from "cheerio";
 import { render, screen } from "@testing-library/react";
 
 import BlogPostRenderer from "../BlogPostRenderer";
@@ -56,7 +57,7 @@ describe("BlogPostRenderer", () => {
   it("does not throw when content is non-string", () => {
     expect(() => render(<BlogPostRenderer post={basePost} />)).not.toThrow();
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Title");
-    const { load } = require("cheerio") as { load: jest.Mock };
+    const load = jest.mocked(mockedLoad);
     expect(load).not.toHaveBeenCalled();
     expect(sanitizeHtmlServer(basePost.content)).toBe("");
   });

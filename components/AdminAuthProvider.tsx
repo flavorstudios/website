@@ -382,8 +382,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     requiresVerification,
     router,
     testEmailVerified,
-    readTestEmailVerifiedSync,
-    requiresVerification,
+    testMode,
+    updateVerificationStatus,
+    user,
   ])
 
   const shouldBlockChildren =

@@ -10,6 +10,7 @@ import {
   unlinkMediaFromPost,
 } from "@/lib/media";
 import type { BlogPost } from "@/lib/types";
+import { ensureHtmlContent } from "@/lib/html-content";
 
 export type { BlogPost };
 
@@ -73,6 +74,7 @@ const FALLBACK_BLOG_POSTS: BlogPost[] = [
 
 const normalizeBlogPost = (post: BlogPost): BlogPost => ({
   ...post,
+  content: ensureHtmlContent(post.content),
   scheduledFor:
     typeof post.scheduledFor === "string" && post.scheduledFor.trim().length > 0
       ? post.scheduledFor

@@ -65,7 +65,11 @@ function sanitizeAttributes(element: CheerioElement, $: CheerioAPI) {
   }
 }
 
-export function sanitizeHtmlServer(html: string) {
+export function sanitizeHtmlServer(html: unknown) {
+  if (typeof html !== "string") {
+    return "";
+  }
+  
   if (!html) {
     return "";
   }

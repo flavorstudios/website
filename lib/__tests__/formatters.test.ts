@@ -55,4 +55,24 @@ describe('formatPublicBlog', () => {
     expect(out.shareCount).toBe(0);
     expect(out.author).toBe('author');
   });
+
+  it('converts tiptap json string content into html when formatting detail', async () => {
+    const tiptapJson = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Hello world' }],
+        },
+      ],
+    };
+
+    const withJsonContent: BlogPost = {
+      ...baseBlog,
+      content: JSON.stringify(tiptapJson),
+    };
+
+    const out = await formatPublicBlogDetail(withJsonContent);
+    expect(out.content).toBe('<p>Hello world</p>');
+  });
 });

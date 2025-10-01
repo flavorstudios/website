@@ -4,6 +4,7 @@ import type { BlogPost } from "./content-store"; // Adjust path if needed
 import type { Video } from "./content-store"; // Adjust path if needed
 import type { PublicBlogSummary, PublicBlogDetail } from "./types";
 import { normalizeAuthor } from "./author-normalizer";
+import { ensureHtmlContent } from "./html-content";
 
 let mediaModulePromise: Promise<typeof import("./media")> | null = null;
 
@@ -75,7 +76,7 @@ export async function formatPublicBlogDetail(
     id: blog.id,
     title: blog.title,
     slug: blog.slug,
-    content: blog.content,
+    content: ensureHtmlContent(blog.content),
     excerpt: blog.excerpt,
     featuredImage: featuredImage ?? blog.featuredImage,
     category: blog.category,

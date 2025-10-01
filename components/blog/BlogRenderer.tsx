@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import type { AriaAttributes, ComponentType } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Calendar, Clock, Eye, FileText, AlertTriangle, User } from "lucide-react";
@@ -59,7 +59,10 @@ function BlogRendererSkeleton() {
 interface StateMessageProps {
   title: string;
   description: string;
-  icon: ComponentType<{ className?: string; "aria-hidden"?: string }>;
+  icon: ComponentType<{
+    className?: string;
+    "aria-hidden"?: AriaAttributes["aria-hidden"];
+  }>;
   variant?: "error" | "muted";
 }
 

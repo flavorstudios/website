@@ -1,0 +1,8 @@
+diff --git a/.gitattributes b/.gitattributes
+new file mode 100644
+index 0000000..3b2e1d4
+--- /dev/null
++++ b/.gitattributes
+@@ -0,0 +1,2 @@
++# Keep binary PNG diffs clean
++*.png binary

@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import BlogRenderer from "@/components/blog/BlogRenderer";
 import { sanitizeHtmlClient } from "@/lib/sanitize/client";
+import { ensureHtmlContent } from "@/lib/html-content";
 import type { BlogPost as StoreBlogPost } from "@/lib/content-store";
 import type { PublicBlogDetail } from "@/lib/types";
 
@@ -15,13 +16,22 @@ interface BlogPostPreviewProps {
 
 export default function BlogPostPreview({ post, isLoading, empty, error }: BlogPostPreviewProps) {
   const { sanitized, sanitizationError } = useMemo(() => {
-    if (!post?.content || typeof post.content !== "string") {
+    const rawContent = post?.content;
+
+    const hasUsableString =
+      typeof rawContent === "string" && rawContent.trim().length > 0;
+
+    const contentForSanitization = hasUsableString
+      ? rawContent
+      : ensureHtmlContent(rawContent);
+
+    if (typeof contentForSanitization !== "string" || !contentForSanitization.trim()) {
       return { sanitized: "", sanitizationError: null as string | null };
     }
 
     try {
       return {
-        sanitized: sanitizeHtmlClient(post.content),
+        sanitized: sanitizeHtmlClient(contentForSanitization),
         sanitizationError: null as string | null,
       };
     } catch (err) {
@@ -33,10 +43,7 @@ export default function BlogPostPreview({ post, isLoading, empty, error }: BlogP
     }
   }, [post?.content]);
 
-  const derivedEmpty =
-    typeof empty === "boolean"
-      ? empty
-      : !(typeof post?.content === "string" && post.content.trim().length > 0);
+  const derivedEmpty = typeof empty === "boolean" ? empty : sanitized.trim().length === 0;
 
   return (
     <BlogRenderer

@@ -22,7 +22,8 @@ const isDesktopWidth = () =>
   typeof window.matchMedia === "function" &&
   window.matchMedia("(min-width: 768px)").matches;
 
-const shouldForceListView = () => clientEnv.TEST_MODE === "true" || isDesktopWidth();
+const shouldForceListView = () =>
+  isDesktopWidth() || (typeof window === "undefined" && clientEnv.TEST_MODE === "true");
 
 interface MediaLibraryProps {
   onSelect?: (url: string) => void;

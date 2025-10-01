@@ -1,16 +1,35 @@
 jest.mock("cheerio", () => {
-  const load = jest.fn(() => {
-    const factory = (selector: string) => {
-      const api = {
-        remove: jest.fn(),
-        each: jest.fn(),
-        length: selector === "body" ? 1 : 0,
-        html: jest.fn(() => ""),
-      };
-      return api;
+  const load = jest.fn((html: string) => {
+    const bodyApi = {
+      remove: jest.fn(),
+      each: jest.fn(),
+      length: 1,
+      html: jest.fn(() => html),
     };
 
-    factory.root = () => ({ html: () => "" });
+    const defaultApi = {
+      remove: jest.fn(),
+      each: jest.fn(),
+      length: 0,
+      html: jest.fn(() => ""),
+    };
+
+    const factory = (selector: string) => {
+      if (selector === "body") {
+        return bodyApi;
+      }
+
+      if (selector === "*") {
+        return {
+          ...defaultApi,
+          each: jest.fn(),
+        };
+      }
+
+      return defaultApi;
+    };
+
+    factory.root = () => ({ html: () => html });
 
     return factory;
   });
@@ -57,13 +76,29 @@ describe("BlogPostRenderer", () => {
     readTime: "1 min",
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("does not throw when content is non-string", () => {
     expect(() =>
       render(<BlogRenderer post={basePost} sanitizeHtml={sanitizeHtmlServer} />),
     ).not.toThrow();
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Title");
     const load = jest.mocked(mockedLoad);
-    expect(load).not.toHaveBeenCalled();
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(load.mock.calls[0]?.[0]).toContain("<p>");
     expect(sanitizeHtmlServer(basePost.content)).toBe("");
+  });
+
+  it("renders article markup when coercing TipTap JSON content", () => {
+    const { container } = render(
+      <BlogRenderer post={basePost} sanitizeHtml={sanitizeHtmlServer} />,
+    );
+
+    const articleBody = container.querySelector(".prose");
+
+    expect(articleBody?.innerHTML.trim().length).toBeGreaterThan(0);
+    expect(screen.getByText("Tiptap")).toBeInTheDocument();
   });
 });

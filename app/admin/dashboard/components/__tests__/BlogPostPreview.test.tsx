@@ -35,4 +35,32 @@ describe("BlogPostPreview", () => {
 
     expect(screen.getByText("Team")).toBeInTheDocument();
   });
+
+  it("renders converted HTML from TipTap JSON content", () => {
+    const tiptapPayload = {
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            {
+              type: "text",
+              text: "Converted TipTap content",
+            },
+          ],
+        },
+      ],
+    };
+
+    render(
+      <BlogPostPreview
+        post={{ ...basePreviewPost, content: tiptapPayload } as any}
+      />,
+    );
+
+    expect(screen.getByText("Converted TipTap content")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Nothing to show yet", { exact: false }),
+    ).not.toBeInTheDocument();
+  });
 });

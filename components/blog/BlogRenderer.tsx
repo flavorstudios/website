@@ -12,6 +12,7 @@ import type { PublicBlogDetail } from "@/lib/types";
 import { isAllowedImageUrl } from "@/lib/image-domains";
 import { safeDateLabel } from "@/lib/safe-date";
 import { normalizeAuthor } from "@/lib/author-normalizer";
+import { ensureHtmlContent } from "@/lib/html-content";
 
 export type BlogRendererPost = PublicBlogDetail | StoreBlogPost;
 
@@ -96,18 +97,31 @@ function resolveSanitizedHtml({
     return "";
   }
 
-  const rawContent = typeof post.content === "string" ? post.content : "";
+  const hasNonEmptyStringContent =
+    typeof post.content === "string" && post.content.trim().length > 0;
+
+  const recoveredHtml = hasNonEmptyStringContent
+    ? post.content
+    : ensureHtmlContent(post.content);
+
+  if (!hasNonEmptyStringContent && recoveredHtml.trim().length === 0) {
+    console.warn("BlogRenderer: Failed to recover HTML from post content.", {
+      postId: "id" in post ? post.id : undefined,
+      slug: "slug" in post ? post.slug : undefined,
+      contentType: typeof post.content,
+    });
+  }
 
   if (typeof sanitizeHtml === "function") {
     try {
-      return sanitizeHtml(rawContent);
+      return sanitizeHtml(recoveredHtml);
     } catch (error) {
       console.error("Failed to sanitise blog content:", error);
       return "";
     }
   }
 
-  return rawContent;
+  return recoveredHtml;
 }
 
 export default function BlogRenderer({

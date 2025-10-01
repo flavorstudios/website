@@ -1,64 +1,55 @@
-diff --git a/.github/workflows/visual.yml b/.github/workflows/visual.yml
-new file mode 100644
-index 0000000..9a7b3f2
---- /dev/null
-+++ b/.github/workflows/visual.yml
-@@ -0,0 +1,75 @@
-+name: Visual snapshots
-+
-+on:
-+  workflow_dispatch:
-+    inputs:
-+      mode:
-+        description: "choose update or verify"
-+        required: true
-+        default: "update"
-+        type: choice
-+        options: [update, verify]
-+  pull_request:
-+    types: [labeled, opened, synchronize]
-+    branches: [ main ]
-+
-+permissions:
-+  contents: write
-+
-+jobs:
-+  visual:
-+    if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'update-visuals') || github.event.inputs.mode == 'update' || github.event.inputs.mode == 'verify' }}
-+    runs-on: ubuntu-latest
-+    container: mcr.microsoft.com/playwright:v1.47.0-jammy
-+    steps:
-+      - name: Checkout
-+        uses: actions/checkout@v4
-+        with:
-+          fetch-depth: 0
-+      - name: Setup Node
-+        uses: actions/setup-node@v4
-+        with:
-+          node-version: 20
-+      - name: Enable pnpm
-+        run: corepack enable
-+      - name: Install deps
-+        run: pnpm install --frozen-lockfile
-+      - name: Build app for e2e
-+        run: pnpm -s e2e:build
-+
-+      - name: Update snapshots
-+        if: ${{ github.event.inputs.mode == 'update' || contains(github.event.pull_request.labels.*.name, 'update-visuals') }}
-+        run: pnpm -s visual:update
-+
-+      - name: Commit snapshot changes
-+        if: ${{ github.event.inputs.mode == 'update' || contains(github.event.pull_request.labels.*.name, 'update-visuals') }}
-+        run: |
-+          if [[ -n "$(git status --porcelain)" ]]; then
-+            git config user.email "actions@users.noreply.github.com"
-+            git config user.name "github-actions"
-+            git add tests/admin-login-legal-visual.spec.ts-snapshots/
-+            git commit -m "test(visual): update admin login legal snapshots [ci skip]"
-+            git push
-+          else
-+            echo "No snapshot changes to commit."
-+          fi
-+
-+      - name: Verify tests pass without updating
-+        run: pnpm -s visual:test
+name: Visual snapshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "choose update or verify"
+        required: true
+        default: "update"
+        type: choice
+        options: [update, verify]
+  pull_request:
+    types: [labeled, opened, synchronize]
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  visual:
+    if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'update-visuals') || github.event.inputs.mode == 'update' || github.event.inputs.mode == 'verify' }}
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.47.0-jammy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Enable pnpm
+        run: corepack enable
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Build app for e2e
+        run: pnpm -s e2e:build
+      - name: Update snapshots
+        if: ${{ github.event.inputs.mode == 'update' || contains(github.event.pull_request.labels.*.name, 'update-visuals') }}
+        run: pnpm -s visual:update
+      - name: Commit snapshot changes
+        if: ${{ github.event.inputs.mode == 'update' || contains(github.event.pull_request.labels.*.name, 'update-visuals') }}
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.email "actions@users.noreply.github.com"
+            git config user.name "github-actions"
+            git add tests/admin-login-legal-visual.spec.ts-snapshots/
+            git commit -m "test(visual): update admin login legal snapshots [ci skip]"
+            git push
+          else
+            echo "No snapshot changes to commit."
+          fi
+      - name: Verify tests pass without updating
+        run: pnpm -s visual:test

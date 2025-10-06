@@ -116,19 +116,24 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const isGuardedAdminRoute = useMemo(() => {
-    if (!pathname) {
+    if (!pathname?.startsWith("/admin")) {
       return false
     }
-    if (!pathname.startsWith("/admin")) {
+    
+    const unguardedPrefixes = [
+      "/admin/login",
+      "/admin/forgot-password",
+      "/admin/signup",
+      "/admin/verify-email",
+      "/admin/preview",
+    ]
+
+    return !unguardedPrefixes.some((prefix) => {
+      if (pathname === prefix) return true
+      if (pathname.startsWith(`${prefix}/`)) return true
+      if (pathname.startsWith(`${prefix}?`)) return true
       return false
-    }
-    if (pathname.startsWith("/admin/verify-email")) {
-      return false
-    }
-    if (pathname === "/admin/signup") {
-      return false
-    }
-    return true
+    })
   }, [pathname])
 
   const persistTestEmailVerified = useCallback(
@@ -324,6 +329,14 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     if (testMode) {
       const syncValue = readTestEmailVerifiedSync()
       const effectiveValue = syncValue ?? testEmailVerified
+
+      if (effectiveValue === null) {
+        updateVerificationStatus("verified")
+        if (pathname?.startsWith("/admin/verify-email")) {
+          router.replace("/admin/dashboard")
+        }
+        return
+      }
 
       if (effectiveValue === true) {
         updateVerificationStatus("verified")

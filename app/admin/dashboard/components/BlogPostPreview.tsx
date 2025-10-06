@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import BlogRenderer from "@/components/blog/BlogRenderer";
 import { sanitizeHtmlClient } from "@/lib/sanitize/client";
-import { ensureHtmlContent } from "@/lib/html-content";
+import { ensureHtmlContent } from "@/lib/html-content/client";
 import type { BlogPost as StoreBlogPost } from "@/lib/content-store";
 import type { PublicBlogDetail } from "@/lib/types";
 

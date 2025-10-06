@@ -12,7 +12,7 @@ import type { PublicBlogDetail } from "@/lib/types";
 import { isAllowedImageUrl } from "@/lib/image-domains";
 import { safeDateLabel } from "@/lib/safe-date";
 import { normalizeAuthor } from "@/lib/author-normalizer";
-import { ensureHtmlContent } from "@/lib/html-content";
+import { ensureHtmlContent } from "@/lib/html-content-client";
 
 export type BlogRendererPost = PublicBlogDetail | StoreBlogPost;
 

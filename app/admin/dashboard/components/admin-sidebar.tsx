@@ -126,7 +126,7 @@ export function AdminSidebar({
         className={`
           h-full md:h-screen overflow-y-auto bg-background border-r
           ${isMobile
-            ? `fixed left-0 top-0 ${sidebarOpen ? "z-50" : "z-40"} transition-transform duration-300 ease-in-out`
+            ? `fixed left-0 top-0 ${sidebarOpen ? "z-[60]" : "z-40"} transition-transform duration-300 ease-in-out`
             : "sticky top-0 z-40"}
           ${sidebarOpen
             ? "translate-x-0 pointer-events-auto"

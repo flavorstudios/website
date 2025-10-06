@@ -203,7 +203,7 @@ export default function VerifyEmailClient() {
         tone: "success",
         message: "Test mode: verification marked complete. Redirecting…",
       });
-      startRedirect("/admin/dashboard");
+      startRedirect("/admin/dashboard", { delayMs: 150 });
       return;
     }
     setLoading(true);

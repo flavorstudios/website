@@ -1,0 +1,46 @@
+/* Shared skip link styles imported by both legacy and App Router stylesheets */
+.skip-link {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  box-shadow: 0 10px 25px -15px rgba(15, 23, 42, 0.6);
+  transform: translateY(-200%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  clip: rect(0 0 0 0);
+  clip-path: inset(100%);
+  overflow: hidden;
+  white-space: nowrap;
+  transition: transform 0.2s ease, opacity 0.2s ease, visibility 0s linear 0.2s;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible,
+.skip-link[data-visible="true"] {
+  clip: auto;
+  clip-path: inset(0);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  transition-delay: 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}

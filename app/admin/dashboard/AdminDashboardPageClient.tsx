@@ -80,8 +80,8 @@ const SystemSettings = dynamic(
 // ---- Route map (reused) ----------------------------------------------------
 const NAV: { id: SectionId; href: string; title: string }[] = [
   { id: "overview", href: "/admin/dashboard", title: "Overview" },
-  { id: "blogs", href: "/admin/dashboard/blog", title: "Blog Posts" },
-  { id: "blogs", href: "/admin/dashboard/blog-posts", title: "Blog Posts" },
+  { id: "blogs", href: "/admin/dashboard/blog", title: "Blog Management" },
+  { id: "blogs", href: "/admin/dashboard/blog-posts", title: "Blog Management" },
   { id: "videos", href: "/admin/dashboard/videos", title: "Videos" },
   { id: "media", href: "/admin/dashboard/media", title: "Media" },
   { id: "categories", href: "/admin/dashboard/categories", title: "Categories" },
@@ -484,13 +484,6 @@ export default function AdminDashboardPageClient({
                 aria-hidden={isMobile && sidebarOpen ? true : undefined}
               >
                 <div className="max-w-7xl mx-auto">
-                  <h1
-                    className="sr-only"
-                    id="admin-dashboard-page-title"
-                    data-testid="dashboard-page-heading"
-                  >
-                    {currentTitle}
-                  </h1>
                   {/* Online/Offline indicator */}
                   {!isOnline && (
                     <Alert className="mb-4 border-amber-200 bg-amber-50">

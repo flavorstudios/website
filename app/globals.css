@@ -1,3 +1,5 @@
+@import "../styles/skip-link.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -95,45 +97,6 @@ samp {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-/* Skip link utility */
-.skip-link {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 999;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  box-shadow: 0 10px 25px -15px rgba(15, 23, 42, 0.6);
-  transform: translateY(-200%);
-  opacity: 0;
-  pointer-events: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.skip-link:not(:focus):not(:focus-visible) {
-  width: 1px;
-  height: 1px;
-  clip: rect(0 0 0 0);
-  clip-path: inset(100%);
-  overflow: hidden;
-  white-space: nowrap;
-  padding: 0;
-  border: 0;
-  opacity: 0;
-  transform: translateY(-200%);
-}
-
-.skip-link:focus,
-.skip-link:focus-visible {
-  outline: 2px solid hsl(var(--ring));
-  outline-offset: 2px;
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
 }
 
 /* Admin Panel Specific Styles */

@@ -61,7 +61,7 @@ export default async function HomeLayout({ children }: { children: ReactNode }) 
     <>
       <AdblockBanner />
       <HomeNavigation blogCategories={blogCategories} videoCategories={videoCategories} />
-      <main id="main-content" tabIndex={-1} className="bg-slate-950">
+      <main id="main" tabIndex={-1} role="main" className="bg-slate-950">
         {children}
       </main>
       <Footer />

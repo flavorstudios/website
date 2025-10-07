@@ -7,6 +7,10 @@ export default function PwaServiceWorker() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
 
   useEffect(() => {
+    if (clientEnv.TEST_MODE === 'true') {
+      return;
+    }
+
     let refreshing = false;
     let newWorker: ServiceWorker | null = null;
 
@@ -57,7 +61,7 @@ export default function PwaServiceWorker() {
         navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
       };
     }
-  }, []);
+  }, [clientEnv.TEST_MODE]);
 
   // Trigger update by sending SKIP_WAITING to the waiting SW
   const handleUpdate = () => {

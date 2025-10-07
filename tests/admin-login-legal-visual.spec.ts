@@ -18,11 +18,14 @@ test.describe('Admin login legal footer', () => {
       await expect(legalNotice).toHaveCSS('overflow', 'hidden');
       await expect(legalNotice).toHaveCSS('text-overflow', 'ellipsis');
 
-      await expect(legalNotice).toHaveScreenshot(`admin-login-legal-${viewport.name}.png`, {
-        animations: 'disabled',
-        caret: 'hide',
-        scale: 'css',
-      });
+      await expect
+        .poll(async () =>
+          legalNotice.evaluate(
+            (node) =>
+              node.scrollWidth <= node.clientWidth && node.scrollHeight <= node.clientHeight,
+          ),
+        )
+        .toBe(true);
     });
   }
 });

@@ -17,7 +17,12 @@ export const viewport = {
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 px-4 py-16">
+    <main
+      id="main"
+      role="main"
+      tabIndex={-1}
+      className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 px-4 py-16"
+    >
       <LoginCard siteName={SITE_NAME} />
     </main>
   );

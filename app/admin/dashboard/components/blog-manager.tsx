@@ -497,10 +497,9 @@ export default function BlogManager() {
     return (
       <div>
         <div className="space-y-1">
-          <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
+          <h2 className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
             Blog Management
-          </span>
-          <h2 className="sr-only">Blog Management</h2>
+          </h2>
           <AdminPageHeader
             as="h1"
             title="Blog Posts"
@@ -585,10 +584,9 @@ export default function BlogManager() {
       {/* Header with right-aligned action buttons */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-1">
-          <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
+          <h2 className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
             Blog Management
-          </span>
-          <h2 className="sr-only">Blog Management</h2>
+          </h2>
           <AdminPageHeader
             as="h1"
             title="Blog Posts"

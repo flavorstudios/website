@@ -28,7 +28,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useEditor, EditorContent, Editor } from "@tiptap/react"
-import Placeholder from "@tiptap/extension-placeholder"
 import { sanitizeHtmlClient } from "@/lib/sanitize/client"
 import { createSharedTiptapExtensions } from "@/lib/tiptap-extensions"
 

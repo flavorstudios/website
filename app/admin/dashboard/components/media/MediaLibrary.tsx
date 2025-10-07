@@ -6,6 +6,7 @@ import MediaList from "./MediaList";
 import MediaUpload from "./MediaUpload";
 import MediaBulkActions from "./MediaBulkActions";
 import MediaDetailsDrawer from "./MediaDetailsDrawer";
+import AdminPageHeader from "@/components/AdminPageHeader";
 import type {
   MediaDoc,
   TypeFilter,
@@ -531,7 +532,15 @@ export default function MediaLibrary({
   };
 
   return (
-    <div className="flex flex-col gap-4" aria-busy={loading}>
+    <div className="space-y-6" aria-busy={loading}>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <AdminPageHeader
+          as="h1"
+          title="Media"
+          subtitle="Upload, organise, and reuse assets across your content"
+        />
+      </div>
+      
       <MediaToolbar
         search={search}
         onSearchChange={setSearch}

@@ -12,11 +12,17 @@ export function SkipLink() {
     }
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (
-        event.key === "Tab" &&
-        !event.shiftKey &&
-        document.activeElement === document.body
-      ) {
+      if (event.key !== "Tab" || event.shiftKey) {
+        return;
+      }
+
+      const activeElement = document.activeElement;
+      const shouldFocusSkipLink =
+        !activeElement ||
+        activeElement === document.body ||
+        activeElement === document.documentElement;
+
+      if (shouldFocusSkipLink) {
         linkRef.current?.focus();
       }
     }

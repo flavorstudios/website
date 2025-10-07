@@ -80,8 +80,8 @@ const SystemSettings = dynamic(
 // ---- Route map (reused) ----------------------------------------------------
 const NAV: { id: SectionId; href: string; title: string }[] = [
   { id: "overview", href: "/admin/dashboard", title: "Overview" },
-  { id: "blogs", href: "/admin/dashboard/blog", title: "Blog Management" },
-  { id: "blogs", href: "/admin/dashboard/blog-posts", title: "Blog Management" },
+  { id: "blogs", href: "/admin/dashboard/blog", title: "Blog Posts" },
+  { id: "blogs", href: "/admin/dashboard/blog-posts", title: "Blog Posts" },
   { id: "videos", href: "/admin/dashboard/videos", title: "Videos" },
   { id: "media", href: "/admin/dashboard/media", title: "Media" },
   { id: "categories", href: "/admin/dashboard/categories", title: "Categories" },
@@ -310,7 +310,7 @@ export default function AdminDashboardPageClient({
     if (isMobile && sidebarOpen) {
       wrapper.style.pointerEvents = "none";
       wrapper.style.position = "relative";
-      wrapper.style.zIndex = "0";
+      wrapper.style.zIndex = "-1";
     } else {
       wrapper.style.pointerEvents = "";
       wrapper.style.position = "";

@@ -117,6 +117,8 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
     }
   }
 
+  const isOtpFlow = mfaRequired || otpExpanded || otp.length > 0;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Persistent live region so SRs announce new errors */}
@@ -227,7 +229,13 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
         className="w-full"
       >
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-        {loading ? "Signing in…" : "Sign in"}
+        {loading
+          ? isOtpFlow
+            ? "Logging in…"
+            : "Signing in…"
+          : isOtpFlow
+            ? "Login"
+            : "Sign in"}
       </Button>
     </form>
   )

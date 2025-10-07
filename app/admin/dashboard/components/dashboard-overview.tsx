@@ -19,6 +19,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import AdminPageHeader from "@/components/AdminPageHeader";
 import ProgressStat from "./progress-stat";
 import {
   TrendingUp,
@@ -361,6 +362,11 @@ export default function DashboardOverview() {
 
   return (
     <div className="space-y-6">
+      <AdminPageHeader
+        as="h1"
+        title="Dashboard Overview"
+        subtitle="Track activity, performance, and quick actions for your studio"
+      />
       {/* Controls */}
       <div className="flex items-center gap-3">
         <Button

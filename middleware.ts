@@ -20,9 +20,11 @@ function getRequestIp(request: NextRequest): string {
   return "unknown";
 }
 
+const isE2E = process.env.E2E === "true";
+
 export async function middleware(request: NextRequest) {
   // 🔓 Test/CI bypass: allow all when explicitly disabled (Codex suggestion)
-  if (serverEnv.ADMIN_AUTH_DISABLED === "1") {
+  if (serverEnv.ADMIN_AUTH_DISABLED === "1" || isE2E) {
     return NextResponse.next();
   }
 

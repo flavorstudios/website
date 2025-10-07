@@ -118,16 +118,17 @@ export function AdminSidebar({
   return (
     <>
       <aside
-      ref={sidebarRef}
+        ref={sidebarRef}
         id={id}
+        data-testid={id}
         role="complementary"
         aria-hidden={isHidden}
         tabIndex={isHidden ? -1 : undefined}
         className={`
           h-full md:h-screen overflow-y-auto bg-background border-r
           ${isMobile
-            ? `fixed left-0 top-0 ${sidebarOpen ? "z-[60]" : "z-40"} transition-transform duration-300 ease-in-out`
-            : "sticky top-0 z-40"}
+            ? `fixed left-0 top-0 transition-transform duration-300 ease-in-out ${sidebarOpen ? "z-[60]" : "z-40"}`
+            : "sticky top-0 z-[60]"}
           ${sidebarOpen
             ? "translate-x-0 pointer-events-auto"
             : "-translate-x-full md:translate-x-0 pointer-events-none md:pointer-events-auto"}

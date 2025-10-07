@@ -56,6 +56,7 @@ export default defineConfig({
       NEXT_PUBLIC_TEST_MODE: 'true',
       TEST_MODE: 'true',
       NEXT_DISABLE_FONT_DOWNLOADS: '1',
+      E2E: 'true',
       NODE_OPTIONS: `--require ${fontMockPath}`,
     },
   },

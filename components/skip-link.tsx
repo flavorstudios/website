@@ -36,7 +36,7 @@ export function SkipLink() {
 
   return (
     <a
-      href="#main-content"
+      href="#main"
       className="skip-link"
       data-visible={isVisible ? "true" : undefined}
       onFocus={() => setIsVisible(true)}

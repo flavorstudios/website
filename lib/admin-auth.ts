@@ -14,6 +14,8 @@ import { getUserRole } from "@/lib/user-roles";
 import { serverEnv } from "@/env/server";
 import { createHash } from "crypto";
 
+const isE2E = process.env.E2E === "true";
+
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
 const debug =
   serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
@@ -24,10 +26,10 @@ function getRequestIp(req: NextRequest): string {
   return "unknown";
 }
 
-  // Combined flag to short-circuit all auth checks when either bypass is enabled
+// Combined flag to short-circuit all auth checks when either bypass is enabled
 // or auth is explicitly disabled via environment variable.
 export const DISABLE_AUTH =
-  ADMIN_BYPASS || serverEnv.ADMIN_AUTH_DISABLED === "1";
+  ADMIN_BYPASS || serverEnv.ADMIN_AUTH_DISABLED === "1" || isE2E;
 
 // Fetch admin emails from Firestore's admin_users collection (lowercased, trimmed).
 async function getFirestoreAdminEmails(): Promise<string[]> {

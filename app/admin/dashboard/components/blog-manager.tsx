@@ -500,6 +500,7 @@ export default function BlogManager() {
           <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
             Blog Management
           </span>
+          <h2 className="sr-only">Blog Management</h2>
           <AdminPageHeader
             as="h1"
             title="Blog Posts"
@@ -587,6 +588,7 @@ export default function BlogManager() {
           <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
             Blog Management
           </span>
+          <h2 className="sr-only">Blog Management</h2>
           <AdminPageHeader
             as="h1"
             title="Blog Posts"

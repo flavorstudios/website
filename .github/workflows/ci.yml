@@ -13,6 +13,14 @@ jobs:
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Git LFS pull
+        run: |
+          git lfs install
+          git lfs pull
       
       # Install pnpm; version is taken from package.json "packageManager"
       - uses: pnpm/action-setup@v4
@@ -37,6 +45,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Verify LFS snapshots
+        run: scripts/verify-lfs-snapshots.sh
 
       - name: Determine Firebase emulator version
         id: firebase-tools
@@ -92,6 +103,7 @@ jobs:
       - name: Playwright tests
         env:
           CRON_SECRET: test-secret
+          E2E: "true"
         run: pnpm e2e
 
       - name: Clean up service account key

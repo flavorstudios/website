@@ -7,6 +7,7 @@ export async function expectNoAxeViolations(
   page: Page,
   opts?: { include?: string | string[] }
 ) {
+  await page.waitForLoadState("networkidle");
   let builder = new AxeBuilder({ page });
 
   if (opts?.include) {

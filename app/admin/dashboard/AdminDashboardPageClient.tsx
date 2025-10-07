@@ -440,7 +440,7 @@ export default function AdminDashboardPageClient({
   return (
     <RoleProvider>
           {/* Accessible skip link */}
-          <a href="#main-content" className="skip-link">
+          <a href="#admin-main" className="skip-link">
             Skip to main content
           </a>
 
@@ -475,8 +475,8 @@ export default function AdminDashboardPageClient({
                 className="sticky top-0 z-40 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
               />
 
-              <main
-                id="main-content"
+              <section
+                id="admin-main"
                 className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-4 pt-4
                            pb-[calc(var(--mobile-nav-h,64px)+env(safe-area-inset-bottom,0px))] lg:pb-6"
                 role="main"
@@ -510,7 +510,7 @@ export default function AdminDashboardPageClient({
                     Section: {currentTitle}
                   </div>
                 </div>
-              </main>
+              </section>
 
               {isMobile && !keyboardOpen && !sidebarOpen && (
                 <MobileNav

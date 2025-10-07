@@ -1,2 +1,6 @@
 # Keep binary PNG diffs clean
 *.png binary
+
+# Ensure Playwright snapshots are always treated as binary assets
+# even when Git LFS is unavailable (e.g., in CI containers).
+tests/**-snapshots/*.png -text

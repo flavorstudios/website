@@ -16,7 +16,6 @@ import {
 
 import Toaster from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SkipLink } from "@/components/skip-link";
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -143,7 +142,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
       >
-        <SkipLink />
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[10000] focus:rounded focus:bg-background focus:px-3 focus:py-2 focus:shadow-lg"
+          data-testid="skip-link"
+        >
+          Skip to main content
+        </a>
+        <h1 className="sr-only">{SITE_NAME}</h1>
         <ThemeProvider>
           {/* GTM (NOSCRIPT) — only if container id is provided */}
           {gtmId && (
@@ -161,11 +167,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
           <Toaster />
 
-          {/*
-            No header/footer/main wrapper here.
-            Section-specific chrome lives in route-group layouts.
-          */}
-          {children}
+          <main id="main" role="main" tabIndex={-1}>
+            {/*
+              No header/footer/main wrapper here.
+              Section-specific chrome lives in route-group layouts.
+            */}
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>

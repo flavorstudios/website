@@ -118,29 +118,34 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
     return renderGuardedMessage("Missing token.");
   }
 
+  let tokenError: ReactNode | null = null;
+
   const payload = (() => {
     if (isE2E) {
       return { postId: id, uid: "e2e", exp: Date.now() / 1000 };
     }
 
-  const inspection = inspectPreviewToken(token!);
+    const inspection = inspectPreviewToken(token!);
     if (inspection.status === "invalid") {
       logFailure(403, new Error("Invalid token"));
+      tokenError = "Invalid token.";
       return null;
     }
     if (inspection.status === "expired") {
       logFailure(410, new Error("Expired token"));
+      tokenError = "Preview token expired.";
       return null;
     }
     if (inspection.payload.postId !== id) {
       logFailure(403, new Error("Invalid token"));
+      tokenError = "Invalid token.";
       return null;
     }
     return inspection.payload;
   })();
 
   if (!payload) {
-    return renderGuardedMessage("Invalid token.");
+    return renderGuardedMessage(tokenError ?? "Invalid token.");
   }
 
   try {

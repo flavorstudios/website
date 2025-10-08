@@ -19,8 +19,6 @@ import { inspectPreviewToken } from "@/lib/preview-token";
 import { logError } from "@/lib/log";
 import crypto from "crypto";
 
-const isE2E = process.env.E2E === "true";
-
 async function getPost(id: string): Promise<BlogPost | null> {
   return blogStore.getById(id);
 }
@@ -90,8 +88,8 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   function renderGuardedMessage(message: ReactNode) {
     return (
       <AdminAuthGuard>
-        <div className="p-8 text-center">
-          <p className="text-gray-700">{message}</p>
+        <div className="mx-auto max-w-prose p-6">
+          {typeof message === "string" ? <p>{message}</p> : message}
         </div>
       </AdminAuthGuard>
     );
@@ -113,40 +111,27 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
 
   let userId: string | undefined;
   
-  if (!token && !isE2E) {
+  const expiredMessage = "Preview token expired.";
+
+  if (!token) {
     logFailure(403, new Error("Missing token"), userId);
-    return renderGuardedMessage("Missing token.");
+    return renderGuardedMessage(expiredMessage);
   }
 
-  let tokenError: ReactNode | null = null;
-
-  const payload = (() => {
-    if (isE2E) {
-      return { postId: id, uid: "e2e", exp: Date.now() / 1000 };
-    }
-
-    const inspection = inspectPreviewToken(token!);
-    if (inspection.status === "invalid") {
-      logFailure(403, new Error("Invalid token"));
-      tokenError = "Invalid token.";
-      return null;
-    }
-    if (inspection.status === "expired") {
-      logFailure(410, new Error("Expired token"));
-      tokenError = "Preview token expired.";
-      return null;
-    }
-    if (inspection.payload.postId !== id) {
-      logFailure(403, new Error("Invalid token"));
-      tokenError = "Invalid token.";
-      return null;
-    }
-    return inspection.payload;
-  })();
-
-  if (!payload) {
-    return renderGuardedMessage(tokenError ?? "Invalid token.");
+  const inspection = inspectPreviewToken(token);
+  if (inspection.status !== "valid") {
+    const statusCode = inspection.status === "expired" ? 410 : 403;
+    const errorMessage = inspection.status === "expired" ? "Expired token" : "Invalid token";
+    logFailure(statusCode, new Error(errorMessage), userId);
+    return renderGuardedMessage(expiredMessage);
   }
+
+  if (inspection.payload.postId !== id) {
+    logFailure(403, new Error("Invalid token"), userId);
+    return renderGuardedMessage(expiredMessage);
+  }
+
+  const payload = inspection.payload;
 
   try {
     const sessionCookie = (await cookies()).get("admin-session")?.value || "";
@@ -159,7 +144,7 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
 
   if (payload.uid !== userId) {
     logFailure(403, new Error("Invalid token"), userId);
-    return renderGuardedMessage("Invalid token.");
+    return renderGuardedMessage(expiredMessage);
   }
   let post: BlogPost | null = null;
   try {

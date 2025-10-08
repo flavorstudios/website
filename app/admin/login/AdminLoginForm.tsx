@@ -77,6 +77,10 @@ export default function AdminLoginForm() {
   const searchParams = useSearchParams()
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
 
+  const normalizedError = error.trim()
+  const alertMessage = normalizedError.length ? normalizedError : null
+  const alertId = alertMessage ? "admin-login-error" : undefined
+
   const passwordResetNotice =
     searchParams.get("reset") === "1"
       ? "Your password has been updated. Please sign in."
@@ -263,11 +267,23 @@ export default function AdminLoginForm() {
                   : "Use legacy admin password (env-based)"}
               </Button>
             )}
+            {alertMessage && (
+              <div
+                id={alertId}
+                role="alert"
+                aria-live="assertive"
+                className="text-sm text-red-600"
+              >
+                {alertMessage}
+              </div>
+            )}
+
             {showLegacyLogin ? (
               <EmailLoginForm
                 error={error}
                 setError={setError}
                 notice={passwordResetNotice ?? undefined}
+                errorMessageId={alertId}
               />
             ) : (
               <FirebaseEmailLoginForm
@@ -275,6 +291,7 @@ export default function AdminLoginForm() {
                 setError={setError}
                 notice={passwordResetNotice ?? undefined}
                 onSuccess={finalizeLogin}
+                errorMessageId={alertId}
               />
             )}
             <div className="relative py-2">
@@ -314,7 +331,7 @@ export default function AdminLoginForm() {
               </Link>
             </p>
             <p
-              className="text-xs text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis"
+              className="text-xs text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis w-full max-w-[220px] sm:max-w-[300px] md:max-w-[380px]"
               data-testid="admin-login-legal"
             >
               By continuing, you agree to our{' '}

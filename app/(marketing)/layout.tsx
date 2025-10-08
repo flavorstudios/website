@@ -69,9 +69,9 @@ export default async function MarketingLayout({ children }: { children: ReactNod
 
       <Header blogCategories={blogCategories} videoCategories={videoCategories} />
 
-      <main id="main" tabIndex={-1} role="main">
+      <div className="min-h-screen">
         {children}
-      </main>
+      </div>
 
       <Footer />
       <BackToTop />

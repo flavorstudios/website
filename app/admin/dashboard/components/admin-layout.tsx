@@ -107,16 +107,17 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
         <AdminHeader onLogout={handleLogout} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         {/* Padding matches ADMIN_HEADER_HEIGHT (h-14 = 56px) */}
-        <main
-          id="main"
-          role="main"
+        <section
+          id="admin-layout-main"
           tabIndex={-1}
           className="relative flex-1 overflow-y-auto overflow-x-hidden pt-14"
+          role="region"
+          aria-label="Admin content"
         >
           <div className="min-h-screen max-w-screen-xl mx-auto w-full p-4 sm:p-6 pb-[env(safe-area-inset-bottom)]">
             {children}
           </div>
-        </main>
+        </section>
 
         {isMobile && <BottomNav />}
       </div>

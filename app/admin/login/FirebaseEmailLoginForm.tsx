@@ -20,6 +20,7 @@ type FirebaseEmailLoginFormProps = {
   notice?: string
   setError: (value: string) => void
   onSuccess: () => void
+  errorMessageId?: string
 }
 
 const requiresVerification =
@@ -51,6 +52,7 @@ export default function FirebaseEmailLoginForm({
   notice,
   onSuccess,
   setError,
+  errorMessageId,
 }: FirebaseEmailLoginFormProps) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -148,11 +150,13 @@ export default function FirebaseEmailLoginForm({
     }
   }
 
+  const describedBy = formError ? errorMessageId ?? "firebase-login-error" : undefined
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       <div className="min-h-[1.5rem] space-y-2" aria-live="assertive">
-        {formError && (
-          <p id="firebase-login-error" className="text-sm text-red-600" role="alert">
+        {!errorMessageId && formError && (
+          <p id="firebase-login-error" className="text-sm text-red-600">
             {formError}
           </p>
         )}
@@ -179,7 +183,7 @@ export default function FirebaseEmailLoginForm({
             }
           }}
           required
-          aria-describedby={formError ? "firebase-login-error" : undefined}
+          aria-describedby={describedBy}
         />
       </div>
 
@@ -199,7 +203,7 @@ export default function FirebaseEmailLoginForm({
             }
           }}
           required
-          aria-describedby={formError ? "firebase-login-error" : undefined}
+          aria-describedby={describedBy}
         />
       </div>
 

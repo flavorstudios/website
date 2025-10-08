@@ -61,9 +61,9 @@ export default async function HomeLayout({ children }: { children: ReactNode }) 
     <>
       <AdblockBanner />
       <HomeNavigation blogCategories={blogCategories} videoCategories={videoCategories} />
-      <main id="main" tabIndex={-1} role="main" className="bg-slate-950">
+      <div className="bg-slate-950">
         {children}
-      </main>
+      </div>
       <Footer />
       <BackToTop />
       <PwaServiceWorker />

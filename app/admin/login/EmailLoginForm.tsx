@@ -13,6 +13,7 @@ type EmailLoginFormProps = {
   error: string
   setError: Dispatch<SetStateAction<string>>
   notice?: string
+  errorMessageId?: string
 }
 
 const fetchMfaStatus = async (url: string): Promise<{ mfaRequired: boolean }> => {
@@ -24,7 +25,12 @@ const fetchMfaStatus = async (url: string): Promise<{ mfaRequired: boolean }> =>
   return data
 }
 
-export default function EmailLoginForm({ error, setError, notice }: EmailLoginFormProps) {
+export default function EmailLoginForm({
+  error,
+  setError,
+  notice,
+  errorMessageId,
+}: EmailLoginFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -119,13 +125,15 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
 
   const isOtpFlow = mfaRequired || otpExpanded || otp.length > 0;
 
+  const describedBy = formError ? errorMessageId ?? "login-error" : undefined
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Persistent live region so SRs announce new errors */}
       <div className="min-h-[1.5rem] space-y-2">
         <div aria-live="assertive">
-          {formError && (
-            <p id="login-error" className="text-red-600 text-sm" role="alert">
+          {!errorMessageId && formError && (
+            <p id="login-error" className="text-red-600 text-sm">
               {formError}
             </p>
           )}
@@ -150,7 +158,7 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          aria-describedby={formError ? "login-error" : undefined}
+          aria-describedby={describedBy}
         />
       </div>
 
@@ -171,7 +179,7 @@ export default function EmailLoginForm({ error, setError, notice }: EmailLoginFo
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          aria-describedby={formError ? "login-error" : undefined}
+          aria-describedby={describedBy}
         />
       </div>
 

@@ -7,7 +7,9 @@ export async function expectNoAxeViolations(
   page: Page,
   opts?: { include?: string | string[] }
 ) {
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("load");
+  await page.waitForTimeout(150);
+
   let builder = new AxeBuilder({ page });
 
   if (opts?.include) {
@@ -47,7 +49,8 @@ export async function expectNoAxeViolations(
     }
   }
 
-  const { violations } = await builder.analyze();
+  const results = await builder.analyze();
+  const violations = results.violations ?? [];
 
   if (violations.length) {
     // Nice readable output in CI
@@ -58,9 +61,4 @@ export async function expectNoAxeViolations(
 }
 
 /** Backward-compat alias for older tests that import { runA11yScan } */
-export async function runA11yScan(
-  page: Page,
-  opts?: { include?: string | string[] }
-) {
-  await expectNoAxeViolations(page, opts);
-}
+export const runA11yScan = expectNoAxeViolations;

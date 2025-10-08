@@ -5,7 +5,11 @@ import React from 'react';
 import PreviewPage from '../[id]/page';
 import { verifyAdminSession, requireAdmin, getSessionInfo } from '@/lib/admin-auth';
 import { blogStore } from '@/lib/content-store';
-import { inspectPreviewToken } from '@/lib/preview-token';
+import { validatePreviewTokenOrThrow } from '@/lib/preview-token';
+import {
+  ExpiredPreviewTokenError,
+  InvalidPreviewTokenError,
+} from '@/lib/preview-token-errors';
 import { logError } from '@/lib/log';
 import { renderToStaticMarkup } from 'react-dom/server';
 
@@ -32,7 +36,7 @@ jest.mock('next/headers', () => ({
 }));
 
 jest.mock('@/lib/preview-token', () => ({
-  inspectPreviewToken: jest.fn(),
+  validatePreviewTokenOrThrow: jest.fn(),
   createPreviewToken: jest.fn(),
 }));
 
@@ -49,7 +53,7 @@ const mockedVerify = verifyAdminSession as jest.Mock;
 const mockedRequireAdmin = requireAdmin as jest.Mock;
 const mockedGetSessionInfo = getSessionInfo as jest.Mock;
 const mockedGetById = (blogStore.getById as unknown) as jest.Mock;
-const mockedInspect = inspectPreviewToken as jest.Mock;
+const mockedValidate = validatePreviewTokenOrThrow as jest.Mock;
 const mockedCreatePreviewToken = jest.requireMock('@/lib/preview-token')
   .createPreviewToken as jest.Mock;
 const mockedLogError = logError as jest.Mock;
@@ -91,10 +95,11 @@ describe('preview route', () => {
     mockedGetById.mockResolvedValue(mockPost);
     cookieValue = 'session';
     headerStore = new Headers({ 'x-request-id': 'req' });
-    mockedInspect.mockReset();
-    mockedInspect.mockReturnValue({
-      status: 'valid',
-      payload: { postId: '1', uid: 'user1', exp: Math.floor(Date.now() / 1000) + 60 },
+    mockedValidate.mockReset();
+    mockedValidate.mockReturnValue({
+      postId: '1',
+      uid: 'user1',
+      exp: Math.floor(Date.now() / 1000) + 60,
     });
     mockedCreatePreviewToken.mockReset();
     mockedLogError.mockReset();
@@ -109,7 +114,9 @@ describe('preview route', () => {
   });
 
   it('returns error element for invalid token', async () => {
-    mockedInspect.mockReturnValue({ status: 'invalid' });
+    mockedValidate.mockImplementation(() => {
+      throw new InvalidPreviewTokenError();
+    });
     const result = (await PreviewPage({
       params: Promise.resolve({ id: '1' }),
       searchParams: Promise.resolve({ token: 'bad' }),
@@ -120,9 +127,8 @@ describe('preview route', () => {
   });
 
   it('returns error element for expired token', async () => {
-    mockedInspect.mockReturnValue({
-      status: 'expired',
-      payload: { postId: '1', uid: 'user1', exp: Math.floor(Date.now() / 1000) - 10 },
+    mockedValidate.mockImplementation(() => {
+      throw new ExpiredPreviewTokenError();
     });
     const result = (await PreviewPage({
       params: Promise.resolve({ id: '1' }),

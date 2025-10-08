@@ -1,10 +1,21 @@
 import crypto from "crypto";
 import { serverEnv } from "@/env/server";
+import {
+  ExpiredPreviewTokenError,
+  InvalidPreviewTokenError,
+} from "./preview-token-errors";
 
 interface PreviewPayload {
   postId: string;
   uid: string;
   exp: number; // unix timestamp seconds
+}
+
+export type PreviewTokenPayload = PreviewPayload;
+
+export interface PreviewTokenExpectations {
+  postId?: string;
+  uid?: string;
 }
 
 function getSecret(): string;
@@ -64,6 +75,38 @@ export function inspectPreviewToken(token: string): PreviewTokenInspection {
     return { status: "expired", payload };
   }
   return { status: "valid", payload };
+}
+
+export function validatePreviewTokenOrThrow(
+  token: string | null | undefined,
+  expectations: PreviewTokenExpectations = {}
+): PreviewTokenPayload {
+  if (!token) {
+    throw new InvalidPreviewTokenError();
+  }
+
+  const inspection = inspectPreviewToken(token);
+
+  if (inspection.status === "invalid") {
+    throw new InvalidPreviewTokenError();
+  }
+
+  if (inspection.status === "expired") {
+    throw new ExpiredPreviewTokenError();
+  }
+
+  const { postId, uid } = expectations;
+  const { payload } = inspection;
+
+  if (postId && payload.postId !== postId) {
+    throw new InvalidPreviewTokenError();
+  }
+
+  if (uid && payload.uid !== uid) {
+    throw new InvalidPreviewTokenError();
+  }
+
+  return payload;
 }
 
 export function createPreviewToken(

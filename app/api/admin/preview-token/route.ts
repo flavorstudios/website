@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { logError } from "@/lib/log";
 import { createPreviewToken } from "@/lib/preview-token";
+import { serverEnv } from "@/env/server";
 
 interface PreviewTokenRequestBody {
   postId?: string;
@@ -42,4 +43,22 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
+  }
+
+export async function GET(request: NextRequest) {
+  const nodeEnv = process.env.NODE_ENV || serverEnv.NODE_ENV;
+
+  if (nodeEnv === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const url = new URL(request.url);
+  const expired = url.searchParams.get("expired") === "1";
+  const postId = url.searchParams.get("postId")?.trim() || "1";
+  const uid = url.searchParams.get("uid")?.trim() || "preview";
+  const ttl = expired ? -60 : 300;
+
+  const token = createPreviewToken(postId, uid, ttl);
+
+  return NextResponse.json({ token, postId, uid, expired });
 }

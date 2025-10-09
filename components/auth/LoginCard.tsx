@@ -295,7 +295,7 @@ export function LoginCard({ siteName }: LoginCardProps) {
         </p>
       </CardContent>
       <CardFooter className="flex flex-col items-center gap-2 px-6 pb-8 pt-0 text-center text-xs text-muted-foreground sm:px-10 sm:pb-10 lg:px-12 lg:pb-12">
-        <p>
+        <p className="w-full text-pretty leading-relaxed text-muted-foreground sm:max-w-sm">
           By continuing, you agree to our{" "}
           <Link href="/terms-of-service" className="font-medium text-primary hover:underline">
             Terms of Service

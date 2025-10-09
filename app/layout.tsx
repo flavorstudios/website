@@ -7,15 +7,12 @@ export const viewport = {
 import type { ReactNode } from "react";
 import "./globals.css";
 import "./fonts/poppins.css";
-import {
-  Poppins,
-  Inter,
-  Lora,
-  JetBrains_Mono,
-} from "next/font/google";
+import { Poppins, Inter, Lora, JetBrains_Mono } from "next/font/google";
 
 import Toaster from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Footer } from "@/components/footer";
+import { AfterMainSlot, FooterSlot, HeaderSlot, LayoutSlotsRoot } from "@/components/layout-slots";
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -102,6 +99,14 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "sw
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora", display: "swap" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
+function DefaultHeader() {
+  return (
+    <div className="sr-only" aria-hidden="true">
+      Flavor Studios navigation
+    </div>
+  );
+}
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   // GTM env flag
   const gtmId = serverEnv.NEXT_PUBLIC_GTM_CONTAINER_ID || "";
@@ -149,32 +154,51 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         )}
         {/* END GTM (HEAD) */}
       </head>
-      <body
-        className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
-      >
-        <ThemeProvider>
-          <a href="#main" className="a11y-skip">
-            Skip to main content
-          </a>
+      <body className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}>
+        <LayoutSlotsRoot footer={<Footer />}>
+          <ThemeProvider>
+            <a href="#main" className="a11y-skip">
+              Skip to main content
+            </a>
 
-          {/* GTM (NOSCRIPT) — only if container id is provided */}
-          {gtmId && (
-            <noscript>
-              <iframe
-                src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
-                height="0"
-                width="0"
-                style={{ display: "none", visibility: "hidden" }}
-                title="Google Tag Manager NoScript"
-              />
-            </noscript>
-          )}
-          {/* END GTM (NOSCRIPT) */}
+            {/* GTM (NOSCRIPT) — only if container id is provided */}
+            {gtmId && (
+              <noscript>
+                <iframe
+                  src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+                  height="0"
+                  width="0"
+                  style={{ display: "none", visibility: "hidden" }}
+                  title="Google Tag Manager NoScript"
+                />
+              </noscript>
+            )}
+            {/* END GTM (NOSCRIPT) */}
 
-          {children}
+            <div className="flex min-h-screen flex-col">
+              <header role="banner" className="w-full">
+                <HeaderSlot fallback={<DefaultHeader />} />
+              </header>
 
-          <Toaster />
-        </ThemeProvider>
+              <main
+                id="main"
+                role="main"
+                tabIndex={-1}
+                className="flex-1 focus-visible:outline-none"
+              >
+                {children}
+              </main>
+
+              <footer role="contentinfo" className="w-full">
+                <FooterSlot fallback={<Footer />} />
+              </footer>
+            </div>
+
+            <AfterMainSlot />
+
+            <Toaster />
+          </ThemeProvider>
+        </LayoutSlotsRoot>
       </body>
     </html>
   );

@@ -2,6 +2,13 @@ import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import type { BlogPost } from "@/lib/content-store"
 import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store"
+import { hasE2EBypass } from "@/lib/e2e-utils"
+import {
+  addE2EBlogPost,
+  getE2EBlogPostById,
+  getE2EBlogPosts,
+  updateE2EBlogPost,
+} from "@/lib/e2e-fixtures"
 
 function parseOptionalIsoDate(value: unknown, field: string): string | undefined {
   if (value === null || value === undefined) return undefined
@@ -18,6 +25,79 @@ function parseOptionalIsoDate(value: unknown, field: string): string | undefined
 }
 
 export async function POST(request: NextRequest) {
+  if (hasE2EBypass(request)) {
+    const nowIso = new Date().toISOString()
+    const payload = await request.json()
+    const status: BlogPost["status"] =
+      payload?.status === "scheduled" || payload?.status === "published"
+        ? payload.status
+        : "draft"
+
+    const normalized: BlogPost = {
+      id:
+        typeof payload?.id === "string" && payload.id.trim().length > 0
+          ? payload.id.trim()
+          : `blog-e2e-${Date.now()}`,
+      title: payload?.title ?? "Untitled Post",
+      slug:
+        payload?.slug?.trim?.() ||
+        (payload?.title || "untitled")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/(^-|-$)/g, ""),
+      content: typeof payload?.content === "string" ? payload.content : "",
+      excerpt:
+        typeof payload?.excerpt === "string" && payload.excerpt.trim().length > 0
+          ? payload.excerpt
+          : (payload?.content || "")
+              .replace(/<[^>]*>/g, "")
+              .slice(0, 160),
+      status,
+      category: payload?.category || "Announcements",
+      categories: Array.isArray(payload?.categories)
+        ? payload.categories
+        : [payload?.category || "Announcements"],
+      tags: Array.isArray(payload?.tags) ? payload.tags : [],
+      featuredImage: payload?.featuredImage || "/cover.jpg",
+      seoTitle: payload?.seoTitle || payload?.title || "Untitled Post",
+      seoDescription:
+        payload?.seoDescription ||
+        "Preview environment post used for automated testing.",
+      author: payload?.author || "Flavor Studios Editorial",
+      publishedAt:
+        payload?.publishedAt && typeof payload.publishedAt === "string"
+          ? new Date(payload.publishedAt).toISOString()
+          : nowIso,
+      scheduledFor:
+        payload?.scheduledFor && typeof payload.scheduledFor === "string"
+          ? new Date(payload.scheduledFor).toISOString()
+          : undefined,
+      createdAt:
+        payload?.createdAt && typeof payload.createdAt === "string"
+          ? new Date(payload.createdAt).toISOString()
+          : nowIso,
+      updatedAt: nowIso,
+      views: typeof payload?.views === "number" ? payload.views : 0,
+      readTime: payload?.readTime || "4 min",
+      commentCount: typeof payload?.commentCount === "number" ? payload.commentCount : 0,
+      shareCount: typeof payload?.shareCount === "number" ? payload.shareCount : 0,
+      schemaType: payload?.schemaType || "Article",
+      openGraphImage: payload?.openGraphImage || "/cover.jpg",
+    }
+
+    const existing = getE2EBlogPostById(normalized.id)
+    if (existing) {
+      const updated = updateE2EBlogPost(normalized.id, {
+        ...normalized,
+        updatedAt: nowIso,
+      })
+      return NextResponse.json(updated, { status: 200 })
+    }
+
+    const created = addE2EBlogPost(normalized)
+    return NextResponse.json(created, { status: 201 })
+  }
+
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
@@ -98,6 +178,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  if (hasE2EBypass(request)) {
+    return NextResponse.json({ posts: getE2EBlogPosts() })
+  }
+  
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }

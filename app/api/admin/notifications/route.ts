@@ -1,15 +1,37 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import { getNotificationsService } from "@/lib/notifications"
+import { hasE2EBypass } from "@/lib/e2e-utils"
+import { getE2ENotifications } from "@/lib/e2e-fixtures"
 
 export const runtime = "nodejs"
 
 export async function GET(request: NextRequest) {
-  if (!(await requireAdmin(request, "canManageUsers"))) {
+  const bypass = hasE2EBypass(request)
+
+  if (!bypass && !(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   try {
+    if (bypass) {
+      const items = getE2ENotifications()
+      const unreadCount = items.filter((n) => !n.read).length
+      return NextResponse.json(
+        {
+          notifications: items,
+          unreadCount,
+          nextCursor: null,
+          success: true,
+        },
+        {
+          headers: {
+            "Cache-Control": "no-store",
+          },
+        },
+      )
+    }
+    
     // Resolve the user whose notifications we’re fetching.
     // Replace this with your real session/user resolution.
     const userId =

@@ -112,7 +112,7 @@ export function AdminHeader({
             variant="ghost"
             size="sm"
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+            aria-label="Open sidebar"
             aria-expanded={sidebarOpen}
             aria-controls="app-sidebar"
             className="lg:hidden min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"

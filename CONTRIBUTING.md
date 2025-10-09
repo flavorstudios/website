@@ -13,10 +13,10 @@ reliable.
    ```
 2. Build the production bundle that the Playwright suite launches:
    ```bash
-   pnpm -s tsx scripts/build-e2e.ts
+   pnpm -s e2e:build
    ```
    The script sets the required environment variables, mocks Google Fonts, and
-   verifies the `.next` build output.
+   verifies the `.next` build output before starting the server.
 3. Regenerate the snapshots for the admin login legal footer:
    ```bash
    pnpm playwright test tests/admin-login-legal-visual.spec.ts --update-snapshots

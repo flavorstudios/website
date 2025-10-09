@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dialog";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { cn } from "@/lib/utils";
+import { E2E_DASHBOARD_HISTORY } from "@/lib/e2e-fixtures";
 
 // Lazy sections via central registry
 const DashboardOverview = dynamic(
@@ -143,6 +144,15 @@ export default function AdminDashboardPageClient({
   );
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const mainWrapperRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_E2E === "true" && typeof window !== "undefined") {
+      const win = window as Record<string, unknown>;
+      if (win.__dashboardHistoryDatasets == null) {
+        win.__dashboardHistoryDatasets = E2E_DASHBOARD_HISTORY;
+      }
+    }
+  }, []);
 
   // --- Hotkeys --------------------------------------------------------------
   useHotkeys("n", () => router.push("/admin/blog/create"), undefined, [router]);

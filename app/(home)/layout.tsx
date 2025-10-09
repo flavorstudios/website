@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer"
 import { BackToTop } from "@/components/back-to-top"
 import PwaServiceWorker from "@/components/PwaServiceWorker"
 import AdblockBanner from "@/components/AdblockBanner"
+import { LayoutSlots } from "@/components/layout-slots"
 
 import { getDynamicCategories } from "@/lib/dynamic-categories"
 import { serverEnv } from "@/env/server"
@@ -58,30 +59,30 @@ export default async function HomeLayout({ children }: { children: ReactNode }) 
   )
 
   return (
-    <>
+    <LayoutSlots
+      header={
+        <div className="relative z-50">
+          <h1 className="sr-only">Flavor Studios</h1>
+          <HomeNavigation blogCategories={blogCategories} videoCategories={videoCategories} />
+        </div>
+      }
+      footer={<Footer />}
+      afterMain={
+        <>
+          <BackToTop />
+          <PwaServiceWorker />
+          {cookieYesId && (
+            <Script
+              id="cookieyes"
+              src={`https://cdn-cookieyes.com/client_data/${cookieYesId}/script.js`}
+              strategy="afterInteractive"
+            />
+          )}
+        </>
+      }
+    >
       <AdblockBanner />
-
-      <header role="banner" className="relative z-50">
-        <h1 className="sr-only">Flavor Studios</h1>
-        <HomeNavigation blogCategories={blogCategories} videoCategories={videoCategories} />
-      </header>
-
-      <main id="main" role="main" tabIndex={-1} className="min-h-screen bg-slate-950">
-        {children}
-      </main>
-
-      <footer role="contentinfo" aria-label="Site footer">
-        <Footer />
-      </footer>
-      <BackToTop />
-      <PwaServiceWorker />
-      {cookieYesId && (
-        <Script
-          id="cookieyes"
-          src={`https://cdn-cookieyes.com/client_data/${cookieYesId}/script.js`}
-          strategy="afterInteractive"
-        />
-      )}
-    </>
+      {children}
+    </LayoutSlots>
   )
 }

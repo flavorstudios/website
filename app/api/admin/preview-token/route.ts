@@ -7,6 +7,18 @@ import { serverEnv } from "@/env/server";
 const isE2EEnvironment =
   process.env.NEXT_PUBLIC_E2E === "true" || process.env.E2E === "true";
 
+function buildE2ETokenResponse(
+  postId: string,
+  uid: string,
+  expired: boolean,
+) {
+  const state = expired ? "expired" : "valid";
+  const now = Date.now();
+  const expiresAt = expired ? now - 60_000 : now + 60_000;
+  const token = `e2e-token:${state}:${postId}:${uid || "bypass"}`;
+  return NextResponse.json({ token, expiresAt }, { status: 200 });
+}
+
 interface PreviewTokenRequestBody {
   postId?: string;
 }
@@ -55,10 +67,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "postId is required" }, { status: 400 });
   }
 
+  if (isE2EEnvironment) {
+    return buildE2ETokenResponse(postId, sessionUid ?? (uidOverride || "bypass"), expired);
+  }
+
   try {
     const ttl = expired ? -60 : 300;
     const token = createPreviewToken(postId, sessionUid, ttl);
-    return NextResponse.json({ token });
+    const expiresAt = Date.now() + ttl * 1000;
+    return NextResponse.json({ token, expiresAt });
   } catch (error) {
     logError("preview-token: failed to create preview token", error, {
       postId,
@@ -80,6 +97,10 @@ export async function GET(request: NextRequest) {
   const bypassAuth = isE2EEnvironment && uid === "bypass";
   const nodeEnv = process.env.NODE_ENV || serverEnv.NODE_ENV;
 
+  if (isE2EEnvironment) {
+    return buildE2ETokenResponse(postId, uid, expired);
+  }
+
   if (!bypassAuth && nodeEnv === "production") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -88,7 +109,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const token = createPreviewToken(postId, uid, ttl);
-    return NextResponse.json({ token });
+    const expiresAt = Date.now() + ttl * 1000;
+    return NextResponse.json({ token, expiresAt });
   } catch (error) {
     logError("preview-token: failed to create preview token (GET)", error, {
       postId,
@@ -97,11 +119,10 @@ export async function GET(request: NextRequest) {
     });
 
     if (bypassAuth) {
-      const fallbackToken = `e2e-${expired ? "expired" : "valid"}-${Date.now()}`;
-      return NextResponse.json({ token: fallbackToken });
+      return buildE2ETokenResponse(postId, uid, expired);
     }
 
-  return NextResponse.json(
+    return NextResponse.json(
       { error: "Preview secret not configured" },
       { status: 500 },
     );

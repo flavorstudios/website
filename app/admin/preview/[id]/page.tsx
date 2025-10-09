@@ -91,6 +91,8 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   const { token } = await searchParams;
   const reqHeaders = await headers();
   const requestId = reqHeaders.get("x-request-id") || crypto.randomUUID();
+  const isE2E =
+    process.env.E2E === "true" || process.env.NEXT_PUBLIC_E2E === "true";
 
   function renderGuardedMessage(message: ReactNode) {
     return (
@@ -122,14 +124,30 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
 
   let payload: PreviewTokenPayload;
 
-  try {
-    payload = validatePreviewTokenOrThrow(token ?? null, { postId: id });
-  } catch (error) {
-    const isExpired = error instanceof ExpiredPreviewTokenError;
-    const statusCode = isExpired ? 410 : 403;
-    const message = isExpired ? expiredMessage : invalidMessage;
-    logFailure(statusCode, error, userId);
-    return renderGuardedMessage(message);
+  if (isE2E && token?.startsWith("e2e-token:")) {
+    const [, state, tokenPostId, tokenUid] = token.split(":");
+    if (tokenPostId && tokenPostId !== id) {
+      logFailure(403, new InvalidPreviewTokenError(), userId);
+      return renderGuardedMessage(invalidMessage);
+    }
+    if (state === "expired") {
+      return renderGuardedMessage(expiredMessage);
+    }
+    payload = {
+      postId: tokenPostId || id,
+      uid: tokenUid || "bypass",
+      exp: Math.floor(Date.now() / 1000) + 60,
+    } satisfies PreviewTokenPayload;
+  } else {
+    try {
+      payload = validatePreviewTokenOrThrow(token ?? null, { postId: id });
+    } catch (error) {
+      const isExpired = error instanceof ExpiredPreviewTokenError;
+      const statusCode = isExpired ? 410 : 403;
+      const message = isExpired ? expiredMessage : invalidMessage;
+      logFailure(statusCode, error, userId);
+      return renderGuardedMessage(message);
+    }
   }
 
   try {

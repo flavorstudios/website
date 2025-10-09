@@ -1,28 +1,17 @@
 /* Shared skip link styles imported by both legacy and App Router stylesheets */
 .skip-link,
 .a11y-skip {
-  position: fixed;
-  top: 1rem;
-  left: 1rem;
-  z-index: 1000;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  box-shadow: 0 10px 25px -15px rgba(15, 23, 42, 0.6);
-  transform: translateY(-200%);
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+  pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  pointer-events: none;
-  clip: rect(0 0 0 0);
-  clip-path: inset(100%);
-  overflow: hidden;
-  white-space: nowrap;
   transition: transform 0.2s ease, opacity 0.2s ease, visibility 0s linear 0.2s;
 }
 
@@ -32,13 +21,24 @@
 .a11y-skip:focus,
 .a11y-skip:focus-visible,
 .a11y-skip[data-visible="true"] {
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  overflow: visible;
   clip: auto;
   clip-path: inset(0);
+  white-space: normal;
+  z-index: 10000;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  background-color: hsl(var(--background, 0 0% 100%));
+  color: hsl(var(--foreground, 0 0% 3.9%));
+  box-shadow: 0 10px 25px -15px rgba(15, 23, 42, 0.6);
+  pointer-events: auto;
   opacity: 1;
   visibility: visible;
-  pointer-events: auto;
-  transform: translateY(0);
-  outline: 2px solid hsl(var(--ring));
+  outline: 2px solid hsl(var(--ring, 0 0% 3.9%));
   outline-offset: 2px;
   transition-delay: 0s;
 }

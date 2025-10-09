@@ -78,8 +78,7 @@ export default function AdminLoginForm() {
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
 
   const normalizedError = error.trim()
-  const alertMessage = normalizedError.length ? normalizedError : null
-  const alertId = alertMessage ? "admin-login-error" : undefined
+  const alertId = normalizedError.length ? "admin-login-error" : undefined
 
   const passwordResetNotice =
     searchParams.get("reset") === "1"
@@ -267,17 +266,6 @@ export default function AdminLoginForm() {
                   : "Use legacy admin password (env-based)"}
               </Button>
             )}
-            {alertMessage && (
-              <div
-                id={alertId}
-                role="alert"
-                aria-live="assertive"
-                className="text-sm text-red-600"
-              >
-                {alertMessage}
-              </div>
-            )}
-
             {showLegacyLogin ? (
               <EmailLoginForm
                 error={error}
@@ -331,7 +319,7 @@ export default function AdminLoginForm() {
               </Link>
             </p>
             <p
-              className="block overflow-hidden text-ellipsis whitespace-nowrap text-xs text-slate-500 w-[220px] sm:w-[300px] md:w-[380px] shrink-0 grow-0"
+              className="block overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground w-[240px] sm:w-[320px] md:w-[380px] shrink-0"
               data-testid="admin-login-legal"
             >
               By continuing you agree to our{' '}

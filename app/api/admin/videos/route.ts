@@ -2,13 +2,17 @@ import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import { videoStore } from "@/lib/content-store"
 import { logActivity } from "@/lib/activity-log"
+import { hasE2EBypass } from "@/lib/e2e-utils"
+import { addE2EVideo, getE2EVideos } from "@/lib/e2e-fixtures"
 
 export async function GET(request: NextRequest) {
-  if (!(await requireAdmin(request, "canManageVideos"))) {
+  const bypass = hasE2EBypass(request)
+
+  if (!bypass && !(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
-    const videos = await videoStore.getAll()
+    const videos = bypass ? getE2EVideos() : await videoStore.getAll()
 
     const formattedVideos = videos.map((video) => ({
       id: video.id,
@@ -43,7 +47,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!(await requireAdmin(request, "canManageVideos"))) {
+  const bypass = hasE2EBypass(request)
+
+  if (!bypass && !(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
   try {
@@ -59,7 +65,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const video = await videoStore.create({
+    const baseVideo = {
       title: videoData.title,
       slug: videoData.slug, // <--- Save the slug
       description: videoData.description || "",
@@ -71,7 +77,22 @@ export async function POST(request: NextRequest) {
       status: videoData.status || "draft",
       publishedAt: videoData.publishedAt || new Date().toISOString(),
       featured: videoData.featured || false,
-    })
+    }
+
+    if (bypass) {
+      const now = new Date().toISOString()
+      const id = `video-e2e-${Date.now()}`
+      addE2EVideo({
+        ...baseVideo,
+        id,
+        createdAt: now,
+        updatedAt: now,
+        views: 0,
+      })
+      return NextResponse.json({ video: { ...baseVideo, id } }, { status: 201 })
+    }
+
+    const video = await videoStore.create(baseVideo)
     const actor = await getSessionInfo(request)
     await logActivity({
       type: "video.create",

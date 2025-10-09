@@ -20,7 +20,7 @@ export default defineConfig({
   retries: 0,
   webServer: {
     // Run the app in PRODUCTION for stable e2e (no dev overlay, proper metadata)
-    command: 'pnpm -s start',
+    command: 'pnpm -s e2e:build',
     cwd: repoRoot,
     url: 'http://127.0.0.1:3000',
     reuseExistingServer: false, // always use the prod server started above

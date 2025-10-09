@@ -20,15 +20,19 @@ function getRequestIp(request: NextRequest): string {
   return "unknown";
 }
 
-const isE2E = process.env.E2E === "true";
-
 export async function middleware(request: NextRequest) {
-  // 🔓 Test/CI bypass: allow all when explicitly disabled (Codex suggestion)
-  if (serverEnv.ADMIN_AUTH_DISABLED === "1" || isE2E) {
+  const isE2E = process.env.E2E === "true";
+  const { pathname } = request.nextUrl;
+
+  if (isE2E && (pathname.startsWith("/admin") || pathname.startsWith("/api/admin"))) {
     return NextResponse.next();
   }
 
-  const { pathname } = request.nextUrl;
+  // 🔓 Test/CI bypass: allow all when explicitly disabled (Codex suggestion)
+  if (serverEnv.ADMIN_AUTH_DISABLED === "1") {
+    return NextResponse.next();
+  }
+
   const ip = getRequestIp(request);
 
   const isAdminRequest = pathname.startsWith("/admin");

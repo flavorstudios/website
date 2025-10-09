@@ -609,11 +609,11 @@ export default function BlogManager() {
             onClick={handleCreatePost}
             size="sm"
             className="rounded-xl px-4 flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow"
-            aria-label="Create new post"
-            title="Create new post"
+            aria-label="New Post"
+            title="New Post"
           >
             <PlusCircle className="h-4 w-4" />
-            Create New Post
+            New Post
           </Button>
         </div>
       </div>

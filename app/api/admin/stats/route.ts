@@ -14,6 +14,7 @@ import { z } from "zod";
 import { serverEnv } from "@/env/server";
 import { calculateMoMGrowth } from "./utils";
 import { hasE2EBypass } from "@/lib/e2e-utils";
+import { E2E_STATS_HISTORY_MONTHLY } from "@/lib/e2e-fixtures";
 
 export const runtime = "nodejs";
 
@@ -72,21 +73,6 @@ type StatsResponse = {
   to: string;
 } & Stats & { history?: MonthlyStats[] };
 
-const E2E_HISTORY: MonthlyStats[] = [
-  { month: "Jan", posts: 12, videos: 6, comments: 54 },
-  { month: "Feb", posts: 11, videos: 5, comments: 48 },
-  { month: "Mar", posts: 13, videos: 6, comments: 52 },
-  { month: "Apr", posts: 10, videos: 4, comments: 46 },
-  { month: "May", posts: 14, videos: 7, comments: 58 },
-  { month: "Jun", posts: 15, videos: 8, comments: 60 },
-  { month: "Jul", posts: 16, videos: 8, comments: 64 },
-  { month: "Aug", posts: 17, videos: 9, comments: 66 },
-  { month: "Sep", posts: 18, videos: 9, comments: 70 },
-  { month: "Oct", posts: 19, videos: 10, comments: 72 },
-  { month: "Nov", posts: 20, videos: 11, comments: 75 },
-  { month: "Dec", posts: 22, videos: 12, comments: 80 },
-];
-
 function buildE2EStats(range: Range): StatsResponse {
   const { start, end } = calcRange(range);
   return {
@@ -102,7 +88,7 @@ function buildE2EStats(range: Range): StatsResponse {
     publishedPosts: 198,
     featuredVideos: 12,
     monthlyGrowth: 10,
-    history: E2E_HISTORY,
+    history: E2E_STATS_HISTORY_MONTHLY,
   };
 }
 

@@ -137,6 +137,7 @@ export default function EmailLoginForm({
             id={errorRegionId}
             role="alert"
             aria-live="assertive"
+            aria-label={formError}
             className="text-sm text-red-600"
           >
             {formError}

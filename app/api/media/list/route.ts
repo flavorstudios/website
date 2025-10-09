@@ -14,13 +14,16 @@ function toInt(val: string | null, fallback: number) {
 
 export async function GET(request: NextRequest) {
   const sessionCookie = request.cookies.get("admin-session")?.value || "";
+  const bypass = hasE2EBypass(request);
 
-  try {
-    await verifyAdminSession(sessionCookie);
-  } catch {
-    // Log the denial but do not leak details to the client
-    await logAdminAuditFailure(null, getClientIp(request), "media_list_denied");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!bypass) {
+    try {
+      await verifyAdminSession(sessionCookie);
+    } catch {
+      // Log the denial but do not leak details to the client
+      await logAdminAuditFailure(null, getClientIp(request), "media_list_denied");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
   // Parse and sanitize query params
@@ -34,7 +37,7 @@ export async function GET(request: NextRequest) {
     : undefined;
 
   try {
-    if (hasE2EBypass(request)) {
+    if (bypass) {
       const cursorValue = Number.isFinite(startAfter!) ? startAfter : undefined;
       if (cursorValue) {
         return NextResponse.json(

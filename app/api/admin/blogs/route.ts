@@ -5,6 +5,8 @@ import type { BlogPost } from "@/lib/content-store"
 import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store" // <-- Updated as per Codex
 import { publishToUser } from "@/lib/sse-broker"  // <-- Added for SSE broadcast
 import { logActivity } from "@/lib/activity-log"
+import { hasE2EBypass } from "@/lib/e2e-utils"
+import { getE2EBlogPosts } from "@/lib/e2e-fixtures"
 
 function parseOptionalIsoDate(value: unknown, field: string): string | undefined {
   if (value === null || value === undefined) return undefined
@@ -22,7 +24,9 @@ function parseOptionalIsoDate(value: unknown, field: string): string | undefined
 
 // GET: Fetch all blogs for admin dashboard (with filtering, sorting, pagination)
 export async function GET(request: NextRequest) {
-  if (!(await requireAdmin(request, "canManageBlogs"))) {
+  const bypass = hasE2EBypass(request)
+
+  if (!bypass && !(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -45,7 +49,7 @@ export async function GET(request: NextRequest) {
     const fromDate = fromParam ? new Date(fromParam).getTime() : null
     const toDate = toParam ? new Date(toParam).getTime() : null
 
-    const blogs = await blogStore.getAll()
+    const blogs = bypass ? getE2EBlogPosts() : await blogStore.getAll()
 
     // Apply filters
     const filtered = blogs.filter((blog: any) => {

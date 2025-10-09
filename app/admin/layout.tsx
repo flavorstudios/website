@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import "../globals.css"; // Ensure global styles are applied to the admin section
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { LayoutSlots } from "@/components/layout-slots";
 import { AdminAuthProvider } from "@/components/AdminAuthProvider";
 import { TooltipProvider } from "@/components/ui/tooltip"; // <-- TooltipProvider import added
 import DevTools from "./_dev-tools"; // mounts dev fetch logger in development
@@ -54,23 +55,24 @@ export default function AdminLayout({
   // DO NOT nest <html> or <body> tags here.
   // The root layout (app/layout.tsx) already provides them.
   return (
-    <>
+    <LayoutSlots
+      header={
+        <div className="sr-only" aria-hidden="true">
+          Flavor Studios Admin Console
+        </div>
+      }
+      footer={
+        <div className="sr-only" aria-hidden="true">
+          Flavor Studios admin tools
+        </div>
+      }
+    >
       <DevTools />
-      <header role="banner" className="sr-only">
-        <h1>Flavor Studios Admin Console</h1>
-      </header>
       <AdminAuthProvider>
         <ReactQueryProvider>
-          <TooltipProvider>
-            <main id="main" role="main" tabIndex={-1}>
-              {children}
-            </main>
-          </TooltipProvider>
+          <TooltipProvider>{children}</TooltipProvider>
         </ReactQueryProvider>
       </AdminAuthProvider>
-      <footer role="contentinfo" className="sr-only">
-        Flavor Studios admin tools
-      </footer>
-    </>
+      </LayoutSlots>
   );
 }

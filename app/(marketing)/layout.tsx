@@ -5,6 +5,7 @@ import { Footer } from "@/components/footer";
 import { BackToTop } from "@/components/back-to-top";
 import PwaServiceWorker from "@/components/PwaServiceWorker";
 import AdblockBanner from "@/components/AdblockBanner";
+import { LayoutSlots } from "@/components/layout-slots";
 
 import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { serverEnv } from "@/env/server";
@@ -63,36 +64,33 @@ export default async function MarketingLayout({ children }: { children: ReactNod
   );
 
   return (
-    <>
+    <LayoutSlots
+      header={
+        <div className="relative z-50">
+          <h1 className="sr-only">Flavor Studios</h1>
+          <Header blogCategories={blogCategories} videoCategories={videoCategories} />
+        </div>
+      }
+      footer={<Footer />}
+      afterMain={
+        <>
+          <BackToTop />
+          <PwaServiceWorker />
+          {/* ⭐️ LOAD the stealth detection script only for marketing */}
+          <Script src="/js/_support_banner.js" strategy="afterInteractive" />
+          {cookieYesId && (
+            <Script
+              id="cookieyes"
+              src={`https://cdn-cookieyes.com/client_data/${cookieYesId}/script.js`}
+              strategy="afterInteractive"
+            />
+          )}
+        </>
+      }
+    >
       {/* ⭐️ AdBlock Support Banner (marketing only) */}
       <AdblockBanner />
-
-      <header role="banner" className="relative z-50">
-        <h1 className="sr-only">Flavor Studios</h1>
-        <Header blogCategories={blogCategories} videoCategories={videoCategories} />
-      </header>
-
-      <main id="main" role="main" tabIndex={-1} className="min-h-screen">
-        {children}
-      </main>
-
-      <footer role="contentinfo" aria-label="Site footer">
-        <Footer />
-      </footer>
-
-      <BackToTop />
-      <PwaServiceWorker />
-
-      {/* ⭐️ LOAD the stealth detection script only for marketing */}
-      <Script src="/js/_support_banner.js" strategy="afterInteractive" />
-
-      {cookieYesId && (
-        <Script
-          id="cookieyes"
-          src={`https://cdn-cookieyes.com/client_data/${cookieYesId}/script.js`}
-          strategy="afterInteractive"
-        />
-      )}
-    </>
+      {children}
+    </LayoutSlots>
   );
 }

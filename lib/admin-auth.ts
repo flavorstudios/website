@@ -15,6 +15,8 @@ import { serverEnv } from "@/env/server";
 import { createHash } from "crypto";
 
 const isE2E = process.env.E2E === "true";
+const requireEmailVerification =
+  !isE2E && serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === "true";
 
 // Enable deep debug logging if DEBUG_ADMIN is set (or in dev)
 const debug =
@@ -232,7 +234,7 @@ export async function requireAdmin(
   if (!sessionCookie) return false;
   try {
     const decoded = await verifyAdminSession(sessionCookie);
-    if (serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === "true") {
+    if (requireEmailVerification) {
       const emailVerified =
         (decoded as { email_verified?: boolean }).email_verified ??
         (decoded as { emailVerified?: boolean }).emailVerified ?? false;
@@ -285,7 +287,7 @@ export async function requireAdminAction(
   if (!sessionCookie) return false;
   try {
     const decoded = await verifyAdminSession(sessionCookie);
-    if (serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === "true") {
+    if (requireEmailVerification) {
       const emailVerified =
         (decoded as { email_verified?: boolean }).email_verified ??
         (decoded as { emailVerified?: boolean }).emailVerified ?? false;

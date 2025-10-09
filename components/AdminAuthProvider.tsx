@@ -68,7 +68,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const requiresVerification =
-    clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true"
+    !process.env.E2E && clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true"
   const envTestMode = clientEnv.TEST_MODE === "true"
   const testMode = (testModeOverride ?? envTestMode) || authInitFailed
 

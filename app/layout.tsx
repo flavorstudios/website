@@ -148,8 +148,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         >
           Skip to main content
         </a>
-
-        <h1 className="sr-only">{SITE_NAME}</h1>
         <ThemeProvider>
           {/* GTM (NOSCRIPT) — only if container id is provided */}
           {gtmId && (

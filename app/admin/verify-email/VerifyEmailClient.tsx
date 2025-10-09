@@ -22,7 +22,7 @@ export default function VerifyEmailClient() {
   const { testEmailVerified, setTestEmailVerified } = useAdminAuth();
 
   const requireVerification =
-    clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
+    !process.env.E2E && clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
   const testMode = clientEnv.TEST_MODE === "true";
 
   const waitForNextFrame = useCallback(

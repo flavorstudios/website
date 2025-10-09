@@ -331,7 +331,7 @@ export default function AdminLoginForm() {
               </Link>
             </p>
             <p
-              className="text-xs text-slate-500 whitespace-nowrap overflow-hidden text-ellipsis w-full max-w-[220px] sm:max-w-[300px] md:max-w-[380px]"
+              className="block overflow-hidden text-ellipsis whitespace-nowrap text-xs text-slate-500 w-[220px] sm:w-[300px] md:w-[380px] shrink-0 grow-0"
               data-testid="admin-login-legal"
             >
               By continuing, you agree to our{' '}

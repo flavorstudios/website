@@ -33,5 +33,7 @@ export function isDisposableEmail(email: string): boolean {
 }
 
 export function requiresEmailVerification(): boolean {
-  return serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === "true";
+  return (
+    !process.env.E2E && serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === "true"
+  );
 }

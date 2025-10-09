@@ -147,9 +147,8 @@ export default function AdminDashboardPageClient({
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_E2E === "true" && typeof window !== "undefined") {
-      const win = window as Record<string, unknown>;
-      if (win.__dashboardHistoryDatasets == null) {
-        win.__dashboardHistoryDatasets = E2E_DASHBOARD_HISTORY;
+      if (window.__dashboardHistoryDatasets == null) {
+        window.__dashboardHistoryDatasets = E2E_DASHBOARD_HISTORY;
       }
     }
   }, []);

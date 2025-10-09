@@ -5,9 +5,10 @@ import { clientEnv } from '@/env.client';
 
 export default function PwaServiceWorker() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const isTestMode = clientEnv.TEST_MODE === 'true';
 
   useEffect(() => {
-    if (clientEnv.TEST_MODE === 'true') {
+    if (isTestMode) {
       return;
     }
 
@@ -61,7 +62,7 @@ export default function PwaServiceWorker() {
         navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
       };
     }
-  }, [clientEnv.TEST_MODE]);
+  }, [isTestMode]);
 
   // Trigger update by sending SKIP_WAITING to the waiting SW
   const handleUpdate = () => {

@@ -1,5 +1,6 @@
 /* Shared skip link styles imported by both legacy and App Router stylesheets */
-.skip-link {
+.skip-link,
+.a11y-skip {
   position: fixed;
   top: 1rem;
   left: 1rem;
@@ -27,7 +28,10 @@
 
 .skip-link:focus,
 .skip-link:focus-visible,
-.skip-link[data-visible="true"] {
+.skip-link[data-visible="true"],
+.a11y-skip:focus,
+.a11y-skip:focus-visible,
+.a11y-skip[data-visible="true"] {
   clip: auto;
   clip-path: inset(0);
   opacity: 1;
@@ -40,7 +44,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .skip-link {
+  .skip-link,
+  .a11y-skip {
     transition: none;
   }
 }

@@ -39,6 +39,9 @@
     --ring: 222.2 84% 4.9%;
     --radius: 0.75rem;
 
+    /* Sidebar defaults */
+    --sidebar-w: 280px;
+
     /* Font role variables (paired with next/font variables) */
     --fs-body: var(--font-inter);
     --fs-heading: var(--font-lora);
@@ -78,6 +81,42 @@
 html,
 body {
   font-family: var(--fs-body);
+}
+
+#app-sidebar {
+  z-index: 70;
+}
+
+@media (min-width: 768px) {
+  #app-sidebar {
+    position: sticky;
+    top: 0;
+  }
+}
+
+#drawer {
+  position: fixed;
+  left: 0;
+  z-index: 60;
+}
+
+#overlay {
+  position: fixed;
+  z-index: 50;
+  left: var(--sidebar-w);
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.login-legal-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.login-legal-bar > [data-testid="admin-login-legal"] {
+  flex: 0 0 auto;
 }
 
 h1,

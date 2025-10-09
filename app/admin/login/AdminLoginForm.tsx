@@ -320,7 +320,7 @@ export default function AdminLoginForm() {
               )}
             </Button>
           </div>
-          <div className="flex flex-col gap-3 text-left">
+          <div className="login-legal-bar flex flex-col gap-3 text-left sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-slate-600">
               Don&apos;t have an account?{' '}
               <Link
@@ -334,7 +334,7 @@ export default function AdminLoginForm() {
               className="block overflow-hidden text-ellipsis whitespace-nowrap text-xs text-slate-500 w-[220px] sm:w-[300px] md:w-[380px] shrink-0 grow-0"
               data-testid="admin-login-legal"
             >
-              By continuing, you agree to our{' '}
+              By continuing you agree to our{' '}
               <Link
                 href="/terms-of-service"
                 className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
@@ -348,7 +348,7 @@ export default function AdminLoginForm() {
               >
                 Privacy Policy
               </Link>
-              .
+              . Unauthorized access is prohibited.
             </p>
           </div>
         </div>

@@ -117,6 +117,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {/* Meta viewport fallback for bots/legacy */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+        {/* Skip link fallback styles (in case Tailwind utilities aren't loaded) */}
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+.a11y-skip{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+.a11y-skip:focus{left:0;top:0;width:auto;height:auto;clip:auto;overflow:visible;white-space:normal;z-index:10000;padding:.5rem .75rem;border-radius:.375rem}
+`,
+          }}
+        />
+
         {/* Mastodon Verification */}
         <link rel="me" href="https://mastodon.social/@flavorstudios" />
 
@@ -142,13 +152,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}
       >
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[10000]"
-        >
-          Skip to main content
-        </a>
         <ThemeProvider>
+          <a href="#main" className="a11y-skip">
+            Skip to main content
+          </a>
+
           {/* GTM (NOSCRIPT) — only if container id is provided */}
           {gtmId && (
             <noscript>
@@ -163,11 +171,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           )}
           {/* END GTM (NOSCRIPT) */}
 
-          <Toaster />
+          <header role="banner" className="site-banner">
+            <h1 className="sr-only">Flavor Studios</h1>
+          </header>
 
           <main id="main" role="main" tabIndex={-1}>
             {children}
           </main>
+
+          <footer role="contentinfo" aria-label="Site footer" className="site-footer" />
+
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

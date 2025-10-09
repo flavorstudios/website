@@ -440,7 +440,7 @@ export default function AdminDashboardPageClient({
   return (
     <RoleProvider>
           {/* Accessible skip link */}
-          <a href="#admin-dashboard-main" className="skip-link">
+          <a href="#admin-dashboard-main" className="skip-link a11y-skip">
             Skip to main content
           </a>
 

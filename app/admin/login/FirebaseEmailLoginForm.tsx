@@ -150,15 +150,21 @@ export default function FirebaseEmailLoginForm({
     }
   }
 
-  const describedBy = formError ? errorMessageId ?? "firebase-login-error" : undefined
+  const errorRegionId = errorMessageId ?? "firebase-login-error"
+  const describedBy = formError ? errorRegionId : undefined
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      <div className="min-h-[1.5rem] space-y-2" aria-live="assertive">
-        {!errorMessageId && formError && (
-          <p id="firebase-login-error" className="text-sm text-red-600">
+      <div className="min-h-[1.5rem] space-y-2">
+        {formError && (
+          <div
+            id={errorRegionId}
+            role="alert"
+            aria-live="assertive"
+            className="text-sm text-red-600"
+          >
             {formError}
-          </p>
+          </div>
         )}
         {infoNotice && (
           <p className="text-sm text-slate-600" role="status" aria-live="polite">

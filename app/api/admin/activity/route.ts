@@ -2,6 +2,7 @@ import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { adminDb } from "@/lib/firebase-admin";
 import { type NextRequest, NextResponse } from "next/server";
 import { serverEnv } from "@/env/server";
+import { hasE2EBypass } from "@/lib/e2e-utils";
 import type { Timestamp } from "firebase-admin/firestore";
 
 // GET /api/admin/activity - Only for authorized admins
@@ -49,6 +50,40 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    if (hasE2EBypass(req)) {
+      return NextResponse.json(
+        {
+          activities: [
+            {
+              id: "activity-1",
+              type: "post",
+              title: "Published “Launch Trailer”",
+              description: "Jamie Rivera",
+              status: "success",
+              timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+            },
+            {
+              id: "activity-2",
+              type: "media",
+              title: "Uploaded gallery shots",
+              description: "Avery Chen",
+              status: "success",
+              timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+            },
+            {
+              id: "activity-3",
+              type: "comment",
+              title: "Moderated 4 comments",
+              description: "Morgan Lee",
+              status: "pending",
+              timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+            },
+          ],
+        },
+        { status: 200 }
+      );
+    }
+    
     // ✅ Fallback: if Firestore isn't configured, return empty list (prevents 5xx)
     if (!adminDb) {
       return NextResponse.json({ activities: [] }, { status: 200 });

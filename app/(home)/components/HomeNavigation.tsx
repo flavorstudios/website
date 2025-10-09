@@ -102,14 +102,14 @@ export function HomeNavigation({ blogCategories, videoCategories }: HomeNavigati
           : "bg-transparent",
       )}
     >
-      <header className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 py-3">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 py-3">
         <Link href="/" className="flex items-center space-x-2" aria-label="Flavor Studios home">
           <span className="text-xl font-semibold uppercase tracking-wide text-white drop-shadow-md">
             Flavor Studios
           </span>
         </Link>
 
-        <div className="hidden items-center space-x-6 md:flex">
+        <nav aria-label="Primary" className="hidden items-center space-x-6 md:flex">
           <MegaMenu
             items={menuItems}
             className="[&_a[role=menuitem]]:!text-slate-200 [&_a[role=menuitem]]:hover:!text-white [&_button[role=menuitem]]:!text-slate-200 [&_button[role=menuitem]]:hover:!text-white"
@@ -124,7 +124,7 @@ export function HomeNavigation({ blogCategories, videoCategories }: HomeNavigati
               Buy Me a Coffee
             </Link>
           </Button>
-        </div>
+        </nav>
 
         <div className="flex items-center gap-2 md:hidden">
           <SearchFeature
@@ -160,7 +160,7 @@ export function HomeNavigation({ blogCategories, videoCategories }: HomeNavigati
             </SheetContent>
           </Sheet>
         </div>
-      </header>
+      </div>
     </div>
   )
 }

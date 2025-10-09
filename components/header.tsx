@@ -81,23 +81,23 @@ export function Header({
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto max-w-7xl px-4">
         <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2" aria-label="Flavor Studios home">
             <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
               Flavor Studios
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
+          <nav aria-label="Primary" className="hidden items-center space-x-6 md:flex">
             <MegaMenu items={menuItems} />
             <SearchFeature
               triggerClassName="text-white hover:text-blue-300"
               iconClassName="text-white hover:text-blue-300"
             />
-          </div>
+          </nav>
 
           {/* Mobile Navigation */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -141,6 +141,6 @@ export function Header({
           </div>
         </div>
       </div>
-    </header>
+    </div>
   )
 }

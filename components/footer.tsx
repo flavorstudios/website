@@ -46,11 +46,7 @@ export function Footer() {
   }, [])
 
   return (
-    <footer
-      role="contentinfo"
-      aria-label="Site footer"
-      className="relative overflow-hidden bg-black text-white"
-    >
+    <div className="relative overflow-hidden bg-black text-white">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 -top-32 h-[14rem] bg-white"
@@ -146,6 +142,6 @@ export function Footer() {
           <p className="text-[clamp(0.68rem,1vw,0.85rem)] text-white/60">Built with passion. Powered by dreams.</p>
         </div>
       </div>
-    </footer>
+    </div>
   )
 }

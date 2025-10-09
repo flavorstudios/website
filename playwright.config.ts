@@ -29,6 +29,7 @@ export default defineConfig({
       PORT: '3000',
 
       NEXT_PUBLIC_BASE_URL: 'http://127.0.0.1:3000',
+      NEXT_PUBLIC_E2E: 'true',
       BASE_URL: 'http://127.0.0.1:3000',
       NEXTAUTH_URL: 'http://127.0.0.1:3000',
 
@@ -63,5 +64,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:3000',
     headless: true,
+    extraHTTPHeaders: {
+      'x-e2e-auth': 'bypass',
+    },
   },
 });

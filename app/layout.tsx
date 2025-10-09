@@ -122,7 +122,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           dangerouslySetInnerHTML={{
             __html: `
 .a11y-skip{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
-.a11y-skip:focus{left:0;top:0;width:auto;height:auto;clip:auto;overflow:visible;white-space:normal;z-index:10000;padding:.5rem .75rem;border-radius:.375rem}
+.a11y-skip:focus{left:0;top:0;clip:auto;width:auto;height:auto;overflow:visible;white-space:normal;z-index:10000;padding:.5rem .75rem;border-radius:.375rem;background:#fff;color:#111;box-shadow:0 0 0 4px rgba(59,130,246,.45)}
 `,
           }}
         />
@@ -171,15 +171,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           )}
           {/* END GTM (NOSCRIPT) */}
 
-          <header role="banner" className="site-banner">
-            <h1 className="sr-only">Flavor Studios</h1>
-          </header>
-
-          <main id="main" role="main" tabIndex={-1}>
-            {children}
-          </main>
-
-          <footer role="contentinfo" aria-label="Site footer" className="site-footer" />
+          {children}
 
           <Toaster />
         </ThemeProvider>

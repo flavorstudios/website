@@ -13,6 +13,7 @@ export const serverEnvSchema = z.object({
   ADMIN_EMAIL: z.string().optional(),
   ADMIN_REQUIRE_EMAIL_VERIFICATION: z.string().optional(),
   ADMIN_DISPOSABLE_DOMAINS: z.string().optional(),
+  E2E: z.string().optional(),
 });
 
 const skipValidation =
@@ -178,6 +179,7 @@ export const serverEnv: Record<string, string | undefined> & {
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
   TEST_MODE: process.env.TEST_MODE,
+  E2E: process.env.E2E,
 };
 
 export type ServerEnv = typeof serverEnv;

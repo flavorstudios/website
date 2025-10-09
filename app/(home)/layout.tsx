@@ -60,11 +60,19 @@ export default async function HomeLayout({ children }: { children: ReactNode }) 
   return (
     <>
       <AdblockBanner />
-      <HomeNavigation blogCategories={blogCategories} videoCategories={videoCategories} />
-      <div className="bg-slate-950">
+
+      <header role="banner" className="relative z-50">
+        <h1 className="sr-only">Flavor Studios</h1>
+        <HomeNavigation blogCategories={blogCategories} videoCategories={videoCategories} />
+      </header>
+
+      <main id="main" role="main" tabIndex={-1} className="min-h-screen bg-slate-950">
         {children}
-      </div>
-      <Footer />
+      </main>
+
+      <footer role="contentinfo" aria-label="Site footer">
+        <Footer />
+      </footer>
       <BackToTop />
       <PwaServiceWorker />
       {cookieYesId && (

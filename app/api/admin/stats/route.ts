@@ -13,6 +13,7 @@ import { createHash, randomUUID } from "crypto";
 import { z } from "zod";
 import { serverEnv } from "@/env/server";
 import { calculateMoMGrowth } from "./utils";
+import { hasE2EBypass } from "@/lib/e2e-utils";
 
 export const runtime = "nodejs";
 
@@ -71,6 +72,40 @@ type StatsResponse = {
   to: string;
 } & Stats & { history?: MonthlyStats[] };
 
+const E2E_HISTORY: MonthlyStats[] = [
+  { month: "Jan", posts: 12, videos: 6, comments: 54 },
+  { month: "Feb", posts: 11, videos: 5, comments: 48 },
+  { month: "Mar", posts: 13, videos: 6, comments: 52 },
+  { month: "Apr", posts: 10, videos: 4, comments: 46 },
+  { month: "May", posts: 14, videos: 7, comments: 58 },
+  { month: "Jun", posts: 15, videos: 8, comments: 60 },
+  { month: "Jul", posts: 16, videos: 8, comments: 64 },
+  { month: "Aug", posts: 17, videos: 9, comments: 66 },
+  { month: "Sep", posts: 18, videos: 9, comments: 70 },
+  { month: "Oct", posts: 19, videos: 10, comments: 72 },
+  { month: "Nov", posts: 20, videos: 11, comments: 75 },
+  { month: "Dec", posts: 22, videos: 12, comments: 80 },
+];
+
+function buildE2EStats(range: Range): StatsResponse {
+  const { start, end } = calcRange(range);
+  return {
+    ok: true,
+    range,
+    from: start.toISOString(),
+    to: end.toISOString(),
+    totalPosts: 240,
+    totalVideos: 96,
+    totalComments: 1320,
+    totalViews: 48210,
+    pendingComments: 4,
+    publishedPosts: 198,
+    featuredVideos: 12,
+    monthlyGrowth: 10,
+    history: E2E_HISTORY,
+  };
+}
+
 // Short-lived cache (60s), keyed by `range`
 const statsCache: Record<string, { data: StatsResponse; expires: number }> = {};
 
@@ -128,6 +163,18 @@ export async function GET(request: NextRequest) {
     }
     const range = parsed.data;
     const { start, end } = calcRange(range);
+
+    if (hasE2EBypass(request)) {
+      const payload = buildE2EStats(range);
+      const etag = `"${createHash("md5").update(JSON.stringify(payload)).digest("hex")}"`;
+      return NextResponse.json(payload, {
+        status: 200,
+        headers: {
+          ETag: etag,
+          "Cache-Control": "no-store",
+        },
+      });
+    }
 
     const now = Date.now();
     const ifNoneMatch = request.headers.get("if-none-match");

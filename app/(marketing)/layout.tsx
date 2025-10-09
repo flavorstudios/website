@@ -67,13 +67,19 @@ export default async function MarketingLayout({ children }: { children: ReactNod
       {/* ⭐️ AdBlock Support Banner (marketing only) */}
       <AdblockBanner />
 
-      <Header blogCategories={blogCategories} videoCategories={videoCategories} />
+      <header role="banner" className="relative z-50">
+        <h1 className="sr-only">Flavor Studios</h1>
+        <Header blogCategories={blogCategories} videoCategories={videoCategories} />
+      </header>
 
-      <div className="min-h-screen">
+      <main id="main" role="main" tabIndex={-1} className="min-h-screen">
         {children}
-      </div>
+      </main>
 
-      <Footer />
+      <footer role="contentinfo" aria-label="Site footer">
+        <Footer />
+      </footer>
+
       <BackToTop />
       <PwaServiceWorker />
 

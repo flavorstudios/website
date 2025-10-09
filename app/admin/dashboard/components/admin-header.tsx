@@ -94,18 +94,17 @@ export function AdminHeader({
   }
 
   return (
-    <header
-        role="banner"
-        className={cn(
-          "sticky top-0 z-40",
-          ADMIN_HEADER_HEIGHT,
-          "px-4 flex items-center",
-          "border-b pt-[env(safe-area-inset-top)]",
-          "backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/70",
-          "motion-reduce:transition-none motion-reduce:backdrop-filter-none",
-          className
-        )}
-      >
+    <div
+      className={cn(
+        "sticky top-0 z-40",
+        ADMIN_HEADER_HEIGHT,
+        "px-4 flex items-center",
+        "border-b pt-[env(safe-area-inset-top)]",
+        "backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-zinc-900/70",
+        "motion-reduce:transition-none motion-reduce:backdrop-filter-none",
+        className
+      )}
+    >
         <div className="flex items-center w-full gap-2 sm:gap-4">
           {/* Left: Sidebar toggle (mobile only) */}
           <Button
@@ -117,6 +116,7 @@ export function AdminHeader({
             aria-expanded={sidebarOpen}
             aria-controls="app-sidebar"
             className="lg:hidden min-h-11 px-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            data-testid="open-sidebar"
           >
             <Menu className="h-5 w-5" aria-hidden="true" />
           </Button>
@@ -174,7 +174,7 @@ export function AdminHeader({
             />
           </div>
         </div>
-      </header>
+      </div>
   )
 }
 

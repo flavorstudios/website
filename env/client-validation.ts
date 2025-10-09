@@ -13,6 +13,7 @@ const optionalNonEmptyString = z.preprocess(
 
 export const clientEnvSchema = z.object({
   NODE_ENV: optionalNonEmptyString,
+  NEXT_PUBLIC_E2E: optionalNonEmptyString,
   NEXT_PUBLIC_BASE_URL: optionalNonEmptyString,
   NEXT_PUBLIC_GTM_CONTAINER_ID: optionalNonEmptyString,
   NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER: optionalNonEmptyString,
@@ -39,6 +40,7 @@ const skipValidation =
 const rawClientEnv = {
   NODE_ENV: process.env.NODE_ENV,
   NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
+  NEXT_PUBLIC_E2E: process.env.NEXT_PUBLIC_E2E,
   NEXT_PUBLIC_GTM_CONTAINER_ID: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID,
   NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER:
     process.env.NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER,
@@ -72,6 +74,7 @@ export type ClientEnvShape = z.infer<typeof clientEnvSchema>;
 const defaults: ClientEnvShape = {
   NODE_ENV: process.env.NODE_ENV,
   NEXT_PUBLIC_BASE_URL: '',
+  NEXT_PUBLIC_E2E: undefined,
   NEXT_PUBLIC_GTM_CONTAINER_ID: undefined,
   NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER: undefined,
   NEXT_PUBLIC_COOKIEYES_ID: undefined,

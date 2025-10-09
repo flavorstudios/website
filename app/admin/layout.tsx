@@ -56,13 +56,21 @@ export default function AdminLayout({
   return (
     <>
       <DevTools />
+      <header role="banner" className="sr-only">
+        <h1>Flavor Studios Admin Console</h1>
+      </header>
       <AdminAuthProvider>
         <ReactQueryProvider>
           <TooltipProvider>
-            {children}
+            <main id="main" role="main" tabIndex={-1}>
+              {children}
+            </main>
           </TooltipProvider>
         </ReactQueryProvider>
       </AdminAuthProvider>
+      <footer role="contentinfo" className="sr-only">
+        Flavor Studios admin tools
+      </footer>
     </>
   );
 }

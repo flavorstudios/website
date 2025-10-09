@@ -285,7 +285,13 @@ export default function AdminDashboardPageClient({
   // --- Sync sidebar width globally for responsive layout -------------------
   useEffect(() => {
     const root = document.documentElement;
-    const width = isMobile ? "0px" : sidebarOpen ? "16rem" : "5rem";
+    const width = isMobile
+      ? sidebarOpen
+        ? "16rem"
+        : "0px"
+      : sidebarOpen
+        ? "16rem"
+        : "5rem";
     root.style.setProperty("--sidebar-w", width);
     return () => {
       root.style.removeProperty("--sidebar-w");
@@ -459,6 +465,17 @@ export default function AdminDashboardPageClient({
               sidebarOpen={sidebarOpen}
               setSidebarOpen={setSidebarOpen}
             />
+
+            {isMobile && sidebarOpen && (
+              <button
+                type="button"
+                id="overlay"
+                data-testid="admin-sidebar-overlay"
+                aria-label="Close sidebar"
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden bg-black/50 backdrop-blur-sm"
+              />
+            )}
 
             <div
               ref={mainWrapperRef}

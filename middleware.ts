@@ -25,7 +25,16 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (isE2E && (pathname.startsWith("/admin") || pathname.startsWith("/api/admin"))) {
-    return NextResponse.next();
+    const res = NextResponse.next();
+    res.cookies.set({
+      name: "e2e",
+      value: "1",
+      httpOnly: false,
+      path: "/",
+      sameSite: "lax",
+    });
+    res.headers.set("x-e2e-auth", "bypass");
+    return res;
   }
 
   // 🔓 Test/CI bypass: allow all when explicitly disabled (Codex suggestion)

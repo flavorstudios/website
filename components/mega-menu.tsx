@@ -148,7 +148,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                 "hover:shadow-md hover:scale-[1.01] hover:bg-white/80 hover:border-gray-200/50",
                 "focus:bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-gray-200/50",
                 isActive(pathname, subItem.href) &&
-                  "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50",
+                  "text-blue-600 dark:text-blue-300 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50",
                 focusedIndex === index && "bg-white/80 border-gray-200/50",
               )}
               onClick={() => {
@@ -168,7 +168,9 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                   <div
                     className={cn(
                       "font-medium transition-colors",
-                      isActive(pathname, subItem.href) ? "text-blue-700" : "text-gray-900 group-hover:text-gray-900",
+                      isActive(pathname, subItem.href)
+                        ? "text-blue-600 dark:text-blue-300"
+                        : "text-foreground group-hover:text-foreground",
                     )}
                   >
                     {subItem.label}
@@ -183,7 +185,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                   )}
                 </div>
                 {subItem.description && (
-                  <div className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors leading-relaxed">
+                  <div className="text-xs text-muted-foreground group-hover:text-foreground/80 transition-colors leading-relaxed">
                     {subItem.description}
                   </div>
                 )}
@@ -216,7 +218,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                 "hover:shadow-lg hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
                 isActive(pathname, item.href)
                   ? "text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
-                  : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-gray-900",
+                  : "text-foreground/80 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-foreground",
               )}
               aria-current={isActive(pathname, item.href) ? "page" : undefined}
             >
@@ -233,7 +235,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                 "focus:outline-none focus:ring-2 focus:ring-blue-500/30 hover:shadow-lg hover:scale-[1.02]",
                 activeMenu === item.label
                   ? "text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
-                  : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-gray-900",
+                  : "text-foreground/80 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-foreground",
               )}
               onKeyDown={(e) => handleKeyDown(e, item, index)}
               tabIndex={0}

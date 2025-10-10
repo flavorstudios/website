@@ -41,7 +41,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                   "hover:shadow-lg hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
                   isActive(pathname, item.href)
                     ? "text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
-                    : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-gray-900",
+                    : "text-foreground/80 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-foreground",
                 )}
                 onClick={onItemClick}
                 aria-current={isActive(pathname, item.href) ? "page" : undefined}
@@ -60,7 +60,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                     "focus:outline-none focus:ring-2 focus:ring-blue-500/30 hover:shadow-lg hover:scale-[1.02]",
                     expanded === item.label
                       ? "text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
-                      : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-gray-900",
+                      : "text-foreground/80 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-foreground",
                   )}
                   onClick={() => toggleExpanded(item.label)}
                   onKeyDown={(e) => {
@@ -158,8 +158,8 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                                 "group flex items-start justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden border border-transparent",
                                 "hover:shadow-md hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
                                 isActive(pathname, subItem.href)
-                                  ? "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50"
-                                  : "text-gray-600 hover:text-gray-900 hover:bg-white/80 hover:border-gray-200/50",
+                                  ? "text-blue-600 dark:text-blue-300 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50"
+                                  : "text-foreground/70 hover:text-foreground hover:bg-white/80 hover:border-gray-200/50",
                               )}
                               onClick={onItemClick}
                               aria-current={isActive(pathname, subItem.href) ? "page" : undefined}
@@ -167,7 +167,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                               <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                               <div className="flex-1 min-w-0 relative z-10 pr-3">
                                 <div className="flex items-start space-x-2 mb-1">
-                                  <div className="font-medium text-sm leading-tight">{subItem.label}</div>
+                                  <div className="font-medium text-sm leading-tight text-foreground">{subItem.label}</div>
                                   {subItem.isNew && (
                                     <div className="flex items-center space-x-1 flex-shrink-0">
                                       <Sparkles className="w-3 h-3 text-amber-500" />
@@ -178,7 +178,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                                   )}
                                 </div>
                                 {subItem.description && (
-                                  <div className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors leading-relaxed">
+                                  <div className="text-xs text-muted-foreground group-hover:text-foreground/80 transition-colors leading-relaxed">
                                     {subItem.description}
                                   </div>
                                 )}
@@ -207,8 +207,8 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                               "group flex items-start justify-between py-3.5 px-4 text-sm rounded-xl transition-all duration-300 relative overflow-hidden border border-transparent",
                               "hover:shadow-md hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-blue-500/30",
                               isActive(pathname, subItem.href)
-                                ? "text-blue-700 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50"
-                                : "text-gray-600 hover:text-gray-900 hover:bg-white/80 hover:border-gray-200/50",
+                                ? "text-blue-600 dark:text-blue-300 bg-gradient-to-r from-blue-100/80 to-purple-100/80 shadow-md border-blue-200/50"
+                                : "text-foreground/70 hover:text-foreground hover:bg-white/80 hover:border-gray-200/50",
                             )}
                             onClick={onItemClick}
                             aria-current={isActive(pathname, subItem.href) ? "page" : undefined}
@@ -216,7 +216,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             <div className="flex-1 min-w-0 relative z-10 pr-3">
                               <div className="flex items-start space-x-2 mb-1">
-                                <div className="font-medium text-sm leading-tight">{subItem.label}</div>
+                                <div className="font-medium text-sm leading-tight text-foreground">{subItem.label}</div>
                                 {subItem.isNew && (
                                   <div className="flex items-center space-x-1 flex-shrink-0">
                                     <Sparkles className="w-3 h-3 text-amber-500" />
@@ -227,7 +227,7 @@ export function MobileMegaMenu({ items, onItemClick, className }: MobileMegaMenu
                                 )}
                               </div>
                               {subItem.description && (
-                                <div className="text-xs text-gray-500 group-hover:text-gray-600 transition-colors leading-relaxed">
+                                <div className="text-xs text-muted-foreground group-hover:text-foreground/80 transition-colors leading-relaxed">
                                   {subItem.description}
                                 </div>
                               )}

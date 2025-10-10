@@ -56,7 +56,7 @@ export function Footer() {
           // we keep the legacy shape documented and render the new concave clip-path.
           // const legacyClipPath = "ellipse(88% 100% at 50% 0%)"
           clipPath:
-            "path('M0 100% L0 28% C 20% 10%, 30% 0%, 50% 0% C 70% 0%, 80% 10%, 100% 28% L100% 100% Z')",
+            "path('M0 100% L0 32% C 22% 46%, 34% 58%, 50% 60% C 66% 58%, 78% 46%, 100% 32% L100% 100% Z')",
           boxShadow: "0 36px 110px rgba(0,0,0,0.3)",
         }}
       />

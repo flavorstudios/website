@@ -165,6 +165,18 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   )
 
   useEffect(() => {
+    if (!shouldUseTestVerification || typeof window === "undefined") {
+      return
+    }
+    const stored = window.localStorage.getItem(
+      TEST_EMAIL_VERIFIED_STORAGE_KEY
+    )
+    if (stored === null) {
+      persistTestEmailVerified(true)
+    }
+  }, [persistTestEmailVerified, shouldUseTestVerification])
+
+  useEffect(() => {
     if (typeof window === "undefined") {
       return
     }

@@ -51,7 +51,12 @@ export function Footer() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 -top-32 h-[14rem] bg-white"
         style={{
-          clipPath: "ellipse(88% 100% at 50% 0%)",
+          // The previous curve used an outward arc via ellipse(88% 100% at 50% 0%).
+          // To preserve that reference while providing the requested inward curve,
+          // we keep the legacy shape documented and render the new concave clip-path.
+          // const legacyClipPath = "ellipse(88% 100% at 50% 0%)"
+          clipPath:
+            "path('M0 100% L0 28% C 20% 10%, 30% 0%, 50% 0% C 70% 0%, 80% 10%, 100% 28% L100% 100% Z')",
           boxShadow: "0 36px 110px rgba(0,0,0,0.3)",
         }}
       />

@@ -94,8 +94,8 @@ export function Header({
           <nav aria-label="Primary" className="hidden items-center space-x-6 md:flex">
             <MegaMenu items={menuItems} />
             <SearchFeature
-              triggerClassName="text-white hover:text-blue-300"
-              iconClassName="text-white hover:text-blue-300"
+              triggerClassName="text-foreground hover:text-blue-600"
+              iconClassName="text-foreground"
             />
           </nav>
 
@@ -103,8 +103,8 @@ export function Header({
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <div className="flex items-center md:hidden">
               <SearchFeature
-                triggerClassName="text-white hover:text-blue-300"
-                iconClassName="text-white hover:text-blue-300"
+                triggerClassName="text-foreground hover:text-blue-600"
+                iconClassName="text-foreground"
               />
               <SheetTrigger asChild>
                 <Button
@@ -112,7 +112,7 @@ export function Header({
                   size="icon"
                   aria-expanded={isOpen}
                   aria-controls="mobile-menu"
-                  className="text-white hover:text-blue-300"
+                  className="text-foreground hover:text-blue-600"
                 >
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>

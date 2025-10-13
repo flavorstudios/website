@@ -113,10 +113,12 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .login-legal-bar > [data-testid="admin-login-legal"] {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .legal-notice {

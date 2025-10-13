@@ -56,23 +56,25 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true"
   const envTestMode = clientEnv.TEST_MODE === "true"
   const testMode = (testModeOverride ?? envTestMode) || authInitFailed
-  const shouldUseTestVerification =
-    !e2eActive && requiresVerification && testMode
-  const isTestEnvironment = e2eActive
+  const shouldUseLocalVerification =
+    requiresVerification && (testMode || e2eActive)
   const [testEmailVerified, setTestEmailVerifiedState] = useState<
     boolean | null
   >(() => {
-    if (isTestEnvironment) {
-      return true
-    }
-    if (!shouldUseTestVerification || typeof window === "undefined") {
+    if (!shouldUseLocalVerification) {
       return null
+    }
+    if (typeof window === "undefined") {
+      return e2eActive ? false : null
     }
     const stored = window.localStorage.getItem(
       TEST_EMAIL_VERIFIED_STORAGE_KEY
     )
     if (stored === null) {
-      return null
+      if (e2eActive) {
+        window.localStorage.setItem(TEST_EMAIL_VERIFIED_STORAGE_KEY, "false")
+      }
+      return e2eActive ? false : null
     }
     return stored === "true"
   })
@@ -81,26 +83,27 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   const readTestEmailVerifiedSync = useCallback(() => {
-    if (!shouldUseTestVerification || typeof window === "undefined") {
-      return null
+    if (!shouldUseLocalVerification || typeof window === "undefined") {
+      return shouldUseLocalVerification && e2eActive ? false : null
     }
     const stored = window.localStorage.getItem(TEST_EMAIL_VERIFIED_STORAGE_KEY)
     if (stored === null) {
-      return null
+      return shouldUseLocalVerification && e2eActive ? false : null
     }
     return stored === "true"
-  }, [shouldUseTestVerification])
+  }, [shouldUseLocalVerification, e2eActive])
 
   type VerificationStatus = "pending" | "verified" | "unverified"
 
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>(
     () => {
-      if (!requiresVerification || isTestEnvironment) {
+      if (!requiresVerification) {
         return "verified"
       }
-      if (shouldUseTestVerification) {
+      if (shouldUseLocalVerification) {
         const syncValue = readTestEmailVerifiedSync()
-        const effectiveValue = syncValue ?? testEmailVerified
+        const effectiveValue =
+          syncValue !== null ? syncValue : testEmailVerified
         if (effectiveValue === true) {
           return "verified"
         }
@@ -146,36 +149,36 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   const persistTestEmailVerified = useCallback(
     (value: boolean | null) => {
-      if (!shouldUseTestVerification) {
+      if (!shouldUseLocalVerification || typeof window === "undefined") {
         setTestEmailVerifiedState(value)
         return
       }
       if (typeof window !== "undefined") {
         if (value === null) {
-          window.localStorage.removeItem(TEST_EMAIL_VERIFIED_STORAGE_KEY)
-        } else {
-          window.localStorage.setItem(
-            TEST_EMAIL_VERIFIED_STORAGE_KEY,
-            value ? "true" : "false"
-          )
-        }
-
-        window.dispatchEvent(
-          new CustomEvent<{ value: boolean | null }>(
-            TEST_EMAIL_VERIFIED_EVENT_NAME,
-            {
-              detail: { value },
-            }
-          )
+        window.localStorage.removeItem(TEST_EMAIL_VERIFIED_STORAGE_KEY)
+      } else {
+        window.localStorage.setItem(
+          TEST_EMAIL_VERIFIED_STORAGE_KEY,
+          value ? "true" : "false"
         )
       }
+
+      window.dispatchEvent(
+        new CustomEvent<{ value: boolean | null }>(
+          TEST_EMAIL_VERIFIED_EVENT_NAME,
+          {
+            detail: { value },
+          }
+        )
+      )
+
       setTestEmailVerifiedState(value)
     },
-    [shouldUseTestVerification]
+    [shouldUseLocalVerification]
   )
 
   useEffect(() => {
-    if (!shouldUseTestVerification || typeof window === "undefined") {
+    if (!shouldUseLocalVerification || typeof window === "undefined") {
       return
     }
     const stored = window.localStorage.getItem(
@@ -184,27 +187,30 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     if (stored === null) {
       persistTestEmailVerified(false)
     }
-  }, [persistTestEmailVerified, shouldUseTestVerification])
+  }, [persistTestEmailVerified, shouldUseLocalVerification])
 
   useEffect(() => {
     if (typeof window === "undefined") {
       return
     }
 
-    if (!shouldUseTestVerification) {
-      if (!isTestEnvironment) {
-        setTestEmailVerifiedState(null)
-      }
+    if (!shouldUseLocalVerification) {
+      setTestEmailVerifiedState(null)
       return
     }
 
     const stored = window.localStorage.getItem(TEST_EMAIL_VERIFIED_STORAGE_KEY)
     if (stored === null) {
-      setTestEmailVerifiedState(null)
+      if (e2eActive) {
+        window.localStorage.setItem(TEST_EMAIL_VERIFIED_STORAGE_KEY, "false")
+        setTestEmailVerifiedState(false)
+      } else {
+        setTestEmailVerifiedState(null)
+      }
       return
     }
     setTestEmailVerifiedState(stored === "true")
-  }, [isTestEnvironment, shouldUseTestVerification])
+  }, [shouldUseLocalVerification, e2eActive])
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -251,7 +257,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (!shouldUseTestVerification || typeof window === "undefined") {
+    if (!shouldUseLocalVerification || typeof window === "undefined") {
       return
     }
 
@@ -280,7 +286,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         handleCustomEvent as EventListener
       )
     }
-  }, [shouldUseTestVerification])
+  }, [shouldUseLocalVerification])
 
   useEffect(() => {
     // Guard: If Firebase config error, do not register listener
@@ -347,22 +353,20 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useLayoutEffect(() => {
-    if (!requiresVerification || isTestEnvironment) {
+    if (!requiresVerification) {
       updateVerificationStatus("verified")
-      if (
-        isTestEnvironment &&
-        pathname?.startsWith("/admin/verify-email")
-      ) {
+      if (pathname?.startsWith("/admin/verify-email")) {
         router.replace("/admin/dashboard")
       }
       return
     }
 
-    if (shouldUseTestVerification) {
+    if (shouldUseLocalVerification) {
       const syncValue = readTestEmailVerifiedSync()
-      const effectiveValue = syncValue ?? testEmailVerified
+      const effectiveValue =
+        syncValue !== null ? syncValue : testEmailVerified ?? false
 
-      if (effectiveValue === true) {
+      if (effectiveValue) {
         updateVerificationStatus("verified")
         if (pathname?.startsWith("/admin/verify-email")) {
           router.replace("/admin/dashboard")
@@ -408,21 +412,20 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       router.replace("/admin/verify-email")
     }
   }, [
-    isTestEnvironment,
     loading,
     pathname,
     readTestEmailVerifiedSync,
     requiresVerification,
     router,
+    shouldUseLocalVerification,
     testEmailVerified,
-    shouldUseTestVerification,
     updateVerificationStatus,
     user,
   ])
 
   const shouldBlockChildren =
     requiresVerification &&
-    !isTestEnvironment &&
+    !shouldUseLocalVerification &&
     isGuardedAdminRoute &&
     verificationStatus !== "verified"
 

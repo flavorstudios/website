@@ -44,7 +44,7 @@ const E2E_MEDIA_ROWS = [
   },
   {
     id: "e2e-media-2",
-    name: "Storyboard Breakdown",
+    name: "Second Media Item",
     type: "Video",
     size: "42.3 MB",
     url: "/media/e2e/storyboard-breakdown.mp4",

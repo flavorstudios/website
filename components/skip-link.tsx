@@ -45,6 +45,13 @@ export function SkipLink({ targetId = "main-content" }: SkipLinkProps) {
       data-visible={isVisible ? "true" : undefined}
       onFocus={() => setIsVisible(true)}
       onBlur={() => setIsVisible(false)}
+      onClick={() => {
+        if (typeof document === "undefined") {
+          return
+        }
+        const target = document.getElementById(targetId)
+        target?.focus({ preventScroll: true })
+      }}
       ref={linkRef}
     >
       Skip to main content

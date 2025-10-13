@@ -64,8 +64,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:3000',
     headless: true,
-    extraHTTPHeaders: {
-      'x-e2e-auth': 'bypass',
-    },
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
   },
 });

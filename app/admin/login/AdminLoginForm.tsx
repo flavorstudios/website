@@ -99,6 +99,10 @@ export default function AdminLoginForm() {
           // ignore and fallback to navigation below
         }
       }
+      if (clientEnv.TEST_MODE === "true") {
+        window.location.assign("/admin/dashboard")
+        return
+      }
       router.push("/admin/dashboard")
     }
   }, [router])
@@ -320,7 +324,7 @@ export default function AdminLoginForm() {
               )}
             </Button>
           </div>
-          <div className="login-legal-bar flex flex-col gap-3 text-left sm:flex-row sm:items-center sm:justify-between">
+          <div className="login-legal-bar flex min-w-0 flex-col gap-3 text-left sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-slate-600">
               Don&apos;t have an account?{' '}
               <Link
@@ -331,7 +335,7 @@ export default function AdminLoginForm() {
               </Link>
             </p>
             <p
-              className="block overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground w-[240px] sm:w-[320px] md:w-[380px] shrink-0"
+              className="legal-notice text-xs text-muted-foreground"
               data-testid="admin-login-legal"
             >
               By continuing you agree to our{' '}

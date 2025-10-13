@@ -134,8 +134,8 @@ export function AdminSidebar({
         className={`
           h-full md:h-screen overflow-y-auto bg-background border-r
           ${isMobile
-            ? `fixed left-0 top-0 transition-transform duration-300 ease-in-out ${sidebarOpen ? "z-[80]" : "z-30"}`
-            : "sticky top-0 z-[80]"}
+            ? `fixed left-0 top-0 transition-transform duration-300 ease-in-out ${sidebarOpen ? "z-[90]" : "z-30"}`
+            : "sticky top-0 z-[90]"}
           ${sidebarOpen
             ? "translate-x-0 pointer-events-auto"
             : "-translate-x-full md:translate-x-0 pointer-events-none md:pointer-events-auto"}

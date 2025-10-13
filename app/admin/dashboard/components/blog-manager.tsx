@@ -493,14 +493,20 @@ export default function BlogManager() {
     return () => window.removeEventListener("keydown", onKey);
   }, [handleRevalidateBlog, handleCreatePost]);
 
+  const managementDescription =
+    "Manage your blog posts, drafts, and editorial calendar."
+
   if (loading) {
     return (
       <div>
         <AdminPageHeader
           as="h2"
-          title="Blog Manager"
-          subtitle="Manage your blog posts, drafts, and editorial calendar"
+          title="Blog Workspace"
+          subtitle="Blog Management"
         />
+        <p className="mt-1 text-sm text-muted-foreground">
+          {managementDescription}
+        </p>
         <div className="mt-4 space-y-4">
           <div className="sm:hidden space-y-3" data-testid="blog-card-list">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -576,14 +582,17 @@ export default function BlogManager() {
   // --- Main UI ---
   return (
     <div>
-      {/* Header with right-aligned action buttons */}
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <AdminPageHeader
-          as="h2"
-          title="Blog Manager"
-          subtitle="Manage your blog posts, drafts, and editorial calendar"
-        />
-        <div className="flex gap-2">
+        {/* Header with right-aligned action buttons */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
+          <AdminPageHeader
+            as="h2"
+            title="Blog Workspace"
+            subtitle="Blog Management"
+          />
+          <p className="mt-1 text-sm text-muted-foreground">
+            {managementDescription}
+          </p>
+          <div className="flex gap-2">
           <Button
             onClick={handleRevalidateBlog}
             disabled={isRevalidating}

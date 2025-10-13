@@ -790,6 +790,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   placeholder="Start writing your blog post..."
                   socket={ws}
                   ariaLabelledBy={contentHeadingId}
+                  ariaLabel="Content"
                 />
               </CardContent>
             </Card>

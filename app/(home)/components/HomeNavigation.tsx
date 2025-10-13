@@ -147,15 +147,6 @@ export function HomeNavigation({ blogCategories, videoCategories }: HomeNavigati
             <SheetContent id="mobile-navigation" side="right" className="w-[300px] sm:w-[400px]">
               <div className="mt-8">
                 <MobileMegaMenu items={menuItems} onItemClick={() => setIsSheetOpen(false)} />
-                <Button
-                  asChild
-                  className="mt-6 w-full bg-orange-700 text-white hover:bg-orange-800"
-                >
-                  <Link href="/support">
-                    <Coffee className="mr-2 h-4 w-4" />
-                    Support Us
-                  </Link>
-                </Button>
               </div>
             </SheetContent>
           </Sheet>

@@ -62,17 +62,22 @@ function MediaLibraryE2ETable({
   const [hasLoadedMore, setHasLoadedMore] = useState(false);
 
   const handleLoadMore = () => {
-    setRows([...E2E_MEDIA_ROWS]);
+    setRows([...E2E_MEDIA_ROWS]); 
     setHasLoadedMore(true);
   };
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
-        as="h1"
-        title="Media Library"
-        subtitle="Review and manage uploaded assets"
-      />
+      <div className="space-y-1">
+        <h2 className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
+          Media Management
+        </h2>
+        <AdminPageHeader
+          as="h1"
+          title="Media Library"
+          subtitle="Manage and organize your uploaded media files"
+        />
+      </div>
 
       <div className="overflow-x-auto rounded-lg border border-border bg-white shadow-sm">
         <table className="min-w-full divide-y divide-border text-sm">
@@ -637,12 +642,17 @@ export default function MediaLibrary({
 
   return (
     <div className="space-y-6" aria-busy={loading}>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <AdminPageHeader
-          as="h1"
-          title="Media"
-          subtitle="Upload, organise, and reuse assets across your content"
-        />
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
+            Media Management
+          </h2>
+          <AdminPageHeader
+            as="h1"
+            title="Media Library"
+            subtitle="Manage and organize your uploaded media files"
+          />
+        </div>
       </div>
       
       <MediaToolbar

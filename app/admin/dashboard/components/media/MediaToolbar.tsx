@@ -1,5 +1,4 @@
 "use client";
-import AdminPageHeader from "@/components/AdminPageHeader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,11 +63,6 @@ export default function MediaToolbar({
 }: Props) {
   return (
     <div className="space-y-4 mb-4">
-      <AdminPageHeader
-        as="h2"
-        title="Media Library"
-        subtitle="Manage and organize your uploaded media files"
-      />
       <div className="flex items-center flex-wrap gap-2">
         <Input
           placeholder="Search"

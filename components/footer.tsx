@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 
-const primaryLinks = [
+type FooterLink = {
+  readonly name: string;
+  readonly href: string;
+  readonly ariaLabel?: string;
+};
+
+const primaryLinks: readonly FooterLink[] = [
   { name: "About Flavor Studios", href: "/about" },
   { name: "Watch", href: "/watch" },
   { name: "Play", href: "/play" },
@@ -10,7 +16,7 @@ const primaryLinks = [
   { name: "Support", href: "/support" },
 ] as const;
 
-const socialLinks = [
+const socialLinks: readonly FooterLink[] = [
   { name: "YouTube", href: "https://www.youtube.com/@flavorstudios" },
   { name: "Facebook", href: "https://www.facebook.com/flavourstudios" },
   { name: "Instagram", href: "https://www.instagram.com/flavorstudios" },
@@ -21,7 +27,7 @@ const socialLinks = [
   { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/" },
 ] as const;
 
-const legalRowLinks = [
+const legalRowLinks: readonly FooterLink[] = [
   { name: "Privacy Policy", href: "/privacy-policy" },
   { name: "Terms of Service", href: "/terms-of-service" },
   { name: "Cookie Policy", href: "/cookie-policy" },

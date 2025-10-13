@@ -6,7 +6,7 @@ export const viewport = {
 
 import type { ReactNode } from "react";
 import "./globals.css";
-import { Poppins } from "next/font/google";
+import { Inter, JetBrains_Mono as JetBrainsMono, Lora, Poppins } from "next/font/google";
 
 import Toaster from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -88,6 +88,27 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 // next/font: load fonts with CSS variables exposed to globals.css
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const lora = Lora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-lora",
+  display: "swap",
+});
+
+const jetbrains = JetBrainsMono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-jetbrains",
+  display: "swap",
+});
+
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],

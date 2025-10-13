@@ -74,7 +74,7 @@ function MediaLibraryE2ETable({
         </h2>
         <AdminPageHeader
           as="h1"
-          title="Media Library"
+          title="Media Manager"
           subtitle="Manage and organize your uploaded media files"
         />
       </div>
@@ -649,7 +649,7 @@ export default function MediaLibrary({
           </h2>
           <AdminPageHeader
             as="h1"
-            title="Media Library"
+            title="Media Manager"
             subtitle="Manage and organize your uploaded media files"
           />
         </div>

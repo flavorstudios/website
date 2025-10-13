@@ -162,7 +162,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                 }
               }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-blue-50/50 to-purple-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="flex-1 min-w-0 relative z-10">
                 <div className="flex items-center space-x-2 mb-1">
                   <div
@@ -190,7 +190,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                   </div>
                 )}
               </div>
-              <div className="ml-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 relative z-10 flex-shrink-0">
+              <div className="ml-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-1 relative z-10 flex-shrink-0 pointer-events-none">
                 <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
               </div>
             </Link>
@@ -222,7 +222,7 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
               )}
               aria-current={isActive(pathname, item.href) ? "page" : undefined}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <span className="relative z-10">{item.label}</span>
             </Link>
           ) : (
@@ -238,11 +238,15 @@ export function MegaMenu({ items, className }: MegaMenuProps) {
                   : "text-foreground/80 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:text-foreground",
               )}
               onKeyDown={(e) => handleKeyDown(e, item, index)}
+              onClick={() => {
+                setFocusedIndex(-1)
+                setActiveMenu((current) => (current === item.label ? null : item.label))
+              }}
               tabIndex={0}
               aria-label={item.label}
               type="button"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               {/* ---- This block is now WITHOUT the count bubble ---- */}
               <div className="flex items-center relative z-10">
                 <span>{item.label}</span>

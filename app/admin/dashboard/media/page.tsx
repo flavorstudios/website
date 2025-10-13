@@ -3,13 +3,13 @@ import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 
 export const metadata = getMetadata({
-  title: `Media Library – ${SITE_NAME} Admin`,
-  description: `Upload and manage media assets for ${SITE_NAME}.`,
+  title: `Media Manager – ${SITE_NAME} Admin`,
+  description: `Manage and organize media assets for ${SITE_NAME}.`,
   path: "/admin/dashboard/media",
   robots: "noindex, nofollow",
   openGraph: {
-    title: `Media Library – ${SITE_NAME} Admin`,
-    description: `Upload and manage media assets for ${SITE_NAME}.`,
+    title: `Media Manager – ${SITE_NAME} Admin`,
+    description: `Manage and organize media assets for ${SITE_NAME}.`,
     url: `${SITE_URL}/admin/dashboard/media`,
     siteName: SITE_NAME,
     type: "website",
@@ -21,8 +21,8 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: SITE_BRAND_TWITTER,
     creator: SITE_BRAND_TWITTER,
-    title: `Media Library – ${SITE_NAME} Admin`,
-    description: `Upload and manage media assets for ${SITE_NAME}.`,
+    title: `Media Manager – ${SITE_NAME} Admin`,
+    description: `Manage and organize media assets for ${SITE_NAME}.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
 });

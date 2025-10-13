@@ -153,7 +153,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         )}
         {/* END GTM (HEAD) */}
       </head>
-      <body className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased`}>
+      <body
+        className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased bg-white`}
+      >
+        <div id="top" />
         <LayoutSlotsRoot footer={<Footer />}>
           <ThemeProvider>
             <a href="#main" className="a11y-skip">

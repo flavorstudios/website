@@ -502,8 +502,8 @@ export default function BlogManager() {
           </h2>
           <AdminPageHeader
             as="h1"
-            title="Blog Posts"
-            subtitle="Create, edit and publish blog posts for Flavor Studios"
+            title="Blog Manager"
+            subtitle="Manage your blog posts, drafts, and editorial calendar"
           />
         </div>
         <div className="mt-4 space-y-4">
@@ -589,8 +589,8 @@ export default function BlogManager() {
           </h2>
           <AdminPageHeader
             as="h1"
-            title="Blog Posts"
-            subtitle="Create, edit and publish blog posts for Flavor Studios"
+            title="Blog Manager"
+            subtitle="Manage your blog posts, drafts, and editorial calendar"
           />
         </div>
         <div className="flex gap-2">

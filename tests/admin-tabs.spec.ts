@@ -62,9 +62,9 @@ test('admin nav tabs render correct content', async ({ page }) => {
 
   const sections = [
     { label: 'Dashboard', expected: /Welcome back/i, path: '/admin/dashboard' },
-    { label: 'Blog Posts', expected: /Blog Management/i, path: '/admin/dashboard/blog-posts' },
+    { label: 'Blog Posts', expected: /Blog Manager/i, path: '/admin/dashboard/blog-posts' },
     { label: 'Videos', expected: /Video Manager/i, path: '/admin/dashboard/videos' },
-    { label: 'Media', expected: /Media Library/i, path: '/admin/dashboard/media' },
+    { label: 'Media', expected: /Media Manager/i, path: '/admin/dashboard/media' },
     { label: 'Categories', expected: /^Categories$/i, path: '/admin/dashboard/categories' },
     { label: 'Comments', expected: /Comments & Reviews/i, path: '/admin/dashboard/comments' },
     { label: 'Applications', expected: /^Applications$/i, path: '/admin/dashboard/applications' },

@@ -271,17 +271,18 @@ export default function AdminLoginForm() {
                   : "Use legacy admin password (env-based)"}
               </Button>
             )}
-            {hasError && (
-              <div
-                id={alertId}
-                role="alert"
-                aria-live="assertive"
-                data-testid="auth-error"
-                className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 shadow-sm"
-              >
-                {normalizedError || "Authentication failed."}
-              </div>
-            )}
+            <div aria-live="assertive">
+              {hasError && (
+                <div
+                  id={alertId}
+                  role="alert"
+                  data-testid="auth-error"
+                  className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 shadow-sm"
+                >
+                  {normalizedError || "Authentication failed."}
+                </div>
+              )}
+            </div>
             {showLegacyLogin ? (
               <EmailLoginForm
                 error={error}
@@ -334,26 +335,28 @@ export default function AdminLoginForm() {
                 Sign up
               </Link>
             </p>
-            <p
-              className="legal-notice text-xs text-muted-foreground"
-              data-testid="admin-login-legal"
-            >
-              By continuing you agree to our{' '}
-              <Link
-                href="/terms-of-service"
-                className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
+            <div className="legal-notice-wrapper">
+              <p
+                className="legal-notice text-xs text-muted-foreground"
+                data-testid="admin-login-legal"
               >
-                Terms of Service
-              </Link>{' '}
-              and{' '}
-              <Link
-                href="/privacy-policy"
-                className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
-              >
-                Privacy Policy
-              </Link>
-              . Unauthorized access is prohibited.
-            </p>
+                By continuing you agree to our{' '}
+                <Link
+                  href="/terms-of-service"
+                  className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
+                >
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link
+                  href="/privacy-policy"
+                  className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
+                >
+                  Privacy Policy
+                </Link>
+                . Unauthorized access is prohibited.
+              </p>
+            </div>
           </div>
         </div>
       </div>

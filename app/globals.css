@@ -116,6 +116,10 @@ body {
   min-width: 0;
 }
 
+.legal-notice-wrapper {
+  min-width: 0;
+}
+
 .login-legal-bar > [data-testid="admin-login-legal"] {
   flex: 1 1 auto;
   min-width: 0;

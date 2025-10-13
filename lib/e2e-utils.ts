@@ -1,7 +1,11 @@
 import type { NextRequest } from "next/server";
 
+function isTruthyFlag(value: string | undefined): boolean {
+  return value === "true" || value === "1";
+}
+
 export function isE2EEnabled(): boolean {
-  return process.env.E2E === "true" || process.env.NEXT_PUBLIC_E2E === "true";
+  return isTruthyFlag(process.env.E2E) || isTruthyFlag(process.env.NEXT_PUBLIC_E2E);
 }
 
 export function hasE2EBypass(request?: NextRequest | null): boolean {

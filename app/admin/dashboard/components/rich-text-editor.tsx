@@ -39,6 +39,7 @@ interface RichTextEditorProps {
   socket?: WebSocket | null
   ariaLabelledBy?: string
   ariaLabel?: string
+  id?: string
 }
 
 export function RichTextEditor({
@@ -49,6 +50,7 @@ export function RichTextEditor({
   socket,
   ariaLabelledBy,
   ariaLabel,
+  id,
 }: RichTextEditorProps) {
   const [showLinkDialog, setShowLinkDialog] = useState(false)
   const [linkUrl, setLinkUrl] = useState("")
@@ -67,6 +69,10 @@ export function RichTextEditor({
       "aria-multiline": "true",
     }
 
+    if (id) {
+      attributes.id = id
+    }
+
     if (ariaLabelledBy) {
       attributes["aria-labelledby"] = ariaLabelledBy
     }
@@ -76,7 +82,7 @@ export function RichTextEditor({
     }
 
     return attributes
-  }, [ariaLabel, ariaLabelledBy])
+  }, [ariaLabel, ariaLabelledBy, id])
 
   const editor = useEditor({
     extensions: [

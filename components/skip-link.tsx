@@ -45,12 +45,25 @@ export function SkipLink({ targetId = "main-content" }: SkipLinkProps) {
       data-visible={isVisible ? "true" : undefined}
       onFocus={() => setIsVisible(true)}
       onBlur={() => setIsVisible(false)}
-      onClick={() => {
+      onClick={(event) => {
+        event.preventDefault()
         if (typeof document === "undefined") {
           return
         }
         const target = document.getElementById(targetId)
-        target?.focus({ preventScroll: true })
+        if (!target) {
+          return
+        }
+        const focusTarget = () => {
+          if (typeof (target as HTMLElement).focus === "function") {
+            target.focus({ preventScroll: true })
+          }
+        }
+        if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+          window.requestAnimationFrame(focusTarget)
+        } else {
+          focusTarget()
+        }
       }}
       ref={linkRef}
     >

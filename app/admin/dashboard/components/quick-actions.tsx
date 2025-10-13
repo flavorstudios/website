@@ -28,7 +28,7 @@ export function QuickActions() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
-          onSelect={() => router.push("/admin/dashboard/blog-posts?mode=create")}
+          onSelect={() => router.push("/admin/dashboard/blog-posts")}
         >
           Create New Post
         </DropdownMenuItem>

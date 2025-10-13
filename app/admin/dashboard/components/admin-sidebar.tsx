@@ -123,8 +123,7 @@ export function AdminSidebar({
   }, [pathname, isMobile, setSidebarOpen])
 
   return (
-    <>
-      <aside
+    <aside
         ref={sidebarRef}
         id={id}
         data-testid={id}
@@ -140,6 +139,7 @@ export function AdminSidebar({
             ? "translate-x-0 pointer-events-auto"
             : "-translate-x-full md:translate-x-0 pointer-events-none md:pointer-events-auto"}
           w-64 ${sidebarOpen ? "md:w-64" : "md:w-20"}
+          max-w-[16rem]
           flex flex-col md:relative
         `}
         aria-label="Admin navigation"
@@ -164,7 +164,7 @@ export function AdminSidebar({
             )}
 
             <Button
-                variant="ghost"
+              variant="ghost"
               size="sm"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="hidden md:flex p-1 h-8 w-8 focus:outline-none focus:ring"
@@ -288,6 +288,5 @@ export function AdminSidebar({
           </div>
         )}
       </aside>
-    </>
   )
 }

@@ -101,6 +101,8 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   // Using a fixed user ID since NextAuth is not in use
   const userId = "anon";
   const contentHeadingId = useId();
+  const contentLabelId = useId();
+  const contentEditorId = useId();
 
   const initialScheduledDate = (() => {
     if (!initialPost?.scheduledFor) return undefined;
@@ -778,18 +780,25 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
             {/* Content Editor */}
             <Card>
               <CardHeader>
-                <CardTitle id={contentHeadingId} className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5" aria-hidden="true" />
-                  Content
+                <CardTitle className="flex items-center gap-2" id={contentHeadingId}>
+                  <label
+                    id={contentLabelId}
+                    htmlFor={contentEditorId}
+                    className="flex cursor-pointer items-center gap-2 text-base font-semibold leading-none"
+                  >
+                    <BookOpen className="h-5 w-5" aria-hidden="true" />
+                    Content
+                  </label>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <RichTextEditor
+                  id={contentEditorId}
                   value={post.content}
                   onChange={(content) => setPost((prev) => ({ ...prev, content }))}
                   placeholder="Start writing your blog post..."
                   socket={ws}
-                  ariaLabelledBy={contentHeadingId}
+                  ariaLabelledBy={contentLabelId}
                   ariaLabel="Content"
                 />
               </CardContent>

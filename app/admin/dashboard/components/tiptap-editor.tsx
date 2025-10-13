@@ -77,7 +77,7 @@ export function TiptapEditor({ value, onChange, placeholder, className }: Tiptap
           padding: 1rem;
           border-radius: 0.5rem;
           overflow-x: auto;
-          font-family: monospace;
+          font-family: 'Poppins', sans-serif;
         }
 
         [contenteditable] ul,

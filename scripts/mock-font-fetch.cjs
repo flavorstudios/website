@@ -21,12 +21,6 @@ if (typeof originalFetch === 'function') {
 @font-face { font-family: 'Poppins'; font-style: normal; font-weight: 500; src: local('Arial'); }
 @font-face { font-family: 'Poppins'; font-style: normal; font-weight: 600; src: local('Arial'); }
 @font-face { font-family: 'Poppins'; font-style: normal; font-weight: 700; src: local('Arial'); }
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; src: local('Arial'); }
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 500; src: local('Arial'); }
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; src: local('Arial'); }
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 700; src: local('Arial'); }
-@font-face { font-family: 'Lora'; font-style: normal; font-weight: 400; src: local('Times New Roman'); }
-@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; src: local('Courier New'); }
 `;
 
   const fontCssBuffer = Buffer.from(fontCss);

@@ -20,10 +20,10 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        // Body default: Inter; headings use Lora via CSS vars; code uses JetBrains Mono.
-        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui", "sans-serif"],
-        serif: ["var(--font-lora)", "ui-serif", "serif"],
-        code: ["var(--font-jetbrains)", "ui-monospace", "SFMono-Regular", "monospace"],
+        // Enforce a single typography stack project-wide.
+        sans: ["var(--font-poppins)", "Poppins", "sans-serif"],
+        serif: ["var(--font-poppins)", "Poppins", "sans-serif"],
+        code: ["var(--font-poppins)", "Poppins", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

@@ -42,7 +42,7 @@ const GoogleIcon = () => (
       textAnchor="middle"
       dominantBaseline="middle"
       fontSize="11"
-      fontFamily="'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif"
+      fontFamily="'Poppins', sans-serif"
       fontWeight="600"
       fill="currentColor"
     >

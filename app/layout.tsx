@@ -6,7 +6,7 @@ export const viewport = {
 
 import type { ReactNode } from "react";
 import "./globals.css";
-import { Poppins, Inter, Lora, JetBrains_Mono } from "next/font/google";
+import { Poppins } from "next/font/google";
 
 import Toaster from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -94,9 +94,6 @@ const poppins = Poppins({
   variable: "--font-poppins",
   display: "swap",
 });
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const lora = Lora({ subsets: ["latin"], variable: "--font-lora", display: "swap" });
-const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
 function DefaultHeader() {
   return (
@@ -113,13 +110,19 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      style={{ fontFamily: "var(--font-poppins)" }}
+      style={{ fontFamily: "'Poppins', sans-serif" }}
       suppressHydrationWarning
       data-app-env={serverEnv.NODE_ENV}
     >
       <head>
         {/* Meta viewport fallback for bots/legacy */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
 
         {/* Skip link fallback styles (in case Tailwind utilities aren't loaded) */}
         <style

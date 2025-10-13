@@ -112,7 +112,7 @@ export async function sendPasswordResetEmail({
 
   const html = `<!DOCTYPE html>
 <html lang="en">
-  <body style="font-family: Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px;">
+  <body style="font-family: 'Poppins', sans-serif; background-color: #f8fafc; margin: 0; padding: 24px;">
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
       <tr>
         <td style="max-width: 480px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 32px; box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);">

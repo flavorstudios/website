@@ -42,10 +42,10 @@
     /* Sidebar defaults */
     --sidebar-w: 280px;
 
-    /* Font role variables (paired with next/font variables) */
-    --fs-body: var(--font-inter);
-    --fs-heading: var(--font-lora);
-    --fs-code: var(--font-jetbrains);
+    /* Font role variables (all mapped to Poppins) */
+    --fs-body: var(--font-poppins);
+    --fs-heading: var(--font-poppins);
+    --fs-code: var(--font-poppins);
   }
 
   .dark {

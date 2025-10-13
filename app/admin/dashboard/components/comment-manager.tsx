@@ -36,7 +36,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
   Check,
@@ -53,7 +52,6 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { formatDate } from "@/lib/date"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
-import CommentStatsChart from "@/components/admin/comment/CommentStatsChart"
 import AdminPageHeader from "@/components/AdminPageHeader"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { logClientError } from "@/lib/log-client"
@@ -464,17 +462,6 @@ export default function CommentManager() {
     pageSize,
   ])
 
-  const getStatusCounts = () => ({
-    all: comments.length,
-    pending: comments.filter((c) => c.status === "pending").length,
-    approved: comments.filter((c) => c.status === "approved").length,
-    spam: comments.filter((c) => c.status === "spam").length,
-    trash: comments.filter((c) => c.status === "trash").length,
-    flagged: comments.filter((c) => c.flagged).length,
-  })
-
-  const statusCounts = getStatusCounts()
-
   const FilterControls = () => (
     <div className="flex flex-wrap items-center gap-2">
       <Select
@@ -688,58 +675,6 @@ export default function CommentManager() {
         </div>
       </div>
 
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="outline" className="mb-4">
-            View Stats
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-4xl p-6">
-          <CommentStatsChart />
-        </DialogContent>
-      </Dialog>
-
-      <CommentStatsChart />
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-gray-900">{statusCounts.all}</div>
-            <div className="text-sm text-gray-600">Total</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-700">{statusCounts.pending}</div>
-            <div className="text-sm text-gray-600">Pending</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-700">{statusCounts.approved}</div>
-            <div className="text-sm text-gray-600">Approved</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-red-600">{statusCounts.spam}</div>
-            <div className="text-sm text-gray-600">Spam</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-gray-600">{statusCounts.trash}</div>
-            <div className="text-sm text-gray-600">Trash</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-red-600">{statusCounts.flagged}</div>
-            <div className="text-sm text-gray-600">Flagged</div>
-          </CardContent>
-        </Card>
-      </div>
-
       <CommentBulkActions
         count={selectedIds.length}
         onApprove={handleBulkApprove}
@@ -751,26 +686,15 @@ export default function CommentManager() {
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="flex flex-wrap gap-2 w-full">
-          <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
-          <TabsTrigger value="pending">Pending ({statusCounts.pending})</TabsTrigger>
-          <TabsTrigger value="approved">Approved ({statusCounts.approved})</TabsTrigger>
-          <TabsTrigger value="spam">Spam ({statusCounts.spam})</TabsTrigger>
-          <TabsTrigger value="flagged">Flagged ({statusCounts.flagged})</TabsTrigger>
-          <TabsTrigger value="trash">Trash ({statusCounts.trash})</TabsTrigger>
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="pending">Pending</TabsTrigger>
+          <TabsTrigger value="approved">Approved</TabsTrigger>
+          <TabsTrigger value="spam">Spam</TabsTrigger>
+          <TabsTrigger value="flagged">Flagged</TabsTrigger>
+          <TabsTrigger value="trash">Trash</TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab} className="space-y-4 mt-6">
-          {activeTab === "pending" && statusCounts.pending > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-yellow-700" />
-              <div>
-                <h4 className="font-medium text-yellow-800">Comments Awaiting Review</h4>
-                <p className="text-sm text-yellow-700">
-                  {statusCounts.pending} comments need your approval before they appear publicly.
-                </p>
-              </div>
-            </div>
-          )}
 
           {filteredComments.length > 0 ? (
             <div className="space-y-4">

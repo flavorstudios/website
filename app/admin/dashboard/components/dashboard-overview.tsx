@@ -137,7 +137,8 @@ export default function DashboardOverview() {
   const stats = statsQuery.data as DashboardStats | undefined;
   const statsError = statsQuery.error as unknown;
   const statsLoading = statsQuery.isLoading;
-  const target = lastRefreshedAt ?? statsQuery.dataUpdatedAt;
+  const lastUpdatedLabel = useMemo(() => {
+    const target = lastRefreshedAt ?? statsQuery.dataUpdatedAt;
     if (!target) return "N/A";
     if (!statsQuery.dataUpdatedAt) return "N/A";
 

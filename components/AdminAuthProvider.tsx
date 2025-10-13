@@ -156,11 +156,12 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       if (typeof window !== "undefined") {
         if (value === null) {
         window.localStorage.removeItem(TEST_EMAIL_VERIFIED_STORAGE_KEY)
-      } else {
-        window.localStorage.setItem(
-          TEST_EMAIL_VERIFIED_STORAGE_KEY,
-          value ? "true" : "false"
-        )
+        } else {
+          window.localStorage.setItem(
+            TEST_EMAIL_VERIFIED_STORAGE_KEY,
+            value ? "true" : "false"
+          )
+        }
       }
 
       window.dispatchEvent(

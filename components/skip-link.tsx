@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export function SkipLink() {
+type SkipLinkProps = {
+  targetId?: string;
+};
+
+export function SkipLink({ targetId = "main-content" }: SkipLinkProps) {
   const linkRef = useRef<HTMLAnchorElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -36,7 +40,7 @@ export function SkipLink() {
 
   return (
     <a
-      href="#main"
+      href={`#${targetId}`}
       className="skip-link"
       data-visible={isVisible ? "true" : undefined}
       onFocus={() => setIsVisible(true)}

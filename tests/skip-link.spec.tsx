@@ -14,7 +14,7 @@ test.describe("Skip link + a11y", () => {
 
     // Activate the skip link and ensure focus lands on the main region
     await page.keyboard.press("Enter");
-    await expect(page.locator("#main")).toBeFocused();
+    await expect(page.locator("#main-content")).toBeFocused();
   });
 
   test("has no obvious axe violations", async ({ page }) => {

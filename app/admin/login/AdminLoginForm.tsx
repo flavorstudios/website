@@ -78,7 +78,8 @@ export default function AdminLoginForm() {
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
 
   const normalizedError = error.trim()
-  const alertId = normalizedError.length ? "admin-login-error" : undefined
+  const alertId = "admin-auth-error"
+  const hasError = normalizedError.length > 0
 
   const passwordResetNotice =
     searchParams.get("reset") === "1"
@@ -266,12 +267,23 @@ export default function AdminLoginForm() {
                   : "Use legacy admin password (env-based)"}
               </Button>
             )}
+            {hasError && (
+              <div
+                id={alertId}
+                role="alert"
+                aria-live="assertive"
+                data-testid="auth-error"
+                className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 shadow-sm"
+              >
+                {normalizedError || "Authentication failed."}
+              </div>
+            )}
             {showLegacyLogin ? (
               <EmailLoginForm
                 error={error}
                 setError={setError}
                 notice={passwordResetNotice ?? undefined}
-                errorMessageId={alertId}
+                errorMessageId={hasError ? alertId : undefined}
               />
             ) : (
               <FirebaseEmailLoginForm
@@ -279,7 +291,7 @@ export default function AdminLoginForm() {
                 setError={setError}
                 notice={passwordResetNotice ?? undefined}
                 onSuccess={finalizeLogin}
-                errorMessageId={alertId}
+                errorMessageId={hasError ? alertId : undefined}
               />
             )}
             <div className="relative py-2">

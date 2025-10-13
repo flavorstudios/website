@@ -13,6 +13,7 @@ import { onAuthStateChanged, signOut, User } from "firebase/auth"
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { clientEnv } from "@/env.client"
+import { isE2EEnabled } from "@/lib/e2e-utils"
 
 const TEST_EMAIL_VERIFIED_STORAGE_KEY = "admin-test-email-verified"
 const TEST_EMAIL_VERIFIED_EVENT_NAME = "admin-test-email-verified-change"
@@ -34,26 +35,13 @@ const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefin
 
 // ---- Provider Implementation ----
 export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
+  const e2eActive = isE2EEnabled()
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => !e2eActive)
   const [error, setError] = useState<string | null>(null)
   const [authInitFailed, setAuthInitFailed] = useState(() =>
     Boolean(firebaseInitError)
   )
-  const [testEmailVerified, setTestEmailVerifiedState] = useState<
-    boolean | null
-  >(() => {
-    if (typeof window === "undefined") {
-      return null
-    }
-    const stored = window.localStorage.getItem(
-      TEST_EMAIL_VERIFIED_STORAGE_KEY
-    )
-    if (stored === null) {
-      return null
-    }
-    return stored === "true"
-  })
   const [testModeOverride, setTestModeOverride] = useState<boolean | null>(() => {
     if (typeof window === "undefined") {
       return null
@@ -64,15 +52,33 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
     return stored === "true"
   })
-  const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
-  const router = useRouter()
-  const pathname = usePathname()
-  const isE2E = process.env.NEXT_PUBLIC_E2E === "true"
   const requiresVerification =
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true"
   const envTestMode = clientEnv.TEST_MODE === "true"
   const testMode = (testModeOverride ?? envTestMode) || authInitFailed
-  const shouldUseTestVerification = testMode || isE2E
+  const shouldUseTestVerification =
+    !e2eActive && requiresVerification && testMode
+  const isTestEnvironment = e2eActive
+  const [testEmailVerified, setTestEmailVerifiedState] = useState<
+    boolean | null
+  >(() => {
+    if (isTestEnvironment) {
+      return true
+    }
+    if (!shouldUseTestVerification || typeof window === "undefined") {
+      return null
+    }
+    const stored = window.localStorage.getItem(
+      TEST_EMAIL_VERIFIED_STORAGE_KEY
+    )
+    if (stored === null) {
+      return null
+    }
+    return stored === "true"
+  })
+  const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
+  const router = useRouter()
+  const pathname = usePathname()
 
   const readTestEmailVerifiedSync = useCallback(() => {
     if (!shouldUseTestVerification || typeof window === "undefined") {
@@ -89,7 +95,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>(
     () => {
-      if (!requiresVerification) {
+      if (!requiresVerification || isTestEnvironment) {
         return "verified"
       }
       if (shouldUseTestVerification) {
@@ -140,6 +146,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   const persistTestEmailVerified = useCallback(
     (value: boolean | null) => {
+      if (!shouldUseTestVerification) {
+        setTestEmailVerifiedState(value)
+        return
+      }
       if (typeof window !== "undefined") {
         if (value === null) {
           window.localStorage.removeItem(TEST_EMAIL_VERIFIED_STORAGE_KEY)
@@ -161,7 +171,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }
       setTestEmailVerifiedState(value)
     },
-    []
+    [shouldUseTestVerification]
   )
 
   useEffect(() => {
@@ -182,7 +192,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!shouldUseTestVerification) {
-      setTestEmailVerifiedState(null)
+      if (!isTestEnvironment) {
+        setTestEmailVerifiedState(null)
+      }
       return
     }
 
@@ -192,7 +204,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       return
     }
     setTestEmailVerifiedState(stored === "true")
-  }, [shouldUseTestVerification])
+  }, [isTestEnvironment, shouldUseTestVerification])
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -335,8 +347,14 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useLayoutEffect(() => {
-    if (!requiresVerification) {
+    if (!requiresVerification || isTestEnvironment) {
       updateVerificationStatus("verified")
+      if (
+        isTestEnvironment &&
+        pathname?.startsWith("/admin/verify-email")
+      ) {
+        router.replace("/admin/dashboard")
+      }
       return
     }
 
@@ -378,7 +396,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       if (pathname?.startsWith("/admin/verify-email")) {
         router.replace("/admin/dashboard")
       }
-    return
+      return
     }
 
     updateVerificationStatus("unverified")
@@ -390,6 +408,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       router.replace("/admin/verify-email")
     }
   }, [
+    isTestEnvironment,
     loading,
     pathname,
     readTestEmailVerifiedSync,
@@ -402,7 +421,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   ])
 
   const shouldBlockChildren =
-    requiresVerification && isGuardedAdminRoute && verificationStatus !== "verified"
+    requiresVerification &&
+    !isTestEnvironment &&
+    isGuardedAdminRoute &&
+    verificationStatus !== "verified"
 
   return (
     <AdminAuthContext.Provider

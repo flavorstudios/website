@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Spinner from "@/components/ui/spinner";
+import { isE2EEnabled } from "@/lib/e2e-utils";
 
 type Status = "loading" | "authenticated" | "unauthenticated" | "error";
 
-const isE2E =
-  process.env.NEXT_PUBLIC_E2E === "true" || process.env.E2E === "true";
+const isTestEnv = isE2EEnabled();
 
 /**
  * Guard that validates the admin session before rendering children.
@@ -17,11 +17,11 @@ const isE2E =
  * - Renders children only when authenticated
  */
 export default function AdminAuthGuard({ children }: { children: React.ReactNode }) {
-  const [status, setStatus] = useState<Status>(isE2E ? "authenticated" : "loading");
+  const [status, setStatus] = useState<Status>(isTestEnv ? "authenticated" : "loading");
   const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    if (isE2E) {
+    if (isTestEnv) {
       return undefined;
     }
     

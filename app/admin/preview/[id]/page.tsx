@@ -25,6 +25,7 @@ import {
 } from "@/lib/preview-token-errors";
 import { logError } from "@/lib/log";
 import crypto from "crypto";
+import { ValidateSessionPing } from "@/components/ValidateSessionPing";
 
 async function getPost(id: string): Promise<BlogPost | null> {
   return blogStore.getById(id);
@@ -125,6 +126,7 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   function renderGuardedMessage(message: ReactNode) {
     return (
       <AdminAuthGuard>
+        <ValidateSessionPing />
         <div className="mx-auto max-w-prose p-6">
           {typeof message === "string" ? <p>{message}</p> : message}
         </div>

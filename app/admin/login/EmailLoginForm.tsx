@@ -126,22 +126,21 @@ export default function EmailLoginForm({
   const isOtpFlow = mfaRequired || otpExpanded || otp.length > 0;
 
   const errorRegionId = errorMessageId ?? "login-error"
-  const describedBy = formError ? errorRegionId : undefined
+  const inlineErrorId = errorMessageId ? undefined : errorRegionId
+  const describedBy = formError ? errorMessageId ?? inlineErrorId : undefined
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Persistent live region so SRs announce new errors */}
       <div className="min-h-[1.5rem] space-y-2">
-        {formError && (
-          <div
-            id={errorRegionId}
-            role="alert"
+        {inlineErrorId && formError && (
+          <p
+            id={inlineErrorId}
             aria-live="assertive"
-            aria-label={formError}
             className="text-sm text-red-600"
           >
             {formError}
-          </div>
+          </p>
         )}
         {infoNotice && (
           <p

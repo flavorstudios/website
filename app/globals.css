@@ -119,6 +119,14 @@ body {
   flex: 0 0 auto;
 }
 
+.legal-notice {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 h1,
 h2,
 h3,

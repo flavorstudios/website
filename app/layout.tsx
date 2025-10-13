@@ -12,6 +12,7 @@ import Toaster from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Footer } from "@/components/footer";
 import { AfterMainSlot, FooterSlot, HeaderSlot, LayoutSlotsRoot } from "@/components/layout-slots";
+import { SkipLink } from "@/components/skip-link";
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -183,9 +184,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <div id="top" />
         <LayoutSlotsRoot footer={<Footer />}>
           <ThemeProvider>
-            <a href="#main" className="a11y-skip">
-              Skip to main content
-            </a>
+            <SkipLink targetId="main-content" />
 
             {/* GTM (NOSCRIPT) — only if container id is provided */}
             {gtmId && (
@@ -207,7 +206,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </header>
 
               <main
-                id="main"
+                id="main-content"
                 role="main"
                 tabIndex={-1}
                 className="flex-1 focus-visible:outline-none"

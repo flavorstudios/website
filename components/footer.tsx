@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import Link from "next/link"
+import Link from "next/link";
 
 const primaryLinks = [
   { name: "About Flavor Studios", href: "/about" },
@@ -8,9 +8,9 @@ const primaryLinks = [
   { name: "Play", href: "/play" },
   { name: "Blog", href: "/blog" },
   { name: "Support", href: "/support" },
-]
+] as const;
 
-  const socialLinks = [
+const socialLinks = [
   { name: "YouTube", href: "https://www.youtube.com/@flavorstudios" },
   { name: "Facebook", href: "https://www.facebook.com/flavourstudios" },
   { name: "Instagram", href: "https://www.instagram.com/flavorstudios" },
@@ -19,28 +19,28 @@ const primaryLinks = [
   { name: "Telegram", href: "https://t.me/flavorstudios" },
   { name: "Threads", href: "https://www.threads.net/@flavorstudios" },
   { name: "Reddit", href: "https://www.reddit.com/r/flavorstudios/" },
-]
+] as const;
 
-    const legalRowLinks = [
+const legalRowLinks = [
   { name: "Privacy Policy", href: "/privacy-policy" },
   { name: "Terms of Service", href: "/terms-of-service" },
   { name: "Cookie Policy", href: "/cookie-policy" },
   { name: "DMCA", href: "/dmca" },
   { name: "Disclaimer", href: "/disclaimer" },
   { name: "Usage Policy", href: "/media-usage-policy", ariaLabel: "Usage Policy" },
-]
+] as const;
 
-    export default function Footer() {
-  const currentYear = new Date().getFullYear()
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative overflow-hidden bg-black text-white">
+    <div className="relative overflow-hidden bg-black text-white">
       <svg
         className="pointer-events-none absolute -top-24 left-0 h-28 w-full text-white"
         viewBox="0 0 1440 120"
         preserveAspectRatio="none"
         aria-hidden="true"
-        >
+      >
         <path d="M0,120 C320,0 1120,0 1440,120 L1440,0 L0,0 Z" fill="currentColor" />
       </svg>
 
@@ -48,10 +48,12 @@ const primaryLinks = [
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
-          background: "radial-gradient(circle at 50% -20%, rgba(229, 9, 20, 0.45), rgba(0, 0, 0, 0) 64%)",
+          background:
+            "radial-gradient(circle at 50% -20%, rgba(229, 9, 20, 0.45), rgba(0, 0, 0, 0) 64%)",
           opacity: 0.85,
         }}
       />
+
       <div className="relative z-10">
         <div className="mx-auto max-w-7xl px-6 py-20 text-center sm:px-8 lg:px-12">
           <div className="mb-10 flex justify-center">
@@ -134,15 +136,15 @@ const primaryLinks = [
                 </li>
               ))}
             </ul>
-          <p className="mt-3 text-[clamp(0.68rem,1vw,0.85rem)]">
+            <p className="mt-3 text-[clamp(0.68rem,1vw,0.85rem)]">
               © {currentYear} Flavor Studios. All rights reserved.
             </p>
             <p className="text-[clamp(0.68rem,1vw,0.85rem)]">Built with passion. Powered by dreams.</p>
           </div>
         </div>
       </div>
-    </footer>
-  )
+    </div>
+  );
 }
 
-export { Footer }
+export { Footer };

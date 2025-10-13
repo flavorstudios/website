@@ -93,6 +93,34 @@ const NAV: { id: SectionId; href: string; title: string }[] = [
   { id: "settings", href: "/admin/dashboard/settings", title: "Settings" },
   { id: "system", href: "/admin/dashboard/system", title: "System Tools" },
 ] as const;
+
+const SECTION_HEADINGS: Record<SectionId, string> = {
+  overview: "Admin Dashboard",
+  blogs: "Blog Manager",
+  videos: "Video Manager",
+  media: "Media Manager",
+  categories: "Categories",
+  comments: "Comments & Reviews",
+  applications: "Applications",
+  inbox: "Email Inbox",
+  users: "Users",
+  settings: "Settings",
+  system: "System Tools",
+};
+
+const SECTION_DESCRIPTIONS: Record<SectionId, string> = {
+  overview: "Monitor studio performance and recent activity at a glance.",
+  blogs: "Manage your blog posts, drafts, and editorial calendar.",
+  videos: "Track published videos and plan upcoming releases.",
+  media: "Organize and review your media assets before publishing.",
+  categories: "Maintain categories to improve content discovery.",
+  comments: "Moderate community feedback and respond quickly.",
+  applications: "Review incoming submissions and collaborate with the team.",
+  inbox: "Stay on top of studio email and automated alerts.",
+  users: "Manage teammate profiles, roles, and permissions.",
+  settings: "Configure integrations and admin preferences.",
+  system: "Access deployment tasks and maintenance tools.",
+};
 const validSection = (s: string | null): s is SectionId =>
   !!s && NAV.some((n) => n.id === s);
 
@@ -397,15 +425,19 @@ export default function AdminDashboardPageClient({
       logClientError("Logout failed:", error);
     }
   }, []);
-  const currentTitle = useMemo(
+  const currentNavTitle = useMemo(
     () => NAV.find((n) => n.id === activeSection)?.title ?? "Dashboard",
     [activeSection]
   );
 
+  const sectionHeading = SECTION_HEADINGS[activeSection] ?? currentNavTitle;
+  const sectionDescription =
+    SECTION_DESCRIPTIONS[activeSection] ?? "Manage your studio operations.";
+
   // Keep document title in sync with the active section
   useEffect(() => {
-    document.title = `${currentTitle} | ${SITE_NAME} Admin`;
-  }, [currentTitle]);
+    document.title = `${sectionHeading} | ${SITE_NAME} Admin`;
+  }, [sectionHeading]);
 
   if (!mounted) {
     return (
@@ -506,11 +538,26 @@ export default function AdminDashboardPageClient({
                 tabIndex={-1}
                 className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-4 pt-4
                            pb-[calc(var(--mobile-nav-h,64px)+env(safe-area-inset-bottom,0px))] lg:pb-6"
-                aria-label={currentTitle}
+                aria-label={sectionHeading}
                 aria-hidden={isMobile && sidebarOpen ? true : undefined}
                 role="region"
               >
                 <div className="max-w-7xl mx-auto">
+                  <header
+                    className="mb-6 space-y-1"
+                    data-testid="dashboard-heading"
+                  >
+                    <h1
+                      className="text-3xl font-semibold tracking-tight text-foreground"
+                      data-testid="dashboard-title"
+                    >
+                      {sectionHeading}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                      {sectionDescription}
+                    </p>
+                  </header>
+
                   {/* Online/Offline indicator */}
                   {!isOnline && (
                     <Alert className="mb-4 border-amber-200 bg-amber-50">
@@ -534,7 +581,7 @@ export default function AdminDashboardPageClient({
 
                   {/* ARIA live region for section changes */}
                   <div className="sr-only" aria-live="polite">
-                    Section: {currentTitle}
+                    Section: {sectionHeading}
                   </div>
                 </div>
               </section>

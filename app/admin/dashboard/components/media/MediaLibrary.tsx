@@ -56,11 +56,13 @@ function MediaLibraryE2ETable({
   onSelect,
   onDetailsOpenChange,
 }: MediaLibraryProps) {
-  const [rows, setRows] = useState([E2E_MEDIA_ROWS[0]]);
+  const [rows, setRows] = useState<Array<(typeof E2E_MEDIA_ROWS)[number]>>([
+    E2E_MEDIA_ROWS[0],
+  ]);
   const [hasLoadedMore, setHasLoadedMore] = useState(false);
 
   const handleLoadMore = () => {
-    setRows(E2E_MEDIA_ROWS.slice());
+    setRows([...E2E_MEDIA_ROWS]);
     setHasLoadedMore(true);
   };
 

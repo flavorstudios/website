@@ -63,7 +63,7 @@ export default function PwaServiceWorker() {
         navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
       };
     }
-  }, [isTestMode]);
+  }, [isE2E, isTestMode]);
 
   // Trigger update by sending SKIP_WAITING to the waiting SW
   const handleUpdate = () => {

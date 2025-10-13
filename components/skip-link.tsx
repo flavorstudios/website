@@ -27,7 +27,13 @@ export function SkipLink({ targetId = "main-content" }: SkipLinkProps) {
         activeElement === document.documentElement;
 
       if (shouldFocusSkipLink) {
-        linkRef.current?.focus();
+        setIsVisible(true);
+        const focusLink = () => linkRef.current?.focus();
+        if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+          window.requestAnimationFrame(focusLink);
+        } else {
+          focusLink();
+        }
       }
     }
 

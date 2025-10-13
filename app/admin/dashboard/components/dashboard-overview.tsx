@@ -564,7 +564,9 @@ export default function DashboardOverview() {
                   return (
                     <Button
                       key={index}
+                      type="button"
                       variant="outline"
+                      aria-label={action.title}
                       className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
                       onClick={() => router.push(action.href)}
                     >

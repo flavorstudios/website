@@ -80,6 +80,11 @@ export default function AdminLoginForm() {
   const normalizedError = error.trim()
   const alertId = "admin-auth-error"
   const hasError = normalizedError.length > 0
+  const alertMessage = "Authentication failed."
+  const supplementalErrorMessage =
+    normalizedError.length > 0 && normalizedError !== alertMessage
+      ? normalizedError
+      : null
 
   const passwordResetNotice =
     searchParams.get("reset") === "1"
@@ -279,10 +284,19 @@ export default function AdminLoginForm() {
                   data-testid="auth-error"
                   className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 shadow-sm"
                 >
-                  {normalizedError || "Authentication failed."}
+                  {alertMessage}
                 </div>
               )}
             </div>
+            {supplementalErrorMessage && (
+              <p
+                role="status"
+                aria-live="polite"
+                className="text-sm text-muted-foreground"
+              >
+                {supplementalErrorMessage}
+              </p>
+            )}
             {showLegacyLogin ? (
               <EmailLoginForm
                 error={error}
@@ -335,9 +349,9 @@ export default function AdminLoginForm() {
                 Sign up
               </Link>
             </p>
-            <div className="legal-notice-wrapper">
+            <div className="legal-notice-wrapper min-w-0">
               <p
-                className="legal-notice text-xs text-muted-foreground"
+                className="legal-notice block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground"
                 data-testid="admin-login-legal"
               >
                 By continuing you agree to our{' '}

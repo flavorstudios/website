@@ -23,7 +23,10 @@ export default function VerifyEmailClient() {
 
   const requireVerification =
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
-  const testMode = clientEnv.TEST_MODE === "true";
+  const e2eActive =
+    typeof process !== "undefined" &&
+    (process.env.NEXT_PUBLIC_E2E === "1" || process.env.NEXT_PUBLIC_E2E === "true");
+  const testMode = clientEnv.TEST_MODE === "true" || e2eActive;
 
   const waitForNextFrame = useCallback(
     () =>
@@ -77,7 +80,11 @@ export default function VerifyEmailClient() {
     };
 
     if (testMode) {
-      const verified = testEmailVerified ?? false;
+      const verified =
+        testEmailVerified ??
+        (typeof window !== "undefined"
+          ? window.localStorage.getItem("admin-test-email-verified") === "true"
+          : false);
       if (verified) {
         setStatus({
           tone: "success",
@@ -136,6 +143,16 @@ export default function VerifyEmailClient() {
     testMode,
     testEmailVerified,
   ]);
+
+  useEffect(() => {
+    if (!testMode || typeof window === "undefined") {
+      return;
+    }
+
+    if (window.localStorage.getItem("admin-test-email-verified") === null) {
+      window.localStorage.setItem("admin-test-email-verified", "false");
+    }
+  }, [testMode]);
 
   useEffect(() => {
     refreshUser();
@@ -198,6 +215,9 @@ export default function VerifyEmailClient() {
       setLoading(true);
       void Promise.resolve().then(() => {
         setTestEmailVerified(true);
+        if (typeof window !== "undefined") {
+          window.localStorage.setItem("admin-test-email-verified", "true");
+        }
       });
       setStatus({
         tone: "success",

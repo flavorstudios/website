@@ -125,25 +125,26 @@ export function AdminSidebar({
   return (
     <aside
         ref={sidebarRef}
-        id={id}
-        data-testid={id}
-        role="complementary"
-        aria-hidden={isHidden}
-        tabIndex={isHidden ? -1 : undefined}
-        className={`
-          h-full md:h-screen overflow-y-auto bg-background border-r
-          ${isMobile
-            ? `fixed left-0 top-0 transition-transform duration-300 ease-in-out ${sidebarOpen ? "z-[90]" : "z-30"}`
-            : "sticky top-0 z-[90]"}
-          ${sidebarOpen
-            ? "translate-x-0 pointer-events-auto"
-            : "-translate-x-full md:translate-x-0 pointer-events-none md:pointer-events-auto"}
-          w-64 ${sidebarOpen ? "md:w-64" : "md:w-20"}
-          max-w-[16rem]
-          flex flex-col md:relative
-        `}
-        aria-label="Admin navigation"
-      >
+      id={id}
+      data-testid={id}
+      role="complementary"
+      data-state={sidebarOpen ? "open" : "closed"}
+      aria-hidden={isHidden}
+      tabIndex={isHidden ? -1 : undefined}
+      className={`
+        h-full md:h-screen overflow-y-auto bg-background border-r
+        ${isMobile
+          ? "fixed inset-y-0 left-0 transition-transform duration-300 ease-in-out"
+          : "sticky top-0"}
+        ${sidebarOpen
+          ? "translate-x-0 pointer-events-auto z-[999]"
+          : "-translate-x-full md:translate-x-0 pointer-events-none md:pointer-events-auto z-30"}
+        w-64 ${sidebarOpen ? "md:w-64" : "md:w-20"}
+        max-w-[16rem]
+        flex flex-col md:relative
+      `}
+      aria-label="Admin navigation"
+    >
         {/* Sidebar Header: match main nav height, remove extra vertical padding */}
         <div className={`${sidebarOpen ? "px-4" : "px-2"} border-b border-border ${ADMIN_HEADER_HEIGHT} flex items-center`}>
           <div className="flex items-center justify-between w-full">
@@ -202,8 +203,8 @@ export function AdminSidebar({
 
               return (
                 <Button
-                    key={item.id}
-                  asChild={!!item.href}
+                  key={item.id}
+                  asChild={Boolean(item.href)}
                   variant={active ? "default" : "ghost"}
                   className={`w-full ${
                     sidebarOpen ? "justify-start px-3" : "justify-center px-0"
@@ -212,7 +213,6 @@ export function AdminSidebar({
                       ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
                       : "text-muted-foreground hover:bg-muted"
                   } focus:outline-none focus:ring`}
-                  // Only handle clicks here for non-href items
                   onClick={
                     item.href
                       ? undefined
@@ -221,7 +221,6 @@ export function AdminSidebar({
                           if (isMobile) setSidebarOpen(false)
                         }
                   }
-                  // Avoid passing type to <a> when asChild is true
                   type={item.href ? undefined : "button"}
                 >
                   {item.href ? (
@@ -232,7 +231,6 @@ export function AdminSidebar({
                       aria-current={active ? "page" : undefined}
                       title={!sidebarOpen ? item.label : undefined}
                       onClick={() => {
-                        // Immediate state update so highlight reflects the click even before route change
                         setActiveSection(item.id)
                         if (isMobile) setSidebarOpen(false)
                       }}
@@ -243,7 +241,7 @@ export function AdminSidebar({
                           <span className="flex-1 text-left text-sm truncate">{item.label}</span>
                           {item.count && (
                             <Badge
-                                variant="secondary"
+                              variant="secondary"
                               className={`ml-2 text-xs ${
                                 active ? "bg-white/20 text-white" : "bg-muted text-foreground"
                               }`}
@@ -262,7 +260,7 @@ export function AdminSidebar({
                           <span className="flex-1 text-left text-sm truncate">{item.label}</span>
                           {item.count && (
                             <Badge
-                                variant="secondary"
+                              variant="secondary"
                               className="ml-2 text-xs bg-muted text-foreground"
                             >
                               {item.count}

@@ -442,7 +442,12 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {error && (
-        <Alert variant="destructive" className="mb-4">
+        <Alert
+          variant="destructive"
+          className="mb-4"
+          role="status"
+          aria-live="polite"
+        >
           <AlertDescription className="text-red-700 text-sm">
             {error}
           </AlertDescription>

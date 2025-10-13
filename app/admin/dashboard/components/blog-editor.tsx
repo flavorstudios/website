@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback, useId } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -100,9 +100,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const router = useRouter();
   // Using a fixed user ID since NextAuth is not in use
   const userId = "anon";
-  const contentHeadingId = useId();
-  const contentLabelId = useId();
-  const contentEditorId = useId();
+  const contentEditorId = "blog-post-content-editor";
+  const contentLabelId = `${contentEditorId}-label`;
+  const contentHeadingId = `${contentEditorId}-heading`;
 
   const initialScheduledDate = (() => {
     if (!initialPost?.scheduledFor) return undefined;

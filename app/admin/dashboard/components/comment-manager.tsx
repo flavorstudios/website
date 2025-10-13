@@ -659,7 +659,7 @@ export default function CommentManager() {
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
         {/* Responsive search input */}
         <div className="relative w-full sm:w-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 h-4 w-4" />
           <Input
             placeholder="Search comments..."
             value={searchTerm}
@@ -676,7 +676,7 @@ export default function CommentManager() {
             <SheetTrigger asChild>
               <Button
                 size="sm"
-                className="bg-orange-600 hover:bg-orange-700 text-white"
+                className="bg-orange-700 hover:bg-orange-800 text-white"
               >
                 Filters
               </Button>
@@ -710,13 +710,13 @@ export default function CommentManager() {
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-yellow-600">{statusCounts.pending}</div>
+            <div className="text-2xl font-bold text-yellow-700">{statusCounts.pending}</div>
             <div className="text-sm text-gray-600">Pending</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{statusCounts.approved}</div>
+            <div className="text-2xl font-bold text-green-700">{statusCounts.approved}</div>
             <div className="text-sm text-gray-600">Approved</div>
           </CardContent>
         </Card>
@@ -762,7 +762,7 @@ export default function CommentManager() {
         <TabsContent value={activeTab} className="space-y-4 mt-6">
           {activeTab === "pending" && statusCounts.pending > 0 && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
+              <AlertTriangle className="h-5 w-5 text-yellow-700" />
               <div>
                 <h4 className="font-medium text-yellow-800">Comments Awaiting Review</h4>
                 <p className="text-sm text-yellow-700">
@@ -817,7 +817,7 @@ export default function CommentManager() {
                     size="sm"
                     disabled={page === 1}
                     onClick={() => setPage(page - 1)}
-                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                    className="bg-orange-700 hover:bg-orange-800 text-white"
                   >
                     Previous
                   </Button>
@@ -828,7 +828,7 @@ export default function CommentManager() {
                     size="sm"
                     disabled={page === totalPages}
                     onClick={() => setPage(page + 1)}
-                    className="bg-orange-600 hover:bg-orange-700 text-white"
+                    className="bg-orange-700 hover:bg-orange-800 text-white"
                   >
                     Next
                   </Button>
@@ -889,7 +889,7 @@ export default function CommentManager() {
               <Button
                 onClick={() => setReplyTarget(null)}
                 disabled={replyLoading}
-                className="bg-orange-600 hover:bg-orange-700 text-white"
+                className="bg-orange-700 hover:bg-orange-800 text-white"
               >
                 Cancel
               </Button>
@@ -1023,7 +1023,7 @@ function CommentCard({
                       </table>
                     </TooltipContent>
                   </Tooltip>
-                  <span className="ml-2 text-xs text-gray-400">(Moderation scores)</span>
+                  <span className="ml-2 text-xs text-gray-600">(Moderation scores)</span>
                 </span>
               )}
             </div>
@@ -1057,7 +1057,7 @@ function CommentCard({
                         size="sm"
                         onClick={() => onUpdateStatus(comment.id, comment.postId, "approved")}
                         aria-label="Approve comment"
-                        className="bg-orange-600 hover:bg-orange-700 text-white"
+                        className="bg-orange-700 hover:bg-orange-800 text-white"
                       >
                         <Check className="h-4 w-4 mr-1" />
                         Approve
@@ -1073,7 +1073,7 @@ function CommentCard({
                         size="sm"
                         onClick={() => onUpdateStatus(comment.id, comment.postId, "spam")}
                         aria-label="Mark as spam"
-                        className="bg-orange-600 hover:bg-orange-700 text-white"
+                        className="bg-orange-700 hover:bg-orange-800 text-white"
                       >
                         <X className="h-4 w-4 mr-1" />
                         Spam
@@ -1089,7 +1089,7 @@ function CommentCard({
                         size="sm"
                         onClick={onToggleFlag}
                         aria-label={comment.flagged ? "Unflag comment" : "Flag comment"}
-                        className="bg-orange-600 hover:bg-orange-700 text-white"
+                        className="bg-orange-700 hover:bg-orange-800 text-white"
                       >
                         <Flag className="h-4 w-4" />
                       </Button>
@@ -1105,7 +1105,7 @@ function CommentCard({
                       size="sm"
                       onClick={onDelete}
                       aria-label="Delete comment"
-                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                      className="bg-orange-700 hover:bg-orange-800 text-white"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -1146,7 +1146,7 @@ function EmptyState({ activeTab }: { activeTab: string }) {
     <Card>
       <CardContent className="text-center py-12">
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Icon className="w-8 h-8 text-gray-400" />
+          <Icon className="w-8 h-8 text-gray-600" />
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No comments found</h3>
         <p className="text-gray-600">{messages[activeTab as keyof typeof messages]}</p>

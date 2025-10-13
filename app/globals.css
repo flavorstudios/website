@@ -84,7 +84,7 @@ body {
 }
 
 #app-sidebar {
-  z-index: 70;
+  z-index: 80;
 }
 
 @media (min-width: 768px) {
@@ -102,8 +102,8 @@ body {
 
 #overlay {
   position: fixed;
-  z-index: 50;
-  left: var(--sidebar-w);
+  z-index: 40;
+  left: var(--sidebar-w, 16rem);
   right: 0;
   top: 0;
   bottom: 0;

@@ -43,7 +43,7 @@ export default function SignupForm() {
   const { setTestEmailVerified } = useAdminAuth();
   const testMode = clientEnv.TEST_MODE === "true";
   const requiresVerification =
-    !process.env.E2E && clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
+    clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
 
   const handleChange = <K extends keyof SignupFormInput>(
     key: K,

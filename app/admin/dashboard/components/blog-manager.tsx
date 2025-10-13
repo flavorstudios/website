@@ -598,7 +598,7 @@ export default function BlogManager() {
             onClick={handleRevalidateBlog}
             disabled={isRevalidating}
             size="sm"
-            className="rounded-xl px-4 flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white"
+            className="rounded-xl px-4 flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white"
             aria-label="Refresh blog posts"
             title="Refresh blog posts"
           >

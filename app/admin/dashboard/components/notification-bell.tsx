@@ -335,7 +335,7 @@ export function NotificationBell() {
       case "comment":
         return "bg-blue-100 text-blue-600";
       case "contact":
-        return "bg-green-100 text-green-600";
+        return "bg-green-100 text-green-800";
       case "flagged":
         return "bg-red-100 text-red-600";
       default:
@@ -757,7 +757,7 @@ export function NotificationBell() {
                                           {notification.message}
                                         </span>
                                         <time
-                                          className="mt-1 block text-xs text-gray-400"
+                                          className="mt-1 block text-xs text-gray-600"
                                           dateTime={toISO(notification.timestamp)}
                                         >
                                           {formatTime(notification.timestamp)}

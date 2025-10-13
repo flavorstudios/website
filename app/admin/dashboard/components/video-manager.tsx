@@ -355,7 +355,7 @@ function VideoCard({
           <div className="text-xs text-gray-500">{catObj?.name || video.category}</div>
           <div className="mt-1 flex items-center gap-2">
             <VideoStatusBadge status={video.status} />
-            <span className="text-xs text-gray-400">{formatDate(video.publishedAt)}</span>
+            <span className="text-xs text-gray-600">{formatDate(video.publishedAt)}</span>
           </div>
           <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
             <span>{(video.views ?? 0).toLocaleString()} views</span>
@@ -1172,7 +1172,7 @@ export default function VideoManager() {
           </Button>
         </div>
       ) : paginatedVideos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+        <div className="flex flex-col items-center justify-center py-16 text-gray-600">
           <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-2" aria-hidden>
             <rect width="56" height="56" rx="12" fill="#F3F4F6" />
             <path d="M19 29V35C19 35.5523 19.4477 36 20 36H36C36.5523 36 37 35.5523 37 35V29" stroke="#A1A1AA" strokeWidth="2" strokeLinecap="round" />

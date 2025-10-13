@@ -100,7 +100,7 @@ export function CacheCleaner() {
       <CardContent className="space-y-4">
         {lastCleared && (
           <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <CheckCircle className="h-4 w-4 text-green-700" />
             <span className="text-sm text-green-700">Last cleared: {lastCleared}</span>
           </div>
         )}
@@ -109,7 +109,7 @@ export function CacheCleaner() {
           <Button
             onClick={clearFrontendCache}
             disabled={loading}
-            className="flex flex-col items-center gap-2 h-auto p-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+            className="flex flex-col items-center gap-2 h-auto p-4 rounded-xl bg-orange-700 hover:bg-orange-800 text-white"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             <div className="text-center">
@@ -121,7 +121,7 @@ export function CacheCleaner() {
           <Button
             onClick={clearBackendCache}
             disabled={loading}
-            className="flex flex-col items-center gap-2 h-auto p-4 rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+            className="flex flex-col items-center gap-2 h-auto p-4 rounded-xl bg-orange-700 hover:bg-orange-800 text-white"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
             <div className="text-center">

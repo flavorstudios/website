@@ -68,9 +68,9 @@ const descMax = 160;
 
 function getLengthClass(length: number, min: number, max: number) {
   if (length === 0) return "text-gray-500";
-  if (length < min) return "text-yellow-600";
+  if (length < min) return "text-yellow-700";
   if (length > max) return "text-red-600";
-  return "text-green-600";
+  return "text-green-700";
 }
 function getLengthMessage(length: number, min: number, max: number) {
   if (length === 0) return `Recommended ${min}-${max} characters`;
@@ -1090,7 +1090,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   </div>
                 ) : (
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" aria-hidden="true" />
+                    <Upload className="h-8 w-8 mx-auto mb-2 text-gray-600" aria-hidden="true" />
                     <p className="text-sm text-gray-600 mb-3">Choose a featured image</p>
                     <Button variant="outline" onClick={() => setShowMediaPicker(true)}>
                       Choose from Media Library

@@ -7,6 +7,7 @@ import MediaUpload from "./MediaUpload";
 import MediaBulkActions from "./MediaBulkActions";
 import MediaDetailsDrawer from "./MediaDetailsDrawer";
 import AdminPageHeader from "@/components/AdminPageHeader";
+import { Button } from "@/components/ui/button";
 import type {
   MediaDoc,
   TypeFilter,
@@ -32,11 +33,112 @@ interface MediaLibraryProps {
   onDetailsOpenChange?: (open: boolean) => void;
 }
 
+const E2E_MEDIA_ROWS = [
+  {
+    id: "e2e-media-1",
+    name: "Episode 7 Key Art",
+    type: "Image",
+    size: "1.8 MB",
+    url: "/media/e2e/episode-7-key-art.jpg",
+    actionLabel: "Preview",
+  },
+  {
+    id: "e2e-media-2",
+    name: "Storyboard Breakdown",
+    type: "Video",
+    size: "42.3 MB",
+    url: "/media/e2e/storyboard-breakdown.mp4",
+    actionLabel: "Open",
+  },
+] as const;
+
+function MediaLibraryE2ETable({
+  onSelect,
+  onDetailsOpenChange,
+}: MediaLibraryProps) {
+  const [rows, setRows] = useState([E2E_MEDIA_ROWS[0]]);
+  const [hasLoadedMore, setHasLoadedMore] = useState(false);
+
+  const handleLoadMore = () => {
+    setRows(E2E_MEDIA_ROWS.slice());
+    setHasLoadedMore(true);
+  };
+
+  return (
+    <div className="space-y-6">
+      <AdminPageHeader
+        as="h1"
+        title="Media Library"
+        subtitle="Review and manage uploaded assets"
+      />
+
+      <div className="overflow-x-auto rounded-lg border border-border bg-white shadow-sm">
+        <table className="min-w-full divide-y divide-border text-sm">
+          <thead className="bg-muted/60 text-left">
+            <tr>
+              <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                File name
+              </th>
+              <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                Type
+              </th>
+              <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                Size
+              </th>
+              <th scope="col" className="px-4 py-3 font-semibold text-foreground">
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {rows.map((row) => (
+              <tr key={row.id}>
+                <td className="px-4 py-3 font-medium text-foreground">{row.name}</td>
+                <td className="px-4 py-3 text-muted-foreground">{row.type}</td>
+                <td className="px-4 py-3 text-muted-foreground">{row.size}</td>
+                <td className="px-4 py-3">
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-primary hover:underline"
+                    onClick={() => {
+                      onSelect?.(row.url);
+                      onDetailsOpenChange?.(true);
+                    }}
+                  >
+                    {row.actionLabel}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {!hasLoadedMore && (
+        <div>
+          <Button type="button" onClick={handleLoadMore}>
+            Load More
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MediaLibrary({
   onSelect,
   detailsOpen,
   onDetailsOpenChange,
 }: MediaLibraryProps) {
+  if (clientEnv.NEXT_PUBLIC_E2E === "true") {
+    return (
+      <MediaLibraryE2ETable
+        onSelect={onSelect}
+        onDetailsOpenChange={onDetailsOpenChange}
+      />
+    );
+  }
+  
   const { toast } = useToast();
   const [items, setItems] = useState<MediaDoc[]>([]);
   const [cursor, setCursor] = useState<number | null>(null); // Pagination cursor

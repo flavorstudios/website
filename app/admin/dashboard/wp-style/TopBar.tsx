@@ -25,7 +25,7 @@ export default function TopBar({ onQuickAction }: TopBarProps) {
   return (
     <div className="flex items-center justify-between gap-3 p-3 border-b bg-white">
       <form onSubmit={submitSearch} className="relative w-full sm:w-64">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
         <Input
           placeholder="Search..."
           className="pl-8 w-full"

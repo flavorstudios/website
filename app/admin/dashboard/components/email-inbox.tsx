@@ -727,7 +727,7 @@ export default function EmailInbox() {
                   aria-label="Select all messages"
                 />
                 <div className="relative flex-1 min-w-[120px]">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 h-4 w-4" />
                   <Input
                     placeholder="Search messages..."
                     value={searchTerm}
@@ -898,9 +898,9 @@ export default function EmailInbox() {
             <CardContent className="p-0">
               <div className="max-h-96 overflow-y-auto">
                 {loadingState ? (
-                  <div className="flex justify-center items-center py-10 text-gray-400">Loading messages...</div>
+                  <div className="flex justify-center items-center py-10 text-gray-600">Loading messages...</div>
                 ) : filteredMessages.length === 0 ? (
-                  <div className="flex justify-center items-center py-10 text-gray-400">No messages found.</div>
+                  <div className="flex justify-center items-center py-10 text-gray-600">Loading messages...</div>
                 ) : (
                   filteredMessages.map((message) => (
                     <motion.div
@@ -945,7 +945,7 @@ export default function EmailInbox() {
                                   toggleFlag(message.id, !message.flagged)
                                 }}
                                 aria-label={message.flagged ? "Unflag message" : "Flag message"}
-                                className="text-gray-400 hover:text-red-500"
+                                className="text-gray-600 hover:text-red-500"
                               >
                                 <Flag
                                   className={`h-4 w-4 ${
@@ -959,7 +959,7 @@ export default function EmailInbox() {
                                   toggleStar(message.id, !message.starred)
                                 }}
                                 aria-label={message.starred ? "Unstar message" : "Star message"}
-                                className="text-gray-400 hover:text-yellow-500"
+                                className="text-gray-600 hover:text-yellow-500"
                               >
                                 <Star
                                   className={`h-4 w-4 ${
@@ -992,7 +992,7 @@ export default function EmailInbox() {
                                 </Badge>
                               ))}
                             </div>
-                            <p className="text-xs text-gray-400">{formatDate(message.createdAt)}</p>
+                            <p className="text-xs text-gray-600">{formatDate(message.createdAt)}</p>
                           </div>
                         </div>
                       </div>
@@ -1029,7 +1029,7 @@ export default function EmailInbox() {
                       <p className="text-sm text-gray-600 mt-1">
                         From: {selectedMessage.firstName} {selectedMessage.lastName} &lt;{selectedMessage.email}&gt;
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">{formatDate(selectedMessage.createdAt, true)}</p>
+                      <p className="text-xs text-gray-600 mt-1">{formatDate(selectedMessage.createdAt, true)}</p>
                       {selectedMessage.scores && (
                         <div className="mt-2 text-xs text-gray-600">
                           <p className="font-semibold mb-1">Moderation scores:</p>

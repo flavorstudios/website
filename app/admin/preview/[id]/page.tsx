@@ -30,6 +30,32 @@ async function getPost(id: string): Promise<BlogPost | null> {
   return blogStore.getById(id);
 }
 
+async function validateSessionViaApi(reqHeaders: Headers) {
+  const forwardedHost = reqHeaders.get("x-forwarded-host") ?? undefined;
+  const host = reqHeaders.get("host") ?? forwardedHost;
+  const prefersHttp = host?.startsWith("localhost") || host?.startsWith("127.0.0.1");
+  const proto = reqHeaders.get("x-forwarded-proto") ?? (prefersHttp ? "http" : "https");
+
+  const fallbackOrigin =
+    process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL ?? "http://127.0.0.1:3000";
+  const origin = host ? `${proto}://${host}` : fallbackOrigin;
+
+  try {
+    const cookieStore = await cookies();
+    const serializedCookies = cookieStore
+      .getAll()
+      .map((cookie) => `${cookie.name}=${cookie.value}`)
+      .join("; ");
+
+    await fetch(new URL("/api/admin/validate-session", origin).toString(), {
+      headers: serializedCookies ? { cookie: serializedCookies } : undefined,
+      cache: "no-store",
+    });
+  } catch {
+    // Ignore network issues; preview should still render
+  }
+}
+
 interface PreviewPageProps {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ token?: string }>;
@@ -93,6 +119,8 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   const requestId = reqHeaders.get("x-request-id") || crypto.randomUUID();
   const isE2E =
     process.env.E2E === "true" || process.env.NEXT_PUBLIC_E2E === "true";
+
+    await validateSessionViaApi(reqHeaders);
 
   function renderGuardedMessage(message: ReactNode) {
     return (

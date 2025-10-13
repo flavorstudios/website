@@ -6,9 +6,10 @@ import { clientEnv } from '@/env.client';
 export default function PwaServiceWorker() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const isTestMode = clientEnv.TEST_MODE === 'true';
+  const isE2E = clientEnv.NEXT_PUBLIC_E2E === 'true';
 
   useEffect(() => {
-    if (isTestMode) {
+    if (isTestMode || isE2E) {
       return;
     }
 

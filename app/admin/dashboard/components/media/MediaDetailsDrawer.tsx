@@ -241,11 +241,11 @@ export default function MediaDetailsDrawer({
         <div>
           <p className="font-semibold break-all">{media.filename || media.name}</p>
           <p className="text-sm text-gray-500">{mime || "Unknown type"}</p>
-          <p className="text-xs text-gray-400">Size: {formatBytes(media.size)}</p>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-600">Size: {formatBytes(media.size)}</p>
+          <p className="text-xs text-gray-600">
             Dimensions: {media.width ?? "?"} × {media.height ?? "?"}
           </p>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-600">
             Uploaded: {createdAtMs ? new Date(createdAtMs).toLocaleString() : "—"}
           </p>
           <div className="flex gap-2 mt-2">

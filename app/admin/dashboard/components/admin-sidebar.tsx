@@ -81,7 +81,14 @@ export function AdminSidebar({
     { id: "categories", label: "Categories", icon: Edit, count: null, href: "/admin/dashboard/categories" },
     { id: "comments", label: "Comments", icon: MessageSquare, count: null, href: "/admin/dashboard/comments" },
     { id: "applications", label: "Applications", icon: ClipboardList, count: null, href: "/admin/dashboard/applications" },
-    { id: "inbox", label: "Email Inbox", icon: Mail, count: null, href: "/admin/dashboard/inbox" },
+    {
+      id: "inbox",
+      label: "Email Inbox",
+      ariaLabel: "Admin Inbox",
+      icon: Mail,
+      count: null,
+      href: "/admin/dashboard/inbox",
+    },
     {
       id: "users",
       label: "Users",
@@ -127,8 +134,8 @@ export function AdminSidebar({
         className={`
           h-full md:h-screen overflow-y-auto bg-background border-r
           ${isMobile
-            ? `fixed left-0 top-0 transition-transform duration-300 ease-in-out ${sidebarOpen ? "z-[70]" : "z-40"}`
-            : "sticky top-0 z-[70]"}
+            ? `fixed left-0 top-0 transition-transform duration-300 ease-in-out ${sidebarOpen ? "z-[80]" : "z-30"}`
+            : "sticky top-0 z-[80]"}
           ${sidebarOpen
             ? "translate-x-0 pointer-events-auto"
             : "-translate-x-full md:translate-x-0 pointer-events-none md:pointer-events-auto"}

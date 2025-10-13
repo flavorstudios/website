@@ -172,7 +172,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       TEST_EMAIL_VERIFIED_STORAGE_KEY
     )
     if (stored === null) {
-      persistTestEmailVerified(true)
+      persistTestEmailVerified(false)
     }
   }, [persistTestEmailVerified, shouldUseTestVerification])
 

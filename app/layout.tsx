@@ -6,7 +6,6 @@ export const viewport = {
 
 import type { ReactNode } from "react";
 import "./globals.css";
-import "./fonts/poppins.css";
 import { Poppins, Inter, Lora, JetBrains_Mono } from "next/font/google";
 
 import Toaster from "@/components/ui/toaster";

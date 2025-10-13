@@ -128,6 +128,7 @@ export default function DashboardOverview() {
   // Live toggle controls polling interval
   const [live, setLive] = useState(false);
   const [showInitialSpinner, setShowInitialSpinner] = useState(true);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<number | null>(null);
   const initialSpinnerStartedAtRef = useRef<number>(Date.now());
   const MIN_INITIAL_SPINNER_MS = 450;
 
@@ -136,7 +137,8 @@ export default function DashboardOverview() {
   const stats = statsQuery.data as DashboardStats | undefined;
   const statsError = statsQuery.error as unknown;
   const statsLoading = statsQuery.isLoading;
-  const lastUpdatedLabel = useMemo(() => {
+  const target = lastRefreshedAt ?? statsQuery.dataUpdatedAt;
+    if (!target) return "N/A";
     if (!statsQuery.dataUpdatedAt) return "N/A";
 
     try {
@@ -145,11 +147,11 @@ export default function DashboardOverview() {
         minute: "numeric",
         second: "numeric",
         fractionalSecondDigits: 3,
-      }).format(new Date(statsQuery.dataUpdatedAt));
+      }).format(new Date(target));
     } catch {
-      return new Date(statsQuery.dataUpdatedAt).toLocaleTimeString();
+      return new Date(target).toLocaleTimeString();
     }
-  }, [statsQuery.dataUpdatedAt]);
+  }, [lastRefreshedAt, statsQuery.dataUpdatedAt]);
 
   useEffect(() => {
     if (!showInitialSpinner) return;
@@ -212,6 +214,7 @@ export default function DashboardOverview() {
   }, [firstError]);
 
   const refresh = () => {
+    setLastRefreshedAt(Date.now());
     statsQuery.refetch();
     mutateActivity?.();
   };
@@ -355,10 +358,10 @@ export default function DashboardOverview() {
   const sign = stats.monthlyGrowth > 0 ? "+" : stats.monthlyGrowth < 0 ? "-" : "";
   const growthColor =
     stats.monthlyGrowth > 0
-      ? "text-green-600"
+      ? "text-green-700"
       : stats.monthlyGrowth < 0
-        ? "text-red-600"
-        : "text-gray-600";
+        ? "text-red-700"
+        : "text-gray-700";
 
   return (
     <div className="space-y-6">
@@ -373,7 +376,7 @@ export default function DashboardOverview() {
           onClick={refresh}
           disabled={statsQuery.isFetching}
           size="sm"
-          className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+          className="rounded-xl bg-orange-700 hover:bg-orange-800 text-white"
         >
           Refresh
         </Button>
@@ -493,13 +496,13 @@ export default function DashboardOverview() {
                   {stats.totalComments}
                 </p>
                 {stats.pendingComments > 0 ? (
-                  <p className="text-sm text-yellow-600 mt-1">{stats.pendingComments} pending review</p>
+                  <p className="text-sm text-yellow-700 mt-1">{stats.pendingComments} pending review</p>
                 ) : (
                   <p className="text-sm text-gray-500 mt-1">All up to date</p>
                 )}
               </div>
-              <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <MessageSquare className="w-6 h-6 text-green-700" />
               </div>
             </div>
           </CardContent>
@@ -590,7 +593,7 @@ export default function DashboardOverview() {
             <div className="space-y-4">
               {recentActivity.length === 0 ? (
                 <div className="text-center py-8">
-                  <Activity className="h-8 w-8 mx-auto mb-2 opacity-50 text-gray-400" />
+                  <Activity className="h-8 w-8 mx-auto mb-2 opacity-60 text-gray-600" />
                   <p className="text-gray-500">No recent activity</p>
                   <p className="text-xs text-gray-600 mt-1">Activity will appear here as you use the dashboard</p>
                 </div>
@@ -607,7 +610,7 @@ export default function DashboardOverview() {
                       }`}
                     ></div>
                     <div className="flex-1">
-                      <p className="text-xs uppercase text-gray-400">{activity.type}</p>
+                      <p className="text-xs uppercase text-gray-600">{activity.type}</p>
                       <p className="text-sm font-medium text-gray-900">{activity.title}</p>
                       <p className="text-sm text-gray-600">{activity.description}</p>
                       <p className="text-xs text-gray-500 mt-1">{activity.timestamp}</p>

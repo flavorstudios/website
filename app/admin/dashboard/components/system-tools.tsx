@@ -39,7 +39,7 @@ export default function SystemTools() {
           <Button
             onClick={handleRevalidateWebsite}
             disabled={isRevalidatingWebsite}
-            className="w-full sm:w-auto rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+            className="w-full sm:w-auto rounded-xl bg-orange-700 hover:bg-orange-800 text-white"
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${isRevalidatingWebsite ? "animate-spin" : ""}`} />
             {isRevalidatingWebsite ? "Revalidating Website..." : "Revalidate Entire Website"}

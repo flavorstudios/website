@@ -122,11 +122,11 @@ export default function MediaList({
                 <p className="font-medium truncate text-sm">{getPrimaryLabel(m)}</p>
                 <p className="text-xs text-gray-500">{formatDate(m.createdAt)}</p>
                 {m.tags?.length ? (
-                  <p className="text-xs text-gray-400 truncate">
+                  <p className="text-xs text-gray-600 truncate">
                     {m.tags.join(", ")}
                   </p>
                 ) : null}
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-600">
                   Used in {m.attachedTo?.length ?? 0} item(s)
                 </p>
               </button>

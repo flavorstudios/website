@@ -369,7 +369,7 @@ export default function UserList() {
                     <td className="p-2">{u.disabled ? "Disabled" : "Active"}</td>
                     <td className="p-2">
                       {u.emailVerified ? (
-                        <CheckCircle className="h-4 w-4 text-green-600" aria-label="Email verified" />
+                        <CheckCircle className="h-4 w-4 text-green-700" aria-label="Email verified" />
                       ) : (
                         <XCircle className="h-4 w-4 text-red-600" aria-label="Email not verified" />
                       )}
@@ -414,7 +414,7 @@ export default function UserList() {
                   <span>{u.disabled ? "Disabled" : "Active"}</span>
                   <span>
                     {u.emailVerified ? (
-                      <CheckCircle className="inline h-3 w-3 text-green-600" aria-label="Email verified" />
+                      <CheckCircle className="inline h-3 w-3 text-green-700" aria-label="Email verified" />
                     ) : (
                       <XCircle className="inline h-3 w-3 text-red-600" aria-label="Email not verified" />
                     )}

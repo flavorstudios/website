@@ -482,7 +482,8 @@ export default function AdminDashboardPageClient({
                 data-testid="admin-sidebar-overlay"
                 aria-label="Close sidebar"
                 onClick={() => setSidebarOpen(false)}
-                className="lg:hidden bg-black/50 backdrop-blur-sm"
+                className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+                style={{ left: "var(--sidebar-w,16rem)" }}
               />
             )}
 

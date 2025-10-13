@@ -123,7 +123,7 @@ export function SystemSettings() {
             onClick={handleSave}
             disabled={saving || loading}
             aria-label="Save settings"
-            className="rounded-xl bg-orange-600 hover:bg-orange-700 text-white"
+            className="rounded-xl bg-orange-700 hover:bg-orange-800 text-white"
           >
             <Save className="h-4 w-4 mr-2" aria-hidden="true" />
             {saving ? "Saving..." : "Save"}

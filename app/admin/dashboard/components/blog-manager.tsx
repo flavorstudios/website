@@ -496,16 +496,11 @@ export default function BlogManager() {
   if (loading) {
     return (
       <div>
-        <div className="space-y-1">
-          <h2 className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
-            Blog Management
-          </h2>
-          <AdminPageHeader
-            as="h1"
-            title="Blog Manager"
-            subtitle="Manage your blog posts, drafts, and editorial calendar"
-          />
-        </div>
+        <AdminPageHeader
+          as="h2"
+          title="Blog Manager"
+          subtitle="Manage your blog posts, drafts, and editorial calendar"
+        />
         <div className="mt-4 space-y-4">
           <div className="sm:hidden space-y-3" data-testid="blog-card-list">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -583,16 +578,11 @@ export default function BlogManager() {
     <div>
       {/* Header with right-aligned action buttons */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h2 className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
-            Blog Management
-          </h2>
-          <AdminPageHeader
-            as="h1"
-            title="Blog Manager"
-            subtitle="Manage your blog posts, drafts, and editorial calendar"
-          />
-        </div>
+        <AdminPageHeader
+          as="h2"
+          title="Blog Manager"
+          subtitle="Manage your blog posts, drafts, and editorial calendar"
+        />
         <div className="flex gap-2">
           <Button
             onClick={handleRevalidateBlog}

@@ -68,16 +68,11 @@ function MediaLibraryE2ETable({
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        <h2 className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
-          Media Management
-        </h2>
-        <AdminPageHeader
-          as="h1"
-          title="Media Manager"
-          subtitle="Manage and organize your uploaded media files"
-        />
-      </div>
+      <AdminPageHeader
+        as="h2"
+        title="Media Manager"
+        subtitle="Manage and organize your uploaded media files"
+      />
 
       <div className="overflow-x-auto rounded-lg border border-border bg-white shadow-sm">
         <table className="min-w-full divide-y divide-border text-sm">
@@ -643,16 +638,11 @@ export default function MediaLibrary({
   return (
     <div className="space-y-6" aria-busy={loading}>
       <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h2 className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-700">
-            Media Management
-          </h2>
-          <AdminPageHeader
-            as="h1"
-            title="Media Manager"
-            subtitle="Manage and organize your uploaded media files"
-          />
-        </div>
+        <AdminPageHeader
+          as="h2"
+          title="Media Manager"
+          subtitle="Manage and organize your uploaded media files"
+        />
       </div>
       
       <MediaToolbar

@@ -37,6 +37,7 @@ interface Notification {
 export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const [overlayTop, setOverlayTop] = useState(0);
 
   // Selection and filters
   const [selectionMode, setSelectionMode] = useState(false);
@@ -369,6 +370,20 @@ export function NotificationBell() {
       dialogRef.current?.focus();
     }, 0);
 
+    const updateOverlayTop = () => {
+      const header = document.querySelector<HTMLElement>('[data-admin-header]');
+      if (header) {
+        const rect = header.getBoundingClientRect();
+        setOverlayTop(rect.bottom);
+      } else {
+        setOverlayTop(0);
+      }
+    };
+
+    updateOverlayTop();
+    window.addEventListener("resize", updateOverlayTop);
+    window.addEventListener("scroll", updateOverlayTop, true);
+
     // Close on Escape + selection shortcuts (kept)
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsOpen(false);
@@ -394,9 +409,11 @@ export function NotificationBell() {
 
     return () => {
       window.clearTimeout(t);
+      window.removeEventListener("resize", updateOverlayTop);
+      window.removeEventListener("scroll", updateOverlayTop, true);
       document.removeEventListener("keydown", onKey as any);
     };
-    }, [isOpen, selected.size, bulkMarkRead, bulkMarkUnread, bulkDelete, selectAll]);
+  }, [isOpen, selected.size, bulkMarkRead, bulkMarkUnread, bulkDelete, selectAll]);
 
   // --- SSE live updates (kept) ---
   useEffect(() => {
@@ -490,7 +507,8 @@ export function NotificationBell() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/20 dark:bg-black/40"
+              className="fixed left-0 right-0 bottom-0 z-40 bg-black/20 dark:bg-black/40"
+              style={{ top: Math.max(overlayTop, 0) }}
               onClick={() => setIsOpen(false)}
               aria-hidden="true"
             />

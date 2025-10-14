@@ -266,6 +266,7 @@ export default function VerifyEmailClient() {
           variant="secondary"
           type="button"
           disabled={loading}
+          aria-label="I have verified"
         >
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
           I have verified

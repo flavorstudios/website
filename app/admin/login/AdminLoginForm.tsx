@@ -349,9 +349,9 @@ export default function AdminLoginForm() {
                 Sign up
               </Link>
             </p>
-            <div className="legal-notice-wrapper min-w-0">
+            <div className="legal-notice-wrapper min-w-0 flex-1">
               <p
-                className="legal-notice block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs text-muted-foreground"
+                className="legal-notice block w-full max-w-full whitespace-nowrap overflow-hidden text-ellipsis text-xs text-muted-foreground"
                 data-testid="admin-login-legal"
               >
                 By continuing you agree to our{' '}

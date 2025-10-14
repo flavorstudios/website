@@ -137,7 +137,7 @@ export function AdminSidebar({
           ? "fixed inset-y-0 left-0 transition-transform duration-300 ease-in-out"
           : "sticky top-0"}
         ${sidebarOpen
-          ? "translate-x-0 pointer-events-auto z-[999]"
+          ? "translate-x-0 pointer-events-auto z-50 md:z-auto"
           : "-translate-x-full md:translate-x-0 pointer-events-none md:pointer-events-auto z-30"}
         w-64 ${sidebarOpen ? "md:w-64" : "md:w-20"}
         max-w-[16rem]

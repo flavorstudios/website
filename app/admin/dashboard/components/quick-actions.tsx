@@ -13,6 +13,10 @@ import {
 export function QuickActions() {
   const router = useRouter()
 
+  const navigate = (href: string) => {
+    router.push(href)
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -28,17 +32,27 @@ export function QuickActions() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
-          onSelect={() => router.push("/admin/dashboard/blog-posts")}
+          onClick={() => navigate("/admin/dashboard/blog-posts")}
+          onSelect={() => navigate("/admin/dashboard/blog-posts")}
         >
           Create New Post
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/videos")}>
+        <DropdownMenuItem
+          onClick={() => navigate("/admin/dashboard/videos")}
+          onSelect={() => navigate("/admin/dashboard/videos")}
+        >
           Add Video
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/comments")}>
+        <DropdownMenuItem
+          onClick={() => navigate("/admin/dashboard/comments")}
+          onSelect={() => navigate("/admin/dashboard/comments")}
+        >
           Moderate Comments
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => router.push("/admin/dashboard/users")}>
+        <DropdownMenuItem
+          onClick={() => navigate("/admin/dashboard/users")}
+          onSelect={() => navigate("/admin/dashboard/users")}
+        >
           Manage Users
         </DropdownMenuItem>
       </DropdownMenuContent>

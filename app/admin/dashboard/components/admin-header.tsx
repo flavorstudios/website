@@ -95,6 +95,7 @@ export function AdminHeader({
 
   return (
     <div
+      data-admin-header
       className={cn(
         "sticky top-0 z-40",
         ADMIN_HEADER_HEIGHT,

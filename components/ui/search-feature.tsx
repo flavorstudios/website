@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, Fragment } from "react"
 import { usePathname } from "next/navigation"
 import { isAdminRoute, DEFAULT_ADMIN_ROUTE_PREFIXES } from "@/lib/cookie-consent"
 import { Search, Loader2 } from "lucide-react"
@@ -48,17 +48,23 @@ function useDebounce(value: string, delay: number) {
 }
 
 // Highlight search terms in text
-function highlightText(text: string, searchTerm: string) {
-  if (!searchTerm.trim()) return text
-  const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi")
+function highlightText(text: string, searchTerm: string): React.ReactNode {
+  const trimmed = searchTerm.trim()
+  if (!trimmed) return text
+
+  const escapedTerm = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  if (!escapedTerm) return text
+
+  const regex = new RegExp(`(${escapedTerm})`, "gi")
   const parts = text.split(regex)
+
   return parts.map((part, index) =>
-    regex.test(part) ? (
-      <mark key={index} className="bg-blue-100 text-blue-900 rounded px-1">
+    index % 2 === 1 ? (
+      <mark key={`highlight-${index}`} className="bg-blue-100 text-blue-900 rounded px-1">
         {part}
       </mark>
     ) : (
-      part
+      <Fragment key={`text-${index}`}>{part}</Fragment>
     ),
   )
 }

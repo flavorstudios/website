@@ -38,6 +38,7 @@ import type {
   BlogPost as StoreBlogPost,
   BlogRevision,
 } from "@/lib/content-store";
+import { clientEnv } from "@/env.client";
 
 export type BlogPost = Omit<
   StoreBlogPost,
@@ -103,6 +104,8 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const contentEditorId = "blog-post-content-editor";
   const contentLabelId = `${contentEditorId}-label`;
   const contentHeadingId = `${contentEditorId}-heading`;
+  const isE2E =
+    clientEnv.NEXT_PUBLIC_E2E === "1" || clientEnv.NEXT_PUBLIC_E2E === "true";
 
   const initialScheduledDate = (() => {
     if (!initialPost?.scheduledFor) return undefined;
@@ -792,15 +795,29 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <RichTextEditor
-                  id={contentEditorId}
-                  value={post.content}
-                  onChange={(content) => setPost((prev) => ({ ...prev, content }))}
-                  placeholder="Start writing your blog post..."
-                  socket={ws}
-                  ariaLabelledBy={contentLabelId}
-                  ariaLabel="Content"
-                />
+                {isE2E ? (
+                  <Textarea
+                    id={contentEditorId}
+                    value={post.content}
+                    onChange={(event) =>
+                      setPost((prev) => ({ ...prev, content: event.target.value }))
+                    }
+                    aria-label="Content"
+                    aria-labelledby={contentLabelId}
+                    placeholder="Start writing your blog post..."
+                    className="min-h-[18rem]"
+                  />
+                ) : (
+                  <RichTextEditor
+                    id={contentEditorId}
+                    value={post.content}
+                    onChange={(content) => setPost((prev) => ({ ...prev, content }))}
+                    placeholder="Start writing your blog post..."
+                    socket={ws}
+                    ariaLabelledBy={contentLabelId}
+                    ariaLabel="Content"
+                  />
+                )}
               </CardContent>
             </Card>
             {/* SEO Settings */}

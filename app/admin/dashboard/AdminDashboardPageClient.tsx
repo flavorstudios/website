@@ -24,6 +24,7 @@ import Spinner from "@/components/ui/spinner";
 import MobileNav from "./components/mobile-nav";
 import { SectionId } from "./sections";
 import { BlogManager } from "./components";
+import { AdminTabs } from "./components/admin-tabs";
 import {
   Dialog,
   DialogContent,
@@ -195,7 +196,10 @@ export default function AdminDashboardPageClient({
   );
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_E2E === "true" && typeof window !== "undefined") {
+    const e2eEnabled =
+      process.env.NEXT_PUBLIC_E2E === "true" ||
+      process.env.NEXT_PUBLIC_E2E === "1";
+    if (e2eEnabled && typeof window !== "undefined") {
       if (window.__dashboardHistoryDatasets == null) {
         window.__dashboardHistoryDatasets = E2E_DASHBOARD_HISTORY;
       }
@@ -589,6 +593,10 @@ export default function AdminDashboardPageClient({
                       {sectionDescription}
                     </p>
                   </header>
+
+                  <div className="mb-6">
+                    <AdminTabs />
+                  </div>
 
                   {/* Online/Offline indicator */}
                   {!isOnline && (

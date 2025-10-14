@@ -15,10 +15,7 @@ import { sanitizeHtmlServer } from "@/lib/sanitize/server";
 import { HttpError } from "@/lib/http";
 import { ErrorBoundary } from "@/app/admin/dashboard/components/ErrorBoundary";
 import { verifyAdminSession } from "@/lib/admin-auth";
-import {
-  validatePreviewTokenOrThrow,
-  type PreviewTokenPayload,
-} from "@/lib/preview-token";
+import { validatePreviewToken } from "@/lib/preview/validate";
 import {
   ExpiredPreviewTokenError,
   InvalidPreviewTokenError,
@@ -119,7 +116,9 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   const reqHeaders = await headers();
   const requestId = reqHeaders.get("x-request-id") || crypto.randomUUID();
   const isE2E =
-    process.env.E2E === "true" || process.env.NEXT_PUBLIC_E2E === "true";
+    process.env.E2E === "true" ||
+    process.env.NEXT_PUBLIC_E2E === "true" ||
+    process.env.NEXT_PUBLIC_E2E === "1";
 
     await validateSessionViaApi(reqHeaders);
 
@@ -152,33 +151,22 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   const invalidMessage = "Invalid token.";
   const expiredMessage = "Preview token expired.";
 
-  let payload: PreviewTokenPayload;
+  const validation = await validatePreviewToken({
+    id,
+    token,
+    isE2E,
+  });
 
-  if (isE2E && token?.startsWith("e2e-token:")) {
-    const [, state, tokenPostId, tokenUid] = token.split(":");
-    if (tokenPostId && tokenPostId !== id) {
-      logFailure(403, new InvalidPreviewTokenError(), userId);
-      return renderGuardedMessage(invalidMessage);
-    }
-    if (state === "expired") {
-      return renderGuardedMessage(expiredMessage);
-    }
-    payload = {
-      postId: tokenPostId || id,
-      uid: tokenUid || "bypass",
-      exp: Math.floor(Date.now() / 1000) + 60,
-    } satisfies PreviewTokenPayload;
-  } else {
-    try {
-      payload = validatePreviewTokenOrThrow(token ?? null, { postId: id });
-    } catch (error) {
-      const isExpired = error instanceof ExpiredPreviewTokenError;
-      const statusCode = isExpired ? 410 : 403;
-      const message = isExpired ? expiredMessage : invalidMessage;
-      logFailure(statusCode, error, userId);
-      return renderGuardedMessage(message);
-    }
+  if (!validation.ok) {
+    const isExpired = validation.reason === "expired";
+    const error = isExpired
+      ? new ExpiredPreviewTokenError()
+      : new InvalidPreviewTokenError();
+    logFailure(isExpired ? 410 : 403, error, userId);
+    return renderGuardedMessage(isExpired ? expiredMessage : invalidMessage);
   }
+
+  const payload = validation.payload;
 
   try {
     const sessionCookie = (await cookies()).get("admin-session")?.value || "";

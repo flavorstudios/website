@@ -132,7 +132,10 @@ export default function MediaLibrary({
   detailsOpen,
   onDetailsOpenChange,
 }: MediaLibraryProps) {
-  if (clientEnv.NEXT_PUBLIC_E2E === "true") {
+  if (
+    clientEnv.NEXT_PUBLIC_E2E === "true" ||
+    clientEnv.NEXT_PUBLIC_E2E === "1"
+  ) {
     return (
       <MediaLibraryE2ETable
         onSelect={onSelect}

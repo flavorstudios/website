@@ -29,7 +29,7 @@ export default defineConfig({
       PORT: '3000',
 
       NEXT_PUBLIC_BASE_URL: 'http://127.0.0.1:3000',
-      NEXT_PUBLIC_E2E: 'true',
+      NEXT_PUBLIC_E2E: '1',
       BASE_URL: 'http://127.0.0.1:3000',
       NEXTAUTH_URL: 'http://127.0.0.1:3000',
 

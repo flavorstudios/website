@@ -351,7 +351,7 @@ export default function AdminLoginForm() {
             </p>
             <div className="min-w-0 flex-1">
               <p
-                className="block max-w-full whitespace-nowrap overflow-hidden text-ellipsis text-xs text-muted-foreground"
+                className="block w-full max-w-full whitespace-nowrap overflow-hidden text-ellipsis text-xs text-muted-foreground"
                 data-testid="admin-login-legal"
               >
                 © Flavor Studios ·{' '}

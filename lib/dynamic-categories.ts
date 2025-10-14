@@ -20,13 +20,24 @@ export interface DynamicCategoriesResult {
 // --- Utility: Normalize and format category list ---
 function format(list: Record<string, unknown>[]): CategoryData[] {
   return (list || [])
-    .filter(c => (c as CategoryData).isActive)
-    .sort((a, b) => ((a as CategoryData).order ?? 0) - ((b as CategoryData).order ?? 0))
-    .map(({ title, postCount, ...rest }) => ({
-      ...(rest as Partial<CategoryData>),
-      name: typeof title === "string" ? title : "",
-      count: typeof postCount === "number" ? postCount : 0,
-    })) as CategoryData[];
+    .filter((c) => (c as CategoryData).isActive)
+    .sort(
+      (a, b) => ((a as CategoryData).order ?? 0) - ((b as CategoryData).order ?? 0),
+    )
+    .map(({ title, postCount, slug, ...rest }) => {
+      const name = typeof title === "string" ? title.trim() : "";
+      const normalizedSlug =
+        typeof slug === "string" && slug.trim().length > 0
+          ? slug.trim()
+          : createCategorySlug(name);
+
+      return {
+        ...(rest as Partial<CategoryData>),
+        slug: normalizedSlug,
+        name,
+        count: typeof postCount === "number" ? postCount : 0,
+      } as CategoryData;
+    });
 }
 
 // --- Server Helpers ---

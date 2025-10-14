@@ -2,8 +2,9 @@ jest.mock('../media', () => ({
   ensureFreshMediaUrl: jest.fn(async (url: string | null | undefined) => url ?? undefined),
 }));
 
-import { formatPublicBlogSummary, formatPublicBlogDetail } from '../formatters';
+import { formatPublicBlogSummary, formatPublicBlogDetail, formatPublicVideo } from '../formatters';
 import type { BlogPost } from '../content-store';
+import type { Video } from '../types';
 
 describe('formatPublicBlog', () => {
   const baseBlog: BlogPost = {
@@ -74,5 +75,38 @@ describe('formatPublicBlog', () => {
 
     const out = await formatPublicBlogDetail(withJsonContent);
     expect(out.content).toBe('<p>Hello world</p>');
+  });
+});
+
+describe('formatPublicVideo', () => {
+  const baseVideo: Video = {
+    id: 'v1',
+    title: 'Video',
+    slug: 'video',
+    category: 'anime',
+  };
+
+  it('uses provided categories array when present', () => {
+    const result = formatPublicVideo({
+      ...baseVideo,
+      categories: ['anime', 'behind-the-scenes'],
+    });
+
+    expect(result.categories).toEqual(['anime', 'behind-the-scenes']);
+  });
+
+  it('falls back to the single category when no categories array provided', () => {
+    const result = formatPublicVideo(baseVideo);
+
+    expect(result.categories).toEqual(['anime']);
+  });
+
+  it('normalizes missing tags to an empty array', () => {
+    const result = formatPublicVideo({
+      ...baseVideo,
+      tags: undefined,
+    });
+
+    expect(result.tags).toEqual([]);
   });
 });

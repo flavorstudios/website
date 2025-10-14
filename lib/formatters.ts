@@ -102,10 +102,18 @@ export async function formatPublicBlogDetail(
 
 /**
  * Formats a video object for safe public API responses.
- * Only exposes non-admin fields.
- * Adds .categories[] as an array with only the single category.
+ * Only exposes non-admin fields and ensures categories are always an array.
  */
 export function formatPublicVideo(video: Video) {
+  const categories =
+    Array.isArray(video.categories) && video.categories.length > 0
+      ? video.categories
+      : video.category
+        ? [video.category]
+        : [];
+
+  const tags = Array.isArray(video.tags) ? video.tags : [];
+
   return {
     id: video.id,
     title: video.title,
@@ -114,8 +122,8 @@ export function formatPublicVideo(video: Video) {
     thumbnail: video.thumbnail,
     description: video.description,
     category: video.category,
-    categories: [video.category], // <-- Only single category as array
-    tags: video.tags,
+    categories,
+    tags,
     duration: video.duration,
     publishedAt: video.publishedAt,
     featured: video.featured,

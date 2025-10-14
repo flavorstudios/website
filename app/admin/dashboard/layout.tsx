@@ -5,16 +5,12 @@ import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
 
-const isE2EMode =
-  typeof process !== "undefined" &&
-  (process.env.NEXT_PUBLIC_E2E === "1" || process.env.NEXT_PUBLIC_E2E === "true");
-
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isE2EMode || typeof window === "undefined") {
+    if (process.env.NEXT_PUBLIC_E2E !== "1" || typeof window === "undefined") {
       return;
     }
 

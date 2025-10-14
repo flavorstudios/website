@@ -349,26 +349,26 @@ export default function AdminLoginForm() {
                 Sign up
               </Link>
             </p>
-            <div className="legal-notice-wrapper min-w-0 flex-1">
+            <div className="min-w-0 flex-1">
               <p
-                className="legal-notice block w-full min-w-0 max-w-full whitespace-nowrap overflow-hidden text-ellipsis text-xs text-muted-foreground"
+                className="block max-w-full whitespace-nowrap overflow-hidden text-ellipsis text-xs text-muted-foreground"
                 data-testid="admin-login-legal"
               >
-                By continuing you agree to our{' '}
+                © Flavor Studios ·{' '}
                 <Link
                   href="/terms-of-service"
                   className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
                 >
-                  Terms of Service
+                  Terms
                 </Link>{' '}
-                and{' '}
+                ·{' '}
                 <Link
                   href="/privacy-policy"
                   className="font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded-sm"
                 >
-                  Privacy Policy
-                </Link>
-                . Unauthorized access is prohibited.
+                  Privacy
+                </Link>{' '}
+                · …
               </p>
             </div>
           </div>

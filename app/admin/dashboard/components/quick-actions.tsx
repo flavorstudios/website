@@ -1,62 +1,42 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu"
+
+type Action = {
+  label: string
+  href: string
+}
+
+const actions: Action[] = [
+  { label: "Create New Post", href: "/admin/dashboard/blog-posts" },
+  { label: "Add Video", href: "/admin/dashboard/videos" },
+  { label: "Moderate Comments", href: "/admin/dashboard/comments" },
+  { label: "Manage Users", href: "/admin/dashboard/users" },
+]
 
 export function QuickActions() {
   const router = useRouter()
 
-  const navigate = (href: string) => {
+  const handleNavigate = (href: string) => {
     router.push(href)
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <div className="flex flex-wrap gap-2" role="group" aria-label="Quick actions">
+      {actions.map((action) => (
         <Button
-          variant="default"
+          key={action.href}
+          type="button"
           size="sm"
-          className="gap-2"
-          aria-label="Quick actions"
+          variant="outline"
+          aria-label={action.label}
+          onClick={() => handleNavigate(action.href)}
         >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          <span className="hidden sm:inline">New</span>
+          {action.label}
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => navigate("/admin/dashboard/blog-posts")}
-          onSelect={() => navigate("/admin/dashboard/blog-posts")}
-        >
-          Create New Post
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => navigate("/admin/dashboard/videos")}
-          onSelect={() => navigate("/admin/dashboard/videos")}
-        >
-          Add Video
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => navigate("/admin/dashboard/comments")}
-          onSelect={() => navigate("/admin/dashboard/comments")}
-        >
-          Moderate Comments
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => navigate("/admin/dashboard/users")}
-          onSelect={() => navigate("/admin/dashboard/users")}
-        >
-          Manage Users
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      ))}
+    </div>
   )
 }
 

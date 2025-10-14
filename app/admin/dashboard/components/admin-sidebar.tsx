@@ -25,6 +25,7 @@ import type React from "react"
 import { useEffect, useMemo, Dispatch, SetStateAction, useRef } from "react"
 import useMediaQuery from "@/hooks/use-media-query"
 import { ADMIN_HEADER_HEIGHT } from "@/lib/constants"
+import { cn } from "@/lib/utils"
 import { SectionId } from "../sections"
 
 interface AdminSidebarProps {
@@ -126,25 +127,24 @@ export function AdminSidebar({
 
   return (
     <aside
-        ref={sidebarRef}
+      ref={sidebarRef}
       id={id}
       data-testid={id}
       role="complementary"
       data-state={sidebarOpen ? "open" : "closed"}
       aria-hidden={isHidden}
       tabIndex={isHidden ? -1 : undefined}
-      className={`
-        h-full md:h-screen overflow-y-auto bg-background border-r
-        ${isMobile
+      className={cn(
+        "flex h-full max-w-[16rem] flex-col overflow-y-auto border-r bg-background",
+        "md:relative md:h-screen",
+        isMobile
           ? "fixed inset-y-0 left-0 transition-transform duration-300 ease-in-out"
-          : "sticky top-0"}
-        ${sidebarOpen
+          : "sticky top-0",
+        sidebarOpen
           ? "translate-x-0 pointer-events-auto z-50 md:z-auto"
-          : "-translate-x-full md:translate-x-0 pointer-events-none md:pointer-events-auto z-30"}
-        w-64 ${sidebarOpen ? "md:w-64" : "md:w-20"}
-        max-w-[16rem]
-        flex flex-col md:relative
-      `}
+          : "-translate-x-full pointer-events-none z-40 md:translate-x-0 md:pointer-events-auto md:z-auto",
+        sidebarOpen ? "w-64 md:w-64" : "w-64 md:w-20"
+      )}
       aria-label="Admin navigation"
     >
         {/* Sidebar Header: match main nav height, remove extra vertical padding */}

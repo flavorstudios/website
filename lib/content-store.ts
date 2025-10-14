@@ -247,6 +247,7 @@ export interface Video {
   thumbnail: string;
   duration: string;
   category: string;
+  categories?: string[];
   tags: string[];
   status: "draft" | "published";
   publishedAt: string;
@@ -312,6 +313,7 @@ export const VideoSchema = z.object({
   thumbnail: z.string(),
   duration: z.string(),
   category: z.string(),
+  categories: z.array(z.string()).optional(),
   tags: z.array(z.string()),
   status: z.enum(["draft", "published"]),
   publishedAt: z.string(),

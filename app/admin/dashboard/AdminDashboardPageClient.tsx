@@ -173,6 +173,27 @@ export default function AdminDashboardPageClient({
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const mainWrapperRef = useRef<HTMLDivElement | null>(null);
 
+  const navigateToSection = useCallback(
+    (section: SectionId, href?: string) => {
+      const targetHref =
+        href ?? NAV.find((candidate) => candidate.id === section)?.href;
+      if (!targetHref) {
+        return;
+      }
+
+      setActiveSection(section);
+
+      try {
+        router.push(targetHref);
+      } catch {
+        if (typeof window !== "undefined") {
+          window.location.assign(targetHref);
+        }
+      }
+    },
+    [router]
+  );
+
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_E2E === "true" && typeof window !== "undefined") {
       if (window.__dashboardHistoryDatasets == null) {
@@ -458,7 +479,12 @@ export default function AdminDashboardPageClient({
   const renderContent = () => {
     switch (activeSection) {
       case "overview":
-        return <DashboardOverview key="overview" />;
+        return (
+          <DashboardOverview
+            key="overview"
+            onNavigateSection={navigateToSection}
+          />
+        );
       case "blogs":
         return <BlogManager key="blogs" />;
       case "videos":
@@ -480,7 +506,12 @@ export default function AdminDashboardPageClient({
       case "settings":
         return <SystemSettings key="settings" />;
       default:
-        return <DashboardOverview key="overview-fallback" />;
+        return (
+          <DashboardOverview
+            key="overview-fallback"
+            onNavigateSection={navigateToSection}
+          />
+        );
     }
   };
 
@@ -505,6 +536,7 @@ export default function AdminDashboardPageClient({
               setActiveSection={setActiveSection}
               sidebarOpen={sidebarOpen}
               setSidebarOpen={setSidebarOpen}
+              onNavigateSection={navigateToSection}
             />
 
             {isMobile && sidebarOpen && (
@@ -590,6 +622,7 @@ export default function AdminDashboardPageClient({
                 <MobileNav
                   activeSection={activeSection}
                   setActiveSection={setActiveSection}
+                  onNavigateSection={navigateToSection}
                 />
               )}
             </div>

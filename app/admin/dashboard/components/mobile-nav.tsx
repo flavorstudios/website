@@ -24,9 +24,14 @@ import { useRole } from "../contexts/role-context"
 interface MobileNavProps {
   activeSection: SectionId
   setActiveSection: Dispatch<SetStateAction<SectionId>>
+  onNavigateSection?: (section: SectionId, href: string) => void
 }
 
-export default function MobileNav({ activeSection, setActiveSection }: MobileNavProps) {
+export default function MobileNav({
+  activeSection,
+  setActiveSection,
+  onNavigateSection,
+}: MobileNavProps) {
   const pathname = usePathname()
   const navRef = useRef<HTMLElement>(null)
   const { accessibleSections } = useRole()
@@ -90,7 +95,13 @@ export default function MobileNav({ activeSection, setActiveSection }: MobileNav
                 className={`flex min-h-[44px] min-w-[64px] flex-col items-center justify-center gap-1 rounded-md px-3 py-2 text-[11px] font-medium leading-4 text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
-                onClick={() => setActiveSection(item.id)}
+                onClick={(event) => {
+                  if (onNavigateSection) {
+                    event.preventDefault()
+                    onNavigateSection(item.id, item.href)
+                  }
+                  setActiveSection(item.id)
+                }}
                 aria-label={item.label}
                 aria-current={isCurrent ? "page" : undefined}
               >

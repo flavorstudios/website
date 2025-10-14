@@ -34,6 +34,7 @@ interface AdminSidebarProps {
   setActiveSection: Dispatch<SetStateAction<SectionId>>
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
+  onNavigateSection?: (section: SectionId, href: string) => void
 }
 
 type MenuItem = {
@@ -51,6 +52,7 @@ export function AdminSidebar({
   setActiveSection,
   sidebarOpen,
   setSidebarOpen,
+  onNavigateSection,
 }: AdminSidebarProps) {
   const { accessibleSections } = useRole()
   const isMobile = useMediaQuery("(max-width: 767px)")
@@ -230,7 +232,11 @@ export function AdminSidebar({
                       aria-label={item.ariaLabel ?? item.label}
                       aria-current={active ? "page" : undefined}
                       title={!sidebarOpen ? item.label : undefined}
-                      onClick={() => {
+                      onClick={(event) => {
+                        if (onNavigateSection) {
+                          event.preventDefault()
+                          onNavigateSection(item.id, item.href!)
+                        }
                         setActiveSection(item.id)
                         if (isMobile) setSidebarOpen(false)
                       }}

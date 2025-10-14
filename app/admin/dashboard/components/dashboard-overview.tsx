@@ -37,6 +37,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { fetcher } from "@/lib/fetcher";
 import { useRole } from "../contexts/role-context";
+import { SectionId } from "../sections";
 import { HttpError } from "@/lib/http";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 
@@ -80,6 +81,7 @@ interface QuickAction {
   icon: LucideIcon;
   href: string;
   color: string;
+  section: SectionId;
 }
 
 const quickActions: QuickAction[] = [
@@ -89,6 +91,7 @@ const quickActions: QuickAction[] = [
     icon: FileText,
     href: "/admin/dashboard/blog-posts",
     color: "bg-blue-500",
+    section: "blogs",
   },
   {
     title: "Add Video",
@@ -96,6 +99,7 @@ const quickActions: QuickAction[] = [
     icon: Video,
     href: "/admin/dashboard/videos",
     color: "bg-purple-500",
+    section: "videos",
   },
   {
     title: "Moderate Comments",
@@ -103,6 +107,7 @@ const quickActions: QuickAction[] = [
     icon: MessageSquare,
     href: "/admin/dashboard/comments",
     color: "bg-green-500",
+    section: "comments",
   },
   {
     title: "Manage Users",
@@ -110,10 +115,17 @@ const quickActions: QuickAction[] = [
     icon: Users,
     href: "/admin/dashboard/users",
     color: "bg-teal-500",
+    section: "users",
   },
 ];
 
-export default function DashboardOverview() {
+interface DashboardOverviewProps {
+  onNavigateSection?: (section: SectionId, href: string) => void;
+}
+
+export default function DashboardOverview({
+  onNavigateSection,
+}: DashboardOverviewProps) {
   useEffect(() => {
     if (typeof window !== "undefined" && !(window as any).Chart) {
       (window as any).Chart = ChartJS;
@@ -568,7 +580,13 @@ export default function DashboardOverview() {
                       variant="outline"
                       aria-label={action.title}
                       className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
-                      onClick={() => router.push(action.href)}
+                      onClick={() => {
+                        if (onNavigateSection) {
+                          onNavigateSection(action.section, action.href);
+                          return;
+                        }
+                        router.push(action.href);
+                      }}
                     >
                       <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center`}>
                         <Icon className="w-4 h-4 text-white" />

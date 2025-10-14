@@ -57,6 +57,20 @@ describe('formatPublicBlog', () => {
     expect(out.author).toBe('author');
   });
 
+  it('omits empty categories when missing', async () => {
+    const blogWithoutCategories: BlogPost = {
+      ...baseBlog,
+      category: '',
+      categories: ['', '  ', null as unknown as string],
+    };
+
+    const summary = await formatPublicBlogSummary(blogWithoutCategories);
+    expect(summary.categories).toEqual([]);
+
+    const detail = await formatPublicBlogDetail(blogWithoutCategories);
+    expect(detail.categories).toEqual([]);
+  });
+
   it('converts tiptap json string content into html when formatting detail', async () => {
     const tiptapJson = {
       type: 'doc',

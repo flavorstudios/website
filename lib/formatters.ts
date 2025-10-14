@@ -34,6 +34,15 @@ export async function formatPublicBlogSummary(
   const featuredImage =
     (await maybeEnsureFreshMediaUrl(blog.featuredImage)) ?? blog.featuredImage;
 
+  const categories = Array.isArray(blog.categories) && blog.categories.length > 0
+    ? blog.categories.filter(
+        (category): category is string =>
+          typeof category === "string" && category.trim().length > 0,
+      )
+    : blog.category && blog.category.trim().length > 0
+      ? [blog.category]
+      : [];
+
   return {
     id: blog.id,
     title: blog.title,
@@ -41,9 +50,7 @@ export async function formatPublicBlogSummary(
     excerpt: blog.excerpt,
     featuredImage,
     category: blog.category,
-    categories: Array.isArray(blog.categories) && blog.categories.length > 0
-      ? blog.categories
-      : [blog.category],
+    categories,
     tags: blog.tags,
     publishedAt: blog.publishedAt,
     readTime: blog.readTime,
@@ -72,6 +79,15 @@ export async function formatPublicBlogDetail(
       : Promise.resolve(blog.openGraphImage),
   ]);
 
+  const categories = Array.isArray(blog.categories) && blog.categories.length > 0
+    ? blog.categories.filter(
+        (category): category is string =>
+          typeof category === "string" && category.trim().length > 0,
+      )
+    : blog.category && blog.category.trim().length > 0
+      ? [blog.category]
+      : [];
+
   return {
     id: blog.id,
     title: blog.title,
@@ -80,9 +96,7 @@ export async function formatPublicBlogDetail(
     excerpt: blog.excerpt,
     featuredImage: featuredImage ?? blog.featuredImage,
     category: blog.category,
-    categories: Array.isArray(blog.categories) && blog.categories.length > 0
-      ? blog.categories
-      : [blog.category],
+    categories,
     tags: blog.tags,
     author: normalizeAuthor(blog.author),
     publishedAt: blog.publishedAt,

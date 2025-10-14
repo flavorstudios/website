@@ -53,6 +53,29 @@ export async function getDynamicCategories(): Promise<Category[]> {
 
 // --------- BLOG POSTS FETCH (returns posts with .categories[] and .commentCount) ---------
 
+function normalizeCategories(
+  categories: unknown,
+  fallback: unknown,
+): string[] {
+  const normalized = (Array.isArray(categories) ? categories : [])
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+
+  if (normalized.length > 0) {
+    return normalized;
+  }
+
+  if (typeof fallback === "string") {
+    const trimmed = fallback.trim();
+    if (trimmed.length > 0) {
+      return [trimmed];
+    }
+  }
+
+  return [];
+}
+
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     const response = await fetch(`${baseUrl}/api/blogs`, { cache: "no-store" }); // <-- Codex update
@@ -61,9 +84,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
       // Always expose .categories[] and .commentCount for every post
       return (Array.isArray(posts) ? posts : []).map((post: BlogPost) => ({
         ...post,
-        categories: Array.isArray(post.categories) && post.categories.length > 0
-          ? post.categories
-          : [post.category],
+        categories: normalizeCategories(post.categories, post.category),
         commentCount: typeof post.commentCount === "number" ? post.commentCount : 0, // <--- Codex!
         shareCount: typeof post.shareCount === "number" ? post.shareCount : 0,
       }));
@@ -84,9 +105,7 @@ export async function getVideos(): Promise<Video[]> {
       // Always expose .categories[] for every video
       return (Array.isArray(videos) ? videos : []).map((video: Video) => ({
         ...video,
-        categories: Array.isArray(video.categories) && video.categories.length > 0
-          ? video.categories
-          : [video.category],
+        categories: normalizeCategories(video.categories, video.category),
       }));
     }
   } catch (error) {

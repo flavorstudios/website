@@ -105,7 +105,12 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const contentLabelId = `${contentEditorId}-label`;
   const contentHeadingId = `${contentEditorId}-heading`;
   const isE2E =
-    clientEnv.NEXT_PUBLIC_E2E === "1" || clientEnv.NEXT_PUBLIC_E2E === "true";
+    clientEnv.NEXT_PUBLIC_E2E === "1" ||
+    clientEnv.NEXT_PUBLIC_E2E === "true" ||
+    process.env.NEXT_PUBLIC_E2E === "1" ||
+    process.env.NEXT_PUBLIC_E2E === "true" ||
+    process.env.E2E === "1" ||
+    process.env.E2E === "true";
 
   const initialScheduledDate = (() => {
     if (!initialPost?.scheduledFor) return undefined;

@@ -34,7 +34,7 @@ export function isDisposableEmail(email: string): boolean {
 
 export function requiresEmailVerification(): boolean {
   const serverRequires = serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === "true"
-  const e2eActive = process.env.E2E === "true"
+  const e2eActive = process.env.E2E === "true" || process.env.E2E === "1"
 
   if (e2eActive) {
     return (

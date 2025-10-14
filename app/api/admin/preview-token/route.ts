@@ -7,7 +7,8 @@ import { serverEnv } from "@/env/server";
 const isE2EEnvironment =
   process.env.NEXT_PUBLIC_E2E === "true" ||
   process.env.NEXT_PUBLIC_E2E === "1" ||
-  process.env.E2E === "true";
+  process.env.E2E === "true" ||
+  process.env.E2E === "1";
 
 function buildE2ETokenResponse(
   postId: string,

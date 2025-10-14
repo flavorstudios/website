@@ -14,7 +14,7 @@ import { getUserRole } from "@/lib/user-roles";
 import { serverEnv } from "@/env/server";
 import { createHash } from "crypto";
 
-const isE2E = process.env.E2E === "true";
+const isE2E = process.env.E2E === "true" || process.env.E2E === "1";
 const requireEmailVerification =
   !isE2E && serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === "true";
 

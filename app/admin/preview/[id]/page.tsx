@@ -117,6 +117,7 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
   const requestId = reqHeaders.get("x-request-id") || crypto.randomUUID();
   const isE2E =
     process.env.E2E === "true" ||
+    process.env.E2E === "1" ||
     process.env.NEXT_PUBLIC_E2E === "true" ||
     process.env.NEXT_PUBLIC_E2E === "1";
 

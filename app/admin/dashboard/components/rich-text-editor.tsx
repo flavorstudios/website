@@ -105,6 +105,7 @@ export function RichTextEditor({
     if (!editor) return
 
     const trackedAttributes = [
+      "id",
       "contenteditable",
       "role",
       "aria-multiline",

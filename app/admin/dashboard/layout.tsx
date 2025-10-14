@@ -5,12 +5,18 @@ import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
 
+const isE2EEnvironment =
+  process.env.NEXT_PUBLIC_E2E === "1" ||
+  process.env.NEXT_PUBLIC_E2E?.toLowerCase() === "true" ||
+  process.env.E2E === "1" ||
+  process.env.E2E?.toLowerCase() === "true";
+
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_E2E !== "1" || typeof window === "undefined") {
+    if (!isE2EEnvironment || typeof window === "undefined") {
       return;
     }
 

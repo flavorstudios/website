@@ -198,7 +198,9 @@ export default function AdminDashboardPageClient({
   useEffect(() => {
     const e2eEnabled =
       process.env.NEXT_PUBLIC_E2E === "true" ||
-      process.env.NEXT_PUBLIC_E2E === "1";
+      process.env.NEXT_PUBLIC_E2E === "1" ||
+      process.env.E2E === "true" ||
+      process.env.E2E === "1";
     if (e2eEnabled && typeof window !== "undefined") {
       if (window.__dashboardHistoryDatasets == null) {
         window.__dashboardHistoryDatasets = E2E_DASHBOARD_HISTORY;

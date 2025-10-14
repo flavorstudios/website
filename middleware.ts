@@ -21,7 +21,7 @@ function getRequestIp(request: NextRequest): string {
 }
 
 export async function middleware(request: NextRequest) {
-  const isE2E = process.env.E2E === "true";
+  const isE2E = process.env.E2E === "true" || process.env.E2E === "1";
   const { pathname } = request.nextUrl;
 
   if (isE2E && (pathname.startsWith("/admin") || pathname.startsWith("/api/admin"))) {

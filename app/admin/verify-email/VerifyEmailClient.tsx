@@ -25,7 +25,10 @@ export default function VerifyEmailClient() {
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
   const e2eActive =
     typeof process !== "undefined" &&
-    (process.env.NEXT_PUBLIC_E2E === "1" || process.env.NEXT_PUBLIC_E2E === "true");
+    (process.env.NEXT_PUBLIC_E2E === "1" ||
+      process.env.NEXT_PUBLIC_E2E === "true" ||
+      process.env.E2E === "1" ||
+      process.env.E2E === "true");
   const testMode = clientEnv.TEST_MODE === "true" || e2eActive;
 
   const waitForNextFrame = useCallback(

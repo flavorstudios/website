@@ -25,10 +25,15 @@ export async function fetchJson<T>(
     const timer = setTimeout(() => ctrl.abort(), timeoutMs);
 
     try {
+      const headers = new Headers(init.headers ?? undefined);
+      if (!headers.has('Accept')) {
+        headers.set('Accept', 'application/json');
+      }
+
       const res = await fetch(input, {
-        credentials: 'include',
-        headers: { Accept: 'application/json', ...(init.headers || {}) },
         ...init,
+        credentials: init.credentials ?? 'include',
+        headers,
         signal: ctrl.signal,
       });
 

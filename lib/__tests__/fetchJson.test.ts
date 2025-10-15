@@ -151,4 +151,25 @@ describe('fetchJson', () => {
     const res = await fetchJson<void>('/no-content');
     expect(res).toBeUndefined();
   });
+
+  it('preserves headers provided as a Headers instance', async () => {
+    const response = {
+      ok: true,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ ok: true }),
+    } as Response;
+
+    global.fetch = jest.fn().mockResolvedValue(response);
+
+    const headers = new Headers({ Authorization: 'Bearer test-token' });
+    await fetchJson('/secure', { headers });
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    const [, init] = (global.fetch as jest.Mock).mock.calls[0];
+    expect(init).toBeDefined();
+    expect(init!.headers).toBeInstanceOf(Headers);
+    const passedHeaders = init!.headers as Headers;
+    expect(passedHeaders.get('authorization')).toBe('Bearer test-token');
+    expect(passedHeaders.get('accept')).toBe('application/json');
+  });
 });

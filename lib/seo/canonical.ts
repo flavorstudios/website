@@ -11,31 +11,24 @@ export function getCanonicalUrl(path: string): string {
     return url.href;
   } catch {
     // path is relative or missing protocol, clean it up
-    let cleanPath = path;
+    const baseHref = SITE_URL.endsWith('/') ? SITE_URL : `${SITE_URL}/`;
+    const trimmed = typeof path === 'string' ? path.trim() : '';
+    const relative = trimmed === '' ? '.' : trimmed;
+    const url = new URL(relative, baseHref);
 
-    // Remove any accidental leading SITE_URL from relative path
-    if (cleanPath.startsWith(SITE_URL)) {
-      cleanPath = cleanPath.slice(SITE_URL.length);
+    // Normalise the pathname without touching query strings
+    url.pathname = url.pathname.replace(/\/{2,}/g, '/');
+
+    if (url.pathname.length > 1 && url.pathname.endsWith('/')) {
+      url.pathname = url.pathname.slice(0, -1);
     }
 
-    // Ensure leading slash
-    if (!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+    const canonicalSite = SITE_URL.endsWith('/') ? SITE_URL.slice(0, -1) : SITE_URL;
 
-    // Remove duplicate slashes (except the "://" after https)
-    cleanPath = cleanPath.replace(/\/{2,}/g, '/');
-
-    // Handle the root case
-    if (cleanPath === '/' || cleanPath === '') {
-      return SITE_URL.endsWith('/') ? SITE_URL.slice(0, -1) : SITE_URL;
+    if ((url.pathname === '' || url.pathname === '/') && !url.search && !url.hash) {
+      return canonicalSite;
     }
 
-    // Remove trailing slash (unless it's just '/')
-    if (cleanPath.length > 1 && cleanPath.endsWith('/')) {
-      cleanPath = cleanPath.slice(0, -1);
-    }
-
-    // Always join with a single slash
-    const baseUrl = SITE_URL.endsWith('/') ? SITE_URL.slice(0, -1) : SITE_URL;
-    return `${baseUrl}${cleanPath}`;
+    return `${url.origin}${url.pathname}${url.search}${url.hash}`;
   }
 }

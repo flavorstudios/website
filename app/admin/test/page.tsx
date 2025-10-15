@@ -43,8 +43,7 @@ export const metadata = getMetadata({
 export default async function AdminTest() {
   // Secure: Only show page if session is authenticated via Firebase
   const cookieStore = await cookies(); // Await here
-  const session = cookieStore.get("admin-session
-  ");
+  const session = cookieStore.get("admin-session");
 
   // CHANGE: Use requireAdminAction (no params)
   const isAuthenticated = session?.value

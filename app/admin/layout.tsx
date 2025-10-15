@@ -10,6 +10,9 @@ import { TooltipProvider } from "@/components/ui/tooltip"; // <-- TooltipProvide
 import DevTools from "./_dev-tools"; // mounts dev fetch logger in development
 import ReactQueryProvider from "@/components/ReactQueryProvider"; // Added: React Query provider
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 // Centralized metadata for the entire admin layout segment.
 export const metadata = getMetadata({
   title: `Admin Console – ${SITE_NAME}`,

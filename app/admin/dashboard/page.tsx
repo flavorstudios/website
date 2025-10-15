@@ -9,6 +9,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { isAdminSdkAvailable, ADMIN_BYPASS } from "@/lib/firebase-admin";
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 // === SEO METADATA (ADMIN - NOINDEX) ===
 export const metadata = getMetadata({

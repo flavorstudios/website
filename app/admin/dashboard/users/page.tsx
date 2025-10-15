@@ -2,6 +2,9 @@ import AdminDashboardPageClient from "../AdminDashboardPageClient"
 import { getMetadata } from "@/lib/seo-utils"
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export const metadata = getMetadata({
   title: `Profile – ${SITE_NAME} Admin`,
   description: `Manage admin profiles for ${SITE_NAME}.`,

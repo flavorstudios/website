@@ -5,6 +5,7 @@ import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import AdminLoginForm from "./AdminLoginForm";
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 // --- SEO METADATA: Admin pages must be noindex, nofollow ---
 export const metadata = getMetadata({

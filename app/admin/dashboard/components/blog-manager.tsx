@@ -501,7 +501,7 @@ export default function BlogManager() {
       <div>
         <AdminPageHeader
           as="h2"
-          title="Blog Manager"
+          title="Blog Posts"
           subtitle="Blog Management"
         />
         <p className="mt-1 text-sm text-muted-foreground">
@@ -586,7 +586,7 @@ export default function BlogManager() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <AdminPageHeader
             as="h2"
-            title="Blog Manager"
+            title="Blog Posts"
             subtitle="Blog Management"
           />
           <p className="mt-1 text-sm text-muted-foreground">

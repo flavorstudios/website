@@ -20,20 +20,12 @@ export function SkipLink({ targetId = "main-content" }: SkipLinkProps) {
         return;
       }
 
-      const activeElement = document.activeElement;
-      const shouldFocusSkipLink =
-        !activeElement ||
-        activeElement === document.body ||
-        activeElement === document.documentElement;
-
-      if (shouldFocusSkipLink) {
-        setIsVisible(true);
-        const focusLink = () => linkRef.current?.focus();
-        if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
-          window.requestAnimationFrame(focusLink);
-        } else {
-          focusLink();
-        }
+      setIsVisible(true);
+      const focusLink = () => linkRef.current?.focus();
+      if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+        window.requestAnimationFrame(focusLink);
+      } else {
+        focusLink();
       }
     }
 

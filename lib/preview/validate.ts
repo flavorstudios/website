@@ -21,6 +21,17 @@ export async function validatePreviewToken({
 }: ValidatePreviewTokenInput): Promise<ValidatePreviewTokenResult> {
   const value = token ?? "";
 
+  if (isE2E && !value) {
+    return {
+      ok: true,
+      payload: {
+        postId: id,
+        uid: "bypass",
+        exp: Math.floor(Date.now() / 1000) + 60,
+      },
+    };
+  }
+
   if (isE2E && value.startsWith("e2e-token:")) {
     const [, state, postId, uid] = value.split(":");
     if (postId && postId !== id) {

@@ -39,7 +39,7 @@ import { isClientE2EEnabled } from "@/lib/e2e-utils";
 const BlogSectionFallback = () => (
   <div className="space-y-4" data-testid="blog-card-skeletons">
     <header className="space-y-1" aria-hidden="true">
-      <p className="text-2xl font-semibold text-foreground">Blog Manager</p>
+      <p className="text-2xl font-semibold text-foreground">Blog Posts</p>
       <p className="text-sm text-muted-foreground">Blog Management</p>
     </header>
     <div className="sm:hidden space-y-3" data-testid="blog-card-list">
@@ -184,7 +184,7 @@ const NAV: { id: SectionId; href: string; title: string }[] = [
 
 const SECTION_HEADINGS: Record<SectionId, string> = {
   overview: "Admin Dashboard",
-  blogs: "Blog Manager",
+  blogs: "Blog Posts",
   videos: "Video Manager",
   media: "Media Manager",
   categories: "Categories",
@@ -696,7 +696,7 @@ export default function AdminDashboardPageClient({
 
                   {/* ARIA live region for section changes */}
                   <div className="sr-only" aria-live="polite">
-                    Section: {sectionHeading}
+                    Now viewing {sectionHeading} section
                   </div>
                 </div>
               </section>

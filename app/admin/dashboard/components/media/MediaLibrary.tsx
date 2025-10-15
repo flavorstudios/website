@@ -70,7 +70,7 @@ function MediaLibraryE2ETable({
   return (
     <div className="space-y-6">
       <AdminPageHeader
-        as="h2"
+        as="h1"
         title="Media Manager"
         subtitle="Manage and organize your uploaded media files"
       />
@@ -641,7 +641,7 @@ export default function MediaLibrary({
     <div className="space-y-6" aria-busy={loading}>
       <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
         <AdminPageHeader
-          as="h2"
+          as="h1"
           title="Media Manager"
           subtitle="Manage and organize your uploaded media files"
         />

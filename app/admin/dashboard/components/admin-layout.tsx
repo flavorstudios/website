@@ -68,7 +68,12 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div
+        className="min-h-screen bg-background flex items-center justify-center"
+        role="status"
+        aria-busy="true"
+      >
+        <h1 className="sr-only">Loading Admin Dashboard</h1>
         <div className="flex items-center space-x-3">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           <span className="text-lg font-medium text-foreground">Loading Admin Dashboard...</span>

@@ -78,9 +78,7 @@ export default function EmailLoginForm({
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
-    setError("")
     setHasLocalFormError(false)
-    setFormError(null)
     try {
       const hasOtp = Boolean(otp)
       const endpoint = hasOtp ? "/api/admin/email-session" : "/api/admin/email-login"
@@ -111,6 +109,9 @@ export default function EmailLoginForm({
         setLoading(false)
         return
       }
+      setError("")
+      setFormError(null)
+      setHasLocalFormError(false)
       if (isTestMode && typeof window !== "undefined") {
         window.location.assign("/admin/dashboard")
         return

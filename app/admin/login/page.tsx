@@ -4,6 +4,8 @@ import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import AdminLoginForm from "./AdminLoginForm";
 
+export const runtime = 'nodejs'
+
 // --- SEO METADATA: Admin pages must be noindex, nofollow ---
 export const metadata = getMetadata({
   title: `Admin Login – ${SITE_NAME}`,

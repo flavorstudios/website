@@ -8,6 +8,8 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { isAdminSdkAvailable, ADMIN_BYPASS } from "@/lib/firebase-admin";
 
+export const runtime = 'nodejs'
+
 // === SEO METADATA (ADMIN - NOINDEX) ===
 export const metadata = getMetadata({
   title: `${SITE_NAME} Admin Dashboard`,

@@ -3,6 +3,8 @@ import { SITE_BRAND_TWITTER, SITE_NAME, SITE_URL } from "@/lib/constants";
 
 import ForgotPasswordForm from "./ForgotPasswordForm";
 
+export const runtime = 'nodejs'
+
 export const metadata = getMetadata({
   title: `Reset Admin Password – ${SITE_NAME}`,
   description: `Request a secure password reset link for your ${SITE_NAME} admin account.`,

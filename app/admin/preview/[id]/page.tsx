@@ -134,6 +134,10 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
     );
   }
 
+  if (isE2E) {
+    return renderGuardedMessage("E2E Preview Mode");
+  }
+
   function logFailure(status: number, err: unknown, uid?: string) {
     const e = err instanceof Error ? err : new Error(String(err));
     const stack = e.stack?.split("\n").slice(0, 20).join("\n");

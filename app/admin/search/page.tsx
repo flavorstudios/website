@@ -10,6 +10,8 @@ interface PageProps {
   searchParams?: Promise<{ q?: string }>;
 }
 
+export const runtime = 'nodejs'
+
 export const metadata = getMetadata({
   title: `${SITE_NAME} Admin Search`,
   description: `Search posts, videos, users, and categories across the ${SITE_NAME} admin tools.`,

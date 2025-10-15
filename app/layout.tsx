@@ -4,6 +4,8 @@ export const viewport = {
   themeColor: "#ffffff",
 };
 
+export const runtime = 'nodejs'
+
 import type { ReactNode } from "react";
 import "./globals.css";
 import { Inter, JetBrains_Mono as JetBrainsMono, Lora, Poppins } from "next/font/google";

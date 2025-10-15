@@ -2,6 +2,8 @@ import SignupForm from "./SignupForm";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 
+export const runtime = 'nodejs'
+
 export const metadata = getMetadata({
   title: `Create Admin Account – ${SITE_NAME}`,
   description: `Provision a secure administrator account to manage ${SITE_NAME} content and tooling.`,

@@ -2,10 +2,7 @@ import {
   type PreviewTokenPayload,
   validatePreviewTokenOrThrow,
 } from "@/lib/preview-token";
-import {
-  ExpiredPreviewTokenError,
-  InvalidPreviewTokenError,
-} from "@/lib/preview-token-errors";
+import { ExpiredPreviewTokenError } from "@/lib/preview-token-errors";
 
 export interface ValidatePreviewTokenInput {
   id: string;

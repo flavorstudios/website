@@ -1,3 +1,5 @@
+import { blogStore } from "@/lib/content-store";
+
 const mockPosts: any[] = [];
 
 jest.mock("@/lib/media", () => ({
@@ -57,8 +59,6 @@ const basePost = {
   updatedAt: "2024-01-01T00:00:00.000Z",
   views: 0,
 };
-
-const { blogStore } = require("@/lib/content-store") as typeof import("@/lib/content-store");
 
 describe("blogStore category normalization", () => {
   beforeEach(() => {

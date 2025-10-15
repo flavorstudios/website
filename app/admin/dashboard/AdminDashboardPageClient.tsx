@@ -38,6 +38,10 @@ import { isClientE2EEnabled } from "@/lib/e2e-utils";
 
 const BlogSectionFallback = () => (
   <div className="space-y-4" data-testid="blog-card-skeletons">
+    <header className="space-y-1">
+      <h2 className="text-2xl font-semibold text-foreground">Blog Manager</h2>
+      <p className="text-sm text-muted-foreground">Blog Management</p>
+    </header>
     <div className="sm:hidden space-y-3" data-testid="blog-card-list">
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
         <div
@@ -247,7 +251,6 @@ export default function AdminDashboardPageClient({
 
   const [activeSection, setActiveSection] = useState<SectionId>(initialResolved);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [mounted, setMounted] = useState(false);
   const [error, setError] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [keyboardOpen, setKeyboardOpen] = useState(false);
@@ -316,8 +319,6 @@ export default function AdminDashboardPageClient({
 
   // --- One-time init + route prefetch --------------------------------------
   useEffect(() => {
-    setMounted(true);
-
     // init ping (with credentials)
     fetchJson("/api/admin/init", { method: "POST", credentials: "include" }).catch((err) => {
       logClientError("Admin init failed:", err);
@@ -544,22 +545,6 @@ export default function AdminDashboardPageClient({
   useEffect(() => {
     document.title = `${sectionHeading} | ${SITE_NAME} Admin`;
   }, [sectionHeading]);
-
-  if (!mounted) {
-    return (
-      <div
-        className="min-h-screen bg-gray-50 flex items-center justify-center"
-        data-testid="dashboard-loading"
-      >
-        <div className="flex items-center space-x-3" role="status" aria-live="polite">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600" />
-          <span className="text-lg font-medium text-gray-700">
-            Loading Admin Dashboard...
-          </span>
-        </div>
-      </div>
-    );
-  }
 
   const renderContent = () => {
     switch (activeSection) {

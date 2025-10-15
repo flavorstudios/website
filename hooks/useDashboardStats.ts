@@ -36,19 +36,41 @@ export function useDashboardStats(live = false, enabled = true, range = '12mo') 
     queryKey: ['dashboard', range],
     queryFn: async () => {
       const url = `/api/admin/stats?range=${range}`;
-      const res = await fetch(url, {
-        headers: etags[range] ? { 'If-None-Match': etags[range] } : undefined,
-        cache: 'no-store',
-        credentials: 'include',
-      });
-      if (res.status === 304) {
-        const cached = queryClient.getQueryData<DashboardStats>(['dashboard', range]);
-        if (!cached) throw new HttpError('Not Modified', 304, url);
-        return cached;
-      }
-      if (!res.ok) throw new HttpError('Failed to load', res.status, url);
-      etags[range] = res.headers.get('etag') || undefined;
-      return (await res.json()) as DashboardStats;
+      
+      const fetchStats = async (useEtag: boolean): Promise<DashboardStats> => {
+        const headers = useEtag && etags[range] ? { 'If-None-Match': etags[range] } : undefined;
+
+        const res = await fetch(url, {
+          headers,
+          cache: 'no-store',
+          credentials: 'include',
+        });
+
+        if (res.status === 304) {
+          const cached = queryClient.getQueryData<DashboardStats>(['dashboard', range]);
+          if (cached) {
+            return cached;
+          }
+
+          // If the server returned 304 but we no longer have cached data,
+          // clear the stale ETag and retry once without it.
+          if (useEtag) {
+            delete etags[range];
+            return fetchStats(false);
+          }
+
+          throw new HttpError('Not Modified', 304, url);
+        }
+
+        if (!res.ok) {
+          throw new HttpError('Failed to load', res.status, url);
+        }
+
+        etags[range] = res.headers.get('etag') || undefined;
+        return (await res.json()) as DashboardStats;
+      };
+
+      return fetchStats(true);
     },
     retry: 0,
     staleTime: 60_000,

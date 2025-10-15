@@ -18,6 +18,7 @@ import type {
 } from "@/types/media";
 import { useToast } from "@/hooks/use-toast";
 import { clientEnv } from "@/env.client";
+import { isClientE2EEnabled } from "@/lib/e2e-utils";
 
 const isDesktopWidth = () =>
   typeof window !== "undefined" &&
@@ -132,10 +133,7 @@ export default function MediaLibrary({
   detailsOpen,
   onDetailsOpenChange,
 }: MediaLibraryProps) {
-  if (
-    clientEnv.NEXT_PUBLIC_E2E === "true" ||
-    clientEnv.NEXT_PUBLIC_E2E === "1"
-  ) {
+  if (isClientE2EEnabled()) {
     return (
       <MediaLibraryE2ETable
         onSelect={onSelect}

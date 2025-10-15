@@ -72,6 +72,29 @@ const FALLBACK_BLOG_POSTS: BlogPost[] = [
   },
 ];
 
+function normalizeCategories(
+  categories: unknown,
+  fallback: unknown,
+): string[] {
+  const normalized = (Array.isArray(categories) ? categories : [])
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+
+  if (normalized.length > 0) {
+    return normalized;
+  }
+
+  if (typeof fallback === "string") {
+    const trimmed = fallback.trim();
+    if (trimmed.length > 0) {
+      return [trimmed];
+    }
+  }
+
+  return [];
+}
+
 const normalizeBlogPost = (post: BlogPost): BlogPost => ({
   ...post,
   content: ensureHtmlContent(post.content),
@@ -79,10 +102,7 @@ const normalizeBlogPost = (post: BlogPost): BlogPost => ({
     typeof post.scheduledFor === "string" && post.scheduledFor.trim().length > 0
       ? post.scheduledFor
       : undefined,
-  categories:
-    Array.isArray(post.categories) && post.categories.length > 0
-      ? post.categories
-      : [post.category],
+  categories: normalizeCategories(post.categories, post.category),
   commentCount: typeof post.commentCount === "number" ? post.commentCount : 0,
   shareCount: typeof post.shareCount === "number" ? post.shareCount : 0,
 });

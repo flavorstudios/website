@@ -149,6 +149,22 @@ export default function DashboardOverview({
   const stats = statsQuery.data as DashboardStats | undefined;
   const statsError = statsQuery.error as unknown;
   const statsLoading = statsQuery.isLoading;
+  const isInitialLoading = showInitialSpinner || (statsLoading && !stats);
+  const baseStats = useMemo<DashboardStats>(
+    () => ({
+      totalPosts: 0,
+      totalVideos: 0,
+      totalComments: 0,
+      totalViews: 0,
+      pendingComments: 0,
+      publishedPosts: 0,
+      featuredVideos: 0,
+      monthlyGrowth: 0,
+      history: [],
+    }),
+    [],
+  );
+  const effectiveStats = stats ?? baseStats;
   const lastUpdatedLabel = useMemo(() => {
     const target = lastRefreshedAt ?? statsQuery.dataUpdatedAt;
     if (!target) return "N/A";
@@ -303,45 +319,39 @@ export default function DashboardOverview({
     (window as any).__dashboardHistoryDatasets = datasets;
   }, [chartData, hasActivity]);
 
-  // Permission warning (do not attempt fetching or show generic errors)
+  const fatalError = hasNetworkError && !stats;
+
   if (!canViewAnalytics || unauthorized) {
     return (
-      <div className="flex items-center justify-center h-64" data-testid="analytics-permission-block">
-        <div className="text-center">
-          <p className="text-gray-600 mb-2">You don&apos;t have permission to view analytics.</p>
+      <div
+        className="flex h-64 items-center justify-center"
+        data-testid="analytics-permission-block"
+        aria-live="polite"
+      >
+        <div className="text-center space-y-2">
+          <p className="text-gray-600">You don&apos;t have permission to view analytics.</p>
         </div>
       </div>
     );
   }
 
-  // First-load spinner stays mounted until the first stats request settles
-  if (showInitialSpinner || (statsLoading && !stats)) {
+  if (fatalError) {
+    const code = diagnosticCode || "DASHLOAD_NETWORK";
     return (
-      <div className="flex items-center justify-center h-64" data-testid="dashboard-loading">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-        <span className="ml-3 text-gray-600">Loading real-time data...</span>
-      </div>
-    );
-  }
-
-  // Network error overlay (keep last good data otherwise)
-  if (hasNetworkError && !statsLoading && !stats) {
-    return (
-      <div className="flex items-center justify-center h-64" data-testid="dashboard-error">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-700 mb-2">
-            Dashboard data unavailable
-          </h2>
-          <p className="text-red-600 mb-2">Unable to load dashboard data</p>
-          <p className="text-gray-600 mb-2">Please try again.</p>
-          {diagnosticCode && (
-            <p className="text-gray-500 text-xs mb-4" data-testid="dashboard-error-code">
-              {diagnosticCode}
-            </p>
-          )}
+      <div className="flex h-64 items-center justify-center" data-testid="dashboard-error">
+        <div
+          className="max-w-md rounded-xl border border-red-200 bg-red-50 px-6 py-5 text-center shadow-sm"
+          role="status"
+          aria-live="assertive"
+        >
+          <h2 className="mb-2 text-xl font-semibold text-red-700">Dashboard data unavailable</h2>
+          <p className="mb-3 text-red-600">Unable to load dashboard data. Please try again.</p>
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-red-500" data-testid="dashboard-error-code">
+            {code}
+          </p>
           <Button
             onClick={refresh}
-            className="rounded-xl bg-orange-800 hover:bg-orange-900 text-white"
+            className="rounded-xl bg-orange-800 text-white hover:bg-orange-900"
           >
             Retry Dashboard
           </Button>
@@ -349,40 +359,36 @@ export default function DashboardOverview({
       </div>
     );
   }
-
-  if (!stats) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Dashboard data unavailable
-          </h2>
-          <p className="text-gray-600 mb-2">Unable to load dashboard data</p>
-          <Button
-            onClick={refresh}
-            className="rounded-xl bg-orange-800 hover:bg-orange-900 text-white"
-          >
-            Refresh Dashboard
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  const sign = stats.monthlyGrowth > 0 ? "+" : stats.monthlyGrowth < 0 ? "-" : "";
+  const monthlyGrowth = effectiveStats.monthlyGrowth;
+  const sign = monthlyGrowth > 0 ? "+" : monthlyGrowth < 0 ? "-" : "";
   const growthColor =
-    stats.monthlyGrowth > 0
+    monthlyGrowth > 0
       ? "text-green-700"
-      : stats.monthlyGrowth < 0
+      : monthlyGrowth < 0
         ? "text-red-700"
         : "text-gray-700";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" aria-busy={isInitialLoading || statsQuery.isFetching}>
       <AdminPageHeader
         as="h1"
         title="Dashboard Overview"
         subtitle="Track activity, performance, and quick actions for your studio"
       />
+      {isInitialLoading && (
+        <div
+          className="flex items-center gap-3 rounded-lg border border-border bg-background/80 px-4 py-3 text-sm text-muted-foreground"
+          data-testid="dashboard-loading"
+          role="status"
+          aria-live="polite"
+        >
+          <span
+            aria-hidden="true"
+            className="h-4 w-4 flex-none animate-spin rounded-full border-2 border-primary border-t-transparent"
+          />
+          <span className="font-medium text-foreground">Loading Admin Dashboard...</span>
+        </div>
+      )}
       {/* Controls */}
       <div className="flex items-center gap-3">
         <Button
@@ -455,20 +461,20 @@ export default function DashboardOverview({
                   className="text-3xl font-bold text-gray-900"
                   data-testid="total-posts-value"
                 >
-                  {stats.totalPosts}
+                  {effectiveStats.totalPosts}
                 </p>
                 <p className={`text-sm flex items-center mt-1 ${growthColor}`}>
-                  {stats.monthlyGrowth !== 0 && (
-                    stats.monthlyGrowth > 0 ? (
+                  {monthlyGrowth !== 0 && (
+                    monthlyGrowth > 0 ? (
                       <TrendingUp className="h-3 w-3 mr-1" />
                     ) : (
                       <TrendingDown className="h-3 w-3 mr-1" />
                     )
                   )}
                   {sign}
-                  {Math.abs(stats.monthlyGrowth)}% posts+videos growth this month
+                  {Math.abs(monthlyGrowth)}% posts+videos growth this month
                 </p>
-                {stats.totalPosts === 0 && <p className="text-sm text-gray-500 mt-1">No posts yet</p>}
+                {effectiveStats.totalPosts === 0 && <p className="text-sm text-gray-500 mt-1">No posts yet</p>}
               </div>
               <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
                 <FileText className="w-6 h-6 text-blue-600" />
@@ -486,9 +492,9 @@ export default function DashboardOverview({
                   className="text-3xl font-bold text-gray-900"
                   data-testid="total-videos-value"
                 >
-                  {stats.totalVideos}
+                  {effectiveStats.totalVideos}
                 </p>
-                <p className="text-sm text-gray-500 mt-1">{stats.featuredVideos} featured</p>
+                <p className="text-sm text-gray-500 mt-1">{effectiveStats.featuredVideos} featured</p>
               </div>
               <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
                 <Video className="w-6 h-6 text-purple-600" />
@@ -506,10 +512,10 @@ export default function DashboardOverview({
                   className="text-3xl font-bold text-gray-900"
                   data-testid="total-comments-value"
                 >
-                  {stats.totalComments}
+                  {effectiveStats.totalComments}
                 </p>
-                {stats.pendingComments > 0 ? (
-                  <p className="text-sm text-yellow-700 mt-1">{stats.pendingComments} pending review</p>
+                {effectiveStats.pendingComments > 0 ? (
+                  <p className="text-sm text-yellow-700 mt-1">{effectiveStats.pendingComments} pending review</p>
                 ) : (
                   <p className="text-sm text-gray-500 mt-1">All up to date</p>
                 )}
@@ -530,7 +536,7 @@ export default function DashboardOverview({
                   className="text-3xl font-bold text-gray-900"
                   data-testid="total-views-value"
                 >
-                  {stats.totalViews.toLocaleString()}
+                  {effectiveStats.totalViews.toLocaleString()}
                 </p>
                 <p className="text-sm text-blue-600 mt-1">All time</p>
               </div>
@@ -543,7 +549,7 @@ export default function DashboardOverview({
       </div>
 
       {/* 12-Month Activity Chart */}
-      {stats.history && hasActivity && (
+      {stats && stats.history && hasActivity && (
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -651,7 +657,7 @@ export default function DashboardOverview({
       </div>
 
       {/* Content Performance - Only show if there's actual content */}
-      {(stats.totalPosts > 0 || stats.totalVideos > 0 || stats.totalComments > 0) && (
+      {(effectiveStats.totalPosts > 0 || effectiveStats.totalVideos > 0 || effectiveStats.totalComments > 0) && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
             <CardHeader>
@@ -662,25 +668,25 @@ export default function DashboardOverview({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {stats.totalPosts > 0 && (
+                {effectiveStats.totalPosts > 0 && (
                   <ProgressStat
                     label="Published Posts"
-                    current={stats.publishedPosts}
-                    total={stats.totalPosts}
+                    current={effectiveStats.publishedPosts}
+                    total={effectiveStats.totalPosts}
                   />
                 )}
-                {stats.totalVideos > 0 && (
+                {effectiveStats.totalVideos > 0 && (
                   <ProgressStat
                     label="Featured Videos"
-                    current={stats.featuredVideos}
-                    total={stats.totalVideos}
+                    current={effectiveStats.featuredVideos}
+                    total={effectiveStats.totalVideos}
                   />
                 )}
-                {stats.totalComments > 0 && (
+                {effectiveStats.totalComments > 0 && (
                   <ProgressStat
                     label="Approved Comments"
-                    current={stats.totalComments - stats.pendingComments}
-                    total={stats.totalComments}
+                    current={Math.max(0, effectiveStats.totalComments - effectiveStats.pendingComments)}
+                    total={effectiveStats.totalComments}
                   />
                 )}
               </div>
@@ -697,21 +703,21 @@ export default function DashboardOverview({
             <CardContent>
               <div className="space-y-4">
                 <div className="text-center">
-                  <p className={`text-3xl font-bold ${growthColor}`}>{sign}{Math.abs(stats.monthlyGrowth)}%</p>
+                  <p className={`text-3xl font-bold ${growthColor}`}>{sign}{Math.abs(monthlyGrowth)}%</p>
                   <p className="text-sm text-gray-600">Content Growth</p>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm">Posts total (lifetime)</span>
-                    <span className="text-sm font-medium">{stats.totalPosts}</span>
+                    <span className="text-sm font-medium">{effectiveStats.totalPosts}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Videos created overall</span>
-                    <span className="text-sm font-medium">{stats.totalVideos}</span>
+                    <span className="text-sm font-medium">{effectiveStats.totalVideos}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Views accumulated</span>
-                    <span className="text-sm font-medium">{stats.totalViews.toLocaleString()}</span>
+                    <span className="text-sm font-medium">{effectiveStats.totalViews.toLocaleString()}</span>
                   </div>
                 </div>
               </div>

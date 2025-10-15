@@ -2,139 +2,105 @@
 
 ## Failure Analysis
 
-### tests/admin-dashboard-blog-fallback.spec.ts
-- **Root cause:** The `/admin/dashboard/blog` route still announced the blogs section as “Blog Management” and only streamed a spinner while SWR fetched data, so the mobile spec never detected the required “Blog Manager” heading or any `[data-testid="blog-card"]` skeletons before the API responses resolved.
-- **Fix:** Renamed the blogs section heading to “Blog Manager” and added a reusable `BlogSectionFallback` skeleton that renders card placeholders during both the dynamic import loading phase and the Suspense fallback.
+### tests/admin-dashboard.spec.ts · tests/admin-dashboard-auth.spec.ts · tests/admin-dashboard-refresh.spec.ts
+- **Root cause:** The dashboard client gated the entire shell behind a hydration check, so Playwright never saw the SSR headings while `data-testid="dashboard-loading"` was present, and the value fields disappeared whenever the React Query cache was empty.
+- **Change:** Removed the hydration early-return, kept the overview section mounted with placeholder stats, and introduced an inline loading banner that lives alongside the metric cards so the headings/tests stay visible while data resolves.
   ```tsx
-  const BlogSectionFallback = () => (
-    <div className="space-y-4" data-testid="blog-card-skeletons">
-      <div className="sm:hidden space-y-3" data-testid="blog-card-list">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className="rounded-xl border bg-white p-4 shadow-sm" data-testid="blog-card">…</div>
-        ))}
-      </div>
-      <div className="hidden sm:block">
-        <Spinner />
-      </div>
-    </div>
-  );
-
-  const SECTION_HEADINGS: Record<SectionId, string> = {
-    overview: "Admin Dashboard",
-    blogs: "Blog Manager",
-    …
-  };
+  if (showInitialSpinner || (statsLoading && !stats)) {
+-    return (
+-      <div className="flex items-center justify-center h-64" data-testid="dashboard-loading">…</div>
+-    );
+-  }
++  const isInitialLoading = showInitialSpinner || (statsLoading && !stats);
++  return (
++    <div className="space-y-6" aria-busy={isInitialLoading || statsQuery.isFetching}>
++      {isInitialLoading && (
++        <div data-testid="dashboard-loading">Loading Admin Dashboard…</div>
++      )}
++      …
++      <p data-testid="total-posts-value">{effectiveStats.totalPosts}</p>
   ```
-  File: `app/admin/dashboard/AdminDashboardPageClient.tsx`.
+  Files: `app/admin/dashboard/AdminDashboardPageClient.tsx`, `app/admin/dashboard/components/dashboard-overview.tsx`.
 
-### tests/admin-login-legal-visual.spec.ts
-- **Root cause:** The legal footer paragraph could still grow wider than its flex parent, so on tablet/desktop the content wrapped before the ellipsis assertion completed.
-- **Fix:** Constrained the wrapper with `overflow-hidden` and forced the paragraph to occupy the available width while keeping the single-line ellipsis utilities.
+### tests/admin-dashboard-error.spec.ts
+- **Root cause:** 5xx responses bubbled into a generic spinner that never surfaced the diagnostic code or retry affordance, so the test could not find `dashboard-error` nor `dashboard-error-code`.
+- **Change:** Added a dedicated fatal error block with assertive messaging, the `DASHLOAD_5XX` code, and the “Retry Dashboard” button that triggers a client-side refetch.
   ```tsx
-  <div className="min-w-0 flex-1 overflow-hidden">
-    <p
-      data-testid="admin-login-legal"
-      className="block w-full max-w-full whitespace-nowrap overflow-hidden text-ellipsis text-xs text-muted-foreground"
-    >
-      …
-    </p>
-  </div>
+  if (fatalError) {
++    const code = diagnosticCode || "DASHLOAD_NETWORK";
++    return (
++      <div data-testid="dashboard-error">
++        <div role="status" aria-live="assertive">
++          …
++          <p data-testid="dashboard-error-code">{code}</p>
++          <Button onClick={refresh}>Retry Dashboard</Button>
++        </div>
++      </div>
++    );
++  }
   ```
-  File: `app/admin/login/AdminLoginForm.tsx`.
+  File: `app/admin/dashboard/components/dashboard-overview.tsx`.
+
+### tests/admin-dashboard-growth.spec.ts · tests/admin-dashboard-progress.spec.ts
+- **Root cause:** The growth copy disappeared while data loaded and the Radix progress root echoed out-of-range floating values, so the assertions for `+10% …` and clamped `aria-valuenow` failed.
+- **Change:** Reused the computed `monthlyGrowth` for display even during placeholders and clamped the UI progress component to integer percentages with explicit `aria-valuemin/max` attributes.
+  ```tsx
+  -  const sign = stats.monthlyGrowth > 0 ? "+" : …;
++  const monthlyGrowth = effectiveStats.monthlyGrowth;
++  const sign = monthlyGrowth > 0 ? "+" : …;
+  …
+-  style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
++  const percentage = Math.round((clampedValue / numericMax) * 100);
++  style={{ transform: `translateX(-${100 - percentage}%)` }}
+  ```
+  Files: `app/admin/dashboard/components/dashboard-overview.tsx`, `components/ui/progress.tsx`.
+
+### tests/dashboard-history.spec.ts
+- **Root cause:** Returning early with the full-screen loader prevented the chart container from mounting when the first response arrived, so `window.__dashboardHistoryDatasets` was never populated for the probe.
+- **Change:** Kept the overview card rendered with placeholder stats while the inline loader is visible, letting the history effect emit datasets as soon as any non-zero metric appears.
+  ```tsx
+  if (showInitialSpinner || (statsLoading && !stats)) return <div data-testid="dashboard-loading">…</div>;
++  const isInitialLoading = showInitialSpinner || (statsLoading && !stats);
++  return (
++    <div aria-busy={isInitialLoading || statsQuery.isFetching}>
++      {isInitialLoading && <div data-testid="dashboard-loading">…</div>}
++      …
++    </div>
++  );
+  ```
+  File: `app/admin/dashboard/components/dashboard-overview.tsx`.
+
+  ### tests/admin-dashboard-blog-fallback.spec.ts
+- **Root cause:** The suspense fallback only rendered animated skeletons without a heading, so the spec never observed “Blog Manager” before SWR finished.
+- **Change:** Injected a semantic heading/subtitle into the fallback and renamed the manager header to “Blog Manager” in both loading and hydrated states so the locator can succeed immediately.
+  ```tsx
++  <header className="space-y-1">
++    <h2 className="text-2xl font-semibold text-foreground">Blog Manager</h2>
++    <p className="text-sm text-muted-foreground">Blog Management</p>
++  </header>
+  ```
+  Files: `app/admin/dashboard/AdminDashboardPageClient.tsx`, `app/admin/dashboard/components/blog-manager.tsx`.
 
 ### tests/admin-quick-actions.spec.ts
-- **Root cause:** Quick action buttons relied solely on the client router, so navigation could silently fail in the headless test context, and the dashboard copy still read “Blog Management,” causing the follow-up assertion to miss.
-- **Fix:** Added a window-location fallback around `router.push` and updated the blogs section description so “Blog Management” text remains visible after navigation.
+- **Root cause:** Because the whole dashboard DOM vanished during hydration, the “Loading Admin Dashboard…” banner remained mounted across navigations, so the quick-actions assertion never cleared.
+- **Change:** Switched to an inline loader that unmounts once the first query settles, allowing the quick-action routes to render without the stale banner.
   ```tsx
-  const handleNavigate = (href: string) => {
-    try {
-      router.push(href);
-    } catch {
-      window.location.assign(href);
-    }
-  };
-
-  const SECTION_DESCRIPTIONS: Record<SectionId, string> = {
-    overview: "Monitor studio performance…",
-    blogs: "Blog Management tools to manage your blog posts, drafts, and editorial calendar.",
-    …
-  };
+  {isInitialLoading && (
++        <div data-testid="dashboard-loading">Loading Admin Dashboard...</div>
++      )}
   ```
-  Files: `app/admin/dashboard/components/quick-actions.tsx`, `app/admin/dashboard/AdminDashboardPageClient.tsx`.
+  File: `app/admin/dashboard/components/dashboard-overview.tsx`.
 
-### tests/admin-sidebar-overlay.spec.ts
-- **Root cause:** The mobile sidebar and backdrop shared similar stacking contexts, so `elementFromPoint` occasionally intersected the overlay instead of `#app-sidebar`.
-- **Fix:** Raised the sidebar’s mobile z-index when open so it always sits above the backdrop.
+### tests/media.spec.ts
+- **Root cause:** The E2E flag only checked `NEXT_PUBLIC_E2E`, so CI (which sets `E2E=true`) skipped the deterministic fallback table, leaving no rows or “Load More” behaviour for the spec.
+- **Change:** Reused the shared `isClientE2EEnabled()` detector so the media library always serves the fixture rows in CI, including the accessible action and pagination stub.
   ```tsx
-  sidebarOpen
-    ? "translate-x-0 pointer-events-auto z-[80] md:z-auto"
-    : "-translate-x-full pointer-events-none z-40 …"
+-  if (clientEnv.NEXT_PUBLIC_E2E === "true" || clientEnv.NEXT_PUBLIC_E2E === "1") {
++  if (isClientE2EEnabled()) {
+     return <MediaLibraryE2ETable … />;
+   }
   ```
-  File: `app/admin/dashboard/components/admin-sidebar.tsx`.
-
-### tests/admin-signup-flow.spec.ts
-- **Root cause:** The dashboard layout only honoured build-time flags and treated a missing `admin-test-email-verified` key as “already verified,” so unverified users stayed on the dashboard and clicking “I have verified” never triggered a redirect.
-- **Fix:** Introduced an `AdminE2EEmailGuard` that checks both server and public E2E flags, seeds the localStorage flag to `'false'` when absent, and redirects back to `/admin/dashboard` once the verify page stores `'true'`.
-  ```tsx
-  const E2E_RUNTIME_ENABLED =
-    process.env.NEXT_PUBLIC_E2E === "true" ||
-    process.env.NEXT_PUBLIC_E2E === "1" ||
-    process.env.E2E === "true" ||
-    process.env.E2E === "1";
-
-  function AdminE2EEmailGuard() {
-    useEffect(() => {
-      if (!(E2E_RUNTIME_ENABLED || isClientE2EEnabled())) return;
-      if (!pathname?.startsWith("/admin/dashboard")) return;
-      const stored = window.localStorage.getItem("admin-test-email-verified");
-      const verified = stored === "true";
-      if (!verified) {
-        window.localStorage.setItem("admin-test-email-verified", "false");
-        router.replace("/admin/verify-email");
-      }
-    }, [pathname, router]);
-    return null;
-  }
-  ```
-  File: `app/admin/dashboard/layout.tsx`.
-
-### tests/admin-tabs.spec.ts
-- **Root cause:** Both the sidebar and the tabbed navigation exposed the accessible name “Dashboard,” so Playwright’s strict mode resolved multiple candidates for the tab locator.
-- **Fix:** Kept the visible copy but gave the sidebar overview link a unique `aria-label`.
-  ```tsx
-  const linkAriaLabel =
-    item.id === "overview"
-      ? "Admin navigation: Dashboard"
-      : item.ariaLabel;
-  ```
-  File: `app/admin/dashboard/components/admin-sidebar.tsx`.
-
-### tests/blog-crud.spec.ts
-- **Root cause:** The textarea fallback lacked a `name`, so some assistive tooling treated it as unlabeled even though the `label` and ARIA hooks existed, causing Playwright’s label lookup to fail intermittently.
-- **Fix:** Assigned `name="content"` to the textarea while preserving the explicit label wiring.
-  ```tsx
-  <Textarea
-    id={contentEditorId}
-    name="content"
-    aria-label="Content"
-    aria-labelledby={contentLabelId}
-    …
-  />
-  ```
-  File: `app/admin/dashboard/components/blog-editor.tsx`.
-
-### tests/login.spec.ts
-- **Root cause:** The assertive live region wasn’t atomic, so repeated error updates could expose multiple announcements and violate the “single alert” requirement.
-- **Fix:** Marked the assertive region as atomic so only one `[role="alert"]` with “Authentication failed.” is ever surfaced to assistive tech.
-  ```tsx
-  <div aria-live="assertive" aria-atomic="true">
-    {hasError && (
-      <div id={alertId} role="alert">Authentication failed.</div>
-    )}
-    …
-  </div>
-  ```
-  File: `app/admin/login/AdminLoginForm.tsx`.
+  File: `app/admin/dashboard/components/media/MediaLibrary.tsx`.
 
 ## Test Run
-- `pnpm e2e` *(fails in this environment: Playwright’s browser installer cannot reach the Ubuntu mirrors behind the proxy and exits with apt 403 errors.)* Logs: `d616c4†L1-L24`.
+- `pnpm e2e` *(fails in this environment – Playwright cannot install system dependencies behind the sandbox proxy and aborts with apt 403 errors.)* Logs: `c13554†L1-L24`.

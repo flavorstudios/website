@@ -54,45 +54,52 @@ export function LayoutSlotsRoot({ header, footer, afterMain, children }: LayoutS
 export function LayoutSlots({ header, footer, afterMain, children }: LayoutSlotsProviderProps) {
   const ctx = useContext(LayoutSlotsContext);
   const previousRef = useRef<Partial<LayoutSlotsValue>>({});
+  const setSlots = ctx?.setSlots;
 
   useEffect(() => {
-    if (!ctx) return;
+    if (!setSlots) return;
 
-    const updates: Partial<LayoutSlotsValue> = {};
     const previous: Partial<LayoutSlotsValue> = {};
+    let hasUpdates = false;
 
-    if (typeof header !== "undefined") {
-      previous.header = ctx.slots.header;
-      updates.header = header;
-    }
-    if (typeof footer !== "undefined") {
-      previous.footer = ctx.slots.footer;
-      updates.footer = footer;
-    }
-    if (typeof afterMain !== "undefined") {
-      previous.afterMain = ctx.slots.afterMain;
-      updates.afterMain = afterMain;
-    }
+    setSlots((prev) => {
+      const next: Partial<LayoutSlotsValue> = {};
 
-    const hasUpdates = Object.keys(updates).length > 0;
+      if (typeof header !== "undefined" && header !== prev.header) {
+        previous.header = prev.header;
+        next.header = header;
+      }
+      if (typeof footer !== "undefined" && footer !== prev.footer) {
+        previous.footer = prev.footer;
+        next.footer = footer;
+      }
+      if (typeof afterMain !== "undefined" && afterMain !== prev.afterMain) {
+        previous.afterMain = prev.afterMain;
+        next.afterMain = afterMain;
+      }
 
-    if (hasUpdates) {
+      if (Object.keys(next).length === 0) {
+        previousRef.current = {};
+        return prev;
+      }
+
+      hasUpdates = true;
       previousRef.current = previous;
-      ctx.setSlots((prev) => ({ ...prev, ...updates }));
-    } else {
-      previousRef.current = {};
-    }
+      return { ...prev, ...next };
+    });
 
     return () => {
       if (!hasUpdates) return;
 
       const restore = previousRef.current;
-      ctx.setSlots((prev) => ({
+      if (Object.keys(restore).length === 0) return;
+
+      setSlots((prev) => ({
         ...prev,
         ...restore,
       }));
     };
-  }, [afterMain, ctx, footer, header]);
+  }, [afterMain, footer, header, setSlots]);
 
   return <>{children}</>;
 }

@@ -95,17 +95,26 @@ function normalizeCategories(
   return [];
 }
 
-const normalizeBlogPost = (post: BlogPost): BlogPost => ({
-  ...post,
-  content: ensureHtmlContent(post.content),
-  scheduledFor:
-    typeof post.scheduledFor === "string" && post.scheduledFor.trim().length > 0
-      ? post.scheduledFor
-      : undefined,
-  categories: normalizeCategories(post.categories, post.category),
-  commentCount: typeof post.commentCount === "number" ? post.commentCount : 0,
-  shareCount: typeof post.shareCount === "number" ? post.shareCount : 0,
-});
+const normalizeBlogPost = (post: BlogPost): BlogPost => {
+  const categories = normalizeCategories(post.categories, post.category);
+  const providedCategory =
+    typeof post.category === "string" ? post.category.trim() : "";
+  const category =
+    providedCategory.length > 0 ? providedCategory : categories[0] ?? "";
+
+  return {
+    ...post,
+    content: ensureHtmlContent(post.content),
+    scheduledFor:
+      typeof post.scheduledFor === "string" && post.scheduledFor.trim().length > 0
+        ? post.scheduledFor
+        : undefined,
+    categories,
+    category,
+    commentCount: typeof post.commentCount === "number" ? post.commentCount : 0,
+    shareCount: typeof post.shareCount === "number" ? post.shareCount : 0,
+  };
+};
 
 const FALLBACK_MARKER = Symbol("content-store:fallback");
 

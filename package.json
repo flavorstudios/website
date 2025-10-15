@@ -11,7 +11,6 @@
     "lint": "next lint",
     "test": "jest",
     "e2e:build": "pnpm -s tsx scripts/serve-e2e.ts",
-    "pree2e": "pnpm -s playwright install --with-deps",
     "e2e": "playwright test",
     "visual:update": "pnpm playwright test tests/admin-login-legal-visual.spec.ts --update-snapshots",
     "visual:test": "pnpm playwright test tests/admin-login-legal-visual.spec.ts",
@@ -147,9 +146,7 @@
     "typescript": "^5.8.3",
     "@storybook/addon-a11y": "^8.1.0",
     "@storybook/addon-essentials": "^8.1.0",
-    "@storybook/addon-links": "^8.1.0",
-    "@storybook/nextjs": "^8.1.0",
-    "@storybook/react": "^8.1.0",
+    "i": "^0.3.7",
     "storybook": "^8.1.0",
     "@firebase/rules-unit-testing": "^3.0.0",
     "supertest": "^7.1.1"

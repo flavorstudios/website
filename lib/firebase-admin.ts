@@ -9,8 +9,7 @@ import { serverEnv } from "@/env/server";
 import { logger, debug } from "@/lib/logger";
 import { getAllowedAdminEmails } from "@/lib/admin-allowlist";
 
-// Allow e2e/CI to short-circuit any admin boot (actual auth bypass is implemented in lib/admin-auth.ts)
-export const ADMIN_BYPASS = serverEnv.ADMIN_BYPASS === "true";
+const disableAdmin = process.env.ADMIN_AUTH_DISABLED === '1' || process.env.E2E === 'true';
 
 // === EARLY LOGS FOR ENV DEBUGGING ===
 if (debug) {
@@ -37,7 +36,7 @@ if (debug) {
 let parsedCredentials: ServiceAccount | null = null;
 
 // If we're in bypass mode, skip any initialization work entirely.
-if (ADMIN_BYPASS) {
+if (disableAdmin) {
   if (debug) logger.warn("[Firebase Admin] ADMIN_BYPASS=true — skipping Admin SDK initialization.");
 } else if (!serviceAccountJson) {
   if (debug) {
@@ -89,7 +88,7 @@ if (debug) {
       (parsedCredentials as any).project_id;
     logger.debug("[Firebase Admin] Derived projectId:", projectId);
   }
-  if (!adminEmailsEnv && !ADMIN_BYPASS) {
+  if (!adminEmailsEnv && !disableAdmin) {
     logger.warn("[Firebase Admin] Warning: ADMIN_EMAIL or ADMIN_EMAILS environment variable is missing. Admin routes will deny all access!");
   }
   logger.debug("[Firebase Admin] STARTUP Loaded ADMIN_EMAILS/ADMIN_EMAIL:", adminEmailsEnv);
@@ -102,10 +101,10 @@ export { getAllowedAdminEmails };
 
 // ✅ Export Firebase Admin Services - export undefined if not initialized OR if bypassing
 export const adminAuth: Auth | undefined =
-  !ADMIN_BYPASS && serviceAccountJson && parsedCredentials ? getAuth() : undefined;
+  !disableAdmin && serviceAccountJson && parsedCredentials ? getAuth() : undefined;
 
 export const adminDb: Firestore | undefined =
-  !ADMIN_BYPASS && serviceAccountJson && parsedCredentials ? getFirestore() : undefined;
+  !disableAdmin && serviceAccountJson && parsedCredentials ? getFirestore() : undefined;
 
 /** Quick status helper (never throws) */
 export function isAdminSdkAvailable(): boolean {

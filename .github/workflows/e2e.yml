@@ -1,0 +1,60 @@
+name: E2E
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # ✅ This installs browsers and **system** deps (apt) with sudo safely
+      - name: Install Playwright browsers & OS deps
+        uses: microsoft/playwright-github-action@v1
+
+      - name: Build app (prod)
+        run: pnpm build
+
+      - name: Run E2E tests
+        env:
+          # --- Minimal, safe test env ---
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: '1'
+          E2E: 'true'
+          TEST_MODE: 'true'
+          ADMIN_AUTH_DISABLED: '1'     # make sure your server respects this
+          ADMIN_BYPASS: 'true'
+          NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION: 'false'
+          # Provide a stub service account to satisfy init code paths
+          FIREBASE_SERVICE_ACCOUNT_JSON: |
+            {
+              "type": "service_account",
+              "project_id": "test-project",
+              "private_key_id": "test-key-id",
+              "private_key": "-----BEGIN PRIVATE KEY-----\nMIIB...test\n-----END PRIVATE KEY-----\n",
+              "client_email": "test@example.iam.gserviceaccount.com",
+              "client_id": "1234567890",
+              "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+              "token_uri": "https://oauth2.googleapis.com/token",
+              "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+              "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/test"
+            }
+        run: pnpm e2e

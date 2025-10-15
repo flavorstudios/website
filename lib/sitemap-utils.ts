@@ -14,16 +14,45 @@ export interface SitemapUrl {
 function joinUrl(base: string, path: string): string {
   const trimmed = path.trim();
 
-  // If the path looks like an absolute URL, optionally prefixed with slashes,
-  // treat it as an absolute URL and return it (strip leading slashes).
-  if (/^\/?https?:\/\//i.test(trimmed)) {
-    return trimmed.replace(/^\/+/, "");
+  // Support values like "///https://example.com" where extra leading slashes are present
+  const absoluteMatch = trimmed.match(/^\/+((?:https?:)?\/\/.*)$/i);
+  if (absoluteMatch) {
+    const [, absoluteUrl] = absoluteMatch;
+    // Ensure protocol-relative values preserve the leading double slash
+    if (absoluteUrl.startsWith("//")) {
+      try {
+        const baseUrl = new URL(base);
+        const normalized = `//${absoluteUrl.replace(/^\/+/, "")}`;
+        return `${baseUrl.protocol}${normalized}`;
+      } catch {
+        const normalized = `//${absoluteUrl.replace(/^\/+/, "")}`;
+        return `https:${normalized}`;
+      }
+    }
+    return absoluteUrl;
+  }
+
+  // Already an absolute URL with protocol
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  // Protocol-relative URLs (e.g. //cdn.example.com/path)
+  if (trimmed.startsWith("//")) {
+    try {
+      const baseUrl = new URL(base);
+      const normalized = `//${trimmed.replace(/^\/+/, "")}`;
+      return `${baseUrl.protocol}${normalized}`;
+    } catch {
+      const normalized = `//${trimmed.replace(/^\/+/, "")}`;
+      return `https:${normalized}`;
+    }
   }
 
   try {
-    // If 'path' is already an absolute URL, return as-is
-    new URL(path);
-    return path;
+    // If 'path' is already an absolute URL (including other schemes), return as-is
+    new URL(trimmed);
+    return trimmed;
   } catch {
     // Relative path; join with base.
     const cleanBase = base.replace(/\/*$/, "");

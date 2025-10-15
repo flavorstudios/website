@@ -33,4 +33,46 @@ describe("commentStore.create", () => {
     }
     expect(ids.size).toBe(50);
   });
+
+  it("marks comments as pending when moderation is unavailable", async () => {
+    serverEnv.PERSPECTIVE_API_KEY = undefined;
+    const fetchMock = global.fetch as jest.Mock;
+    fetchMock.mockClear();
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+    const res = await commentStore.create({
+      postId: "1",
+      postType: "blog",
+      content: "hello",
+    });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(res.status).toBe("pending");
+    expect(res.scores).toBeUndefined();
+    expect(warnSpy).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+  });
+
+  it("approves comments when moderation scores are below the threshold", async () => {
+    const fetchMock = global.fetch as jest.Mock;
+    fetchMock.mockResolvedValueOnce({
+      json: async () => ({
+        attributeScores: {
+          TOXICITY: { summaryScore: { value: 0.1 } },
+          INSULT: { summaryScore: { value: 0.05 } },
+          THREAT: { summaryScore: { value: 0 } },
+        },
+      }),
+    } as unknown as Response);
+
+    const res = await commentStore.create({
+      postId: "1",
+      postType: "blog",
+      content: "hello",
+    });
+
+    expect(res.status).toBe("approved");
+    expect(res.scores).toEqual({ toxicity: 0.1, insult: 0.05, threat: 0 });
+  });
 });

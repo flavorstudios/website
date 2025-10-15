@@ -85,44 +85,64 @@ export const commentStore = {
     const THRESHOLD = 0.75;
 
     // --- Perspective Moderation ---
-    let moderation: PerspectiveResponse = {};
-    try {
-      moderation = await fetch(
-        `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            comment: { text: comment.content },
-            requestedAttributes: {
-              TOXICITY: {},
-              INSULT: {},
-              THREAT: {},
-            },
-            doNotStore: true,
-          }),
-        }
-      ).then((res) => res.json());
-    } catch (error) {
-      console.error("Perspective API failed:", error);
-      throw new Error("Comment moderation failed");
+    let moderation: PerspectiveResponse | null = null;
+
+    if (!PERSPECTIVE_API_KEY) {
+      console.warn(
+        "Perspective API key not configured; comments will require manual review.",
+      );
+    } else {
+      try {
+        moderation = await fetch(
+          `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_API_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              comment: { text: comment.content },
+              requestedAttributes: {
+                TOXICITY: {},
+                INSULT: {},
+                THREAT: {},
+              },
+              doNotStore: true,
+            }),
+          },
+        ).then((res) => res.json());
+      } catch (error) {
+        console.error("Perspective API failed:", error);
+        throw new Error("Comment moderation failed");
+      }
     }
 
     // --- Access moderation scores from strongly typed response
-    const attr = moderation.attributeScores;
+    const attr = moderation?.attributeScores;
 
-    const scores = {
-      toxicity: attr?.TOXICITY?.summaryScore.value ?? 0,
-      insult: attr?.INSULT?.summaryScore.value ?? 0,
-      threat: attr?.THREAT?.summaryScore.value ?? 0,
-    };
+    const toxicity = attr?.TOXICITY?.summaryScore.value;
+    const insult = attr?.INSULT?.summaryScore.value;
+    const threat = attr?.THREAT?.summaryScore.value;
+
+    const hasScores =
+      typeof toxicity === "number" ||
+      typeof insult === "number" ||
+      typeof threat === "number";
+
+    const scores = hasScores
+      ? {
+          toxicity: toxicity ?? 0,
+          insult: insult ?? 0,
+          threat: threat ?? 0,
+        }
+      : undefined;
 
     const isFlagged =
-      scores.toxicity > THRESHOLD ||
-      scores.insult > THRESHOLD ||
-      scores.threat > THRESHOLD;
+      !!scores &&
+      (scores.toxicity > THRESHOLD ||
+        scores.insult > THRESHOLD ||
+        scores.threat > THRESHOLD);
 
-    const status: Comment["status"] = isFlagged ? "pending" : "approved";
+    const status: Comment["status"] =
+      hasScores && !isFlagged ? "approved" : "pending";
 
     // --- Ensure all required fields are present for Comment type ---
     const newComment = {
@@ -130,7 +150,7 @@ export const commentStore = {
       id: randomUUID(),
       createdAt: new Date().toISOString(),
       status,
-      scores,
+      ...(scores ? { scores } : {}),
     } as Comment;
 
     try {

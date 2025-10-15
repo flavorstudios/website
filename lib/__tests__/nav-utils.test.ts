@@ -28,4 +28,10 @@ describe("isActive", () => {
   it("returns false when href is undefined", () => {
     expect(isActive("/blog")).toBe(false)
   })
+
+  it("ignores query strings and hashes when determining activity", () => {
+    expect(isActive("/blog", "/blog?page=2")).toBe(true)
+    expect(isActive("/blog/article", "/blog#top")).toBe(true)
+    expect(isActive("/blog", "/blog?category=dev#section")).toBe(true)
+  })
 })

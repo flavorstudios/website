@@ -3,6 +3,20 @@ function normalizePath(value: string): string {
     return "/";
   }
 
+  // Strip any query string or hash fragment before we normalize the path.
+  const queryIndex = value.indexOf("?");
+  const hashIndex = value.indexOf("#");
+  const cutIndex =
+    queryIndex === -1
+      ? hashIndex
+      : hashIndex === -1
+        ? queryIndex
+        : Math.min(queryIndex, hashIndex);
+
+  if (cutIndex !== -1) {
+    value = value.slice(0, cutIndex);
+  }
+
   if (!value.startsWith("/")) {
     value = `/${value}`;
   }

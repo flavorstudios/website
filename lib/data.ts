@@ -76,13 +76,31 @@ function normalizeCategories(
   return [];
 }
 
+function extractCollection<T>(value: unknown, key: string): T[] {
+  if (Array.isArray(value)) {
+    return value as T[];
+  }
+
+  if (
+    value &&
+    typeof value === "object" &&
+    key in value &&
+    Array.isArray((value as Record<string, unknown>)[key])
+  ) {
+    return (value as Record<string, unknown>)[key] as T[];
+  }
+
+  return [];
+}
+
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     const response = await fetch(`${baseUrl}/api/blogs`, { cache: "no-store" }); // <-- Codex update
     if (response.ok) {
       const posts = await response.json();
+      const blogPosts = extractCollection<BlogPost>(posts, "posts");
       // Always expose .categories[] and .commentCount for every post
-      return (Array.isArray(posts) ? posts : []).map((post: BlogPost) => ({
+      return blogPosts.map((post: BlogPost) => ({
         ...post,
         categories: normalizeCategories(post.categories, post.category),
         commentCount: typeof post.commentCount === "number" ? post.commentCount : 0, // <--- Codex!
@@ -102,8 +120,9 @@ export async function getVideos(): Promise<Video[]> {
     const response = await fetch(`${baseUrl}/api/videos`, { cache: "no-store" }); // <-- Codex update
     if (response.ok) {
       const videos = await response.json();
+      const videoItems = extractCollection<Video>(videos, "videos");
       // Always expose .categories[] for every video
-      return (Array.isArray(videos) ? videos : []).map((video: Video) => ({
+      return videoItems.map((video: Video) => ({
         ...video,
         categories: normalizeCategories(video.categories, video.category),
       }));

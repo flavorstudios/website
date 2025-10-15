@@ -35,6 +35,7 @@ import {
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { cn } from "@/lib/utils";
 import { E2E_DASHBOARD_HISTORY } from "@/lib/e2e-fixtures";
+import { isClientE2EEnabled } from "@/lib/e2e-utils";
 
 // Lazy sections via central registry
 const DashboardOverview = dynamic(
@@ -97,7 +98,7 @@ const NAV: { id: SectionId; href: string; title: string }[] = [
 
 const SECTION_HEADINGS: Record<SectionId, string> = {
   overview: "Admin Dashboard",
-  blogs: "Blog Manager",
+  blogs: "Blog Management",
   videos: "Video Manager",
   media: "Media Manager",
   categories: "Categories",
@@ -196,15 +197,11 @@ export default function AdminDashboardPageClient({
   );
 
   useEffect(() => {
-    const e2eEnabled =
-      process.env.NEXT_PUBLIC_E2E === "true" ||
-      process.env.NEXT_PUBLIC_E2E === "1" ||
-      process.env.E2E === "true" ||
-      process.env.E2E === "1";
-    if (e2eEnabled && typeof window !== "undefined") {
-      if (window.__dashboardHistoryDatasets == null) {
-        window.__dashboardHistoryDatasets = E2E_DASHBOARD_HISTORY;
-      }
+    if (typeof window === "undefined" || !isClientE2EEnabled()) {
+      return;
+    }
+    if (window.__dashboardHistoryDatasets == null) {
+      window.__dashboardHistoryDatasets = E2E_DASHBOARD_HISTORY;
     }
   }, []);
 

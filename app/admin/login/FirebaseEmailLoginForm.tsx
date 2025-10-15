@@ -157,15 +157,17 @@ export default function FirebaseEmailLoginForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       <div className="min-h-[1.5rem] space-y-2">
-        {inlineErrorId && formError && (
-          <p
-            id={inlineErrorId}
-            aria-live="assertive"
-            className="text-sm text-red-600"
-          >
-            {formError}
-          </p>
-        )}
+        <div aria-live="assertive">
+          {inlineErrorId && formError && (
+            <div
+              id={inlineErrorId}
+              role="alert"
+              className="text-sm text-red-600"
+            >
+              {formError}
+            </div>
+          )}
+        </div>
         {infoNotice && (
           <p className="text-sm text-slate-600" role="status" aria-live="polite">
             {infoNotice}

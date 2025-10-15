@@ -141,7 +141,7 @@ export function AdminSidebar({
           ? "fixed inset-y-0 left-0 transition-transform duration-300 ease-in-out"
           : "sticky top-0",
         sidebarOpen
-          ? "translate-x-0 pointer-events-auto z-[60] md:z-auto"
+          ? "translate-x-0 pointer-events-auto z-[70] md:z-auto"
           : "-translate-x-full pointer-events-none z-40 md:translate-x-0 md:pointer-events-auto md:z-auto",
         sidebarOpen ? "w-64 md:w-64" : "w-64 md:w-20"
       )}
@@ -202,6 +202,10 @@ export function AdminSidebar({
             {filteredNavItems.map((item) => {
               const active = item.id === activeId
               const Icon = item.icon
+              const linkAriaLabel =
+                item.id === "overview"
+                  ? "Nav: Dashboard"
+                  : item.ariaLabel;
 
               return (
                 <Button
@@ -229,7 +233,7 @@ export function AdminSidebar({
                     <Link
                       href={item.href}
                       className="flex items-center w-full"
-                      aria-label={item.ariaLabel ?? item.label}
+                      aria-label={linkAriaLabel}
                       aria-current={active ? "page" : undefined}
                       title={!sidebarOpen ? item.label : undefined}
                       onClick={(event) => {

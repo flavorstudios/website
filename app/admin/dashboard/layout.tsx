@@ -4,24 +4,19 @@ import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
-
-const isE2EEnvironment =
-  process.env.NEXT_PUBLIC_E2E === "1" ||
-  process.env.NEXT_PUBLIC_E2E?.toLowerCase() === "true" ||
-  process.env.E2E === "1" ||
-  process.env.E2E?.toLowerCase() === "true";
+import { isClientE2EEnabled } from "@/lib/e2e-utils";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isE2EEnvironment || typeof window === "undefined") {
+    if (typeof window === "undefined" || !isClientE2EEnabled()) {
       return;
     }
 
-    const verified = window.localStorage.getItem("admin-test-email-verified") === "true";
-    if (!verified && pathname?.startsWith("/admin/dashboard")) {
+    const status = window.localStorage.getItem("admin-test-email-verified");
+    if (status === "false" && pathname?.startsWith("/admin/dashboard")) {
       router.replace("/admin/verify-email");
     }
   }, [pathname, router]);

@@ -19,7 +19,13 @@ export function QuickActions() {
   const router = useRouter()
 
   const handleNavigate = (href: string) => {
-    router.push(href)
+    try {
+      router.push(href)
+    } catch {
+      if (typeof window !== "undefined") {
+        window.location.assign(href)
+      }
+    }
   }
 
   return (

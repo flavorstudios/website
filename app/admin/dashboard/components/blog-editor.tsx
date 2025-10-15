@@ -801,6 +801,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                 {isE2E ? (
                   <Textarea
                     id={contentEditorId}
+                    name="content"
                     value={post.content}
                     onChange={(event) =>
                       setPost((prev) => ({ ...prev, content: event.target.value }))

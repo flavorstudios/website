@@ -6,7 +6,45 @@ export const DEFAULT_ADMIN_ROUTE_PREFIXES = [
 ];
 
 function normalizeHost(host: string): string {
-  return host.replace(/^https?:\/\//, "").replace(/\/$/, "").toLowerCase();
+  const trimmed = host.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  const attempts = new Set<string>();
+
+  // Strings that already include a scheme can be parsed directly.
+  attempts.add(trimmed);
+
+  // Most host headers won't include a protocol, so try a standard http URL.
+  attempts.add(trimmed.startsWith("//") ? `http:${trimmed}` : `http://${trimmed}`);
+
+  // IPv6 host headers may omit square brackets. Wrap them so URL can parse.
+  if (trimmed.includes(":") && !trimmed.includes(".") && !trimmed.includes("[")) {
+    attempts.add(`http://[${trimmed}]`);
+  }
+
+  for (const candidate of attempts) {
+    try {
+      const url = new URL(candidate);
+      if (url.hostname) {
+        return url.hostname.toLowerCase();
+      }
+    } catch {
+      // Try next candidate
+    }
+  }
+
+  const withoutProto = trimmed
+    .replace(/^https?:\/\//, "")
+    .replace(/\/+$/, "");
+
+  const withoutBrackets =
+    withoutProto.startsWith("[") && withoutProto.endsWith("]")
+      ? withoutProto.slice(1, -1)
+      : withoutProto;
+
+  return withoutBrackets.replace(/:\d+$/, "").toLowerCase();
 }
 
 export function isAdminRoute(path: string, prefixes: string[] = DEFAULT_ADMIN_ROUTE_PREFIXES): boolean {
@@ -14,7 +52,7 @@ export function isAdminRoute(path: string, prefixes: string[] = DEFAULT_ADMIN_RO
 }
 
 export function isAllowedDomain(host: string, allowed: string[]): boolean {
-  const h = host.toLowerCase();
+  const h = normalizeHost(host);
   return allowed.some((d) => {
     const domain = normalizeHost(d);
     return h === domain || h.endsWith(`.${domain}`);

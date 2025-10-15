@@ -23,7 +23,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import Spinner from "@/components/ui/spinner";
 import MobileNav from "./components/mobile-nav";
 import { SectionId } from "./sections";
-import { BlogManager } from "./components";
 import { AdminTabs } from "./components/admin-tabs";
 import {
   Dialog,
@@ -37,10 +36,93 @@ import { cn } from "@/lib/utils";
 import { E2E_DASHBOARD_HISTORY } from "@/lib/e2e-fixtures";
 import { isClientE2EEnabled } from "@/lib/e2e-utils";
 
+const BlogSectionFallback = () => (
+  <div className="space-y-4" data-testid="blog-card-skeletons">
+    <div className="sm:hidden space-y-3" data-testid="blog-card-list">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div
+          className="h-4 w-4 rounded border border-muted bg-muted/60 animate-pulse"
+          aria-hidden="true"
+        />
+        <div
+          className="h-3 w-20 rounded bg-muted animate-pulse"
+          aria-hidden="true"
+        />
+      </div>
+
+      {Array.from({ length: 3 }).map((_, index) => (
+        <div
+          key={index}
+          className="rounded-xl border bg-white p-4 shadow-sm"
+          data-testid="blog-card"
+        >
+          <div className="flex items-start gap-3">
+            <div
+              className="mt-1 h-4 w-4 rounded border border-muted bg-muted/60 animate-pulse"
+              aria-hidden="true"
+            />
+            <div className="flex flex-1 flex-col gap-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-1 items-start gap-3">
+                  <div
+                    className="h-12 w-16 flex-shrink-0 rounded bg-muted animate-pulse"
+                    aria-hidden="true"
+                  />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div
+                      className="h-4 w-3/4 rounded bg-muted animate-pulse"
+                      aria-hidden="true"
+                    />
+                    <div
+                      className="h-3 w-1/2 rounded bg-muted animate-pulse"
+                      aria-hidden="true"
+                    />
+                  </div>
+                </div>
+                <div
+                  className="h-9 w-9 rounded bg-muted animate-pulse"
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <div
+                  className="h-3 w-16 rounded bg-muted animate-pulse"
+                  aria-hidden="true"
+                />
+                <div
+                  className="h-3 w-3 rounded-full bg-muted animate-pulse"
+                  aria-hidden="true"
+                />
+                <div
+                  className="h-3 w-12 rounded bg-muted animate-pulse"
+                  aria-hidden="true"
+                />
+                <div
+                  className="h-5 w-16 rounded-full bg-muted animate-pulse"
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <div className="hidden sm:block">
+      <Spinner />
+    </div>
+  </div>
+);
+
 // Lazy sections via central registry
 const DashboardOverview = dynamic(
   () => import("./components").then((m) => m.DashboardOverview),
   { ssr: false, loading: () => <Spinner /> }
+);
+const BlogManagerSection = dynamic(
+  () => import("./components").then((m) => m.BlogManager),
+  { ssr: false, loading: () => <BlogSectionFallback /> }
 );
 const VideoManager = dynamic(
   () => import("./components").then((m) => m.VideoManager),
@@ -98,7 +180,7 @@ const NAV: { id: SectionId; href: string; title: string }[] = [
 
 const SECTION_HEADINGS: Record<SectionId, string> = {
   overview: "Admin Dashboard",
-  blogs: "Blog Management",
+  blogs: "Blog Manager",
   videos: "Video Manager",
   media: "Media Manager",
   categories: "Categories",
@@ -112,7 +194,7 @@ const SECTION_HEADINGS: Record<SectionId, string> = {
 
 const SECTION_DESCRIPTIONS: Record<SectionId, string> = {
   overview: "Monitor studio performance and recent activity at a glance.",
-  blogs: "Manage your blog posts, drafts, and editorial calendar.",
+  blogs: "Blog Management tools to manage your blog posts, drafts, and editorial calendar.",
   videos: "Track published videos and plan upcoming releases.",
   media: "Organize and review your media assets before publishing.",
   categories: "Maintain categories to improve content discovery.",
@@ -489,7 +571,7 @@ export default function AdminDashboardPageClient({
           />
         );
       case "blogs":
-        return <BlogManager key="blogs" />;
+        return <BlogManagerSection key="blogs" />;
       case "videos":
         return <VideoManager key="videos" />;
       case "media":
@@ -615,7 +697,17 @@ export default function AdminDashboardPageClient({
                   )}
 
                   <ErrorBoundary>
-                    <Suspense fallback={<Spinner />}>{renderContent()}</Suspense>
+                    <Suspense
+                      fallback={
+                        activeSection === "blogs" ? (
+                          <BlogSectionFallback />
+                        ) : (
+                          <Spinner />
+                        )
+                      }
+                    >
+                      {renderContent()}
+                    </Suspense>
                   </ErrorBoundary>
 
                   {/* ARIA live region for section changes */}

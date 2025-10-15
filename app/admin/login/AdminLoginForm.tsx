@@ -276,7 +276,7 @@ export default function AdminLoginForm() {
                   : "Use legacy admin password (env-based)"}
               </Button>
             )}
-            <div aria-live="assertive">
+            <div aria-live="assertive" aria-atomic="true">
               {hasError && (
                 <div
                   id={alertId}
@@ -349,9 +349,9 @@ export default function AdminLoginForm() {
                 Sign up
               </Link>
             </p>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 overflow-hidden">
               <p
-                className="block min-w-0 max-w-full whitespace-nowrap overflow-hidden text-ellipsis text-xs text-muted-foreground"
+                className="block w-full max-w-full whitespace-nowrap overflow-hidden text-ellipsis text-xs text-muted-foreground"
                 data-testid="admin-login-legal"
               >
                 © Flavor Studios ·{' '}

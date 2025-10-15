@@ -4,6 +4,7 @@ import { SITE_BRAND_TWITTER, SITE_NAME, SITE_URL } from "@/lib/constants";
 import ForgotPasswordForm from "./ForgotPasswordForm";
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export const metadata = getMetadata({
   title: `Reset Admin Password – ${SITE_NAME}`,

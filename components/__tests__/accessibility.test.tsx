@@ -1,10 +1,10 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { axe, toHaveNoViolations } from "jest-axe";
 
-expect.extend(toHaveNoViolations);
-
 import EmailLoginForm from "@/app/admin/login/EmailLoginForm";
+
+expect.extend(toHaveNoViolations);
 
 describe("Accessibility", () => {
   it("EmailLoginForm should have no axe violations", async () => {
@@ -14,7 +14,10 @@ describe("Accessibility", () => {
     };
 
     const { container } = render(<Wrapper />);
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+
+    await waitFor(async () => {
+        const results = await axe(container);
+        expect(results).toHaveNoViolations();
+    });
   });
 });

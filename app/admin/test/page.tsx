@@ -7,6 +7,9 @@ import Link from "next/link";
 // Change: import requireAdminAction instead of requireAdmin
 import { requireAdminAction } from "@/lib/admin-auth";
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 // === SEO METADATA (noindex for internal pages, but still structured) ===
 export const metadata = getMetadata({
   title: `Admin Test – ${SITE_NAME}`,
@@ -40,7 +43,8 @@ export const metadata = getMetadata({
 export default async function AdminTest() {
   // Secure: Only show page if session is authenticated via Firebase
   const cookieStore = await cookies(); // Await here
-  const session = cookieStore.get("admin-session");
+  const session = cookieStore.get("admin-session
+  ");
 
   // CHANGE: Use requireAdminAction (no params)
   const isAuthenticated = session?.value

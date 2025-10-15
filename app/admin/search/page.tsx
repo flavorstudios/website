@@ -11,6 +11,7 @@ interface PageProps {
 }
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export const metadata = getMetadata({
   title: `${SITE_NAME} Admin Search`,

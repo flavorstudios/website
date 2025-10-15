@@ -1,6 +1,7 @@
 import 'whatwg-fetch';
 import '@testing-library/jest-dom';
 import React from 'react';
+import './test-utils/dom-mocks';
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -32,6 +33,18 @@ process.env["NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"] = 'test'
 process.env["NEXT_PUBLIC_FIREBASE_APP_ID"] = 'test'
 process.env.BASE_URL = 'http://localhost'
 process.env.NEXT_DISABLE_MINIFY = 'true'
+
+// Silence optional client env var warnings
+process.env.NEXT_PUBLIC_E2E = process.env.NEXT_PUBLIC_E2E ?? "false";
+process.env.NEXT_PUBLIC_GTM_CONTAINER_ID = process.env.NEXT_PUBLIC_GTM_CONTAINER_ID ?? "GTM-TEST";
+process.env.NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER = process.env.NEXT_PUBLIC_ENABLE_GTM_COOKIE_BANNER ?? "false";
+process.env.NEXT_PUBLIC_COOKIEYES_ID = process.env.NEXT_PUBLIC_COOKIEYES_ID ?? "cookieyes-test";
+process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY ?? "vapid-test";
+process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID ?? "G-TEST";
+process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES = process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES ?? "/admin";
+process.env.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS = process.env.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS ?? "{}";
+process.env.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION = process.env.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION ?? "false";
+process.env.NEXT_PUBLIC_TEST_MODE = process.env.NEXT_PUBLIC_TEST_MODE ?? "true";
 
 jest.mock('@/components/ui/calendar', () => ({
   Calendar: ({ onSelect }: { onSelect?: (date: Date) => void }) =>

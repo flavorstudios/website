@@ -9,7 +9,10 @@ import { serverEnv } from "@/env/server";
 import { logger, debug } from "@/lib/logger";
 import { getAllowedAdminEmails } from "@/lib/admin-allowlist";
 
-const disableAdmin = process.env.ADMIN_AUTH_DISABLED === '1' || process.env.E2E === 'true';
+export const ADMIN_BYPASS = serverEnv.ADMIN_BYPASS === "true";
+
+const disableAdmin =
+  ADMIN_BYPASS || serverEnv.ADMIN_AUTH_DISABLED === "1" || process.env.E2E === "true";
 
 // === EARLY LOGS FOR ENV DEBUGGING ===
 if (debug) {

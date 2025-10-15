@@ -339,7 +339,7 @@ export default function AdminLoginForm() {
               )}
             </Button>
           </div>
-          <div className="login-legal-bar flex min-w-0 flex-col gap-3 text-left sm:flex-row sm:items-center sm:justify-between">
+          <div className="login-legal-bar flex min-w-0 flex-col items-center gap-3 text-left sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-slate-600 flex-shrink-0">
               Don&apos;t have an account?{' '}
               <Link
@@ -351,7 +351,7 @@ export default function AdminLoginForm() {
             </p>
             <div className="min-w-0 flex-1 overflow-hidden">
               <p
-                className="block w-full max-w-full whitespace-nowrap overflow-hidden text-ellipsis text-xs text-muted-foreground"
+                className="block max-w-full whitespace-nowrap overflow-hidden text-ellipsis text-xs text-muted-foreground"
                 data-testid="admin-login-legal"
               >
                 © Flavor Studios ·{' '}

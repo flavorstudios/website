@@ -38,8 +38,8 @@ import { isClientE2EEnabled } from "@/lib/e2e-utils";
 
 const BlogSectionFallback = () => (
   <div className="space-y-4" data-testid="blog-card-skeletons">
-    <header className="space-y-1">
-      <h2 className="text-2xl font-semibold text-foreground">Blog Manager</h2>
+    <header className="space-y-1" aria-hidden="true">
+      <p className="text-2xl font-semibold text-foreground">Blog Manager</p>
       <p className="text-sm text-muted-foreground">Blog Management</p>
     </header>
     <div className="sm:hidden space-y-3" data-testid="blog-card-list">
@@ -617,7 +617,6 @@ export default function AdminDashboardPageClient({
                 aria-label="Close sidebar"
                 onClick={() => setSidebarOpen(false)}
                 className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-                style={{ left: "var(--sidebar-w,16rem)" }}
               />
             )}
 

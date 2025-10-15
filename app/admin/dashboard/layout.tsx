@@ -32,7 +32,7 @@ function AdminE2EEmailGuard() {
     let verified = false;
     try {
       const stored = window.localStorage.getItem("admin-test-email-verified");
-      if (stored === "true") {
+      if (stored === "true" || stored === "1") {
         verified = true;
       } else {
         window.localStorage.setItem("admin-test-email-verified", "false");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, useId } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -105,6 +105,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   const contentEditorId = "blog-post-content-editor";
   const contentLabelId = `${contentEditorId}-label`;
   const contentHeadingId = `${contentEditorId}-heading`;
+  const titleFieldId = useId();
+  const slugFieldId = useId();
+  const excerptFieldId = useId();
   const isE2E =
     clientEnv.NEXT_PUBLIC_E2E === "1" ||
     clientEnv.NEXT_PUBLIC_E2E === "true" ||
@@ -746,8 +749,11 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
             <Card>
               <CardContent className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Title</label>
+                  <Label htmlFor={titleFieldId} className="mb-2 block text-sm font-medium">
+                    Title
+                  </Label>
                   <Input
+                    id={titleFieldId}
                     value={post.title}
                     onChange={(e) => setPost((prev) => ({ ...prev, title: e.target.value }))}
                     placeholder="Enter your blog post title..."
@@ -755,8 +761,11 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Slug</label>
+                  <Label htmlFor={slugFieldId} className="mb-2 block text-sm font-medium">
+                    Slug
+                  </Label>
                   <Input
+                    id={slugFieldId}
                     value={post.slug}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -772,8 +781,11 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Excerpt</label>
+                  <Label htmlFor={excerptFieldId} className="mb-2 block text-sm font-medium">
+                    Excerpt
+                  </Label>
                   <Textarea
+                    id={excerptFieldId}
                     value={post.excerpt}
                     onChange={(e) => setPost((prev) => ({ ...prev, excerpt: e.target.value }))}
                     placeholder="Brief description of your post..."

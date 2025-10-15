@@ -203,9 +203,7 @@ export function AdminSidebar({
               const active = item.id === activeId
               const Icon = item.icon
               const linkAriaLabel =
-                item.id === "overview"
-                  ? "Admin navigation: Dashboard"
-                  : item.ariaLabel;
+                item.id === "overview" ? "Admin navigation" : item.ariaLabel;
 
               return (
                 <Button
@@ -236,6 +234,7 @@ export function AdminSidebar({
                       aria-label={linkAriaLabel}
                       aria-current={active ? "page" : undefined}
                       title={!sidebarOpen ? item.label : undefined}
+                      tabIndex={isHidden ? -1 : undefined}
                       onClick={(event) => {
                         if (onNavigateSection) {
                           event.preventDefault()
@@ -248,7 +247,12 @@ export function AdminSidebar({
                       <Icon className={`h-5 w-5 flex-shrink-0 ${sidebarOpen ? "mr-3" : ""}`} aria-hidden="true" />
                       {sidebarOpen && (
                         <>
-                          <span className="flex-1 text-left text-sm truncate">{item.label}</span>
+                          <span
+                            className="flex-1 text-left text-sm truncate"
+                            aria-hidden={item.id === "overview" ? true : undefined}
+                          >
+                            {item.label}
+                          </span>
                           {item.count && (
                             <Badge
                               variant="secondary"

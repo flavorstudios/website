@@ -302,6 +302,12 @@ export default function DashboardOverview({
     (m) => m.posts || m.videos || m.comments,
   );
 
+  const shouldShowHistoryCard =
+    hasActivity ||
+    effectiveStats.totalPosts > 0 ||
+    effectiveStats.totalVideos > 0 ||
+    effectiveStats.totalComments > 0;
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!hasActivity) {
@@ -338,7 +344,11 @@ export default function DashboardOverview({
   if (fatalError) {
     const code = diagnosticCode || "DASHLOAD_NETWORK";
     return (
-      <div className="flex h-64 items-center justify-center" data-testid="dashboard-error">
+      <div
+        className="flex h-64 items-center justify-center"
+        role="banner"
+        data-testid="dashboard-error"
+      >
         <div
           className="max-w-md rounded-xl border border-red-200 bg-red-50 px-6 py-5 text-center shadow-sm"
           role="status"
@@ -346,10 +356,14 @@ export default function DashboardOverview({
         >
           <h2 className="mb-2 text-xl font-semibold text-red-700">Dashboard data unavailable</h2>
           <p className="mb-3 text-red-600">Unable to load dashboard data. Please try again.</p>
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-red-500" data-testid="dashboard-error-code">
+          <p
+            className="mb-4 text-xs font-semibold uppercase tracking-wide text-red-500"
+            data-testid="dashboard-error-code"
+          >
             {code}
           </p>
           <Button
+            type="button"
             onClick={refresh}
             className="rounded-xl bg-orange-800 text-white hover:bg-orange-900"
           >
@@ -549,7 +563,7 @@ export default function DashboardOverview({
       </div>
 
       {/* 12-Month Activity Chart */}
-      {stats && stats.history && hasActivity && (
+      {stats && shouldShowHistoryCard && (
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -559,7 +573,18 @@ export default function DashboardOverview({
           </CardHeader>
           <CardContent>
             <div className="h-64">
-              <Bar ref={chartRef} data={chartData} options={chartOptions} />
+              {hasActivity ? (
+                <Bar
+                  ref={chartRef}
+                  data={chartData}
+                  options={chartOptions}
+                  aria-label="Posts, Videos & Comments (12 months) chart"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-muted-foreground text-center">
+                  Historical engagement data will appear once your content starts getting views.
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -657,7 +682,7 @@ export default function DashboardOverview({
       </div>
 
       {/* Content Performance - Only show if there's actual content */}
-      {(effectiveStats.totalPosts > 0 || effectiveStats.totalVideos > 0 || effectiveStats.totalComments > 0) && (
+      {stats && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
             <CardHeader>
@@ -668,27 +693,21 @@ export default function DashboardOverview({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {effectiveStats.totalPosts > 0 && (
-                  <ProgressStat
-                    label="Published Posts"
-                    current={effectiveStats.publishedPosts}
-                    total={effectiveStats.totalPosts}
-                  />
-                )}
-                {effectiveStats.totalVideos > 0 && (
-                  <ProgressStat
-                    label="Featured Videos"
-                    current={effectiveStats.featuredVideos}
-                    total={effectiveStats.totalVideos}
-                  />
-                )}
-                {effectiveStats.totalComments > 0 && (
-                  <ProgressStat
-                    label="Approved Comments"
-                    current={Math.max(0, effectiveStats.totalComments - effectiveStats.pendingComments)}
-                    total={effectiveStats.totalComments}
-                  />
-                )}
+                <ProgressStat
+                  label="Published Posts"
+                  current={effectiveStats.publishedPosts}
+                  total={effectiveStats.totalPosts}
+                />
+                <ProgressStat
+                  label="Featured Videos"
+                  current={effectiveStats.featuredVideos}
+                  total={effectiveStats.totalVideos}
+                />
+                <ProgressStat
+                  label="Approved Comments"
+                  current={Math.max(0, effectiveStats.totalComments - effectiveStats.pendingComments)}
+                  total={effectiveStats.totalComments}
+                />
               </div>
             </CardContent>
           </Card>

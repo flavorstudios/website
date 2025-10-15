@@ -103,6 +103,7 @@ function MediaLibraryE2ETable({
                   <button
                     type="button"
                     className="text-sm font-medium text-primary hover:underline"
+                    aria-label={`${row.actionLabel} ${row.name}`}
                     onClick={() => {
                       onSelect?.(row.url);
                       onDetailsOpenChange?.(true);

@@ -2,105 +2,178 @@
 
 ## Failure Analysis
 
-### tests/admin-dashboard.spec.ts · tests/admin-dashboard-auth.spec.ts · tests/admin-dashboard-refresh.spec.ts
-- **Root cause:** The dashboard client gated the entire shell behind a hydration check, so Playwright never saw the SSR headings while `data-testid="dashboard-loading"` was present, and the value fields disappeared whenever the React Query cache was empty.
-- **Change:** Removed the hydration early-return, kept the overview section mounted with placeholder stats, and introduced an inline loading banner that lives alongside the metric cards so the headings/tests stay visible while data resolves.
+### tests/admin-dashboard.spec.ts · tests/admin-dashboard-auth.spec.ts · tests/admin-dashboard-refresh.spec.ts · tests/admin-quick-actions.spec.ts
+- **Root cause:** The overview card only rendered when historical analytics existed, so a data-less boot left the dashboard shell blank and the inline loader never cleared, which also blocked quick-action navigations from surfacing their destination headings.
+- **Change:** Keep the overview card mounted whenever any metric is non-zero and swap the chart body to a textual placeholder when the 12-month dataset is empty so the shell, metrics grid, and loader remain visible while data hydrates.
   ```tsx
-  if (showInitialSpinner || (statsLoading && !stats)) {
--    return (
--      <div className="flex items-center justify-center h-64" data-testid="dashboard-loading">…</div>
--    );
--  }
-+  const isInitialLoading = showInitialSpinner || (statsLoading && !stats);
-+  return (
-+    <div className="space-y-6" aria-busy={isInitialLoading || statsQuery.isFetching}>
-+      {isInitialLoading && (
-+        <div data-testid="dashboard-loading">Loading Admin Dashboard…</div>
-+      )}
-+      …
-+      <p data-testid="total-posts-value">{effectiveStats.totalPosts}</p>
+-      {stats && stats.history && hasActivity && (
++      {stats && shouldShowHistoryCard && (
+         <Card className="hover:shadow-lg transition-shadow">
+           <CardContent>
+-            <div className="h-64">
+-              <Bar ref={chartRef} data={chartData} options={chartOptions} />
+-            </div>
++            <div className="h-64">
++              {hasActivity ? (
++                <Bar
++                  ref={chartRef}
++                  data={chartData}
++                  options={chartOptions}
++                  aria-label="Posts, Videos & Comments (12 months) chart"
++                />
++              ) : (
++                <div className="flex h-full items-center justify-center text-sm text-muted-foreground text-center">
++                  Historical engagement data will appear once your content starts getting views.
++                </div>
++              )}
+           </CardContent>
+         </Card>
+       )}
   ```
-  Files: `app/admin/dashboard/AdminDashboardPageClient.tsx`, `app/admin/dashboard/components/dashboard-overview.tsx`.
+  Files: `app/admin/dashboard/components/dashboard-overview.tsx`.
 
 ### tests/admin-dashboard-error.spec.ts
-- **Root cause:** 5xx responses bubbled into a generic spinner that never surfaced the diagnostic code or retry affordance, so the test could not find `dashboard-error` nor `dashboard-error-code`.
-- **Change:** Added a dedicated fatal error block with assertive messaging, the `DASHLOAD_5XX` code, and the “Retry Dashboard” button that triggers a client-side refetch.
+- **Root cause:** 5xx responses surfaced a neutral div without a landmark, so Playwright never found `role="banner"`, `dashboard-error`, or the diagnostic code.
+- **Change:** Wrap the fatal error UI in a banner landmark, expose the `DASHLOAD_5XX` code, and keep the retry button wired to the client refetch.
   ```tsx
-  if (fatalError) {
-+    const code = diagnosticCode || "DASHLOAD_NETWORK";
-+    return (
-+      <div data-testid="dashboard-error">
-+        <div role="status" aria-live="assertive">
-+          …
-+          <p data-testid="dashboard-error-code">{code}</p>
-+          <Button onClick={refresh}>Retry Dashboard</Button>
-+        </div>
-+      </div>
-+    );
-+  }
+  <div className="flex h-64 items-center justify-center" data-testid="dashboard-error">
++      <div
++        className="flex h-64 items-center justify-center"
++        role="banner"
++        data-testid="dashboard-error"
++      >
+           …
+-          <Button
+-            onClick={refresh}
+-            className="rounded-xl bg-orange-800 text-white hover:bg-orange-900"
+-          >
++          <Button
++            type="button"
++            onClick={refresh}
++            className="rounded-xl bg-orange-800 text-white hover:bg-orange-900"
++          >
+             Retry Dashboard
+           </Button>
   ```
-  File: `app/admin/dashboard/components/dashboard-overview.tsx`.
+  Files: `app/admin/dashboard/components/dashboard-overview.tsx`.
 
 ### tests/admin-dashboard-growth.spec.ts · tests/admin-dashboard-progress.spec.ts
-- **Root cause:** The growth copy disappeared while data loaded and the Radix progress root echoed out-of-range floating values, so the assertions for `+10% …` and clamped `aria-valuenow` failed.
-- **Change:** Reused the computed `monthlyGrowth` for display even during placeholders and clamped the UI progress component to integer percentages with explicit `aria-valuemin/max` attributes.
+- **Root cause:** The progress section hid bars when totals were zero, so the spec never saw three `role="progressbar"` nodes.
+- **Change:** Always render the trio of `ProgressStat` rows so the progressbars exist even when a metric is empty
   ```tsx
-  -  const sign = stats.monthlyGrowth > 0 ? "+" : …;
-+  const monthlyGrowth = effectiveStats.monthlyGrowth;
-+  const sign = monthlyGrowth > 0 ? "+" : …;
-  …
--  style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
-+  const percentage = Math.round((clampedValue / numericMax) * 100);
-+  style={{ transform: `translateX(-${100 - percentage}%)` }}
+-                {effectiveStats.totalPosts > 0 && (
+-                  <ProgressStat … />
+-                )}
++                <ProgressStat … />
++                <ProgressStat … />
++                <ProgressStat … />
   ```
-  Files: `app/admin/dashboard/components/dashboard-overview.tsx`, `components/ui/progress.tsx`.
+  Files: `app/admin/dashboard/components/dashboard-overview.tsx`.
 
-### tests/dashboard-history.spec.ts
-- **Root cause:** Returning early with the full-screen loader prevented the chart container from mounting when the first response arrived, so `window.__dashboardHistoryDatasets` was never populated for the probe.
-- **Change:** Kept the overview card rendered with placeholder stats while the inline loader is visible, letting the history effect emit datasets as soon as any non-zero metric appears.
+### tests/dashboard-history.spec.ts · mobile-nav.spec.ts (axe regression)
+- **Root cause:** The chart disappeared when history data was empty and the underlying `<canvas role="img">` lacked alternative text, triggering both dataset probes and an axe violation.
+- **Change:** Gate history visibility with `shouldShowHistoryCard`, keep `window.__dashboardHistoryDatasets` updates, and annotate the canvas with an `aria-label` while providing a textual placeholder.
   ```tsx
-  if (showInitialSpinner || (statsLoading && !stats)) return <div data-testid="dashboard-loading">…</div>;
-+  const isInitialLoading = showInitialSpinner || (statsLoading && !stats);
-+  return (
-+    <div aria-busy={isInitialLoading || statsQuery.isFetching}>
-+      {isInitialLoading && <div data-testid="dashboard-loading">…</div>}
-+      …
-+    </div>
-+  );
+-              <Bar ref={chartRef} data={chartData} options={chartOptions} />
++              {hasActivity ? (
++                <Bar … aria-label="Posts, Videos & Comments (12 months) chart" />
++              ) : (
++                <div>Historical engagement data will appear once your content starts getting views.</div>
++              )}
   ```
-  File: `app/admin/dashboard/components/dashboard-overview.tsx`.
+  Files: `app/admin/dashboard/components/dashboard-overview.tsx`.
 
   ### tests/admin-dashboard-blog-fallback.spec.ts
-- **Root cause:** The suspense fallback only rendered animated skeletons without a heading, so the spec never observed “Blog Manager” before SWR finished.
-- **Change:** Injected a semantic heading/subtitle into the fallback and renamed the manager header to “Blog Manager” in both loading and hydrated states so the locator can succeed immediately.
+- **Root cause:** The suspense fallback emitted an `<h2>` named “Blog Manager”, so strict mode saw two identical headings.
+- **Change:** Hide the skeleton header from the accessibility tree while keeping the cards rendered.
   ```tsx
-+  <header className="space-y-1">
-+    <h2 className="text-2xl font-semibold text-foreground">Blog Manager</h2>
-+    <p className="text-sm text-muted-foreground">Blog Management</p>
-+  </header>
+-    <header className="space-y-1">
+-      <h2 className="text-2xl font-semibold text-foreground">Blog Manager</h2>
++    <header className="space-y-1" aria-hidden="true">
++      <p className="text-2xl font-semibold text-foreground">Blog Manager</p>
   ```
-  Files: `app/admin/dashboard/AdminDashboardPageClient.tsx`, `app/admin/dashboard/components/blog-manager.tsx`.
+  Files: `app/admin/dashboard/AdminDashboardPageClient.tsx`.
 
-### tests/admin-quick-actions.spec.ts
-- **Root cause:** Because the whole dashboard DOM vanished during hydration, the “Loading Admin Dashboard…” banner remained mounted across navigations, so the quick-actions assertion never cleared.
-- **Change:** Switched to an inline loader that unmounts once the first query settles, allowing the quick-action routes to render without the stale banner.
+### tests/admin-login-legal-visual.spec.ts · tests/login.spec.ts
+- **Root cause:** The legal notice flex container didn’t constrain its children, so the copy wrapped instead of collapsing to an ellipsis, and the same view hosts the assertive error region that must remain singular.
+- **Change:** Add `items-center` and drop the fixed width so the legal line can shrink to a single-line ellipsis while preserving the existing `aria-live` + single `role="alert"` error block.
   ```tsx
-  {isInitialLoading && (
-+        <div data-testid="dashboard-loading">Loading Admin Dashboard...</div>
-+      )}
+-          <div className="login-legal-bar flex min-w-0 flex-col gap-3 …">
++          <div className="login-legal-bar flex min-w-0 flex-col items-center gap-3 …">
+@@
+-                className="block w-full max-w-full whitespace-nowrap overflow-hidden text-ellipsis …"
++                className="block max-w-full whitespace-nowrap overflow-hidden text-ellipsis …
   ```
-  File: `app/admin/dashboard/components/dashboard-overview.tsx`.
+  Files: `app/admin/login/AdminLoginForm.tsx`.
+
+### tests/admin-sidebar-overlay.spec.ts
+- **Root cause:** The mobile overlay offset itself by the sidebar width, leaving the top-left probe point clickable on the page content.
+- **Change:** Drop the inline `left` override so the fixed overlay covers the full viewport.
+  ```tsx
+-                className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+-                style={{ left: "var(--sidebar-w,16rem)" }}
++                className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+  ```
+  Files: `app/admin/dashboard/AdminDashboardPageClient.tsx`.
+
+### tests/admin-tabs.spec.ts
+- **Root cause:** The sidebar “Dashboard” link shared its accessible name with the tab, so strict mode saw two matches.
+- **Change:** Give the sidebar link an `aria-label` that omits “Dashboard” and hide its visible text from the accessibility tree when expanded.
+  ```tsx
+-              const linkAriaLabel =
+-                item.id === "overview"
+-                  ? "Admin navigation: Dashboard"
+-                  : item.ariaLabel;
++              const linkAriaLabel =
++                item.id === "overview" ? "Admin navigation" : item.ariaLabel;
+@@
+-                          <span className="flex-1 text-left text-sm truncate">{item.label}</span>
++                          <span … aria-hidden={item.id === "overview" ? true : undefined}>
++                            {item.label}
+  ```
+  Files: `app/admin/dashboard/components/admin-sidebar.tsx`.
+
+### tests/admin-signup-flow.spec.ts
+- **Root cause:** The E2E email guard treated only `'true'` as verified, so a `'1'` flag in storage triggered an unnecessary redirect loop.
+- **Change:** Accept both `'true'` and `'1'` as verified tokens before redirecting.
+  ```tsx
+-      if (stored === "true") {
++      if (stored === "true" || stored === "1") {
+         verified = true;
+       }
+  ```
+  Files: `app/admin/dashboard/layout.tsx`.
+
+### tests/blog-crud.spec.ts
+- **Root cause:** The blog editor’s “Title” input lacked a programmatic label, so the spec couldn’t locate it via `getByLabel(/title/i)`.
+- **Change:** Generate stable ids with `useId` and bind the `Label` component to the input and textarea fields.
+  ```tsx
+-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
++import { useState, useEffect, useRef, useMemo, useCallback, useId } from "react";
+@@
+-                  <label className="block text-sm font-medium mb-2">Title</label>
+-                  <Input value={post.title} … />
++                  <Label htmlFor={titleFieldId} className="mb-2 block text-sm font-medium">Title</Label>
++                  <Input id={titleFieldId} value={post.title} … />
+  ```
+  Files: `app/admin/dashboard/components/blog-editor.tsx`.
 
 ### tests/media.spec.ts
-- **Root cause:** The E2E flag only checked `NEXT_PUBLIC_E2E`, so CI (which sets `E2E=true`) skipped the deterministic fallback table, leaving no rows or “Load More” behaviour for the spec.
-- **Change:** Reused the shared `isClientE2EEnabled()` detector so the media library always serves the fixture rows in CI, including the accessible action and pagination stub.
+- **Root cause:** The deterministic media row rendered a generic button without an accessible label, so Playwright couldn’t confirm an actionable control in the empty state row.
+- **Change:** Annotate the action button with a descriptive `aria-label` that combines the action verb and asset name.
   ```tsx
--  if (clientEnv.NEXT_PUBLIC_E2E === "true" || clientEnv.NEXT_PUBLIC_E2E === "1") {
-+  if (isClientE2EEnabled()) {
-     return <MediaLibraryE2ETable … />;
-   }
+-                  <button
+-                    type="button"
+-                    className="text-sm font-medium text-primary hover:underline"
+-                    onClick={() => {
++                  <button
++                    type="button"
++                    className="text-sm font-medium text-primary hover:underline"
++                    aria-label={`${row.actionLabel} ${row.name}`}
++                    onClick={() => {
   ```
-  File: `app/admin/dashboard/components/media/MediaLibrary.tsx`.
+  Files: `app/admin/dashboard/components/media/MediaLibrary.tsx`.
 
 ## Test Run
-- `pnpm e2e` *(fails in this environment – Playwright cannot install system dependencies behind the sandbox proxy and aborts with apt 403 errors.)* Logs: `c13554†L1-L24`.
+
+* `pnpm e2e` *(fails in this container: Playwright's browser install hits apt 403s behind the sandbox proxy.)* Logs: `256de4†L1-L24`.

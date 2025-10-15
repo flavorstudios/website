@@ -1,17 +1,28 @@
 import type { PublicBlogDetail, PublicBlogSummary } from "@/lib/types"
 import { serverEnv } from "@/env/server"
+import { SITE_URL } from "@/lib/constants"
 
-const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL
+function buildApiUrl(path: string): string {
+  const base =
+    serverEnv.NEXT_PUBLIC_BASE_URL ||
+    serverEnv.BASE_URL ||
+    (process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : SITE_URL)
+
+  try {
+    return new URL(path, base).toString()
+  } catch {
+    return path
+  }
+}
 
 export async function getBlogPost(key: string): Promise<PublicBlogDetail | null> {
   try {
     const encodedKey = encodeURIComponent(key)
-    const response = await fetch(
-      baseUrl ? `${baseUrl}/api/blogs/${encodedKey}` : `/api/blogs/${encodedKey}`,
-      {
-        next: { revalidate: 300 },
-      },
-    )
+    const response = await fetch(buildApiUrl(`/api/blogs/${encodedKey}`), {
+      next: { revalidate: 300 },
+    })
 
     if (response.status === 404) {
       // Missing posts are represented as null so pages can trigger notFound()
@@ -37,7 +48,7 @@ export async function getBlogPost(key: string): Promise<PublicBlogDetail | null>
 export const blogStore = {
   async getAllPosts(): Promise<PublicBlogSummary[]> {
     try {
-      const response = await fetch(baseUrl ? `${baseUrl}/api/blogs` : `/api/blogs`, {
+      const response = await fetch(buildApiUrl(`/api/blogs`), {
         cache: "no-store",
       })
 

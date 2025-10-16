@@ -11,6 +11,7 @@
     "lint": "next lint",
     "test": "pnpm test:unit",
     "test:unit": "jest --selectProjects web --runInBand",
+    "test:functions": "pnpm -s tsx scripts/test-functions.ts",
     "e2e:build": "pnpm -s tsx scripts/serve-e2e.ts",
     "e2e": "pnpm exec playwright test",
     "ci:test": "pnpm -s test:unit && pnpm -s test:functions && pnpm -s e2e",

@@ -10,6 +10,8 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     env:
+      BASE_URL: ${{ secrets.BASE_URL }}
+      NEXT_PUBLIC_BASE_URL: ${{ secrets.BASE_URL }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - uses: actions/checkout@v4
@@ -88,7 +90,6 @@ jobs:
 
       - name: Build
         env:
-          CRON_SECRET: test-secret
           SKIP_ENV_VALIDATION: "true"
           NEXT_PUBLIC_FIREBASE_API_KEY: stub
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: stub.firebaseapp.com

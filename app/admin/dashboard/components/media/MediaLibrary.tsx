@@ -6,7 +6,6 @@ import MediaList from "./MediaList";
 import MediaUpload from "./MediaUpload";
 import MediaBulkActions from "./MediaBulkActions";
 import MediaDetailsDrawer from "./MediaDetailsDrawer";
-import AdminPageHeader from "@/components/AdminPageHeader";
 import { Button } from "@/components/ui/button";
 import type {
   MediaDoc,
@@ -69,11 +68,12 @@ function MediaLibraryE2ETable({
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader
-        as="h1"
-        title="Media Manager"
-        subtitle="Manage and organize your uploaded media files"
-      />
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold text-foreground">Media Library (Test Mode)</h2>
+        <p className="text-sm text-muted-foreground">
+          Manage and organize sample media while automated tests are running.
+        </p>
+      </div>
 
       <div className="overflow-x-auto rounded-lg border border-border bg-white shadow-sm">
         <table className="min-w-full divide-y divide-border text-sm">
@@ -616,7 +616,7 @@ export default function MediaLibrary({
       className="flex flex-col items-center justify-center gap-3 rounded border border-dashed border-muted-foreground/40 bg-muted/40 p-6 text-center"
       role="status"
     >
-      <p className="text-sm text-muted-foreground">{message}</p>
+      <p className="text-sm text-gray-500 italic">{message}</p>
       {loadError ? (
         <p className="text-xs text-destructive">Check your connection and try again.</p>
       ) : null}
@@ -639,14 +639,6 @@ export default function MediaLibrary({
 
   return (
     <div className="space-y-6" aria-busy={loading}>
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
-        <AdminPageHeader
-          as="h1"
-          title="Media Manager"
-          subtitle="Manage and organize your uploaded media files"
-        />
-      </div>
-      
       <MediaToolbar
         search={search}
         onSearchChange={setSearch}
@@ -683,7 +675,7 @@ export default function MediaLibrary({
             onRefresh={(item) => refreshItem(item.id)}
           />
         ) : showInitialEmpty ? (
-          renderEmptyState("No media available yet. Upload your first file to get started.")
+          renderEmptyState("No media available yet. Upload files to get started.")
         ) : showFilteredEmpty ? (
           renderEmptyState("No media match your current filters. Try adjusting search or filters.")
         ) : null

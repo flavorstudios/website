@@ -385,7 +385,8 @@ export default function DashboardOverview({
   return (
     <div className="space-y-6" aria-busy={isInitialLoading || statsQuery.isFetching}>
       <AdminPageHeader
-        as="h1"
+        as="h2"
+        className="space-y-1"
         title="Dashboard Overview"
         subtitle="Track activity, performance, and quick actions for your studio"
       />
@@ -465,7 +466,7 @@ export default function DashboardOverview({
       </div>
 
       {/* Real-time Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -560,6 +561,29 @@ export default function DashboardOverview({
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="space-y-3">
+        <h2 className="text-xl font-semibold text-foreground">System Tools</h2>
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">Run maintenance utilities after publishing large updates.</p>
+            <p className="text-sm text-muted-foreground">Access deployment helpers without leaving the dashboard overview.</p>
+          </div>
+          <Button
+            type="button"
+            onClick={() => {
+              if (onNavigateSection) {
+                onNavigateSection("system", "/admin/dashboard/system");
+                return;
+              }
+              router.push("/admin/dashboard/system");
+            }}
+            className="h-auto rounded-lg bg-orange-600 px-5 py-2 text-white shadow-sm transition-colors hover:bg-orange-700"
+          >
+            Open System Tools
+          </Button>
+        </div>
       </div>
 
       {/* 12-Month Activity Chart */}

@@ -1,7 +1,6 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { RefreshCw } from "lucide-react"
 import { useState } from "react"
 import { useToast } from "@/hooks/use-toast"
@@ -26,26 +25,22 @@ export default function SystemTools() {
   }
 
   return (
-    <div>
-      <Card>
-        <CardHeader>
-          <CardTitle as="h2">Revalidate Entire Website</CardTitle>
-          <CardDescription>
-            Force a revalidation of all cached content across the entire public website. Use this after major content
-            updates.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            onClick={handleRevalidateWebsite}
-            disabled={isRevalidatingWebsite}
-            className="w-full sm:w-auto rounded-xl bg-orange-700 hover:bg-orange-800 text-white"
-          >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isRevalidatingWebsite ? "animate-spin" : ""}`} />
-            {isRevalidatingWebsite ? "Revalidating Website..." : "Revalidate Entire Website"}
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-foreground">Revalidate Entire Website</h2>
+      <div className="flex flex-col gap-4 rounded-xl border border-border bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Force a revalidation of all cached content across the entire public website.
+        </p>
+        <Button
+          onClick={handleRevalidateWebsite}
+          disabled={isRevalidatingWebsite}
+          className="w-full rounded-lg bg-orange-600 px-6 py-3 text-white transition-colors hover:bg-orange-700 sm:w-auto"
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 ${isRevalidatingWebsite ? "animate-spin" : ""}`} />
+          {isRevalidatingWebsite ? "Revalidating Website..." : "Revalidate Entire Website"}
+        </Button>
+      </div>
+      <p className="text-sm text-muted-foreground">Use this after major content updates.</p>
     </div>
   )
 }

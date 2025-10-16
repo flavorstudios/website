@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -208,6 +208,21 @@ export default function UserList() {
     }
   };
 
+  const roleBadgeClass = (role: string) => {
+    const map: Record<string, string> = {
+      admin: "bg-purple-100 text-purple-700",
+      editor: "bg-blue-100 text-blue-700",
+      support: "bg-amber-100 text-amber-700",
+    };
+    return map[role] ?? "bg-gray-100 text-gray-600";
+  };
+
+  const statusBadgeClass = (disabled: boolean) =>
+    disabled ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700";
+
+  const verifiedBadgeClass = (verified: boolean) =>
+    verified ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700";
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 flex-wrap">
@@ -283,7 +298,7 @@ export default function UserList() {
         <Button
           variant="outline"
           onClick={exportCsv}
-          className="ml-auto"
+          className="w-full sm:w-auto sm:ml-auto"
           aria-label="Export CSV"
         >
           Export CSV
@@ -366,13 +381,15 @@ export default function UserList() {
                         {u.role}
                       </Badge>
                     </td>
-                    <td className="p-2">{u.disabled ? "Disabled" : "Active"}</td>
                     <td className="p-2">
-                      {u.emailVerified ? (
-                        <CheckCircle className="h-4 w-4 text-green-700" aria-label="Email verified" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-red-600" aria-label="Email not verified" />
-                      )}
+                      <Badge className={cn("capitalize", statusBadgeClass(u.disabled))}>
+                        {u.disabled ? "disabled" : "active"}
+                      </Badge>
+                    </td>
+                    <td className="p-2">
+                      <Badge className={cn("capitalize", verifiedBadgeClass(Boolean(u.emailVerified)))}>
+                        {u.emailVerified ? "verified" : "unverified"}
+                      </Badge>
                     </td>
                     <td className="p-2">{u.lastLogin}</td>
                     <td className="p-2">{u.createdAt}</td>
@@ -409,16 +426,16 @@ export default function UserList() {
                     onClick={(e) => e.stopPropagation()}
                   />
                 </div>
-                <div className="text-xs text-muted-foreground flex flex-wrap gap-x-2">
-                  <span>Role: {u.role}</span>
-                  <span>{u.disabled ? "Disabled" : "Active"}</span>
-                  <span>
-                    {u.emailVerified ? (
-                      <CheckCircle className="inline h-3 w-3 text-green-700" aria-label="Email verified" />
-                    ) : (
-                      <XCircle className="inline h-3 w-3 text-red-600" aria-label="Email not verified" />
-                    )}
-                  </span>
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <Badge className={cn("capitalize", roleBadgeClass(u.role))}>
+                    {u.role || "member"}
+                  </Badge>
+                  <Badge className={cn("capitalize", statusBadgeClass(u.disabled))}>
+                    {u.disabled ? "disabled" : "active"}
+                  </Badge>
+                  <Badge className={cn("capitalize", verifiedBadgeClass(Boolean(u.emailVerified)))}>
+                    {u.emailVerified ? "verified" : "unverified"}
+                  </Badge>
                   {u.lastLogin && <span>Last: {u.lastLogin}</span>}
                   {u.createdAt && <span>Created: {u.createdAt}</span>}
                 </div>

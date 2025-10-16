@@ -224,16 +224,18 @@ export default function MediaList({
                   {showFilteredEmpty ? (
                     "No media match your current filters."
                   ) : (
-                    <>
-                      No media available yet.
+                    <div className="space-y-2">
+                      <p className="text-gray-500 italic">
+                        No media available yet. Upload files to get started.
+                      </p>
                       <button
                         type="button"
-                        className="ml-2 inline-flex items-center gap-1 text-primary underline-offset-2 hover:underline"
+                        className="inline-flex items-center justify-center gap-1 text-primary underline-offset-2 hover:underline"
                         onClick={openUploader}
                       >
                         Upload media
                       </button>
-                    </>
+                    </div>
                   )}
                 </td>
               </tr>

@@ -952,13 +952,14 @@ export default function VideoManager() {
   return (
     <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}> 
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <AdminPageHeader
           as="h2"
+          className="space-y-1"
           title="Video Manager"
-          subtitle="Manage your YouTube content and episodes"
+          subtitle="Coordinate releases and keep metadata tidy."
         />
-        <div className="flex gap-2">
+        <div className="flex flex-shrink-0 flex-wrap gap-2">
           <Button
             variant={viewMode === "table" ? "default" : "outline"}
             size="icon"

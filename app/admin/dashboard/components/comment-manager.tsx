@@ -52,7 +52,6 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { formatDate } from "@/lib/date"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
-import AdminPageHeader from "@/components/AdminPageHeader"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { logClientError } from "@/lib/log-client"
 
@@ -637,13 +636,16 @@ export default function CommentManager() {
 
   return (
     <div className="space-y-6">
-      {/* --- Standardized Admin Section Header --- */}
-      <AdminPageHeader
-        as="h2"
-        title="Comments & Reviews"
-        subtitle="Moderate user comments and feedback"
-      />
-      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-2">
+      <section aria-labelledby="comment-filters" className="space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <h2 id="comment-filters" className="text-xl font-semibold text-foreground">
+            Moderation Filters
+          </h2>
+          <span className="text-xs uppercase tracking-wide text-muted-foreground">
+            Keep the conversation healthy
+          </span>
+        </div>
+        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
         {/* Responsive search input */}
         <div className="relative w-full sm:w-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 h-4 w-4" />
@@ -656,24 +658,25 @@ export default function CommentManager() {
           />
         </div>
         <div className="hidden sm:block">
-          <FilterControls />
+            <FilterControls />
+          </div>
+          <div className="sm:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  size="sm"
+                  className="bg-orange-700 hover:bg-orange-800 text-white"
+                >
+                  Filters
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="bottom" className="space-y-4 p-4">
+                <FilterControls />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-        <div className="sm:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                size="sm"
-                className="bg-orange-700 hover:bg-orange-800 text-white"
-              >
-                Filters
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="p-4 space-y-4">
-              <FilterControls />
-            </SheetContent>
-          </Sheet>
-        </div>
-      </div>
+      </section>
 
       <CommentBulkActions
         count={selectedIds.length}

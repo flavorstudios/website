@@ -17,7 +17,6 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import AdminPageHeader from "@/components/AdminPageHeader";
 import { fetcher } from "@/lib/fetcher";
 import { useToast } from "@/hooks/use-toast";
 import { Download, Star, Mail, Heart } from "lucide-react";
@@ -253,13 +252,9 @@ export default function Applications() {
 
   return (
     <div className="space-y-6">
-      {/* --- Standardized Admin Section Header --- */}
-      <AdminPageHeader
-        as="h2"
-        title="Applications"
-        subtitle="Manage all user submissions and job applications"
-      />
-      <div className="flex flex-wrap gap-2">
+      <section className="space-y-3">
+        <h2 className="text-xl font-semibold text-foreground">Application Status</h2>
+        <div className="flex flex-wrap gap-2">
         <Button
           key="all"
           variant={statusFilter === "all" ? "default" : "outline"}
@@ -296,7 +291,8 @@ export default function Applications() {
           </Button>
         ))}
       </div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+      </section>
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2 w-full">
           <Input
             placeholder="Search"
@@ -479,7 +475,7 @@ export default function Applications() {
                 {sorted.length === 0 && (
                   <tr>
                     <td className="p-6 text-center text-gray-500" colSpan={9}>
-                      No submissions found
+                      No applications yet. New submissions will appear here.
                     </td>
                   </tr>
                 )}
@@ -573,7 +569,9 @@ export default function Applications() {
           );
         })}
         {sorted.length === 0 && (
-          <p className="text-center text-gray-500">No submissions found</p>
+          <p className="text-center text-gray-500">
+            No applications yet. New submissions will appear here.
+          </p>
         )}
       </div>
 

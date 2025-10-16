@@ -44,7 +44,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
-import AdminPageHeader from "@/components/AdminPageHeader"
 import { logClientError } from "@/lib/log-client"
 
 interface ContactMessage {
@@ -697,17 +696,19 @@ export default function EmailInbox() {
           </ul>
         </DialogContent>
       </Dialog>
-      {/* --- Standardized Admin Section Header --- */}
-      <AdminPageHeader
-        as="h2"
-        title="Email Inbox"
-        subtitle="View and respond to contact messages"
-      />
-      <div className="flex items-center justify-between">
-        <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-          {messages.filter((m) => m.status === "unread").length} unread
-        </Badge>
-      </div>
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1">
+            <h2 className="text-xl font-semibold text-foreground">Inbox Filters</h2>
+            <p className="text-sm text-muted-foreground">
+              Stay on top of studio email and automated alerts.
+            </p>
+          </div>
+          <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+            {messages.filter((m) => m.status === "unread").length} unread
+          </Badge>
+        </div>
+      </section>
 
       {emailError && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded p-4 mb-2">
@@ -715,7 +716,7 @@ export default function EmailInbox() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Message List */}
         <div className={`lg:col-span-1 ${selectedMessage ? "hidden lg:block" : ""}`}>
           <Card>
@@ -898,9 +899,11 @@ export default function EmailInbox() {
             <CardContent className="p-0">
               <div className="max-h-96 overflow-y-auto">
                 {loadingState ? (
-                  <div className="flex justify-center items-center py-10 text-gray-600">Loading messages...</div>
+                  <div className="flex items-center justify-center py-10 text-gray-600">Loading messages...</div>
                 ) : filteredMessages.length === 0 ? (
-                  <div className="flex justify-center items-center py-10 text-gray-600">Loading messages...</div>
+                  <div className="flex items-center justify-center py-12 text-gray-400">
+                    No messages yet.
+                  </div>
                 ) : (
                   filteredMessages.map((message) => (
                     <motion.div

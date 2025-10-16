@@ -23,7 +23,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import Spinner from "@/components/ui/spinner";
 import MobileNav from "./components/mobile-nav";
 import { SectionId } from "./sections";
-import { AdminTabs } from "./components/admin-tabs";
 import {
   Dialog,
   DialogContent,
@@ -185,7 +184,7 @@ const NAV: { id: SectionId; href: string; title: string }[] = [
 const SECTION_HEADINGS: Record<SectionId, string> = {
   overview: "Admin Dashboard",
   blogs: "Blog Posts",
-  videos: "Video Manager",
+  videos: "Videos",
   media: "Media Manager",
   categories: "Categories",
   comments: "Comments & Reviews",
@@ -198,16 +197,16 @@ const SECTION_HEADINGS: Record<SectionId, string> = {
 
 const SECTION_DESCRIPTIONS: Record<SectionId, string> = {
   overview: "Monitor studio performance and recent activity at a glance.",
-  blogs: "Blog Management tools to manage your blog posts, drafts, and editorial calendar.",
-  videos: "Track published videos and plan upcoming releases.",
-  media: "Organize and review your media assets before publishing.",
+  blogs: "Manage your blog posts, drafts, and editorial calendar.",
+  videos: "Manage your YouTube content and upcoming releases.",
+  media: "Organize and review your uploaded media assets before publishing.",
   categories: "Maintain categories to improve content discovery.",
   comments: "Moderate community feedback and respond quickly.",
-  applications: "Review incoming submissions and collaborate with the team.",
+  applications: "Manage all user submissions and job applications.",
   inbox: "Stay on top of studio email and automated alerts.",
   users: "Manage teammate profiles, roles, and permissions.",
   settings: "Configure integrations and admin preferences.",
-  system: "Access deployment tasks and maintenance tools.",
+  system: "Access deployment and maintenance utilities.",
 };
 const validSection = (s: string | null): s is SectionId =>
   !!s && NAV.some((n) => n.id === s);
@@ -645,7 +644,7 @@ export default function AdminDashboardPageClient({
               >
                 <div className="max-w-7xl mx-auto">
                   <header
-                    className="mb-6 space-y-1"
+                    className="mb-8 space-y-2"
                     data-testid="dashboard-heading"
                   >
                     <h1
@@ -658,10 +657,6 @@ export default function AdminDashboardPageClient({
                       {sectionDescription}
                     </p>
                   </header>
-
-                  <div className="mb-6">
-                    <AdminTabs />
-                  </div>
 
                   {/* Online/Offline indicator */}
                   {!isOnline && (

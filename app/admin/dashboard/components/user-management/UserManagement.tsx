@@ -13,9 +13,11 @@ export default function UserManagement() {
   }
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-2xl font-semibold">Users</h2>
-        <p className="text-sm text-muted-foreground">Manage user accounts</p>
+      <div className="space-y-1">
+        <h2 className="text-xl font-semibold text-foreground">Team Directory</h2>
+        <p className="text-sm text-muted-foreground">
+          Filter teammates by role, status, and verification state.
+        </p>
       </div>
       <UserList />
     </div>

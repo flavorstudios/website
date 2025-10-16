@@ -498,15 +498,11 @@ export default function BlogManager() {
 
   if (loading) {
     return (
-      <div>
-        <AdminPageHeader
-          as="h2"
-          title="Blog Posts"
-          subtitle="Blog Management"
-        />
-        <p className="mt-1 text-sm text-muted-foreground">
-          {managementDescription}
-        </p>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <AdminPageHeader as="h2" className="space-y-1" title="Blog Management" />
+          <p className="text-sm text-muted-foreground">{managementDescription}</p>
+        </div>
         <div className="mt-4 space-y-4">
           <div className="sm:hidden space-y-3" data-testid="blog-card-list">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -581,18 +577,14 @@ export default function BlogManager() {
 
   // --- Main UI ---
   return (
-    <div>
-        {/* Header with right-aligned action buttons */}
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-          <AdminPageHeader
-            as="h2"
-            title="Blog Posts"
-            subtitle="Blog Management"
-          />
-          <p className="mt-1 text-sm text-muted-foreground">
-            {managementDescription}
-          </p>
-          <div className="flex gap-2">
+    <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}> 
+      {/* Header with right-aligned action buttons */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-2">
+          <AdminPageHeader as="h2" className="space-y-1" title="Blog Management" />
+          <p className="text-sm text-muted-foreground">{managementDescription}</p>
+        </div>
+        <div className="flex flex-shrink-0 gap-2">
           <Button
             onClick={handleRevalidateBlog}
             disabled={isRevalidating}
@@ -618,7 +610,7 @@ export default function BlogManager() {
       </div>
 
       {categoryErrorMessage && (
-        <Alert variant="destructive" className="mb-4" role="status">
+        <Alert variant="destructive" role="status">
           <AlertDescription>
             {categoryErrorMessage || 'Failed to load categories. Filters may be limited until the feed recovers.'}
           </AlertDescription>

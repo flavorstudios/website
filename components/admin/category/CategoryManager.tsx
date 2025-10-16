@@ -650,27 +650,29 @@ export default function CategoryManager() {
   }
 
   return (
-    <div className={cn("space-y-4", selected.size > 0 && "pb-20 sm:pb-4")}>
-      <AdminPageHeader
-        title="Categories"
-        subtitle="Manage your blog and video categories"
-      />
-      <div className="grid w-full max-w-xs grid-cols-3 gap-2 text-center sm:max-w-none sm:w-auto">
-        <div className="rounded-md bg-gray-50 p-2">
-          <div className="text-lg font-bold">{categories.length}</div>
-          <div className="text-xs text-gray-500">Total</div>
+    <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-4")}>
+      <div className="space-y-2">
+        <AdminPageHeader as="h2" className="space-y-1" title="Manage Categories" />
+        <p className="text-sm text-muted-foreground">
+          Maintain categories to improve content discovery.
+        </p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-xl border bg-white p-4 text-center shadow-sm">
+          <div className="text-xl font-semibold text-foreground">{categories.length}</div>
+          <div className="text-xs text-muted-foreground">Total</div>
         </div>
-        <div className="rounded-md bg-gray-50 p-2">
-          <div className="text-lg font-bold">{activeCount}</div>
-          <div className="text-xs text-gray-500">Active</div>
+        <div className="rounded-xl border bg-white p-4 text-center shadow-sm">
+          <div className="text-xl font-semibold text-foreground">{activeCount}</div>
+          <div className="text-xs text-muted-foreground">Active</div>
         </div>
-        <div className="rounded-md bg-gray-50 p-2">
-          <div className="text-lg font-bold">{inactiveCount}</div>
-          <div className="text-xs text-gray-500">Inactive</div>
+        <div className="rounded-xl border bg-white p-4 text-center shadow-sm">
+          <div className="text-xl font-semibold text-foreground">{inactiveCount}</div>
+          <div className="text-xs text-muted-foreground">Inactive</div>
         </div>
       </div>
-      <div className="flex flex-wrap justify-between gap-2">
-        <div className="flex gap-2 flex-wrap w-full sm:w-auto">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex w-full flex-wrap gap-2">
           <Select value={type} onValueChange={(v) => setType(v as CategoryType)}>
             <SelectTrigger className="w-full sm:w-32" aria-label="Type">
               <SelectValue />
@@ -757,7 +759,7 @@ export default function CategoryManager() {
             Reset
           </Button>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto justify-end">
+        <div className="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
           <input
             ref={fileInputRef}
             type="file"

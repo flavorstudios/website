@@ -172,4 +172,18 @@ describe('fetchJson', () => {
     expect(passedHeaders.get('authorization')).toBe('Bearer test-token');
     expect(passedHeaders.get('accept')).toBe('application/json');
   });
+  
+  it('respects a caller-provided abort signal without retrying', async () => {
+    const controller = new AbortController();
+    controller.abort();
+
+    const fetchSpy = jest.fn();
+    global.fetch = fetchSpy as unknown as typeof global.fetch;
+
+    await expect(
+      fetchJson('/abort', { signal: controller.signal }, { retry: 2 }),
+    ).rejects.toMatchObject({ name: 'AbortError' });
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
 });

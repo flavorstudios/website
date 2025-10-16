@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
-import type { Response } from "firebase-functions/v2/https";
+import type { Response } from "express";
 import { helloTest } from "../functions/src/test";
 import { submitContact } from "../functions/src/public/contact";
 import { getBlogs } from "../functions/src/public/blogs";
@@ -52,7 +52,10 @@ async function testHelloFunction() {
     }
   };
   const res = new MockResponse();
-  await helloTest(req as Parameters<typeof helloTest>[0], res as unknown as Response);
+  await helloTest(
+    req as Parameters<typeof helloTest>[0],
+    res as unknown as Parameters<typeof helloTest>[1]
+  );
 
   assert.equal(res.statusCode, 200, "helloTest should default to status 200");
   assert.deepEqual(

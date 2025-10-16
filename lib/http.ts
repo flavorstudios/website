@@ -22,12 +22,50 @@ export async function fetchJson<T>(
 
   const attemptOnce = async (): Promise<T> => {
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    const timeoutError = new Error('Request timed out');
+    const timer = setTimeout(() => {
+      if (!ctrl.signal.aborted) {
+        ctrl.abort(timeoutError);
+      }
+    }, timeoutMs);
+
+    const userSignal = init.signal;
+    let abortListenerAttached = false;
+    const forwardAbort = () => {
+      if (ctrl.signal.aborted) {
+        return;
+      }
+
+      const reason =
+        userSignal && 'reason' in userSignal ? (userSignal as AbortSignal & { reason?: unknown }).reason : undefined;
+
+      if (reason !== undefined) {
+        ctrl.abort(reason);
+        return;
+      }
+
+      const abortError = new Error('The operation was aborted.');
+      abortError.name = 'AbortError';
+      ctrl.abort(abortError);
+    };
+
+    if (userSignal) {
+      if (userSignal.aborted) {
+        forwardAbort();
+      } else {
+        userSignal.addEventListener('abort', forwardAbort);
+        abortListenerAttached = true;
+      }
+    }
 
     try {
       const headers = new Headers(init.headers ?? undefined);
       if (!headers.has('Accept')) {
         headers.set('Accept', 'application/json');
+      }
+
+      if (ctrl.signal.aborted) {
+        throw ctrl.signal.reason ?? new Error('The operation was aborted.');
       }
 
       const res = await fetch(input, {
@@ -75,13 +113,16 @@ export async function fetchJson<T>(
       // Unexpected non-JSON content on success
       throw new HttpError(`Expected JSON for ${urlText}`, 0, urlText, text.slice(0, 200));
     } catch (err) {
-      if ((err as Error).name === 'AbortError') {
+      if (err === timeoutError || ctrl.signal.reason === timeoutError) {
         // Normalize timeouts for consistent handling/tests
-        throw new Error('Request timed out');
+        throw timeoutError;
       }
       throw err;
     } finally {
       clearTimeout(timer);
+      if (abortListenerAttached && userSignal) {
+        userSignal.removeEventListener('abort', forwardAbort);
+      }
     }
   };
 
@@ -94,12 +135,15 @@ export async function fetchJson<T>(
       const message = (err as Error).message || '';
       const isTimeout = message.includes('timed out');
 
+      const isAbortError = (err as Error).name === 'AbortError';
+
       const retryable =
         isTimeout ||
-        status === undefined || // e.g., network error from fetch
-        status === 0 ||         // client/parse error we marked as retryable
-        status === 429 ||
-        (typeof status === 'number' && status >= 500);
+        (!isAbortError &&
+          (status === undefined || // e.g., network error from fetch
+            status === 0 || // client/parse error we marked as retryable
+            status === 429 ||
+            (typeof status === 'number' && status >= 500)));
 
       if (attempt < retry && retryable) {
         const backoff = Math.min(500 * 2 ** attempt, 5000);

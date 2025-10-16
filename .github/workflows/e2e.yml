@@ -24,9 +24,9 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      # ✅ This installs browsers and **system** deps (apt) with sudo safely
+      # ✅ Install Playwright browsers and required OS deps directly
       - name: Install Playwright browsers & OS deps
-        uses: microsoft/playwright-github-action@v1
+        run: pnpm exec playwright install --with-deps
 
       - name: Build app (prod)
         run: pnpm build

@@ -8,7 +8,7 @@ test('logs in via cookie and loads dashboard without console errors', async ({ p
 
   // Fake login by setting the admin-session cookie
   await context.addCookies([
-    { name: 'admin-session', value: 'playwright', domain: '127.0.0.1', path: '/' },
+    { name: 'admin-session', value: 'playwright', domain: 'localhost', path: '/' },
   ]);
 
   await page.goto('/admin/dashboard');

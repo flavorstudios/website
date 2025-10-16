@@ -13,8 +13,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["node", "jest"],          // <--- Added as per audit
-    "typeRoots": ["./types", "./node_modules/@types"],
+    "types": ["node", "jest", "@testing-library/jest-dom"],          // <--- Added as per audit
+    "typeRoots": ["./types", "./node_modules/@types", "./node_modules/@testing-library"],
     "plugins": [
       {
         "name": "next"

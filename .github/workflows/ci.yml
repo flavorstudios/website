@@ -73,8 +73,11 @@ jobs:
       - name: Verify Firebase authentication
         run: pnpm dlx firebase-tools projects:list
 
-      - name: Jest tests
-        run: pnpm dlx firebase-tools emulators:exec --only firestore,storage "pnpm test"
+      - name: Unit tests (web)
+        run: pnpm dlx firebase-tools emulators:exec --only firestore,storage "pnpm -s test:unit"
+
+      - name: Functions tests (node)
+        run: pnpm -s test:functions
 
       - name: Save Firebase emulators
         if: steps.firebase-emulators-cache.outputs.cache-hit != 'true'

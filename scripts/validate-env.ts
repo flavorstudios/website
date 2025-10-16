@@ -1,19 +1,26 @@
 import { config } from "dotenv";
-import { clientEnvSchema } from "../env/client-validation";
-import {
-  serverEnvSchema,
-  serverEnv,
-} from "../env/server-validation";
+import { applyDefaultEnv } from "../env/defaults";
+
+config({ path: ".env.local" });
+
+const appliedDefaultKeys = applyDefaultEnv();
+
+const { clientEnvSchema } = await import("../env/client-validation");
+const { serverEnvSchema, serverEnv } = await import("../env/server-validation");
 
 const skipValidation =
   process.env.ADMIN_BYPASS === "true" ||
   process.env.SKIP_ENV_VALIDATION === "true";
 
+if (appliedDefaultKeys.length > 0) {
+  console.warn(
+    `[env] Using fallback values for missing env vars: ${appliedDefaultKeys.join(", ")}`,
+  );
+}
+
 if (skipValidation) {
   console.warn("Skipping Firebase Admin env validation");
 }
-
-config({ path: ".env.local" });
 
 if (!skipValidation) {
   clientEnvSchema.parse(process.env);

@@ -57,7 +57,8 @@ Thumbs.db
 .Trashes
 
 # --- IDE/editor config ---
-.vscode
+.vscode/*
+!.vscode/settings.json
 .idea
 
 # --- SQLite database files ---

@@ -1,0 +1,5 @@
+# Admin Dashboard Screenshot Observations
+
+The provided screenshots of the admin dashboard show that the main Dashboard tab continues to display a "Loading Admin Dashboard..." message instead of the usual metrics, suggesting the dashboard data request is either failing or never resolving. Other sections such as Blog Posts, Videos, Media, Categories, Comments, Applications, Email Inbox, and Users render correctly, which points to an issue isolated to the dashboard overview fetch or rendering path.
+
+Additionally, every date filter input across the admin pages uses the placeholder text `mm/dd/yyy`, which is missing the final `y`. This typo is repeated on the Blog Posts, Videos, Media, Categories, Comments, Applications, and Users pages and would likely confuse users expecting the full four-digit year format.

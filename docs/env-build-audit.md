@@ -1,48 +1,41 @@
-# Environment Validation Audit
+# Environment Validation Build Failure Audit
 
-## Summary of Failure
-Running `pnpm build` executes [`scripts/validate-env.ts`](../scripts/validate-env.ts), which loads `.env.local` and validates required variables through [`env/server-validation.ts`](../env/server-validation.ts). The build failed because several required server-side variables were undefined in the execution environment, triggering the guard that throws an `Invalid server environment variables` error.
+## Summary
+- **Build command**: `pnpm build`
+- **Failure point**: Next.js build worker exits during environment validation.
+- **Error message**: `Invalid environment variables\nCRON_SECRET: Required\nBASE_URL: Required`
 
-The failing variables were:
+The project runs `scripts/validate-env.ts` during the `prebuild` step. That script loads `.env.local`, applies the default fallback map from `env/defaults.ts`, and validates values with Zod schemas defined in `env/client-validation.ts` and `env/server-validation.ts`.
 
-- `BASE_URL`
-- `NEXT_PUBLIC_BASE_URL`
-- `CRON_SECRET`
-- `PREVIEW_SECRET`
-- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+## Key Observations
+1. When the build runs in CI (`NODE_ENV=production` and `CI=true`), the fallback helper only back-fills missing variables that are marked as safe for automated environments (see `FALLBACK_ENV` in `env/defaults.ts`).
+2. `BASE_URL` and `CRON_SECRET` are required by `serverEnvSchema` in `env/server-validation.ts`.
+3. These two variables are missing from the environment where `pnpm build` was executed, so the validation step aborts before Next.js can finish building.
 
-## Root Causes
-1. **No `.env.local` loaded in CI** – The validator calls `dotenv` with `path: ".env.local"`. If the file is absent in CI (which is typical), the required variables remain undefined, causing the validation error. [`serverEnvSchema`](../env/server-validation.ts) marks these fields as mandatory, so they must be supplied by the runtime environment.
-2. **CI does not inject minimal secrets for validation** – The GitHub Action relied on defaults, but the validator explicitly refuses empty strings for `CRON_SECRET` and `PREVIEW_SECRET`, and the Firebase storage bucket must be present on both server and client configurations. Without overrides, validation aborts before the build starts.
+## Recommended Remediations (choose one)
+### Option A — Define explicit CI secrets (recommended for production parity)
+1. In your hosting provider (e.g., GitHub Actions, Vercel, Netlify), create secrets for:
+   - `BASE_URL` – the fully qualified site URL, e.g. `https://example.com`.
+   - `CRON_SECRET` – the private token you expect your cron jobs to supply.
+2. Expose those secrets to the build job (e.g., `echo "BASE_URL=$BASE_URL" >> $GITHUB_ENV`).
+3. Re-run `pnpm build`. The validation should now pass because the required keys are populated.
 
-## Recommended Remediations
-To preserve existing code, provide the missing configuration through environment management instead of code changes.
-
-### Local / Developer Machines
-1. Copy [`env.example`](../env.example) to `.env.local`.
-2. Populate at least the five required variables with non-empty dummy values:
-   ```ini
+### Option B — Provide a `.env.local` for local/CI builds
+1. Create an `.env.local` file at the repo root with at least the following:
+   ```bash
    BASE_URL=http://localhost:3000
-   NEXT_PUBLIC_BASE_URL=http://localhost:3000
-   CRON_SECRET=local-dev-secret
-   PREVIEW_SECRET=local-preview-secret
-   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=dev-example.appspot.com
-   FIREBASE_STORAGE_BUCKET=dev-example.appspot.com
+   CRON_SECRET=local-dev-cron-secret
    ```
-3. If Firebase admin functionality is not needed locally, you can leave the remaining secrets blank. The validator only enforces that *one* of `FIREBASE_SERVICE_ACCOUNT_KEY` or `FIREBASE_SERVICE_ACCOUNT_JSON` is supplied when validation is not skipped. For local smoke tests, set `SKIP_ENV_VALIDATION=true` in `.env.local` to bypass the Firebase requirement.
+2. Ensure the file is available when the build runs (for CI, you can upload it as an artifact or template one during the workflow).
+3. Rerun `pnpm build`.
 
-### Continuous Integration
-1. **Add required secrets to the pipeline** – Define the five variables (plus `FIREBASE_STORAGE_BUCKET` so the client/server buckets match) as CI secrets. For GitHub Actions, add them under the repository’s *Settings → Secrets and variables → Actions* panel.
-2. **Consider a validation bypass for build-only jobs** – If the build job does not exercise Firebase or cron endpoints, set the `SKIP_ENV_VALIDATION` secret to `true` before running `pnpm build`. This leverages the existing `skipValidation` flag in the validator while keeping production deployments strict.
-3. **Keep secrets non-empty** – The validator rejects empty strings, so ensure the CI secrets are actual values (even dummy placeholders in non-production contexts).
+### Option C — Temporarily allow fallbacks for automation (not advised for production)
+1. Export `USE_DEFAULT_ENV=true` or `NODE_ENV=development` before running the build to allow the fallback defaults defined in `env/defaults.ts` to populate required keys.
+2. This should only be used for non-production environments because it injects demo credentials (`demo-project` Firebase account, example admin email, etc.).
 
-### Optional Hardening
-- Mirror `NEXT_PUBLIC_BASE_URL` into CI using the Vercel-provided `VERCEL_URL` fallback logic by exporting `VERCEL_ENV`/`VERCEL_URL` before the build. This allows staging builds to pick up fully qualified URLs automatically.
-- Document the minimal required secret set in your deployment README so future contributors know which variables are mandatory for a successful build.
-
-## Verification Plan
-After supplying the environment variables (or enabling `SKIP_ENV_VALIDATION` for non-production builds), rerun:
+## Verification
+After applying any of the options above, run:
 ```bash
 pnpm build
 ```
-The build should progress past `scripts/validate-env.ts` without throwing `Invalid server environment variables`.
+The command should complete without the `Invalid environment variables` error when the required values are set.

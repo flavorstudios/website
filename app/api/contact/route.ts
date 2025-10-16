@@ -4,7 +4,7 @@ import nodemailer from "nodemailer";
 import { z } from "zod";
 import { serverEnv } from "@/env/server";
 
-const PERSPECTIVE_API_KEY = serverEnv.PERSPECTIVE_API_KEY!;
+const PERSPECTIVE_API_KEY = serverEnv.PERSPECTIVE_API_KEY;
 const THRESHOLD = 0.7;
 
 const notifyEnabled = serverEnv.NOTIFY_NEW_SUBMISSION === "true";
@@ -31,7 +31,20 @@ const contactSchema = z.object({
   message: z.string().min(1, "Message is required"),
 });
 
-async function moderateText(text: string) {
+type ModerationScores = {
+  toxicity: number;
+  insult: number;
+  threat: number;
+};
+
+async function moderateText(text: string): Promise<ModerationScores | null> {
+  if (!PERSPECTIVE_API_KEY) {
+    console.warn(
+      "[PerspectiveAPI] API key not configured; skipping automated moderation.",
+    );
+    return null;
+  }
+
   try {
     const res = await fetch(
       `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_API_KEY}`,
@@ -74,8 +87,10 @@ export async function POST(request: Request) {
 
     const scores = await moderateText(message);
     const flagged = scores
-      ? scores.toxicity > THRESHOLD || scores.insult > THRESHOLD || scores.threat > THRESHOLD
-      : true;
+      ? scores.toxicity > THRESHOLD ||
+        scores.insult > THRESHOLD ||
+        scores.threat > THRESHOLD
+      : false;
 
     const db = getAdminDb();
     const docRef = db.collection("contactMessages").doc();

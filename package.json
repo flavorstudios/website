@@ -13,6 +13,7 @@
     "test:unit": "jest --selectProjects web --runInBand",
     "test:functions": "pnpm -s tsx scripts/test-functions.ts",
     "e2e:build": "pnpm -s tsx scripts/serve-e2e.ts",
+    "pree2e": "pnpm exec playwright install --with-deps",
     "e2e": "pnpm exec playwright test",
     "ci:test": "pnpm -s test:unit && pnpm -s test:functions && pnpm -s e2e",
     "visual:update": "pnpm exec playwright test e2e/admin-login-legal-visual.e2e.spec.ts --update-snapshots",

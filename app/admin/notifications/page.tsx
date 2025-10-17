@@ -147,7 +147,7 @@ export default function NotificationsPage() {
         />
       </div>
       {filtered.length === 0 ? (
-          <p className="text-center text-sm text-muted-foreground">You're all caught up.</p>
+          <p className="text-center text-sm text-muted-foreground">You&apos;re all caught up.</p>
         ) : (
           <ul className="space-y-2">
             {filtered.map((n) => (

@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 test('progress bars clamp values between 0 and 100', async ({ page }) => {
   await page.route('**/api/admin/stats?**', async (route) => {
@@ -26,6 +27,7 @@ test('progress bars clamp values between 0 and 100', async ({ page }) => {
   });
 
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   await expect(page.getByText('Content Performance')).toBeVisible();
 
   const bars = page.getByRole('progressbar');

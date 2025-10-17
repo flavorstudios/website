@@ -1,5 +1,7 @@
-import { test, expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { test, expect } from './test-setup';
 import { expectNoAxeViolations } from './axe-helper';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 // Ensure user-role request succeeds so dashboard can render
 const mockUserRole = async (page: Page) => {
@@ -27,16 +29,24 @@ test('shows network error when dashboard data fails to load', async ({ page }) =
   await page.setViewportSize({ width: 375, height: 800 });
 
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   await expect(page.getByTestId('dashboard-error')).toBeVisible();
   await expect(page.getByText('Retry Dashboard')).toBeVisible();
   // Diagnostic code should surface for 5xx
   await expect(page.getByTestId('dashboard-error-code')).toHaveText('DASHLOAD_5XX');
 
   // Open sidebar (button is expected elsewhere in the layout)
-  await page.getByLabel('Open sidebar').click();
+  const openSidebarButton = page.getByLabel('Open sidebar');
+  await expect(openSidebarButton).toBeVisible();
+  await openSidebarButton.click();
+
+  await page.waitForSelector('#app-sidebar', { state: 'visible' });
+  await page.waitForTimeout(50);
 
   // Ensure no overlay dims or blocks the sidebar
-  const opacity = await page.locator('#app-sidebar').evaluate((el) => getComputedStyle(el).opacity);
+  const opacity = await page
+    .locator('#app-sidebar')
+    .evaluate((el) => getComputedStyle(el).opacity);
   expect(opacity).toBe('1');
 
   const withinSidebar = await page.evaluate(() => {
@@ -57,6 +67,7 @@ test('does not duplicate landmarks when analytics endpoints fail', async ({ page
   });
 
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
 
   await expect(page.getByTestId('dashboard-error')).toBeVisible();
 
@@ -95,6 +106,7 @@ test("shows permission message when unauthorized", async ({ page }) => {
   });
 
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   await expect(page.getByTestId('analytics-permission-block')).toBeVisible();
   await expect(
     page.getByText("You don't have permission to view analytics.")

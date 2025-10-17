@@ -1,5 +1,5 @@
 // tests/skip-link.spec.tsx
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./test-setup";
 import AxeBuilder from "@axe-core/playwright";
 
 test.describe("Skip link + a11y", () => {

@@ -1,4 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
+
+test.use({ storageState: { cookies: [], origins: [] } });
 
 const DASHBOARD_HTML = `
 <html>
@@ -68,6 +71,7 @@ test.describe('Admin onboarding flow', () => {
     });
 
     await page.goto('/admin/signup');
+    await awaitAppReady(page);
 
     await page.getByLabel('Full name').fill('Test Admin');
     await page.getByLabel('Email').fill('admin@example.com');
@@ -75,9 +79,13 @@ test.describe('Admin onboarding flow', () => {
     await page.getByRole('button', { name: 'Create admin account' }).click();
 
     await page.waitForURL('**/admin/dashboard');
+    await awaitAppReady(page);
 
-    await page.getByRole('button', { name: 'Log out' }).click();
+    const logoutButton = page.getByRole('button', { name: /log out/i });
+    await expect(logoutButton).toBeAttached();
+    await logoutButton.click();
     await page.waitForURL('**/admin/login');
+    await awaitAppReady(page);
 
     await page.getByLabel('Email').fill('admin@example.com');
     await page.getByLabel('Password').fill('StrongPassw0rd!');

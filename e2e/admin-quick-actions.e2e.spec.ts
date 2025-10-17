@@ -1,4 +1,6 @@
-import { test, expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 const stubResponses = async (page: Page) => {
   await page.route('**/api/**', async (route) => {
@@ -61,10 +63,10 @@ test('quick action buttons navigate to expected sections', async ({ page }) => {
   const actions = [
     {
       button: 'Create New Post',
-      expected: 'Blog Management',
+      expected: 'Blog Posts',
       url: '/admin/dashboard/blog-posts',
     },
-    { button: 'Add Video', expected: 'Video Manager', url: '/admin/dashboard/videos' },
+    { button: 'Add Video', expected: 'Videos', url: '/admin/dashboard/videos' },
     {
       button: 'Moderate Comments',
       expected: 'Comments & Reviews',
@@ -74,10 +76,14 @@ test('quick action buttons navigate to expected sections', async ({ page }) => {
   ];
 
   for (const { button, expected, url } of actions) {
-    await page.goto('/admin/dashboard');
+    await awaitAppReady(page);
+    const actionButton = page.getByRole('button', { name: button });
+    await expect(actionButton).toBeVisible();
+    await actionButton.click();
     await page.getByRole('button', { name: button }).click();
     await expect(page).toHaveURL(url);
-    await expect(page.getByText(expected)).toBeVisible();
+    await awaitAppReady(page);
+    await expect(page.getByTestId('dashboard-title')).toHaveText(expected);
     await expect(page.getByText('Loading Admin Dashboard...')).not.toBeVisible();
   }
 });

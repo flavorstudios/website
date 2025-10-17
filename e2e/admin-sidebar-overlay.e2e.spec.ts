@@ -1,11 +1,14 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 test.use({ viewport: { width: 390, height: 844 } });
 
 test('mobile sidebar stays topmost when drawer is open', async ({ page }) => {
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
 
   const toggle = page.getByRole('button', { name: /open sidebar/i });
+  await expect(toggle).toBeVisible();
   await toggle.click();
 
   const sidebar = page.locator('#app-sidebar');

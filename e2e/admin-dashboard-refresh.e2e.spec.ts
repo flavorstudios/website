@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 test('refresh updates data without page reload', async ({ page }) => {
   let call = 0;
@@ -27,10 +28,13 @@ test('refresh updates data without page reload', async ({ page }) => {
     });
   });
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   await expect(page.getByText('Total Posts')).toBeVisible();
   await expect(page.getByTestId('total-posts-value')).toHaveText('1');
   const before = await page.locator('text=Last updated').textContent();
-  await page.getByRole('button', { name: 'Refresh' }).click();
+  const refreshButton = page.getByTestId('refresh');
+  await expect(refreshButton).toBeEnabled();
+  await refreshButton.click();
   await expect(page.getByTestId('total-posts-value')).toHaveText('2');
   const after = await page.locator('text=Last updated').textContent();
   expect(before).not.toBe(after);

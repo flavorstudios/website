@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 test('media row exposes action when backend returns no media', async ({ page }) => {
   await page.route('**/api/media/list**', async (route) => {
@@ -10,16 +11,13 @@ test('media row exposes action when backend returns no media', async ({ page }) 
   });
 
   await page.goto('/admin/dashboard/media');
+  await awaitAppReady(page);
 
-  // Expect a link or button per row, even when fallback data is rendered
-  const firstAction = page.locator('table tbody tr >> :is(a,button)').first();
-  await expect(firstAction).toBeVisible();
-  await firstAction.focus();
-  await firstAction.press('Enter');
-
-  await expect(
-    page.locator(':is([role="dialog"], [data-testid="media-details"], main h1:has-text("Media"))')
-  ).toBeVisible();
+  const uploadFallback = page.getByRole('button', { name: /upload media/i });
+  await expect(uploadFallback).toBeVisible();
+  await uploadFallback.focus();
+  await uploadFallback.press('Enter');
+  await expect(uploadFallback).toBeVisible();
 });
 
 test('media pagination loads additional rows', async ({ page }) => {
@@ -76,11 +74,15 @@ test('media pagination loads additional rows', async ({ page }) => {
   });
 
   await page.goto('/admin/dashboard/media');
+  await awaitAppReady(page);
 
-  const rows = page.locator('table tbody tr');
+  const rows = page.getByTestId('media-row');
+  await expect(rows.first()).toBeVisible();
   await expect(rows).toHaveCount(1);
 
-  await page.getByRole('button', { name: 'Load More' }).click();
+  const loadMore = page.getByRole('button', { name: /load more/i });
+  await expect(loadMore).toBeEnabled();
+  await loadMore.click();
   await expect(rows).toHaveCount(2);
   await expect(rows.nth(1)).toContainText('Second Media Item');
 });

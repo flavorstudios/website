@@ -1,7 +1,23 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { config } from "dotenv";
 import { applyDefaultEnv } from "../env/defaults";
 
-config({ path: ".env.local" });
+const maybeLoadEnvFile = (file: string | undefined): void => {
+  if (!file) return;
+  const fullPath = resolve(process.cwd(), file);
+  if (existsSync(fullPath)) {
+    config({ path: fullPath });
+  }
+};
+
+const preferProductionEnv =
+  process.env.NODE_ENV === "production" || process.env.CI === "true" ||
+  process.env.CI === "1";
+
+maybeLoadEnvFile(preferProductionEnv ? ".env.production" : undefined);
+maybeLoadEnvFile(".env");
+maybeLoadEnvFile(".env.local");
 
 const appliedDefaultKeys = applyDefaultEnv();
 

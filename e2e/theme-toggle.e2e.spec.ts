@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
 import type { Page, Route } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 const stubResponses = async (page: Page) => {
   await page.route('**/api/**', async (route: Route) => {
@@ -58,6 +59,7 @@ test.beforeEach(async ({ page }) => {
 
 test('single theme toggle switches and persists', async ({ page }) => {
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   const toggle = page.getByLabel('Toggle theme');
   await expect(toggle).toHaveCount(1);
 
@@ -66,6 +68,7 @@ test('single theme toggle switches and persists', async ({ page }) => {
   expect(isDark).toBe(true);
 
   await page.reload();
+  await awaitAppReady(page);
   isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
   expect(isDark).toBe(true);
 });
@@ -74,6 +77,7 @@ test('respects system preference on first load', async ({ page }) => {
   await page.addInitScript(() => localStorage.removeItem('theme'));
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   const isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
   expect(isDark).toBe(true);
 });

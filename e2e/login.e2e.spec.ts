@@ -1,5 +1,8 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test-setup';
 import { runA11yScan } from './axe-helper';
+import { awaitAppReady } from './utils/awaitAppReady';
+
+test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe('Login form', () => {
   test('invalid login announces error via aria-live', async ({ page }) => {
@@ -16,6 +19,7 @@ test.describe('Login form', () => {
     });
 
     await page.goto('/admin/login');
+    await awaitAppReady(page);
     await page.getByLabel('Email').fill('fake@example.com');
     await page.getByLabel('Password').fill('wrong-password');
     await page.getByRole('button', { name: /^sign in$/i }).click();
@@ -42,6 +46,7 @@ test.describe('Login form', () => {
     });
 
     await page.goto('/admin/login');
+    await awaitAppReady(page);
 
     const legacyToggle = page.getByTestId('legacy-login-toggle');
     if (await legacyToggle.count()) {
@@ -90,6 +95,7 @@ test.describe('Login form', () => {
     });
 
     await page.goto('/admin/login');
+    await awaitAppReady(page);
 
     const legacyToggle = page.getByTestId('legacy-login-toggle');
     if (await legacyToggle.count()) {

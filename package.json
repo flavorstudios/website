@@ -8,6 +8,7 @@
     "prebuild": "tsx scripts/validate-env.ts",
     "build": "next build",
     "start": "next start",
+    "start:test": "pnpm exec tsx scripts/start-test.ts",
     "lint": "next lint",
     "test": "pnpm test:unit",
     "test:unit": "jest --selectProjects web --runInBand",

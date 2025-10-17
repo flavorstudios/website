@@ -131,12 +131,21 @@ export default function SignupForm() {
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <div aria-live="assertive" className="min-h-[1.5rem] text-sm">
         {formError && (
-          <p id="signup-error" role="alert" className="text-red-600">
+          <p
+            id="signup-error"
+            role="alert"
+            className="text-red-600"
+            data-testid="signup-error"
+          >
             {formError}
           </p>
         )}
         {successMessage && (
-          <p className="text-emerald-600" role="status">
+          <p
+            className="text-emerald-600"
+            role="status"
+            data-testid="verify-status"
+          >
             {successMessage}
           </p>
         )}

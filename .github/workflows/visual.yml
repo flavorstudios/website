@@ -21,6 +21,10 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'update-visuals') || github.event.inputs.mode == 'update' || github.event.inputs.mode == 'verify' }}
     runs-on: ubuntu-latest
     container: mcr.microsoft.com/playwright:v1.47.0-jammy
+    env:
+      BASE_URL: ${{ secrets.BASE_URL }}
+      NEXT_PUBLIC_BASE_URL: ${{ secrets.BASE_URL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

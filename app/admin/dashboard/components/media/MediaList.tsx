@@ -95,7 +95,11 @@ export default function MediaList({
 
         {hasItems ? (
           items.map((m) => (
-            <div key={m.id} className="border rounded p-3 flex gap-3 items-center">
+            <div
+              key={m.id}
+              className="border rounded p-3 flex gap-3 items-center"
+              data-testid="media-card"
+            >
               <Checkbox
                 aria-label={`Select ${getPrimaryLabel(m)}`}
                 checked={selected.has(m.id)}
@@ -176,7 +180,7 @@ export default function MediaList({
           <tbody>
             {hasItems ? (
               items.map((m) => (
-                <tr key={m.id} className="border-t">
+                <tr key={m.id} className="border-t" data-testid="media-row">
                   <td className="p-2">
                     <Checkbox
                       aria-label={`Select ${getPrimaryLabel(m)}`}

@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 test('blog fallback cards render before data resolves on mobile', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
@@ -34,8 +35,9 @@ test('blog fallback cards render before data resolves on mobile', async ({ page 
   });
 
   await page.goto('/admin/dashboard/blog');
+  await awaitAppReady(page);
 
-  await expect(page.getByRole('heading', { name: 'Blog Manager' })).toBeVisible();
+  await expect(page.getByTestId('page-title')).toHaveText(/Blog/i);
 
   const cards = page.getByTestId('blog-card');
   await expect(cards.first()).toBeVisible();

@@ -1,12 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test-setup';
 import { runA11yScan } from './axe-helper';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 test.use({ viewport: { width: 390, height: 844 } });
 
 test('sidebar drawer traps focus and returns focus on close', async ({ page }) => {
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
 
   const toggle = page.getByRole('button', { name: /open sidebar/i });
+  await expect(toggle).toBeVisible();
   await toggle.focus();
   await toggle.press('Enter');
 

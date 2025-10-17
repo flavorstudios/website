@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 const viewports = [
   { name: 'mobile', width: 320, height: 720 },
@@ -11,6 +12,7 @@ test.describe('Admin login legal footer', () => {
     test(`legal notice remains single-line (${viewport.name})`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await page.goto('/admin/login');
+      await awaitAppReady(page);
 
       const legalNotice = page.getByTestId('admin-login-legal');
       await expect(legalNotice).toBeVisible();

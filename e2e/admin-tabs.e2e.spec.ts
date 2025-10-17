@@ -1,4 +1,6 @@
-import { test, expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 const stubResponses = async (page: Page) => {
   await page.route('**/api/**', async (route) => {
@@ -59,27 +61,29 @@ test.beforeEach(async ({ page }) => {
 
 test('admin nav tabs render correct content', async ({ page }) => {
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
 
   const sections = [
-    { label: 'Dashboard', expected: /Welcome back/i, path: '/admin/dashboard' },
-    { label: 'Blog Posts', expected: /Blog Manager/i, path: '/admin/dashboard/blog-posts' },
-    { label: 'Videos', expected: /Video Manager/i, path: '/admin/dashboard/videos' },
-    { label: 'Media', expected: /Media Manager/i, path: '/admin/dashboard/media' },
-    { label: 'Categories', expected: /^Categories$/i, path: '/admin/dashboard/categories' },
-    { label: 'Comments', expected: /Comments & Reviews/i, path: '/admin/dashboard/comments' },
-    { label: 'Applications', expected: /^Applications$/i, path: '/admin/dashboard/applications' },
-    { label: 'Email Inbox', expected: /Email Inbox/i, path: '/admin/dashboard/inbox' },
-    { label: 'Users', expected: /^Users$/i, path: '/admin/dashboard/users' },
-    { label: 'Settings', expected: /^Settings$/i, path: '/admin/dashboard/settings' },
-    { label: 'System Tools', expected: /Revalidate Entire Website/i, path: '/admin/dashboard/system' },
-  ];
+    { label: 'Dashboard', expected: 'Admin Dashboard', path: '/admin/dashboard' },
+    { label: 'Blog Posts', expected: 'Blog Posts', path: '/admin/dashboard/blog-posts' },
+    { label: 'Videos', expected: 'Videos', path: '/admin/dashboard/videos' },
+    { label: 'Media', expected: 'Media Manager', path: '/admin/dashboard/media' },
+    { label: 'Categories', expected: 'Categories', path: '/admin/dashboard/categories' },
+    { label: 'Comments', expected: 'Comments & Reviews', path: '/admin/dashboard/comments' },
+    { label: 'Applications', expected: 'Applications', path: '/admin/dashboard/applications' },
+    { label: 'Email Inbox', expected: 'Email Inbox', path: '/admin/dashboard/inbox' },
+    { label: 'Users', expected: 'Users', path: '/admin/dashboard/users' },
+    { label: 'Settings', expected: 'Settings', path: '/admin/dashboard/settings' },
+    { label: 'System Tools', expected: 'System Tools', path: '/admin/dashboard/system' },
+  ] as const;
 
   for (const { label, expected, path } of sections) {
-    await page.getByRole('link', { name: label }).click();
+    const navLink = page.getByRole('link', { name: label });
+    await expect(navLink).toBeVisible();
+    await navLink.click();
     await expect(page).toHaveURL(path);
-    await expect(
-      page.getByRole('heading', { name: expected, exact: false })
-    ).toBeVisible();
+    await awaitAppReady(page);
+    await expect(page.getByTestId('dashboard-title')).toHaveText(expected);
     await expect(page.getByText('Loading Admin Dashboard...')).not.toBeVisible();
   }
 });

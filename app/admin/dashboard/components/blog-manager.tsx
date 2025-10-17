@@ -592,6 +592,7 @@ export default function BlogManager() {
             className="rounded-xl px-4 flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white"
             aria-label="Refresh blog posts"
             title="Refresh blog posts"
+            data-testid="refresh"
           >
             <RefreshCw className={`h-4 w-4 ${isRevalidating ? "animate-spin" : ""}`} />
             {isRevalidating ? "Refreshing..." : "Refresh"}
@@ -602,6 +603,7 @@ export default function BlogManager() {
             className="rounded-xl px-4 flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow"
             aria-label="New Post"
             title="New Post"
+            data-testid="new-post"
           >
             <PlusCircle className="h-4 w-4" />
             New Post

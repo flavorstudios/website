@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 test('displays combined posts and videos growth', async ({ page }) => {
   await page.route('**/api/admin/stats?**', async (route) => {
@@ -25,5 +26,6 @@ test('displays combined posts and videos growth', async ({ page }) => {
     });
   });
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   await expect(page.getByText('+10% posts+videos growth this month')).toBeVisible();
 });

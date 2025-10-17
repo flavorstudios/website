@@ -1,8 +1,10 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 test.describe('Admin password reset', () => {
   test('completes the happy path flow', async ({ page }) => {
     await page.goto('/admin/forgot-password');
+    await awaitAppReady(page);
 
     await page.getByLabel('Email').fill('admin@example.com');
 
@@ -22,7 +24,7 @@ test.describe('Admin password reset', () => {
     const body = await response.json();
     expect(body.emailLink).toBeTruthy();
 
-    expect(new URL(body.emailLink).protocol).toBe('http:');
+    expect(['http:', 'https:']).toContain(new URL(body.emailLink).protocol);
 
     const [openResponse] = await Promise.all([
       page.waitForResponse((res) =>

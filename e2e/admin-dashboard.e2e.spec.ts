@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 test('admin dashboard renders', async ({ page }) => {
   await page.route('**/api/admin/stats?**', async (route) => {
@@ -25,6 +26,7 @@ test('admin dashboard renders', async ({ page }) => {
     });
   });
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   await expect(page.getByTestId('dashboard-loading')).toBeVisible();
   await expect(page.getByText('Total Posts')).toBeVisible();
   await expect(page.getByText('Total Views')).toBeVisible();

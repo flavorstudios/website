@@ -38,7 +38,9 @@ import { isClientE2EEnabled } from "@/lib/e2e-utils";
 const BlogSectionFallback = () => (
   <div className="space-y-4" data-testid="blog-card-skeletons">
     <header className="space-y-1" aria-hidden="true">
-      <p className="text-2xl font-semibold text-foreground">Blog Posts</p>
+      <p className="text-2xl font-semibold text-foreground" data-testid="page-title">
+        Blog Posts
+      </p>
       <p className="text-sm text-muted-foreground">Blog Management</p>
     </header>
     <div className="sm:hidden space-y-3" data-testid="blog-card-list">

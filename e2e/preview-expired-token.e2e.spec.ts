@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test-setup';
 // Intercept external font requests to avoid network access during tests
 // and return an empty stylesheet.
 test.beforeEach(async ({ page }) => {

@@ -1,9 +1,13 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 test.describe('Blog CRUD', () => {
   test('create, edit, save flow works on desktop', async ({ page }) => {
     await page.goto('/admin/dashboard/blog');
-    await page.getByRole('button', { name: /new post/i }).click();
+    await awaitAppReady(page);
+    const newPost = page.getByTestId('new-post');
+    await expect(newPost).toBeVisible();
+    await newPost.click();
     await page.getByLabel(/title/i).fill('Playwright Test Post');
     const contentEditor = page.getByLabel(/content/i);
     await expect(contentEditor).toBeVisible();
@@ -15,6 +19,7 @@ test.describe('Blog CRUD', () => {
   test.use({ viewport: { width: 390, height: 844 } });
   test('list renders as cards on mobile without horizontal scroll', async ({ page }) => {
     await page.goto('/admin/dashboard/blog');
+    await awaitAppReady(page);
     // No horizontal scroll
     const hasScroll = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
     expect(hasScroll).toBeFalsy();

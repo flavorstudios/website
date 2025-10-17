@@ -1,4 +1,6 @@
-import { test, expect, type Page, type Route } from '@playwright/test';
+import type { Page, Route } from '@playwright/test';
+import { test, expect } from './test-setup';
+import { awaitAppReady } from './utils/awaitAppReady';
 
 async function stubDashboard(page: Page, stats: Record<string, unknown>) {
   await page.route('**/api/admin/stats?**', async (route: Route) => {
@@ -36,6 +38,7 @@ test('renders posts-only history with correct bars', async ({ page }) => {
     history: [{ month: 'Jan', posts: 5, videos: 0, comments: 0 }],
   });
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   await page.waitForSelector('text=Posts, Videos & Comments (12 months)');
   await page.waitForFunction(() => (window as any).__dashboardHistoryDatasets);
   const datasets = await page.evaluate(() =>
@@ -58,6 +61,7 @@ test('renders videos-only history with correct bars', async ({ page }) => {
     history: [{ month: 'Jan', posts: 0, videos: 7, comments: 0 }],
   });
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   await page.waitForSelector('text=Posts, Videos & Comments (12 months)');
   await page.waitForFunction(() => (window as any).__dashboardHistoryDatasets);
   const datasets = await page.evaluate(() =>
@@ -76,6 +80,7 @@ test('renders videos-only history with correct bars', async ({ page }) => {
 test('history card hides when all totals are zero', async ({ page }) => {
   await stubDashboard(page, baseStats);
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   await expect(page.getByText('Posts, Videos & Comments (12 months)')).toHaveCount(0);
 });
 
@@ -85,6 +90,7 @@ test('history card hides when entries exist but all metrics are zero', async ({ 
     history: [{ month: 'Jan', posts: 0, videos: 0, comments: 0 }],
   });
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   await expect(page.getByText('Posts, Videos & Comments (12 months)')).toHaveCount(0);
 });
 
@@ -95,5 +101,6 @@ test('history card shows when any metric nonzero', async ({ page }) => {
     history: [{ month: 'Jan', posts: 0, videos: 0, comments: 3 }],
   });
   await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
   await expect(page.getByText('Posts, Videos & Comments (12 months)')).toBeVisible();
 });

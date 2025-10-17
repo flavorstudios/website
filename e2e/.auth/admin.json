@@ -1,0 +1,25 @@
+{
+  "cookies": [
+    {
+      "name": "e2e-admin",
+      "value": "true",
+      "domain": "127.0.0.1",
+      "path": "/",
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax",
+      "expires": -1
+    },
+    {
+      "name": "e2e-admin",
+      "value": "true",
+      "domain": "localhost",
+      "path": "/",
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax",
+      "expires": -1
+    }
+  ],
+  "origins": []
+}

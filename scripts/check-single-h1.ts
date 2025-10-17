@@ -1,18 +1,31 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
-async function getMatcher() {
-  try {
-    const mod = await import("globby");
-    return mod.globby as (patterns: string[]) => Promise<string[]>;
-  } catch {
-    const mod = await import("tinyglobby");
-    return mod.globby as (patterns: string[]) => Promise<string[]>;
+function collectHtmlFiles(dir: string): string[] {
+  if (!existsSync(dir)) {
+    return [];
   }
+
+const entries = readdirSync(dir, { withFileTypes: true });
+  const files: string[] = [];
+
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...collectHtmlFiles(fullPath));
+      continue;
+    }
+
+    if (entry.isFile() && fullPath.endsWith(".html")) {
+      files.push(fullPath);
+    }
+  }
+
+  return files;
 }
 
 async function main() {
-  const globby = await getMatcher();
-  const files = await globby([".next/server/app/(admin)/**/*.html"]);
+  const files = collectHtmlFiles(".next/server/app/(admin)");
   let failed = false;
   for (const f of files) {
     const html = readFileSync(f, "utf8");

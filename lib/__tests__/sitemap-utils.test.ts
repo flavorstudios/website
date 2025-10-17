@@ -40,24 +40,30 @@ describe("fetchDynamicContent", () => {
       json: async () => [
         {
           slug: "first-post",
-          status: "published",
           updatedAt: "2024-01-01T00:00:00Z",
+        },
+        {
+          slug: "draft-post",
+          status: "draft",
+          updatedAt: "2024-01-03T00:00:00Z",
         },
       ],
     } as unknown as Response
 
-    const videoPayload = [
-      {
-        slug: "pilot-episode",
-        status: "published",
-        updatedAt: "2024-01-02T00:00:00Z",
-      },
-    ]
-
     const videoResponse = {
       ok: true,
       status: 200,
-      json: async () => videoPayload,
+      json: async () => [
+        {
+          slug: "pilot-episode",
+          publishedAt: "2024-01-02T00:00:00Z",
+        },
+        {
+          slug: "unreleased-clip",
+          status: "draft",
+          publishedAt: "2024-01-04T00:00:00Z",
+        },
+      ],
     } as unknown as Response
 
     const fetchSpy = jest
@@ -83,10 +89,11 @@ describe("fetchDynamicContent", () => {
       `${baseUrl}/api/videos`,
       expect.objectContaining({ cache: "no-store" }),
     )
-    expect(result).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ url: "/watch/pilot-episode" }),
-      ]),
-    )
+
+    const urls = result.map((entry) => entry.url)
+    expect(urls).toContain("/blog/first-post")
+    expect(urls).toContain("/watch/pilot-episode")
+    expect(urls).not.toContain("/blog/draft-post")
+    expect(urls).not.toContain("/watch/unreleased-clip")
   })
 })

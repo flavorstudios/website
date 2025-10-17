@@ -1,8 +1,5 @@
 // lib/sitemap-utils.ts
 
-import type { BlogPost } from "./content-store";
-import type { Video } from "./content-store";
-
 export interface SitemapUrl {
   url: string;
   priority: string; // e.g. "0.5", "1.0"
@@ -69,6 +66,65 @@ function toISO8601(input: string | Date | null | undefined): string {
   return "";
 }
 
+type UnknownRecord = Record<string, unknown>;
+
+function asRecord(value: unknown): UnknownRecord | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+  return value as UnknownRecord;
+}
+
+function isPublished(entry: UnknownRecord): boolean {
+  const rawStatus = entry.status;
+  if (typeof rawStatus !== "string") {
+    // Public API responses omit status entirely; treat as published in that case.
+    return true;
+  }
+
+  const normalized = rawStatus.trim().toLowerCase();
+  if (!normalized) {
+    return true;
+  }
+
+  return normalized === "published";
+}
+
+function extractSlug(entry: UnknownRecord): string | null {
+  const slug = entry.slug;
+  if (typeof slug !== "string") {
+    return null;
+  }
+
+  const trimmed = slug.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function extractLastmod(entry: UnknownRecord): string | undefined {
+  const candidates = [entry.updatedAt, entry.publishedAt, entry.createdAt];
+
+  for (const candidate of candidates) {
+    if (candidate instanceof Date) {
+      const iso = toISO8601(candidate);
+      if (iso) return iso;
+      continue;
+    }
+
+    if (typeof candidate === "number" && Number.isFinite(candidate)) {
+      const iso = toISO8601(new Date(candidate));
+      if (iso) return iso;
+      continue;
+    }
+
+    if (typeof candidate === "string") {
+      const iso = toISO8601(candidate);
+      if (iso) return iso;
+    }
+  }
+
+  return undefined;
+}
+
 // ---- GENERATE SITEMAP XML ----
 export function generateSitemapXML(baseUrl: string, urls: SitemapUrl[]): string {
   const sitemapEntries = urls.map((page) => {
@@ -131,15 +187,29 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
       const blogsData = await blogsResponse.json();
       // --- Codex Update: Support both array and { posts: [] }
       const blogs = Array.isArray(blogsData) ? blogsData : blogsData.posts || [];
-      blogs.forEach((blog: BlogPost) => {
-        if (blog.slug && blog.status === "published") {
-          dynamicPages.push({
-            url: `/blog/${blog.slug}`,
-            priority: "0.7",
-            changefreq: "weekly",
-            lastmod: toISO8601(blog.updatedAt || blog.publishedAt || blog.createdAt)
-          });
+      blogs.forEach((blog) => {
+        const record = asRecord(blog);
+        if (!record) {
+          return;
         }
+
+        if (!isPublished(record)) {
+          return;
+        }
+
+        const slug = extractSlug(record);
+        if (!slug) {
+          return;
+        }
+
+        const lastmod = extractLastmod(record);
+
+        dynamicPages.push({
+          url: `/blog/${slug}`,
+          priority: "0.7",
+          changefreq: "weekly",
+          ...(lastmod ? { lastmod } : {}),
+        });
       });
     } else {
       console.error("Error: Blog API returned status", blogsResponse.status);
@@ -158,15 +228,29 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
       const videosData = await videosResponse.json();
       // --- Codex Update: Support both array and { videos: [] }
       const videos = Array.isArray(videosData) ? videosData : videosData.videos || [];
-      videos.forEach((video: Video) => {
-        if (video.slug && video.status === "published") {
-          dynamicPages.push({
-            url: `/watch/${video.slug}`,
-            priority: "0.7",
-            changefreq: "weekly",
-            lastmod: toISO8601(video.updatedAt || video.publishedAt || video.createdAt)
-          });
+      videos.forEach((video) => {
+        const record = asRecord(video);
+        if (!record) {
+          return;
         }
+
+        if (!isPublished(record)) {
+          return;
+        }
+
+        const slug = extractSlug(record);
+        if (!slug) {
+          return;
+        }
+
+        const lastmod = extractLastmod(record);
+
+        dynamicPages.push({
+          url: `/watch/${slug}`,
+          priority: "0.7",
+          changefreq: "weekly",
+          ...(lastmod ? { lastmod } : {}),
+        });
       });
     } else {
       console.error("Error: Video API returned status", videosResponse.status);

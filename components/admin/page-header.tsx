@@ -1,10 +1,24 @@
 import * as React from "react";
+import type { JSX } from "react";
 
 import { cn } from "@/lib/utils";
+import type { SafeHTMLAttributes, WithDataAttributes } from "@/types/dom";
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
-type PageHeaderProps = Omit<React.HTMLAttributes<HTMLElement>, "title"> & {
+type DataAttributes = {
+  [key in `data-${string}`]?: string | number | undefined;
+};
+
+// Preserve support for custom data-* attributes while still preventing callers
+// from overriding managed id/className values.
+type HeadingProps =
+  Omit<React.HTMLAttributes<HTMLHeadingElement>, "id" | "className"> &
+  DataAttributes;
+
+type PageHeaderBaseProps = WithDataAttributes<Omit<React.HTMLAttributes<HTMLElement>, "title">>;
+
+type PageHeaderProps = PageHeaderBaseProps & {
   title: string;
   description?: string;
   /** Optional right-aligned actions (buttons, links) */
@@ -16,7 +30,7 @@ type PageHeaderProps = Omit<React.HTMLAttributes<HTMLElement>, "title"> & {
   headingClassName?: string;
   descriptionClassName?: string;
   containerClassName?: string;
-  headingProps?: Omit<React.HTMLAttributes<HTMLHeadingElement>, "id" | "className">;
+  headingProps?: HeadingProps;
 };
 
 type HeadingTagProps = {
@@ -27,7 +41,7 @@ type HeadingTagProps = {
 };
 
 const HeadingTag = ({ level, children, className, id }: HeadingTagProps) => {
-  const Tag = (`h${level}`) as keyof JSX.IntrinsicElements;
+  const Tag = (`h${level}`) as keyof React.JSX.IntrinsicElements;
   return (
     <Tag id={id} className={className}>
       {children}

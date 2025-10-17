@@ -1,8 +1,7 @@
 import * as React from "react";
-import type { JSX } from "react";
 
 import { cn } from "@/lib/utils";
-import type { SafeHTMLAttributes, WithDataAttributes } from "@/types/dom";
+import type { WithDataAttributes } from "@/types/dom";
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 

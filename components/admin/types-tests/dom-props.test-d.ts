@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import type { SafeHTMLAttributes } from "@/types/dom"
 
 // Should accept aria- and data- attributes

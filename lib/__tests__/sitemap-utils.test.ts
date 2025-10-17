@@ -96,4 +96,63 @@ describe("fetchDynamicContent", () => {
     expect(urls).not.toContain("/blog/draft-post")
     expect(urls).not.toContain("/watch/unreleased-clip")
   })
+  
+  it("supports APIs that return nested post/video collections", async () => {
+    const baseUrl = "https://flavorstudios.in"
+
+    const blogResponse = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        posts: [
+          { slug: "from-object", publishedAt: "2024-02-01T00:00:00Z" },
+          { slug: "draft-from-object", status: "draft" },
+          { slug: "" },
+          null,
+        ],
+      }),
+    } as unknown as Response
+
+    const videoResponse = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        videos: [
+          { slug: "object-video", updatedAt: "2024-02-02T00:00:00Z" },
+          { slug: "unpublished-object-video", status: "draft" },
+          123,
+        ],
+      }),
+    } as unknown as Response
+
+    jest
+      .spyOn(globalThis as unknown as { fetch: typeof fetch }, "fetch")
+      .mockImplementation((input: RequestInfo | URL) => {
+        const url = typeof input === "string" ? input : input.toString()
+        if (url.endsWith("/api/blogs")) {
+          return Promise.resolve(blogResponse)
+        }
+        if (url.endsWith("/api/videos")) {
+          return Promise.resolve(videoResponse)
+        }
+        return Promise.resolve({
+          ok: false,
+          status: 404,
+          json: async () => ({}),
+        } as unknown as Response)
+      })
+
+    const result = await fetchDynamicContent(baseUrl)
+
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ url: "/blog/from-object" }),
+        expect.objectContaining({ url: "/watch/object-video" }),
+      ]),
+    )
+
+    const urls = result.map((entry) => entry.url)
+    expect(urls).not.toContain("/blog/draft-from-object")
+    expect(urls).not.toContain("/watch/unpublished-object-video")
+  })
 })

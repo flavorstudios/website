@@ -68,11 +68,28 @@ function toISO8601(input: string | Date | null | undefined): string {
 
 type UnknownRecord = Record<string, unknown>;
 
+function isRecord(value: unknown): value is UnknownRecord {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
 function asRecord(value: unknown): UnknownRecord | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return null;
+  return isRecord(value) ? value : null;
+}
+
+type CollectionKey = "posts" | "videos";
+
+function extractCollectionItems(data: unknown, key: CollectionKey): unknown[] {
+  if (Array.isArray(data)) {
+    return data;
   }
-  return value as UnknownRecord;
+
+  const record = asRecord(data);
+  if (!record) {
+    return [];
+  }
+
+  const nested = record[key];
+  return Array.isArray(nested) ? nested : [];
 }
 
 function isPublished(entry: UnknownRecord): boolean {
@@ -185,21 +202,21 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
     });
     if (blogsResponse.ok) {
       const blogsData = await blogsResponse.json();
-      // --- Codex Update: Support both array and { posts: [] }
-      const blogs = Array.isArray(blogsData) ? blogsData : blogsData.posts || [];
-      blogs.forEach((blog) => {
-        const record = asRecord(blog);
+      const blogs = extractCollectionItems(blogsData, "posts");
+
+      for (const blogEntry of blogs) {
+        const record = asRecord(blogEntry);
         if (!record) {
-          return;
+          continue;
         }
 
         if (!isPublished(record)) {
-          return;
+          continue;
         }
 
         const slug = extractSlug(record);
         if (!slug) {
-          return;
+          continue;
         }
 
         const lastmod = extractLastmod(record);
@@ -210,7 +227,7 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
           changefreq: "weekly",
           ...(lastmod ? { lastmod } : {}),
         });
-      });
+      }
     } else {
       console.error("Error: Blog API returned status", blogsResponse.status);
     }
@@ -226,21 +243,21 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
     });
     if (videosResponse.ok) {
       const videosData = await videosResponse.json();
-      // --- Codex Update: Support both array and { videos: [] }
-      const videos = Array.isArray(videosData) ? videosData : videosData.videos || [];
-      videos.forEach((video) => {
-        const record = asRecord(video);
+      const videos = extractCollectionItems(videosData, "videos");
+
+      for (const videoEntry of videos) {
+        const record = asRecord(videoEntry);
         if (!record) {
-          return;
+          continue;
         }
 
         if (!isPublished(record)) {
-          return;
+          continue;
         }
 
         const slug = extractSlug(record);
         if (!slug) {
-          return;
+          continue;
         }
 
         const lastmod = extractLastmod(record);
@@ -251,7 +268,7 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
           changefreq: "weekly",
           ...(lastmod ? { lastmod } : {}),
         });
-      });
+      }
     } else {
       console.error("Error: Video API returned status", videosResponse.status);
     }

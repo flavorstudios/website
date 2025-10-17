@@ -60,7 +60,7 @@ import type { CategoryData } from "@/lib/dynamic-categories";
 import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions/blog";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/components/admin/Pagination";
-import AdminPageHeader from "@/components/AdminPageHeader";
+import { PageHeader } from "@/components/admin/page-header";
 import { fetcher } from "@/lib/fetcher";
 import { useDebounce } from "@/hooks/use-debounce";
 import useMediaQuery from "@/hooks/use-media-query";
@@ -499,10 +499,13 @@ export default function BlogManager() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="space-y-2">
-          <AdminPageHeader as="h2" className="space-y-1" title="Blog Management" />
-          <p className="text-sm text-muted-foreground">{managementDescription}</p>
-        </div>
+        <PageHeader
+          level={2}
+          className="mb-0"
+          containerClassName="flex-col"
+          title="Blog Management"
+          description={managementDescription}
+        />
         <div className="mt-4 space-y-4">
           <div className="sm:hidden space-y-3" data-testid="blog-card-list">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -580,10 +583,13 @@ export default function BlogManager() {
     <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}> 
       {/* Header with right-aligned action buttons */}
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-2">
-          <AdminPageHeader as="h2" className="space-y-1" title="Blog Management" />
-          <p className="text-sm text-muted-foreground">{managementDescription}</p>
-        </div>
+        <PageHeader
+          level={2}
+          className="mb-0"
+          containerClassName="flex-col"
+          title="Blog Management"
+          description={managementDescription}
+        />
         <div className="flex flex-shrink-0 gap-2">
           <Button
             onClick={handleRevalidateBlog}

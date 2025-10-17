@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, useId, type ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
-import AdminPageHeader from "@/components/AdminPageHeader";
+import { PageHeader } from "@/components/admin/page-header";
 import AdminBreadcrumbs from "@/components/AdminBreadcrumbs";
 import Spinner from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -141,6 +141,7 @@ export default function AdminSearchPageClient({
     };
   }, [query]);
 
+  const headingId = useId();
   const hasQuery = query.trim().length > 0;
   const readyForResults = query.trim().length >= 2;
   const hasResults =
@@ -161,62 +162,64 @@ export default function AdminSearchPageClient({
             ]}
           />
 
-          <AdminPageHeader
-            title="Admin Search"
-            subtitle={
-              hasQuery
-                ? `Results for “${query.trim()}”`
-                : "Search across posts, videos, users, categories, and tags."
-            }
-          />
+          <section aria-labelledby={headingId} className="flex flex-col gap-6">
+            <PageHeader
+              headingId={headingId}
+              title="Admin Search"
+              description={
+                hasQuery
+                  ? `Results for “${query.trim()}”`
+                  : "Search across posts, videos, users, categories, and tags."
+              }
+            />
 
-          {!hasQuery && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Start by searching</CardTitle>
-                <CardDescription>
-                  Use the search bar at the top of the dashboard or press “/” to quickly focus it, then enter at least two
-                  characters.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          )}
+            {!hasQuery && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Start by searching</CardTitle>
+                  <CardDescription>
+                    Use the search bar at the top of the dashboard or press “/” to quickly focus it, then enter at least two
+                    characters.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            )}
 
-          {hasQuery && !readyForResults && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Keep typing…</CardTitle>
-                <CardDescription>Enter at least two characters to see matching admin content.</CardDescription>
-              </CardHeader>
-            </Card>
-          )}
+            {hasQuery && !readyForResults && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Keep typing…</CardTitle>
+                  <CardDescription>Enter at least two characters to see matching admin content.</CardDescription>
+                </CardHeader>
+              </Card>
+            )}
 
-          {state === "loading" && (
-            <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card/40 p-8">
-              <Spinner />
-              <p className="text-sm text-muted-foreground">Searching the admin content…</p>
-            </div>
-          )}
+            {state === "loading" && (
+              <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card/40 p-8">
+                <Spinner />
+                <p className="text-sm text-muted-foreground">Searching the admin content…</p>
+              </div>
+            )}
 
-          {state === "error" && error && (
-            <Alert variant="destructive" className="max-w-xl">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+            {state === "error" && error && (
+              <Alert variant="destructive" className="max-w-xl">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          {state === "success" && readyForResults && !hasResults && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">No results found</CardTitle>
-                <CardDescription>
-                  We couldn’t find any posts, videos, users, categories, or tags matching “{query.trim()}”.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          )}
+            {state === "success" && readyForResults && !hasResults && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">No results found</CardTitle>
+                  <CardDescription>
+                    We couldn’t find any posts, videos, users, categories, or tags matching “{query.trim()}”.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            )}
 
-          {state === "success" && hasResults && (
-            <div className="space-y-6">
+            {state === "success" && hasResults && (
+              <div className="space-y-6">
               <SearchResultsSection
                 title="Blog posts"
                 description="Top matches from your published and draft posts."
@@ -316,6 +319,7 @@ export default function AdminSearchPageClient({
               </SearchResultsSection>
             </div>
           )}
+          </section>
         </div>
       </div>
     </AdminAuthGuard>

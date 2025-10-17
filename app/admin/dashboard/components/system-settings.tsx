@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Save } from "lucide-react"
-import AdminPageHeader from "@/components/AdminPageHeader"
+import { PageHeader } from "@/components/admin/page-header"
 import { useTheme } from "next-themes"
 import { useToast } from "@/hooks/use-toast"
 
@@ -113,10 +113,12 @@ export function SystemSettings() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <AdminPageHeader
-          as="h2"
+        <PageHeader
+          level={2}
+          className="mb-0"
+          containerClassName="flex-col"
           title="Settings"
-          subtitle="Manage your profile, notifications, and appearance preferences"
+          description="Manage your profile, notifications, and appearance preferences"
         />
         <div className="flex items-center gap-2">
           <Button

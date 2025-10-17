@@ -19,7 +19,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import AdminPageHeader from "@/components/AdminPageHeader";
+import { PageHeader } from "@/components/admin/page-header";
 import ProgressStat from "./progress-stat";
 import {
   TrendingUp,
@@ -384,11 +384,14 @@ export default function DashboardOverview({
 
   return (
     <div className="space-y-6" aria-busy={isInitialLoading || statsQuery.isFetching}>
-      <AdminPageHeader
-        as="h2"
-        className="space-y-1"
+      <PageHeader
+        level={2}
+        className="mb-4"
+        containerClassName="flex-col"
+        headingClassName="text-2xl font-semibold text-foreground"
+        descriptionClassName="text-sm text-muted-foreground"
         title="Dashboard Overview"
-        subtitle="Track activity, performance, and quick actions for your studio"
+        description="Track activity, performance, and quick actions for your studio"
       />
       {isInitialLoading && (
         <div

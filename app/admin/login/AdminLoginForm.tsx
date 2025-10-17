@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2 } from "lucide-react"
+import { PageHeader } from "@/components/admin/page-header"
 import FirebaseEmailLoginForm from "./FirebaseEmailLoginForm"
 import EmailLoginForm from "./EmailLoginForm"
 import useAuthError from "@/hooks/useAuthError"
@@ -248,14 +249,14 @@ export default function AdminLoginForm() {
               priority
             />
           </div>
-          <div className="space-y-4">
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
-              Welcome back
-            </h1>
-            <p className="text-base text-slate-600 md:text-lg">
-              Create, schedule, and manage your stories.
-            </p>
-          </div>
+          <PageHeader
+            title="Welcome back"
+            description="Create, schedule, and manage your stories."
+            containerClassName="flex-col items-start gap-4"
+            headingClassName="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl"
+            descriptionClassName="text-base text-slate-600 md:text-lg"
+            className="mb-0"
+          />
         </div>
         <div className="flex flex-col gap-8 bg-white px-6 py-8 md:px-10 md:py-12 text-left">
           <div className="flex flex-col gap-6">

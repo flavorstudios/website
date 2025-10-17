@@ -12,7 +12,6 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +19,7 @@ import {
   PASSWORD_RESET_NEUTRAL_MESSAGE,
   PASSWORD_RESET_RATE_LIMIT_MESSAGE,
 } from "@/lib/password-reset-messages";
+import { PageHeader } from "@/components/admin/page-header";
 
 const EMAIL_ERROR_MESSAGE = "Enter a valid email address.";
 const NETWORK_ERROR_MESSAGE = "Unable to process your request. Please try again.";
@@ -102,13 +102,15 @@ export default function ForgotPasswordForm({
   return (
     <div className="min-h-screen bg-[#f4f4f5] flex items-center justify-center px-4 py-12">
       <Card className="w-full max-w-sm bg-white border border-slate-200 shadow-sm rounded-lg">
-        <CardHeader className="p-6 text-center space-y-2">
-          <CardTitle className="text-2xl font-semibold text-slate-900">
-            Forgot password?
-          </CardTitle>
-          <CardDescription className="text-sm text-slate-600">
-            Enter your admin email to receive reset instructions.
-          </CardDescription>
+        <CardHeader className="p-6">
+          <PageHeader
+            title="Forgot password?"
+            description="Enter your admin email to receive reset instructions."
+            className="mb-0 text-center"
+            containerClassName="flex-col items-center gap-2"
+            headingClassName="text-2xl font-semibold text-slate-900"
+            descriptionClassName="text-sm text-slate-600"
+          />
         </CardHeader>
         <CardContent className="p-6 pt-0">
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useId } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, MailCheck } from "lucide-react";
 
@@ -9,6 +9,7 @@ import { getFirebaseAuth } from "@/lib/firebase";
 import { clientEnv } from "@/env.client";
 import { useAdminAuth } from "@/components/AdminAuthProvider";
 import { isClientE2EEnabled } from "@/lib/e2e-utils";
+import { PageHeader } from "@/components/admin/page-header";
 
 type StatusMessage = {
   tone: "neutral" | "success" | "error";
@@ -21,6 +22,7 @@ export default function VerifyEmailClient() {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const { testEmailVerified, setTestEmailVerified } = useAdminAuth();
+  const headingId = useId();
 
   const requireVerification =
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
@@ -230,15 +232,23 @@ export default function VerifyEmailClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col items-center text-center">
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+      <section
+        aria-labelledby={headingId}
+        className="flex flex-col items-center text-center gap-4"
+      >
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
           <MailCheck className="h-6 w-6" aria-hidden="true" />
         </div>
-        <h1 className="text-2xl font-semibold">Verify your email</h1>
-        <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-          We&rsquo;ve sent a verification link to your registered email address. Please verify to unlock admin privileges.
-        </p>
-      </div>
+        <PageHeader
+          headingId={headingId}
+          title="Verify your email"
+          description="We've sent a verification link to your registered email address. Please verify to unlock admin privileges."
+          className="mb-0 text-center"
+          containerClassName="flex-col items-center gap-2"
+          headingClassName="text-2xl font-semibold"
+          descriptionClassName="mt-2 max-w-sm text-sm text-muted-foreground"
+        />
+      </section>
 
       <div
         className={`rounded-md border p-4 text-sm ${

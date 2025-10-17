@@ -1,7 +1,7 @@
 // app/admin/dashboard/AdminDashboardPageClient.tsx
 "use client";
 
-import { useState, useEffect, useCallback, Suspense, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, Suspense, useMemo, useRef, useId } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { signOut } from "firebase/auth";
@@ -23,6 +23,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import Spinner from "@/components/ui/spinner";
 import MobileNav from "./components/mobile-nav";
 import { SectionId } from "./sections";
+import { PageHeader } from "@/components/admin/page-header";
 import {
   Dialog,
   DialogContent,
@@ -541,6 +542,7 @@ export default function AdminDashboardPageClient({
   const sectionHeading = SECTION_HEADINGS[activeSection] ?? currentNavTitle;
   const sectionDescription =
     SECTION_DESCRIPTIONS[activeSection] ?? "Manage your studio operations.";
+  const headingId = useId();
 
   // Keep document title in sync with the active section
   useEffect(() => {
@@ -640,25 +642,21 @@ export default function AdminDashboardPageClient({
                 tabIndex={-1}
                 className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-4 pt-4
                            pb-[calc(var(--mobile-nav-h,64px)+env(safe-area-inset-bottom,0px))] lg:pb-6"
-                aria-label={sectionHeading}
+                aria-labelledby={headingId}
                 aria-hidden={isMobile && sidebarOpen ? true : undefined}
                 role="region"
               >
                 <div className="max-w-7xl mx-auto">
-                  <header
-                    className="mb-8 space-y-2"
+                  <PageHeader
+                    headingId={headingId}
+                    className="mb-8"
+                    containerClassName="flex-col"
+                    headingClassName="text-3xl font-semibold tracking-tight text-foreground"
+                    title={sectionHeading}
+                    description={sectionDescription}
                     data-testid="dashboard-heading"
-                  >
-                    <h1
-                      className="text-3xl font-semibold tracking-tight text-foreground"
-                      data-testid="dashboard-title"
-                    >
-                      {sectionHeading}
-                    </h1>
-                    <p className="text-sm text-muted-foreground">
-                      {sectionDescription}
-                    </p>
-                  </header>
+                  headingProps={{ "data-testid": "dashboard-title" }}
+                  />
 
                   {/* Online/Offline indicator */}
                   {!isOnline && (

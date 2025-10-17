@@ -34,6 +34,7 @@ import { authors } from "@/lib/authors";
 import { slugify } from "@/lib/slugify";
 import { logClientError } from "@/lib/log-client";
 import MediaPickerDialog from "./media/MediaPickerDialog";
+import { PageHeader } from "@/components/admin/page-header";
 import type {
   BlogPost as StoreBlogPost,
   BlogRevision,
@@ -649,10 +650,14 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
               Back
             </Button>
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900">{post.id ? "Edit Post" : "Create New Post"}</h2>
-              <p className="text-gray-600">Write and publish your blog content</p>
-            </div>
+            <PageHeader
+              title={post.id ? "Edit Post" : "Create New Post"}
+              description="Write and publish your blog content"
+              className="mb-0"
+              containerClassName="flex-col items-start"
+              headingClassName="text-3xl font-bold text-gray-900"
+              descriptionClassName="text-gray-600"
+            />
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {!online && (

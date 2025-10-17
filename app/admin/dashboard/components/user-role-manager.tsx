@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import type { UserRole } from "@/lib/role-permissions"
-import AdminPageHeader from "@/components/AdminPageHeader"
+import { PageHeader } from "@/components/admin/page-header"
 import { logClientError } from "@/lib/log-client"
 
 export function UserRoleManager() {
@@ -43,10 +43,12 @@ export function UserRoleManager() {
   return (
     <div className="space-y-6">
       {/* Page Heading and Subheading */}
-      <AdminPageHeader
-        as="h2"
+      <PageHeader
+        level={2}
+        className="mb-4"
+        containerClassName="flex-col"
         title="User management"
-        subtitle="Manage all users, roles, and permissions"
+        description="Manage all users, roles, and permissions"
       />
       <Card>
         <CardHeader>

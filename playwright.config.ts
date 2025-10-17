@@ -7,7 +7,8 @@ const defaultBaseUrl = process.env.BASE_URL ?? "http://127.0.0.1:3000";
 const storageState = path.join(repoRoot, "e2e/.auth/admin.json");
 
 export default defineConfig({
-  testDir: "e2e",
+  testDir: '.',
+  testMatch: ['e2e/**/*.spec.ts', 'tests/**/*.spec.ts'],
   reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
   timeout: 60_000,
   retries: process.env.CI ? 1 : 0,

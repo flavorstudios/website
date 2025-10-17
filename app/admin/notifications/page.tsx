@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useId } from "react"
 import useSWR from "swr"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import { fetcher } from "@/lib/fetcher"
 import { Check, Trash2, Undo2 } from "lucide-react"
+import { PageHeader } from "@/components/admin/page-header"
 
 interface Notification {
   id: string
@@ -38,6 +39,7 @@ function formatTime(ts: Date | string) {
 }
 
 export default function NotificationsPage() {
+  const headingId = useId()
   const { data, error, isLoading, mutate } = useSWR<{ notifications: Notification[] }>(
     "/api/admin/notifications",
     fetcher,
@@ -110,14 +112,18 @@ export default function NotificationsPage() {
 
   return (
     <div className="mx-auto max-w-3xl p-4">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Notifications</h1>
-        {unreadCount > 0 && (
-          <Button size="sm" variant="ghost" onClick={markAllAsRead} className="gap-1">
-            <Check className="h-4 w-4" /> Mark all read
-          </Button>
-        )}
-      </div>
+      <section aria-labelledby={headingId} className="space-y-4">
+        <PageHeader
+          headingId={headingId}
+          title="Notifications"
+          description="Review updates across your studio and triage alerts."
+          actions=
+            {unreadCount > 0 ? (
+              <Button size="sm" variant="ghost" onClick={markAllAsRead} className="gap-1">
+                <Check className="h-4 w-4" /> Mark all read
+              </Button>
+            ) : undefined}
+        />
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="flex gap-2">
           {(["all", "unread", "important"] as const).map((t) => (
@@ -141,54 +147,55 @@ export default function NotificationsPage() {
         />
       </div>
       {filtered.length === 0 ? (
-        <p className="text-center text-sm text-muted-foreground">You\u2019re all caught up.</p>
-      ) : (
-        <ul className="space-y-2">
-          {filtered.map((n) => (
-            <li key={n.id}>
-              <Card
-                className={cn(n.read ? "bg-background" : "border-blue-200 bg-blue-50")}
-              >
-                <CardContent className="flex items-start justify-between gap-4 p-4">
-                  <div className="space-y-1">
-                    {n.href ? (
-                      <a
-                        href={n.href}
-                        onClick={() => markAsRead(n.id)}
-                        className="font-medium hover:underline"
+          <p className="text-center text-sm text-muted-foreground">You're all caught up.</p>
+        ) : (
+          <ul className="space-y-2">
+            {filtered.map((n) => (
+              <li key={n.id}>
+                <Card
+                  className={cn(n.read ? "bg-background" : "border-blue-200 bg-blue-50")}
+                >
+                  <CardContent className="flex items-start justify-between gap-4 p-4">
+                    <div className="space-y-1">
+                      {n.href ? (
+                        <a
+                          href={n.href}
+                          onClick={() => markAsRead(n.id)}
+                          className="font-medium hover:underline"
+                        >
+                          {n.title}
+                        </a>
+                      ) : (
+                        <p className="font-medium">{n.title}</p>
+                      )}
+                      <p className="text-sm text-muted-foreground">{n.message}</p>
+                      <p className="text-xs text-muted-foreground">{formatTime(n.timestamp)}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => (n.read ? markAsUnread(n.id) : markAsRead(n.id))}
+                        aria-label={n.read ? "Mark unread" : "Mark read"}
                       >
-                        {n.title}
-                      </a>
-                    ) : (
-                      <p className="font-medium">{n.title}</p>
-                    )}
-                    <p className="text-sm text-muted-foreground">{n.message}</p>
-                    <p className="text-xs text-muted-foreground">{formatTime(n.timestamp)}</p>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => (n.read ? markAsUnread(n.id) : markAsRead(n.id))}
-                      aria-label={n.read ? "Mark unread" : "Mark read"}
-                    >
-                      {n.read ? <Undo2 className="h-4 w-4" /> : <Check className="h-4 w-4" />}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteNotification(n.id)}
-                      aria-label="Delete notification"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      )}
+                        {n.read ? <Undo2 className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteNotification(n.id)}
+                        aria-label="Delete notification"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   )
 }

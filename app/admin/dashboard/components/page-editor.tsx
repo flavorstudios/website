@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Eye, Save, FileText, Smartphone, Monitor } from "lucide-react"
-import AdminPageHeader from "@/components/AdminPageHeader"
+import { PageHeader } from "@/components/admin/page-header"
 
 interface PageData {
   id: string
@@ -80,10 +80,12 @@ export function PageEditor() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <AdminPageHeader
-          as="h2"
+        <PageHeader
+          level={2}
+          className="mb-0"
+          containerClassName="flex-col"
           title="Page Editor"
-          subtitle="Edit and manage your website pages"
+          description="Edit and manage your website pages"
         />
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm">

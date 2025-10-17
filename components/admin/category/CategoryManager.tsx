@@ -30,7 +30,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Pagination } from "@/components/admin/Pagination"
 import { cn } from "@/lib/utils"
-import AdminPageHeader from "@/components/AdminPageHeader"
+import { PageHeader } from "@/components/admin/page-header"
 import { slugify } from "@/lib/slugify"
 import useHotkeys from "@/app/admin/dashboard/hooks/use-hotkeys"
 import useDebounce from "@/hooks/use-debounce"
@@ -651,12 +651,13 @@ export default function CategoryManager() {
 
   return (
     <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-4")}>
-      <div className="space-y-2">
-        <AdminPageHeader as="h2" className="space-y-1" title="Manage Categories" />
-        <p className="text-sm text-muted-foreground">
-          Maintain categories to improve content discovery.
-        </p>
-      </div>
+      <PageHeader
+        level={2}
+        className="mb-2"
+        containerClassName="flex-col"
+        title="Manage Categories"
+        description="Maintain categories to improve content discovery."
+      />
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border bg-white p-4 text-center shadow-sm">
           <div className="text-xl font-semibold text-foreground">{categories.length}</div>

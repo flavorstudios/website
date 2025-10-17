@@ -32,7 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import AdminPageHeader from "@/components/AdminPageHeader";
+import { PageHeader } from "@/components/admin/page-header";
 import { VideoForm } from "@/components/ui/video-form";
 import {
   Info,
@@ -953,11 +953,12 @@ export default function VideoManager() {
     <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}> 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <AdminPageHeader
-          as="h2"
-          className="space-y-1"
+        <PageHeader
+          level={2}
+          className="mb-0"
+          containerClassName="flex-col"
           title="Video Manager"
-          subtitle="Coordinate releases and keep metadata tidy."
+          description="Coordinate releases and keep metadata tidy."
         />
         <div className="flex flex-shrink-0 flex-wrap gap-2">
           <Button

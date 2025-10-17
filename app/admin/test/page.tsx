@@ -6,6 +6,7 @@ import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import Link from "next/link";
 // Change: import requireAdminAction instead of requireAdmin
 import { requireAdminAction } from "@/lib/admin-auth";
+import { PageHeader } from "@/components/admin/page-header";
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -52,8 +53,13 @@ export default async function AdminTest() {
 
   if (!isAuthenticated) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-4">Admin Test Page</h1>
+      <div className="p-8 space-y-4">
+        <PageHeader
+          title="Admin Test Page"
+          description="Internal diagnostics for admin authentication."
+          className="mb-0"
+          containerClassName="flex-col"
+        />
         <div className="bg-red-100 p-4 rounded text-red-700 font-semibold">
           Not authenticated. Please <Link href="/admin/login" className="text-blue-600 hover:underline">log in</Link> as admin.
         </div>
@@ -62,8 +68,13 @@ export default async function AdminTest() {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Admin Test Page</h1>
+    <div className="p-8 space-y-4">
+      <PageHeader
+        title="Admin Test Page"
+        description="Internal diagnostics for admin authentication."
+        className="mb-0"
+        containerClassName="flex-col"
+      />
       <div className="bg-gray-100 p-4 rounded">
         <p>
           <strong>Session Cookie:</strong> {session?.value || "Not found"}

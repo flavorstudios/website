@@ -1,4 +1,6 @@
-import { AdminDashboardSectionPage } from "./AdminDashboardSectionPage";
+import { PageHeader } from "@/components/admin/page-header";
+import { AdminDashboardSectionPage, getSectionCopy } from "./AdminDashboardSectionPage";
+import type { SectionId } from "./sections";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
@@ -80,6 +82,8 @@ async function prefetchDashboard(qc: QueryClient, cookie: string, origin: string
   });
 }
 
+const SECTION: SectionId = "overview";
+
 export default async function AdminDashboardPage() {
   const h = await headers();
   const cookie = h.get("cookie") ?? "";
@@ -114,9 +118,21 @@ export default async function AdminDashboardPage() {
     }
   }
 
+  const { title, description } = getSectionCopy(SECTION);
+
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <AdminDashboardSectionPage section="overview" />
-    </HydrationBoundary>
+    <>
+      <PageHeader
+        level={1}
+        title={title}
+        description={description}
+        className="sr-only"
+        headingClassName="sr-only"
+        descriptionClassName={description ? "sr-only" : undefined}
+      />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <AdminDashboardSectionPage section={SECTION} />
+      </HydrationBoundary>
+    </>
   );
 }

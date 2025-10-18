@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useId } from "react"
+import { useMemo, useState, useId, type ReactNode } from "react"
 import useSWR from "swr"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -92,21 +92,104 @@ export default function NotificationsPage() {
   }
 
   const markAllAsRead = async () => {
-    await fetch('/api/admin/notifications/mark-all-read', {
-      method: 'POST',
-      credentials: 'include'
+    await fetch("/api/admin/notifications/mark-all-read", {
+      method: "POST",
+      credentials: "include",
     })
     void mutate()
   }
 
+  const controls = !isLoading && !error ? (
+    <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="flex gap-2">
+        {(["all", "unread", "important"] as const).map((t) => (
+          <Button
+            key={t}
+            variant={view === t ? "secondary" : "ghost"}
+            size="sm"
+            className="h-8 px-2 text-xs"
+            onClick={() => setView(t)}
+          >
+            {t === "all" ? "All" : t === "unread" ? "Unread" : "Important"}
+          </Button>
+        ))}
+      </div>
+      <Input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search notifications"
+        className="h-8 flex-1 min-w-[180px]"
+        aria-label="Search notifications"
+      />
+    </div>
+  ) : null
+
+  let content: ReactNode
   if (isLoading) {
-    return <p className="p-4 text-center text-sm text-muted-foreground">Loading notifications…</p>
-  }
-  if (error) {
-    return (
+    content = (
+      <p className="p-4 text-center text-sm text-muted-foreground">
+        Loading notifications…
+      </p>
+    )
+  } else if (error) {
+    content = (
       <p className="p-4 text-center text-sm text-destructive">
         Failed to load notifications
       </p>
+    )
+  } else if (filtered.length === 0) {
+    content = (
+      <p className="text-center text-sm text-muted-foreground">
+        You&apos;re all caught up.
+      </p>
+    )
+  } else {
+    content = (
+      <ul className="space-y-2">
+        {filtered.map((n) => (
+          <li key={n.id}>
+            <Card
+              className={cn(n.read ? "bg-background" : "border-blue-200 bg-blue-50")}
+            >
+              <CardContent className="flex items-start justify-between gap-4 p-4">
+                <div className="space-y-1">
+                  {n.href ? (
+                    <a
+                      href={n.href}
+                      onClick={() => markAsRead(n.id)}
+                      className="font-medium hover:underline"
+                    >
+                      {n.title}
+                    </a>
+                  ) : (
+                    <p className="font-medium">{n.title}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">{n.message}</p>
+                  <p className="text-xs text-muted-foreground">{formatTime(n.timestamp)}</p>
+                </div>
+                <div className="flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => (n.read ? markAsUnread(n.id) : markAsRead(n.id))}
+                    aria-label={n.read ? "Mark unread" : "Mark read"}
+                  >
+                    {n.read ? <Undo2 className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => deleteNotification(n.id)}
+                    aria-label="Delete notification"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </li>
+        ))}
+      </ul>
     )
   }
 
@@ -124,77 +207,8 @@ export default function NotificationsPage() {
               </Button>
             ) : undefined}
         />
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <div className="flex gap-2">
-          {(["all", "unread", "important"] as const).map((t) => (
-            <Button
-              key={t}
-              variant={view === t ? "secondary" : "ghost"}
-              size="sm"
-              className="h-8 px-2 text-xs"
-              onClick={() => setView(t)}
-            >
-              {t === "all" ? "All" : t === "unread" ? "Unread" : "Important"}
-            </Button>
-          ))}
-        </div>
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search notifications"
-          className="h-8 flex-1 min-w-[180px]"
-          aria-label="Search notifications"
-        />
-      </div>
-      {filtered.length === 0 ? (
-          <p className="text-center text-sm text-muted-foreground">You&apos;re all caught up.</p>
-        ) : (
-          <ul className="space-y-2">
-            {filtered.map((n) => (
-              <li key={n.id}>
-                <Card
-                  className={cn(n.read ? "bg-background" : "border-blue-200 bg-blue-50")}
-                >
-                  <CardContent className="flex items-start justify-between gap-4 p-4">
-                    <div className="space-y-1">
-                      {n.href ? (
-                        <a
-                          href={n.href}
-                          onClick={() => markAsRead(n.id)}
-                          className="font-medium hover:underline"
-                        >
-                          {n.title}
-                        </a>
-                      ) : (
-                        <p className="font-medium">{n.title}</p>
-                      )}
-                      <p className="text-sm text-muted-foreground">{n.message}</p>
-                      <p className="text-xs text-muted-foreground">{formatTime(n.timestamp)}</p>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => (n.read ? markAsUnread(n.id) : markAsRead(n.id))}
-                        aria-label={n.read ? "Mark unread" : "Mark read"}
-                      >
-                        {n.read ? <Undo2 className="h-4 w-4" /> : <Check className="h-4 w-4" />}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deleteNotification(n.id)}
-                        aria-label="Delete notification"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </li>
-            ))}
-          </ul>
-        )}
+        {controls}
+        {content}
       </section>
     </div>
   )

@@ -4,7 +4,7 @@
     "next/typescript",
     "plugin:jsx-a11y/recommended"
   ],
-  "plugins": ["jsx-a11y"],
+  "plugins": ["jsx-a11y", "local"],
   "rules": {
     "jsx-a11y/label-has-associated-control": "off",
     "jsx-a11y/no-autofocus": "off",
@@ -19,44 +19,8 @@
     "@typescript-eslint/no-unused-expressions": "warn",
     "prefer-const": "warn",
     "react-hooks/rules-of-hooks": "off",
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/exhaustive-deps": "warn",
+    "local/no-h1-outside-page": "error"
   },
-  "overrides": [
-    {
-      "files": [
-        "app/admin/**/*.{ts,tsx,js,jsx}",
-        "components/admin/**/*.{ts,tsx,js,jsx}"
-      ],
-      "excludedFiles": [
-        "app/admin/**/page.{ts,tsx,js,jsx}",
-        "components/admin/page-header.tsx",
-        "app/admin/dashboard/AdminDashboardSectionPage.tsx"
-      ],
-      "rules": {
-        "no-restricted-syntax": [
-          "error",
-          {
-            "selector": "JSXOpeningElement[name.name=\"h1\"]",
-            "message": "<h1> is only allowed within admin page entry files or the PageHeader component."
-          },
-          {
-            "selector": "JSXOpeningElement[name.name=\"PageHeader\"]:not(:has(JSXAttribute[name.name=\"level\"]))",
-            "message": "PageHeader must specify a level when used outside admin page entry files."
-          },
-          {
-            "selector": "JSXOpeningElement[name.name=\"PageHeader\"]:has(JSXAttribute[name.name=\"level\"] JSXExpressionContainer Literal[value=1])",
-            "message": "PageHeader with level={1} must live in an admin page entry file."
-          },
-          {
-            "selector": "JSXOpeningElement[name.name=\"PageHeader\"]:has(JSXAttribute[name.name=\"level\"] Literal[value=1])",
-            "message": "PageHeader with level={1} must live in an admin page entry file."
-          },
-          {
-            "selector": "JSXOpeningElement[name.name=\"PageHeader\"]:has(JSXAttribute[name.name=\"level\"] JSXExpressionContainer Identifier[name=\"LEVEL_ONE_PAGE_HEADER\"])",
-            "message": "PageHeader with level={1} must live in an admin page entry file."
-          }
-        ]
-      }
-    }
-  ]
+  "overrides": []
 }

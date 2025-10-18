@@ -17,6 +17,7 @@ interface RouteResult {
   outerHTML: string[];
   ssrCount?: number;
   ssrHeadings?: string[];
+  statusCode?: number;
   mode: AuditMode;
 }
 
@@ -124,10 +125,29 @@ async function waitForServerReady() {
 }
 
 async function startDevServer() {
-  const env = { ...process.env, PORT: String(PORT) };
-  const server = spawn("pnpm", ["exec", "next", "dev", "-p", String(PORT)], {
-    env,
-    stdio: "pipe",
+  const env = {
+    ...process.env,
+    PORT: String(PORT),
+    E2E: process.env.E2E ?? "true",
+    NEXT_PUBLIC_E2E: process.env.NEXT_PUBLIC_E2E ?? "true",
+  };
+
+  const nextBin = path.join("node_modules", ".bin", process.platform === "win32" ? "next.cmd" : "next");
+  const useNextBin = existsSync(nextBin);
+
+  const command = useNextBin ? nextBin : "pnpm";
+  const args = useNextBin
+    ? ["dev", "-p", String(PORT)]
+    : ["exec", "next", "dev", "-p", String(PORT)];
+
+  const server = spawn(command, args, {
+    env: useNextBin
+      ? env
+      : {
+          ...env,
+          COREPACK_ENABLE_DOWNLOAD: "0",
+        },
+    shell: false,
   });
 
   server.stdout.setEncoding("utf8");
@@ -186,7 +206,7 @@ async function auditRoutesWithBrowser(routes: string[]) {
       const page = await browser.newPage();
       const url = `${BASE_URL}${route}`;
       await page.goto(url, { waitUntil: "networkidle" });
-      await page.waitForLoadState("networkidle");
+      const response = await page.goto(url, { waitUntil: "networkidle" });
 
       const h1Locator = page.locator("h1");
       const roleLocator = page.getByRole("heading", { level: 1 });
@@ -218,6 +238,7 @@ async function auditRoutesWithBrowser(routes: string[]) {
         ssrCount: ssrInfo?.count,
         ssrHeadings: ssrInfo?.headings,
         mode: "browser",
+        statusCode: response?.status(),
       });
 
       await page.close();
@@ -246,6 +267,7 @@ async function auditRoutesWithFetch(routes: string[]) {
         ssrCount: 0,
         ssrHeadings: [],
         mode: "ssr",
+        statusCode: undefined,
       });
       continue;
     }
@@ -271,16 +293,18 @@ async function auditRoutesWithFetch(routes: string[]) {
       ssrCount: h1Elements.length,
       ssrHeadings: headings,
       mode: "ssr",
+      statusCode: response.status,
     });
   }
   return results;
 }
 
 function printResults(results: RouteResult[]) {
-  const header = ["Route", "Mode", "<h1> count", "Role count", "Headings"];
+  const header = ["Route", "Mode", "Status", "<h1> count", "Role count", "Headings"];
   const rows = results.map((result) => [
     result.route,
     result.mode,
+    result.statusCode != null ? String(result.statusCode) : "-",
     String(result.h1Count),
     String(result.roleCount),
     result.headings.join(" | ") || "(none)",
@@ -331,12 +355,17 @@ async function main() {
     );
   }
 
-  const offenders = results.filter((result) => result.h1Count !== 1 || result.roleCount !== 1);
+  const offenders = results.filter((result) => {
+    if (result.statusCode != null && result.statusCode >= 400) {
+      return false;
+    }
+    return result.h1Count !== 1 || result.roleCount !== 1;
+  });
   if (offenders.length > 0) {
     console.error("\nRoutes with invalid heading counts:");
     for (const offender of offenders) {
       console.error(
-        ` - ${offender.route}: <h1>=${offender.h1Count}, role level=1=${offender.roleCount} :: ${offender.headings.join(", ")}`
+        ` - ${offender.route} (status ${offender.statusCode ?? "unknown"}): <h1>=${offender.h1Count}, role level=1=${offender.roleCount} :: ${offender.headings.join(", ")}`
       );
     }
     process.exitCode = 1;

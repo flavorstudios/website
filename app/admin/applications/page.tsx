@@ -1,4 +1,9 @@
-import { AdminDashboardSectionPage } from "../dashboard/AdminDashboardSectionPage";
+import { PageHeader } from "@/components/admin/page-header";
+import {
+  AdminDashboardSectionPage,
+  getSectionCopy,
+} from "@/components/admin/dashboard/AdminDashboardSectionPage";
+import type { SectionId } from "../dashboard/sections";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 
@@ -35,6 +40,22 @@ export const metadata = getMetadata({
   },
 });
 
+const SECTION: SectionId = "applications";
+
 export default function AdminApplicationsPage() {
-  return <AdminDashboardSectionPage section="applications" />;
+  const { title, description } = getSectionCopy(SECTION);
+
+  return (
+    <>
+      <PageHeader
+        level={1}
+        title={title}
+        description={description}
+        className="sr-only"
+        headingClassName="sr-only"
+        descriptionClassName={description ? "sr-only" : undefined}
+      />
+      <AdminDashboardSectionPage section={SECTION} />
+    </>
+  );
 }

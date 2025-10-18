@@ -35,6 +35,7 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Enable Corepack and activate pnpm
         run: |

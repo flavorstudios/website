@@ -52,6 +52,10 @@ module.exports = {
       return {};
     }
 
+    if (filename.includes(`${path.sep}components${path.sep}admin${path.sep}page-header.tsx`)) {
+      return {};
+    }
+
     const normalized = filename.split(path.sep).join("/");
 
     if (
@@ -80,7 +84,7 @@ module.exports = {
             (attr) => attr.type === "JSXAttribute" && attr.name && attr.name.name === "level"
           );
           const rendersLevelOne = levelAttr ? isLevelOne(levelAttr) : true;
-          if (rendersLevelOne && !isPageFile(normalized)) {
+          if (rendersLevelOne && !isPageFile(normalized) && !isAllowedComponent(normalized)) {
             report(node, "PageHeader with level={1} must live in an admin page entry file.");
           }
         }

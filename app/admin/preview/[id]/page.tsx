@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { cookies, headers } from "next/headers";
 import type { ReactNode } from "react";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
+import { PageHeader } from "@/components/admin/page-header";
 import {
   blogStore,
   type BlogPost,
@@ -123,11 +124,19 @@ export default async function PreviewPage({ params, searchParams }: PreviewPageP
 
     await validateSessionViaApi(reqHeaders);
 
-  function renderGuardedMessage(message: ReactNode) {
+  function renderGuardedMessage(message: ReactNode, heading = "Admin Preview") {
+    const title = typeof heading === "string" && heading.trim() ? heading : "Admin Preview";
     return (
       <AdminAuthGuard>
         <ValidateSessionPing />
-        <div className="mx-auto max-w-prose p-6">
+        <div className="mx-auto max-w-prose space-y-4 p-6">
+          <PageHeader
+            level={1}
+            title={title}
+            className="sr-only"
+            headingClassName="sr-only"
+            descriptionClassName="sr-only"
+          />
           {typeof message === "string" ? <p>{message}</p> : message}
         </div>
       </AdminAuthGuard>

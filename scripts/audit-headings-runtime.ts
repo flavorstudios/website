@@ -5,6 +5,9 @@ import process from "node:process";
 import { spawn } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 import { chromium } from "playwright";
+import { load as loadHtml } from "cheerio";
+
+type AuditMode = "browser" | "ssr";
 
 interface RouteResult {
   route: string;
@@ -14,6 +17,7 @@ interface RouteResult {
   outerHTML: string[];
   ssrCount?: number;
   ssrHeadings?: string[];
+  mode: AuditMode;
 }
 
 const PORT = Number(process.env.AUDIT_HEADINGS_PORT ?? 4310);
@@ -46,7 +50,9 @@ function filePathToRoute(file: string): string | null {
     .split("/")
     .map(segmentToRoutePart)
     .filter((part): part is string => part != null);
-  return `/${segments.join("/")}`.replace(/\/+$/, "");
+  const fullSegments = ["admin", ...segments];
+  const path = `/${fullSegments.filter(Boolean).join("/")}`.replace(/\/+$/, "");
+  return path || "/admin";
 }
 
 const ADMIN_ROUTE_ROOTS = ["app/(admin)", "app/admin"];
@@ -171,7 +177,7 @@ async function readSSRHtml(route: string) {
   return null;
 }
 
-async function auditRoutes(routes: string[]) {
+async function auditRoutesWithBrowser(routes: string[]) {
   await mkdir(ARTIFACT_DIR, { recursive: true });
   const browser = await chromium.launch();
   const results: RouteResult[] = [];
@@ -211,6 +217,7 @@ async function auditRoutes(routes: string[]) {
         outerHTML,
         ssrCount: ssrInfo?.count,
         ssrHeadings: ssrInfo?.headings,
+        mode: "browser",
       });
 
       await page.close();
@@ -221,10 +228,59 @@ async function auditRoutes(routes: string[]) {
   return results;
 }
 
+async function auditRoutesWithFetch(routes: string[]) {
+  const results: RouteResult[] = [];
+  for (const route of routes) {
+    const url = `${BASE_URL}${route}`;
+    let response: Response | null = null;
+    try {
+      response = await fetch(url);
+    } catch (error) {
+      console.error(`Failed to fetch ${url}:`, error);
+      results.push({
+        route: route || "/admin",
+        h1Count: 0,
+        roleCount: 0,
+        headings: [],
+        outerHTML: [],
+        ssrCount: 0,
+        ssrHeadings: [],
+        mode: "ssr",
+      });
+      continue;
+    }
+
+    const html = await response.text();
+    const $ = loadHtml(html);
+    const h1Elements = $("h1");
+    const headings: string[] = [];
+    const outerHTML: string[] = [];
+    h1Elements.each((_, element) => {
+      const text = $(element).text().trim();
+      headings.push(text);
+      outerHTML.push($.html(element));
+      console.log(`[${route}] H1 SSR: ${$.html(element)}`);
+    });
+
+    results.push({
+      route: route || "/admin",
+      h1Count: h1Elements.length,
+      roleCount: h1Elements.length,
+      headings,
+      outerHTML,
+      ssrCount: h1Elements.length,
+      ssrHeadings: headings,
+      mode: "ssr",
+    });
+  }
+  return results;
+}
+
 function printResults(results: RouteResult[]) {
-  const header = ["Route", "<h1> count", "Role count", "Headings"];
+  const header = ["Route", "Mode", "<h1> count", "Role count", "Headings"];
   const rows = results.map((result) => [
     result.route,
+    result.mode,
     String(result.h1Count),
     String(result.roleCount),
     result.headings.join(" | ") || "(none)",
@@ -251,13 +307,29 @@ async function main() {
 
   const server = await startDevServer();
   let results: RouteResult[] = [];
+  let usedFallback = false;
   try {
-    results = await auditRoutes(routes);
+    try {
+      results = await auditRoutesWithBrowser(routes);
+    } catch (error) {
+      usedFallback = true;
+      console.warn(
+        "Playwright failed to launch. Falling back to SSR HTML audit.",
+        error instanceof Error ? error.message : error
+      );
+      results = await auditRoutesWithFetch(routes);
+    }
   } finally {
     await stopDevServer(server);
   }
 
   printResults(results);
+
+  if (usedFallback) {
+    console.warn(
+      "SSR fallback mode omits client-rendered headings. Install Playwright browsers for full coverage."
+    );
+  }
 
   const offenders = results.filter((result) => result.h1Count !== 1 || result.roleCount !== 1);
   if (offenders.length > 0) {

@@ -21,6 +21,12 @@ const ALLOWED_LEVEL_ONE_COMPONENTS = new Set([
   "app/admin/dashboard/AdminDashboardSectionPage.tsx",
 ]);
 
+const COMPONENT_H1_ALLOWLIST = new Set([
+  "components/blog/BlogRenderer.tsx",
+  "components/blog/blog-header.tsx",
+  "components/home/HeroSection.tsx",
+]);
+
 const RISKY_COMPONENT_HINTS = new Set([
   "layout",
   "template",
@@ -121,14 +127,16 @@ async function scanFile(file: string, issues: Issue[], pageHeaderUsage: Map<stri
 
   for (const match of content.matchAll(riskyMatch)) {
     const index = match.index ?? 0;
+    const isAllowedComponentH1 = COMPONENT_H1_ALLOWLIST.has(normalized);
     const reason = isLayout
       ? "Admin layout/template must not render <h1>"
-      : looksAdminComponent(file)
-        ? "Admin shared component should not render <h1>"
-        : isComponent
-          ? "Shared component renders <h1>"
-          : "<h1> found";
-    const severity = isLayout || looksAdminComponent(file) ? "error" : "warn";
+      : isComponent
+        ? "Shared component renders <h1>"
+        : "<h1> found";
+    const severity =
+      isLayout || (isComponent && !isAllowedComponentH1) || looksAdminComponent(file)
+        ? "error"
+        : "warn";
     pushIssue(issues, file, linePositions, index, reason, severity);
   }
 

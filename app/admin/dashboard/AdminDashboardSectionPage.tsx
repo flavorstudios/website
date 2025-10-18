@@ -16,6 +16,7 @@ export function AdminDashboardSectionPage({ section }: AdminDashboardSectionPage
   return (
     <>
       <PageHeader
+        level={1}
         title={title}
         description={description}
         className="sr-only"

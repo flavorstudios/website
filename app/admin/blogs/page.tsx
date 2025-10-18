@@ -36,5 +36,5 @@ export const metadata = getMetadata({
 });
 
 export default function AdminBlogsPage() {
-  return <AdminDashboardSectionPage section="categories" />;
+  return <AdminDashboardSectionPage section="blogs" />;
 }

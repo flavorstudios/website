@@ -30,6 +30,13 @@
     "cron:logs": "tsx scripts/query-cron-logs.ts",
     "preinstall": "npx -y only-allow pnpm"
   },
+  "trustedDependencies": [
+    "@firebase/util",
+    "esbuild",
+    "protobufjs",
+    "sharp",
+    "unrs-resolver"
+  ],
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",

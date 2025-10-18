@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "target": "ES2022",                  // CHANGED: for modern features
@@ -21,7 +22,7 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

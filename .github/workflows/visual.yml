@@ -37,6 +37,17 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Show tool versions
+        run: |
+          node -v
+          pnpm -v
+
       - name: Enable Corepack and activate pnpm
         run: |
           corepack enable
@@ -45,11 +56,6 @@ jobs:
 
       - name: Configure pnpm store dir for stable caching
         run: pnpm config set store-dir ~/.pnpm-store
-
-      - name: Show versions
-        run: |
-          node -v
-          pnpm -v
 
       - name: Assert pnpm version
         run: node .github/scripts/assert-pnpm-version.mjs
@@ -61,7 +67,7 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-      - name: Install deps
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build app for e2e
         env:

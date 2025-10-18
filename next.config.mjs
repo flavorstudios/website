@@ -1,6 +1,8 @@
 // next.config.mjs
 
 // Import the necessary modules
+import fs from 'node:fs';
+import path from 'node:path';
 import bundleAnalyzer from '@next/bundle-analyzer';
 import imageDomains from './config/image-domains.json' with { type: 'json' };
 // Access server-only environment variables directly
@@ -44,6 +46,15 @@ const nextConfig = {
       config.optimization = config.optimization ?? {};
       config.optimization.minimize = false;
     }
+
+    const hasSrc = fs.existsSync(path.join(process.cwd(), 'src'));
+    config.resolve.alias = {
+      ...(config.resolve.alias ?? {}),
+      '@': hasSrc
+        ? path.resolve(process.cwd(), 'src')
+        : path.resolve(process.cwd()),
+    };
+    
     return config;
   },
 

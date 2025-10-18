@@ -1,5 +1,3 @@
-import { AdminDashboardSectionPage, getSectionCopy } from "../AdminDashboardSectionPage"
-import type { SectionId } from "../sections"
 import { getMetadata } from "@/lib/seo-utils"
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"
 import { SettingsTabs } from "@/components/admin/settings/SettingsTabs"
@@ -40,8 +38,6 @@ export const metadata = getMetadata({
   },
 })
 
-const SECTION: SectionId = "settings"
-
 interface SettingsPageProps {
   searchParams?: { tab?: string }
 }
@@ -69,20 +65,5 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
         appearance={settings.appearance}
       />
     </div>
-  )
-}
-
-  return (
-    <>
-      <PageHeader
-        level={1}
-        title={title}
-        description={description}
-        className="sr-only"
-        headingClassName="sr-only"
-        descriptionClassName={description ? "sr-only" : undefined}
-      />
-      <AdminDashboardSectionPage section={SECTION} />
-    </>
   )
 }

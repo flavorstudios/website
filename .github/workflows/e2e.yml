@@ -25,7 +25,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 10.14.0 # Keep in sync with package.json#packageManager
+          version: 9.12.3 # Keep in sync with package.json#packageManager
           run_install: false
 
       - name: Configure pnpm store dir for stable caching

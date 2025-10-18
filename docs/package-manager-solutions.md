@@ -3,7 +3,7 @@
 This guide provides actionable steps to stop the VS Code warning—`"Using npm as the preferred package manager. Found multiple lockfiles"`—while keeping all existing project work intact. It assumes the team wants to continue using pnpm, which is already declared in `package.json` and supported by the repository layout.
 
 ## 1. Align local tooling with pnpm
-1. Commit the repository's `.vscode/settings.json` file (added in this change) so that VS Code picks pnpm automatically. This mirrors the `"packageManager": "pnpm@10.14.0"` field in `package.json` and prevents the warning from reappearing for contributors who open the workspace in VS Code.
+1. Commit the repository's `.vscode/settings.json` file (added in this change) so that VS Code picks pnpm automatically. This mirrors the `"packageManager": "pnpm@9.12.3"` field in `package.json` and prevents the warning from reappearing for contributors who open the workspace in VS Code.
 2. In individual setups that cannot use workspace settings (e.g., Codespaces), manually set **Settings > Features > NPM > Package Manager** to `pnpm`.
 
 ## 2. Remove the stray npm lockfile without losing work

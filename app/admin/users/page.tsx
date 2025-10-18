@@ -1,4 +1,4 @@
-import AdminDashboardPageClient from "../dashboard/AdminDashboardPageClient";
+import { AdminDashboardSectionPage } from "../dashboard/AdminDashboardSectionPage";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 
@@ -36,5 +36,5 @@ export const metadata = getMetadata({
 });
 
 export default function AdminUsersPage() {
-  return <AdminDashboardPageClient initialSection="users" />;
+  return <AdminDashboardSectionPage section="users" />;
 }

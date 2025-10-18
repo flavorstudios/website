@@ -1,8 +1,8 @@
-import AdminDashboardPageClient from "../dashboard/AdminDashboardPageClient"
+import { AdminDashboardSectionPage } from "../dashboard/AdminDashboardSectionPage"
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export default function AdminEmailInboxPage() {
-  return <AdminDashboardPageClient initialSection="inbox" />
+  return <AdminDashboardSectionPage section="inbox" />
 }

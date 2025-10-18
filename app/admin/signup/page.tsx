@@ -1,6 +1,7 @@
 import SignupForm from "./SignupForm";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { PageHeader } from "@/components/admin/page-header";
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -45,10 +46,14 @@ export default function AdminSignupPage() {
     <div className="flex min-h-screen items-center justify-center bg-[#f5f8fd] p-6">
       <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-md">
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-semibold">Create your admin account</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Access the secure console for {SITE_NAME} content and operations.
-          </p>
+          <PageHeader
+            title="Create your admin account"
+            description={`Access the secure console for ${SITE_NAME} content and operations.`}
+            className="mb-0"
+            containerClassName="flex-col items-center gap-2"
+            headingClassName="text-2xl font-semibold"
+            descriptionClassName="mt-2 text-sm text-muted-foreground"
+          />
         </div>
         <SignupForm />
       </div>

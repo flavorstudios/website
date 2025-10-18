@@ -247,6 +247,7 @@ export default function VerifyEmailClient() {
           containerClassName="flex-col items-center gap-2"
           headingClassName="text-2xl font-semibold"
           descriptionClassName="mt-2 max-w-sm text-sm text-muted-foreground"
+          level={2}
         />
       </section>
 

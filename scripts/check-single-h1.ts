@@ -6,7 +6,7 @@ function collectHtmlFiles(dir: string): string[] {
     return [];
   }
 
-const entries = readdirSync(dir, { withFileTypes: true });
+  const entries = readdirSync(dir, { withFileTypes: true });
   const files: string[] = [];
 
   for (const entry of entries) {
@@ -25,13 +25,25 @@ const entries = readdirSync(dir, { withFileTypes: true });
 }
 
 async function main() {
-  const files = collectHtmlFiles(".next/server/app/(admin)");
+  const roots = [".next/server/app/(admin)", ".next/server/app/admin"];
+  const files = roots.flatMap((root) => collectHtmlFiles(root));
   let failed = false;
   for (const f of files) {
     const html = readFileSync(f, "utf8");
-    const count = (html.match(/<h1\b/gi) || []).length;
+    const matches = [...html.matchAll(/<h1[^>]*>/gi)];
+    const count = matches.length;
     if (count !== 1) {
       console.error(`Expected 1 <h1>, found ${count} in ${f}`);
+      matches.forEach((match) => {
+        const index = match.index ?? 0;
+        const start = Math.max(0, index - 150);
+        const end = Math.min(html.length, index + 150);
+        const context = html
+          .slice(start, end)
+          .replace(/\s+/g, " ")
+          .trim();
+        console.error(`  snippet: ${context}`);
+      });
       failed = true;
     }
   }

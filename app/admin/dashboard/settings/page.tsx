@@ -1,4 +1,4 @@
-import AdminDashboardPageClient from "../AdminDashboardPageClient"
+import { AdminDashboardSectionPage } from "../AdminDashboardSectionPage"
 import { getMetadata } from "@/lib/seo-utils"
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"
 
@@ -36,5 +36,5 @@ export const metadata = getMetadata({
 })
 
 export default function SettingsPage() {
-  return <AdminDashboardPageClient initialSection="settings" />
+  return <AdminDashboardSectionPage section="settings" />
 }

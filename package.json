@@ -23,6 +23,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "audit:media": "tsx scripts/audit-media-storage.ts",
+    "audit:headings:static": "tsx scripts/audit-headings-static.ts",
+    "audit:headings:runtime": "tsx scripts/audit-headings-runtime.ts",
     "test:jobs": "pnpm run test:cron",
     "test:cron": "tsx scripts/test-cron.ts",
     "cron:logs": "tsx scripts/query-cron-logs.ts"

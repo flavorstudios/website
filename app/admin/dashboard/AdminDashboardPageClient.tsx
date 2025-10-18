@@ -184,7 +184,7 @@ const NAV: { id: SectionId; href: string; title: string }[] = [
   { id: "system", href: "/admin/dashboard/system", title: "System Tools" },
 ] as const;
 
-const SECTION_HEADINGS: Record<SectionId, string> = {
+export const SECTION_HEADINGS: Record<SectionId, string> = {
   overview: "Admin Dashboard",
   blogs: "Blog Posts",
   videos: "Videos",
@@ -198,7 +198,7 @@ const SECTION_HEADINGS: Record<SectionId, string> = {
   system: "System Tools",
 };
 
-const SECTION_DESCRIPTIONS: Record<SectionId, string> = {
+export const SECTION_DESCRIPTIONS: Record<SectionId, string> = {
   overview: "Monitor studio performance and recent activity at a glance.",
   blogs: "Manage your blog posts, drafts, and editorial calendar.",
   videos: "Manage your YouTube content and upcoming releases.",
@@ -655,7 +655,8 @@ export default function AdminDashboardPageClient({
                     title={sectionHeading}
                     description={sectionDescription}
                     data-testid="dashboard-heading"
-                  headingProps={{ "data-testid": "dashboard-title" }}
+                    level={2}
+                    headingProps={{ "data-testid": "dashboard-title" }}
                   />
 
                   {/* Online/Offline indicator */}

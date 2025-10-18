@@ -104,6 +104,7 @@ export default function ForgotPasswordForm({
             containerClassName="flex-col items-center gap-2"
             headingClassName="text-2xl font-semibold text-slate-900"
             descriptionClassName="text-sm text-slate-600"
+            level={2}
           />
         </CardHeader>
         <CardContent className="p-6 pt-0">

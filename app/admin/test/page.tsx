@@ -51,15 +51,19 @@ export default async function AdminTest() {
     ? await requireAdminAction()
     : false;
 
+  const header = (
+    <PageHeader
+      title="Admin Test Page"
+      description="Internal diagnostics for admin authentication."
+      className="mb-0"
+      containerClassName="flex-col"
+    />
+  );
+
   if (!isAuthenticated) {
     return (
       <div className="p-8 space-y-4">
-        <PageHeader
-          title="Admin Test Page"
-          description="Internal diagnostics for admin authentication."
-          className="mb-0"
-          containerClassName="flex-col"
-        />
+        {header}
         <div className="bg-red-100 p-4 rounded text-red-700 font-semibold">
           Not authenticated. Please <Link href="/admin/login" className="text-blue-600 hover:underline">log in</Link> as admin.
         </div>
@@ -69,12 +73,7 @@ export default async function AdminTest() {
 
   return (
     <div className="p-8 space-y-4">
-      <PageHeader
-        title="Admin Test Page"
-        description="Internal diagnostics for admin authentication."
-        className="mb-0"
-        containerClassName="flex-col"
-      />
+      {header}
       <div className="bg-gray-100 p-4 rounded">
         <p>
           <strong>Session Cookie:</strong> {session?.value || "Not found"}

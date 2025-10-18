@@ -1,6 +1,7 @@
 import VerifyEmailClient from "./VerifyEmailClient";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { PageHeader } from "@/components/admin/page-header";
 
 export const metadata = getMetadata({
   title: `Verify Admin Email – ${SITE_NAME}`,
@@ -35,6 +36,13 @@ export default function VerifyEmailPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f5f8fd] p-6">
       <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md">
+        <PageHeader
+          title="Verify admin email"
+          description={`Confirm your administrator email to unlock ${SITE_NAME} tools.`}
+          className="sr-only"
+          headingClassName="sr-only"
+          descriptionClassName="sr-only"
+        />
         <VerifyEmailClient />
       </div>
     </div>

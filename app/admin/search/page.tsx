@@ -1,10 +1,11 @@
-import AdminSearchPageClient from "./AdminSearchPageClient";
 import { headers } from "next/headers";
 import { NextRequest } from "next/server";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { SITE_URL, SITE_NAME, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { getMetadata } from "@/lib/seo-utils";
+import { PageHeader } from "@/components/admin/page-header";
+import AdminSearchPageClient from "./AdminSearchPageClient";
 
 interface PageProps {
   searchParams?: Promise<{ q?: string }>;
@@ -57,5 +58,16 @@ export default async function AdminSearchPage({ searchParams }: PageProps) {
     redirect("/admin/login");
   }
 
-  return <AdminSearchPageClient initialQuery={query} />;
+  return (
+    <>
+      <PageHeader
+        title="Admin Search"
+        description="Search posts, videos, users, categories, and tags across the admin."
+        className="sr-only"
+        headingClassName="sr-only"
+        descriptionClassName="sr-only"
+      />
+      <AdminSearchPageClient initialQuery={query} />
+    </>
+  );
 }

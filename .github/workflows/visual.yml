@@ -38,8 +38,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10.14.0 # Keep in sync with package.json#packageManager
           run_install: false
+
+      - name: Configure pnpm store dir for stable caching
+        run: pnpm config set store-dir ~/.pnpm-store
 
       - name: Show versions
         run: |
@@ -49,14 +52,10 @@ jobs:
       - name: Assert pnpm version
         run: node .github/scripts/assert-pnpm-version.mjs
 
-      - name: Get pnpm store path
-        id: pnpm-store
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
-
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
-          path: ${{ steps.pnpm-store.outputs.STORE_PATH }}
+          path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-

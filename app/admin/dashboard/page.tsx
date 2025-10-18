@@ -1,4 +1,4 @@
-import AdminDashboardPageClient from "./AdminDashboardPageClient";
+import { AdminDashboardSectionPage } from "./AdminDashboardSectionPage";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query";
@@ -116,7 +116,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <AdminDashboardPageClient />
+      <AdminDashboardSectionPage section="overview" />
     </HydrationBoundary>
   );
 }

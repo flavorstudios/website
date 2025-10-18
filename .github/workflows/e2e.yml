@@ -49,6 +49,9 @@ jobs:
         run: pnpm exec playwright install --with-deps
 
       - name: Build app (prod)
+        env:
+          CI: "true"
+          NEXT_TELEMETRY_DISABLED: "1"
         run: pnpm build
 
       - name: Run E2E tests

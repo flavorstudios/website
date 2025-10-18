@@ -112,6 +112,8 @@ jobs:
 
       - name: Build
         env:
+          CI: "true"
+          NEXT_TELEMETRY_DISABLED: "1"
           SKIP_ENV_VALIDATION: "true"
           NEXT_PUBLIC_FIREBASE_API_KEY: stub
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: stub.firebaseapp.com

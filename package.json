@@ -27,7 +27,8 @@
     "audit:headings:runtime": "tsx scripts/audit-headings-runtime.ts",
     "test:jobs": "pnpm run test:cron",
     "test:cron": "tsx scripts/test-cron.ts",
-    "cron:logs": "tsx scripts/query-cron-logs.ts"
+    "cron:logs": "tsx scripts/query-cron-logs.ts",
+    "preinstall": "npx -y only-allow pnpm"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -161,10 +162,10 @@
     "supertest": "^7.1.1"
   },
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=10"
+    "node": "20.x",
+    "pnpm": "10.x"
   },
-  "packageManager": "pnpm@9.12.3",
+  "packageManager": "pnpm@10.6.2",
   "description": "This is the official website of **Flavor Studios** | Your source for Anime News & Original Stories That Inspire.",
   "main": "index.js",
   "directories": {

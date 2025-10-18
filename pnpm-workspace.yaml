@@ -1,7 +1,0 @@
-ignoredBuiltDependencies:
-  - '@firebase/util'
-  - core-js-pure
-  - esbuild
-  - protobufjs
-  - sharp
-  - unrs-resolver

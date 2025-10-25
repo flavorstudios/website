@@ -79,7 +79,7 @@ jobs:
           echo "✅ SEO audit complete."
 
       - name: 📤 Upload SEO Audit Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         # v4.4.3: https://github.com/actions/upload-artifact/releases/tag/v4.4.3
         with:
           name: seo-audit-logs

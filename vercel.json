@@ -6,7 +6,7 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "build": {
     "env": {
-      "NODE_VERSION": "22.11.0"
+      "NODE_VERSION": "22"
     }
   }
 }

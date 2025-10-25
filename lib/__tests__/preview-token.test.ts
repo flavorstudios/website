@@ -131,14 +131,14 @@ describe('preview token', () => {
       envModule.serverEnv.PREVIEW_SECRET = undefined;
       setProcessEnv("NODE_ENV", 'production');
       envModule.serverEnv.NODE_ENV = 'production';
-      setProcessEnv("NODE_ENV", 'production');
+      setProcessEnv("ADMIN_AUTH_DISABLED", '1');
       envModule.serverEnv.ADMIN_AUTH_DISABLED = '1';
       const token = createPreviewToken('post1', 'user1', 60);
       expect(validatePreviewToken(token, 'post1', 'user1')).toBe('valid');
     } finally {
       setProcessEnv("PREVIEW_SECRET", originalProcessSecret);
       envModule.serverEnv.PREVIEW_SECRET = originalServerSecret;
-      setProcessEnv("PREVIEW_SECRET", originalProcessSecret);
+      setProcessEnv("NODE_ENV", originalNodeEnv);
       envModule.serverEnv.NODE_ENV = originalServerNodeEnv;
       setProcessEnv("ADMIN_AUTH_DISABLED", originalProcessAdminDisabled);
       envModule.serverEnv.ADMIN_AUTH_DISABLED = originalServerAdminDisabled;

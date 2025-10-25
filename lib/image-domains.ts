@@ -1,4 +1,4 @@
-import imageDomains from "@/config/image-domains.json";
+import imageDomains from "@/config/image-domains.json" assert { type: "json" };
 import { SITE_URL } from "@/lib/constants";
 
 const siteUrl = new URL(SITE_URL);

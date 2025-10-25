@@ -2,7 +2,7 @@
 // If advanced routing is needed, extend BlogPage to accept `category` and
 // `blogPosts` props directly and update app/blog/page.tsx to match.
 
-import siteData from "@/content-data/categories.json";
+import siteData from "@/content-data/categories.json" assert { type: "json" };
 import BlogPage from "../../page";
 import Link from "next/link";
 

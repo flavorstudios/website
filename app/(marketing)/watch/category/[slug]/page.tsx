@@ -1,4 +1,4 @@
-import siteData from "@/content-data/categories.json";
+import siteData from "@/content-data/categories.json" assert { type: "json" };
 import WatchPage from "../../page";
 
 export default async function WatchCategoryPage({

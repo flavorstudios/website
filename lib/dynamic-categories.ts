@@ -1,4 +1,4 @@
-import siteData from "@/content-data/categories.json";
+import siteData from "@/content-data/categories.json" assert { type: "json" };
 
 // --- Category Data Interface (normalized) ---
 export interface CategoryData {

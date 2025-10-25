@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import {
   completeJob,
@@ -8,11 +8,11 @@ import {
 } from "@/lib/revalidate-store";
 import type { JobStatus } from "@/types/revalidate";
 
-interface Params {
-  params: { jobId: string };
-}
-
-export async function GET(_request: Request, { params }: Params) {
+export async function GET(
+  _request: NextRequest,
+  context: { params: { jobId: string } },
+) {
+  const { params } = context;
   const { jobId } = params;
   const job = getJob(jobId);
 

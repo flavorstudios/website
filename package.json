@@ -96,9 +96,9 @@
     "date-fns": "^4.1.0",
     "dotenv": "^16.5.0",
     "embla-carousel-react": "^8.6.0",
-    "firebase": "^11.9.1",
-    "firebase-admin": "^13.4.0",
-    "firebase-functions": "^6.4.0",
+    "firebase": "^12.4.0",
+    "firebase-admin": "^13.5.0",
+    "firebase-functions": "^6.6.0",
     "framer-motion": "^12.17.3",
     "idb": "^8.0.3",
     "input-otp": "^1.4.2",
@@ -169,7 +169,7 @@
     "@storybook/addon-essentials": "^8.1.0",
     "i": "^0.3.7",
     "storybook": "^8.1.0",
-    "@firebase/rules-unit-testing": "^3.0.0",
+    "@firebase/rules-unit-testing": "^5.0.0",
     "supertest": "^7.1.1"
   },
   "engines": {

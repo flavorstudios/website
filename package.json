@@ -170,7 +170,7 @@
     "supertest": "^7.1.1"
   },
   "engines": {
-    "node": "20.x",
+    "node": ">=20 <23",
     "pnpm": "10.x"
   },
   "packageManager": "pnpm@10.6.2",

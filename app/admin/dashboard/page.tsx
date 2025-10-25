@@ -120,19 +120,21 @@ export default async function AdminDashboardPage() {
 
   const { title, description } = getSectionCopy(SECTION);
 
+  const dehydratedState = dehydrate(queryClient);
+
   return (
-    <>
-      <PageHeader
-        level={1}
-        title={title}
-        description={description}
-        className="sr-only"
-        headingClassName="sr-only"
-        descriptionClassName={description ? "sr-only" : undefined}
-      />
-      <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrationBoundary state={dehydratedState}>
+      <>
+        <PageHeader
+          level={1}
+          title={title}
+          description={description}
+          className="sr-only"
+          headingClassName="sr-only"
+          descriptionClassName={description ? "sr-only" : undefined}
+        />
         <AdminDashboardSectionPage section={SECTION} />
-      </HydrationBoundary>
-    </>
+      </>
+    </HydrationBoundary>
   );
 }

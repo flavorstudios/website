@@ -13,6 +13,10 @@ on:
     types: [labeled, opened, synchronize]
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
@@ -27,32 +31,28 @@ jobs:
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@9bb56186c1a4490d6d6cf4b90efb4b0b10fc25d3
         with:
           fetch-depth: 0
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edca14a8b19c4ea3fd7a5c975299a9835c5caa
         with:
           node-version-file: '.nvmrc'
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Activate pnpm
+        run: |
+          PNPM_VERSION=$(node -p "require('./package.json').packageManager.split('@')[1]")
+          corepack prepare "pnpm@${PNPM_VERSION}" --activate
 
       - name: Show tool versions
         run: |
           node -v
-          pnpm -v
-
-      - name: Enable Corepack and activate pnpm
-        run: |
-          corepack enable
-          PNPM_VERSION=$(node -p "require('./package.json').packageManager.split('@')[1]")
-          corepack prepare "pnpm@${PNPM_VERSION}" --activate
+          pnpm --version
 
       - name: Configure pnpm store dir for stable caching
         run: pnpm config set store-dir ~/.pnpm-store
@@ -61,7 +61,7 @@ jobs:
         run: node .github/scripts/assert-pnpm-version.mjs
 
       - name: Cache pnpm store
-        uses: actions/cache@v4
+        uses: actions/cache@55f6b8b6b5d3f8b1e8269ba09e9f27b78f8731f8
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}

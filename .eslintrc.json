@@ -20,7 +20,8 @@
     "prefer-const": "warn",
     "react-hooks/rules-of-hooks": "off",
     "react-hooks/exhaustive-deps": "warn",
-    "local/no-h1-outside-page": "error"
+    "local/no-h1-outside-page": "error",
+    "local/no-server-import-in-client": "error"
   },
   "overrides": []
 }

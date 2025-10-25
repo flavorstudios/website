@@ -2,6 +2,8 @@
 import '@testing-library/jest-dom';
 import 'whatwg-fetch';
 import React from 'react';
+import { webcrypto } from 'crypto';
+import { TextDecoder, TextEncoder } from 'util';
 
 // Mock next/navigation for App Router so components using useRouter() render in tests
 jest.mock('next/navigation', () => {
@@ -31,6 +33,26 @@ if (typeof window !== 'undefined') {
   Object.defineProperty(window, 'ResizeObserver', {
     writable: true,
     value: ResizeObserverMock,
+  });
+}
+
+Object.defineProperty(globalThis, 'crypto', {
+  configurable: true,
+  writable: true,
+  value: webcrypto,
+});
+
+if (typeof globalThis.TextEncoder === 'undefined') {
+  Object.defineProperty(globalThis, 'TextEncoder', {
+    configurable: true,
+    value: TextEncoder,
+  });
+}
+
+if (typeof globalThis.TextDecoder === 'undefined') {
+  Object.defineProperty(globalThis, 'TextDecoder', {
+    configurable: true,
+    value: TextDecoder,
   });
 }
 

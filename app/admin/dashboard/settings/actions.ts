@@ -21,7 +21,7 @@ import {
   getCurrentAdminUid,
   readUserSettings,
   writeUserSettings,
-} from "@/lib/settings"
+} from "@/lib/settings/server"
 
 const rollbackStore = new Map<
   string,

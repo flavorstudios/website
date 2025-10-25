@@ -2,7 +2,7 @@ import { getMetadata } from "@/lib/seo-utils"
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"
 import { SettingsTabs } from "@/components/admin/settings/SettingsTabs"
 import { loadSettings } from "./actions"
-import { getCurrentAdminUid } from "@/lib/settings"
+import { getCurrentAdminUid } from "@/lib/settings/server"
 import { getAdminAuth } from "@/lib/firebase-admin"
 
 export const runtime = 'nodejs'

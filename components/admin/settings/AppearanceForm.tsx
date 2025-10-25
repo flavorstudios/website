@@ -20,7 +20,7 @@ import {
   rollbackSettings,
   updateAppearance,
 } from "@/app/admin/dashboard/settings/actions"
-import { getContrastRatio } from "@/lib/settings"
+import { getContrastRatio } from "@/lib/settings/client"
 
 interface AppearanceFormProps {
   initialValues: AppearanceSettingsInput

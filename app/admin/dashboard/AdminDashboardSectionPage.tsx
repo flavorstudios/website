@@ -10,11 +10,11 @@ interface AdminDashboardSectionPageProps {
 
 export function getSectionCopy(section: SectionId) {
   return {
-    title: SECTION_HEADINGS[section] ?? "Admin Dashboard",
-    description: SECTION_DESCRIPTIONS[section] ?? undefined,
+    title: SECTION_HEADINGS?.[section] ?? "Admin Dashboard",
+    description: SECTION_DESCRIPTIONS?.[section] ?? undefined,
   } as const;
 }
 
-  export function AdminDashboardSectionPage({ section }: AdminDashboardSectionPageProps) {
+export function AdminDashboardSectionPage({ section }: AdminDashboardSectionPageProps) {
   return <AdminDashboardPageClient initialSection={section} />;
 }

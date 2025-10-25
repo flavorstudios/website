@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { avatarFileSchema } from "@/lib/schemas/settings"
-import { initialsFromName, hashAvatar } from "@/lib/settings"
+import { initialsFromName, hashAvatar } from "@/lib/settings/client"
 
 interface AvatarUploaderProps {
   value?: string | null
@@ -165,7 +165,7 @@ export function AvatarUploader({
       canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Failed to export avatar"))), "image/webp", 0.9)
     })
     const arrayBuffer = await blob.arrayBuffer()
-    const filename = `users/avatar-${hashAvatar(arrayBuffer)}.webp`
+    const filename = `users/avatar-${await hashAvatar(arrayBuffer)}.webp`
     let uploadResult: { url: string; storagePath?: string }
     if (onUploadFile) {
       uploadResult = await onUploadFile(blob, filename)

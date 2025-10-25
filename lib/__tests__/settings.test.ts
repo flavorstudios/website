@@ -3,7 +3,13 @@ import {
   notificationsSettingsSchema,
   profileSettingsSchema,
 } from "@/lib/schemas/settings"
-import { DEFAULT_NOTIFICATIONS, getContrastRatio, mergeSettings } from "@/lib/settings"
+import {
+  DEFAULT_NOTIFICATIONS,
+  getContrastRatio,
+  mergeSettings,
+} from "@/lib/settings/common"
+import { hashAvatar as hashAvatarClient } from "@/lib/settings/client"
+import { hashAvatar as hashAvatarServer } from "@/lib/settings/server"
 
 describe("settings schemas", () => {
   it("validates profile display name length", () => {
@@ -78,5 +84,21 @@ describe("mergeSettings", () => {
     })
     expect(result.profile.displayName).toBe("User")
     expect(result.notifications).toEqual(DEFAULT_NOTIFICATIONS)
+  })
+})
+
+describe("hashAvatar", () => {
+  it("produces stable SHA-1 hashes across environments", async () => {
+    const encoder = new TextEncoder()
+    const samples = ["avatar", "another-avatar"]
+    for (const sample of samples) {
+      const data = encoder.encode(sample)
+      await expect(hashAvatarClient(data)).resolves.toBe(
+        await hashAvatarServer(data),
+      )
+      await expect(hashAvatarClient(data.buffer)).resolves.toBe(
+        await hashAvatarServer(data.buffer),
+      )
+    }
   })
 })

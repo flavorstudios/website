@@ -1,5 +1,7 @@
 // All categories are now managed dynamically—no more static arrays for seeding!
 
+import "server-only"
+
 import { isAdminSdkAvailable } from "@/lib/firebase-admin"
 import { logger } from "@/lib/logger"
 import { pageStore } from "./content-store"

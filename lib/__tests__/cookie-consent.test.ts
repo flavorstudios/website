@@ -31,6 +31,7 @@ describe("shouldShowCookieConsent", () => {
     expect(
       shouldShowCookieConsent({
         ...baseOptions,
+        allowedDomains: [...baseOptions.allowedDomains],
         host: "preview.example.com:3000",
       }),
     ).toBe(true);
@@ -40,6 +41,7 @@ describe("shouldShowCookieConsent", () => {
     expect(
       shouldShowCookieConsent({
         ...baseOptions,
+        allowedDomains: [...baseOptions.allowedDomains],
         host: "preview.example.com:3000",
         hasConsent: true,
       }),

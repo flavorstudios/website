@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo, useCallback, useId } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import BlogPostPreview from "./BlogPostPreview";
-import { RichTextEditor } from "./rich-text-editor";
 import Image from "next/image";
 import {
   Save, Eye, CalendarIcon, Upload, X, Clock, BookOpen, Tag, Settings, ArrowLeft, Info
@@ -33,12 +33,13 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { authors } from "@/lib/authors";
 import { slugify } from "@/lib/slugify";
 import { logClientError } from "@/lib/log-client";
-import MediaPickerDialog from "./media/MediaPickerDialog";
 import { PageHeader } from "@/components/admin/page-header";
 import type {
   BlogPost as StoreBlogPost,
   BlogRevision,
 } from "@/lib/content-store";
+import type { RichTextEditorProps } from "./rich-text-editor";
+import type { MediaPickerDialogProps } from "./media/MediaPickerDialog";
 import { clientEnv } from "@/env.client";
 import { isClientE2EEnabled } from "@/lib/e2e-utils";
 
@@ -63,6 +64,27 @@ export type BlogPost = Omit<
 // NEW: autosave hook
 import { useAutosave } from "@/hooks/useAutosave";
 // User ID for per-user draft keys
+
+const RichTextEditor = dynamic<RichTextEditorProps>(
+  () => import("./rich-text-editor").then((mod) => mod.RichTextEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        data-testid="rich-text-editor-loading"
+        aria-busy="true"
+        className="flex min-h-[200px] items-center justify-center rounded-md border border-dashed border-muted-foreground/40 bg-muted/40 p-6 text-sm text-muted-foreground"
+      >
+        Loading editor…
+      </div>
+    ),
+  },
+);
+
+const MediaPickerDialog = dynamic<MediaPickerDialogProps>(
+  () => import("./media/MediaPickerDialog"),
+  { ssr: false, loading: () => null },
+);
 
 const titleMin = 50;
 const titleMax = 60;

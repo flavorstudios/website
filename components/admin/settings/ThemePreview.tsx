@@ -14,7 +14,7 @@ interface ThemePreviewProps {
 
 export const ThemePreview = memo(function ThemePreview({ appearance }: ThemePreviewProps) {
   const text = appearance.theme === "dark" ? "text-white" : "text-slate-900"
-  const accentStyles: CSSProperties = {
+  const accentStyles: CSSProperties & Record<string, string> = {
     "--preview-accent": appearance.accent,
   }
 

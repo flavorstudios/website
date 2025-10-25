@@ -31,7 +31,7 @@ import { useEditor, EditorContent, Editor } from "@tiptap/react"
 import { sanitizeHtmlClient } from "@/lib/sanitize/client"
 import { createSharedTiptapExtensions } from "@/lib/tiptap-extensions"
 
-interface RichTextEditorProps {
+export interface RichTextEditorProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string

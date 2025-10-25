@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         p.title.toLowerCase().includes(query) ||
         p.slug.toLowerCase().includes(query) ||
         p.excerpt.toLowerCase().includes(query) ||
-        p.tags.some((t) => t.toLowerCase().includes(query))
+        p.tags?.some((t) => t.toLowerCase().includes(query))
     )
     .slice(0, 5)
     .map((p) => ({ id: p.id, title: p.title, slug: p.slug }));
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       (v) =>
         v.title.toLowerCase().includes(query) ||
         v.slug.toLowerCase().includes(query) ||
-        v.tags.some((t) => t.toLowerCase().includes(query))
+        v.tags?.some((t) => t.toLowerCase().includes(query))
     )
     .slice(0, 5)
     .map((v) => ({ id: v.id, title: v.title, slug: v.slug }));
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
 
   // Aggregate unique tags from posts
   const tagSet = new Set<string>();
-  postsAll.forEach((p) => p.tags.forEach((t) => tagSet.add(t)));
+  postsAll.forEach((p) => p.tags?.forEach((t) => tagSet.add(t)));
   const tags = Array.from(tagSet)
     .filter((t) => t.toLowerCase().includes(query))
     .slice(0, 5);

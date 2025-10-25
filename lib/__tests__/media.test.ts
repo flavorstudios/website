@@ -1,5 +1,5 @@
 import type { MediaDoc } from '@/types/media';
-import type { FirebaseFirestore } from 'firebase-admin';
+import type { CollectionReference } from 'firebase-admin/firestore';
 
 const mockDocData: MediaDoc = {
   id: '1234567890abcdef',
@@ -19,13 +19,13 @@ const docRef = {
   })),
 };
 
-const collectionRef = {
-  doc: jest.fn(() => docRef),
+const collectionRef: Pick<CollectionReference<MediaDoc>, 'doc'> = {
+  doc: jest.fn(() => docRef as unknown as ReturnType<CollectionReference<MediaDoc>['doc']>),
 };
 
 jest.mock('@/lib/firebase-admin', () => ({
   safeAdminDb: {
-    collection: jest.fn(() => collectionRef as unknown as FirebaseFirestore.CollectionReference<MediaDoc>),
+    collection: jest.fn(() => collectionRef as unknown as CollectionReference<MediaDoc>),
   },
 }));
 
@@ -43,8 +43,8 @@ describe('ensureFreshMediaUrl', () => {
       urlExpiresAt: Date.now() + 60_000,
     };
 
-    const refreshMock = jest
-      .fn<typeof media.refreshMediaUrl>()
+    const refreshMock: jest.MockedFunction<typeof media.refreshMediaUrl> = jest
+      .fn()
       .mockResolvedValue(refreshedDoc);
 
     const result = await media.ensureFreshMediaUrl(mockDocData.url, {

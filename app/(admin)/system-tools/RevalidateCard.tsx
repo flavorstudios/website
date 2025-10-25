@@ -201,14 +201,14 @@ export default function RevalidateCard({
           });
 
           if (isFailed) {
-            toast({
-              title: "Revalidation failed",
-              description: data.message ?? "Check logs in the history panel.",
-              variant: "destructive",
-            });
+            toast.error(
+              "Revalidation failed",
+              {
+                description: data.message ?? "Check logs in the history panel.",
+              },
+            );
           } else {
-            toast({
-              title: "Revalidation complete",
+            toast.success("Revalidation complete", {
               description: `Environment: ${context.env} • Scope: ${scopeLabel}`,
             });
           }
@@ -227,10 +227,8 @@ export default function RevalidateCard({
         stopPolling();
         setRunning(false);
         setProgress(0);
-        toast({
-          title: "Polling failed",
+        toast.error("Polling failed", {
           description: "We lost the connection to the job status.",
-          variant: "destructive",
         });
       }
 
@@ -283,10 +281,8 @@ export default function RevalidateCard({
       stopPolling();
       setRunning(false);
       setProgress(0);
-      toast({
-        title: "Could not start revalidation",
+      toast.error("Could not start revalidation", {
         description: "Please try again or check your connection.",
-        variant: "destructive",
       });
     }
   }, [dryRun, env, onRunStart, pollJobStatus, purgeCdn, routes, scope, stopPolling, tags, toast, warm]);

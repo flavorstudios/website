@@ -1,6 +1,8 @@
 /**
  * @jest-environment node
  */
+export {};
+
 process.env.PREVIEW_SECRET = 'test-secret';
 /* eslint-disable @typescript-eslint/no-require-imports */
 const envModule = require("@/env/server");
@@ -11,6 +13,14 @@ const {
   inspectPreviewToken,
 } = require("../preview-token");
 /* eslint-enable @typescript-eslint/no-require-imports */
+
+const setProcessEnv = (key: string, value: string | undefined) => {
+  if (typeof value === "undefined") {
+    Reflect.deleteProperty(process.env, key);
+  } else {
+    Reflect.set(process.env, key, value);
+  }
+};
 
 describe('preview token', () => {
   it('valid token passes', () => {
@@ -40,23 +50,23 @@ describe('preview token', () => {
     const originalProcessAdminDisabled = process.env.ADMIN_AUTH_DISABLED;
     const originalServerAdminDisabled = envModule.serverEnv.ADMIN_AUTH_DISABLED;
     try {
-      delete process.env.PREVIEW_SECRET;
+      setProcessEnv("PREVIEW_SECRET", undefined);
       envModule.serverEnv.PREVIEW_SECRET = undefined;
-      process.env.NODE_ENV = 'production';
+      setProcessEnv("NODE_ENV", 'production');
       envModule.serverEnv.NODE_ENV = 'production';
-      delete process.env.TEST_MODE;
+      setProcessEnv("TEST_MODE", undefined);
       envModule.serverEnv.TEST_MODE = undefined;
-      delete process.env.ADMIN_AUTH_DISABLED;
+      setProcessEnv("ADMIN_AUTH_DISABLED", undefined);
       envModule.serverEnv.ADMIN_AUTH_DISABLED = undefined;
       expect(validatePreviewToken(token, 'post1', 'user1')).toBe('invalid');
     } finally {
-      process.env.PREVIEW_SECRET = originalProcessSecret;
+      setProcessEnv("PREVIEW_SECRET", originalProcessSecret);
       envModule.serverEnv.PREVIEW_SECRET = originalServerSecret;
-      process.env.NODE_ENV = originalNodeEnv;
+      setProcessEnv("NODE_ENV", originalNodeEnv);
       envModule.serverEnv.NODE_ENV = originalServerNodeEnv;
-      process.env.TEST_MODE = originalProcessTestMode;
+      setProcessEnv("TEST_MODE", originalProcessTestMode);
       envModule.serverEnv.TEST_MODE = originalServerTestMode;
-      process.env.ADMIN_AUTH_DISABLED = originalProcessAdminDisabled;
+      setProcessEnv("ADMIN_AUTH_DISABLED", originalProcessAdminDisabled);
       envModule.serverEnv.ADMIN_AUTH_DISABLED = originalServerAdminDisabled;
     }
   });
@@ -67,17 +77,17 @@ describe('preview token', () => {
     const originalNodeEnv = process.env.NODE_ENV;
     const originalServerNodeEnv = envModule.serverEnv.NODE_ENV;
     try {
-      delete process.env.PREVIEW_SECRET;
+      setProcessEnv("PREVIEW_SECRET", undefined);
       envModule.serverEnv.PREVIEW_SECRET = undefined;
-      process.env.NODE_ENV = 'test';
+      setProcessEnv("NODE_ENV", 'test');
       envModule.serverEnv.NODE_ENV = 'test';
       const token = createPreviewToken('post1', 'user1', 60);
       expect(validatePreviewToken(token, 'post1', 'user1')).toBe('valid');
       expect(inspectPreviewToken(token).status).toBe('valid');
     } finally {
-      process.env.PREVIEW_SECRET = originalProcessSecret;
+      setProcessEnv("PREVIEW_SECRET", originalProcessSecret);
       envModule.serverEnv.PREVIEW_SECRET = originalServerSecret;
-      process.env.NODE_ENV = originalNodeEnv;
+      setProcessEnv("NODE_ENV", originalNodeEnv);
       envModule.serverEnv.NODE_ENV = originalServerNodeEnv;
     }
   });
@@ -90,21 +100,21 @@ describe('preview token', () => {
     const originalProcessTestMode = process.env.TEST_MODE;
     const originalServerTestMode = envModule.serverEnv.TEST_MODE;
     try {
-      delete process.env.PREVIEW_SECRET;
+      setProcessEnv("PREVIEW_SECRET", undefined);
       envModule.serverEnv.PREVIEW_SECRET = undefined;
-      process.env.NODE_ENV = 'production';
+      setProcessEnv("NODE_ENV", 'production');
       envModule.serverEnv.NODE_ENV = 'production';
-      process.env.TEST_MODE = 'true';
+      setProcessEnv("TEST_MODE", 'true');
       envModule.serverEnv.TEST_MODE = 'true';
       const token = createPreviewToken('post1', 'user1', -10);
       const inspection = inspectPreviewToken(token);
       expect(inspection.status).toBe('expired');
     } finally {
-      process.env.PREVIEW_SECRET = originalProcessSecret;
+      setProcessEnv("PREVIEW_SECRET", originalProcessSecret);
       envModule.serverEnv.PREVIEW_SECRET = originalServerSecret;
-      process.env.NODE_ENV = originalNodeEnv;
+      setProcessEnv("NODE_ENV", originalNodeEnv);
       envModule.serverEnv.NODE_ENV = originalServerNodeEnv;
-      process.env.TEST_MODE = originalProcessTestMode;
+      setProcessEnv("TEST_MODE", originalProcessTestMode);
       envModule.serverEnv.TEST_MODE = originalServerTestMode;
     }
   });
@@ -117,20 +127,20 @@ describe('preview token', () => {
     const originalProcessAdminDisabled = process.env.ADMIN_AUTH_DISABLED;
     const originalServerAdminDisabled = envModule.serverEnv.ADMIN_AUTH_DISABLED;
     try {
-      delete process.env.PREVIEW_SECRET;
+      setProcessEnv("PREVIEW_SECRET", undefined);
       envModule.serverEnv.PREVIEW_SECRET = undefined;
-      process.env.NODE_ENV = 'production';
+      setProcessEnv("NODE_ENV", 'production');
       envModule.serverEnv.NODE_ENV = 'production';
-      process.env.ADMIN_AUTH_DISABLED = '1';
+      setProcessEnv("NODE_ENV", 'production');
       envModule.serverEnv.ADMIN_AUTH_DISABLED = '1';
       const token = createPreviewToken('post1', 'user1', 60);
       expect(validatePreviewToken(token, 'post1', 'user1')).toBe('valid');
     } finally {
-      process.env.PREVIEW_SECRET = originalProcessSecret;
+      setProcessEnv("PREVIEW_SECRET", originalProcessSecret);
       envModule.serverEnv.PREVIEW_SECRET = originalServerSecret;
-      process.env.NODE_ENV = originalNodeEnv;
+      setProcessEnv("PREVIEW_SECRET", originalProcessSecret);
       envModule.serverEnv.NODE_ENV = originalServerNodeEnv;
-      process.env.ADMIN_AUTH_DISABLED = originalProcessAdminDisabled;
+      setProcessEnv("ADMIN_AUTH_DISABLED", originalProcessAdminDisabled);
       envModule.serverEnv.ADMIN_AUTH_DISABLED = originalServerAdminDisabled;
     }
   });

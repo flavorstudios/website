@@ -41,11 +41,7 @@ const isValueMissing = (value: string | undefined): boolean =>
   value === undefined || value.trim().length === 0;
 
 const shouldApplyFallbacks = (): boolean =>
-  isTruthy(process.env.CI) ||
-  process.env.NODE_ENV === "test" ||
-  process.env.NODE_ENV === undefined ||
-  process.env.NODE_ENV === "development" ||
-  isTruthy(process.env.USE_DEFAULT_ENV);
+  process.env.NODE_ENV === "test" || isTruthy(process.env.USE_DEFAULT_ENV);
 
 export const applyDefaultEnv = (): string[] => {
   if (!shouldApplyFallbacks()) {

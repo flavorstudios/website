@@ -16,7 +16,7 @@ export interface Video {
   description: string
   category: string
   categories?: string[]  // <-- NEW: multi-category support
-  tags: string[]
+  tags?: string[]
   publishedAt: string
   thumbnailUrl: string
   videoUrl: string

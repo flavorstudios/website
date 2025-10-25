@@ -1,3 +1,5 @@
+export {};
+
 jest.mock("@/env/server", () => ({
   serverEnv: {
     NEXT_PUBLIC_BASE_URL: undefined,
@@ -9,15 +11,23 @@ jest.mock("@/lib/constants", () => ({
   SITE_URL: "https://example.com",
 }))
 
+const setProcessEnv = (key: string, value: string | undefined) => {
+  if (typeof value === "undefined") {
+    Reflect.deleteProperty(process.env, key)
+  } else {
+    Reflect.set(process.env, key, value)
+  }
+}
+
 describe("lib/blog", () => {
   const originalNodeEnv = process.env.NODE_ENV
 
   beforeEach(() => {
-    process.env.NODE_ENV = "test"
+    setProcessEnv("NODE_ENV", "test")
   })
 
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv
+    setProcessEnv("NODE_ENV", originalNodeEnv)
     jest.resetModules()
     jest.restoreAllMocks()
   })

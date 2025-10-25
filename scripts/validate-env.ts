@@ -21,6 +21,9 @@ maybeLoadEnvFile(".env.local");
 
 const appliedDefaultKeys = applyDefaultEnv();
 
+const truthyFlags = new Set(["1", "true", "TRUE", "True"]);
+const allowDefaultsExplicitly = truthyFlags.has(process.env.USE_DEFAULT_ENV ?? "");
+
 const { clientEnvSchema } = await import("../env/client-validation");
 const { serverEnvSchema, serverEnv } = await import("../env/server-validation");
 
@@ -29,6 +32,12 @@ const skipValidation =
   process.env.SKIP_ENV_VALIDATION === "true";
 
 if (appliedDefaultKeys.length > 0) {
+  if (process.env.NODE_ENV !== "test" && !allowDefaultsExplicitly) {
+    throw new Error(
+      `[env] Default fallback values are disabled. Missing required env vars: ${appliedDefaultKeys.join(", ")}`,
+    );
+  }
+  
   console.warn(
     `[env] Using fallback values for missing env vars: ${appliedDefaultKeys.join(", ")}`,
   );

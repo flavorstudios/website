@@ -3,8 +3,7 @@ jest.mock('../media', () => ({
 }));
 
 import { formatPublicBlogSummary, formatPublicBlogDetail, formatPublicVideo } from '../formatters';
-import type { BlogPost } from '../content-store';
-import type { Video } from '../types';
+import type { BlogPost, Video } from '../content-store';
 
 describe('formatPublicBlog', () => {
   const baseBlog: BlogPost = {
@@ -97,7 +96,17 @@ describe('formatPublicVideo', () => {
     id: 'v1',
     title: 'Video',
     slug: 'video',
+    description: 'A sample video',
+    youtubeId: 'youtube-id',
+    thumbnail: 'https://img.example.com/video.jpg',
+    duration: '1:23',
     category: 'anime',
+    tags: ['tag'],
+    status: 'published',
+    publishedAt: '2024-01-01T00:00:00.000Z',
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt: '2024-01-02T00:00:00.000Z',
+    views: 0,
   };
 
   it('uses provided categories array when present', () => {

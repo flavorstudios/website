@@ -1,5 +1,7 @@
 /** @jest-environment node */
 
+export {};
+
 const originalEnv = process.env;
 
 describe('requireCronAuth', () => {

@@ -1,3 +1,5 @@
+import "server-only";
+
 import { adminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 import { FieldValue } from "firebase-admin/firestore";

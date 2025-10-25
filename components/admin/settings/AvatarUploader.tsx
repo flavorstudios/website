@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import Image from "next/image"
 import { Upload, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -206,10 +207,13 @@ export function AvatarUploader({
             onPointerUp={endDrag}
             onPointerLeave={endDrag}
           >
-            <img
+            <Image
               src={preview}
               alt="Avatar preview"
-              className="pointer-events-none h-full w-full select-none object-cover"
+              fill
+              unoptimized
+              sizes={`${MASK_SIZE}px`}
+              className="pointer-events-none select-none object-cover"
               style={dragStyle}
             />
           </div>

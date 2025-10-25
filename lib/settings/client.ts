@@ -11,7 +11,7 @@ function toArrayBuffer(input: ArrayBuffer | Uint8Array): ArrayBuffer {
   if (isArrayBuffer(input)) {
     return input
   }
-  return input.buffer.slice(input.byteOffset, input.byteOffset + input.byteLength)
+  return input.slice().buffer
 }
 
 function toHex(bytes: Uint8Array): string {

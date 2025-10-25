@@ -1,3 +1,5 @@
+import "server-only"
+
 import {
   ADMIN_BYPASS,
   adminDb,

@@ -9,14 +9,16 @@
     "build": "next build",
     "start": "next start",
     "start:test": "pnpm exec tsx scripts/start-test.ts",
-    "lint": "next lint",
+    "lint": "next lint --max-warnings=0",
+    "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit",
     "test:unit": "jest --selectProjects web --runInBand",
     "test:functions": "pnpm -s tsx scripts/test-functions.ts",
     "e2e:build": "pnpm -s tsx scripts/serve-e2e.ts",
     "pree2e": "pnpm exec playwright install --with-deps",
     "e2e": "pnpm exec playwright test",
-    "ci:test": "pnpm -s test:unit && pnpm -s test:functions && pnpm -s e2e && pnpm -s build && pnpm -s check:single-h1",
+    "test:e2e:smoke": "pnpm exec playwright test e2e/accessibility-smoke.e2e.spec.ts",
+    "ci:test": "pnpm -s test:unit && pnpm -s test:functions && pnpm -s test:e2e:smoke && pnpm -s build && pnpm -s check:single-h1",
     "check:single-h1": "tsx scripts/check-single-h1.ts",
     "visual:update": "pnpm exec playwright test e2e/admin-login-legal-visual.e2e.spec.ts --update-snapshots",
     "visual:test": "pnpm exec playwright test e2e/admin-login-legal-visual.e2e.spec.ts",
@@ -28,7 +30,8 @@
     "test:jobs": "pnpm run test:cron",
     "test:cron": "tsx scripts/test-cron.ts",
     "cron:logs": "tsx scripts/query-cron-logs.ts",
-    "preinstall": "npx -y only-allow pnpm"
+    "preinstall": "npx -y only-allow pnpm",
+    "analyze": "ANALYZE=true next build"
   },
   "trustedDependencies": [
     "@firebase/util",
@@ -170,7 +173,7 @@
     "supertest": "^7.1.1"
   },
   "engines": {
-    "node": ">=20 <23",
+    "node": "22.x",
     "pnpm": "10.x"
   },
   "packageManager": "pnpm@10.6.2",

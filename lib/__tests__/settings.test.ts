@@ -96,8 +96,12 @@ describe("hashAvatar", () => {
       await expect(hashAvatarClient(data)).resolves.toBe(
         await hashAvatarServer(data),
       )
-      await expect(hashAvatarClient(data.buffer)).resolves.toBe(
-        await hashAvatarServer(data.buffer),
+      const arrayBufferCopy = data.buffer.slice(
+        data.byteOffset,
+        data.byteOffset + data.byteLength,
+      ) as ArrayBuffer
+      await expect(hashAvatarClient(arrayBufferCopy)).resolves.toBe(
+        await hashAvatarServer(arrayBufferCopy),
       )
     }
   })

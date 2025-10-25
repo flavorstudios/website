@@ -28,11 +28,11 @@ jest.mock("@/hooks/use-toast", () => ({
   }),
 }));
 
-const useAutosaveMock = jest.fn(() => ({ status: "idle", savedAt: null }));
-
 jest.mock("@/hooks/useAutosave", () => ({
-  useAutosave: (...args: unknown[]) => useAutosaveMock(...args),
+  useAutosave: jest.fn(() => ({ status: "idle", savedAt: null })),
 }));
+
+const useAutosaveMock = jest.requireMock("@/hooks/useAutosave").useAutosave as jest.Mock;
 
 jest.mock("../BlogPostPreview", () => {
   const MockBlogPostPreview = () => <div data-testid="blog-post-preview" />;

@@ -5,13 +5,9 @@ import React from 'react';
 import PreviewPage from '../[id]/page';
 import { verifyAdminSession, requireAdmin, getSessionInfo } from '@/lib/admin-auth';
 import { blogStore } from '@/lib/content-store';
-import { validatePreviewTokenOrThrow } from '@/lib/preview-token';
-import {
-  ExpiredPreviewTokenError,
-  InvalidPreviewTokenError,
-} from '@/lib/preview-token-errors';
 import { logError } from '@/lib/log';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { validatePreviewToken } from '@/lib/preview/validate';
 
 jest.mock('@/lib/admin-auth', () => ({
   verifyAdminSession: jest.fn(),
@@ -40,6 +36,20 @@ jest.mock('@/lib/preview-token', () => ({
   createPreviewToken: jest.fn(),
 }));
 
+jest.mock('@/lib/preview/validate', () => ({
+  validatePreviewToken: jest.fn(),
+}));
+
+jest.mock('@/components/AdminAuthGuard', () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
+}));
+
+jest.mock('@/components/ValidateSessionPing', () => ({
+  ValidateSessionPing: () => null,
+}));
+
 jest.mock('next/navigation', () => ({
   notFound: () => {
     throw new Error('NEXT_NOT_FOUND');
@@ -53,7 +63,7 @@ const mockedVerify = verifyAdminSession as jest.Mock;
 const mockedRequireAdmin = requireAdmin as jest.Mock;
 const mockedGetSessionInfo = getSessionInfo as jest.Mock;
 const mockedGetById = (blogStore.getById as unknown) as jest.Mock;
-const mockedValidate = validatePreviewTokenOrThrow as jest.Mock;
+const mockedValidate = validatePreviewToken as jest.Mock;
 const mockedCreatePreviewToken = jest.requireMock('@/lib/preview-token')
   .createPreviewToken as jest.Mock;
 const mockedLogError = logError as jest.Mock;
@@ -89,6 +99,9 @@ describe('preview route', () => {
   });
   
   beforeEach(() => {
+    mockedVerify.mockReset();
+    mockedRequireAdmin.mockReset();
+    mockedGetSessionInfo.mockReset();
     mockedVerify.mockResolvedValue({ uid: 'user1' });
     mockedRequireAdmin.mockResolvedValue(true);
     mockedGetSessionInfo.mockResolvedValue({ uid: 'user1' });
@@ -96,10 +109,13 @@ describe('preview route', () => {
     cookieValue = 'session';
     headerStore = new Headers({ 'x-request-id': 'req' });
     mockedValidate.mockReset();
-    mockedValidate.mockReturnValue({
-      postId: '1',
-      uid: 'user1',
-      exp: Math.floor(Date.now() / 1000) + 60,
+    mockedValidate.mockResolvedValue({
+      ok: true,
+      payload: {
+        postId: '1',
+        uid: 'user1',
+        exp: Math.floor(Date.now() / 1000) + 60,
+      },
     });
     mockedCreatePreviewToken.mockReset();
     mockedLogError.mockReset();
@@ -114,29 +130,29 @@ describe('preview route', () => {
   });
 
   it('returns error element for invalid token', async () => {
-    mockedValidate.mockImplementation(() => {
-      throw new InvalidPreviewTokenError();
-    });
-    const result = (await PreviewPage({
+    mockedValidate.mockResolvedValue({ ok: false, reason: 'invalid' });
+    const result = await PreviewPage({
       params: Promise.resolve({ id: '1' }),
       searchParams: Promise.resolve({ token: 'bad' }),
-    })) as React.ReactElement;
-    expect(renderToStaticMarkup(result.props.children as React.ReactElement)).toContain(
-      'Invalid token.'
-    );
+    });
+    expect(React.isValidElement(result)).toBe(true);
+    if (!React.isValidElement(result)) {
+      throw new Error('Expected preview page to return a React element');
+    }
+    expect(renderToStaticMarkup(result)).toContain('Invalid token.');
   });
 
   it('returns error element for expired token', async () => {
-    mockedValidate.mockImplementation(() => {
-      throw new ExpiredPreviewTokenError();
-    });
-    const result = (await PreviewPage({
+    mockedValidate.mockResolvedValue({ ok: false, reason: 'expired' });
+    const result = await PreviewPage({
       params: Promise.resolve({ id: '1' }),
       searchParams: Promise.resolve({ token: 'old' }),
-    })) as React.ReactElement;
-    expect(renderToStaticMarkup(result.props.children as React.ReactElement)).toContain(
-      'Preview token expired.'
-    );
+    });
+    expect(React.isValidElement(result)).toBe(true);
+    if (!React.isValidElement(result)) {
+      throw new Error('Expected preview page to return a React element');
+    }
+    expect(renderToStaticMarkup(result)).toContain('Preview token expired.');
   });
 
   it('throws notFound when post missing', async () => {
@@ -150,14 +166,24 @@ describe('preview route', () => {
   });
 
   it('requires authenticated session for valid tokens', async () => {
+    mockedValidate.mockResolvedValue({
+      ok: true,
+      payload: {
+        postId: '1',
+        uid: 'user1',
+        exp: Math.floor(Date.now() / 1000) + 60,
+      },
+    });
     mockedVerify.mockRejectedValue(new Error('no session'));
-    const result = (await PreviewPage({
+    const result = await PreviewPage({
       params: Promise.resolve({ id: '1' }),
       searchParams: Promise.resolve({ token: 'ok' }),
-    })) as React.ReactElement;
-    expect(renderToStaticMarkup(result.props.children as React.ReactElement)).toContain(
-      'Access denied.'
-    );
+    });
+    expect(React.isValidElement(result)).toBe(true);
+    if (!React.isValidElement(result)) {
+      throw new Error('Expected preview page to return a React element');
+    }
+    expect(renderToStaticMarkup(result)).toContain('Access denied.');
   });
   
 describe('POST /api/admin/preview-token', () => {

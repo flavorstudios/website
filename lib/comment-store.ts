@@ -1,5 +1,7 @@
 // --- COMMENT STORE ---
 
+import "server-only";
+
 import { getAdminDb } from "@/lib/firebase-admin";
 import { randomUUID } from "crypto";
 import type { PerspectiveResponse } from "@/types/perspective";

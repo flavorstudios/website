@@ -1,5 +1,13 @@
 /** @jest-environment node */
 
+const setNodeEnv = (value: string | undefined) => {
+  if (typeof value === "undefined") {
+    Reflect.deleteProperty(process.env, "NODE_ENV");
+  } else {
+    Reflect.set(process.env, "NODE_ENV", value);
+  }
+};
+
 describe("server env bootstrap", () => {
   const originalEnv = process.env;
 
@@ -22,7 +30,7 @@ describe("server env bootstrap", () => {
   it("derives NEXT_PUBLIC_BASE_URL for preview deployments", async () => {
     process.env.VERCEL_ENV = "preview";
     process.env.VERCEL_URL = "preview.flavor.test";
-    process.env.NODE_ENV = "production";
+    setNodeEnv("production");
 
     await import("../env/server-validation");
 
@@ -32,7 +40,7 @@ describe("server env bootstrap", () => {
   });
 
   it("falls back to localhost in development", async () => {
-    process.env.NODE_ENV = "development";
+    setNodeEnv("development");
 
     await import("../env/server-validation");
 

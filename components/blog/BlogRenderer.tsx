@@ -214,25 +214,16 @@ export default function BlogRenderer({
 
       {image && (
         <div className="mb-8 w-full h-64 md:h-96 relative rounded-lg shadow-lg overflow-hidden">
-          {isAllowedImage ? (
-            <Image
-              src={image}
-              alt={post.title || "Blog post cover image"}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 1024px"
-              priority
-            />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={image}
-              alt={post.title || "Blog post cover image"}
-              className="absolute inset-0 h-full w-full object-cover"
-              loading="lazy"
-              decoding="async"
-            />
-          )}
+          <Image
+            src={image}
+            alt={post.title || "Blog post cover image"}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 1024px"
+            priority={isAllowedImage}
+            loading={isAllowedImage ? undefined : "lazy"}
+            unoptimized={!isAllowedImage}
+          />
         </div>
       )}
 

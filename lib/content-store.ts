@@ -1,3 +1,5 @@
+import "server-only";
+
 import { getAdminDb } from "@/lib/firebase-admin";
 import type { Firestore } from "firebase-admin/firestore";
 import { FieldValue } from "firebase-admin/firestore";
@@ -277,7 +279,7 @@ export interface Video {
   duration: string;
   category: string;
   categories?: string[];
-  tags: string[];
+  tags?: string[];
   status: "draft" | "published";
   publishedAt: string;
   createdAt: string;

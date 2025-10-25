@@ -125,46 +125,36 @@ export default function ScheduleDrawer({
 
   function handleSave() {
     if (!startTime) {
-      toast({
-        title: "Start time required",
+      toast.error("Start time required", {
         description: "Please choose when the schedule should begin.",
-        variant: "destructive",
       });
       return;
     }
 
     if (scope === "routes" && !routes.trim()) {
-      toast({
-        title: "Add at least one route",
+      toast.error("Add at least one route", {
         description: "Provide one or more routes separated by commas.",
-        variant: "destructive",
       });
       return;
     }
 
     if (scope === "tags" && !tags.trim()) {
-      toast({
-        title: "Add tags to target",
+      toast.error("Add tags to target", {
         description: "Provide one or more tags separated by commas.",
-        variant: "destructive",
       });
       return;
     }
 
     if (recurrence === "cron" && !cron.trim()) {
-      toast({
-        title: "CRON expression required",
+      toast.error("CRON expression required", {
         description: "Custom schedules need a CRON expression.",
-        variant: "destructive",
       });
       return;
     }
 
     if (env === "production" && !CAN_SCHEDULE_PRODUCTION) {
-      toast({
-        title: "Admin approval required",
+      toast.error("Admin approval required", {
         description: "Only administrators can schedule production runs.",
-        variant: "destructive",
       });
       return;
     }
@@ -182,8 +172,7 @@ export default function ScheduleDrawer({
       purgeCdn,
     });
 
-    toast({
-      title: "Schedule saved",
+    toast.success("Schedule saved", {
       description: `Revalidation will run ${describeRecurrence(recurrence)} in ${env}.`,
     });
 

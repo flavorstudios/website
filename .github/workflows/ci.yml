@@ -18,6 +18,9 @@ jobs:
       BASE_URL: ${{ secrets.BASE_URL }}
       NEXT_PUBLIC_BASE_URL: ${{ secrets.BASE_URL }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
+      ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
+      ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS }}
     steps:
       - uses: actions/checkout@v4
         # v4.2.2: https://github.com/actions/checkout/releases/tag/v4.2.2
@@ -104,6 +107,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Typecheck
+        run: pnpm typecheck
+
       - name: Verify Firebase authentication
         run: pnpm dlx firebase-tools projects:list
 
@@ -142,7 +148,7 @@ jobs:
         env:
           CRON_SECRET: test-secret
           E2E: "true"
-        run: pnpm e2e
+        run: pnpm test:e2e:smoke
 
       - name: Clean up service account key
         if: always()

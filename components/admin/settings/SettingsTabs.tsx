@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PageHeader } from "@/components/admin/page-header"
 import { ProfileForm } from "./ProfileForm"
 import { NotificationsForm } from "./NotificationsForm"
 import { AppearanceForm } from "./AppearanceForm"
@@ -67,11 +66,6 @@ export function SettingsTabs({
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        level={1}
-        title="Settings"
-        description="Manage your profile, notifications, and appearance preferences"
-      />
       <Tabs value={tab} onValueChange={handleValueChange} className="space-y-6" activationMode="manual">
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>

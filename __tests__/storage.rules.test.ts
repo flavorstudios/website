@@ -156,7 +156,6 @@ describeFn("storage security rules", () => {
             rules: readFileSync("storage.rules", "utf8"),
             host: storageHost,
             port: storagePort,
-            storageBucket: bucket,
           },
         });
 
@@ -195,7 +194,7 @@ describeFn("storage security rules", () => {
         const s = context.storage(bucket);
         connectStorageEmulator(s, storageHost, storagePort);
         const testRef = ref(s, "test/verify.txt");
-        await uploadString(testRef, "verify", { contentType: "text/plain" });
+        await uploadString(testRef, "verify", undefined, { contentType: "text/plain" });
         const bytes = await getBytes(testRef);
         if (Buffer.from(bytes).toString() !== "verify") {
           throw new Error(
@@ -302,7 +301,9 @@ describeFn("storage security rules", () => {
     const fileRef = ref(s, "test/seed.txt");
     await assertFails(getBytes(fileRef));
     await assertFails(
-      uploadString(ref(s, "test/blocked.txt"), "hi", { contentType: "text/plain" }),
+      uploadString(ref(s, "test/blocked.txt"), "hi", undefined, {
+        contentType: "text/plain",
+      }),
     );
   });
 
@@ -312,7 +313,9 @@ describeFn("storage security rules", () => {
     connectStorageEmulator(s, storageHost, storagePort);
     await assertFails(getBytes(ref(s, "test/seed.txt")));
     await assertFails(
-      uploadString(ref(s, "test/blocked.txt"), "hi", { contentType: "text/plain" }),
+      uploadString(ref(s, "test/blocked.txt"), "hi", undefined, {
+        contentType: "text/plain",
+      }),
     );
   });
 
@@ -321,7 +324,9 @@ describeFn("storage security rules", () => {
     const s = testEnv.authenticatedContext("admin", { role: "admin" }).storage(bucket);
     connectStorageEmulator(s, storageHost, storagePort);
     await assertSucceeds(
-      uploadString(ref(s, "test/ok.txt"), "hi", { contentType: "text/plain" }),
+      uploadString(ref(s, "test/ok.txt"), "hi", undefined, {
+        contentType: "text/plain",
+      }),
     );
     await assertSucceeds(getBytes(ref(s, "test/ok.txt")));
   });

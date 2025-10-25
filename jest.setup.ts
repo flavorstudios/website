@@ -66,6 +66,9 @@ process.env['NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'] = 'test';
 process.env['NEXT_PUBLIC_FIREBASE_APP_ID'] = 'test';
 process.env.BASE_URL = 'http://localhost';
 process.env.NEXT_DISABLE_MINIFY = 'true';
+process.env.ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET ?? 'test-admin-secret';
+process.env.CRON_SECRET = process.env.CRON_SECRET ?? 'test-cron-secret';
+process.env.PREVIEW_SECRET = process.env.PREVIEW_SECRET ?? 'test-preview-secret';
 
 // Silence optional client env var warnings
 process.env.NEXT_PUBLIC_E2E = process.env.NEXT_PUBLIC_E2E ?? 'false';

@@ -90,8 +90,12 @@ export async function changeEmail(payload: { newEmail: string }) {
   if (!auth) throw new Error("Auth unavailable")
   await auth.updateUser(uid, { email: newEmail })
   changeEmailCooldown.set(uid, now)
+  const db = getAdminDb()
+  if (!db) throw new Error("Admin database unavailable")
+  const currentSettings = await readUserSettings(db, uid)
+  const displayName = currentSettings?.profile.displayName ?? newEmail
   const { settings, rollbackToken } = await persistUpdates(uid, {
-    profile: { email: newEmail },
+    profile: { displayName, email: newEmail },
   })
   return { settings, rollbackToken }
 }

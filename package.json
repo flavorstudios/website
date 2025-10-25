@@ -18,7 +18,7 @@
     "pree2e": "pnpm exec playwright install --with-deps",
     "e2e": "pnpm exec playwright test",
     "test:e2e:smoke": "pnpm exec playwright test e2e/accessibility-smoke.e2e.spec.ts",
-    "ci:test": "pnpm -s test:unit && pnpm -s test:functions && pnpm -s test:e2e:smoke && pnpm -s build && pnpm -s check:single-h1",
+    "ci": "pnpm typecheck && pnpm lint && pnpm build && pnpm test",
     "check:single-h1": "tsx scripts/check-single-h1.ts",
     "visual:update": "pnpm exec playwright test e2e/admin-login-legal-visual.e2e.spec.ts --update-snapshots",
     "visual:test": "pnpm exec playwright test e2e/admin-login-legal-visual.e2e.spec.ts",
@@ -173,8 +173,8 @@
     "supertest": "^7.1.1"
   },
   "engines": {
-    "node": "22.x",
-    "pnpm": "10.6.2"
+    "node": ">=22.0.0 <23.0.0",
+    "pnpm": ">=10.6.2 <11.0.0"
   },
   "packageManager": "pnpm@10.6.2",
   "description": "This is the official website of **Flavor Studios** | Your source for Anime News & Original Stories That Inspire.",

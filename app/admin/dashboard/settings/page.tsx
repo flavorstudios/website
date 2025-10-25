@@ -2,7 +2,6 @@ import { getMetadata } from "@/lib/seo-utils"
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"
 import { SettingsTabs } from "@/components/admin/settings/SettingsTabs"
 import { PageHeader } from "@/components/admin/page-header"
-import type { PageProps } from "next"
 import { loadSettings } from "./actions"
 import { getCurrentAdminUid } from "@/lib/settings/server"
 import { getAdminAuth } from "@/lib/firebase-admin"
@@ -42,10 +41,11 @@ export const metadata = getMetadata({
 
 export default async function SettingsPage({
   searchParams,
-}: PageProps<undefined, { tab?: string | string[] }>) {
+}: {
+  searchParams?: { tab?: string | string[] };
+}) {
   const settings = await loadSettings()
-  const params = (await searchParams) ?? {}
-  const tab = Array.isArray(params.tab) ? params.tab[0] : params.tab
+  const tab = Array.isArray(searchParams?.tab) ? searchParams.tab[0] : searchParams?.tab
   let emailVerified = false
   let providerLocked = false
   try {

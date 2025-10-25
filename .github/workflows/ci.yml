@@ -1,167 +1,29 @@
 name: CI
+
 on:
-  push: { branches: [ main, develop ] }
-  pull_request: { branches: [ main, develop ] }
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
-  build-test:
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    env:
-      BASE_URL: ${{ secrets.BASE_URL }}
-      NEXT_PUBLIC_BASE_URL: ${{ secrets.BASE_URL }}
-      CRON_SECRET: ${{ secrets.CRON_SECRET }}
-      PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
-      ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET || vars.ADMIN_JWT_SECRET || '' }}
-      ADMIN_EMAILS: ${{ secrets.ADMIN_EMAILS || vars.ADMIN_EMAILS || '' }}
+
     steps:
-      - uses: actions/checkout@v4
-        # v4.2.2: https://github.com/actions/checkout/releases/tag/v4.2.2
-        with:
-          lfs: true
-          fetch-depth: 0
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Git LFS pull
-        run: |
-          git lfs install
-          git lfs pull
-
-      - uses: actions/setup-node@v4
-        # v4.1.0: https://github.com/actions/setup-node/releases/tag/v4.1.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - uses: pnpm/action-setup@v4
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 10.6.2
-          run_install: false
+          run_install: true
 
-      - name: Show tool versions
-        run: |
-          node -v
-          pnpm --version
-
-      - name: Configure pnpm store dir for stable caching
-        run: pnpm config set store-dir ~/.pnpm-store
-
-      - name: Assert pnpm version
-        run: node .github/scripts/assert-pnpm-version.mjs
-
-      - name: Restore Next.js cache
-        uses: actions/cache/restore@v4
-        # v4.2.2: https://github.com/actions/cache/releases/tag/v4.2.2
-        with:
-          path: |
-            .next/cache
-          key: ${{ runner.os }}-next-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-next-
-
-      - name: Set Google Credentials Path
-        run: echo "GOOGLE_APPLICATION_CREDENTIALS=${{ runner.temp }}/firebase-service-account.json" >> $GITHUB_ENV
-
-      - name: Ensure credentials directory exists
-        run: mkdir -p "$(dirname "$GOOGLE_APPLICATION_CREDENTIALS")"
-      - name: Write Firebase service account key
-        run: |
-          cat <<'EOF' > "$GOOGLE_APPLICATION_CREDENTIALS"
-          ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          EOF
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Verify admin secrets are configured
-        run: |
-          if [ -z "${ADMIN_JWT_SECRET:-}" ]; then
-            echo "ADMIN_JWT_SECRET must be provided via GitHub Secrets or Variables" >&2
-            exit 1
-          fi
-
-          if [ -z "${ADMIN_EMAILS:-}" ]; then
-            echo "ADMIN_EMAILS must be provided via GitHub Secrets or Variables" >&2
-            exit 1
-          fi
-
-      - name: Verify LFS snapshots
-        run: scripts/verify-lfs-snapshots.sh
-
-      - name: Determine Firebase emulator version
-        id: firebase-tools
-        run: echo "version=$(pnpm dlx firebase-tools --version)" >> "$GITHUB_OUTPUT"
-
-      - name: Set Firebase emulator cache key
-        id: firebase-emulators-key
-        run: echo "key=${{ runner.os }}-firebase-emulators-${{ steps.firebase-tools.outputs.version }}" >> "$GITHUB_OUTPUT"
-
-      - name: Ensure Firebase emulator cache directory exists
-        run: mkdir -p ~/.cache/firebase/emulators
-        
-      - name: Restore Firebase emulators
-        id: firebase-emulators-cache
-        uses: actions/cache/restore@v4
-        with:
-          path: ~/.cache/firebase/emulators
-          key: ${{ steps.firebase-emulators-key.outputs.key }}
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Verify Firebase authentication
-        run: pnpm dlx firebase-tools projects:list
-
-      - name: Unit tests (web)
-        run: pnpm dlx firebase-tools emulators:exec --only firestore,storage "pnpm -s test:unit"
-
-      - name: Functions tests (node)
-        run: pnpm -s test:functions
-
-      - name: Save Firebase emulators
-        if: steps.firebase-emulators-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: ~/.cache/firebase/emulators
-          key: ${{ steps.firebase-emulators-key.outputs.key }}
-
-      - name: Build
-        env:
-          CI: "true"
-          NEXT_TELEMETRY_DISABLED: "1"
-          SKIP_ENV_VALIDATION: "true"
-          NEXT_PUBLIC_FIREBASE_API_KEY: stub
-          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: stub.firebaseapp.com
-          NEXT_PUBLIC_FIREBASE_PROJECT_ID: stub
-          FIREBASE_STORAGE_BUCKET: stub.appspot.com
-          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: stub.appspot.com
-          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "1234567890"
-          NEXT_PUBLIC_FIREBASE_APP_ID: "1:123:web:abc"
-          VAPID_PRIVATE_KEY: stub
-        run: pnpm build
-
-      - name: Install Playwright
-        run: pnpm dlx playwright install --with-deps
-
-      - name: Playwright tests
-        env:
-          CRON_SECRET: test-secret
-          E2E: "true"
-        run: pnpm test:e2e:smoke
-
-      - name: Clean up service account key
-        if: always()
-        run: rm -f "$GOOGLE_APPLICATION_CREDENTIALS"
+      - name: Run CI checks
+        run: pnpm ci

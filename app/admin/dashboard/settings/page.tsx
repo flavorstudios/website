@@ -2,6 +2,7 @@ import { getMetadata } from "@/lib/seo-utils"
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"
 import { SettingsTabs } from "@/components/admin/settings/SettingsTabs"
 import { PageHeader } from "@/components/admin/page-header"
+import type { PageProps } from "next"
 import { loadSettings } from "./actions"
 import { getCurrentAdminUid } from "@/lib/settings/server"
 import { getAdminAuth } from "@/lib/firebase-admin"
@@ -39,12 +40,12 @@ export const metadata = getMetadata({
   },
 })
 
-interface SettingsPageProps {
-  searchParams?: { tab?: string }
-}
-
-export default async function SettingsPage({ searchParams }: SettingsPageProps) {
+export default async function SettingsPage({
+  searchParams,
+}: PageProps<undefined, { tab?: string | string[] }>) {
   const settings = await loadSettings()
+  const params = (await searchParams) ?? {}
+  const tab = Array.isArray(params.tab) ? params.tab[0] : params.tab
   let emailVerified = false
   let providerLocked = false
   try {
@@ -65,7 +66,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
         description="Manage your profile, notifications, and appearance preferences"
       />
       <SettingsTabs
-        initialTab={searchParams?.tab}
+        initialTab={tab}
         profile={{ ...settings.profile, emailVerified, providerLocked }}
         notifications={settings.notifications}
         appearance={settings.appearance}

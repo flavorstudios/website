@@ -173,8 +173,8 @@
     "supertest": "^7.1.1"
   },
   "engines": {
-    "node": "22.x",
-    "pnpm": "10.x"
+    "node": "22.11.0",
+    "pnpm": "10.6.2"
   },
   "packageManager": "pnpm@10.6.2",
   "description": "This is the official website of **Flavor Studios** | Your source for Anime News & Original Stories That Inspire.",

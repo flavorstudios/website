@@ -15,9 +15,12 @@ permissions:
 jobs:
   lockfile:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@9bb56186c1a4490d6d6cf4b90efb4b0b10fc25d3
-      - uses: actions/setup-node@60edca14a8b19c4ea3fd7a5c975299a9835c5caa
+      - uses: actions/checkout@v4
+        # v4.2.2: https://github.com/actions/checkout/releases/tag/v4.2.2
+      - uses: actions/setup-node@v4
+        # v4.1.0: https://github.com/actions/setup-node/releases/tag/v4.1.0
         with:
           node-version-file: '.nvmrc'
           cache: pnpm
@@ -43,7 +46,8 @@ jobs:
         run: node .github/scripts/assert-pnpm-version.mjs
 
       - name: Cache pnpm store
-        uses: actions/cache@55f6b8b6b5d3f8b1e8269ba09e9f27b78f8731f8
+        uses: actions/cache@v4
+        # v4.2.2: https://github.com/actions/cache/releases/tag/v4.2.2
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}

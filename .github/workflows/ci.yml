@@ -18,6 +18,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+
+      - name: Install pnpm on PATH
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - name: Firebase SA → file and export path
         run: |
           set -e
@@ -31,18 +44,12 @@ jobs:
           fi
           echo "GOOGLE_APPLICATION_CREDENTIALS=$cred" >> "$GITHUB_ENV"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-          cache-dependency-path: |
-            pnpm-lock.yaml
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
+      - name: Sanity
+        run: |
+          node -v
+          command -v pnpm
+          pnpm -v
+          test -s "$GOOGLE_APPLICATION_CREDENTIALS" && echo "Creds file present"
 
       - name: Fail if required secrets are missing or empty
         run: |
@@ -77,3 +84,4 @@ jobs:
 
       - name: Test
         run: pnpm test -r
+        

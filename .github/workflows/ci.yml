@@ -18,6 +18,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm on PATH
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -26,10 +31,12 @@ jobs:
           cache-dependency-path: |
             pnpm-lock.yaml
 
-      - name: Install pnpm on PATH
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
+      - name: Sanity
+        run: |
+          node -v
+          command -v pnpm
+          pnpm -v
+          test -s "$GOOGLE_APPLICATION_CREDENTIALS" && echo "Creds file present"
 
       - name: Firebase SA → file and export path
         run: |

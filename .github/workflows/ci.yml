@@ -28,13 +28,30 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Validate required secrets
+        run: |
+          set -euo pipefail
+          missing=()
+          for var in BASE_URL CRON_SECRET PREVIEW_SECRET ADMIN_JWT_SECRET FIREBASE_STORAGE_BUCKET; do
+            value="${!var-}"
+            if [ -z "${value}" ]; then
+              missing+=("$var")
+            fi
+          done
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            printf '::error::Missing required secret(s): %s\n' "${missing[*]}"
+            exit 1
+          fi
+        shell: bash
 
       - name: Show tool versions
         run: |
           node -v
           pnpm -v
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         run: pnpm build

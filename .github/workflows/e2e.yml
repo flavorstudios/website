@@ -31,6 +31,13 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
+      # ✅ Fallback to ensure pnpm is on PATH even if Corepack has issues
+      - name: Install pnpm on PATH (fallback)
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+          # Do NOT set "version" if package.json has "packageManager": "pnpm@..."
+
       - name: Enable Corepack
         run: corepack enable
 
@@ -88,4 +95,3 @@ jobs:
               "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/test"
             }
         run: pnpm e2e
-        

@@ -19,12 +19,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         # v4.2.2: https://github.com/actions/checkout/releases/tag/v4.2.2
+
       - uses: actions/setup-node@v4
         # v4.1.0: https://github.com/actions/setup-node/releases/tag/v4.1.0
         with:
           node-version-file: '.nvmrc'
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
+
+      # ✅ Ensure pnpm is actually on PATH even before Corepack
+      - name: Install pnpm on PATH (fallback)
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+          # Do NOT set "version" if package.json has "packageManager": "pnpm@..."
 
       - name: Enable Corepack
         run: corepack enable
@@ -53,6 +61,6 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
-              
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

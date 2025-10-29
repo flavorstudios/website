@@ -33,6 +33,13 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
+      # ✅ Ensure pnpm is on PATH (fallback in case Corepack hiccups)
+      - name: Install pnpm on PATH (fallback)
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+          # Do NOT set "version" if package.json has "packageManager": "pnpm@..."
+
       - name: Enable Corepack
         run: corepack enable
 
@@ -84,4 +91,3 @@ jobs:
         with:
           name: seo-audit-logs
           path: audit-results/
-          

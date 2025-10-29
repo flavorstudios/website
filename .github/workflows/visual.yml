@@ -38,6 +38,7 @@ jobs:
         # v4.2.2: https://github.com/actions/checkout/releases/tag/v4.2.2
         with:
           fetch-depth: 0
+
       - name: Setup Node
         uses: actions/setup-node@v4
         # v4.1.0: https://github.com/actions/setup-node/releases/tag/v4.1.0
@@ -45,6 +46,13 @@ jobs:
           node-version-file: '.nvmrc'
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
+
+      # ✅ Ensure pnpm is on PATH (fallback in container)
+      - name: Install pnpm on PATH (fallback)
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+          # Do NOT set "version" if package.json has "packageManager": "pnpm@..."
 
       - name: Enable Corepack
         run: corepack enable
@@ -73,16 +81,20 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Build app for e2e
         env:
           CI: "true"
           NEXT_TELEMETRY_DISABLED: "1"
         run: pnpm -s e2e:build
+
       - name: Update snapshots
         if: ${{ github.event.inputs.mode == 'update' || contains(github.event.pull_request.labels.*.name, 'update-visuals') }}
         run: pnpm -s visual:update
+
       - name: Commit snapshot changes
         if: ${{ github.event.inputs.mode == 'update' || contains(github.event.pull_request.labels.*.name, 'update-visuals') }}
         run: |
@@ -95,5 +107,6 @@ jobs:
           else
             echo "No snapshot changes to commit."
           fi
+
       - name: Verify tests pass without updating
         run: pnpm -s visual:test

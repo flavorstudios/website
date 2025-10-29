@@ -13,36 +13,33 @@ jobs:
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
       PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
       ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
-      FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
+        with:
+          run_install: false
 
-      - name: Validate required secrets
+      - name: Fail if required secrets are missing or empty
         run: |
           set -euo pipefail
-          missing=()
-          for var in BASE_URL CRON_SECRET PREVIEW_SECRET ADMIN_JWT_SECRET FIREBASE_STORAGE_BUCKET; do
-            value="${!var-}"
-            if [ -z "${value}" ]; then
-              missing+=("$var")
+          required=(BASE_URL CRON_SECRET PREVIEW_SECRET ADMIN_JWT_SECRET)
+          for name in "${required[@]}"; do
+            value="${!name-}"
+            stripped="${value//[ $'\t\r\n']/}"
+            if [ -z "${stripped}" ]; then
+              printf '::error::Missing or empty required secret: %s\n' "$name"
+              exit 1
             fi
           done
-
-          if [ "${#missing[@]}" -gt 0 ]; then
-            printf '::error::Missing required secret(s): %s\n' "${missing[*]}"
-            exit 1
-          fi
         shell: bash
 
       - name: Show tool versions

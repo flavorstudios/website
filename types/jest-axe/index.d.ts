@@ -1,7 +1,11 @@
-declare module 'jest-axe' {
-  export const axe: any;
-  export const toHaveNoViolations: any;
+export interface AxeViolations {
+  violations: unknown[];
 }
+
+export type AxeOptions = Record<string, unknown>;
+
+export function axe(node: unknown, options?: AxeOptions): Promise<AxeViolations>;
+export const toHaveNoViolations: jest.ExpectExtendMap;
 
 declare global {
   namespace jest {
@@ -10,5 +14,3 @@ declare global {
     }
   }
 }
-
-export {};

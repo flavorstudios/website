@@ -1,4 +1,3 @@
-import type { RouteContext } from "next";
 import { NextResponse, type NextRequest } from "next/server";
 
 import {
@@ -9,9 +8,11 @@ import {
 } from "@/lib/revalidate-store";
 import type { JobStatus } from "@/types/revalidate";
 
+type RevalidateRouteContext = { params: Promise<{ jobId: string }> };
+
 export async function GET(
   _request: NextRequest,
-  context: RouteContext<"/api/admin/revalidate/[jobId]">,
+  context: RevalidateRouteContext,
 ) {
   const { jobId } = await context.params;
   const job = getJob(jobId);

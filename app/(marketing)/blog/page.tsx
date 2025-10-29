@@ -29,6 +29,7 @@ import { authors } from "@/lib/authors"; // <-- NEW
 import { DateRangePicker } from "@/components/ui/date-range-picker"; // <-- NEW
 import { serverEnv } from "@/env/server";
 import { normalizeSlug } from "@/lib/slugify";
+import type { SearchParams } from "@/types/next";
 
 const ALL_CATEGORY_CANONICAL_SLUG = "all-posts";
 
@@ -164,7 +165,7 @@ async function getBlogData({
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: Promise<{
+  searchParams: SearchParams<{
     category?: string;
     page?: string;
     search?: string;

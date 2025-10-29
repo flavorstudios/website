@@ -6,9 +6,10 @@ import { PageHeader } from "@/components/admin/page-header";
 import BlogEditorPageClient from "./BlogEditorPageClient";
 import type { BlogPost as StoreBlogPost } from "@/lib/content-store";
 import type { BlogPost as EditorBlogPost } from "@/app/admin/dashboard/components/blog-editor";
+import type { SearchParams } from "@/types/next";
 
 interface PageProps {
-  searchParams: Promise<{ id?: string; slug?: string }>;
+  searchParams: SearchParams<{ id?: string; slug?: string }>;
 }
 
 export const metadata = getMetadata({

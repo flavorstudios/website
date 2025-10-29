@@ -3,6 +3,7 @@
   "functions": {
     "app/api/**/*": { "runtime": "@vercel/node@22.0.0" }
   },
+  "buildCommand": "pnpm build",
   "installCommand": "pnpm install --frozen-lockfile",
   "build": {
     "env": {

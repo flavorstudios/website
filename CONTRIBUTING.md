@@ -4,8 +4,9 @@ Flavor Studios welcomes contributions that keep the site secure, accessible, and
 
 ## Environment & tooling
 
-- **Node.js / pnpm** – We support Node.js `20.x` and pnpm `10.x`. Install Node via [nvm](https://github.com/nvm-sh/nvm) and run `corepack enable` to activate pnpm.
-- **Environment variables** – Copy `.env.example` to `.env.local` and populate the values you need. Secrets must never be committed; the `.gitignore` rules already block accidental check-ins.
+- **Node.js / pnpm** – We support Node.js `22.x` (see `.nvmrc`) and pnpm `10.x`. Install Node via [nvm](https://github.com/nvm-sh/nvm), run `nvm use`, and execute `corepack enable` so `pnpm` resolves to the project-pinned version declared in `package.json`.
+- **Tooling verification** – After switching Node versions run `node -v` and `pnpm -v` to confirm the toolchain matches CI. The GitHub workflow enables Corepack to guarantee the same versions.
+- **Environment variables** – Copy `.env.example` to `.env.local` and populate the values you need. Secrets must never be committed; the `.gitignore` rules already block accidental check-ins. The `scripts/validate-env.ts` script runs automatically during `pnpm build` to ensure required variables are present without failing on optional ones.
 - **Firebase emulators** – Run `pnpm dlx firebase-tools emulators:start` to launch local services when exercising Firestore/Storage flows.
 
 ## Common tasks
@@ -14,19 +15,22 @@ Flavor Studios welcomes contributions that keep the site secure, accessible, and
 | --- | --- |
 | Install dependencies | `pnpm install --frozen-lockfile` |
 | Lint all packages | `pnpm lint` |
+| Type-check TypeScript | `pnpm typecheck` |
 | Unit tests (web) | `pnpm test:unit` |
 | Cloud functions tests | `pnpm test:functions` |
 | E2E smoke tests | `pnpm e2e` |
 | Build production bundle | `pnpm build` |
+| Run Storybook locally | `pnpm storybook` |
+| Visual regression tests | `pnpm visual:test` |
 
 The `Makefile` mirrors these commands so CI and developers execute the same entry points. Run `make help` to list available targets.
 
 ## Pull request checklist
 
-1. **Run `pnpm lint` and `pnpm test:unit`.** Fix lint failures or add documentation for intentional suppressions.
-2. **Add or update tests** that demonstrate the fix or regression protection.
+1. **Run `pnpm lint`, `pnpm typecheck`, and `pnpm build`.** Fix any failures before pushing.
+2. **Execute automated tests** (`pnpm test:unit`, `pnpm test:functions`, `pnpm e2e` where applicable) and update them to cover regressions.
 3. **Update documentation** (`README.md`, `docs/ci.md`, `docs/architecture.md`) when behaviour changes.
-4. **Request review** from `@flavor-studios/web` and ensure the GitHub Actions suite is green before merging.
+4. **Request review** from `@flavor-studios/web` and ensure the GitHub Actions suite is green before merging. CI installs with `pnpm install --frozen-lockfile`, caches pnpm’s store, and runs lint, type-check, and build in that order.
 
 ## Refreshing admin login visual snapshots
 

@@ -16,7 +16,9 @@ const COLON_PROTOCOL_REGEX = /^[a-zA-Z][a-zA-Z0-9+.-]*:/;
 const EVENT_HANDLER_REGEX = /^on/i;
 const DANGEROUS_STYLE_REGEX = /expression|url\s*\(/i;
 
-type DomPurifyModule = typeof import("isomorphic-dompurify");
+type DomPurifyModule = {
+  sanitize: (input: string, config?: unknown) => string;
+} & Record<string, unknown>;
 let domPurifyInstance: DomPurifyModule | null = null;
 let domPurifyLoading: Promise<void> | null = null;
 

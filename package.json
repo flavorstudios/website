@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "start:test": "pnpm exec tsx scripts/start-test.ts",
-    "lint": "next lint --max-warnings=0",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit",
     "test:unit": "jest --selectProjects web --runInBand",
@@ -173,7 +173,7 @@
     "supertest": "^7.1.1"
   },
   "engines": {
-    "node": ">=22.0.0 <23.0.0",
+    "node": "22.x",
     "pnpm": ">=10.6.2 <11.0.0"
   },
   "packageManager": "pnpm@10.6.2",

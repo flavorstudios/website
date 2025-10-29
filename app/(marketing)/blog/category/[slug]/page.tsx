@@ -5,10 +5,11 @@
 import siteData from "@/content-data/categories.json" assert { type: "json" };
 import BlogPage from "../../page";
 import Link from "next/link";
+import type { SearchParams } from "@/types/next";
 
 interface BlogCategoryPageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: SearchParams<{ page?: string }>;
 }
 
 /**

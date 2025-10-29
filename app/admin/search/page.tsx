@@ -6,9 +6,10 @@ import { SITE_URL, SITE_NAME, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { getMetadata } from "@/lib/seo-utils";
 import { PageHeader } from "@/components/admin/page-header";
 import AdminSearchPageClient from "./AdminSearchPageClient";
+import type { SearchParams } from "@/types/next";
 
 interface PageProps {
-  searchParams?: Promise<{ q?: string }>;
+  searchParams?: SearchParams<{ q?: string }>;
 }
 
 export const runtime = 'nodejs'
@@ -44,7 +45,7 @@ export const metadata = getMetadata({
 });
 
 export default async function AdminSearchPage({ searchParams }: PageProps) {
-  const params = await searchParams;
+  const params = searchParams ? await searchParams : undefined;
   const query = typeof params?.q === "string" ? params.q : "";
 
   const h = await headers();

@@ -8,13 +8,13 @@
     "strict": true,
     "noEmit": true,                      // Keep this for Next.js, won't emit JS
     "esModuleInterop": true,
-    "module": "ESNext",                  // CHANGED: was "esnext" (case insensitive, but this is canonical)
-    "moduleResolution": "node",          // CHANGED: was "bundler"
+    "module": "esnext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["node", "jest", "@testing-library/jest-dom"],          // <--- Added as per audit
+    "types": ["node", "jest", "@testing-library/jest-dom", "react", "react-dom"],
     "typeRoots": ["./types", "./node_modules/@types", "./node_modules/@testing-library"],
     "plugins": [
       {
@@ -22,7 +22,12 @@
       }
     ],
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["*"],
+      "jest-axe": ["types/jest-axe"],
+      "expect": ["types/expect"],
+      "pretty-format": ["types/pretty-format"],
+      "undici-types": ["types/undici-types"],
+      "lodash": ["types/lodash"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

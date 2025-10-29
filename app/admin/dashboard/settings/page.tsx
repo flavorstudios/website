@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/admin/page-header"
 import { loadSettings } from "./actions"
 import { getCurrentAdminUid } from "@/lib/settings/server"
 import { getAdminAuth } from "@/lib/firebase-admin"
+import type { SearchParams } from "@/types/next"
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -42,10 +43,13 @@ export const metadata = getMetadata({
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams?: { tab?: string | string[] };
+  searchParams?: SearchParams<{ tab?: string | string[] }>;
 }) {
   const settings = await loadSettings()
-  const tab = Array.isArray(searchParams?.tab) ? searchParams.tab[0] : searchParams?.tab
+  const resolvedSearchParams = searchParams ? await searchParams : {}
+  const tab = Array.isArray(resolvedSearchParams.tab)
+    ? resolvedSearchParams.tab[0]
+    : resolvedSearchParams.tab
   let emailVerified = false
   let providerLocked = false
   try {

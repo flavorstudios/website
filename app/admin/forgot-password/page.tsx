@@ -1,6 +1,7 @@
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_BRAND_TWITTER, SITE_NAME, SITE_URL } from "@/lib/constants";
 import { PageHeader } from "@/components/admin/page-header";
+import type { SearchParams as NextSearchParams } from "@/types/next";
 
 import ForgotPasswordForm from "./ForgotPasswordForm";
 
@@ -42,14 +43,14 @@ export const viewport = {
   maximumScale: 1,
 };
 
-type SearchParams = {
+type ForgotPasswordSearchParams = {
   status?: string;
 };
 
 export default async function AdminForgotPasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<SearchParams>;
+  searchParams: NextSearchParams<ForgotPasswordSearchParams>;
 }) {
   const resolvedSearchParams = await searchParams;
   

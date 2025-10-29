@@ -1,20 +1,53 @@
 import { z } from 'zod';
 
+const nonEmptyString = z
+  .string()
+  .transform(value => value.trim())
+  .pipe(z.string().min(1));
+
+const optionalNonEmptyString = nonEmptyString.optional();
+
+const requiredServerKeys = [
+  'BASE_URL',
+  'CRON_SECRET',
+  'PREVIEW_SECRET',
+  'ADMIN_JWT_SECRET',
+] as const;
+
+const optionalServerKeys = [
+  'NEXT_PUBLIC_BASE_URL',
+  'FIREBASE_SERVICE_ACCOUNT_KEY',
+  'FIREBASE_SERVICE_ACCOUNT_JSON',
+  'FIREBASE_STORAGE_BUCKET',
+  'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
+  'ADMIN_EMAILS',
+  'ADMIN_EMAIL',
+  'ADMIN_REQUIRE_EMAIL_VERIFICATION',
+  'ADMIN_DISPOSABLE_DOMAINS',
+  'E2E',
+] as const;
+
+type RequiredServerKey = (typeof requiredServerKeys)[number];
+type OptionalServerKey = (typeof optionalServerKeys)[number];
+
+type ServerEnvShape = Record<RequiredServerKey, string> &
+  Partial<Record<OptionalServerKey, string | undefined>>;
+
 export const serverEnvSchema = z.object({
-  BASE_URL: z.string().min(1),
-  NEXT_PUBLIC_BASE_URL: z.string().min(1),
-  CRON_SECRET: z.string().min(1),
-  PREVIEW_SECRET: z.string().min(1),
-  ADMIN_JWT_SECRET: z.string().min(1),
-  FIREBASE_SERVICE_ACCOUNT_KEY: z.string().optional(),
-  FIREBASE_SERVICE_ACCOUNT_JSON: z.string().optional(),
-  FIREBASE_STORAGE_BUCKET: z.string().optional(),
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string().min(1),
-  ADMIN_EMAILS: z.string().optional(),
-  ADMIN_EMAIL: z.string().optional(),
-  ADMIN_REQUIRE_EMAIL_VERIFICATION: z.string().optional(),
-  ADMIN_DISPOSABLE_DOMAINS: z.string().optional(),
-  E2E: z.string().optional(),
+  BASE_URL: nonEmptyString,
+  CRON_SECRET: nonEmptyString,
+  PREVIEW_SECRET: nonEmptyString,
+  ADMIN_JWT_SECRET: nonEmptyString,
+  NEXT_PUBLIC_BASE_URL: optionalNonEmptyString,
+  FIREBASE_SERVICE_ACCOUNT_KEY: optionalNonEmptyString,
+  FIREBASE_SERVICE_ACCOUNT_JSON: optionalNonEmptyString,
+  FIREBASE_STORAGE_BUCKET: optionalNonEmptyString,
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: optionalNonEmptyString,
+  ADMIN_EMAILS: optionalNonEmptyString,
+  ADMIN_EMAIL: optionalNonEmptyString,
+  ADMIN_REQUIRE_EMAIL_VERIFICATION: optionalNonEmptyString,
+  ADMIN_DISPOSABLE_DOMAINS: optionalNonEmptyString,
+  E2E: optionalNonEmptyString,
 });
 
 const skipValidation =
@@ -37,47 +70,25 @@ if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
   }
 }
 
-const _server: z.SafeParseReturnType<
-  Record<string, string | undefined>,
-  z.infer<typeof serverEnvSchema>
-> = skipValidation
+const allServerKeys: readonly (RequiredServerKey | OptionalServerKey)[] = [
+  ...requiredServerKeys,
+  ...optionalServerKeys,
+];
+
+const rawServerEnv = allServerKeys.reduce<Record<string, string | undefined>>(
+  (acc, key) => {
+    acc[key] = process.env[key];
+    return acc;
+  },
+  {},
+);
+
+const _server: z.SafeParseReturnType<ServerEnvShape, ServerEnvShape> = skipValidation
   ? {
       success: true as const,
-      data: {
-        BASE_URL: process.env.BASE_URL,
-        NEXT_PUBLIC_BASE_URL: process.env["NEXT_PUBLIC_BASE_URL"],
-        CRON_SECRET: process.env.CRON_SECRET,
-        PREVIEW_SECRET: process.env.PREVIEW_SECRET,
-        ADMIN_JWT_SECRET: process.env.ADMIN_JWT_SECRET,
-        FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
-        FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
-        FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
-      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:
-          process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        ADMIN_EMAILS: process.env.ADMIN_EMAILS,
-        ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-        ADMIN_REQUIRE_EMAIL_VERIFICATION:
-          process.env.ADMIN_REQUIRE_EMAIL_VERIFICATION,
-        ADMIN_DISPOSABLE_DOMAINS: process.env.ADMIN_DISPOSABLE_DOMAINS,
-    } as z.infer<typeof serverEnvSchema>,
+      data: rawServerEnv as ServerEnvShape,
     }
-  : serverEnvSchema.safeParse({
-      BASE_URL: process.env.BASE_URL,
-      NEXT_PUBLIC_BASE_URL: process.env["NEXT_PUBLIC_BASE_URL"],
-      CRON_SECRET: process.env.CRON_SECRET,
-      PREVIEW_SECRET: process.env.PREVIEW_SECRET,
-      ADMIN_JWT_SECRET: process.env.ADMIN_JWT_SECRET,
-      FIREBASE_SERVICE_ACCOUNT_KEY: process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
-      FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
-      FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
-      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:
-        process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      ADMIN_EMAILS: process.env.ADMIN_EMAILS,
-      ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-      ADMIN_REQUIRE_EMAIL_VERIFICATION:
-        process.env.ADMIN_REQUIRE_EMAIL_VERIFICATION,
-      ADMIN_DISPOSABLE_DOMAINS: process.env.ADMIN_DISPOSABLE_DOMAINS,
-    });
+  : serverEnvSchema.safeParse(rawServerEnv);
 
 if (!_server.success) {
   const { fieldErrors } = _server.error.flatten();

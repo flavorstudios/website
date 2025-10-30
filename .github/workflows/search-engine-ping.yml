@@ -25,6 +25,13 @@ jobs:
         uses: actions/checkout@v4
         # v4.2.2: https://github.com/actions/checkout/releases/tag/v4.2.2 
 
+      # ✅ Ensure pnpm is on PATH (fallback in case Corepack hiccups)
+      - name: Install pnpm on PATH (fallback)
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+          # Do NOT set "version" if package.json has "packageManager": "pnpm@..."
+
       - name: 🧰 Set up Node.js
         uses: actions/setup-node@v4
         # v4.1.0: https://github.com/actions/setup-node/releases/tag/v4.1.0
@@ -32,13 +39,6 @@ jobs:
           node-version-file: '.nvmrc'
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-
-      # ✅ Ensure pnpm is on PATH (fallback in case Corepack hiccups)
-      - name: Install pnpm on PATH (fallback)
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-          # Do NOT set "version" if package.json has "packageManager": "pnpm@..."
 
       - name: Enable Corepack
         run: corepack enable

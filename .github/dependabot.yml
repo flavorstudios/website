@@ -6,6 +6,8 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "03:00"
+    # keep versions reasonable, only bump when needed :contentReference[oaicite:0]{index=0}
+    versioning-strategy: increase-if-necessary
     open-pull-requests-limit: 10
     groups:
       nextjs:

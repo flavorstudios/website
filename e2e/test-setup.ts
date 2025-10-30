@@ -15,14 +15,14 @@ type TestFixtures = {
 
 export const test = base.extend<TestFixtures>({
   // default behaviour stays the same as before: mocks are enabled
-  useGlobalMocks: [true, { option: true }],
+  useGlobalMocks: [true, { scope: 'test' }],
 });
 
 export const expect = test.expect;
 
 // optional convenience for tests that never want mocks
 export const testNoMocks = test.extend<TestFixtures>({
-  useGlobalMocks: [false, { option: true }],
+  useGlobalMocks: [false, { scope: 'test' }],
 });
 
 test.beforeEach(async ({ page, useGlobalMocks }) => {

@@ -55,8 +55,9 @@ jobs:
         # v4.1.0: https://github.com/actions/setup-node/releases/tag/v4.1.0
         with:
           node-version-file: '.nvmrc'
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          # ❌ removed cache: pnpm because we already cache ~/.pnpm-store
+          # cache: pnpm
+          # cache-dependency-path: pnpm-lock.yaml
 
       - name: Enable Corepack
         run: corepack enable
@@ -87,6 +88,15 @@ jobs:
       - name: Configure pnpm store dir for stable caching
         run: pnpm config set store-dir ~/.pnpm-store
 
+      # ✅ actually cache the pnpm store
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Assert pnpm version
         run: node .github/scripts/assert-pnpm-version.mjs
 
@@ -96,7 +106,14 @@ jobs:
       # 🔐 write the Firebase service account to the path we set above
       - name: Write Firebase service account
         run: |
-          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$GOOGLE_APPLICATION_CREDENTIALS"
+          if [ -n "${FIREBASE_SERVICE_ACCOUNT_JSON}" ]; then
+            echo "${FIREBASE_SERVICE_ACCOUNT_JSON}" > "${GOOGLE_APPLICATION_CREDENTIALS}"
+          elif [ -n "${FIREBASE_SERVICE_ACCOUNT_JSON_B64}" ]; then
+            echo "${FIREBASE_SERVICE_ACCOUNT_JSON_B64}" | base64 -d > "${GOOGLE_APPLICATION_CREDENTIALS}"
+          else
+            echo "Missing FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_JSON_B64" >&2
+            exit 1
+          fi
 
       # ✅ Install Playwright browsers and required OS deps directly
       - name: Install Playwright browsers & OS deps
@@ -112,25 +129,11 @@ jobs:
       - name: Run E2E tests
         env:
           # --- Minimal, safe test env ---
-          NODE_ENV: production
+          NODE_ENV: test
           NEXT_TELEMETRY_DISABLED: '1'
           E2E: 'true'
           TEST_MODE: 'true'
           ADMIN_AUTH_DISABLED: '1'
           ADMIN_BYPASS: 'true'
           NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION: 'false'
-          # still okay to have a stub here
-          FIREBASE_SERVICE_ACCOUNT_JSON: |
-            {
-              "type": "service_account",
-              "project_id": "test-project",
-              "private_key_id": "test-key-id",
-              "private_key": "-----BEGIN PRIVATE KEY-----\nMIIB...test\n-----END PRIVATE KEY-----\n",
-              "client_email": "test@example.iam.gserviceaccount.com",
-              "client_id": "1234567890",
-              "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-              "token_uri": "https://oauth2.googleapis.com/token",
-              "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-              "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/test"
-            }
         run: pnpm e2e

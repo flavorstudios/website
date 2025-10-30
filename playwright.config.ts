@@ -3,15 +3,28 @@ import { defineConfig } from "@playwright/test";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.dirname(fileURLToPath(import.meta.url));
-const defaultBaseUrl = process.env.BASE_URL ?? "http://127.0.0.1:3000";
+
+const isCI = process.env.CI === "true" || process.env.CI === "1";
+const localBaseUrl = "http://127.0.0.1:3000";
+
+// let CI override, but only if we *explicitly* say so
+const explicitBaseUrl =
+  process.env.E2E_BASE_URL ??
+  process.env.PLAYWRIGHT_BASE_URL;
+
+// In CI we want to test the server we start here, not the public BASE_URL
+const defaultBaseUrl =
+  explicitBaseUrl ??
+  (isCI ? localBaseUrl : process.env.BASE_URL ?? localBaseUrl);
+
 const storageState = path.join(repoRoot, "e2e/.auth/admin.json");
 
 export default defineConfig({
-  testDir: '.',
-  testMatch: ['e2e/**/*.spec.ts', 'tests/**/*.spec.ts'],
-  reporter: process.env.CI ? [["list"], ["html", { open: "never" }]] : "list",
+  testDir: ".",
+  testMatch: ["e2e/**/*.spec.ts", "tests/**/*.spec.ts"],
+  reporter: isCI ? [["list"], ["html", { open: "never" }]] : "list",
   timeout: 60_000,
-  retries: process.env.CI ? 1 : 0,
+  retries: isCI ? 1 : 0,
   use: {
     headless: true,
     baseURL: defaultBaseUrl,
@@ -34,7 +47,7 @@ export default defineConfig({
     command: "pnpm start:test",
     url: defaultBaseUrl,
     cwd: repoRoot,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !isCI,
     stdout: "pipe",
     stderr: "pipe",
     timeout: 120_000,

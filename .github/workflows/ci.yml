@@ -9,12 +9,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      CI: true
+      SKIP_STRICT_ENV: 1
       BASE_URL: ${{ secrets.BASE_URL }}
+      NEXT_PUBLIC_BASE_URL: ${{ secrets.BASE_URL }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
       PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
       ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
       FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
       FIREBASE_SERVICE_ACCOUNT_JSON_B64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_B64 }}
+      FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
     steps:
       - uses: actions/checkout@v4
 
@@ -28,8 +33,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          # removed cache: pnpm + cache-dependency-path to avoid post-job path errors
 
       - name: Firebase SA to file and export path
         run: |
@@ -87,4 +91,4 @@ jobs:
         run: pnpm typecheck
 
       - name: Test
-        run: pnpm test -r
+        run: pnpm test

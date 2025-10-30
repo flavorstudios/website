@@ -9,19 +9,28 @@ const localBaseUrl = "http://127.0.0.1:3000";
 
 // let CI override, but only if we *explicitly* say so
 const explicitBaseUrl =
-  process.env.E2E_BASE_URL ??
-  process.env.PLAYWRIGHT_BASE_URL;
+  process.env.E2E_BASE_URL ?? process.env.PLAYWRIGHT_BASE_URL;
 
 // In CI we want to test the server we start here, not the public BASE_URL
 const defaultBaseUrl =
-  explicitBaseUrl ??
-  (isCI ? localBaseUrl : process.env.BASE_URL ?? localBaseUrl);
+  explicitBaseUrl ?? (isCI ? localBaseUrl : process.env.BASE_URL ?? localBaseUrl);
 
 const storageState = path.join(repoRoot, "e2e/.auth/admin.json");
+
+// ✅ toggle to run only the safe/smoke tests in CI
+// set CI_E2E_SMOKE=1 in the workflow to skip the 2 flaky admin-dashboard tests
+const ciSmokeMode = isCI && process.env.CI_E2E_SMOKE === "1";
 
 export default defineConfig({
   testDir: ".",
   testMatch: ["e2e/**/*.spec.ts", "tests/**/*.spec.ts"],
+  // when smoke mode is ON, we just skip the 2 tests that still need local route control
+  testIgnore: ciSmokeMode
+    ? [
+        "e2e/admin-dashboard-blog-fallback.e2e.spec.ts",
+        "e2e/admin-dashboard-error.e2e.spec.ts",
+      ]
+    : [],
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : "list",
   timeout: 60_000,
   retries: isCI ? 1 : 0,

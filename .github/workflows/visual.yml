@@ -40,7 +40,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        # v4.2.2: https://github.com/actions/checkout/releases/tag/v4.2.2
         with:
           fetch-depth: 0
 
@@ -49,16 +48,11 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           run_install: false
-          # Do NOT set "version" if package.json has "packageManager": "pnpm@..."
 
       - name: Setup Node
         uses: actions/setup-node@v4
-        # v4.1.0: https://github.com/actions/setup-node/releases/tag/v4.1.0
         with:
           node-version-file: '.nvmrc'
-          # ❌ don't use cache: pnpm here, we already cache ~/.pnpm-store below
-          # cache: pnpm
-          # cache-dependency-path: pnpm-lock.yaml
 
       - name: Enable Corepack
         run: corepack enable
@@ -85,7 +79,6 @@ jobs:
 
       - name: Cache pnpm store
         uses: actions/cache@v4
-        # v4.2.2: https://github.com/actions/cache/releases/tag/v4.2.2
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
@@ -95,11 +88,25 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # ⬇️ build should EXIT (the old step stayed running, so the job got "context canceled")
       - name: Build app for e2e
         env:
           CI: "true"
           NEXT_TELEMETRY_DISABLED: "1"
-        run: pnpm -s e2e:build
+        run: pnpm -s build
+
+      # ⬇️ start the test server in background so visual steps can hit http://127.0.0.1:3000
+      - name: Start app for visual run
+        env:
+          CI: "true"
+          NEXT_TELEMETRY_DISABLED: "1"
+          SKIP_STRICT_ENV: "1"
+        run: |
+          pnpm -s exec tsx scripts/start-test.ts --port 3000 &
+          echo $! > /tmp/next.pid
+
+      - name: Wait for app
+        run: npx wait-on http://127.0.0.1:3000
 
       - name: Update snapshots
         if: ${{ github.event.inputs.mode == 'update' || contains(github.event.pull_request.labels.*.name, 'update-visuals') }}
@@ -120,3 +127,11 @@ jobs:
 
       - name: Verify tests pass without updating
         run: pnpm -s visual:test
+
+      # ⬇️ always stop the background Next.js server so the job doesn't hang
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/next.pid ]; then
+            kill "$(cat /tmp/next.pid)" || true
+          fi

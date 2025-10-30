@@ -25,10 +25,25 @@ function parseDomainFromBaseUrl(baseUrl: string) {
   }
 }
 
+// original helper (keep)
 function buildCookie(domain: string) {
   return {
     name: "e2e-admin",
     value: "true",
+    domain,
+    path: "/",
+    httpOnly: false,
+    secure: false,
+    sameSite: "Lax" as const,
+    expires: -1,
+  };
+}
+
+// add: match the Playwright test that sets admin-session=playwright
+function buildAdminSessionCookie(domain: string) {
+  return {
+    name: "admin-session",
+    value: "playwright",
     domain,
     path: "/",
     httpOnly: false,
@@ -46,9 +61,12 @@ export async function ensureAdminAuthState(baseUrl?: string) {
   const authDir = resolveAuthDir();
   await mkdir(authDir, { recursive: true });
 
-  const cookies = [buildCookie(domain)];
+  // keep existing cookie and add the one used by e2e tests
+  const cookies = [buildCookie(domain), buildAdminSessionCookie(domain)];
+
   if (domain !== "localhost") {
     cookies.push(buildCookie("localhost"));
+    cookies.push(buildAdminSessionCookie("localhost"));
   }
 
   const storageState = {

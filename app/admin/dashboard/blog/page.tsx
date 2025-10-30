@@ -99,13 +99,14 @@ function isE2ESlow(searchParams?: {
   return envOn || qOn;
 }
 
-export default function BlogPage({
+export default async function BlogPage({
   searchParams,
 }: {
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  const resolvedSearchParams = (await searchParams) ?? {};
   const { title, description } = getSectionCopy(SECTION);
-  const slow = isE2ESlow(searchParams);
+  const slow = isE2ESlow(resolvedSearchParams);
 
   return (
     <>

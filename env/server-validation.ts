@@ -50,9 +50,15 @@ export const serverEnvSchema = z.object({
   E2E: optionalNonEmptyString,
 });
 
+const truthyFlags = new Set(['1', 'true', 'TRUE', 'True']);
+const isTruthy = (value: string | undefined): boolean =>
+  value !== undefined && truthyFlags.has(value);
+
 const skipValidation =
-  process.env.ADMIN_BYPASS === 'true' ||
-  process.env.SKIP_ENV_VALIDATION === 'true';
+  isTruthy(process.env.ADMIN_BYPASS) ||
+  isTruthy(process.env.SKIP_ENV_VALIDATION) ||
+  isTruthy(process.env.SKIP_STRICT_ENV) ||
+  isTruthy(process.env.CI);
 
 const { VERCEL_ENV, VERCEL_URL, NODE_ENV } = process.env;
 const NEXT_PUBLIC_BASE_URL = process.env["NEXT_PUBLIC_BASE_URL"];

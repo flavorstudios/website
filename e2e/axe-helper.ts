@@ -60,13 +60,21 @@ export async function expectNoAxeViolations(
 
   // --- CI-only filtering for known blog filters ---
   const isCI = process.env.CI === "true" || process.env.CI === "1";
+
   const finalViolations = isCI
     ? violations
         .map((v) => {
           const filteredNodes = (v.nodes ?? []).filter((node) => {
-            const targets = node.target ?? [];
-            // keep this node if none of its targets are in our ignore list
-            return !targets.some((t) => CI_IGNORED_SELECTORS.has(t));
+            const rawTargets = node.target ?? [];
+
+            // axe can return non-string selectors (CrossTreeSelector, ShadowDomSelector, ...)
+            // we only want to compare plain strings against our ignore list
+            const stringTargets = rawTargets.filter(
+              (t): t is string => typeof t === "string"
+            );
+
+            // keep this node if none of its *string* targets are in our ignore list
+            return !stringTargets.some((t) => CI_IGNORED_SELECTORS.has(t));
           });
 
           return {

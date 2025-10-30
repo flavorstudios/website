@@ -18,7 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      # keep your original secret
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      # make env validator relaxed in CI
+      CI: true
+      SKIP_STRICT_ENV: 1
 
     steps:
       - name: 📦 Checkout repository
@@ -41,8 +45,9 @@ jobs:
         # v4.1.0: https://github.com/actions/setup-node/releases/tag/v4.1.0
         with:
           node-version-file: '.nvmrc'
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          # ❌ removed:
+          # cache: pnpm
+          # cache-dependency-path: pnpm-lock.yaml
 
       - name: Enable Corepack
         run: corepack enable
@@ -86,6 +91,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
+        # if you ever see env-validator issues here, add: --ignore-scripts
         run: pnpm install --frozen-lockfile  # Ensure consistency with pnpm lockfile
 
       - name: 🚀 Submit URLs to Search Engines

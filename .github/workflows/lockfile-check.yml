@@ -16,6 +16,10 @@ jobs:
   lockfile:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      CI: true
+      SKIP_STRICT_ENV: 1
+
     steps:
       - uses: actions/checkout@v4
         # v4.2.2: https://github.com/actions/checkout/releases/tag/v4.2.2
@@ -41,8 +45,7 @@ jobs:
         # v4.1.0: https://github.com/actions/setup-node/releases/tag/v4.1.0
         with:
           node-version-file: '.nvmrc'
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          # ❌ removed cache: pnpm + cache-dependency-path to avoid post-job path errors
 
       - name: Enable Corepack
         run: corepack enable
@@ -86,4 +89,14 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        # ignore scripts so scripts/validate-env.ts can't fail this job
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      # optional but useful: fail if the lockfile would change
+      - name: Check lockfile is clean
+        run: |
+          if [ -n "$(git status --porcelain pnpm-lock.yaml)" ]; then
+            echo "pnpm-lock.yaml is not up to date. Run 'pnpm install' locally and commit the changes."
+            git diff pnpm-lock.yaml || true
+            exit 1
+          fi

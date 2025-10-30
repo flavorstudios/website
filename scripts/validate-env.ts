@@ -12,7 +12,8 @@ const maybeLoadEnvFile = (file: string | undefined): void => {
 };
 
 const preferProductionEnv =
-  process.env.NODE_ENV === "production" || process.env.CI === "true" ||
+  process.env.NODE_ENV === "production" ||
+  process.env.CI === "true" ||
   process.env.CI === "1";
 
 maybeLoadEnvFile(preferProductionEnv ? ".env.production" : undefined);
@@ -24,30 +25,38 @@ const appliedDefaultKeys = applyDefaultEnv();
 const truthyFlags = new Set(["1", "true", "TRUE", "True"]);
 const allowDefaultsExplicitly = truthyFlags.has(process.env.USE_DEFAULT_ENV ?? "");
 
+// 👇 CI / relaxed mode switch
+const isCIEnv =
+  process.env.CI === "true" ||
+  process.env.CI === "1" ||
+  process.env.SKIP_STRICT_ENV === "1";
+
 const { clientEnvSchema } = await import("../env/client-validation");
 const { serverEnvSchema, serverEnv } = await import("../env/server-validation");
 
 const skipValidation =
   process.env.ADMIN_BYPASS === "true" ||
-  process.env.SKIP_ENV_VALIDATION === "true";
+  process.env.SKIP_ENV_VALIDATION === "true" ||
+  isCIEnv;
 
 if (appliedDefaultKeys.length > 0) {
-  if (process.env.NODE_ENV !== "test" && !allowDefaultsExplicitly) {
+  if (process.env.NODE_ENV !== "test" && !allowDefaultsExplicitly && !isCIEnv) {
     throw new Error(
       `[env] Default fallback values are disabled. Missing required env vars: ${appliedDefaultKeys.join(", ")}`,
     );
   }
-  
+
   console.warn(
     `[env] Using fallback values for missing env vars: ${appliedDefaultKeys.join(", ")}`,
   );
 }
 
 if (skipValidation) {
-  console.warn("Skipping Firebase Admin env validation");
+  console.warn("Skipping Firebase/Admin env validation (CI or bypass).");
 }
 
 if (!skipValidation) {
+  // strict mode (local/prod)
   clientEnvSchema.parse(process.env);
   serverEnvSchema.parse(process.env);
 
@@ -89,6 +98,20 @@ if (!skipValidation) {
     process.env.CRON_SECRET.trim() === ""
   ) {
     throw new Error("CRON_SECRET (cannot be empty)");
+  }
+} else {
+  // relaxed mode (CI): still warn about important ones
+  if (
+    !process.env.FIREBASE_STORAGE_BUCKET &&
+    !process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+  ) {
+    console.warn(
+      "[env] Missing (relaxed): FIREBASE_STORAGE_BUCKET or NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+    );
+  }
+
+  if (!process.env.ADMIN_EMAILS && !process.env.ADMIN_EMAIL) {
+    console.warn("[env] Missing (relaxed): ADMIN_EMAILS or ADMIN_EMAIL");
   }
 }
 

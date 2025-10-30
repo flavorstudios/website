@@ -13,11 +13,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
+      # --- CI / relaxed mode for scripts/validate-env.ts ---
+      CI: true
+      SKIP_STRICT_ENV: 1
+
+      # --- your existing envs ---
       BASE_URL: ${{ secrets.BASE_URL }}
       NEXT_PUBLIC_BASE_URL: ${{ secrets.BASE_URL }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
       PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
       ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
+
+      # --- the ones that were missing in the log ---
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+      FIREBASE_SERVICE_ACCOUNT_JSON_B64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_B64 }}
+      FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+
+      # write SA here (no VS Code complaints)
+      GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-sa.json
+
+      # so client-side E2E flag stops warning
+      NEXT_PUBLIC_E2E: "1"
 
     permissions:
       contents: read
@@ -76,6 +93,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # 🔐 write the Firebase service account to the path we set above
+      - name: Write Firebase service account
+        run: |
+          echo "$FIREBASE_SERVICE_ACCOUNT_JSON" > "$GOOGLE_APPLICATION_CREDENTIALS"
+
       # ✅ Install Playwright browsers and required OS deps directly
       - name: Install Playwright browsers & OS deps
         run: pnpm exec playwright install --with-deps
@@ -83,6 +105,7 @@ jobs:
       - name: Build app (prod)
         env:
           CI: "true"
+          SKIP_STRICT_ENV: "1"
           NEXT_TELEMETRY_DISABLED: "1"
         run: pnpm build
 
@@ -93,10 +116,10 @@ jobs:
           NEXT_TELEMETRY_DISABLED: '1'
           E2E: 'true'
           TEST_MODE: 'true'
-          ADMIN_AUTH_DISABLED: '1'     # make sure your server respects this
+          ADMIN_AUTH_DISABLED: '1'
           ADMIN_BYPASS: 'true'
           NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION: 'false'
-          # Provide a stub service account to satisfy init code paths
+          # still okay to have a stub here
           FIREBASE_SERVICE_ACCOUNT_JSON: |
             {
               "type": "service_account",

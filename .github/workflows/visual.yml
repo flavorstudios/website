@@ -1,6 +1,8 @@
 name: Visual snapshots
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       mode:
@@ -29,6 +31,9 @@ jobs:
     permissions:
       contents: write
     env:
+      # make env validation chill in CI
+      CI: true
+      SKIP_STRICT_ENV: 1
       BASE_URL: ${{ secrets.BASE_URL }}
       NEXT_PUBLIC_BASE_URL: ${{ secrets.BASE_URL }}
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
@@ -51,8 +56,9 @@ jobs:
         # v4.1.0: https://github.com/actions/setup-node/releases/tag/v4.1.0
         with:
           node-version-file: '.nvmrc'
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          # ❌ don't use cache: pnpm here, we already cache ~/.pnpm-store below
+          # cache: pnpm
+          # cache-dependency-path: pnpm-lock.yaml
 
       - name: Enable Corepack
         run: corepack enable

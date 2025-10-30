@@ -22,7 +22,6 @@ jobs:
       - name: Install pnpm on PATH
         uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: false
 
       - name: Setup Node.js
@@ -62,7 +61,7 @@ jobs:
           required=(BASE_URL CRON_SECRET PREVIEW_SECRET ADMIN_JWT_SECRET)
           for name in "${required[@]}"; do
             value="${!name-}"
-            stripped="${value//[ $'\t\r\n']/}"`
+            stripped="${value//[ $'\t\r\n']/}"
             if [ -z "${stripped}" ]; then
               printf '::error::Missing or empty required secret: %s\n' "$name"
               exit 1

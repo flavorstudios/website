@@ -2,6 +2,7 @@ import { z } from "zod"
 
 const accentRegex = /^#(?:[0-9a-fA-F]{3}){1,2}$/
 const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/
+const avatarPathRegex = /^users\/[A-Za-z0-9_-]+\/avatar\/[a-f0-9]{40}\.webp$/
 
 export const avatarFileSchema = z.object({
   name: z.string().min(1),
@@ -15,7 +16,11 @@ export const profileSettingsSchema = z.object({
   bio: z.string().max(500, "Bio must be 500 characters or less").optional().or(z.literal("")),
   timezone: z.string().optional().or(z.literal("")),
   avatarUrl: z.string().url().optional().or(z.literal("")),
-  avatarStoragePath: z.string().optional(),
+  avatarStoragePath: z
+    .string()
+    .regex(avatarPathRegex, "Avatar path is invalid")
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
 })
 
 export const notificationsSettingsSchema = z.object({
@@ -59,6 +64,7 @@ export type UserSettings = z.infer<typeof userSettingsSchema>
 
 export const changeEmailSchema = z.object({
   newEmail: z.string().email("Enter a valid email address"),
+  reauthToken: z.string().min(10, "Reauthentication is required"),
 })
 
 export const sendVerificationSchema = z.object({

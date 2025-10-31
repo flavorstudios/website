@@ -98,13 +98,13 @@ export default function ForgotPasswordForm({
       <Card className="w-full max-w-sm bg-white border border-slate-200 shadow-sm rounded-lg">
         <CardHeader className="p-6">
           <PageHeader
-            title="Forgot password?"
+            title="Reset admin password"
             description="Enter your admin email to receive reset instructions."
             className="mb-0 text-center"
             containerClassName="flex-col items-center gap-2"
             headingClassName="text-2xl font-semibold text-slate-900"
             descriptionClassName="text-sm text-slate-600"
-            level={2}
+            level={1}
           />
         </CardHeader>
         <CardContent className="p-6 pt-0">

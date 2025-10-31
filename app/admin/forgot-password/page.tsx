@@ -1,6 +1,5 @@
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_BRAND_TWITTER, SITE_NAME, SITE_URL } from "@/lib/constants";
-import { PageHeader } from "@/components/admin/page-header";
 import type { SearchParams as NextSearchParams } from "@/types/next";
 
 import ForgotPasswordForm from "./ForgotPasswordForm";
@@ -59,16 +58,5 @@ export default async function AdminForgotPasswordPage({
       ? "Your reset link expired or was already used. Please request a new one."
       : undefined;
 
-  return (
-    <>
-      <PageHeader
-        title="Reset admin password"
-        description={`Request a secure password reset link for ${SITE_NAME}.`}
-        className="sr-only"
-        headingClassName="sr-only"
-        descriptionClassName="sr-only"
-      />
-      <ForgotPasswordForm initialNotice={notice} />
-    </>
-  );
+  return <ForgotPasswordForm initialNotice={notice} />;
 }

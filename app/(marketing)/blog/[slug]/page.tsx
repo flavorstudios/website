@@ -5,6 +5,7 @@ import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER, SITE_DEFAULT_IMAGE } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import BlogRenderer from "@/components/blog/BlogRenderer";
+import SimpleBlogFallback from "@/components/blog/SimpleBlogFallback";
 import { sanitizeHtmlServer } from "@/lib/sanitize/server";
 import { getBlogPost } from "@/lib/blog";
 // ⬇️ Use shared public type instead of declaring locally!
@@ -98,6 +99,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // If post is not found or not published, trigger Next.js not-found page.
   if (!post) notFound();
 
+  const contentHtml = (post as { contentHtml?: unknown }).contentHtml;
+  const hasContentHtml =
+    typeof contentHtml === "string" && contentHtml.trim().length > 0;
+  const hasContentString =
+    typeof post.content === "string" && post.content.trim().length > 0;
+  const bodyContent = (post as { body?: unknown }).body;
+  const hasBodyString =
+    typeof bodyContent === "string" && bodyContent.trim().length > 0;
+
+  const hasRenderableContent = hasContentHtml || hasContentString || hasBodyString;
+
   // --- Codex fix: use featuredImage consistently ---
   const articleSchema = getSchema({
     type: post.schemaType || "Article",
@@ -119,7 +131,26 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       {/* --- Inject Article schema (for Google/SEO) --- */}
       <StructuredData schema={articleSchema} />
       {/* --- Blog Post Renderer (unified) --- */}
-      <BlogRenderer post={post} sanitizeHtml={sanitizeHtmlServer} />
+      {hasRenderableContent ? (
+        <BlogRenderer post={post} sanitizeHtml={sanitizeHtmlServer} />
+      ) : (
+        <SimpleBlogFallback
+          title={post.title ?? "Blog post"}
+          excerpt={
+            post.excerpt ||
+            (typeof (post as { description?: string }).description === "string"
+              ? (post as { description?: string }).description
+              : undefined)
+          }
+          coverImage={post.openGraphImage || post.featuredImage}
+          publishedAt={post.publishedAt || post.createdAt}
+          author={
+            typeof post.author === "string"
+              ? post.author
+              : (post.author as { name?: string } | undefined)?.name
+          }
+        />
+      )}
     </div>
   );
 }

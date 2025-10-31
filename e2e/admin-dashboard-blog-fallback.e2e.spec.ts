@@ -51,6 +51,16 @@ test('blog fallback cards render before data resolves on mobile', async ({ page 
     });
   });
 
+  await page.route('**/api/admin/notifications/stream', async (route) => {
+    await route.fulfill({
+      status: 200,
+      headers: {
+        'content-type': 'text/event-stream',
+      },
+      body: '',
+    });
+  });
+
   await page.goto('/admin/dashboard/blog');
   await awaitAppReady(page);
 

@@ -2,7 +2,6 @@
 
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
-import { PageHeader } from "@/components/admin/page-header";
 import AdminLoginForm from "./AdminLoginForm";
 
 export const runtime = 'nodejs'
@@ -48,16 +47,5 @@ export const viewport = {
 
 export default function AdminLoginPage() {
   // No client-side redirect or session check; handled by middleware!
-  return (
-    <>
-      <PageHeader
-        title="Admin Login"
-        description={`Sign in to the secure ${SITE_NAME} console.`}
-        className="sr-only"
-        headingClassName="sr-only"
-        descriptionClassName="sr-only"
-      />
-      <AdminLoginForm />
-    </>
-  );
+  return <AdminLoginForm />;
 }

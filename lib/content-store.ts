@@ -270,6 +270,20 @@ async function applyFreshMediaToPosts(posts: BlogPost[]): Promise<BlogPost[]> {
   });
 }
 
+async function ensureFreshMediaForPost(post: BlogPost): Promise<BlogPost> {
+  try {
+    const [fresh] = await applyFreshMediaToPosts([post]);
+    return fresh ?? post;
+  } catch (error) {
+    console.warn("content-store: failed to refresh media for blog post", {
+      id: post.id,
+      slug: post.slug,
+      error,
+    });
+    return post;
+  }
+}
+
 /**
  * Retrieve the Firebase Admin Firestore instance or return `null` if the
  * admin client has not been initialised. This lets callers gracefully handle
@@ -417,33 +431,23 @@ export const blogStore = {
   async getById(id: string): Promise<BlogPost | null> {
     const db = getDbOrNull();
     if (!db) {
-      const fallbackPost = FALLBACK_BLOG_POSTS.find((post) => post.id === id);
+      const fallbackPost = fallbackById(id);
       if (!fallbackPost) return null;
-      const [post] = await applyFreshMediaToPosts([
-        normalizeBlogPost(fallbackPost),
-      ]);
-      return post ?? null;
+      return ensureFreshMediaForPost(fallbackPost);
     }
     const doc = await db.collection("blogs").doc(id).get();
     if (!doc.exists) return null;
-    const [post] = await applyFreshMediaToPosts([
-      normalizeBlogPost(doc.data() as BlogPost),
-    ]);
-    return post ?? null;
+    const normalized = normalizeBlogPost(doc.data() as BlogPost);
+    return ensureFreshMediaForPost(normalized);
   },
 
   // Fetch a post by slug for edit/preview workflows
   async getBySlug(slug: string): Promise<BlogPost | null> {
     const db = getDbOrNull();
     if (!db) {
-      const fallbackPost = FALLBACK_BLOG_POSTS.find(
-        (post) => post.slug === slug,
-      );
+      const fallbackPost = fallbackBySlug(slug);
       if (!fallbackPost) return null;
-      const [post] = await applyFreshMediaToPosts([
-        normalizeBlogPost(fallbackPost),
-      ]);
-      return post ?? null;
+      return ensureFreshMediaForPost(fallbackPost);
     }
     const snap = await db
       .collection("blogs")
@@ -451,10 +455,8 @@ export const blogStore = {
       .limit(1)
       .get();
     if (snap.empty) return null;
-    const [post] = await applyFreshMediaToPosts([
-      normalizeBlogPost(snap.docs[0].data() as BlogPost),
-    ]);
-    return post ?? null;
+    const normalized = normalizeBlogPost(snap.docs[0].data() as BlogPost);
+    return ensureFreshMediaForPost(normalized);
   },
 
   async create(

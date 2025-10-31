@@ -15,7 +15,7 @@ interface AvatarUploaderProps {
   displayName: string
   disabled?: boolean
   onAvatarUploaded: (payload: { url: string; storagePath?: string }) => void
-  onUploadFile?: (file: Blob, filename: string) => Promise<{ url: string; storagePath?: string }>
+  onUploadFile: (file: Blob, filename: string) => Promise<{ url: string; storagePath?: string }>
 }
 
 type DragState = { x: number; y: number }
@@ -31,11 +31,12 @@ export function AvatarUploader({
   onUploadFile,
 }: AvatarUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
-  const [preview, setPreview] = useState<string | null>(value ?? null)
+  const [preview, setPreview] = useState<string | null>(value ? value : null)
   const [error, setError] = useState<string | null>(null)
   const [zoom, setZoom] = useState(1)
   const [offset, setOffset] = useState<DragState>({ x: 0, y: 0 })
   const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
   const dataUrlRef = useRef<string | null>(null)
   const dragRef = useRef<{ active: boolean; lastX: number; lastY: number }>({
     active: false,
@@ -44,7 +45,7 @@ export function AvatarUploader({
   })
 
   useEffect(() => {
-    setPreview(value ?? null)
+    setPreview(value ? value : null)
   }, [value])
 
   const handleFile = useCallback(async (file: File) => {
@@ -127,12 +128,13 @@ export function AvatarUploader({
     setOffset({ x: 0, y: 0 })
     setZoom(1)
     dataUrlRef.current = null
-    onAvatarUploaded({ url: "" })
+    onAvatarUploaded({ url: "", storagePath: undefined })
   }, [onAvatarUploaded])
 
   const handleUpload = useCallback(async () => {
     if (!dataUrlRef.current) return
     if (!imageSize) return
+    setIsUploading(true)
     const canvas = document.createElement("canvas")
     canvas.width = CANVAS_SIZE
     canvas.height = CANVAS_SIZE
@@ -165,18 +167,19 @@ export function AvatarUploader({
     const blob = await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Failed to export avatar"))), "image/webp", 0.9)
     })
-    const arrayBuffer = await blob.arrayBuffer()
-    const filename = `users/avatar-${await hashAvatar(arrayBuffer)}.webp`
-    let uploadResult: { url: string; storagePath?: string }
-    if (onUploadFile) {
-      uploadResult = await onUploadFile(blob, filename)
-    } else {
-      const objectUrl = URL.createObjectURL(blob)
-      uploadResult = { url: objectUrl }
+    try {
+      const arrayBuffer = await blob.arrayBuffer()
+      const filename = `users/avatar-${await hashAvatar(arrayBuffer)}.webp`
+      const uploadResult = await onUploadFile(blob, filename)
+      setPreview(uploadResult.url)
+      await Promise.resolve(onAvatarUploaded(uploadResult))
+      dataUrlRef.current = null
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload avatar")
+    } finally {
+      setIsUploading(false)
     }
-    setPreview(uploadResult.url)
-    await Promise.resolve(onAvatarUploaded(uploadResult))
-    setError(null)
   }, [imageSize, offset.x, offset.y, onAvatarUploaded, onUploadFile, zoom])
 
   const dragStyle = useMemo(() => {
@@ -263,7 +266,7 @@ export function AvatarUploader({
               onChange={handleZoom}
               className="w-40"
             />
-            <Button type="button" onClick={handleUpload} disabled={disabled}>
+            <Button type="button" onClick={handleUpload} disabled={disabled || isUploading}>
               Save avatar
             </Button>
           </>

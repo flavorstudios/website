@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/admin/page-header";
 import type { RevalidateEnvironment, RevalidateHistoryItem, RevalidateScope } from "@/types/revalidate";
 
 const HEADER_ENV_ID = "system-tools-env";
@@ -138,12 +139,15 @@ export default function SystemToolsPage() {
 
   return (
     <div className="pb-12">
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:backdrop-blur">
-        <div className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-5 lg:flex-row lg:items-center lg:justify-between lg:px-6">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">System Tools</h1>
-            <p className="text-sm text-muted-foreground">Access deployment and maintenance utilities.</p>
-          </div>
+      <PageHeader
+        level={1}
+        title="System Tools"
+        description="Access deployment and maintenance utilities."
+        className="sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:backdrop-blur"
+        containerClassName="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-5 lg:flex-row lg:items-center lg:justify-between lg:px-6"
+        headingClassName="text-2xl font-semibold tracking-tight text-foreground"
+        descriptionClassName="text-sm text-muted-foreground"
+        actions={
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
             <div className="flex flex-col gap-1">
               <Label htmlFor={HEADER_ENV_ID} className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -168,8 +172,8 @@ export default function SystemToolsPage() {
               <span>{headerLastRun}</span>
             </div>
           </div>
-        </div>
-      </header>
+        }
+      />
 
       <main className="mx-auto max-w-5xl px-4 pb-0 pt-6 lg:px-6">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">

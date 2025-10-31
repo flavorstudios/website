@@ -10,6 +10,8 @@ import {
   userSettingsSchema,
   type UserSettings,
 } from "@/lib/schemas/settings"
+import { getStorage } from "firebase-admin/storage"
+import type { File } from "@google-cloud/storage"
 
 export * from "./common"
 
@@ -74,4 +76,65 @@ export async function writeUserSettings(
     tx.set(docRef, merged, { merge: true })
     return merged
   })
+  }
+
+let cachedBucket: ReturnType<typeof getStorage>["bucket"] | null = null
+
+export function getAdminStorageBucket() {
+  if (!cachedBucket) {
+    try {
+      cachedBucket = getStorage().bucket()
+    } catch (error) {
+      throw new Error("Cloud Storage bucket unavailable")
+    }
+  }
+  if (!cachedBucket) {
+    throw new Error("Cloud Storage bucket unavailable")
+  }
+  return cachedBucket
+}
+
+async function ensurePublicUrl(file: File): Promise<string> {
+  try {
+    await file.makePublic()
+    return file.publicUrl()
+  } catch {
+    const [signedUrl] = await file.getSignedUrl({
+      action: "read",
+      expires: Date.now() + 1000 * 60 * 60 * 24 * 30,
+    })
+    return signedUrl
+  }
+}
+
+export async function uploadAvatarObject(
+  uid: string,
+  hash: string,
+  buffer: Buffer,
+): Promise<{ url: string; path: string }> {
+  const bucket = getAdminStorageBucket()
+  const path = `users/${uid}/avatar/${hash}.webp`
+  const file = bucket.file(path)
+  await file.save(buffer, {
+    contentType: "image/webp",
+    resumable: false,
+    metadata: {
+      cacheControl: "public, max-age=31536000, immutable",
+    },
+  })
+  const url = await ensurePublicUrl(file)
+  return { url, path }
+}
+
+export async function deleteStorageObject(path: string): Promise<void> {
+  const bucket = getAdminStorageBucket()
+  const file = bucket.file(path)
+  try {
+    await file.delete({ ignoreNotFound: true })
+  } catch (error: unknown) {
+    if ((error as { code?: number }).code === 404) {
+      return
+    }
+    throw error
+  }
 }

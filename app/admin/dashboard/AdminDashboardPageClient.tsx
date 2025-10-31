@@ -234,12 +234,16 @@ function resolveSectionFromPath(pathname: string | null | undefined): SectionId 
 
 // ----------------------------------------------------------------------------
 
+type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+
 interface AdminDashboardPageClientProps {
   initialSection?: string;
+  headingLevel?: HeadingLevel;
 }
 
 export default function AdminDashboardPageClient({
   initialSection = "overview",
+  headingLevel = 1,
 }: AdminDashboardPageClientProps) {
   const search = useSearchParams();
   const pathname = usePathname();
@@ -655,7 +659,7 @@ export default function AdminDashboardPageClient({
                     title={sectionHeading}
                     description={sectionDescription}
                     data-testid="dashboard-heading"
-                    level={2}
+                    level={headingLevel}
                     headingProps={{ "data-testid": "dashboard-title" }}
                   />
 

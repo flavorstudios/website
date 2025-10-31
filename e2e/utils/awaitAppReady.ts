@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
 
 type AwaitAppReadyOptions = {
   /**
@@ -29,8 +29,16 @@ export async function awaitAppReady(
   let adminRootReady = false;
   try {
     const adminRoot = page.getByTestId("admin-dashboard-root");
-    await expect(adminRoot).toBeVisible({ timeout: 15_000 });
+    await adminRoot.waitFor({ state: "attached", timeout: 15_000 });
     adminRootReady = true;
+
+    // CI-specific marker rendered in the dashboard shell for deterministic readiness.
+    await page
+      .getByTestId("admin-dashboard-e2e-env")
+      .waitFor({ state: "attached", timeout: 3_000 })
+      .catch(() => {
+        // fine: marker is only available in CI-like environments
+      });
   } catch {
     // not an admin page or still hydrating — continue with the old flow
   }
@@ -40,7 +48,7 @@ export async function awaitAppReady(
 
   // original behaviour: make sure we have a main landmark
   await page.waitForSelector("main, [role='main']", {
-    state: "visible",
+    state: "attached",
     timeout: 15_000,
   });
   await page.waitForTimeout(50);

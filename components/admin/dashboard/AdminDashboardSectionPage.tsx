@@ -1,1 +1,1 @@
-export { AdminDashboardSectionPage, getSectionCopy } from '@/app/admin/dashboard/AdminDashboardSectionPage';
+export { AdminDashboardSectionPage } from '@/app/admin/dashboard/AdminDashboardSectionPage';

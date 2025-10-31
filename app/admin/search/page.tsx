@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { SITE_URL, SITE_NAME, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { getMetadata } from "@/lib/seo-utils";
-import { PageHeader } from "@/components/admin/page-header";
 import AdminSearchPageClient from "./AdminSearchPageClient";
 import type { SearchParams } from "@/types/next";
 
@@ -59,16 +58,5 @@ export default async function AdminSearchPage({ searchParams }: PageProps) {
     redirect("/admin/login");
   }
 
-  return (
-    <>
-      <PageHeader
-        title="Admin Search"
-        description="Search posts, videos, users, categories, and tags across the admin."
-        className="sr-only"
-        headingClassName="sr-only"
-        descriptionClassName="sr-only"
-      />
-      <AdminSearchPageClient initialQuery={query} />
-    </>
-  );
+  return <AdminSearchPageClient initialQuery={query} />;
 }

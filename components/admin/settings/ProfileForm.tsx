@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useMemo, useState, useTransition } from "react"
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
+import type { FormEvent } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
@@ -22,7 +23,11 @@ import {
   rollbackSettings,
   sendEmailVerification,
   updateProfile,
+  uploadAvatar,
 } from "@/app/admin/dashboard/settings/actions"
+import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
+import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth"
+import { FirebaseError } from "firebase/app"
 
 interface ProfileFormProps {
   initialValues: ProfileSettingsInput & {
@@ -48,6 +53,10 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
     defaultValues: initialValues,
     mode: "onChange",
   })
+
+  useEffect(() => {
+    form.register("avatarStoragePath")
+  }, [form])
 
   useEffect(() => {
     setBaseline(initialValues)
@@ -88,6 +97,15 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
     })
   })
 
+  const handleAvatarUpload = useCallback(
+    async (blob: Blob, filename: string) => {
+      const formData = new FormData()
+      formData.append("file", blob, filename)
+      return await uploadAvatar(formData)
+    },
+    [],
+  )
+
   const sendVerification = () => {
     if (verificationCooldown && verificationCooldown > Date.now()) return
     startTransition(async () => {
@@ -104,11 +122,11 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
     })
   }
 
-  const submitChangeEmail = (newEmail: string) => {
+  const submitChangeEmail = ({ email: newEmail, token }: { email: string; token: string }) => {
     setChangeEmailState({ open: false, submitting: true })
     startTransition(async () => {
       try {
-        const { settings, rollbackToken } = await changeEmail({ newEmail })
+        const { settings, rollbackToken } = await changeEmail({ newEmail, reauthToken: token })
         setBaseline(settings.profile)
         form.reset(settings.profile)
         toast.success("Email updated", {
@@ -143,7 +161,12 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
           <AvatarUploader
             value={form.watch("avatarUrl")}
             displayName={form.watch("displayName")}
-            onAvatarUploaded={({ url }) => form.setValue("avatarUrl", url, { shouldDirty: true })}
+            disabled={isPending}
+            onAvatarUploaded={({ url, storagePath }) => {
+              form.setValue("avatarUrl", url ?? "", { shouldDirty: true })
+              form.setValue("avatarStoragePath", storagePath, { shouldDirty: true })
+            }}
+            onUploadFile={handleAvatarUpload}
           />
           <div className="grid gap-4">
             <div className="space-y-2">
@@ -274,52 +297,123 @@ function ChangeEmailForm({
   initialEmail,
   disabled,
 }: {
-  onSubmit: (email: string) => void
+  onSubmit: (payload: { email: string; token: string }) => void
   initialEmail: string
   disabled?: boolean
 }) {
   const [email, setEmail] = useState(initialEmail)
-  const [error, setError] = useState<string | null>(null)
+  const [password, setPassword] = useState("")
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [reauthError, setReauthError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  const validate = () => {
+  useEffect(() => {
+    setEmail(initialEmail)
+  }, [initialEmail])
+
+  const validateEmail = useCallback(() => {
     const parsed = profileSettingsSchema.pick({ email: true }).safeParse({ email })
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "Enter a valid email")
+      setEmailError(parsed.error.issues[0]?.message ?? "Enter a valid email")
       return false
     }
-    setError(null)
+    setEmailError(null)
     return true
+    }, [email])
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!validateEmail()) return
+    if (!password) {
+      setPasswordError("Enter your current password")
+      return
+    }
+    setPasswordError(null)
+    setReauthError(null)
+    if (firebaseInitError) {
+      setReauthError(firebaseInitError.message ?? "Firebase is not configured")
+      return
+    }
+    setSubmitting(true)
+    try {
+      const auth = getFirebaseAuth()
+      const user = auth.currentUser
+      if (!user) {
+        throw new Error("You must be signed in to change your email")
+      }
+      const credential = EmailAuthProvider.credential(initialEmail, password)
+      await reauthenticateWithCredential(user, credential)
+      const token = await user.getIdToken(true)
+      onSubmit({ email, token })
+    } catch (err) {
+      if (err instanceof FirebaseError) {
+        if (err.code === "auth/wrong-password") {
+          setPasswordError("Incorrect password")
+        } else {
+          setReauthError(err.message)
+        }
+      } else if (err instanceof Error) {
+        setReauthError(err.message)
+      } else {
+        setReauthError("Unable to verify credentials")
+      }
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
-    <form
-      className="space-y-4"
-      onSubmit={(event) => {
-        event.preventDefault()
-        if (!validate()) return
-        onSubmit(email)
-      }}
-    >
+    <form className="space-y-4" onSubmit={handleSubmit}>
       <div className="space-y-2">
         <Label htmlFor="newEmail">New email</Label>
         <Input
           id="newEmail"
           type="email"
+          autoComplete="email"
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          onBlur={validate}
-          aria-invalid={!!error}
-          disabled={disabled}
+          onChange={(event) => {
+            setEmail(event.target.value)
+            if (emailError) setEmailError(null)
+          }}
+          onBlur={validateEmail}
+          aria-invalid={!!emailError}
+          disabled={disabled || submitting}
         />
-        {error && (
+        {emailError && (
           <p className="text-sm text-destructive" role="alert">
-            {error}
+            {emailError}
           </p>
         )}
       </div>
+      <div className="space-y-2">
+        <Label htmlFor="currentPassword">Current password</Label>
+        <Input
+          id="currentPassword"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value)
+            if (passwordError) setPasswordError(null)
+          }}
+          aria-invalid={!!passwordError}
+          disabled={disabled || submitting}
+        />
+        {passwordError && (
+          <p className="text-sm text-destructive" role="alert">
+            {passwordError}
+          </p>
+        )}
+      </div>
+      {reauthError && (
+        <p className="text-sm text-destructive" role="alert">
+          {reauthError}
+        </p>
+      )}
       <DialogFooter>
-        <Button type="submit" disabled={disabled}>
-          Confirm
+        <Button type="submit" disabled={disabled || submitting}>
+          Continue
         </Button>
       </DialogFooter>
     </form>

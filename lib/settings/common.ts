@@ -43,6 +43,11 @@ export type ContrastResult = {
   meetsAA: boolean
 }
 
+function pruneUndefined<T extends Record<string, unknown>>(input: T): T {
+  const entries = Object.entries(input).filter(([, value]) => value !== undefined)
+  return Object.fromEntries(entries) as T
+}
+
 function hexToRgb(hex: string): [number, number, number] {
   let normalized = hex.replace("#", "")
   if (normalized.length === 3) {
@@ -96,6 +101,7 @@ export function sanitizeProfileInput(input: ProfileSettingsInput): ProfileSettin
     bio: parsed.bio?.trim() || "",
     timezone: parsed.timezone?.trim() || "",
     avatarUrl: parsed.avatarUrl?.trim() || "",
+    avatarStoragePath: parsed.avatarStoragePath,
   }
 }
 
@@ -118,9 +124,9 @@ export function mergeSettings(
   const base = existing ?? DEFAULT_USER_SETTINGS
   const merged: UserSettings = {
     ...base,
-    profile: { ...base.profile, ...updates.profile },
-    notifications: { ...base.notifications, ...updates.notifications },
-    appearance: { ...base.appearance, ...updates.appearance },
+    profile: pruneUndefined({ ...base.profile, ...updates.profile }),
+    notifications: pruneUndefined({ ...base.notifications, ...updates.notifications }),
+    appearance: pruneUndefined({ ...base.appearance, ...updates.appearance }),
     updatedAt: Date.now(),
   }
   return merged

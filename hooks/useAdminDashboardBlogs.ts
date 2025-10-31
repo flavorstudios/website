@@ -12,7 +12,7 @@ export function useAdminDashboardBlogs(enabled = true) {
   return useQuery<AdminBlogResponse>({
     queryKey: ["dashboard-blog", "admin"],
     queryFn: async () => {
-      const url = "/api/admin/blog?all=1";
+      const url = "/api/admin/blogs?all=1";
       const res = await fetch(url, {
         cache: "no-store",
         credentials: "include",

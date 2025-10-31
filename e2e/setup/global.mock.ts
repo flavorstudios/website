@@ -82,8 +82,13 @@ export async function applyGlobalMocks(page: Page) {
     }))
   );
 
-  await page.route("**/api/admin/blogs?**", (route) =>
-    route.fulfill(
+  await page.route("**/api/admin/blogs*", async (route) => {
+    const url = new URL(route.request().url());
+    if (!url.pathname.endsWith("/api/admin/blogs")) {
+      return route.fallback();
+    }
+
+    await route.fulfill(
       jsonResponse({
         posts: [
           {
@@ -98,8 +103,8 @@ export async function applyGlobalMocks(page: Page) {
         ],
         total: 1,
       })
-    )
-  );
+    );
+  });
 
   await page.route("**/api/admin/categories**", (route) =>
     route.fulfill(jsonResponse({
@@ -170,6 +175,14 @@ export async function applyGlobalMocks(page: Page) {
   );
 
   await page.route("**/api/admin/blogs/stream", (route) =>
+    route.fulfill({
+      status: 200,
+      headers: { "content-type": "text/event-stream" },
+      body: "",
+    })
+  );
+  
+  await page.route("**/api/admin/notifications/stream", (route) =>
     route.fulfill({
       status: 200,
       headers: { "content-type": "text/event-stream" },

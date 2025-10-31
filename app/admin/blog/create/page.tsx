@@ -2,7 +2,6 @@
 
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
-import { PageHeader } from "@/components/admin/page-header";
 import BlogEditorPageClient from "./BlogEditorPageClient";
 
 // === SEO METADATA (ADMIN - NOINDEX) ===
@@ -36,16 +35,5 @@ export const metadata = getMetadata({
 
 // This server component simply renders the client component
 export default function BlogEditorPage() {
-  return (
-    <>
-      <PageHeader
-        title="Create Blog Post"
-        description="Draft a new story before publishing to the main site."
-        className="sr-only"
-        headingClassName="sr-only"
-        descriptionClassName="sr-only"
-      />
-      <BlogEditorPageClient />
-    </>
-  );
+  return <BlogEditorPageClient />;
 }

@@ -1,9 +1,5 @@
 // app/admin/dashboard/page.tsx
-import { PageHeader } from "@/components/admin/page-header";
-import {
-  AdminDashboardSectionPage,
-  getSectionCopy,
-} from "./AdminDashboardSectionPage";
+import { AdminDashboardSectionPage } from "./AdminDashboardSectionPage";
 import type { SectionId } from "./sections";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
@@ -109,7 +105,7 @@ async function prefetchDashboardBlog(
   origin: string,
 ) {
   // important: admin should see drafts too
-  const url = `${origin}/api/admin/blog?all=1&limit=20`;
+  const url = `${origin}/api/admin/blogs?all=1&limit=20`;
   await qc.prefetchQuery({
     queryKey: ["dashboard-blog", "admin"],
     queryFn: async () => {
@@ -189,8 +185,6 @@ export default async function AdminDashboardPage() {
     }
   }
 
-  const { title, description } = getSectionCopy(SECTION);
-
   const dehydratedState = dehydrate(queryClient);
 
   return (
@@ -201,15 +195,6 @@ export default async function AdminDashboardPage() {
             admin-dashboard-e2e
           </div>
         ) : null}
-        {/* Prevent duplicate/embedded banner landmark in axe by neutralizing semantics */}
-        <PageHeader
-          level={1}
-          title={title}
-          description={description}
-          className="sr-only"
-          headingClassName="sr-only"
-          descriptionClassName={description ? "sr-only" : undefined}
-        />
         <AdminDashboardSectionPage section={SECTION} />
       </div>
     </HydrationBoundary>

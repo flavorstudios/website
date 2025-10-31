@@ -679,7 +679,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               containerClassName="flex-col items-start"
               headingClassName="text-3xl font-bold text-gray-900"
               descriptionClassName="text-gray-600"
-              level={2}
+              level={1}
             />
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">

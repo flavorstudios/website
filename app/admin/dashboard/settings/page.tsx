@@ -45,21 +45,33 @@ export default async function SettingsPage({
 }: {
   searchParams?: SearchParams<{ tab?: string | string[] }>;
 }) {
-  const settings = await loadSettings()
+  let settings: Awaited<ReturnType<typeof loadSettings>> | null = null
+  let loadError: string | null = null
+  try {
+    settings = await loadSettings()
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Failed to load admin settings', error)
+    }
+    loadError =
+      'Settings are currently unavailable. Configure FIREBASE_SERVICE_ACCOUNT_KEY or disable ADMIN_BYPASS to enable this page.'
+  }
   const resolvedSearchParams = searchParams ? await searchParams : {}
   const tab = Array.isArray(resolvedSearchParams.tab)
     ? resolvedSearchParams.tab[0]
     : resolvedSearchParams.tab
   let emailVerified = false
   let providerLocked = false
-  try {
-    const uid = await getCurrentAdminUid()
-    const auth = getAdminAuth()
-    const record = await auth.getUser(uid)
-    emailVerified = record.emailVerified ?? false
-    providerLocked = record.providerData.some((provider) => provider.providerId !== "password")
-  } catch {
-    // fall back to defaults if admin SDK unavailable
+  if (settings) {
+    try {
+      const uid = await getCurrentAdminUid()
+      const auth = getAdminAuth()
+      const record = await auth.getUser(uid)
+      emailVerified = record.emailVerified ?? false
+      providerLocked = record.providerData.some((provider) => provider.providerId !== "password")
+    } catch {
+      // fall back to defaults if admin SDK unavailable
+    }
   }
 
   return (
@@ -69,12 +81,18 @@ export default async function SettingsPage({
         title="Settings"
         description="Manage your profile, notifications, and appearance preferences"
       />
-      <SettingsTabs
-        initialTab={tab}
-        profile={{ ...settings.profile, emailVerified, providerLocked }}
-        notifications={settings.notifications}
-        appearance={settings.appearance}
-      />
+      {settings ? (
+        <SettingsTabs
+          initialTab={tab}
+          profile={{ ...settings.profile, emailVerified, providerLocked }}
+          notifications={settings.notifications}
+          appearance={settings.appearance}
+        />
+      ) : (
+        <div className="rounded-lg border border-border/50 bg-muted/20 p-6 text-sm text-muted-foreground">
+          {loadError}
+        </div>
+      )}
     </div>
   )
 }

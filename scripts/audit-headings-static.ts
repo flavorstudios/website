@@ -19,6 +19,13 @@ const ALLOWED_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".md", ".mdx"]
 const PAGE_HEADER_PATH = path.normalize("components/admin/page-header.tsx");
 const ALLOWED_LEVEL_ONE_COMPONENTS = new Set([
   "app/admin/dashboard/AdminDashboardSectionPage.tsx",
+  "app/admin/dashboard/AdminDashboardPageClient.tsx",
+  "app/admin/dashboard/components/blog-editor.tsx",
+  "app/admin/comments/AdminCommentsPageClient.tsx",
+  "app/admin/login/AdminLoginForm.tsx",
+  "app/admin/forgot-password/ForgotPasswordForm.tsx",
+  "app/admin/verify-email/VerifyEmailClient.tsx",
+  "app/admin/search/AdminSearchPageClient.tsx",
 ]);
 
 const COMPONENT_H1_ALLOWLIST = new Set([

@@ -19,7 +19,7 @@ export default function AdminCommentsPageClient() {
             headingId={headingId}
             title="Comments"
             description="Moderate community feedback and keep discussions on track."
-            level={2}
+            level={1}
           />
           <CommentManager />
         </section>

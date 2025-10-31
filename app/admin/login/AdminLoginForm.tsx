@@ -250,13 +250,13 @@ export default function AdminLoginForm() {
             />
           </div>
           <PageHeader
-            title="Welcome back"
-            description="Create, schedule, and manage your stories."
+            title="Admin Login"
+            description="Welcome back! Create, schedule, and manage your stories."
             containerClassName="flex-col items-start gap-4"
             headingClassName="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl"
             descriptionClassName="text-base text-slate-600 md:text-lg"
             className="mb-0"
-            level={2}
+            level={1}
           />
         </div>
         <div className="flex flex-col gap-8 bg-white px-6 py-8 md:px-10 md:py-12 text-left">

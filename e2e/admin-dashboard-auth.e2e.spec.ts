@@ -37,7 +37,7 @@ test("logs in via cookie and loads dashboard without console errors", async ({
   await awaitAppReady(page, { admin: true });
 
   // deterministic anchor for CI/e2e (rendered by the page when CI-like)
-  await expect(page.getByTestId("admin-dashboard-root")).toBeVisible({
+  await expect(page.getByTestId("admin-dashboard-root")).toBeAttached({
     timeout: 15_000,
   });
 

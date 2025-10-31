@@ -92,16 +92,5 @@ export default async function BlogEditPage({ searchParams }: PageProps) {
     readTime,
   };
 
-  return (
-    <>
-      <PageHeader
-        title={`Edit Blog Post${safePost.title ? `: ${safePost.title}` : ""}`}
-        description="Update your story details before publishing."
-        className="sr-only"
-        headingClassName="sr-only"
-        descriptionClassName="sr-only"
-      />
-      <BlogEditorPageClient post={safePost} />
-    </>
-  );
+  return <BlogEditorPageClient post={safePost} />;
 }

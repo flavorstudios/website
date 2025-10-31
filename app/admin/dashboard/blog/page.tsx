@@ -1,8 +1,4 @@
-import { PageHeader } from "@/components/admin/page-header";
-import {
-  AdminDashboardSectionPage,
-  getSectionCopy,
-} from "../AdminDashboardSectionPage";
+import { AdminDashboardSectionPage } from "../AdminDashboardSectionPage";
 import type { SectionId } from "../sections";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
@@ -105,22 +101,9 @@ export default async function BlogPage({
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const resolvedSearchParams = (await searchParams) ?? {};
-  const { title, description } = getSectionCopy(SECTION);
   const slow = isE2ESlow(resolvedSearchParams);
-
   return (
     <>
-      {/* Prevent duplicate/embedded banner landmark in axe by neutralizing semantics */}
-      <PageHeader
-        role="none"
-        level={1}
-        title={title}
-        description={description}
-        className="sr-only"
-        headingClassName="sr-only"
-        descriptionClassName={description ? "sr-only" : undefined}
-      />
-
       <Suspense fallback={<BlogFallback />}>
         <E2EGate enabled={slow}>
           <AdminDashboardSectionPage section={SECTION} />

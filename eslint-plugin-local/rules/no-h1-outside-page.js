@@ -5,9 +5,20 @@ function isPageFile(filename) {
   return /app\/(?:\(admin\)|admin)\/.+\/page\.(?:t|j)sx?$/.test(normalized);
 }
 
+const ALLOWED_COMPONENT_FILES = new Set([
+  "components/admin/page-header.tsx",
+  "app/admin/dashboard/AdminDashboardPageClient.tsx",
+  "app/admin/dashboard/components/blog-editor.tsx",
+  "app/admin/comments/AdminCommentsPageClient.tsx",
+  "app/admin/login/AdminLoginForm.tsx",
+  "app/admin/forgot-password/ForgotPasswordForm.tsx",
+  "app/admin/verify-email/VerifyEmailClient.tsx",
+  "app/admin/search/AdminSearchPageClient.tsx",
+]);
+
 function isAllowedComponent(filename) {
   const normalized = filename.split(path.sep).join("/");
-  return normalized.endsWith("components/admin/page-header.tsx");
+  return ALLOWED_COMPONENT_FILES.has(normalized);
 }
 
 function isLevelOne(attribute) {

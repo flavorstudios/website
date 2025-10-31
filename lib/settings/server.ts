@@ -11,7 +11,7 @@ import {
   type UserSettings,
 } from "@/lib/schemas/settings"
 import { getStorage } from "firebase-admin/storage"
-import type { File } from "@google-cloud/storage"
+import type { Bucket, File } from "@google-cloud/storage"
 import { logError } from "@/lib/log"
 
 export * from "./common"
@@ -79,7 +79,7 @@ export async function writeUserSettings(
   })
   }
 
-let cachedBucket: ReturnType<typeof getStorage>["bucket"] | null = null
+let cachedBucket: Bucket | null = null
 
 export function getAdminStorageBucket() {
   if (!cachedBucket) {

@@ -22,6 +22,7 @@ import {
   getContrastRatio,
   getCurrentAdminUid,
   readUserSettings,
+  hashAvatar,
   uploadAvatarObject,
   deleteStorageObject,
   writeUserSettings,

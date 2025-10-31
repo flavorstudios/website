@@ -2,8 +2,8 @@ import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import type { BlogPost } from "@/lib/content-store"
 import { isCiLike } from "@/lib/env/is-ci-like"
+import { hasE2EBypass } from "@/lib/e2e-utils"
 import {
-  hasE2EBypass,
   addE2EBlogPost,
   getE2EBlogPostById,
   getE2EBlogPosts,

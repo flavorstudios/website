@@ -23,6 +23,7 @@
     "check:single-h1": "tsx scripts/check-single-h1.ts",
     "visual:update": "pnpm exec playwright test e2e/admin-login-legal-visual.e2e.spec.ts --update-snapshots",
     "visual:test": "pnpm exec playwright test e2e/admin-login-legal-visual.e2e.spec.ts",
+    "visual:test:smoke": "pnpm exec playwright test e2e/admin-login-legal-visual.e2e.spec.ts --project=chromium-light --grep=mobile",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "audit:media": "tsx scripts/audit-media-storage.ts",

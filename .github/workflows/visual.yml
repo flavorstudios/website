@@ -2,18 +2,17 @@ name: Visual snapshots
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       mode:
         description: "choose update or verify"
         required: true
-        default: "update"
+        default: "verify"
         type: choice
         options: [update, verify]
-  pull_request:
-    types: [labeled, opened, synchronize]
-    branches: [ main ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,28 +21,26 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  CI: true
+  SKIP_STRICT_ENV: 1
+  BASE_URL: ${{ secrets.BASE_URL }}
+  NEXT_PUBLIC_BASE_URL: ${{ secrets.BASE_URL }}
+  CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
 jobs:
-  visual:
-    if: ${{ github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'update-visuals') || github.event.inputs.mode == 'update' || github.event.inputs.mode == 'verify' }}
+  visual-smoke:
+    name: Visual smoke (PR)
+    if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'update-visuals')
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 35
     container: mcr.microsoft.com/playwright:v1.47.0-jammy
-    permissions:
-      contents: write
-    env:
-      # make env validation chill in CI
-      CI: true
-      SKIP_STRICT_ENV: 1
-      BASE_URL: ${{ secrets.BASE_URL }}
-      NEXT_PUBLIC_BASE_URL: ${{ secrets.BASE_URL }}
-      CRON_SECRET: ${{ secrets.CRON_SECRET }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # ✅ make pnpm exist in the container before setup-node tries to cache it
       - name: Install pnpm on PATH (fallback)
         uses: pnpm/action-setup@v4
         with:
@@ -88,19 +85,184 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # ⬇️ build should EXIT (the old step stayed running, so the job got "context canceled")
-      - name: Build app for e2e
+      - name: Build app for smoke visuals
         env:
-          CI: "true"
-          NEXT_TELEMETRY_DISABLED: "1"
+          NEXT_TELEMETRY_DISABLED: '1'
         run: pnpm -s e2e:build
 
-      # ⬇️ start the test server in background so visual steps can hit http://127.0.0.1:3000
       - name: Start app for visual run
         env:
-          CI: "true"
-          NEXT_TELEMETRY_DISABLED: "1"
-          SKIP_STRICT_ENV: "1"
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: |
+          pnpm -s exec tsx scripts/start-test.ts --port 3000 &
+          echo $! > /tmp/next.pid
+
+      - name: Wait for app
+        run: npx wait-on http://127.0.0.1:3000
+
+      - name: Run smoke visual tests
+        timeout-minutes: 25
+        run: pnpm -s visual:test:smoke
+
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/next.pid ]; then
+            kill "$(cat /tmp/next.pid)" || true
+          fi
+
+  visual-full:
+    name: Visual snapshots (full)
+    if: github.event_name == 'push' || github.event.inputs.mode == 'verify'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container: mcr.microsoft.com/playwright:v1.47.0-jammy
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm on PATH (fallback)
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Activate pnpm
+        run: |
+          PNPM_VERSION=$(node -p "require('./package.json').packageManager?.split('@')[1] ?? ''")
+          if [ -n "$PNPM_VERSION" ]; then
+            corepack prepare "pnpm@${PNPM_VERSION}" --activate
+          else
+            corepack prepare pnpm@9 --activate
+          fi
+
+      - name: Show tool versions
+        run: |
+          node -v
+          pnpm --version
+
+      - name: Configure pnpm store dir for stable caching
+        run: pnpm config set store-dir ~/.pnpm-store
+
+      - name: Assert pnpm version
+        run: node .github/scripts/assert-pnpm-version.mjs
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build app for visuals
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: pnpm -s e2e:build
+
+      - name: Start app for visual run
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: |
+          pnpm -s exec tsx scripts/start-test.ts --port 3000 &
+          echo $! > /tmp/next.pid
+
+      - name: Wait for app
+        run: npx wait-on http://127.0.0.1:3000
+
+      - name: Run Playwright visual shard ${{ matrix.shard }} of 2
+        timeout-minutes: 50
+        run: pnpm -s visual:test -- --shard=${{ matrix.shard }}/2
+
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/next.pid ]; then
+            kill "$(cat /tmp/next.pid)" || true
+          fi
+
+  visual-update:
+    name: Visual snapshots (update)
+    if: github.event.inputs.mode == 'update' || (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'update-visuals'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container: mcr.microsoft.com/playwright:v1.47.0-jammy
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm on PATH (fallback)
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Activate pnpm
+        run: |
+          PNPM_VERSION=$(node -p "require('./package.json').packageManager?.split('@')[1] ?? ''")
+          if [ -n "$PNPM_VERSION" ]; then
+            corepack prepare "pnpm@${PNPM_VERSION}" --activate
+          else
+            corepack prepare pnpm@9 --activate
+          fi
+
+      - name: Show tool versions
+        run: |
+          node -v
+          pnpm --version
+
+      - name: Configure pnpm store dir for stable caching
+        run: pnpm config set store-dir ~/.pnpm-store
+
+      - name: Assert pnpm version
+        run: node .github/scripts/assert-pnpm-version.mjs
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build app for visual updates
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: pnpm -s e2e:build
+
+      - name: Start app for visual run
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
         run: |
           pnpm -s exec tsx scripts/start-test.ts --port 3000 &
           echo $! > /tmp/next.pid
@@ -109,11 +271,13 @@ jobs:
         run: npx wait-on http://127.0.0.1:3000
 
       - name: Update snapshots
-        if: ${{ github.event.inputs.mode == 'update' || contains(github.event.pull_request.labels.*.name, 'update-visuals') }}
         run: pnpm -s visual:update
 
+      - name: Verify updated snapshots
+        timeout-minutes: 50
+        run: pnpm -s visual:test
+
       - name: Commit snapshot changes
-        if: ${{ github.event.inputs.mode == 'update' || contains(github.event.pull_request.labels.*.name, 'update-visuals') }}
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
             git config user.email "actions@users.noreply.github.com"
@@ -123,12 +287,7 @@ jobs:
             git push
           else
             echo "No snapshot changes to commit."
-          fi
-
-      - name: Verify tests pass without updating
-        run: pnpm -s visual:test
-
-      # ⬇️ always stop the background Next.js server so the job doesn't hang
+          
       - name: Stop app
         if: always()
         run: |

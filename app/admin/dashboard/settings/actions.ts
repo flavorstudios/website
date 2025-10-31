@@ -21,7 +21,6 @@ import {
   DEFAULT_APPEARANCE,
   getContrastRatio,
   getCurrentAdminUid,
-  avatarFileSchema,
   readUserSettings,
   uploadAvatarObject,
   deleteStorageObject,

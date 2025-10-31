@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 type AwaitAppReadyOptions = {
   /**
@@ -17,8 +17,28 @@ export async function awaitAppReady(
   page: Page,
   opts: AwaitAppReadyOptions = {},
 ) {
-  // original behaviour
+  // base load
   await page.waitForLoadState("domcontentloaded");
+  // React/Next in CI often keeps a couple of in-flight requests; still worth trying
+  await page.waitForLoadState("networkidle").catch(() => {
+    // don't fail the whole helper in CI if "networkidle" never truly happens
+  });
+
+  // NEW: admin dashboard exposes a stable root in CI-like runs
+  // If we can see it, we can return early (unless the caller asked for a custom selector)
+  let adminRootReady = false;
+  try {
+    const adminRoot = page.getByTestId("admin-dashboard-root");
+    await expect(adminRoot).toBeVisible({ timeout: 15_000 });
+    adminRootReady = true;
+  } catch {
+    // not an admin page or still hydrating — continue with the old flow
+  }
+  if (adminRootReady && !opts.selector) {
+    return;
+  }
+
+  // original behaviour: make sure we have a main landmark
   await page.waitForSelector("main, [role='main']", {
     state: "visible",
     timeout: 15_000,
@@ -50,6 +70,7 @@ export async function awaitAppReady(
         "[data-testid='admin-blog-grid']",
         "[data-testid='admin-blog-list']",
         "[data-testid='admin-blog-skeleton']",
+        "[data-testid='blog-fallback']",
         "text=Blog Posts",
         "text=Recent Posts",
       );

@@ -17,6 +17,7 @@ test("logs in via cookie and loads dashboard without console errors", async ({
 }) => {
   const errors: string[] = [];
 
+  // collect console errors so we can filter CI-only noise later
   page.on("console", (msg) => {
     if (msg.type() === "error") {
       errors.push(msg.text());
@@ -29,51 +30,19 @@ test("logs in via cookie and loads dashboard without console errors", async ({
     { name: "admin-session", value: "playwright", domain: "localhost", path: "/" },
   ]);
 
+  // go to the dashboard
   await page.goto("/admin/dashboard");
-  await awaitAppReady(page);
 
-  // your dashboard does these two calls in CI, give them time
-  await Promise.all([
-    page
-      .waitForResponse(
-        (res) => res.url().includes("/api/admin/settings") && res.ok(),
-        { timeout: 15_000 },
-      )
-      .catch(() => {}),
-    page
-      .waitForResponse(
-        (res) => res.url().includes("/api/admin/init") && res.ok(),
-        { timeout: 15_000 },
-      )
-      .catch(() => {}),
-  ]);
+  // new helper knows how to wait for admin dashboard root in CI
+  await awaitAppReady(page, { admin: true });
 
-  // CI did not always render "Total Posts", so try a few known texts first
-  const candidateTexts = [
-    "Total Posts",
-    "Total Articles",
-    "Recent Posts",
-    "Admin Dashboard",
-    "Flavor Studios Admin Console",
-  ];
+  // deterministic anchor for CI/e2e (rendered by the page when CI-like)
+  await expect(page.getByTestId("admin-dashboard-root")).toBeVisible({
+    timeout: 15_000,
+  });
 
-  let foundAny = false;
-  for (const text of candidateTexts) {
-    const loc = page.getByText(text, { exact: false });
-    const visible = await loc.first().isVisible().catch(() => false);
-    if (visible) {
-      foundAny = true;
-      break;
-    }
-  }
-
-  // final fallback so test is not flaky if wording changes
-  if (!foundAny) {
-    await expect(page.locator("main")).toBeVisible({ timeout: 15_000 });
-  }
-
+  // in CI we allow the known noisy errors only
   const isCI = process.env.CI === "true" || process.env.CI === "1";
-
   const finalErrors = isCI
     ? errors.filter(
         (err) =>

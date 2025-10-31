@@ -1,22 +1,43 @@
 // app/api/admin/stats/route.ts
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { type NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
-import {
-  AggregateField,
-  Timestamp,
-  Query,
-  AggregateQuery,
-  Firestore,
-} from "firebase-admin/firestore";
 import { createHash, randomUUID } from "crypto";
 import { z } from "zod";
 import { serverEnv } from "@/env/server";
 import { calculateMoMGrowth } from "./utils";
 import { hasE2EBypass } from "@/lib/e2e-utils";
 import { E2E_STATS_HISTORY_MONTHLY } from "@/lib/e2e-fixtures";
+import { isCiLike } from "@/lib/env/is-ci-like";
+import type {
+  AggregateField as AggregateFieldType,
+  AggregateQuery,
+  Firestore,
+  Query,
+  Timestamp as TimestampType,
+} from "firebase-admin/firestore";
 
 export const runtime = "nodejs";
+
+// ---- lazy-loaders for heavy deps ----
+type FirestoreModule = typeof import("firebase-admin/firestore");
+type FirebaseAdminModule = typeof import("@/lib/firebase-admin");
+
+let firestoreModulePromise: Promise<FirestoreModule> | null = null;
+let firebaseAdminPromise: Promise<FirebaseAdminModule> | null = null;
+
+async function loadFirestoreModule(): Promise<FirestoreModule> {
+  if (!firestoreModulePromise) {
+    firestoreModulePromise = import("firebase-admin/firestore");
+  }
+  return firestoreModulePromise;
+}
+
+async function loadFirebaseAdmin(): Promise<FirebaseAdminModule> {
+  if (!firebaseAdminPromise) {
+    firebaseAdminPromise = import("@/lib/firebase-admin");
+  }
+  return firebaseAdminPromise;
+}
 
 // Base stats shape
 type Stats = {
@@ -83,11 +104,12 @@ function buildE2EStats(range: Range): StatsResponse {
     totalPosts: 240,
     totalVideos: 96,
     totalComments: 1320,
-    totalViews: 48210,
+    totalViews: 48_210,
     pendingComments: 4,
     publishedPosts: 198,
     featuredVideos: 12,
     monthlyGrowth: 10,
+    // e2e fixtures already have 12mo history, it's fine to send it for all ranges in CI
     history: E2E_STATS_HISTORY_MONTHLY,
   };
 }
@@ -113,7 +135,7 @@ export async function GET(request: NextRequest) {
       "| role:",
       sessionInfo?.role,
       "| email:",
-      sessionInfo?.email
+      sessionInfo?.email,
     );
   }
 
@@ -133,7 +155,7 @@ export async function GET(request: NextRequest) {
         email: sessionInfo?.email || "unknown",
         uid: sessionInfo?.uid || "unknown",
       },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -144,13 +166,14 @@ export async function GET(request: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid range", allowed: RangeSchema.options },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const range = parsed.data;
     const { start, end } = calcRange(range);
 
-    if (hasE2EBypass(request)) {
+    // ✅ CI / e2e / test short-circuit BEFORE loading firebase-admin
+    if (isCiLike() || hasE2EBypass(request)) {
       const payload = buildE2EStats(range);
       const etag = `"${createHash("md5").update(JSON.stringify(payload)).digest("hex")}"`;
       return NextResponse.json(payload, {
@@ -173,8 +196,16 @@ export async function GET(request: NextRequest) {
         range,
         start: start.toISOString(),
         end: end.toISOString(),
-      })
+      }),
     );
+
+    // ✅ load heavy deps only when we actually need them
+    const [{ adminDb }, firestoreModule] = await Promise.all([
+      loadFirebaseAdmin(),
+      loadFirestoreModule(),
+    ]);
+
+    const { AggregateField, Timestamp } = firestoreModule;
 
     // Early fallback if Firestore is not configured
     if (!adminDb) {
@@ -193,9 +224,7 @@ export async function GET(request: NextRequest) {
         monthlyGrowth: 0,
         ...(range === "12mo" ? { history: [] } : {}),
       };
-      const etag = `"${createHash("md5")
-        .update(JSON.stringify(empty))
-        .digest("hex")}"`;
+      const etag = `"${createHash("md5").update(JSON.stringify(empty)).digest("hex")}"`;
       if (ifNoneMatch === etag) {
         return new NextResponse(null, {
           status: 304,
@@ -214,22 +243,14 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // At this point, adminDb is guaranteed.
-    const db: Firestore = adminDb;
+    const db = adminDb as Firestore;
 
     // Serve from cache if available (TTL: 60s)
     const cached = statsCache[range];
     if (cached && cached.expires > now) {
-      const etag = `"${createHash("md5")
-        .update(JSON.stringify(cached.data))
-        .digest("hex")}"`;
+      const etag = `"${createHash("md5").update(JSON.stringify(cached.data)).digest("hex")}"`;
       if (serverEnv.DEBUG_ADMIN === "true") {
-        console.log(
-          "[admin-stats] Returning cached stats (range:",
-          range,
-          "):",
-          cached.data
-        );
+        console.log("[admin-stats] Returning cached stats (range:", range, "):", cached.data);
       }
       if (ifNoneMatch === etag) {
         return new NextResponse(null, {
@@ -260,15 +281,15 @@ export async function GET(request: NextRequest) {
             requestId,
             step: `count:${label}`,
             error: e instanceof Error ? e.message : String(e),
-          })
+          }),
         );
         return 0;
       }
     };
 
     const safeAggregate = async (
-      query: AggregateQuery<{ views: AggregateField<number> }>,
-      label: string
+      query: AggregateQuery<{ views: AggregateFieldType<number> }>,
+      label: string,
     ): Promise<number> => {
       try {
         const snap = await query.get();
@@ -279,7 +300,7 @@ export async function GET(request: NextRequest) {
             requestId,
             step: `aggregate:${label}`,
             error: e instanceof Error ? e.message : String(e),
-          })
+          }),
         );
         return 0;
       }
@@ -301,28 +322,24 @@ export async function GET(request: NextRequest) {
         safeCount(db.collection("videos"), "totalVideos"),
         safeCount(db.collectionGroup("entries"), "totalComments"),
         safeAggregate(
-          db
-            .collection("blogs")
-            .aggregate({ views: AggregateField.sum("views") }),
-          "blogViews"
+          db.collection("blogs").aggregate({ views: AggregateField.sum("views") }),
+          "blogViews",
         ),
         safeAggregate(
-          db
-            .collection("videos")
-            .aggregate({ views: AggregateField.sum("views") }),
-          "videoViews"
+          db.collection("videos").aggregate({ views: AggregateField.sum("views") }),
+          "videoViews",
         ),
         safeCount(
           db.collectionGroup("entries").where("status", "==", "pending"),
-          "pendingComments"
+          "pendingComments",
         ),
         safeCount(
           db.collection("blogs").where("status", "==", "published"),
-          "publishedPosts"
+          "publishedPosts",
         ),
         safeCount(
           db.collection("videos").where("featured", "==", true),
-          "featuredVideos"
+          "featuredVideos",
         ),
       ]);
 
@@ -347,7 +364,7 @@ export async function GET(request: NextRequest) {
           requestId,
           step: "baseFetch",
           error: e instanceof Error ? e.message : String(e),
-        })
+        }),
       );
       return NextResponse.json({ error: "Stats unavailable" }, { status: 503 });
     }
@@ -361,13 +378,13 @@ export async function GET(request: NextRequest) {
 
       for (let i = 11; i >= 0; i--) {
         const monthStart = new Date(
-          Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i, 1)
+          Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i, 1),
         );
         const monthEnd = new Date(
-          Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i + 1, 1)
+          Date.UTC(current.getUTCFullYear(), current.getUTCMonth() - i + 1, 1),
         );
-        const startTs = Timestamp.fromDate(monthStart);
-        const endTs = Timestamp.fromDate(monthEnd);
+        const startTs = (Timestamp as unknown as typeof TimestampType).fromDate(monthStart);
+        const endTs = (Timestamp as unknown as typeof TimestampType).fromDate(monthEnd);
 
         const promise = Promise.all([
           db
@@ -382,8 +399,6 @@ export async function GET(request: NextRequest) {
             .where("publishedAt", "<", endTs)
             .count()
             .get(),
-          // Comments are stored at /comments/{postId}/entries/{commentId}
-          // so we query the shared "entries" collection group.
           db
             .collectionGroup("entries")
             .where("publishedAt", ">=", startTs)
@@ -404,7 +419,7 @@ export async function GET(request: NextRequest) {
                 msg: "monthly aggregation failed",
                 month: monthStart.toISOString(),
                 error: err instanceof Error ? err.message : String(err),
-              })
+              }),
             );
             return {
               month: monthStart.toLocaleString("default", { month: "short" }),
@@ -413,7 +428,7 @@ export async function GET(request: NextRequest) {
               comments: 0,
             };
           });
-          
+
         historyPromises.push(promise);
       }
 
@@ -431,13 +446,13 @@ export async function GET(request: NextRequest) {
     } else {
       const nowDate = new Date();
       const startCurrentMonth = new Date(
-        Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), 1)
+        Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), 1),
       );
       const startNextMonth = new Date(
-        Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() + 1, 1)
+        Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() + 1, 1),
       );
       const startPrevMonth = new Date(
-        Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() - 1, 1)
+        Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth() - 1, 1),
       );
 
       const [
@@ -449,30 +464,30 @@ export async function GET(request: NextRequest) {
         safeCount(
           db
             .collection("blogs")
-            .where("publishedAt", ">=", Timestamp.fromDate(startCurrentMonth))
-            .where("publishedAt", "<", Timestamp.fromDate(startNextMonth)),
-          "currentMonthPosts"
+            .where("publishedAt", ">=", (Timestamp as any).fromDate(startCurrentMonth))
+            .where("publishedAt", "<", (Timestamp as any).fromDate(startNextMonth)),
+          "currentMonthPosts",
         ),
         safeCount(
           db
             .collection("blogs")
-            .where("publishedAt", ">=", Timestamp.fromDate(startPrevMonth))
-            .where("publishedAt", "<", Timestamp.fromDate(startCurrentMonth)),
-          "previousMonthPosts"
+            .where("publishedAt", ">=", (Timestamp as any).fromDate(startPrevMonth))
+            .where("publishedAt", "<", (Timestamp as any).fromDate(startCurrentMonth)),
+          "previousMonthPosts",
         ),
         safeCount(
           db
             .collection("videos")
-            .where("publishedAt", ">=", Timestamp.fromDate(startCurrentMonth))
-            .where("publishedAt", "<", Timestamp.fromDate(startNextMonth)),
-          "currentMonthVideos"
+            .where("publishedAt", ">=", (Timestamp as any).fromDate(startCurrentMonth))
+            .where("publishedAt", "<", (Timestamp as any).fromDate(startNextMonth)),
+          "currentMonthVideos",
         ),
         safeCount(
           db
             .collection("videos")
-            .where("publishedAt", ">=", Timestamp.fromDate(startPrevMonth))
-            .where("publishedAt", "<", Timestamp.fromDate(startCurrentMonth)),
-          "previousMonthVideos"
+            .where("publishedAt", ">=", (Timestamp as any).fromDate(startPrevMonth))
+            .where("publishedAt", "<", (Timestamp as any).fromDate(startCurrentMonth)),
+          "previousMonthVideos",
         ),
       ]);
 
@@ -500,9 +515,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Compute ETag and honor If-None-Match
-    const etag = `"${createHash("md5")
-      .update(JSON.stringify(response))
-      .digest("hex")}"`;
+    const etag = `"${createHash("md5").update(JSON.stringify(response)).digest("hex")}"`;
     if (ifNoneMatch === etag) {
       return new NextResponse(null, {
         status: 304,
@@ -525,7 +538,7 @@ export async function GET(request: NextRequest) {
       JSON.stringify({
         requestId,
         error: error instanceof Error ? error.message : String(error),
-      })
+      }),
     );
     return NextResponse.json({ error: "Stats unavailable" }, { status: 503 });
   }

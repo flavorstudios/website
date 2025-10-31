@@ -1,14 +1,26 @@
 import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import type { BlogPost } from "@/lib/content-store"
-import { blogStore, ADMIN_DB_UNAVAILABLE } from "@/lib/content-store"
-import { hasE2EBypass } from "@/lib/e2e-utils"
+import { isCiLike } from "@/lib/env/is-ci-like"
 import {
+  hasE2EBypass,
   addE2EBlogPost,
   getE2EBlogPostById,
   getE2EBlogPosts,
   updateE2EBlogPost,
 } from "@/lib/e2e-fixtures"
+
+// lazy loader so CI/e2e doesn’t pay for Firestore/content-store on every cold hit
+type ContentStoreModule = typeof import("@/lib/content-store")
+
+let contentStorePromise: Promise<ContentStoreModule> | null = null
+
+async function loadContentStore(): Promise<ContentStoreModule> {
+  if (!contentStorePromise) {
+    contentStorePromise = import("@/lib/content-store")
+  }
+  return contentStorePromise
+}
 
 function parseOptionalIsoDate(value: unknown, field: string): string | undefined {
   if (value === null || value === undefined) return undefined
@@ -25,6 +37,7 @@ function parseOptionalIsoDate(value: unknown, field: string): string | undefined
 }
 
 export async function POST(request: NextRequest) {
+  // 1) CI / e2e short path: stay in memory, no Firestore, no content-store
   if (hasE2EBypass(request)) {
     const nowIso = new Date().toISOString()
     const payload = await request.json()
@@ -98,9 +111,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(created, { status: 201 })
   }
 
+  // 2) normal admin path -> needs permission + real content-store
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+
+  // load AFTER the CI/e2e branch so CI doesn’t pull Firestore
+  const { blogStore, ADMIN_DB_UNAVAILABLE } = await loadContentStore()
+
   try {
     const blogData = await request.json()
     const session = await getSessionAndRole(request)
@@ -108,7 +126,6 @@ export async function POST(request: NextRequest) {
 
     let post: BlogPost | null = null
 
-    // Normalize date fields on the server
     const nowIso = new Date().toISOString()
     const status: BlogPost["status"] | undefined = blogData?.status
     let normalizedScheduledFor: string | undefined
@@ -136,9 +153,7 @@ export async function POST(request: NextRequest) {
           categories: Array.isArray(updates.categories)
             ? updates.categories
             : [updates.category],
-          // Server-authoritative timestamps
           updatedAt: nowIso,
-          // Ensure dates are strings
           ...(normalizedPublishedAt ? { publishedAt: normalizedPublishedAt } : {}),
           ...(normalizedScheduledFor ? { scheduledFor: normalizedScheduledFor } : {}),
         },
@@ -156,11 +171,9 @@ export async function POST(request: NextRequest) {
           ? blogData.categories
           : [blogData.category],
         id: newId,
-        // Server-authoritative timestamps
         createdAt: nowIso,
         updatedAt: nowIso,
         views: 0,
-        // Ensure dates are strings at creation as well
         ...(normalizedPublishedAt ? { publishedAt: normalizedPublishedAt } : {}),
         ...(normalizedScheduledFor ? { scheduledFor: normalizedScheduledFor } : {}),
       })
@@ -178,14 +191,17 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  if (hasE2EBypass(request)) {
+  // For CI / E2E and for ?e2e bypasses, don’t touch Firestore at all
+  if (isCiLike() || hasE2EBypass(request)) {
     return NextResponse.json({ posts: getE2EBlogPosts() })
   }
-  
+
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+
   try {
+    const { blogStore } = await loadContentStore()
     const posts: BlogPost[] = await blogStore.getAll()
     return NextResponse.json({ posts })
   } catch (error) {

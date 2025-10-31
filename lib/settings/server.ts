@@ -12,6 +12,7 @@ import {
 } from "@/lib/schemas/settings"
 import { getStorage } from "firebase-admin/storage"
 import type { File } from "@google-cloud/storage"
+import { logError } from "@/lib/log"
 
 export * from "./common"
 
@@ -85,6 +86,7 @@ export function getAdminStorageBucket() {
     try {
       cachedBucket = getStorage().bucket()
     } catch (error) {
+      logError("settings:getAdminStorageBucket", error)
       throw new Error("Cloud Storage bucket unavailable")
     }
   }

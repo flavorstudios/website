@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { blogStore } from "@/lib/content-store";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
-import { PageHeader } from "@/components/admin/page-header";
 import BlogEditorPageClient from "./BlogEditorPageClient";
 import type { BlogPost as StoreBlogPost } from "@/lib/content-store";
 import type { BlogPost as EditorBlogPost } from "@/app/admin/dashboard/components/blog-editor";

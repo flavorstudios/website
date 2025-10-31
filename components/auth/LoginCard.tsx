@@ -92,7 +92,6 @@ export function LoginCard({ siteName }: LoginCardProps) {
   const onSubmit = async (formValues: { email: string; password: string }) => {
     await new Promise((resolve) => setTimeout(resolve, 600))
     if (process.env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
       console.info("Login submitted", formValues)
     }
   }
@@ -100,7 +99,6 @@ export function LoginCard({ siteName }: LoginCardProps) {
   const onContinueWithGoogle = async () => {
     await new Promise((resolve) => setTimeout(resolve, 300))
     if (process.env.NODE_ENV !== "production") {
-      // eslint-disable-next-line no-console
       console.info("Continue with Google selected")
     }
   }

@@ -283,12 +283,15 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   }, [post.status, post.scheduledFor]);
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadCategories = async () => {
       try {
         const response = await fetch("/api/admin/categories?type=blog", {
           credentials: "include",
         });
         const data = await response.json();
+        if (!isMounted) return;
         const blogCategories: BlogCategory[] = Array.isArray(data.categories)
           ? data.categories.map((cat: BlogCategory) => ({
               name: cat.name,
@@ -297,33 +300,44 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
             }))
           : [];
         setCategories(blogCategories);
-        if (post.categories.length === 0 && blogCategories.length > 0) {
-          setPost((prev) => ({
-            ...prev,
-            category: blogCategories[0].slug,
-            categories: [blogCategories[0].slug],
-          }));
+        if (blogCategories.length > 0) {
+          setPost((prev) => {
+            if (prev.categories.length > 0) {
+              return prev;
+            }
+            const defaultSlug = blogCategories[0].slug;
+            return {
+              ...prev,
+              category: defaultSlug,
+              categories: [defaultSlug],
+            };
+          });
         }
       } catch (error) {
+        if (!isMounted) return;
         logClientError("Failed to load categories:", error);
         toast.error("Failed to load categories");
       }
     };
-    loadCategories();
 
-    // Online/offline awareness only (removed localStorage draft restore: handled by autosave hook via IndexedDB)
+    void loadCategories();
+
     if (typeof window !== "undefined") {
       const updateOnline = () => setOnline(navigator.onLine);
       updateOnline();
       window.addEventListener("online", updateOnline);
       window.addEventListener("offline", updateOnline);
       return () => {
+        isMounted = false;
         window.removeEventListener("online", updateOnline);
         window.removeEventListener("offline", updateOnline);
       };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [toast]);
 
   // Slug generation (improved)
   useEffect(() => {
@@ -333,7 +347,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     if (shouldSyncSlug && autoSlug !== post.slug) {
       setPost((prev) => ({ ...prev, slug: autoSlug }));
     }
-    }, [post.title, post.slug]);
+  }, [post.title, post.slug]);
 
   // Auto-generate excerpt + derived fields (idempotent)
   useEffect(() => {
@@ -353,7 +367,6 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
       }
       return changed ? (next as BlogPost) : prev;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [post.content]);
 
   // Track unsaved changes (removed localStorage persistence; autosave handles local via IndexedDB)
@@ -486,7 +499,6 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   }, [post, getScheduledDateTime, toast]);
 
   // Keyboard shortcuts: Cmd/Ctrl+S to save, Cmd/Ctrl+P to preview
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
@@ -506,7 +518,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   // REMOVED: legacy autosave timers (debounce + heartbeat). Autosave now handled by useAutosave hook.
 
   // Load revisions for current post
-  const loadRevisions = async () => {
+  const loadRevisions = useCallback(async () => {
     if (!post.id) return;
     try {
       const res = await fetch(`/api/admin/blogs/${post.id}/revisions`, { credentials: "include" });
@@ -517,13 +529,12 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
     } catch (err) {
       logClientError("Failed to restore revision:", err);
     }
-  };
+  }, [post.id]);
 
   useEffect(() => {
     if (!post.id) return;
-    loadRevisions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [post.id]);
+    void loadRevisions();
+  }, [post.id, loadRevisions]);
 
   const restoreRevision = async (id: string) => {
     if (!post.id) return;
@@ -679,7 +690,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
               containerClassName="flex-col items-start"
               headingClassName="text-3xl font-bold text-gray-900"
               descriptionClassName="text-gray-600"
-              level={1}
+              level={2}
             />
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">

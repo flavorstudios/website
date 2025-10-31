@@ -26,7 +26,6 @@ interface RevalidateStore {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var __revalidateStore: RevalidateStore | undefined;
 }
 

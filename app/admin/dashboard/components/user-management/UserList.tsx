@@ -337,7 +337,6 @@ export default function UserList() {
               </thead>
               <tbody>
                 {users.map((u) => (
-                  // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
                   <tr
                     key={u.uid}
                     className="border-t hover:bg-gray-50 cursor-pointer focus-visible:bg-blue-50 focus-visible:outline-none"

@@ -84,7 +84,6 @@ export default function ForgotPasswordForm({
       setEmail("");
     } catch (err) {
       if (process.env.NODE_ENV !== "production") {
-        // eslint-disable-next-line no-console
         console.error("Password reset request failed", err);
       }
       setError(NETWORK_ERROR_MESSAGE);
@@ -104,7 +103,7 @@ export default function ForgotPasswordForm({
             containerClassName="flex-col items-center gap-2"
             headingClassName="text-2xl font-semibold text-slate-900"
             descriptionClassName="text-sm text-slate-600"
-            level={1}
+            level={2}
           />
         </CardHeader>
         <CardContent className="p-6 pt-0">

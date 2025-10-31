@@ -119,7 +119,7 @@ export function useAutosave<T>({ userId = "anon", draftId, data }: AutosaveOptio
         retryTimeoutRef.current = setTimeout(() => void save(payload, v), delay);
       }
     },
-    [data, draftId, key, version]
+    [data, draftId, key, userId, version]
   );
 
   // debounce changes

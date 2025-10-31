@@ -171,7 +171,7 @@ export default function AdminSearchPageClient({
                   ? `Results for “${query.trim()}”`
                   : "Search across posts, videos, users, categories, and tags."
               }
-              level={1}
+              level={2}
             />
 
             {!hasQuery && (

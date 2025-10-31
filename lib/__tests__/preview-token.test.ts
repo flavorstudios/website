@@ -4,7 +4,6 @@
 export {};
 
 process.env.PREVIEW_SECRET = 'test-secret';
-/* eslint-disable @typescript-eslint/no-require-imports */
 const envModule = require("@/env/server");
 envModule.serverEnv.PREVIEW_SECRET = "test-secret";
 const {
@@ -12,7 +11,6 @@ const {
   validatePreviewToken,
   inspectPreviewToken,
 } = require("../preview-token");
-/* eslint-enable @typescript-eslint/no-require-imports */
 
 const setProcessEnv = (key: string, value: string | undefined) => {
   if (typeof value === "undefined") {

@@ -1,4 +1,8 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+import { __stores } from '@/lib/firebase-admin';
+import { blogStore } from '@/lib/content-store';
+import { deleteMedia } from '@/lib/media';
+import type { MediaDoc } from '@/types/media';
+
 jest.mock('firebase-admin/firestore', () => ({
   FieldValue: {
     arrayUnion: (...vals: any[]) => ({ __op: 'union', vals }),
@@ -52,12 +56,7 @@ jest.mock('@/lib/firebase-admin', () => {
   return { safeAdminDb: mockDb, getAdminDb: () => mockDb, __stores: { mediaStore, blogStoreData } };
 });
 
-const { __stores } = require('@/lib/firebase-admin');
 const mediaStore: Record<string, any> = __stores.mediaStore;
-
-const { blogStore } = require('@/lib/content-store');
-const { deleteMedia } = require('@/lib/media');
-import type { MediaDoc } from '@/types/media';
 
 describe('media usage linking', () => {
   it('links media to post and prevents deletion without force', async () => {

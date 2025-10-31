@@ -27,6 +27,7 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import type { Category } from "@/types/category"
 import useMediaQuery from "@/hooks/use-media-query"
+import { logClientError } from "@/lib/log-client"
 
 export type CategoryType = "BLOG" | "VIDEO"
 
@@ -115,8 +116,7 @@ export default function CategoryList({
         setItems(prevItems)
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Failed to reorder categories", err)
+      logClientError("Failed to reorder categories", err)
       toast("Failed to update order")
       setItems(prevItems)
     }

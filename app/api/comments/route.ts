@@ -14,7 +14,6 @@ type CommentCreateInput = {
 
 // --- Global declaration to avoid `any` on globalThis ---
 declare global {
-  // eslint-disable-next-line no-var
   var __commentRateMap: Map<string, RateInfo> | undefined;
 }
 

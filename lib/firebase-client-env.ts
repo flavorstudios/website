@@ -38,7 +38,6 @@ export function getMissingFirebaseEnv(): string[] {
 export function assertClientEnv(): void {
   const missing = getMissingFirebaseEnv();
   if (missing.length > 0 && clientEnv.NODE_ENV !== "production") {
-    // eslint-disable-next-line no-console
     console.warn(
       `[Firebase] Missing Firebase environment variable(s): ${missing.join(", ")}. Check your environment (e.g., .env.local or hosting dashboard).`
     );

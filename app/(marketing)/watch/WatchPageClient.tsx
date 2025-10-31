@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Play, Eye, Calendar, Youtube, Clock, Video } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import type { Category } from "@/types/category"
 import { formatDate } from "@/lib/date" // <-- Consistent date formatting
 
@@ -36,12 +36,7 @@ export function WatchPageClient({
   const [loading, setLoading] = useState(true)
   const selectedCategory = searchParams.category || "all"
 
-  useEffect(() => {
-    fetchWatchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const fetchWatchData = async () => {
+  const fetchWatchData = useCallback(async () => {
     try {
       setLoading(true)
       const [videosResponse, categoriesResponse] = await Promise.all([
@@ -77,7 +72,11 @@ export function WatchPageClient({
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    void fetchWatchData()
+  }, [fetchWatchData])
 
   const filteredVideos =
     selectedCategory === "all"

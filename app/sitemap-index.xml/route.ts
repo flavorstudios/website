@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { getCanonicalUrl } from "@/lib/seo-utils";
+import { logError } from "@/lib/log";
 // import { SITE_URL } from "@/lib/constants";
 // import { categoryStore } from "@/lib/category-store"; // Uncomment if/when category sitemaps go live
 
@@ -83,8 +84,9 @@ ${dedupedSitemaps
       },
     });
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error("Error generating sitemap index:", error);
+    logError("sitemap-index", error instanceof Error ? error : undefined, {
+      message: "Error generating sitemap index",
+    });
 
     // Fallback: at least return main sitemap
     const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>

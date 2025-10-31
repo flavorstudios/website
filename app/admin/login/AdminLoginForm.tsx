@@ -27,7 +27,6 @@ import { FirebaseError } from "firebase/app"
 // Safe client-side error logger (dev only)
 function safeLogError(...args: unknown[]) {
   if (clientEnv.NODE_ENV !== "production") {
-    // eslint-disable-next-line no-console
     console.error(...args)
   }
 }
@@ -256,7 +255,7 @@ export default function AdminLoginForm() {
             headingClassName="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl"
             descriptionClassName="text-base text-slate-600 md:text-lg"
             className="mb-0"
-            level={1}
+            level={2}
           />
         </div>
         <div className="flex flex-col gap-8 bg-white px-6 py-8 md:px-10 md:py-12 text-left">

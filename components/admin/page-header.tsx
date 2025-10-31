@@ -62,6 +62,14 @@ export function PageHeader({
   ...headerProps
 }: PageHeaderProps) {
   const headingLevel = level ?? 1;
+  const defaultHeadingClasses: Record<HeadingLevel, string> = {
+    1: "text-2xl font-semibold tracking-tight",
+    2: "text-xl font-semibold tracking-tight",
+    3: "text-lg font-semibold",
+    4: "text-base font-semibold",
+    5: "text-sm font-semibold",
+    6: "text-sm font-medium",
+  };
 
   return (
     <header
@@ -75,7 +83,8 @@ export function PageHeader({
             id={headingId}
             level={headingLevel}
             className={cn(
-              "text-2xl font-semibold tracking-tight",
+              defaultHeadingClasses[headingLevel] ??
+                defaultHeadingClasses[2],
               headingClassName,
             )}
             {...headingProps}

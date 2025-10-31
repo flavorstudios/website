@@ -30,26 +30,7 @@ import {
 import { serverEnv } from "@/env/server"
 import { SITE_NAME, SITE_URL } from "@/lib/constants"
 import { logError } from "@/lib/log"
-
-export type SettingsErrorCode =
-  | "UNAUTHORIZED"
-  | "ADMIN_SDK_UNAVAILABLE"
-  | "FIRESTORE_ERROR"
-  | "EMAIL_TRANSPORT_UNCONFIGURED"
-  | "ROLLBACK_INVALID"
-
-export class SettingsAccessError extends Error {
-  code: SettingsErrorCode
-
-  constructor(code: SettingsErrorCode, message: string, options?: { cause?: unknown }) {
-    super(message)
-    this.name = "SettingsAccessError"
-    this.code = code
-    if (options?.cause !== undefined) {
-      ;(this as { cause?: unknown }).cause = options.cause
-    }
-  }
-}
+import { SettingsAccessError } from "./errors"
 
 function requireSettingsDb(context: string, meta?: Record<string, unknown>) {
   try {
@@ -456,7 +437,7 @@ export async function sendEmailVerification(payload: { email: string }) {
   }
   const auth = requireSettingsAuth("admin-settings:sendEmailVerification", { uid })
   const link = await auth.generateEmailVerificationLink(email)
-try {
+  try {
     await sendVerificationEmailMessage({
       email,
       link,

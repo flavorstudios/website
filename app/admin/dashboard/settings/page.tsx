@@ -2,13 +2,14 @@ import { getMetadata } from "@/lib/seo-utils"
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"
 import { SettingsTabs } from "@/components/admin/settings/SettingsTabs"
 import { PageHeader } from "@/components/admin/page-header"
-import { loadSettings, SettingsAccessError } from "./actions"
+import { loadSettings } from "./actions"
+import { SettingsAccessError } from "./errors"
 import { getCurrentAdminUid } from "@/lib/settings/server"
 import { getAdminAuth } from "@/lib/firebase-admin"
 import type { SearchParams } from "@/types/next"
 import { logError } from "@/lib/log"
 import { ErrorBoundary } from "../components/ErrorBoundary"
-import type { SettingsErrorCode } from "./actions"
+import type { SettingsErrorCode } from "./errors"
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

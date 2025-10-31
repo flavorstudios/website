@@ -1,3 +1,4 @@
+// app/admin/dashboard/page.tsx
 import { PageHeader } from "@/components/admin/page-header";
 import {
   AdminDashboardSectionPage,
@@ -107,7 +108,8 @@ async function prefetchDashboardBlog(
   cookie: string,
   origin: string,
 ) {
-  const url = `${origin}/api/admin/blog?limit=20`;
+  // important: admin should see drafts too
+  const url = `${origin}/api/admin/blog?all=1&limit=20`;
   await qc.prefetchQuery({
     queryKey: ["dashboard-blog", "admin"],
     queryFn: async () => {
@@ -118,6 +120,7 @@ async function prefetchDashboardBlog(
       if (!res.ok) throw new Error("Failed to load blog data");
       return res.json();
     },
+    staleTime: 0,
   });
 }
 
@@ -150,11 +153,28 @@ export default async function AdminDashboardPage() {
 
   const queryClient = new QueryClient();
 
-  // In CI-like environments we skip prefetch to avoid cold starts during e2e
-  const canServerPrefetch =
-    !ciLike && isAdminSdkAvailable() && !ADMIN_BYPASS;
+  // unified guard for SSR prefetch
+  const disableServerPrefetch =
+    ciLike ||
+    process.env.E2E === "true" ||
+    process.env.TEST_MODE === "true" ||
+    process.env.ADMIN_DISABLE_SSR_PREFETCH === "true";
 
-  if (canServerPrefetch) {
+  let shouldServerPrefetch =
+    !disableServerPrefetch && isAdminSdkAvailable() && !ADMIN_BYPASS;
+
+  // React 19 dev double-render guard — run prefetch only once on the server
+  if (shouldServerPrefetch && process.env.NODE_ENV !== "production") {
+    const g = globalThis as { __ADMIN_PREFETCH_SKIP_ONCE__?: boolean };
+    if (g.__ADMIN_PREFETCH_SKIP_ONCE__) {
+      g.__ADMIN_PREFETCH_SKIP_ONCE__ = false;
+      shouldServerPrefetch = false;
+    } else {
+      g.__ADMIN_PREFETCH_SKIP_ONCE__ = true;
+    }
+  }
+
+  if (shouldServerPrefetch) {
     try {
       await prefetchDashboard(queryClient, cookie, origin);
     } catch {

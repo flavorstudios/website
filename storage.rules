@@ -5,18 +5,27 @@ rules_version = '2';
 //    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
 service firebase.storage {
   match /b/{bucket}/o {
+
+    // Publicly readable media used in blog/posts (images, thumbs, etc.)
+    // Admins still control writes.
+    match /media/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Everything else stays admin-only, exactly like before.
     match /{allPaths=**} {
       // Only authenticated admins may access Storage.
       // Admins are identified via custom claims on the auth token.
-
-      function isAdmin() {
-          return request.auth != null && (
-          ('role' in request.auth.token && request.auth.token.role == "admin") ||
-          ('isAdmin' in request.auth.token && request.auth.token.isAdmin == true)
-        );
-      }
-
       allow read, write: if isAdmin();
+    }
+
+    // Re-use the same admin check you already had.
+    function isAdmin() {
+      return request.auth != null && (
+        ('role' in request.auth.token && request.auth.token.role == "admin") ||
+        ('isAdmin' in request.auth.token && request.auth.token.isAdmin == true)
+      );
     }
   }
 }

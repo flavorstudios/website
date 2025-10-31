@@ -40,6 +40,8 @@ import { useRole } from "../contexts/role-context";
 import { SectionId } from "../sections";
 import { HttpError } from "@/lib/http";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAdminDashboardBlogs } from "@/hooks/useAdminDashboardBlogs";
 
 // Register Chart.js primitives once
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -131,11 +133,12 @@ export default function DashboardOverview({
       (window as any).Chart = ChartJS;
     }
   }, []);
-  
+
   const { theme } = useTheme();
   const router = useRouter();
   const { hasPermission } = useRole();
   const canViewAnalytics = hasPermission?.("canViewAnalytics") ?? false;
+  const canManageBlogs = hasPermission?.("canManageBlogs") ?? false;
 
   // Live toggle controls polling interval
   const [live, setLive] = useState(false);
@@ -214,6 +217,11 @@ export default function DashboardOverview({
     }
   );
   const recentActivity = activityData?.activities || [];
+
+  // Admin blogs (for surfacing "Firestore missing" banner)
+  const blogQuery = useAdminDashboardBlogs(canManageBlogs);
+  const blogQueryError = blogQuery.error as HttpError | undefined;
+  const showBlogUnavailable = blogQueryError?.status === 503;
 
   // Helper to detect 401/403 errors from any thrown value (not tied to instanceof)
   const isUnauthorized = (err: unknown): boolean => {
@@ -373,6 +381,7 @@ export default function DashboardOverview({
       </div>
     );
   }
+
   const monthlyGrowth = effectiveStats.monthlyGrowth;
   const sign = monthlyGrowth > 0 ? "+" : monthlyGrowth < 0 ? "-" : "";
   const growthColor =
@@ -393,6 +402,21 @@ export default function DashboardOverview({
         title="Dashboard Overview"
         description="Track activity, performance, and quick actions for your studio"
       />
+      {showBlogUnavailable && (
+        <Alert
+          variant="destructive"
+          data-testid="admin-dashboard-blog-unavailable"
+          role="alert"
+        >
+          <AlertTitle>Blog data unavailable</AlertTitle>
+          <AlertDescription>
+            Firebase Admin credentials are missing. Set{" "}
+            <code>FIREBASE_SERVICE_ACCOUNT_KEY</code> (or{" "}
+            <code>FIREBASE_SERVICE_ACCOUNT_JSON</code>) and redeploy to restore Firestore-backed
+            blog content.
+          </AlertDescription>
+        </Alert>
+      )}
       {isInitialLoading && (
         <div
           className="flex items-center gap-3 rounded-lg border border-border bg-background/80 px-4 py-3 text-sm text-muted-foreground"
@@ -628,36 +652,36 @@ export default function DashboardOverview({
             </CardTitle>
           </CardHeader>
           <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {quickActions.map((action, index) => {
-                  const Icon = action.icon;
-                  return (
-                    <Button
-                      key={index}
-                      type="button"
-                      variant="outline"
-                      aria-label={action.title}
-                      className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
-                      onClick={() => {
-                        if (onNavigateSection) {
-                          onNavigateSection(action.section, action.href);
-                          return;
-                        }
-                        router.push(action.href);
-                      }}
-                    >
-                      <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center`}>
-                        <Icon className="w-4 h-4 text-white" />
-                      </div>
-                      <div className="text-left">
-                        <p className="font-medium text-gray-900">{action.title}</p>
-                        <p className="text-sm text-gray-500">{action.description}</p>
-                      </div>
-                    </Button>
-                  );
-                })}
-              </div>
-            </CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {quickActions.map((action, index) => {
+                const Icon = action.icon;
+                return (
+                  <Button
+                    key={index}
+                    type="button"
+                    variant="outline"
+                    aria-label={action.title}
+                    className="h-auto p-4 flex flex-col items-start gap-2 hover:shadow-md transition-shadow"
+                    onClick={() => {
+                      if (onNavigateSection) {
+                        onNavigateSection(action.section, action.href);
+                        return;
+                      }
+                      router.push(action.href);
+                    }}
+                  >
+                    <div className={`w-8 h-8 ${action.color} rounded-lg flex items-center justify-center`}>
+                      <Icon className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <p className="font-medium text-gray-900">{action.title}</p>
+                      <p className="text-sm text-gray-500">{action.description}</p>
+                    </div>
+                  </Button>
+                );
+              })}
+            </div>
+          </CardContent>
         </Card>
 
         {/* Real-time Recent Activity */}
@@ -684,8 +708,8 @@ export default function DashboardOverview({
                         activity.status === "success"
                           ? "bg-green-500"
                           : activity.status === "pending"
-                          ? "bg-yellow-500"
-                          : "bg-gray-500"
+                            ? "bg-yellow-500"
+                            : "bg-gray-500"
                       }`}
                     ></div>
                     <div className="flex-1">

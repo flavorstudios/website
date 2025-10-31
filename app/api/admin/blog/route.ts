@@ -1,50 +1,52 @@
-import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth"
-import { type NextRequest, NextResponse } from "next/server"
-import type { BlogPost } from "@/lib/content-store"
-import { isCiLike } from "@/lib/env/is-ci-like"
-import { hasE2EBypass } from "@/lib/e2e-utils"
+import { requireAdmin, getSessionAndRole } from "@/lib/admin-auth";
+import { type NextRequest, NextResponse } from "next/server";
+import type { BlogPost } from "@/lib/content-store";
+import { isCiLike } from "@/lib/env/is-ci-like";
+// Keep hasE2EBypass sourced from e2e-utils; fixtures do not export it.
+import { hasE2EBypass } from "@/lib/e2e-utils";
 import {
   addE2EBlogPost,
   getE2EBlogPostById,
   getE2EBlogPosts,
   updateE2EBlogPost,
-} from "@/lib/e2e-fixtures"
+} from "@/lib/e2e-fixtures";
+import { HttpError } from "@/lib/http";
 
 // lazy loader so CI/e2e doesn’t pay for Firestore/content-store on every cold hit
-type ContentStoreModule = typeof import("@/lib/content-store")
+type ContentStoreModule = typeof import("@/lib/content-store");
 
-let contentStorePromise: Promise<ContentStoreModule> | null = null
+let contentStorePromise: Promise<ContentStoreModule> | null = null;
 
 async function loadContentStore(): Promise<ContentStoreModule> {
   if (!contentStorePromise) {
-    contentStorePromise = import("@/lib/content-store")
+    contentStorePromise = import("@/lib/content-store");
   }
-  return contentStorePromise
+  return contentStorePromise;
 }
 
 function parseOptionalIsoDate(value: unknown, field: string): string | undefined {
-  if (value === null || value === undefined) return undefined
+  if (value === null || value === undefined) return undefined;
   if (typeof value !== "string") {
-    throw new Error(`Invalid ${field} timestamp`)
+    throw new Error(`Invalid ${field} timestamp`);
   }
-  const trimmed = value.trim()
-  if (trimmed.length === 0) return undefined
-  const date = new Date(trimmed)
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return undefined;
+  const date = new Date(trimmed);
   if (Number.isNaN(date.getTime())) {
-    throw new Error(`Invalid ${field} timestamp`)
+    throw new Error(`Invalid ${field} timestamp`);
   }
-  return date.toISOString()
+  return date.toISOString();
 }
 
 export async function POST(request: NextRequest) {
   // 1) CI / e2e short path: stay in memory, no Firestore, no content-store
   if (hasE2EBypass(request)) {
-    const nowIso = new Date().toISOString()
-    const payload = await request.json()
+    const nowIso = new Date().toISOString();
+    const payload = await request.json();
     const status: BlogPost["status"] =
       payload?.status === "scheduled" || payload?.status === "published"
         ? payload.status
-        : "draft"
+        : "draft";
 
     const normalized: BlogPost = {
       id:
@@ -96,56 +98,56 @@ export async function POST(request: NextRequest) {
       shareCount: typeof payload?.shareCount === "number" ? payload.shareCount : 0,
       schemaType: payload?.schemaType || "Article",
       openGraphImage: payload?.openGraphImage || "/cover.jpg",
-    }
+    };
 
-    const existing = getE2EBlogPostById(normalized.id)
+    const existing = getE2EBlogPostById(normalized.id);
     if (existing) {
       const updated = updateE2EBlogPost(normalized.id, {
         ...normalized,
         updatedAt: nowIso,
-      })
-      return NextResponse.json(updated, { status: 200 })
+      });
+      return NextResponse.json(updated, { status: 200 });
     }
 
-    const created = addE2EBlogPost(normalized)
-    return NextResponse.json(created, { status: 201 })
+    const created = addE2EBlogPost(normalized);
+    return NextResponse.json(created, { status: 201 });
   }
 
   // 2) normal admin path -> needs permission + real content-store
   if (!(await requireAdmin(request, "canManageBlogs"))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   // load AFTER the CI/e2e branch so CI doesn’t pull Firestore
-  const { blogStore, ADMIN_DB_UNAVAILABLE } = await loadContentStore()
+  const { blogStore, ADMIN_DB_UNAVAILABLE } = await loadContentStore();
 
   try {
-    const blogData = await request.json()
-    const session = await getSessionAndRole(request)
-    const editor = session?.email || "unknown"
+    const blogData = await request.json();
+    const session = await getSessionAndRole(request);
+    const editor = session?.email || "unknown";
 
-    let post: BlogPost | null = null
+    let post: BlogPost | null = null;
 
-    const nowIso = new Date().toISOString()
-    const status: BlogPost["status"] | undefined = blogData?.status
-    let normalizedScheduledFor: string | undefined
-    let normalizedPublishedAt: string | undefined
+    const nowIso = new Date().toISOString();
+    const status: BlogPost["status"] | undefined = blogData?.status;
+    let normalizedScheduledFor: string | undefined;
+    let normalizedPublishedAt: string | undefined;
     try {
       normalizedScheduledFor =
         status === "scheduled"
           ? parseOptionalIsoDate(blogData?.scheduledFor, "scheduledFor")
-          : undefined
+          : undefined;
       normalizedPublishedAt =
         status === "published"
           ? parseOptionalIsoDate(blogData?.publishedAt, "publishedAt") ?? nowIso
-          : undefined
+          : undefined;
     } catch (error) {
-      return NextResponse.json({ error: (error as Error).message }, { status: 400 })
+      return NextResponse.json({ error: (error as Error).message }, { status: 400 });
     }
 
     if (blogData.id) {
       // Update existing post
-      const { id, ...updates } = blogData
+      const { id, ...updates } = blogData;
       post = await blogStore.update(
         id,
         {
@@ -157,14 +159,14 @@ export async function POST(request: NextRequest) {
           ...(normalizedPublishedAt ? { publishedAt: normalizedPublishedAt } : {}),
           ...(normalizedScheduledFor ? { scheduledFor: normalizedScheduledFor } : {}),
         },
-        editor
-      )
+        editor,
+      );
       if (!post) {
-        return NextResponse.json({ error: "Blog not found" }, { status: 404 })
+        return NextResponse.json({ error: "Blog not found" }, { status: 404 });
       }
     } else {
       // Create new post
-      const newId = `blog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      const newId = `blog_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       post = await blogStore.create({
         ...blogData,
         categories: Array.isArray(blogData.categories)
@@ -176,36 +178,70 @@ export async function POST(request: NextRequest) {
         views: 0,
         ...(normalizedPublishedAt ? { publishedAt: normalizedPublishedAt } : {}),
         ...(normalizedScheduledFor ? { scheduledFor: normalizedScheduledFor } : {}),
-      })
+      });
     }
 
-    return NextResponse.json(post, { status: blogData.id ? 200 : 201 })
+    return NextResponse.json(post, { status: blogData.id ? 200 : 201 });
   } catch (error) {
-    console.error("Error saving blog post:", error)
-    const message = (error as Error).message
+    console.error("Error saving blog post:", error);
+    const message = (error as Error).message;
     if (message === ADMIN_DB_UNAVAILABLE) {
-      return NextResponse.json({ error: message }, { status: 503 })
+      return NextResponse.json({ error: message }, { status: 503 });
     }
-    return NextResponse.json({ error: "Failed to save blog post" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to save blog post" }, { status: 500 });
   }
 }
 
 export async function GET(request: NextRequest) {
-  // For CI / E2E and for ?e2e bypasses, don’t touch Firestore at all
+  // 1) CI / E2E and for ?e2e bypasses, don’t touch Firestore at all
   if (isCiLike() || hasE2EBypass(request)) {
-    return NextResponse.json({ posts: getE2EBlogPosts() })
+    return NextResponse.json({ posts: getE2EBlogPosts() });
   }
 
+  // 2) Admin-only (same as before)
   if (!(await requireAdmin(request, "canManageBlogs"))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // 3) Read query params
+  const searchParams = request.nextUrl.searchParams;
+  const includeAll =
+    searchParams.get("all") === "1" || searchParams.get("all") === "true";
+  const limitParam = searchParams.get("limit");
+  const limit = limitParam ? Number.parseInt(limitParam, 10) : undefined;
+
+  let contentStore: ContentStoreModule | null = null;
 
   try {
-    const { blogStore } = await loadContentStore()
-    const posts: BlogPost[] = await blogStore.getAll()
-    return NextResponse.json({ posts })
+    contentStore = await loadContentStore();
+    const { blogStore } = contentStore;
+    const posts: BlogPost[] = await blogStore.getAll();
+
+    const filtered = includeAll
+      ? posts
+      : posts.filter((post) => post.status === "published");
+
+    const sliced =
+      typeof limit === "number" && Number.isFinite(limit) && limit > 0
+        ? filtered.slice(0, limit)
+        : filtered;
+
+    return NextResponse.json({ posts: sliced });
   } catch (error) {
-    console.error("Error fetching blog posts:", error)
-    return NextResponse.json({ error: "Failed to fetch blog posts" }, { status: 500 })
+    console.error("Error fetching blog posts:", error);
+
+    // if content-store itself said "admin DB unavailable", surface 503
+    if (
+      error instanceof HttpError &&
+      contentStore &&
+      error.message === contentStore.ADMIN_DB_UNAVAILABLE
+    ) {
+      return NextResponse.json(
+        { error: contentStore.ADMIN_DB_UNAVAILABLE },
+        { status: 503 },
+      );
+    }
+
+    return NextResponse.json({ error: "Failed to fetch blog posts" }, { status: 500 });
   }
 }

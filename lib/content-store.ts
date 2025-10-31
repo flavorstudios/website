@@ -184,9 +184,13 @@ export function getFallbackBlogPostById(id: string): BlogPost | null {
 async function applyFreshMediaToPosts(posts: BlogPost[]): Promise<BlogPost[]> {
   if (posts.length === 0) return posts;
 
+  // collect media IDs from featured/openGraph + from HTML content
   const idToUrl = new Map<string, string>();
+
   for (const post of posts) {
     const candidates = [post.featuredImage, post.openGraphImage];
+
+    // existing image fields
     for (const candidate of candidates) {
       if (!candidate) continue;
       const [id] = extractMediaIds(candidate);
@@ -194,10 +198,24 @@ async function applyFreshMediaToPosts(posts: BlogPost[]): Promise<BlogPost[]> {
         idToUrl.set(id, candidate);
       }
     }
+
+    // NEW: scan HTML content for media/* URLs (encoded)
+    if (typeof post.content === "string" && post.content.length > 0) {
+      const re = /(media%2F([0-9A-Za-z_-]{8,})%2F[^"')\s]+)/g;
+      let match: RegExpExecArray | null;
+      while ((match = re.exec(post.content)) !== null) {
+        const full = match[1]; // encoded path
+        const mediaId = match[2];
+        if (mediaId && !idToUrl.has(mediaId)) {
+          idToUrl.set(mediaId, decodeURIComponent(full));
+        }
+      }
+    }
   }
 
   if (idToUrl.size === 0) return posts;
 
+  // refresh all found media
   const replacements = new Map<string, string>();
   await Promise.all(
     Array.from(idToUrl.entries()).map(async ([id, currentUrl]) => {
@@ -209,6 +227,16 @@ async function applyFreshMediaToPosts(posts: BlogPost[]): Promise<BlogPost[]> {
   );
 
   if (replacements.size === 0) return posts;
+
+  const rewriteContent = (html: string): string => {
+    return html.replace(
+      /(media%2F([0-9A-Za-z_-]{8,})%2F[^"')\s]+)/g,
+      (match, _full, mediaId: string) => {
+        const replacement = replacements.get(mediaId);
+        return replacement ?? match;
+      },
+    );
+  };
 
   return posts.map((post) => {
     let changed = false;
@@ -228,6 +256,15 @@ async function applyFreshMediaToPosts(posts: BlogPost[]): Promise<BlogPost[]> {
 
     updateField("featuredImage");
     updateField("openGraphImage");
+
+    // also rewrite HTML content if needed
+    if (typeof post.content === "string" && post.content.length > 0) {
+      const rewritten = rewriteContent(post.content);
+      if (rewritten !== post.content) {
+        next.content = rewritten;
+        changed = true;
+      }
+    }
 
     return changed ? next : post;
   });
@@ -253,6 +290,19 @@ function getDbOrNull(): Firestore | null {
     }
     return null;
   }
+}
+
+// NEW: strict helper for admin/public reads
+function requireDb(): Firestore {
+  const db = getDbOrNull();
+  if (!db) {
+    throw new HttpError(
+      ADMIN_DB_UNAVAILABLE,
+      503,
+      "content-store",
+    );
+  }
+  return db;
 }
 
 export const ADMIN_DB_UNAVAILABLE =
@@ -316,7 +366,7 @@ export const BlogPostSchema = z.object({
   excerpt: z.string(),
   status: z.enum(["draft", "published", "scheduled"]),
   category: z.string(),
-  categories: z.array(z.string()).optional(),    // <--- Codex: optional
+  categories: z.array(z.string()).optional(), // <--- Codex: optional
   tags: z.array(z.string()),
   featuredImage: z.string(),
   featured: z.boolean().optional(),
@@ -329,10 +379,10 @@ export const BlogPostSchema = z.object({
   updatedAt: z.string(),
   views: z.number(),
   readTime: z.string().optional(),
-  commentCount: z.number().optional(),           // <--- Codex: optional
-  shareCount: z.number().optional(),             // <--- Track shares
-  schemaType: z.string().optional(),             // <--- ADDED for SEO & preview
-  openGraphImage: z.string().optional(),         // <--- ADDED for SEO & preview
+  commentCount: z.number().optional(), // <--- Codex: optional
+  shareCount: z.number().optional(), // <--- Track shares
+  schemaType: z.string().optional(), // <--- ADDED for SEO & preview
+  openGraphImage: z.string().optional(), // <--- ADDED for SEO & preview
 });
 
 export const VideoSchema = z.object({
@@ -357,9 +407,8 @@ export const VideoSchema = z.object({
 // --- Blog Store ---
 export const blogStore = {
   async getAll(): Promise<BlogPost[]> {
-    const db = getDbOrNull();
-    if (!db)
-      return applyFreshMediaToPosts(FALLBACK_BLOG_POSTS.map(normalizeBlogPost));
+    // strict for admin/public: surface 503 instead of silent fallback
+    const db = requireDb();
     const snap = await db.collection("blogs").orderBy("createdAt", "desc").get();
     const posts = snap.docs.map((d) => normalizeBlogPost(d.data() as BlogPost));
     return applyFreshMediaToPosts(posts);
@@ -370,7 +419,9 @@ export const blogStore = {
     if (!db) {
       const fallbackPost = FALLBACK_BLOG_POSTS.find((post) => post.id === id);
       if (!fallbackPost) return null;
-      const [post] = await applyFreshMediaToPosts([normalizeBlogPost(fallbackPost)]);
+      const [post] = await applyFreshMediaToPosts([
+        normalizeBlogPost(fallbackPost),
+      ]);
       return post ?? null;
     }
     const doc = await db.collection("blogs").doc(id).get();
@@ -385,9 +436,13 @@ export const blogStore = {
   async getBySlug(slug: string): Promise<BlogPost | null> {
     const db = getDbOrNull();
     if (!db) {
-      const fallbackPost = FALLBACK_BLOG_POSTS.find((post) => post.slug === slug);
+      const fallbackPost = FALLBACK_BLOG_POSTS.find(
+        (post) => post.slug === slug,
+      );
       if (!fallbackPost) return null;
-      const [post] = await applyFreshMediaToPosts([normalizeBlogPost(fallbackPost)]);
+      const [post] = await applyFreshMediaToPosts([
+        normalizeBlogPost(fallbackPost),
+      ]);
       return post ?? null;
     }
     const snap = await db
@@ -403,7 +458,10 @@ export const blogStore = {
   },
 
   async create(
-    post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "views" | "commentCount" | "shareCount">
+    post: Omit<
+      BlogPost,
+      "id" | "createdAt" | "updatedAt" | "views" | "commentCount" | "shareCount"
+    >,
   ): Promise<BlogPost> {
     // Validate input (omitting auto fields)
     const data = BlogPostSchema.omit({
@@ -415,7 +473,9 @@ export const blogStore = {
       shareCount: true,
     }).parse(post);
 
-    const id = `post_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    const id = `post_${Date.now()}_${Math.random()
+      .toString(36)
+      .slice(2, 9)}`;
     const newPost: BlogPost = {
       ...post,
       ...data,
@@ -430,13 +490,14 @@ export const blogStore = {
       delete (newPost as Partial<BlogPost>).scheduledFor;
     }
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    if (!db)
+      throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db.collection("blogs").doc(id).set(newPost);
     try {
       const ids = extractMediaIds(
         newPost.content,
         newPost.featuredImage,
-        newPost.openGraphImage
+        newPost.openGraphImage,
       );
       await linkMediaToPost(ids, id);
     } catch {
@@ -448,12 +509,13 @@ export const blogStore = {
   async update(
     id: string,
     updates: Partial<BlogPost>,
-    editor = "unknown"
+    editor = "unknown",
   ): Promise<BlogPost | null> {
     // Validate input (partial allows patching)
     const data = BlogPostSchema.partial().parse(updates);
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    if (!db)
+      throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     const ref = db.collection("blogs").doc(id);
 
     const beforeSnap = await ref.get();
@@ -477,12 +539,12 @@ export const blogStore = {
       const beforeIds = extractMediaIds(
         before.content,
         before.featuredImage,
-        before.openGraphImage
+        before.openGraphImage,
       );
       const afterIds = extractMediaIds(
         updated.content,
         updated.featuredImage,
-        updated.openGraphImage
+        updated.openGraphImage,
       );
       const toAdd = afterIds.filter((m) => !beforeIds.includes(m));
       const toRemove = beforeIds.filter((m) => !afterIds.includes(m));
@@ -496,8 +558,15 @@ export const blogStore = {
 
     // Field-level diff only for keys we attempted to change
     const diff: BlogDiff = {};
-    const setDiff = <K extends keyof BlogPost>(key: K, beforeVal: BlogPost[K], afterVal: BlogPost[K]) => {
-      diff[key] = { before: beforeVal, after: afterVal } as BlogDiff[K];
+    const setDiff = <K extends keyof BlogPost>(
+      key: K,
+      beforeVal: BlogPost[K],
+      afterVal: BlogPost[K],
+    ) => {
+      diff[key] = {
+        before: beforeVal,
+        after: afterVal,
+      } as BlogDiff[K];
     };
     for (const key of Object.keys(data) as (keyof BlogPost)[]) {
       if (before[key] !== updated[key]) {
@@ -525,16 +594,20 @@ export const blogStore = {
       .collection("revisions")
       .orderBy("timestamp", "desc")
       .get();
-    return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<BlogRevision, "id">) }));
+    return snap.docs.map((d) => ({
+      id: d.id,
+      ...(d.data() as Omit<BlogRevision, "id">),
+    }));
   },
 
   async restoreRevision(
     id: string,
     revisionId: string,
-    editor = "unknown"
+    editor = "unknown",
   ): Promise<BlogPost | null> {
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    if (!db)
+      throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     const ref = db.collection("blogs").doc(id);
     const revDoc = await ref.collection("revisions").doc(revisionId).get();
     if (!revDoc.exists) return null;
@@ -557,8 +630,15 @@ export const blogStore = {
 
     // Optional: also log a restore action entry for extra audit clarity
     const reverseDiff: BlogDiff = {};
-    const setReverse = <K extends keyof BlogPost>(key: K, beforeVal: BlogPost[K], afterVal: BlogPost[K]) => {
-      reverseDiff[key] = { before: beforeVal, after: afterVal } as BlogDiff[K];
+    const setReverse = <K extends keyof BlogPost>(
+      key: K,
+      beforeVal: BlogPost[K],
+      afterVal: BlogPost[K],
+    ) => {
+      reverseDiff[key] = {
+        before: beforeVal,
+        after: afterVal,
+      } as BlogDiff[K];
     };
     for (const key of Object.keys(revision.diff) as (keyof BlogPost)[]) {
       const change = revision.diff[key];
@@ -577,7 +657,8 @@ export const blogStore = {
 
   async incrementViews(id: string): Promise<void> {
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    if (!db)
+      throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db
       .collection("blogs")
       .doc(id)
@@ -586,16 +667,15 @@ export const blogStore = {
 
   async setCommentCount(id: string, count: number): Promise<void> {
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
-    await db
-      .collection("blogs")
-      .doc(id)
-      .update({ commentCount: count });
+    if (!db)
+      throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    await db.collection("blogs").doc(id).update({ commentCount: count });
   },
 
   async delete(id: string): Promise<boolean> {
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    if (!db)
+      throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     const ref = db.collection("blogs").doc(id);
     const doc = await ref.get();
     if (!doc.exists) return false;
@@ -604,7 +684,7 @@ export const blogStore = {
       const ids = extractMediaIds(
         data.content,
         data.featuredImage,
-        data.openGraphImage
+        data.openGraphImage,
       );
       await unlinkMediaFromPost(ids, id);
     } catch {
@@ -643,7 +723,7 @@ export const videoStore = {
   },
 
   async create(
-    video: Omit<Video, "id" | "createdAt" | "updatedAt" | "views">
+    video: Omit<Video, "id" | "createdAt" | "updatedAt" | "views">,
   ): Promise<Video> {
     const data = VideoSchema.omit({
       id: true,
@@ -652,7 +732,9 @@ export const videoStore = {
       views: true,
     }).parse(video);
 
-    const id = `video_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    const id = `video_${Date.now()}_${Math.random()
+      .toString(36)
+      .slice(2, 9)}`;
     const newVideo: Video = {
       ...video,
       ...data,
@@ -662,24 +744,30 @@ export const videoStore = {
       views: 0,
     };
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    if (!db)
+      throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db.collection("videos").doc(id).set(newVideo);
     return newVideo;
   },
 
   async update(id: string, updates: Partial<Video>): Promise<Video | null> {
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    if (!db)
+      throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     const data = VideoSchema.partial().parse(updates);
     const ref = db.collection("videos").doc(id);
-    await ref.set({ ...data, updatedAt: new Date().toISOString() }, { merge: true });
+    await ref.set(
+      { ...data, updatedAt: new Date().toISOString() },
+      { merge: true },
+    );
     const doc = await ref.get();
     return doc.exists ? (doc.data() as Video) : null;
   },
 
   async incrementViews(id: string): Promise<void> {
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    if (!db)
+      throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db
       .collection("videos")
       .doc(id)
@@ -688,7 +776,8 @@ export const videoStore = {
 
   async delete(id: string): Promise<boolean> {
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    if (!db)
+      throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     const ref = db.collection("videos").doc(id);
     const doc = await ref.get();
     if (!doc.exists) return false;
@@ -710,7 +799,7 @@ export const pageStore = {
     page: string,
     section: string,
     content: Record<string, unknown>,
-    updatedBy: string
+    updatedBy: string,
   ): Promise<PageContent> {
     const id = `${page}_${section}`;
     const entry: PageContent = {
@@ -722,7 +811,8 @@ export const pageStore = {
       updatedBy,
     };
     const db = getDbOrNull();
-    if (!db) throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
+    if (!db)
+      throw new HttpError(ADMIN_DB_UNAVAILABLE, 503, "content-store");
     await db.collection("pages").doc(id).set(entry);
     return entry;
   },

@@ -250,7 +250,22 @@ export async function uploadMedia(buffer: Buffer, name: string, mimeType: string
     },
   });
 
-  const { url, expiresAt } = await fileUrl(file);
+  // NEW: try to make it public, fall back to signed
+  let url: string;
+  let expiresAt: number | undefined;
+  try {
+    await file.makePublic();
+    url = file.publicUrl();
+  } catch (error) {
+    const signed = await fileUrl(file);
+    url = signed.url;
+    expiresAt = signed.expiresAt;
+    logger.warn("[Media] Failed to make file public, using signed URL instead", {
+      id,
+      objectPath,
+      error,
+    });
+  }
 
   const doc: MediaDoc = {
     id,
@@ -271,7 +286,7 @@ export async function uploadMedia(buffer: Buffer, name: string, mimeType: string
     favorite: false, // ✅ default favorite flag
   };
 
-  if (expiresAt) {
+  if (typeof expiresAt === "number") {
     // Store expiry so the dashboard can refresh signed URLs before they lapse.
     doc.urlExpiresAt = expiresAt;
   }
@@ -316,14 +331,34 @@ export async function refreshMediaUrl(id: string): Promise<MediaDoc | null> {
 
   const { url, expiresAt } = await fileUrl(file);
 
-  const updates: Partial<MediaDoc> = {
+  // Build updates so we can delete urlExpiresAt when the file is public
+  const updates: Record<string, unknown> = {
     url,
-    urlExpiresAt: expiresAt,
     updatedAt: Date.now(),
   };
 
+  if (typeof expiresAt === "number") {
+    updates.urlExpiresAt = expiresAt;
+  } else {
+    // public URL -> no need to keep an expiry field
+    updates.urlExpiresAt = FieldValue.delete();
+  }
+
   await collection.doc(id).set(updates, { merge: true });
-  return { ...data, ...updates } as MediaDoc;
+
+  const next: MediaDoc = {
+    ...data,
+    url,
+    updatedAt: updates.updatedAt as number,
+  };
+
+  if (typeof expiresAt === "number") {
+    next.urlExpiresAt = expiresAt;
+  } else {
+    delete next.urlExpiresAt;
+  }
+
+  return next;
 }
 
 /**
@@ -361,7 +396,12 @@ export async function ensureFreshMediaUrl(
     const data = snap.data() as MediaDoc;
     const now = Date.now();
 
-    if (!data.urlExpiresAt || data.urlExpiresAt <= now) {
+    // NEW: if this doc has no expiry, it's a public URL — just use it
+    if (data.urlExpiresAt == null) {
+      return data.url ?? url;
+    }
+
+    if (data.urlExpiresAt <= now) {
       try {
         const refreshed = await refresh(id);
         return refreshed?.url ?? data.url ?? url;
@@ -447,11 +487,20 @@ export async function cropMedia(
   const variantFile = bucket.file(variantObjectPath);
   await variantFile.save(outBuffer, { contentType: data.mime });
 
-  const { url: variantUrl, expiresAt: variantExpiresAt } = await fileUrl(variantFile);
+  // NEW: make variant public too, or fall back to signed
+  let variantUrl: string;
+  let variantExpiresAt: number | undefined;
+  try {
+    await variantFile.makePublic();
+    variantUrl = variantFile.publicUrl();
+  } catch {
+    const signed = await fileUrl(variantFile);
+    variantUrl = signed.url;
+    variantExpiresAt = signed.expiresAt;
+  }
 
   const variant: MediaVariant = {
     id: genId(),
-    // include url for consumers that expect it
     url: variantUrl,
     path: variantObjectPath,
     width: options.width,
@@ -463,9 +512,10 @@ export async function cropMedia(
     type: "crop",
     label: variantName,
   };
-  if (variantExpiresAt) {
+
+  if (typeof variantExpiresAt === "number") {
     // Allow admin UI to refresh signed URLs for variants as well.
-    variant.urlExpiresAt = variantExpiresAt;
+    (variant as any).urlExpiresAt = variantExpiresAt;
   }
 
   const variants = Array.isArray(data.variants) ? [...data.variants, variant] : [variant];

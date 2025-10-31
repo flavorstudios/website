@@ -1,4 +1,3 @@
-import { describe, expect, test } from "@jest/globals"
 import {
   changeEmailSchema,
   profileSettingsSchema,
@@ -61,6 +60,11 @@ describe("settings schemas", () => {
 
     const merged = mergeSettings(base, {
       profile: {
+        displayName: base.profile.displayName,
+        email: base.profile.email,
+        bio: base.profile.bio,
+        timezone: base.profile.timezone,
+        avatarUrl: base.profile.avatarUrl,
         avatarStoragePath: undefined,
       },
     })

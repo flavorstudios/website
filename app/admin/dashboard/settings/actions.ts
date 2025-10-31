@@ -29,6 +29,53 @@ import {
 } from "@/lib/settings/server"
 import { serverEnv } from "@/env/server"
 import { SITE_NAME, SITE_URL } from "@/lib/constants"
+import { logError } from "@/lib/log"
+
+export type SettingsErrorCode =
+  | "UNAUTHORIZED"
+  | "ADMIN_SDK_UNAVAILABLE"
+  | "FIRESTORE_ERROR"
+  | "EMAIL_TRANSPORT_UNCONFIGURED"
+  | "ROLLBACK_INVALID"
+
+export class SettingsAccessError extends Error {
+  code: SettingsErrorCode
+
+  constructor(code: SettingsErrorCode, message: string, options?: { cause?: unknown }) {
+    super(message)
+    this.name = "SettingsAccessError"
+    this.code = code
+    if (options?.cause !== undefined) {
+      ;(this as { cause?: unknown }).cause = options.cause
+    }
+  }
+}
+
+function requireSettingsDb(context: string, meta?: Record<string, unknown>) {
+  try {
+    return getAdminDb()
+  } catch (error) {
+    logError(`${context}:firestore-unavailable`, error, meta)
+    throw new SettingsAccessError(
+      "ADMIN_SDK_UNAVAILABLE",
+      "Admin Firestore is unavailable. Configure FIREBASE_SERVICE_ACCOUNT_KEY or FIREBASE_SERVICE_ACCOUNT_JSON.",
+      { cause: error },
+    )
+  }
+}
+
+function requireSettingsAuth(context: string, meta?: Record<string, unknown>) {
+  try {
+    return getAdminAuth()
+  } catch (error) {
+    logError(`${context}:auth-unavailable`, error, meta)
+    throw new SettingsAccessError(
+      "ADMIN_SDK_UNAVAILABLE",
+      "Admin authentication is unavailable. Configure FIREBASE_SERVICE_ACCOUNT_KEY or FIREBASE_SERVICE_ACCOUNT_JSON.",
+      { cause: error },
+    )
+  }
+}
 
 type RollbackEntry = {
   previous: UserSettings
@@ -52,7 +99,10 @@ function getTransporter(): nodemailer.Transporter | null {
     return null
   }
   if (!serverEnv.SMTP_HOST) {
-    throw new Error("Email transport is not configured")
+    throw new SettingsAccessError(
+      "EMAIL_TRANSPORT_UNCONFIGURED",
+      "Email transport is not configured. Set SMTP_HOST/SMTP_USER to send verification messages.",
+    )
   }
   if (!cachedTransporter) {
     cachedTransporter = nodemailer.createTransport({
@@ -122,23 +172,54 @@ type PersistOptions = Pick<
   currentSettings?: UserSettings | null
 }
 
-async function ensureAdmin(): Promise<string> {
-  if (!(await requireAdminAction())) {
-    throw new Error("Unauthorized")
+async function ensureAdmin(context = "admin-settings"): Promise<string> {
+  const authorized = await requireAdminAction()
+  if (!authorized) {
+    logError(`${context}:unauthorized`, "Admin session missing or lacks permissions")
+    throw new SettingsAccessError(
+      "UNAUTHORIZED",
+      "You do not have permission to manage admin settings.",
+    )
   }
-  return await getCurrentAdminUid()
+  try {
+    return await getCurrentAdminUid()
+  } catch (error) {
+    logError(`${context}:uid`, error)
+    throw new SettingsAccessError(
+      "UNAUTHORIZED",
+      "Failed to resolve the current admin user from the session.",
+      { cause: error },
+    )
+  }
 }
 
 export async function loadSettings(): Promise<UserSettings> {
-  const uid = await ensureAdmin()
-  const db = getAdminDb()
-  if (!db) throw new Error("Admin database unavailable")
-  const settings = await readUserSettings(db, uid)
-  if (settings) return settings
-  await writeUserSettings(db, uid, {})
-  const fresh = await readUserSettings(db, uid)
-  if (!fresh) throw new Error("Failed to initialize settings")
-  return fresh
+  const uid = await ensureAdmin("admin-settings:loadSettings")
+  const db = requireSettingsDb("admin-settings:loadSettings", { uid })
+
+  try {
+    const settings = await readUserSettings(db, uid)
+    if (settings) return settings
+    await writeUserSettings(db, uid, {})
+    const fresh = await readUserSettings(db, uid)
+    if (!fresh) {
+      throw new SettingsAccessError(
+        "FIRESTORE_ERROR",
+        "Failed to initialize admin settings document.",
+      )
+    }
+    return fresh
+  } catch (error) {
+    if (error instanceof SettingsAccessError) {
+      throw error
+    }
+    logError("admin-settings:loadSettings", error, { uid })
+    throw new SettingsAccessError(
+      "FIRESTORE_ERROR",
+      "Unable to load admin settings from Firestore.",
+      { cause: error },
+    )
+  }
 }
 
 function createRollback(
@@ -164,21 +245,45 @@ async function persistUpdates(
   updates: Partial<UserSettings>,
   options?: PersistOptions,
 ): Promise<{ settings: UserSettings; rollbackToken: string }> {
-  const db = getAdminDb()
-  if (!db) throw new Error("Admin database unavailable")
-  const current = options?.currentSettings ?? (await readUserSettings(db, uid))
-  const settings = await writeUserSettings(db, uid, updates)
-  const rollbackToken = createRollback(uid, current ?? settings, options)
-  revalidatePath(ACTION_PATH)
-  return { settings, rollbackToken }
+  const meta = { uid, updates: Object.keys(updates) }
+  const db = requireSettingsDb("admin-settings:persistUpdates", meta)
+  try {
+    const current = options?.currentSettings ?? (await readUserSettings(db, uid))
+    const settings = await writeUserSettings(db, uid, updates)
+    const rollbackToken = createRollback(uid, current ?? settings, options)
+    revalidatePath(ACTION_PATH)
+    return { settings, rollbackToken }
+  } catch (error) {
+    if (error instanceof SettingsAccessError) {
+      throw error
+    }
+    logError("admin-settings:persistUpdates", error, meta)
+    throw new SettingsAccessError(
+      "FIRESTORE_ERROR",
+      "Unable to persist admin settings changes.",
+      { cause: error },
+    )
+  }
 }
 
 export async function updateProfile(input: ProfileSettingsInput) {
-  const uid = await ensureAdmin()
+  const uid = await ensureAdmin("admin-settings:updateProfile")
   const parsed = profileSettingsSchema.parse(input)
-  const db = getAdminDb()
-  if (!db) throw new Error("Admin database unavailable")
-  const currentSettings = await readUserSettings(db, uid)
+  const db = requireSettingsDb("admin-settings:updateProfile", { uid })
+  let currentSettings: UserSettings | null = null
+  try {
+    currentSettings = await readUserSettings(db, uid)
+  } catch (error) {
+    if (error instanceof SettingsAccessError) {
+      throw error
+    }
+    logError("admin-settings:updateProfile:read", error, { uid })
+    throw new SettingsAccessError(
+      "FIRESTORE_ERROR",
+      "Unable to read existing profile settings.",
+      { cause: error },
+    )
+  }
   const previousAvatarPath = currentSettings?.profile.avatarStoragePath ?? null
   const nextAvatarPath = parsed.avatarStoragePath ?? null
   const hasNewAvatar = Boolean(nextAvatarPath && nextAvatarPath !== previousAvatarPath)
@@ -229,7 +334,7 @@ export async function updateProfile(input: ProfileSettingsInput) {
 }
 
 export async function uploadAvatar(formData: FormData) {
-  const uid = await ensureAdmin()
+  const uid = await ensureAdmin("admin-settings:uploadAvatar")
   const file = formData.get("file")
   if (!(file instanceof File)) {
     throw new Error("Avatar file is required")
@@ -248,15 +353,14 @@ const verificationCooldown = new Map<string, number>()
 const COOLDOWN_MS = 60 * 1000
 
 export async function changeEmail(payload: { newEmail: string; reauthToken: string }) {
-  const uid = await ensureAdmin()
+  const uid = await ensureAdmin("admin-settings:changeEmail")
   const { newEmail, reauthToken } = changeEmailSchema.parse(payload)
   const now = Date.now()
   const last = changeEmailCooldown.get(uid) ?? 0
   if (now - last < COOLDOWN_MS) {
     throw new Error("Email change is temporarily rate limited")
   }
-  const auth = getAdminAuth()
-  if (!auth) throw new Error("Auth unavailable")
+  const auth = requireSettingsAuth("admin-settings:changeEmail", { uid })
 
   const decoded = await auth.verifyIdToken(reauthToken, true)
   if (!decoded || decoded.uid !== uid) {
@@ -283,14 +387,30 @@ export async function changeEmail(payload: { newEmail: string; reauthToken: stri
       email: previousEmail ?? newEmail,
       emailVerified: previousEmailVerified,
     })
+    if (error instanceof SettingsAccessError) {
+      logError("admin-settings:changeEmail:transport", error, { uid })
+      throw error
+    }
     throw error instanceof Error
       ? error
       : new Error("Failed to send verification email")
   }
 
-  const db = getAdminDb()
-  if (!db) throw new Error("Admin database unavailable")
-  const currentSettings = await readUserSettings(db, uid)
+  const db = requireSettingsDb("admin-settings:changeEmail", { uid })
+  let currentSettings: UserSettings | null = null
+  try {
+    currentSettings = await readUserSettings(db, uid)
+  } catch (error) {
+    if (error instanceof SettingsAccessError) {
+      throw error
+    }
+    logError("admin-settings:changeEmail:read", error, { uid })
+    throw new SettingsAccessError(
+      "FIRESTORE_ERROR",
+      "Unable to read settings while changing email.",
+      { cause: error },
+    )
+  }
   const baseProfile = currentSettings?.profile ?? {
     displayName: "",
     email: "",
@@ -327,41 +447,50 @@ export async function changeEmail(payload: { newEmail: string; reauthToken: stri
 }
 
 export async function sendEmailVerification(payload: { email: string }) {
-  const uid = await ensureAdmin()
+  const uid = await ensureAdmin("admin-settings:sendEmailVerification")
   const { email } = sendVerificationSchema.parse(payload)
   const now = Date.now()
   const last = verificationCooldown.get(uid) ?? 0
   if (now - last < COOLDOWN_MS) {
     throw new Error("Verification already requested recently")
   }
-  const auth = getAdminAuth()
-  if (!auth) throw new Error("Auth unavailable")
+  const auth = requireSettingsAuth("admin-settings:sendEmailVerification", { uid })
   const link = await auth.generateEmailVerificationLink(email)
-await sendVerificationEmailMessage({
-    email,
-    link,
-    subject: `${SITE_NAME} – Verify your email address`,
-    heading: "Verify your email address",
-    intro: `Confirm your email to secure your ${SITE_NAME} admin account.`,
-  })
+try {
+    await sendVerificationEmailMessage({
+      email,
+      link,
+      subject: `${SITE_NAME} – Verify your email address`,
+      heading: "Verify your email address",
+      intro: `Confirm your email to secure your ${SITE_NAME} admin account.`,
+    })
+  } catch (error) {
+    if (error instanceof SettingsAccessError) {
+      logError("admin-settings:sendEmailVerification:transport", error, { uid })
+      throw error
+    }
+    throw error instanceof Error
+      ? error
+      : new Error("Failed to send verification email")
+  }
   verificationCooldown.set(uid, now)
   return { ok: true }
 }
 
 export async function updateNotifications(input: NotificationsSettingsInput) {
-  const uid = await ensureAdmin()
+  const uid = await ensureAdmin("admin-settings:updateNotifications")
   const parsed = notificationsSettingsSchema.parse(input)
   return await persistUpdates(uid, { notifications: parsed })
 }
 
 export async function sendTestNotification(channel: "email" | "inApp") {
-  const uid = await ensureAdmin()
+  const uid = await ensureAdmin("admin-settings:sendTestNotification")
   // Stub implementation – in a real system this would send via provider
   return { ok: true, channel, uid }
 }
 
 export async function updateAppearance(input: AppearanceSettingsInput) {
-  const uid = await ensureAdmin()
+  const uid = await ensureAdmin("admin-settings:updateAppearance")
   const parsed = appearanceSettingsSchema.parse(input)
   const contrast = getContrastRatio(parsed.accent)
   if (!contrast.meetsAA) {
@@ -371,27 +500,45 @@ export async function updateAppearance(input: AppearanceSettingsInput) {
 }
 
 export async function resetAppearance() {
-  const uid = await ensureAdmin()
+  const uid = await ensureAdmin("admin-settings:resetAppearance")
   return await persistUpdates(uid, { appearance: DEFAULT_APPEARANCE })
 }
 
 export async function rollbackSettings(token: string) {
   const item = rollbackStore.get(token)
-  if (!item) throw new Error("Rollback expired")
+  if (!item)
+    throw new SettingsAccessError(
+      "ROLLBACK_INVALID",
+      "Rollback token is invalid or has expired.",
+    )
   if (item.expiresAt < Date.now()) {
     if (item.onExpire) {
       await Promise.resolve(item.onExpire())
     }
     rollbackStore.delete(token)
-    throw new Error("Rollback expired")
+    throw new SettingsAccessError(
+      "ROLLBACK_INVALID",
+      "Rollback token is invalid or has expired.",
+    )
   }
   const { uid, previous, previousAuthEmail, previousEmailVerified, onRollback } = item
   rollbackStore.delete(token)
-  const db = getAdminDb()
-  if (!db) throw new Error("Admin database unavailable")
-  await writeUserSettings(db, uid, previous)
+  const db = requireSettingsDb("admin-settings:rollbackSettings", { uid })
+  try {
+    await writeUserSettings(db, uid, previous)
+  } catch (error) {
+    if (error instanceof SettingsAccessError) {
+      throw error
+    }
+    logError("admin-settings:rollbackSettings", error, { uid })
+    throw new SettingsAccessError(
+      "FIRESTORE_ERROR",
+      "Unable to restore previous admin settings.",
+      { cause: error },
+    )
+  }
   if (previousAuthEmail) {
-    const auth = getAdminAuth()
+    const auth = requireSettingsAuth("admin-settings:rollbackSettings", { uid })
     await auth.updateUser(uid, {
       email: previousAuthEmail,
       emailVerified: previousEmailVerified ?? false,

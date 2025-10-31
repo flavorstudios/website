@@ -1,4 +1,3 @@
-import { __stores } from '@/lib/firebase-admin';
 import { blogStore } from '@/lib/content-store';
 import { deleteMedia } from '@/lib/media';
 import type { MediaDoc } from '@/types/media';
@@ -55,6 +54,13 @@ jest.mock('@/lib/firebase-admin', () => {
   } as any;
   return { safeAdminDb: mockDb, getAdminDb: () => mockDb, __stores: { mediaStore, blogStoreData } };
 });
+
+const { __stores } = jest.requireMock('@/lib/firebase-admin') as {
+  __stores: {
+    mediaStore: Record<string, any>;
+    blogStoreData: Record<string, any>;
+  };
+};
 
 const mediaStore: Record<string, any> = __stores.mediaStore;
 

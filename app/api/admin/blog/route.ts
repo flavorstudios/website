@@ -205,16 +205,21 @@ export async function GET(request: NextRequest) {
 
   // 3) Read query params
   const searchParams = request.nextUrl.searchParams;
+  const includeAllParam = searchParams.get("all");
   const includeAll =
-    searchParams.get("all") === "1" || searchParams.get("all") === "true";
+    includeAllParam === "1" ||
+    includeAllParam?.toLowerCase() === "true" ||
+    includeAllParam?.toLowerCase() === "yes";
   const limitParam = searchParams.get("limit");
   const limit = limitParam ? Number.parseInt(limitParam, 10) : undefined;
 
   let contentStore: ContentStoreModule | null = null;
+  let adminUnavailableMessage: string | null = null;
 
   try {
     contentStore = await loadContentStore();
-    const { blogStore } = contentStore;
+    const { blogStore, ADMIN_DB_UNAVAILABLE: ADMIN_DB_ERROR } = contentStore;
+    adminUnavailableMessage = ADMIN_DB_ERROR;
     const posts: BlogPost[] = await blogStore.getAll();
 
     const filtered = includeAll
@@ -237,8 +242,8 @@ export async function GET(request: NextRequest) {
       error.message === contentStore.ADMIN_DB_UNAVAILABLE
     ) {
       return NextResponse.json(
-        { error: contentStore.ADMIN_DB_UNAVAILABLE },
-        { status: 503 },
+        { error: adminUnavailableMessage ?? contentStore.ADMIN_DB_UNAVAILABLE },
+        { status: error.status || 503 },
       );
     }
 

@@ -18,6 +18,33 @@ export type { BlogPost };
 
 const FALLBACK_BLOG_POSTS: BlogPost[] = [
   {
+    id: "fallback-welcome-to-flavor-studios",
+    title: "Welcome to Flavor Studios",
+    slug: "welcome-to-flavor-studios",
+    content: "<p>Welcome to Flavor Studios</p>",
+    excerpt:
+      "Meet Flavor Studios and learn what to expect from our latest creative updates and behind-the-scenes stories.",
+    status: "published",
+    category: "Announcements",
+    categories: ["Announcements"],
+    tags: ["welcome", "studio"],
+    featuredImage: "/cover.jpg",
+    featured: true,
+    seoTitle: "Welcome to Flavor Studios",
+    seoDescription:
+      "A welcome message from Flavor Studios that introduces our work, philosophy, and upcoming projects.",
+    author: "Flavor Studios",
+    publishedAt: "2024-01-01T00:00:00.000Z",
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T00:00:00.000Z",
+    views: 0,
+    readTime: "2 min",
+    commentCount: 0,
+    shareCount: 0,
+    schemaType: "Article",
+    openGraphImage: "/cover.jpg",
+  },
+  {
     id: "fallback-building-developer-velocity",
     title: "How We Build Developer Velocity Without Burning Out",
     slug: "build-developer-velocity-without-burnout",

@@ -42,7 +42,9 @@ describe('DELETE /api/admin/comments/[postId]/[commentId]/delete', () => {
   it('logs activity on delete', async () => {
     const { DELETE } = await import('./route');
     const req = {} as any;
-    const res = await DELETE(req, { params: { postId: 'p1', commentId: 'c1' } });
+    const res = await DELETE(req, {
+      params: Promise.resolve({ postId: 'p1', commentId: 'c1' }),
+    });
     expect(res.status).toBe(200);
     expect(logActivity).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'comment.delete', title: 'c1', user: 'admin@test.com' })

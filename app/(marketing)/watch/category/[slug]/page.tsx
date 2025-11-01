@@ -23,6 +23,7 @@ export default async function WatchCategoryPage({
 
   return (
     <WatchPage
+      params={{}}
       searchParams={{
         category: categorySlug,
         page: resolvedSearchParams.page,

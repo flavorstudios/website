@@ -59,6 +59,7 @@ export default async function BlogCategoryPage({
   // To pass `category` or `blogPosts`, extend BlogPage’s props in app/blog/page.tsx.
   return (
     <BlogPage
+      params={{}}
       searchParams={{
         ...resolvedSearchParams,
         category: categorySlug,

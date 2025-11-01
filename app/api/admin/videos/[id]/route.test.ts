@@ -39,7 +39,9 @@ describe('PUT /api/admin/videos/[id]', () => {
   it('logs activity on update', async () => {
     const { PUT } = await import('./route');
     const req = { json: async () => ({ title: 'Updated Video' }) } as any;
-    const res = await PUT(req, { params: { id: '1' } });
+    const res = await PUT(req, {
+      params: Promise.resolve({ id: '1' }),
+    });
     expect(res.status).toBe(200);
     expect(logActivity).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'video.update', title: 'Updated Video', user: 'admin@test.com' })
@@ -55,7 +57,9 @@ describe('DELETE /api/admin/videos/[id]', () => {
   it('logs activity on delete', async () => {
     const { DELETE } = await import('./route');
     const req = {} as any;
-    const res = await DELETE(req, { params: { id: '1' } });
+    const res = await DELETE(req, {
+      params: Promise.resolve({ id: '1' }),
+    });
     expect(res.status).toBe(200);
     expect(logActivity).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'video.delete', title: '1', user: 'admin@test.com' })

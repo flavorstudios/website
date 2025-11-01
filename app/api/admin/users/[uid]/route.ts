@@ -4,17 +4,16 @@ import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { getUserRole, setUserRole } from "@/lib/user-roles";
 import { logError } from "@/lib/log";
 import { logActivity } from "@/lib/activity-log";
-
-type RouteContext = { params: { uid: string } };
+import type { RouteContext } from "@/types/route";
 
 export async function GET(
   request: NextRequest,
-  { params }: RouteContext,
+  { params }: RouteContext<{ uid: string }>,
 ) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { uid } = params;
+  const { uid } = await params;
   try {
     const auth = getAdminAuth();
     const userRecord = await auth.getUser(uid);
@@ -40,12 +39,12 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: RouteContext,
+  { params }: RouteContext<{ uid: string }>,
 ) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { uid } = params;
+  const { uid } = await params;
   try {
     const auth = getAdminAuth();
     const db = getAdminDb();
@@ -84,12 +83,12 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: RouteContext,
+  { params }: RouteContext<{ uid: string }>,
 ) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { uid } = params;
+  const { uid } = await params;
   try {
     const auth = getAdminAuth();
     const db = getAdminDb();

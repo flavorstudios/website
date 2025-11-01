@@ -6,6 +6,7 @@ import { logError } from "@/lib/log"
 import { publishToUser } from "@/lib/sse-broker"
 import { logActivity } from "@/lib/activity-log"
 import { revalidatePath } from "next/cache"
+import type { RouteContext } from "@/types/route"
 
 function parseOptionalIsoDate(value: unknown, field: string): string | undefined {
   if (value === null || value === undefined) return undefined
@@ -23,12 +24,12 @@ function parseOptionalIsoDate(value: unknown, field: string): string | undefined
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteContext<{ id: string }>
 ) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = params
+  const { id } = await params
   try {
     const data = await request.json()
     let scheduledForIso: string | undefined
@@ -115,12 +116,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteContext<{ id: string }>
 ) {
   if (!(await requireAdmin(request, "canManageBlogs"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = params
+  const { id } = await params
   try {
     const session = await getSessionAndRole(request)
     const success = await blogStore.delete(id)

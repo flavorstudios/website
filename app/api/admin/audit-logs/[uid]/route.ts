@@ -2,12 +2,13 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
+import type { RouteContext } from "@/types/route";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { uid: string } }
+  { params }: RouteContext<{ uid: string }>
 ) {
-  const { uid } = params;
+  const { uid } = await params;
   if (!(await requireAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

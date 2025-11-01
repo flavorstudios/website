@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { type NextRequest, NextResponse } from "next/server";
 import { getNotificationsService } from "@/lib/notifications";
 import { publishToUser } from "@/lib/sse-broker";
+import type { RouteContext } from "@/types/route";
 
 export const runtime = "nodejs";
 
@@ -13,7 +14,7 @@ export const runtime = "nodejs";
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id?: string } }
+  { params }: RouteContext<{ id?: string }>
 ) {
   // Admin gate
   if (!(await requireAdmin(request))) {
@@ -25,7 +26,7 @@ export async function PATCH(
 
   try {
     // Resolve ID from route params or URL as a fallback
-    const { id: paramId } = params;
+    const { id: paramId } = await params;
     let id = paramId;
     if (!id) {
       const pathname = new URL(request.url).pathname;

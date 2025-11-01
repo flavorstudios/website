@@ -79,7 +79,7 @@ async function getVideo(slug: string): Promise<Video | null> {
 export async function generateMetadata({
   params,
 }: PageProps<{ slug: string }>) {
-  const { slug } = await params;
+  const { slug } = params;
   const video = await getVideo(slug);
 
   if (!video) {
@@ -155,7 +155,7 @@ export async function generateMetadata({
 export default async function VideoPage({
   params,
 }: PageProps<{ slug: string }>) {
-  const { slug } = await params;
+  const { slug } = params;
   const video = await getVideo(slug);
 
   if (!video) {

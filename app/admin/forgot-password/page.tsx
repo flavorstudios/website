@@ -51,7 +51,7 @@ type ForgotPasswordPageProps = PageProps<Record<string, never>, ForgotPasswordSe
 export default async function AdminForgotPasswordPage({
   searchParams,
 }: ForgotPasswordPageProps) {
-  const resolvedSearchParams = (await searchParams) ?? {};
+  const resolvedSearchParams = searchParams ?? {};
   
   const notice =
     resolvedSearchParams.status === "expired"

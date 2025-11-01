@@ -6,6 +6,7 @@ import fs from "fs/promises";
 import path from "path";
 import type { Category } from "@/types/category";
 import { publishToUser } from "@/lib/sse-broker";
+import type { RouteContext } from "@/types/route";
 
 const CATEGORIES_PATH = path.join(process.cwd(), "content-data", "categories.json");
 
@@ -27,16 +28,14 @@ function isValidCategoryUpdate(data: unknown): data is Partial<Category> {
   );
 }
 
-type RouteContext = { params: { id: string } };
-
 export async function PUT(
   request: NextRequest,
-  { params }: RouteContext,
+  { params }: RouteContext<{ id: string }>,
 ) {
   if (!(await requireAdmin(request, "canManageCategories"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id } = params;
+  const { id } = await params;
   try {
     const data = await request.json();
 
@@ -104,12 +103,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: RouteContext,
+  { params }: RouteContext<{ id: string }>,
 ) {
   if (!(await requireAdmin(request, "canManageCategories"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { id } = params;
+  const { id } = await params;
   try {
     const json = await readJSON();
 

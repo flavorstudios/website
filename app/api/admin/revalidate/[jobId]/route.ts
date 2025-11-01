@@ -7,14 +7,13 @@ import {
   updateJobProgress,
 } from "@/lib/revalidate-store";
 import type { JobStatus } from "@/types/revalidate";
-
-type RevalidateRouteContext = { params: { jobId: string } };
+import type { RouteContext } from "@/types/route";
 
 export async function GET(
   _request: NextRequest,
-  context: RevalidateRouteContext,
+  { params }: RouteContext<{ jobId: string }>,
 ) {
-  const { jobId } = context.params;
+  const { jobId } = await params;
   const job = getJob(jobId);
 
   if (job) {

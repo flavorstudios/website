@@ -9,6 +9,7 @@ import type { BlogPost } from "@/lib/content-store";
 import { formatPublicBlogDetail } from "@/lib/formatters";
 import { logBreadcrumb, logError } from "@/lib/log";
 import { normalizeSlug } from "@/lib/slugify";
+import type { RouteContext } from "@/types/route";
 
 function isPostPubliclyVisible(post: BlogPost | null): post is BlogPost {
   if (!post) return false;
@@ -27,13 +28,11 @@ function isPostPubliclyVisible(post: BlogPost | null): post is BlogPost {
   return false;
 }
 
-type RouteContext = { params: { key: string } };
-
 export async function GET(
   request: Request,
-  { params }: RouteContext,
+  { params }: RouteContext<{ key: string }>,
 ) {
-  const { key } = params;
+  const { key } = await params;
   let normalizedKey: string | null = null;
   try {
     normalizedKey = normalizeSlug(key);

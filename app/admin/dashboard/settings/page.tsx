@@ -83,7 +83,7 @@ export default async function SettingsPage({
       logError("admin-settings:page", error)
     }
   }
-  const resolvedSearchParams = (await searchParams) ?? {}
+  const resolvedSearchParams = searchParams ?? {}
   const tab = Array.isArray(resolvedSearchParams.tab)
     ? resolvedSearchParams.tab[0]
     : resolvedSearchParams.tab

@@ -1,17 +1,20 @@
+import type { RouteContext } from "@/types/route"
+
 export const runtime = "edge"
 
 const rooms = new Map<string, Set<WebSocket>>()
-
-type RouteContext = { params: { id: string } }
 
 interface ServerWebSocket extends WebSocket {
   accept: () => void
 }
 
-export async function GET(request: Request, { params }: RouteContext) {
+export async function GET(
+  request: Request,
+  { params }: RouteContext<{ id: string }>,
+) {
   const pair = new WebSocketPair()
   const [client, server] = Object.values(pair) as [WebSocket, ServerWebSocket]
-  const { id: postId } = params
+  const { id: postId } = await params
   let set = rooms.get(postId)
   if (!set) {
     set = new Set()

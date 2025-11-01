@@ -2,17 +2,18 @@ import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { type NextRequest, NextResponse } from "next/server";
 import { commentStore } from "@/lib/comment-store";
 import { logActivity } from "@/lib/activity-log";
+import type { RouteContext } from "@/types/route";
 
 // Updated route handlers to use both postId and commentId
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { postId: string; commentId: string } }
+  { params }: RouteContext<{ postId: string; commentId: string }>
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { postId, commentId } = params;
+  const { postId, commentId } = await params;
   try {
     const body = await request.json();
     if (body.status) {
@@ -37,12 +38,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { postId: string; commentId: string } }
+  { params }: RouteContext<{ postId: string; commentId: string }>
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { postId, commentId } = params;
+  const { postId, commentId } = await params;
   try {
     const success = await commentStore.delete(postId, commentId);
     if (!success) {

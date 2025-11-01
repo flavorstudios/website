@@ -129,7 +129,7 @@ type AdminBlogPageProps = PageProps<
 export default async function BlogPage({
   searchParams,
 }: AdminBlogPageProps) {
-  const resolvedSearchParams = (await searchParams) ?? {};
+  const resolvedSearchParams = searchParams ?? {};
   const slow = isE2ESlow(resolvedSearchParams);
   return (
     <>

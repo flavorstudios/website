@@ -178,7 +178,7 @@ type BlogIndexPageProps = PageProps<
 export default async function BlogPage({
   searchParams,
 }: BlogIndexPageProps) {
-  const params = (await searchParams) ?? {};
+  const params = searchParams ?? {};
 
   const rawCategoryParam = params.category;
   const page = params.page ?? "1";

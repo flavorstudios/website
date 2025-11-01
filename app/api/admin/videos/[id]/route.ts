@@ -2,15 +2,16 @@ import { requireAdmin, getSessionInfo } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import { videoStore } from "@/lib/content-store"
 import { logActivity } from "@/lib/activity-log"
+import type { RouteContext } from "@/types/route"
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteContext<{ id: string }>
 ) {
   if (!(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = params
+  const { id } = await params
   try {
     const data = await request.json()
     const video = await videoStore.update(id, data)
@@ -33,12 +34,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteContext<{ id: string }>
 ) {
   if (!(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = params
+  const { id } = await params
   try {
     const success = await videoStore.delete(id)
     if (!success) {

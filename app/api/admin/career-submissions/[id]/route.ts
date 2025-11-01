@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/admin-auth"
 import { type NextRequest, NextResponse } from "next/server"
 import { getAdminDb } from "@/lib/firebase-admin"
+import type { RouteContext } from "@/types/route"
 
 interface Submission {
   [key: string]: unknown
@@ -8,12 +9,12 @@ interface Submission {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteContext<{ id: string }>
 ) {
   if (!(await requireAdmin(request, "canHandleContacts"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = params
+  const { id } = await params
   try {
     const body = await request.json()
     const allowed = [

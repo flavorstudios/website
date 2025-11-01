@@ -42,7 +42,7 @@ export const metadata = getMetadata({
 });
 
 export default async function AdminSearchPage({ searchParams }: AdminSearchPageProps) {
-  const params = (await searchParams) ?? {};
+  const params = searchParams ?? {};
   const query = typeof params.q === "string" ? params.q : "";
 
   const h = await headers();

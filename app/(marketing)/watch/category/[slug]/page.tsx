@@ -1,6 +1,6 @@
 import siteData from "@/content-data/categories.json" assert { type: "json" };
 import WatchPage from "../../page";
-import type { PageProps, SearchParams } from "@/types/next";
+import type { PageProps } from "@/types/next";
 
 type WatchCategoryPageProps = PageProps<{ slug: string }, { page?: string }>;
 

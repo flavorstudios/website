@@ -13,10 +13,13 @@ import type { PublicBlogDetail } from "@/lib/types";
 import type { PageProps } from "@/types/next";
 
 type BlogPostPageProps = PageProps<{ slug: string }>;
+type BlogPostGenerateMetadataProps = {
+  params: Promise<{ slug: string }>;
+};
 
 // SEO metadata (dynamic per post, using Next.js generateMetadata API)
-export async function generateMetadata({ params }: BlogPostPageProps) {
-  const { slug } = params;
+export async function generateMetadata({ params }: BlogPostGenerateMetadataProps) {
+  const { slug } = await params;
   let post: PublicBlogDetail | null = null;
   try {
     post = await getBlogPost(slug);

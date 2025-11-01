@@ -5,7 +5,7 @@
 import siteData from "@/content-data/categories.json" assert { type: "json" };
 import BlogPage from "../../page";
 import Link from "next/link";
-import type { PageProps, SearchParams } from "@/types/next";
+import type { PageProps } from "@/types/next";
 
 type BlogCategoryPageProps = PageProps<{ slug: string }, { page?: string }>;
 

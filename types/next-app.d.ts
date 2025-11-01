@@ -1,15 +1,15 @@
 import "next";
 
-type AwaitedProps<T> = T extends Promise<infer U> ? AwaitedProps<U> : T;
+type UnwrapPromise<T> = T extends Promise<infer U> ? UnwrapPromise<U> : T;
 
 declare module "next" {
   export type PageProps<
     Params = Record<string, never>,
-    SearchParams = Record<string, string | string[] | undefined> | undefined,
+    SearchParams = {
+      [key: string]: string | string[] | undefined;
+    }
   > = {
-    params: AwaitedProps<Params>;
-    searchParams?: SearchParams extends undefined
-      ? undefined
-      : AwaitedProps<SearchParams>;
+    params: UnwrapPromise<Params>;
+    searchParams?: UnwrapPromise<SearchParams>;
   };
 }

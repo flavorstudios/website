@@ -1,15 +1,19 @@
 import type { PageProps as NextPageProps } from "next";
 
+type UnwrapPromise<T> = T extends Promise<infer U> ? UnwrapPromise<U> : T;
+
+type DefaultSearchParams = {
+  [key: string]: string | string[] | undefined;
+};
+
 export type PageProps<
-  Params extends Record<string, string | string[] | undefined> = Record<string, never>,
-  Search extends
-    | Record<string, string | string[] | undefined>
-    | undefined = Record<string, string | string[] | undefined>,
-> = NextPageProps<Params, Search>;
+  Params = Record<string, never>,
+  Search extends DefaultSearchParams | undefined = DefaultSearchParams,
+> = {
+  params: UnwrapPromise<NextPageProps<Params, Search>["params"]>;
+  searchParams?: UnwrapPromise<NextPageProps<Params, Search>["searchParams"]>;
+};
 
 export type SearchParams<
-  T extends Record<string, string | string[] | undefined> = Record<
-    string,
-    string | string[] | undefined
-  >,
-  > = PageProps<Record<string, never>, T>["searchParams"];
+  T extends DefaultSearchParams = DefaultSearchParams,
+> = PageProps<Record<string, never>, T>["searchParams"];

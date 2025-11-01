@@ -59,7 +59,7 @@ describe("/blog/[slug] scheduled post rendering", () => {
 
     const pageModule = await import("../[slug]/page");
     const result = await pageModule.default({
-      params: Promise.resolve({ slug: mockPost.slug }),
+      params: { slug: mockPost.slug },
     });
 
     expect(getBlogPost).toHaveBeenCalledWith(mockPost.slug);

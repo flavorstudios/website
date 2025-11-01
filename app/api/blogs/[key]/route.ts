@@ -27,11 +27,13 @@ function isPostPubliclyVisible(post: BlogPost | null): post is BlogPost {
   return false;
 }
 
+type RouteContext = { params: { key: string } };
+
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ key: string }> },
+  { params }: RouteContext,
 ) {
-  const { key } = await params;
+  const { key } = params;
   let normalizedKey: string | null = null;
   try {
     normalizedKey = normalizeSlug(key);

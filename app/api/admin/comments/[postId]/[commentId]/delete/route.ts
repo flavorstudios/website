@@ -8,12 +8,12 @@ import { logActivity } from "@/lib/activity-log";
 // DELETE /api/admin/comments/[postId]/[commentId]/delete
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ postId: string; commentId: string }> }
+  { params }: { params: { postId: string; commentId: string } }
 ) {
   if (!(await requireAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { postId, commentId } = await params;
+  const { postId, commentId } = params;
   try {
     const db = getAdminDb();
     const entryRef = db

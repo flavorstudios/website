@@ -165,25 +165,25 @@ async function getBlogData({
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams: SearchParams<{
+  searchParams?: SearchParams<{
     category?: string;
     page?: string;
     search?: string;
     sort?: string;
-    author?: string;      // <-- NEW
-    startDate?: string;   // <-- NEW
-    endDate?: string;     // <-- NEW
+    author?: string; // <-- NEW
+    startDate?: string; // <-- NEW
+    endDate?: string; // <-- NEW
   }>;
 }) {
-  const params = await searchParams;
+  const params = searchParams ?? {};
 
-  const rawCategoryParam = params?.category;
-  const page = params?.page ?? "1";
-  const search = params?.search ?? "";
-  const sort = params?.sort ?? "date";
-  const selectedAuthor = params?.author ?? "all";
-  const startDate = params?.startDate ?? "";
-  const endDate = params?.endDate ?? "";
+  const rawCategoryParam = params.category;
+  const page = params.page ?? "1";
+  const search = params.search ?? "";
+  const sort = params.sort ?? "date";
+  const selectedAuthor = params.author ?? "all";
+  const startDate = params.startDate ?? "";
+  const endDate = params.endDate ?? "";
 
   const { normalized: selectedCategory, canonical: selectedCategoryCanonical } =
     resolveCategory(rawCategoryParam);

@@ -24,7 +24,7 @@ import {
 import { logError } from "@/lib/log";
 import crypto from "crypto";
 import { ValidateSessionPing } from "@/components/ValidateSessionPing";
-import type { SearchParams } from "@/types/next";
+import type { PageProps } from "@/types/next";
 
 async function getPost(id: string): Promise<BlogPost | null> {
   return blogStore.getById(id);
@@ -56,13 +56,10 @@ async function validateSessionViaApi(reqHeaders: Headers) {
   }
 }
 
-interface PreviewPageProps {
-  params: Promise<{ id: string }>;
-  searchParams: SearchParams<{ token?: string }>;
-}
+type PreviewPageProps = PageProps<{ id: string }, { token?: string }>;
 
 export async function generateMetadata({ params }: PreviewPageProps) {
-  const { id } = await params;
+  const { id } = params;
   let post: BlogPost | null = null;
   try {
     post = await getPost(id);
@@ -113,8 +110,8 @@ export async function generateMetadata({ params }: PreviewPageProps) {
 }
 
 export default async function PreviewPage({ params, searchParams }: PreviewPageProps) {
-  const { id } = await params;
-  const { token } = await searchParams;
+  const { id } = params;
+  const { token } = searchParams ?? {};
   const reqHeaders = await headers();
   const requestId = reqHeaders.get("x-request-id") || crypto.randomUUID();
   const isE2E =

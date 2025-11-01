@@ -101,7 +101,7 @@ export default async function WatchPage({
   searchParams?: SearchParams<{ category?: string; page?: string }>;
 }) {
   const { videos, categories } = await getWatchData();
-  const params = searchParams ? await searchParams : {};
+  const params = searchParams ?? {};
   const selectedCategory = params.category ?? "all";
   const currentPage = Number.parseInt(params.page ?? "1");
   const videosPerPage = 12;

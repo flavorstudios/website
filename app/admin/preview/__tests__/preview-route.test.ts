@@ -123,8 +123,8 @@ describe('preview route', () => {
 
   it('returns element for valid token', async () => {
     const result = await PreviewPage({
-      params: Promise.resolve({ id: '1' }),
-      searchParams: Promise.resolve({ token: 'ok' }),
+      params: { id: '1' },
+      searchParams: { token: 'ok' },
     });
     expect(React.isValidElement(result)).toBe(true);
   });
@@ -132,8 +132,8 @@ describe('preview route', () => {
   it('returns error element for invalid token', async () => {
     mockedValidate.mockResolvedValue({ ok: false, reason: 'invalid' });
     const result = await PreviewPage({
-      params: Promise.resolve({ id: '1' }),
-      searchParams: Promise.resolve({ token: 'bad' }),
+      params: { id: '1' },
+      searchParams: { token: 'bad' },
     });
     expect(React.isValidElement(result)).toBe(true);
     if (!React.isValidElement(result)) {
@@ -145,8 +145,8 @@ describe('preview route', () => {
   it('returns error element for expired token', async () => {
     mockedValidate.mockResolvedValue({ ok: false, reason: 'expired' });
     const result = await PreviewPage({
-      params: Promise.resolve({ id: '1' }),
-      searchParams: Promise.resolve({ token: 'old' }),
+      params: { id: '1' },
+      searchParams: { token: 'old' },
     });
     expect(React.isValidElement(result)).toBe(true);
     if (!React.isValidElement(result)) {
@@ -159,8 +159,8 @@ describe('preview route', () => {
     mockedGetById.mockResolvedValue(null);
     await expect(
       PreviewPage({
-        params: Promise.resolve({ id: '1' }),
-        searchParams: Promise.resolve({ token: 'ok' }),
+        params: { id: '1' },
+        searchParams: { token: 'ok' },
       })
     ).rejects.toThrow('NEXT_NOT_FOUND');
   });
@@ -176,8 +176,8 @@ describe('preview route', () => {
     });
     mockedVerify.mockRejectedValue(new Error('no session'));
     const result = await PreviewPage({
-      params: Promise.resolve({ id: '1' }),
-      searchParams: Promise.resolve({ token: 'ok' }),
+      params: { id: '1' },
+      searchParams: { token: 'ok' },
     });
     expect(React.isValidElement(result)).toBe(true);
     if (!React.isValidElement(result)) {

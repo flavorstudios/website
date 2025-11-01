@@ -7,12 +7,12 @@ import { logActivity } from "@/lib/activity-log";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ postId: string; commentId: string }> }
+  { params }: { params: { postId: string; commentId: string } }
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { postId, commentId } = await params;
+  const { postId, commentId } = params;
   try {
     const body = await request.json();
     if (body.status) {
@@ -37,12 +37,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ postId: string; commentId: string }> }
+  { params }: { params: { postId: string; commentId: string } }
 ) {
   if (!(await requireAdmin(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { postId, commentId } = await params;
+  const { postId, commentId } = params;
   try {
     const success = await commentStore.delete(postId, commentId);
     if (!success) {

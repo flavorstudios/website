@@ -5,12 +5,12 @@ import { logActivity } from "@/lib/activity-log"
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   if (!(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = await params
+  const { id } = params
   try {
     const data = await request.json()
     const video = await videoStore.update(id, data)
@@ -33,12 +33,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   if (!(await requireAdmin(request, "canManageVideos"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
-  const { id } = await params
+  const { id } = params
   try {
     const success = await videoStore.delete(id)
     if (!success) {

@@ -3,6 +3,7 @@ import type { SectionId } from "../sections";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { Suspense } from "react";
+import type { SearchParams } from "@/types/next";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -123,9 +124,9 @@ function isE2ESlow(searchParams?: {
 export default async function BlogPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams?: SearchParams<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const resolvedSearchParams = (await searchParams) ?? {};
+  const resolvedSearchParams = searchParams ?? {};
   const slow = isE2ESlow(resolvedSearchParams);
   return (
     <>

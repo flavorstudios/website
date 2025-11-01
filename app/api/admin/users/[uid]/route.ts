@@ -5,14 +5,16 @@ import { getUserRole, setUserRole } from "@/lib/user-roles";
 import { logError } from "@/lib/log";
 import { logActivity } from "@/lib/activity-log";
 
+type RouteContext = { params: { uid: string } };
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ uid: string }> }
+  { params }: RouteContext,
 ) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { uid } = await params;
+  const { uid } = params;
   try {
     const auth = getAdminAuth();
     const userRecord = await auth.getUser(uid);
@@ -38,12 +40,12 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ uid: string }> }
+  { params }: RouteContext,
 ) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { uid } = await params;
+  const { uid } = params;
   try {
     const auth = getAdminAuth();
     const db = getAdminDb();
@@ -82,12 +84,12 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ uid: string }> }
+  { params }: RouteContext,
 ) {
   if (!(await requireAdmin(request, "canManageUsers"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { uid } = await params;
+  const { uid } = params;
   try {
     const auth = getAdminAuth();
     const db = getAdminDb();

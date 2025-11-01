@@ -42,7 +42,7 @@ describe('PATCH /api/admin/comments/[postId]/[commentId]/approve', () => {
   it('logs activity on approve', async () => {
     const { PATCH } = await import('./route');
     const req = {} as any;
-    const res = await PATCH(req, { params: Promise.resolve({ postId: 'p1', commentId: 'c1' }) });
+    const res = await PATCH(req, { params: { postId: 'p1', commentId: 'c1' } });
     expect(res.status).toBe(200);
     expect(logActivity).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'comment.approve', title: 'c1', user: 'admin@test.com' })

@@ -65,7 +65,7 @@ describe("GET /api/blogs/:key", () => {
 
     const { GET } = await import("./route");
 
-    const res = await GET({} as Request, { params: Promise.resolve({ key: "test" }) });
+    const res = await GET({} as Request, { params: { key: "test" } });
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.content).toBe("Hello world");
@@ -78,7 +78,7 @@ describe("GET /api/blogs/:key", () => {
 
     const { GET } = await import("./route");
 
-    const res = await GET({} as Request, { params: Promise.resolve({ key: "1" }) });
+    const res = await GET({} as Request, { params: { key: "1" } });
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.author).toBe("Jane Doe");
@@ -95,7 +95,7 @@ describe("GET /api/blogs/:key", () => {
 
       const { GET } = await import("./route");
 
-      const res = await GET({} as Request, { params: Promise.resolve({ key: "test" }) });
+      const res = await GET({} as Request, { params: { key: "test" } });
 
       expect(res.status).toBe(404);
     } finally {
@@ -114,7 +114,7 @@ describe("GET /api/blogs/:key", () => {
 
       const { GET } = await import("./route");
 
-      const res = await GET({} as Request, { params: Promise.resolve({ key: "test" }) });
+      const res = await GET({} as Request, { params: { key: "test" } });
       expect(res.status).toBe(200);
       const data = await res.json();
       expect(data.slug).toBe("test");
@@ -130,7 +130,7 @@ describe("GET /api/blogs/:key", () => {
 
     const { GET } = await import("./route");
 
-    const res = await GET({} as Request, { params: Promise.resolve({ key: "1" }) });
+    const res = await GET({} as Request, { params: { key: "1" } });
     expect(res.status).toBe(404);
     expect(blogStore.getById).not.toHaveBeenCalled();
   });
@@ -145,7 +145,7 @@ describe("GET /api/blogs/:key", () => {
     const { GET } = await import("./route");
 
     const res = await GET({} as Request, {
-      params: Promise.resolve({ key: "test" }),
+      params: { key: "test" },
     });
 
     expect(res.status).toBe(200);
@@ -164,7 +164,7 @@ describe("GET /api/blogs/:key", () => {
     const { GET } = await import("./route");
 
     const res = await GET({} as Request, {
-      params: Promise.resolve({ key: "test" }),
+      params: { key: "test" },
     });
 
     expect(res.status).toBe(404);
@@ -189,7 +189,7 @@ it("returns scheduled fallback content when publish time has passed", async () =
       const { GET } = await import("./route");
 
       const res = await GET({} as Request, {
-        params: Promise.resolve({ key: "test" }),
+        params: { key: "test" },
       });
 
       expect(res.status).toBe(200);

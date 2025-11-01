@@ -44,8 +44,8 @@ export const metadata = getMetadata({
 });
 
 export default async function AdminSearchPage({ searchParams }: PageProps) {
-  const params = searchParams ? await searchParams : undefined;
-  const query = typeof params?.q === "string" ? params.q : "";
+  const params = searchParams ?? {};
+  const query = typeof params.q === "string" ? params.q : "";
 
   const h = await headers();
   const cookie = h.get("cookie") ?? "";

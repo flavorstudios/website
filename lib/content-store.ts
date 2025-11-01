@@ -347,7 +347,7 @@ function requireDb(): Firestore {
 }
 
 export const ADMIN_DB_UNAVAILABLE =
-  "Admin Firestore unavailable. Set FIREBASE_SERVICE_ACCOUNT_KEY.";
+  "Admin Firestore unavailable. Set FIREBASE_SERVICE_ACCOUNT_KEY for project flavorstudios-a44b9 (include FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY with escaped newlines) and FIREBASE_STORAGE_BUCKET=flavorstudios-a44b9.appspot.com.";
 
 export type BlogDiff = {
   [K in keyof BlogPost]?: { before: BlogPost[K]; after: BlogPost[K] };

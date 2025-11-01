@@ -5,11 +5,9 @@ import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import BlogEditorPageClient from "./BlogEditorPageClient";
 import type { BlogPost as StoreBlogPost } from "@/lib/content-store";
 import type { BlogPost as EditorBlogPost } from "@/app/admin/dashboard/components/blog-editor";
-import type { SearchParams } from "@/types/next";
+import type { PageProps } from "@/types/next";
 
-interface PageProps {
-  searchParams: SearchParams<{ id?: string; slug?: string }>;
-}
+type BlogEditPageProps = PageProps<Record<string, never>, { id?: string; slug?: string }>;
 
 export const metadata = getMetadata({
   title: `Edit Blog Post – Admin Panel | ${SITE_NAME}`,
@@ -45,8 +43,8 @@ function computeWordCount(html: string): number {
   return text ? text.split(/\s+/).length : 0;
 }
 
-export default async function BlogEditPage({ searchParams }: PageProps) {
-  const { id, slug } = await searchParams;
+export default async function BlogEditPage({ searchParams }: BlogEditPageProps) {
+  const { id, slug } = searchParams ?? {};
   let post: StoreBlogPost | null = null;
 
   if (id) {

@@ -5,9 +5,9 @@ import { logError } from "@/lib/log";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ uid: string }> }
+  { params }: { params: { uid: string } }
 ) {
-  const { uid } = await params;
+  const { uid } = params;
   if (!(await requireAdmin(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

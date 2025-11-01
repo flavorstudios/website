@@ -1,16 +1,15 @@
 import siteData from "@/content-data/categories.json" assert { type: "json" };
 import WatchPage from "../../page";
-import type { SearchParams } from "@/types/next";
+import type { PageProps, SearchParams } from "@/types/next";
+
+type WatchCategoryPageProps = PageProps<{ slug: string }, { page?: string }>;
 
 export default async function WatchCategoryPage({
   params,
   searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams?: SearchParams<{ page?: string }>;
-}) {
-  const { slug } = await params;
-  const resolvedSearchParams = searchParams ? await searchParams : {};
+}: WatchCategoryPageProps) {
+  const { slug } = params;
+  const resolvedSearchParams = searchParams ?? {};
   const categorySlug = slug;
 
   // Look up the video category in JSON, not the DB!
@@ -24,10 +23,10 @@ export default async function WatchCategoryPage({
 
   return (
     <WatchPage
-      searchParams={Promise.resolve({
+      searchParams={{
         category: categorySlug,
         page: resolvedSearchParams.page,
-      })}
+      }}
     />
   );
 }

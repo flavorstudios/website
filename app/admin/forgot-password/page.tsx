@@ -51,10 +51,10 @@ export default async function AdminForgotPasswordPage({
 }: {
   searchParams: NextSearchParams<ForgotPasswordSearchParams>;
 }) {
-  const resolvedSearchParams = await searchParams;
+  const resolvedSearchParams = searchParams ?? {};
   
   const notice =
-    resolvedSearchParams?.status === "expired"
+    resolvedSearchParams.status === "expired"
       ? "Your reset link expired or was already used. Please request a new one."
       : undefined;
 

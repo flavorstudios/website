@@ -1,6 +1,6 @@
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_BRAND_TWITTER, SITE_NAME, SITE_URL } from "@/lib/constants";
-import type { SearchParams as NextSearchParams } from "@/types/next";
+import type { PageProps } from "@/types/next";
 
 import ForgotPasswordForm from "./ForgotPasswordForm";
 
@@ -46,12 +46,12 @@ type ForgotPasswordSearchParams = {
   status?: string;
 };
 
+type ForgotPasswordPageProps = PageProps<Record<string, never>, ForgotPasswordSearchParams>;
+
 export default async function AdminForgotPasswordPage({
   searchParams,
-}: {
-  searchParams: NextSearchParams<ForgotPasswordSearchParams>;
-}) {
-  const resolvedSearchParams = searchParams ?? {};
+}: ForgotPasswordPageProps) {
+  const resolvedSearchParams = (await searchParams) ?? {};
   
   const notice =
     resolvedSearchParams.status === "expired"

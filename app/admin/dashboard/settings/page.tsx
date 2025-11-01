@@ -6,7 +6,7 @@ import { loadSettings } from "./actions"
 import { SettingsAccessError } from "./errors"
 import { getCurrentAdminUid } from "@/lib/settings/server"
 import { getAdminAuth } from "@/lib/firebase-admin"
-import type { SearchParams } from "@/types/next"
+import type { PageProps } from "@/types/next"
 import { logError } from "@/lib/log"
 import { ErrorBoundary } from "../components/ErrorBoundary"
 import type { SettingsErrorCode } from "./errors"
@@ -44,11 +44,11 @@ export const metadata = getMetadata({
   },
 })
 
+type SettingsPageProps = PageProps<Record<string, never>, { tab?: string | string[] }>;
+
 export default async function SettingsPage({
   searchParams,
-}: {
-  searchParams?: SearchParams<{ tab?: string | string[] }>;
-}) {
+}: SettingsPageProps) {
   let settings: Awaited<ReturnType<typeof loadSettings>> | null = null
   let loadError: string | null = null
   let loadErrorDetail: string | null = null
@@ -83,7 +83,7 @@ export default async function SettingsPage({
       logError("admin-settings:page", error)
     }
   }
-  const resolvedSearchParams = searchParams ?? {}
+  const resolvedSearchParams = (await searchParams) ?? {}
   const tab = Array.isArray(resolvedSearchParams.tab)
     ? resolvedSearchParams.tab[0]
     : resolvedSearchParams.tab

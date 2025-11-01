@@ -17,7 +17,7 @@ type BlogPostGenerateMetadataProps = PageProps<{ slug: string }>;
 
 // SEO metadata (dynamic per post, using Next.js generateMetadata API)
 export async function generateMetadata({ params }: BlogPostGenerateMetadataProps) {
-  const { slug } = params;
+  const { slug } = await params;
   let post: PublicBlogDetail | null = null;
   try {
     post = await getBlogPost(slug);
@@ -88,7 +88,7 @@ export async function generateMetadata({ params }: BlogPostGenerateMetadataProps
 
 // Main BlogPost page (server component)
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   let post: PublicBlogDetail | null = null;
   try {
     post = await getBlogPost(slug);

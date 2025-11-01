@@ -5,11 +5,9 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { SITE_URL, SITE_NAME, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { getMetadata } from "@/lib/seo-utils";
 import AdminSearchPageClient from "./AdminSearchPageClient";
-import type { SearchParams } from "@/types/next";
+import type { PageProps } from "@/types/next";
 
-interface PageProps {
-  searchParams?: SearchParams<{ q?: string }>;
-}
+type AdminSearchPageProps = PageProps<Record<string, never>, { q?: string }>;
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -43,8 +41,8 @@ export const metadata = getMetadata({
   },
 });
 
-export default async function AdminSearchPage({ searchParams }: PageProps) {
-  const params = searchParams ?? {};
+export default async function AdminSearchPage({ searchParams }: AdminSearchPageProps) {
+  const params = (await searchParams) ?? {};
   const query = typeof params.q === "string" ? params.q : "";
 
   const h = await headers();

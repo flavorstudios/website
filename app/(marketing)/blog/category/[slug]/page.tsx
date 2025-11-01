@@ -18,8 +18,8 @@ export default async function BlogCategoryPage({
   params,
   searchParams,
 }: BlogCategoryPageProps) {
-  const { slug } = params;
-  const resolvedSearchParams = searchParams ?? {};
+  const { slug } = await params;
+  const resolvedSearchParams = (await searchParams) ?? {};
   const categorySlug = slug;
 
   // --- Robustly find the category (case-insensitive, defensive fallback) ---

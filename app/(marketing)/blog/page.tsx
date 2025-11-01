@@ -29,7 +29,7 @@ import { authors } from "@/lib/authors"; // <-- NEW
 import { DateRangePicker } from "@/components/ui/date-range-picker"; // <-- NEW
 import { serverEnv } from "@/env/server";
 import { normalizeSlug } from "@/lib/slugify";
-import type { SearchParams } from "@/types/next";
+import type { PageProps } from "@/types/next";
 
 const ALL_CATEGORY_CANONICAL_SLUG = "all-posts";
 
@@ -161,21 +161,24 @@ async function getBlogData({
   }
 }
 
-// --- PAGE COMPONENT ---
-export default async function BlogPage({
-  searchParams,
-}: {
-  searchParams?: SearchParams<{
+type BlogIndexPageProps = PageProps<
+  Record<string, never>,
+  {
     category?: string;
     page?: string;
     search?: string;
     sort?: string;
-    author?: string; // <-- NEW
-    startDate?: string; // <-- NEW
-    endDate?: string; // <-- NEW
-  }>;
-}) {
-  const params = searchParams ?? {};
+    author?: string;
+    startDate?: string;
+    endDate?: string;
+  }
+>;
+
+// --- PAGE COMPONENT ---
+export default async function BlogPage({
+  searchParams,
+}: BlogIndexPageProps) {
+  const params = (await searchParams) ?? {};
 
   const rawCategoryParam = params.category;
   const page = params.page ?? "1";

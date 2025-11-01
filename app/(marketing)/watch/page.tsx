@@ -3,7 +3,7 @@
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
-import type { SearchParams } from "@/types/next";
+import type { PageProps } from "@/types/next";
 import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,13 +95,16 @@ async function getWatchData() {
   }
 }
 
+type WatchIndexPageProps = PageProps<
+  Record<string, never>,
+  { category?: string; page?: string }
+>;
+
 export default async function WatchPage({
   searchParams,
-}: {
-  searchParams?: SearchParams<{ category?: string; page?: string }>;
-}) {
+}: WatchIndexPageProps) {
   const { videos, categories } = await getWatchData();
-  const params = searchParams ?? {};
+  const params = (await searchParams) ?? {};
   const selectedCategory = params.category ?? "all";
   const currentPage = Number.parseInt(params.page ?? "1");
   const videosPerPage = 12;

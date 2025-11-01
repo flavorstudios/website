@@ -44,7 +44,7 @@ function computeWordCount(html: string): number {
 }
 
 export default async function BlogEditPage({ searchParams }: BlogEditPageProps) {
-  const { id, slug } = searchParams ?? {};
+  const { id, slug } = (await searchParams) ?? {};
   let post: StoreBlogPost | null = null;
 
   if (id) {

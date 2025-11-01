@@ -59,7 +59,7 @@ async function validateSessionViaApi(reqHeaders: Headers) {
 type PreviewPageProps = PageProps<{ id: string }, { token?: string }>;
 
 export async function generateMetadata({ params }: PreviewPageProps) {
-  const { id } = params;
+  const { id } = await params;
   let post: BlogPost | null = null;
   try {
     post = await getPost(id);
@@ -110,8 +110,8 @@ export async function generateMetadata({ params }: PreviewPageProps) {
 }
 
 export default async function PreviewPage({ params, searchParams }: PreviewPageProps) {
-  const { id } = params;
-  const { token } = searchParams ?? {};
+  const { id } = await params;
+  const { token } = (await searchParams) ?? {};
   const reqHeaders = await headers();
   const requestId = reqHeaders.get("x-request-id") || crypto.randomUUID();
   const isE2E =

@@ -10,7 +10,6 @@ import { sanitizeHtmlServer } from "@/lib/sanitize/server";
 import { getBlogPost } from "@/lib/blog";
 // ⬇️ Use shared public type instead of declaring locally!
 import type { PublicBlogDetail } from "@/lib/types";
-import { unwrapPageProps } from "@/types/next";
 import type { PageProps } from "@/types/next";
 
 type BlogPostPageProps = PageProps<
@@ -19,8 +18,9 @@ type BlogPostPageProps = PageProps<
 >;
 
 // SEO metadata (dynamic per post, using Next.js generateMetadata API)
-export async function generateMetadata(props: BlogPostPageProps) {
-  const { params } = await unwrapPageProps(props)
+export async function generateMetadata({ params }: BlogPostPageProps) {
+  const { slug } = await params;
+
   let post: PublicBlogDetail | null = null;
   try {
     post = await getBlogPost(slug);
@@ -90,9 +90,9 @@ export async function generateMetadata(props: BlogPostPageProps) {
 }
 
 // Main BlogPost page (server component)
-export default async function BlogPostPage(props: BlogPostPageProps) {
-  const { params } = await unwrapPageProps(props);
-  const { slug } = params;
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const { slug } = await params;
+
   let post: PublicBlogDetail | null = null;
   try {
     post = await getBlogPost(slug);
@@ -101,7 +101,7 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
   }
 
   // If post is not found or not published, trigger Next.js not-found page.
-  if (!post) notFound();
+  if (!post) return notFound();
 
   const contentHtml = (post as { contentHtml?: unknown }).contentHtml;
   const hasContentHtml =

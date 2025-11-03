@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import type { PublicBlogDetail } from "@/lib/types";
+import { createBlogPageProps } from "@/types/route-params";
 
 jest.mock("@/lib/blog", () => ({
   getBlogPost: jest.fn(),
@@ -58,9 +59,9 @@ describe("/blog/[slug] scheduled post rendering", () => {
     const { notFound } = await import("next/navigation");
 
     const pageModule = await import("../[slug]/page");
-    const result = await pageModule.default({
-      params: { slug: mockPost.slug },
-    });
+    const result = await pageModule.default(
+      createBlogPageProps({ slug: mockPost.slug })
+    );
 
     expect(getBlogPost).toHaveBeenCalledWith(mockPost.slug);
     expect(notFound).not.toHaveBeenCalled();

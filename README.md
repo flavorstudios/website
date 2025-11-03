@@ -83,6 +83,13 @@ pnpm start  # run the production server
 > Firebase Admin env check when admin features aren't needed. This also
 > disables cron features that rely on `CRON_SECRET`.
 
+### End-to-end testing workflow
+
+- `pnpm dev:test` spins up the production build with the CI-friendly configuration used by Playwright. It disables Firebase Admin and applies deterministic admin fixtures.
+- `pnpm e2e --project=chromium-light` runs the Playwright suite against the running server. Pass `--headed` to observe the run locally.
+- Use `pnpm exec playwright show-trace <path-to-trace.zip>` to inspect artifacts generated from CI failures.
+- When iterating on a single spec, run `pnpm e2e e2e/admin-dashboard-blog-fallback.e2e.spec.ts --project=chromium-light` to avoid rebuilding every time.
+
 To run a single test file:
 
 pnpm test:unit -- __tests__/validate-session.test.ts

@@ -10,12 +10,9 @@ import { sanitizeHtmlServer } from "@/lib/sanitize/server";
 import { getBlogPost } from "@/lib/blog";
 // ⬇️ Use shared public type instead of declaring locally!
 import type { PublicBlogDetail } from "@/lib/types";
-import type { PageProps } from "@/types/next";
+import type { BlogPageContext } from "@/types/route-params";
 
-type BlogPostPageProps = PageProps<
-  { slug: string },
-  { [key: string]: string | string[] | undefined }
->;
+type BlogPostPageProps = BlogPageContext;
 
 // SEO metadata (dynamic per post, using Next.js generateMetadata API)
 export async function generateMetadata({ params }: BlogPostPageProps) {

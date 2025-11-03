@@ -164,3 +164,18 @@ test("shows permission message when unauthorized", async ({ page }) => {
     page.getByText("You don't have permission to view analytics.")
   ).toBeVisible();
 });
+
+test('maintains single landmark roles when dashboard loads normally', async ({ page }) => {
+  await page.goto('/admin/dashboard');
+  await awaitAppReady(page);
+
+  await expect(page.getByTestId('admin-dashboard-root')).toBeVisible();
+
+  const [bannerCount, mainCount] = await Promise.all([
+    page.$$eval('[role="banner"]', (els) => els.length),
+    page.$$eval('[role="main"]', (els) => els.length),
+  ]);
+
+  expect(bannerCount).toBe(1);
+  expect(mainCount).toBe(1);
+});

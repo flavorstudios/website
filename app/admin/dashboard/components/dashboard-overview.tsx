@@ -354,7 +354,8 @@ export default function DashboardOverview({
     return (
       <div
         className="flex h-64 items-center justify-center"
-        role="banner"
+        role="region"
+        aria-labelledby="dashboard-error-heading"
         data-testid="dashboard-error"
       >
         <div
@@ -362,7 +363,12 @@ export default function DashboardOverview({
           role="status"
           aria-live="assertive"
         >
-          <h2 className="mb-2 text-xl font-semibold text-red-700">Dashboard data unavailable</h2>
+          <h2
+            id="dashboard-error-heading"
+            className="mb-2 text-xl font-semibold text-red-700"
+          >
+            Dashboard data unavailable
+          </h2>
           <p className="mb-3 text-red-600">Unable to load dashboard data. Please try again.</p>
           <p
             className="mb-4 text-xs font-semibold uppercase tracking-wide text-red-500"

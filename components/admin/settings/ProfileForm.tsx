@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
+import { useCallback, useEffect, useState, useTransition } from "react"
 import type { FormEvent } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -28,6 +28,11 @@ import {
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth"
 import { FirebaseError } from "firebase/app"
+import {
+  DEFAULT_TIMEZONES,
+  areTimezonesEqual,
+  readRuntimeTimezones,
+} from "@/lib/settings/timezones"
 
 interface ProfileFormProps {
   initialValues: ProfileSettingsInput & {
@@ -63,12 +68,17 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
     form.reset(initialValues)
   }, [initialValues, form])
 
-  const timezones = useMemo(() => {
-    try {
-      return Intl.supportedValuesOf("timeZone")
-    } catch {
-      return ["UTC", "America/New_York", "Europe/London", "Asia/Tokyo"]
-    }
+  const [timezones, setTimezones] = useState<string[]>(() => [...DEFAULT_TIMEZONES])
+
+  useEffect(() => {
+    const supported = readRuntimeTimezones()
+    if (supported.length === 0) return
+    setTimezones((previous) => {
+      if (areTimezonesEqual(previous, supported)) {
+        return previous
+      }
+      return [...supported]
+    })
   }, [])
 
   const handleSubmit = form.handleSubmit((values) => {

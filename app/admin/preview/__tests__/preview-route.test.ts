@@ -8,6 +8,7 @@ import { blogStore } from '@/lib/content-store';
 import { logError } from '@/lib/log';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { validatePreviewToken } from '@/lib/preview/validate';
+import { createPreviewPageProps } from '@/types/route-params';
 
 jest.mock('@/lib/admin-auth', () => ({
   verifyAdminSession: jest.fn(),
@@ -122,19 +123,17 @@ describe('preview route', () => {
   });
 
   it('returns element for valid token', async () => {
-    const result = await PreviewPage({
-      params: { id: '1' },
-      searchParams: { token: 'ok' },
-    });
+    const result = await PreviewPage(
+      createPreviewPageProps({ id: '1' }, { token: 'ok' })
+    );
     expect(React.isValidElement(result)).toBe(true);
   });
 
   it('returns error element for invalid token', async () => {
     mockedValidate.mockResolvedValue({ ok: false, reason: 'invalid' });
-    const result = await PreviewPage({
-      params: { id: '1' },
-      searchParams: { token: 'bad' },
-    });
+    const result = await PreviewPage(
+      createPreviewPageProps({ id: '1' }, { token: 'bad' })
+    );
     expect(React.isValidElement(result)).toBe(true);
     if (!React.isValidElement(result)) {
       throw new Error('Expected preview page to return a React element');
@@ -144,10 +143,9 @@ describe('preview route', () => {
 
   it('returns error element for expired token', async () => {
     mockedValidate.mockResolvedValue({ ok: false, reason: 'expired' });
-    const result = await PreviewPage({
-      params: { id: '1' },
-      searchParams: { token: 'old' },
-    });
+    const result = await PreviewPage(
+      createPreviewPageProps({ id: '1' }, { token: 'old' })
+    );
     expect(React.isValidElement(result)).toBe(true);
     if (!React.isValidElement(result)) {
       throw new Error('Expected preview page to return a React element');
@@ -158,11 +156,8 @@ describe('preview route', () => {
   it('throws notFound when post missing', async () => {
     mockedGetById.mockResolvedValue(null);
     await expect(
-      PreviewPage({
-        params: { id: '1' },
-        searchParams: { token: 'ok' },
-      })
-    ).rejects.toThrow('NEXT_NOT_FOUND');
+        PreviewPage(createPreviewPageProps({ id: '1' }, { token: 'ok' }))
+      ).rejects.toThrow('NEXT_NOT_FOUND');
   });
 
   it('requires authenticated session for valid tokens', async () => {
@@ -175,10 +170,9 @@ describe('preview route', () => {
       },
     });
     mockedVerify.mockRejectedValue(new Error('no session'));
-    const result = await PreviewPage({
-      params: { id: '1' },
-      searchParams: { token: 'ok' },
-    });
+    const result = await PreviewPage(
+        createPreviewPageProps({ id: '1' }, { token: 'ok' })
+      );
     expect(React.isValidElement(result)).toBe(true);
     if (!React.isValidElement(result)) {
       throw new Error('Expected preview page to return a React element');

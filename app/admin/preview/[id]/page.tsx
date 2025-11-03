@@ -24,8 +24,9 @@ import {
 import { logError } from "@/lib/log";
 import crypto from "crypto";
 import { ValidateSessionPing } from "@/components/ValidateSessionPing";
+import { env } from "@/src/env";
 import { unwrapPageProps } from "@/types/next";
-import type { PageProps } from "@/types/next";
+import type { PreviewPageContext } from "@/types/route-params";
 
 async function getPost(id: string): Promise<BlogPost | null> {
   return blogStore.getById(id);
@@ -37,8 +38,7 @@ async function validateSessionViaApi(reqHeaders: Headers) {
   const prefersHttp = host?.startsWith("localhost") || host?.startsWith("127.0.0.1");
   const proto = reqHeaders.get("x-forwarded-proto") ?? (prefersHttp ? "http" : "https");
 
-  const fallbackOrigin =
-    process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL ?? "http://127.0.0.1:3000";
+  const fallbackOrigin = env.nextPublicBaseUrl || env.baseUrl || "http://127.0.0.1:3000";
   const origin = host ? `${proto}://${host}` : fallbackOrigin;
 
   try {
@@ -57,7 +57,7 @@ async function validateSessionViaApi(reqHeaders: Headers) {
   }
 }
 
-type PreviewPageProps = PageProps<{ id: string }, { token?: string }>;
+type PreviewPageProps = PreviewPageContext;
 
 export async function generateMetadata(props: PreviewPageProps) {
   const { params } = await unwrapPageProps(props);

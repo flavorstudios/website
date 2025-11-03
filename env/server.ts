@@ -1,3 +1,5 @@
+import { isTestLikeEnv } from "../lib/env/is-test-like";
+
 const baseUrlKey = "NEXT_PUBLIC_BASE_URL";
 const { VERCEL_ENV, VERCEL_URL, NODE_ENV } = process.env;
 let baseUrl = process.env[baseUrlKey];
@@ -17,6 +19,13 @@ if (!baseUrl && NODE_ENV !== 'test') {
     baseUrl = resolved;
   }
 }
+
+const TEST_ADMIN_EMAIL = "test-admin@example.com";
+const isTestLike = isTestLikeEnv();
+const resolvedAdminEmail =
+  process.env.ADMIN_EMAIL ?? (isTestLike ? TEST_ADMIN_EMAIL : undefined);
+const resolvedAdminEmails =
+  process.env.ADMIN_EMAILS ?? (isTestLike ? TEST_ADMIN_EMAIL : undefined);
 
 /**
  * Server-only Firebase environment variables.
@@ -75,8 +84,8 @@ export const serverEnv: Record<string, string | undefined> & {
   ADMIN_BYPASS: process.env.ADMIN_BYPASS,
   ADMIN_COOKIE_DOMAIN: process.env.ADMIN_COOKIE_DOMAIN,
   ADMIN_DOMAIN: process.env.ADMIN_DOMAIN,
-  ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-  ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+  ADMIN_EMAIL: resolvedAdminEmail,
+  ADMIN_EMAILS: resolvedAdminEmails,
   ADMIN_REQUIRE_EMAIL_VERIFICATION:
     process.env.ADMIN_REQUIRE_EMAIL_VERIFICATION,
   ADMIN_DISPOSABLE_DOMAINS: process.env.ADMIN_DISPOSABLE_DOMAINS,

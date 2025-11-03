@@ -8,8 +8,12 @@ import type { ServiceAccount } from "firebase-admin"; // Strict type import
 import { serverEnv } from "@/env/server";
 import { logger, debug } from "@/lib/logger";
 import { getAllowedAdminEmails } from "@/lib/admin-allowlist";
+import { isTestLikeEnv } from "./env/is-test-like";
 
 export const ADMIN_BYPASS = serverEnv.ADMIN_BYPASS === "true";
+
+const TEST_ADMIN_EMAIL = "test-admin@example.com";
+const isTestLike = isTestLikeEnv();
 
 const disableAdmin =
   ADMIN_BYPASS || serverEnv.ADMIN_AUTH_DISABLED === "1" || process.env.E2E === "true";
@@ -26,8 +30,9 @@ const serviceAccountJson =
   serverEnv.FIREBASE_SERVICE_ACCOUNT_KEY || serverEnv.FIREBASE_SERVICE_ACCOUNT_JSON;
 
 // Accept ADMIN_EMAILS if it contains a real value; otherwise fall back to ADMIN_EMAIL
-const rawEmails = (serverEnv.ADMIN_EMAILS ?? "").trim();
-export const adminEmailsEnv = rawEmails !== "" ? rawEmails : serverEnv.ADMIN_EMAIL;
+const rawEmails = (serverEnv.ADMIN_EMAILS ?? serverEnv.ADMIN_EMAIL ?? "").trim();
+const fallbackAdminEmail = isTestLike ? TEST_ADMIN_EMAIL : undefined;
+export const adminEmailsEnv = rawEmails !== "" ? rawEmails : fallbackAdminEmail;
 
 if (debug) {
   logger.debug("[Firebase Admin] Loaded admin emails:", getAllowedAdminEmails());
@@ -81,20 +86,31 @@ if (disableAdmin) {
 }
 
 if (debug) {
+  if (disableAdmin) {
+    logger.debug(
+      "[Firebase Admin] Admin SDK initialization skipped (bypass or test mode).",
+    );
+  } else {
+    logger.debug(
+      "[Firebase Admin] Service account credentials parsed successfully:",
+      parsedCredentials !== null,
+    );
+    if (parsedCredentials) {
+      const projectId =
+        parsedCredentials.projectId ||
+        (parsedCredentials as any).project_id;
+      logger.debug("[Firebase Admin] Derived projectId:", projectId);
+    }
+    if (!adminEmailsEnv) {
+      logger.warn(
+        "[Firebase Admin] Warning: ADMIN_EMAIL or ADMIN_EMAILS environment variable is missing. Admin routes will deny all access!",
+      );
+    }
+  }
   logger.debug(
-    "[Firebase Admin] Service account credentials parsed successfully:",
-    parsedCredentials !== null
+    "[Firebase Admin] STARTUP Loaded ADMIN_EMAILS/ADMIN_EMAIL:",
+    adminEmailsEnv ?? "<unset>",
   );
-  if (parsedCredentials) {
-    const projectId =
-      parsedCredentials.projectId ||
-      (parsedCredentials as any).project_id;
-    logger.debug("[Firebase Admin] Derived projectId:", projectId);
-  }
-  if (!adminEmailsEnv && !disableAdmin) {
-    logger.warn("[Firebase Admin] Warning: ADMIN_EMAIL or ADMIN_EMAILS environment variable is missing. Admin routes will deny all access!");
-  }
-  logger.debug("[Firebase Admin] STARTUP Loaded ADMIN_EMAILS/ADMIN_EMAIL:", adminEmailsEnv);
 }
 
 /**

@@ -72,11 +72,7 @@ export function PageHeader({
   };
 
   return (
-    <header
-      className={cn("mb-6", className)}
-      role={headingLevel === 1 ? "banner" : undefined}
-      {...headerProps}
-    >
+    <header className={cn("mb-6", className)} {...headerProps}>
       <div className={cn("flex items-start justify-between gap-4", containerClassName)}>
         <div>
           <HeadingTag

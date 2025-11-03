@@ -505,6 +505,7 @@ export default function BlogManager() {
           containerClassName="flex-col"
           title="Blog Management"
           description={managementDescription}
+          headingProps={{ "data-testid": "page-title" }}
         />
         <div className="mt-4 space-y-4">
           <div className="sm:hidden space-y-3" data-testid="blog-card-list">
@@ -589,6 +590,7 @@ export default function BlogManager() {
           containerClassName="flex-col"
           title="Blog Management"
           description={managementDescription}
+          headingProps={{ "data-testid": "page-title" }}
         />
         <div className="flex flex-shrink-0 gap-2">
           <Button

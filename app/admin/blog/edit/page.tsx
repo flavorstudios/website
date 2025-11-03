@@ -5,6 +5,7 @@ import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import BlogEditorPageClient from "./BlogEditorPageClient";
 import type { BlogPost as StoreBlogPost } from "@/lib/content-store";
 import type { BlogPost as EditorBlogPost } from "@/app/admin/dashboard/components/blog-editor";
+import { unwrapPageProps } from "@/types/next";
 import type { PageProps } from "@/types/next";
 
 type BlogEditPageProps = PageProps<Record<string, never>, { id?: string; slug?: string }>;
@@ -43,7 +44,8 @@ function computeWordCount(html: string): number {
   return text ? text.split(/\s+/).length : 0;
 }
 
-export default async function BlogEditPage({ searchParams }: BlogEditPageProps) {
+export default async function BlogEditPage(props: BlogEditPageProps) {
+  const { searchParams } = await unwrapPageProps(props);
   const { id, slug } = searchParams ?? {};
   let post: StoreBlogPost | null = null;
 

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { formatDate } from "@/lib/date";
 import { notFound } from "next/navigation";
+import { unwrapPageProps } from "@/types/next";
 import type { PageProps } from "@/types/next";
 
 // --- Type for video object
@@ -76,9 +77,8 @@ async function getVideo(slug: string): Promise<Video | null> {
 }
 
 // === DYNAMIC METADATA ===
-export async function generateMetadata({
-  params,
-}: PageProps<{ slug: string }>) {
+export async function generateMetadata(props: PageProps<{ slug: string }>) {
+  const { params } = await unwrapPageProps(props);
   const { slug } = params;
   const video = await getVideo(slug);
 
@@ -152,9 +152,8 @@ export async function generateMetadata({
 }
 
 // === PAGE COMPONENT ===
-export default async function VideoPage({
-  params,
-}: PageProps<{ slug: string }>) {
+export default async function VideoPage(props: PageProps<{ slug: string }>) {
+  const { params } = await unwrapPageProps(props);
   const { slug } = params;
   const video = await getVideo(slug);
 

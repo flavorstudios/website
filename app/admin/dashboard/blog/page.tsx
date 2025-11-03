@@ -3,6 +3,7 @@ import type { SectionId } from "../sections";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { Suspense } from "react";
+import { unwrapPageProps } from "@/types/next";
 import type { PageProps } from "@/types/next";
 
 export const runtime = "nodejs";
@@ -126,9 +127,8 @@ type AdminBlogPageProps = PageProps<
   { [key: string]: string | string[] | undefined }
 >;
 
-export default async function BlogPage({
-  searchParams,
-}: AdminBlogPageProps) {
+export default async function BlogPage(props: AdminBlogPageProps) {
+  const { searchParams } = await unwrapPageProps(props);
   const resolvedSearchParams = searchParams ?? {};
   const slow = isE2ESlow(resolvedSearchParams);
   return (

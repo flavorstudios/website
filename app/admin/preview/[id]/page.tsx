@@ -24,6 +24,7 @@ import {
 import { logError } from "@/lib/log";
 import crypto from "crypto";
 import { ValidateSessionPing } from "@/components/ValidateSessionPing";
+import { unwrapPageProps } from "@/types/next";
 import type { PageProps } from "@/types/next";
 
 async function getPost(id: string): Promise<BlogPost | null> {
@@ -58,7 +59,8 @@ async function validateSessionViaApi(reqHeaders: Headers) {
 
 type PreviewPageProps = PageProps<{ id: string }, { token?: string }>;
 
-export async function generateMetadata({ params }: PreviewPageProps) {
+export async function generateMetadata(props: PreviewPageProps) {
+  const { params } = await unwrapPageProps(props);
   const { id } = params;
   let post: BlogPost | null = null;
   try {
@@ -109,7 +111,8 @@ export async function generateMetadata({ params }: PreviewPageProps) {
   });
 }
 
-export default async function PreviewPage({ params, searchParams }: PreviewPageProps) {
+export default async function PreviewPage(props: PreviewPageProps) {
+  const { params, searchParams } = await unwrapPageProps(props);
   const { id } = params;
   const { token } = searchParams ?? {};
   const reqHeaders = await headers();

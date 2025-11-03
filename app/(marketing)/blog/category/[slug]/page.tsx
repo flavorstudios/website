@@ -5,6 +5,7 @@
 import siteData from "@/content-data/categories.json" assert { type: "json" };
 import BlogPage from "../../page";
 import Link from "next/link";
+import { unwrapPageProps, wrapPageProps } from "@/types/next";
 import type { PageProps } from "@/types/next";
 
 type BlogCategoryPageProps = PageProps<{ slug: string }, { page?: string }>;
@@ -14,10 +15,8 @@ type BlogCategoryPageProps = PageProps<{ slug: string }, { page?: string }>;
  * Finds the blog category from JSON (static) by slug.
  * To support passing category/blogPosts, update BlogPage props in app/blog/page.tsx.
  */
-export default async function BlogCategoryPage({
-  params,
-  searchParams,
-}: BlogCategoryPageProps) {
+export default async function BlogCategoryPage(props: BlogCategoryPageProps) {
+  const { params, searchParams } = await unwrapPageProps(props);
   const { slug } = params;
   const resolvedSearchParams = searchParams ?? {};
   const categorySlug = slug;
@@ -57,13 +56,13 @@ export default async function BlogCategoryPage({
 
   // BlogPage currently only accepts `searchParams`.
   // To pass `category` or `blogPosts`, extend BlogPage’s props in app/blog/page.tsx.
-  return (
-    <BlogPage
-      params={{}}
-      searchParams={{
+  return BlogPage(
+    wrapPageProps({
+      params: {},
+      searchParams: {
         ...resolvedSearchParams,
         category: categorySlug,
-      }}
-    />
+      },
+    }),
   );
 }

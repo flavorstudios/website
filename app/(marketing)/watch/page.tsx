@@ -3,6 +3,7 @@
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
+import { unwrapPageProps } from "@/types/next";
 import type { PageProps } from "@/types/next";
 import Link from "next/link";
 import Image from "next/image";
@@ -100,9 +101,8 @@ type WatchIndexPageProps = PageProps<
   { category?: string; page?: string }
 >;
 
-export default async function WatchPage({
-  searchParams,
-}: WatchIndexPageProps) {
+export default async function WatchPage(props: WatchIndexPageProps) {
+  const { searchParams } = await unwrapPageProps(props);
   const { videos, categories } = await getWatchData();
   const params = searchParams ?? {};
   const selectedCategory = params.category ?? "all";

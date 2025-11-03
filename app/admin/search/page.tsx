@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { SITE_URL, SITE_NAME, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { getMetadata } from "@/lib/seo-utils";
 import AdminSearchPageClient from "./AdminSearchPageClient";
+import { unwrapPageProps } from "@/types/next";
 import type { PageProps } from "@/types/next";
 
 type AdminSearchPageProps = PageProps<Record<string, never>, { q?: string }>;
@@ -41,7 +42,8 @@ export const metadata = getMetadata({
   },
 });
 
-export default async function AdminSearchPage({ searchParams }: AdminSearchPageProps) {
+export default async function AdminSearchPage(props: AdminSearchPageProps) {
+  const { searchParams } = await unwrapPageProps(props);
   const params = searchParams ?? {};
   const query = typeof params.q === "string" ? params.q : "";
 

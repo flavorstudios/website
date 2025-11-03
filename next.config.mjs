@@ -10,6 +10,25 @@ const { ANALYZE } = process.env;
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: ANALYZE === 'true' });
 
+const DEFAULT_ALLOWED_DEV_ORIGINS = [
+  'http://127.0.0.1:3000',
+  'http://localhost:3000',
+  'http://0.0.0.0:3000',
+];
+
+const extraDevOrigin =
+  process.env.PLAYWRIGHT_BASE_URL ??
+  process.env.E2E_BASE_URL ??
+  process.env.NEXT_PUBLIC_BASE_URL;
+
+const allowedDevOrigins = Array.from(
+  new Set(
+    DEFAULT_ALLOWED_DEV_ORIGINS.concat(
+      extraDevOrigin ? [extraDevOrigin] : [],
+    ),
+  ),
+);
+
 const remoteImagePatterns = imageDomains.map((hostname) => ({
   protocol: 'https',
   hostname,
@@ -19,9 +38,7 @@ const remoteImagePatterns = imageDomains.map((hostname) => ({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true, // Add this for best practice, optional
-  experimental: {
-    allowedDevOrigins: ["http://127.0.0.1:3000", "http://localhost:3000"],
-  },
+  allowedDevOrigins,
   eslint: { ignoreDuringBuilds: false },
   images: {
     // Next.js image optimization is enabled.

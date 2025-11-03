@@ -248,6 +248,7 @@ export default function AdminDashboardPageClient({
   const search = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const e2eMode = isClientE2EEnabled();
 
   // Read section from query if present, else fallback to prop
   const initialFromQuery = search?.get("section");
@@ -325,18 +326,26 @@ export default function AdminDashboardPageClient({
 
   // --- One-time init + route prefetch --------------------------------------
   useEffect(() => {
-    // init ping (with credentials)
-    fetchJson("/api/admin/init", { method: "POST", credentials: "include" }).catch((err) => {
-      logClientError("Admin init failed:", err);
-    });
-
-    // Prefetch main routes for snappier nav
-    try {
-      NAV.forEach((n) => router.prefetch?.(n.href));
-    } catch {
-      /* prefetch optional */
+    if (typeof window === "undefined") {
+      return;
     }
-  }, [router]);
+
+    if (!e2eMode) {
+      // init ping (with credentials)
+      fetchJson("/api/admin/init", { method: "POST", credentials: "include" }).catch(
+        (err) => {
+          logClientError("Admin init failed:", err);
+        },
+      );
+
+      // Prefetch main routes for snappier nav
+      try {
+        NAV.forEach((n) => router.prefetch?.(n.href));
+      } catch {
+        /* prefetch optional */
+      }
+    }
+  }, [router, e2eMode]);
 
   // --- Deep-link from pathname (authoritative for section) ------------------
   // FIX: resolve using longest-match to avoid always matching "overview"

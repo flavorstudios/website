@@ -25,22 +25,18 @@ const appliedDefaultKeys = applyDefaultEnv();
 const truthyFlags = new Set(["1", "true", "TRUE", "True"]);
 const allowDefaultsExplicitly = truthyFlags.has(process.env.USE_DEFAULT_ENV ?? "");
 
-// 👇 CI / relaxed mode switch
-const isCIEnv =
-  process.env.CI === "true" ||
-  process.env.CI === "1" ||
-  process.env.SKIP_STRICT_ENV === "1";
+const relaxedValidation =
+  process.env.NODE_ENV === "test" ||
+  truthyFlags.has(process.env.ALLOW_INSECURE_ENV ?? "");
 
 const { clientEnvSchema } = await import("../env/client-validation");
-const { serverEnvSchema, serverEnv } = await import("../env/server-validation");
-
-const skipValidation =
-  process.env.ADMIN_BYPASS === "true" ||
-  process.env.SKIP_ENV_VALIDATION === "true" ||
-  isCIEnv;
+const { serverEnvSchema, serverEnv, serverEnvMeta } = await import(
+  "../env/server-validation",
+);
+const skipValidation = relaxedValidation;
 
 if (appliedDefaultKeys.length > 0) {
-  if (process.env.NODE_ENV !== "test" && !allowDefaultsExplicitly && !isCIEnv) {
+  if (!relaxedValidation && !allowDefaultsExplicitly) {
     throw new Error(
       `[env] Default fallback values are disabled. Missing required env vars: ${appliedDefaultKeys.join(", ")}`,
     );
@@ -52,72 +48,50 @@ if (appliedDefaultKeys.length > 0) {
 }
 
 if (skipValidation) {
-  console.warn("Skipping Firebase/Admin env validation (CI or bypass).");
+  console.warn("Skipping strict Firebase/Admin env validation (test or relaxed mode).");
 }
 
+const serverMissingRequired = serverEnvMeta.missingRequiredEnvVars;
+const serverMissingOptional = serverEnvMeta.missingOptionalEnvVars;
+
 if (!skipValidation) {
-  // strict mode (local/prod)
   clientEnvSchema.parse(process.env);
   serverEnvSchema.parse(process.env);
 
-  if (
-    !process.env.FIREBASE_SERVICE_ACCOUNT_KEY &&
-    !process.env.FIREBASE_SERVICE_ACCOUNT_JSON
-  ) {
+  if (serverMissingRequired.length > 0) {
     throw new Error(
-      "Missing required env vars: FIREBASE_SERVICE_ACCOUNT_KEY or FIREBASE_SERVICE_ACCOUNT_JSON",
+      `[env] Missing required server env var(s): ${serverMissingRequired.join(", ")}`,
     );
   }
 
-  if (
-    !process.env.FIREBASE_STORAGE_BUCKET &&
-    !process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-  ) {
+  if (serverEnvMeta.bucketMismatch) {
     throw new Error(
-      "Missing required env vars: FIREBASE_STORAGE_BUCKET or NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+      `FIREBASE_STORAGE_BUCKET must match NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET.\n` +
+        `FIREBASE_STORAGE_BUCKET: ${serverEnv.FIREBASE_STORAGE_BUCKET ?? 'undefined'}\n` +
+        `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${serverEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? 'undefined'}`,
     );
   }
 
-  if (!process.env.ADMIN_EMAILS && !process.env.ADMIN_EMAIL) {
-    throw new Error("Missing required env vars: ADMIN_EMAILS or ADMIN_EMAIL");
-  }
-  if (
-    process.env.ADMIN_EMAILS !== undefined &&
-    process.env.ADMIN_EMAILS.trim() === ""
-  ) {
-    throw new Error("ADMIN_EMAILS (cannot be empty)");
-  }
-  if (
-    process.env.ADMIN_EMAIL !== undefined &&
-    process.env.ADMIN_EMAIL.trim() === ""
-  ) {
-    throw new Error("ADMIN_EMAIL (cannot be empty)");
-  }
-  if (
-    process.env.CRON_SECRET !== undefined &&
-    process.env.CRON_SECRET.trim() === ""
-  ) {
-    throw new Error("CRON_SECRET (cannot be empty)");
+  if (!serverEnvMeta.hasServiceAccount) {
+    throw new Error(
+      "Missing required env vars: FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_KEY",
+    );
   }
 } else {
-  // relaxed mode (CI): still warn about important ones
-  if (
-    !process.env.FIREBASE_STORAGE_BUCKET &&
-    !process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-  ) {
+  if (serverMissingRequired.length > 0) {
     console.warn(
-      "[env] Missing (relaxed): FIREBASE_STORAGE_BUCKET or NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+      `[env] Missing (relaxed) required server env var(s): ${serverMissingRequired.join(", ")}`,
     );
   }
 
-  if (!process.env.ADMIN_EMAILS && !process.env.ADMIN_EMAIL) {
-    console.warn("[env] Missing (relaxed): ADMIN_EMAILS or ADMIN_EMAIL");
+  if (serverMissingOptional.length > 0) {
+    console.warn(
+      `[env] Missing optional server env var(s): ${serverMissingOptional.join(", ")}`,
+    );
   }
 }
 
-const json =
-  process.env.FIREBASE_SERVICE_ACCOUNT_KEY ??
-  process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+const json = serverEnv.FIREBASE_SERVICE_ACCOUNT_JSON ?? serverEnv.FIREBASE_SERVICE_ACCOUNT_KEY;
 
 if (json) {
   try {
@@ -129,19 +103,8 @@ if (json) {
   }
 }
 
-const { FIREBASE_STORAGE_BUCKET, NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET } =
-  serverEnv;
-
-// Only compare buckets when both are present
-if (
-  !skipValidation &&
-  FIREBASE_STORAGE_BUCKET &&
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET &&
-  FIREBASE_STORAGE_BUCKET !== NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-) {
-  throw new Error(
-    `FIREBASE_STORAGE_BUCKET must match NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET.\n` +
-      `FIREBASE_STORAGE_BUCKET: ${FIREBASE_STORAGE_BUCKET}\n` +
-      `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}`,
+if (serverEnvMeta.appliedFallbackKeys.length > 0) {
+  console.warn(
+    `[env] Using generated fallback values for: ${serverEnvMeta.appliedFallbackKeys.join(", ")}`,
   );
 }

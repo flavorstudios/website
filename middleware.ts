@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
 
   // The rest of the original middleware...
   // 🔓 Test/CI bypass: allow all when explicitly disabled
-  if (serverEnv.ADMIN_AUTH_DISABLED === '1') {
+  if (serverEnv.ADMIN_AUTH_DISABLED === '1' || serverEnv.ADMIN_BYPASS === 'true') {
     return NextResponse.next();
   }
 

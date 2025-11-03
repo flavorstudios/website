@@ -22,6 +22,89 @@ const requireEmailVerification =
 const debug =
   serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
 
+const VALID_ROLE_NAMES = new Set<UserRole>([
+  "admin" as UserRole,
+  "editor" as UserRole,
+  "support" as UserRole,
+]);
+
+type ClaimsRecord = Record<string, unknown>;
+
+function normalizeEmail(email: unknown): string | null {
+  if (typeof email !== "string") return null;
+  const trimmed = email.trim().toLowerCase();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function normalizeRole(role: unknown): UserRole | null {
+  if (typeof role !== "string") return null;
+  const normalized = role.trim().toLowerCase() as UserRole;
+  return VALID_ROLE_NAMES.has(normalized) ? normalized : null;
+}
+
+function extractRoleFromClaims(claims: ClaimsRecord): UserRole | null {
+  const directRole = normalizeRole(claims.role);
+  if (directRole) return directRole;
+
+  const rolesClaim = claims.roles;
+  if (Array.isArray(rolesClaim)) {
+    for (const value of rolesClaim) {
+      const normalized = normalizeRole(value);
+      if (normalized) {
+        return normalized;
+      }
+    }
+  } else if (rolesClaim && typeof rolesClaim === "object") {
+    if ("primary" in rolesClaim) {
+      const normalized = normalizeRole((rolesClaim as ClaimsRecord).primary);
+      if (normalized) {
+        return normalized;
+      }
+    }
+    for (const [key, value] of Object.entries(rolesClaim)) {
+      if (value === true) {
+        const normalized = normalizeRole(key);
+        if (normalized) {
+          return normalized;
+        }
+      }
+    }
+  }
+
+  if (claims.admin === true || claims.isAdmin === true) {
+    return "admin" as UserRole;
+  }
+
+  return null;
+}
+
+function hasAdminClaim(claims: ClaimsRecord): boolean {
+  if (claims.admin === true || claims.isAdmin === true) {
+    return true;
+  }
+
+  const directRole = normalizeRole(claims.role);
+  if (directRole === "admin") {
+    return true;
+  }
+
+  const rolesClaim = claims.roles;
+  if (Array.isArray(rolesClaim)) {
+    return rolesClaim.some((role) => normalizeRole(role) === "admin");
+  }
+
+  if (rolesClaim && typeof rolesClaim === "object") {
+    if ((rolesClaim as ClaimsRecord).admin === true) {
+      return true;
+    }
+    return Object.keys(rolesClaim).some(
+      (role) => normalizeRole(role) === "admin" && (rolesClaim as ClaimsRecord)[role] === true
+    );
+  }
+
+  return false;
+}
+
 function getRequestIp(req: NextRequest): string {
   const xfwd = req.headers.get("x-forwarded-for");
   if (xfwd) return xfwd.split(",")[0]?.trim() || "unknown";
@@ -34,7 +117,20 @@ export const DISABLE_AUTH =
   ADMIN_BYPASS || serverEnv.ADMIN_AUTH_DISABLED === "1" || isE2E;
 
 // Fetch admin emails from Firestore's admin_users collection (lowercased, trimmed).
+const firestoreAdminCache: {
+  emails: string[];
+  expiresAt: number;
+} = {
+  emails: [],
+  expiresAt: 0,
+};
+
 async function getFirestoreAdminEmails(): Promise<string[]> {
+  const now = Date.now();
+  if (firestoreAdminCache.expiresAt > now && firestoreAdminCache.emails.length) {
+    return firestoreAdminCache.emails;
+  }
+
   try {
     if (!adminDb) {
       if (debug) {
@@ -42,16 +138,65 @@ async function getFirestoreAdminEmails(): Promise<string[]> {
           "[admin-auth] adminDb unavailable; skipping Firestore admin_users lookup."
         );
       }
-      return [];
+      firestoreAdminCache.emails = [];
+      firestoreAdminCache.expiresAt = now + 30_000;
+      return firestoreAdminCache.emails;
     }
     const snap = await adminDb.collection("admin_users").get();
-    return snap.docs
-      .map((d) => (d.data().email || "").toLowerCase().trim())
+    firestoreAdminCache.emails = snap.docs
+      .map((d) => normalizeEmail(d.data().email) || "")
       .filter(Boolean);
+    firestoreAdminCache.expiresAt = now + 30_000;
+    return firestoreAdminCache.emails;
   } catch (err) {
     logError("admin-auth: fetch admin_users", err);
-    return [];
+    firestoreAdminCache.emails = [];
+    firestoreAdminCache.expiresAt = now + 15_000;
+    return firestoreAdminCache.emails;
   }
+}
+
+interface AuthorizationResult {
+  allowed: boolean;
+  role: UserRole;
+  reason: "claim" | "allowlist" | "role" | "none";
+}
+
+async function resolveAdminAuthorization(
+  decoded: jwt.JwtPayload | import("firebase-admin").auth.DecodedIdToken,
+  firestoreEmails: string[]
+): Promise<AuthorizationResult> {
+  const claims = decoded as ClaimsRecord;
+  const claimRole = extractRoleFromClaims(claims);
+  const claimAllows = hasAdminClaim(claims);
+  const email = normalizeEmail(decoded.email);
+  const allowlistAllows = email ? isEmailAllowed(email, firestoreEmails) : false;
+
+  if (!claimAllows && !allowlistAllows) {
+    return { allowed: false, role: "support" as UserRole, reason: "none" };
+  }
+
+  if (claimRole) {
+    return { allowed: true, role: claimRole, reason: claimAllows ? "claim" : "role" };
+  }
+
+  if (decoded.uid) {
+    const resolvedRole = await getUserRole(decoded.uid as string, decoded.email as string, {
+      claimRole,
+      fallbackRole: allowlistAllows ? ("admin" as UserRole) : ("support" as UserRole),
+    });
+    return {
+      allowed: true,
+      role: resolvedRole,
+      reason: allowlistAllows ? "allowlist" : "role",
+    };
+  }
+
+  return {
+    allowed: true,
+    role: allowlistAllows ? ("admin" as UserRole) : ("support" as UserRole),
+    reason: allowlistAllows ? "allowlist" : "role",
+  };
 }
 
 export interface VerifiedAdmin {
@@ -135,23 +280,9 @@ export async function verifyAdminSession(
 
   firestoreEmails = await getFirestoreAdminEmails();
 
-  if (!decoded.email) {
-    logError("admin-auth: verifyAdminSession (missing email)", decoded);
-    throw new Error("Session token missing email");
-  }
+  const authz = await resolveAdminAuthorization(decoded, firestoreEmails);
 
-  if (debug) {
-    console.log(
-      "[admin-auth] Email from session:",
-      `"${decoded.email?.trim?.().toLowerCase?.()}"`
-    );
-    console.log(
-      "[admin-auth] Allowed emails after merging:",
-      [...getAllowedAdminEmails(), ...firestoreEmails].map((e) => `"${e}"`)
-    );
-  }
-
-  if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
+  if (!authz.allowed) {
     logError(
       "admin-auth: verifyAdminSession (unauthorized email)",
       decoded.email || ""
@@ -159,9 +290,24 @@ export async function verifyAdminSession(
     throw new Error("Unauthorized admin email");
   }
 
-  // Always pass BOTH uid and email for fallback admin role logic!
-  const role = await getUserRole(decoded.uid as string, decoded.email as string);
-  return { ...(decoded as jwt.JwtPayload), role } as VerifiedAdmin;
+  if (debug) {
+    console.log(
+      "[admin-auth] Session authorized for email:",
+      normalizeEmail(decoded.email)
+    );
+    console.log(
+      "[admin-auth] Authorization source:",
+      authz.reason
+    );
+    if (!adminAuth) {
+      console.log(
+        "[admin-auth] Allowed emails after merging:",
+        [...getAllowedAdminEmails(), ...firestoreEmails].map((e) => `"${e}"`)
+      );
+    }
+  }
+
+  return { ...(decoded as jwt.JwtPayload), role: authz.role } as VerifiedAdmin;
 }
 
 // Returns the decoded admin session and role (or null if verification fails).
@@ -368,12 +514,19 @@ export async function createSessionCookieFromIdToken(
       );
     }
 
-    if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
+    const authz = await resolveAdminAuthorization(decoded, firestoreEmails);
+    if (!authz.allowed) {
       logError(
         "admin-auth: createSessionCookieFromIdToken (unauthorized email)",
         decoded.email || ""
       );
       throw new Error("Unauthorized admin email");
+    }
+    if (debug) {
+      console.log(
+        "[admin-auth] Session cookie allowed via:",
+        authz.reason
+      );
     }
     // Now create the session cookie
     return await adminAuth.createSessionCookie(idToken, { expiresIn });

@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
 import { cookies, headers } from "next/headers";
 import type { ReactNode } from "react";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import AdminAuthGuard from "@/components/AdminAuthGuard";
 import { PageHeader } from "@/components/admin/page-header";
 import {

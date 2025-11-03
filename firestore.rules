@@ -2,6 +2,41 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasAdminRole() {
+      return isSignedIn() && (
+        request.auth.token.admin == true ||
+        request.auth.token.role == 'admin' ||
+        (request.auth.token.roles is list &&
+          request.auth.token.roles.hasAny(['admin'])) ||
+        (request.auth.token.roles is map &&
+          (("admin" in request.auth.token.roles &&
+            request.auth.token.roles.admin == true) ||
+            ("primary" in request.auth.token.roles &&
+              request.auth.token.roles.primary == 'admin')))
+      );
+    }
+
+    match /admin_users/{userId} {
+      allow read: if hasAdminRole();
+      allow write: if hasAdminRole();
+    }
+
+    match /roles/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if hasAdminRole();
+    }
+
+    match /admin_audit_logs/{docId} {
+      allow read, write: if hasAdminRole();
+    }
+
+    match /login_events/{docId} {
+      allow read, write: if hasAdminRole();
+    }
     match /{document=**} {
       allow read, write: if false;
     }

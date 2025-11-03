@@ -64,14 +64,15 @@ test('blog fallback cards render before data resolves on mobile', async ({ page 
   await page.goto('/admin/dashboard/blog');
   await awaitAppReady(page);
 
-  await expect(page.getByTestId('page-title')).toHaveText(/Blog/i);
+  const blogHeading = page.getByRole('heading', { name: /blog/i });
+  await expect(blogHeading).toBeVisible();
 
   const cards = page.getByTestId('blog-card');
   await expect(cards.first()).toBeVisible();
 
   // at THIS moment we still expect the slow request to be in flight
   // (in CI the request sometimes fires a bit earlier, but we keep the check)
-  expect(blogRequestResolved).toBeFalsy();
+  expect.soft(blogRequestResolved).toBeFalsy();
 
   // extra safety for CI: wait for the real network response so the poll below
   // never hangs just because the route pattern didn’t match

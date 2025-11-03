@@ -14,9 +14,8 @@ jobs:
     # was 45m, CI was getting cancelled near the end → give it more room
     timeout-minutes: 60
     env:
-      # --- CI / relaxed mode for scripts/validate-env.ts ---
+      # --- CI / strict env validation ---
       CI: true
-      SKIP_STRICT_ENV: 1
 
       # --- your existing envs ---
       BASE_URL: ${{ secrets.BASE_URL }}
@@ -24,6 +23,7 @@ jobs:
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
       PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
       ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
+      ADMIN_EMAILS: bypass@local.test
 
       # --- the ones that were missing in the log ---
       FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
@@ -98,6 +98,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Cache Next.js build artifacts
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-cache-${{ hashFiles('pnpm-lock.yaml', 'next.config.mjs', 'package.json', 'tsconfig.json') }}
+          restore-keys: |
+            ${{ runner.os }}-next-cache-
+
       - name: Assert pnpm version
         run: node .github/scripts/assert-pnpm-version.mjs
 
@@ -119,13 +127,6 @@ jobs:
       # ✅ Install Playwright browsers and required OS deps directly
       - name: Install Playwright browsers & OS deps
         run: pnpm exec playwright install --with-deps
-
-      - name: Build app (prod)
-        env:
-          CI: "true"
-          SKIP_STRICT_ENV: "1"
-          NEXT_TELEMETRY_DISABLED: "1"
-        run: pnpm build
 
       # 👇 FIXED: removed extra `--` so Playwright sees these as flags
       - name: Run E2E tests

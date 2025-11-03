@@ -12,6 +12,10 @@ jest.mock("@/lib/admin-auth", () => ({
   getSessionInfo: jest.fn().mockResolvedValue({ uid: "tester", role: "admin" }),
 }));
 
+jest.mock("@/lib/env/is-ci-like", () => ({
+  isCiLike: () => false,
+}));
+
 let mockAdminDb: unknown;
 jest.mock("@/lib/firebase-admin", () => ({
   get adminDb() {

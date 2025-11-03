@@ -8,6 +8,17 @@ import {
 import type { UserRole } from "@/lib/role-permissions"
 import { serverEnv } from "@/env/server"
 
+const KNOWN_ROLES = new Set<UserRole>([
+  "admin" as UserRole,
+  "editor" as UserRole,
+  "support" as UserRole,
+]);
+
+interface GetUserRoleOptions {
+  claimRole?: UserRole | null;
+  fallbackRole?: UserRole;
+}
+
 /**
  * Fetches the user's role from the Firestore 'roles' collection.
  * - Returns the exact role if present and valid ("admin", "editor", or "support").
@@ -16,7 +27,11 @@ import { serverEnv } from "@/env/server"
  * - Logs and rethrows actual network/database errors (does NOT default on error).
  * - Normalizes role to lowercase and trims whitespace for safety.
  */
-export async function getUserRole(uid: string, email?: string): Promise<UserRole> {
+export async function getUserRole(
+  uid: string,
+  email?: string,
+  options: GetUserRoleOptions = {}
+): Promise<UserRole> {
   try {
     if (ADMIN_BYPASS || !adminDb) {
       return "admin";
@@ -25,6 +40,9 @@ export async function getUserRole(uid: string, email?: string): Promise<UserRole
     const doc = await adminDb.collection("roles").doc(uid).get();
 
     if (!doc.exists) {
+      if (options.claimRole && KNOWN_ROLES.has(options.claimRole)) {
+        return options.claimRole;
+      }
       if (serverEnv.NODE_ENV !== "production") {
         console.warn(`[getUserRole] No role document found for UID: ${uid}`);
       }
@@ -44,7 +62,9 @@ export async function getUserRole(uid: string, email?: string): Promise<UserRole
           return "admin";
         }
       }
-      return "support";
+      return options.fallbackRole && KNOWN_ROLES.has(options.fallbackRole)
+        ? options.fallbackRole
+        : ("support" as UserRole);
     }
 
     const data = doc.data() as { role?: string };
@@ -61,7 +81,9 @@ export async function getUserRole(uid: string, email?: string): Promise<UserRole
         `[getUserRole] Unrecognized role value "${data?.role}" (normalized: "${normalizedRole}") for UID: ${uid}`
       );
     }
-    return "support";
+    return options.fallbackRole && KNOWN_ROLES.has(options.fallbackRole)
+      ? options.fallbackRole
+      : ("support" as UserRole);
   } catch (err) {
     console.error("[getUserRole] Failed to fetch user role:", err);
     throw err;

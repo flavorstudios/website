@@ -6,6 +6,10 @@ jest.mock("@/lib/admin-auth", () => ({
   requireAdmin: mockRequireAdmin,
 }));
 
+jest.mock("@/lib/env/is-ci-like", () => ({
+  isCiLike: () => false,
+}));
+
 jest.mock("@/app/admin/dashboard/AdminDashboardPageClient", () => () => null);
 
 jest.mock("next/navigation", () => ({
@@ -48,6 +52,9 @@ describe("Admin dashboard prefetch fallback", () => {
     mockIsAdminSdkAvailable.mockReset();
     mockIsAdminSdkAvailable.mockReturnValue(false);
     (global.fetch as unknown) = jest.fn();
+    process.env.E2E = "false";
+    process.env.TEST_MODE = "false";
+    process.env.ADMIN_DISABLE_SSR_PREFETCH = "false";
   });
 
   afterAll(() => {

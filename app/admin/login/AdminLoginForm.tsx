@@ -72,7 +72,11 @@ export default function AdminLoginForm() {
   const { error, setError, clearError } = useAuthError()
   const [loading, setLoading] = useState(false)
   const isTestMode = clientEnv.TEST_MODE === "true"
-  const [showLegacyLogin, setShowLegacyLogin] = useState(() => isTestMode)
+  const allowLegacyLogin =
+    clientEnv.NEXT_PUBLIC_ENABLE_LEGACY_ADMIN_LOGIN === "true" || isTestMode
+  const [showLegacyLogin, setShowLegacyLogin] = useState(
+    () => allowLegacyLogin && isTestMode
+  )
   const router = useRouter()
   const searchParams = useSearchParams()
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
@@ -144,6 +148,12 @@ export default function AdminLoginForm() {
     })
     return () => unsubscribe()
   }, [finalizeLogin, setError, firebaseErrorMessage])
+
+  useEffect(() => {
+    if (!allowLegacyLogin && showLegacyLogin) {
+      setShowLegacyLogin(false)
+    }
+  }, [allowLegacyLogin, showLegacyLogin])
 
   // --- Show Firebase env error, if present ---
   if (firebaseInitError) {
@@ -260,7 +270,7 @@ export default function AdminLoginForm() {
         </div>
         <div className="flex flex-col gap-8 bg-white px-6 py-8 md:px-10 md:py-12 text-left">
           <div className="flex flex-col gap-6">
-            {!isTestMode && (
+            {allowLegacyLogin && !isTestMode && (
               <Button
                 type="button"
                 variant="ghost"

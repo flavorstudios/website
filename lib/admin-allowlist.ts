@@ -2,10 +2,11 @@ import { serverEnv } from "@/env/server";
 
 export function getAllowedAdminEmails(): string[] {
   const emails = serverEnv.ADMIN_EMAILS || serverEnv.ADMIN_EMAIL || "";
-  return emails
+  const normalized = emails
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
+    return Array.from(new Set(normalized));
 }
 
 export function getAllowedAdminDomain(): string | null {

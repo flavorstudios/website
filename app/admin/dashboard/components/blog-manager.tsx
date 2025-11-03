@@ -67,6 +67,7 @@ import useMediaQuery from "@/hooks/use-media-query";
 import { formatDate } from "@/lib/date";
 import { logClientError } from "@/lib/log-client";
 import { usePreviewNavigation } from "@/components/admin/blog/usePreviewNavigation";
+import { isClientE2EEnabled } from "@/lib/e2e-utils";
 
 export default function BlogManager() {
   const { toast } = useToast();
@@ -74,6 +75,7 @@ export default function BlogManager() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { openPreview, loadingId: previewLoadingId } = usePreviewNavigation();
+  const e2eMode = isClientE2EEnabled();
 
   const [categories, setCategories] = useState<CategoryData[]>([]);
 
@@ -264,6 +266,10 @@ export default function BlogManager() {
 
   // --- SSE live updates (no manual close on error; let browser auto-reconnect) ---
   useEffect(() => {
+    if (e2eMode) {
+      return;
+    }
+
     let es: EventSource | null = null;
     try {
       es = new EventSource("/api/admin/blogs/stream");
@@ -290,7 +296,7 @@ export default function BlogManager() {
     return () => {
       es?.close();
     };
-  }, [mutatePosts, mutateCategories]);
+  }, [mutatePosts, mutateCategories, e2eMode]);
 
   const loading = postsLoading || categoriesLoading;
   const displayError = postsError ? "Failed to load blog posts." : null;

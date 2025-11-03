@@ -42,10 +42,10 @@
     /* Sidebar defaults */
     --sidebar-w: 280px;
 
-    /* Font role variables (all mapped to Poppins) */
-    --fs-body: var(--font-poppins);
-    --fs-heading: var(--font-poppins);
-    --fs-code: var(--font-poppins);
+    /* Font role variables */
+    --fs-body: 'Poppins', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --fs-heading: 'Poppins', 'Lora', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --fs-code: 'JetBrains Mono', 'SFMono-Regular', 'Menlo', 'Monaco', Consolas, 'Liberation Mono', 'Courier New', monospace;
   }
 
   .dark {

@@ -11,10 +11,16 @@ This is the official website of **Flavor Studios** | Your source for Anime News 
 1. Copy the example environment file:
 
    ```bash
-   cp .env.local.example .env.local
+   cp env.example .env.local
    ```
 
-2. Set the required environment variables in `.env.local` (the build fails fast when any are missing):
+2. Install dependencies (Node.js 22 is required; `.nvmrc` pins it):
+
+   ```bash
+   pnpm install
+   ```
+
+3. Set the required environment variables in `.env.local` (the build fails fast when any are missing):
 
    | Scope | Variable(s) | Purpose |
    | ----- | ----------- | ------- |
@@ -29,6 +35,18 @@ This is the official website of **Flavor Studios** | Your source for Anime News 
    | Server | `ADMIN_EMAILS` **or** `ADMIN_EMAIL` | Allowed admin login addresses (comma-separated). |
 
    Optional public keys (e.g., `NEXT_PUBLIC_FIREBASE_API_KEY`) remain optional but should be filled for production deployments.
+
+4. Run a local development server:
+
+   ```bash
+   pnpm dev
+   ```
+
+5. Verify the production build without real secrets (uses generated fallbacks):
+
+   ```bash
+   pnpm e2e:build
+   ```
 
 ---
 

@@ -8,7 +8,6 @@ export const runtime = 'nodejs'
 
 import type { ReactNode } from "react";
 import "./globals.css";
-import { Inter, JetBrains_Mono as JetBrainsMono, Lora, Poppins } from "next/font/google";
 
 import Toaster from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -90,35 +89,6 @@ const orgSchema = getSchema({
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-// next/font: load fonts with CSS variables exposed to globals.css
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const lora = Lora({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-lora",
-  display: "swap",
-});
-
-const jetbrains = JetBrainsMono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-jetbrains",
-  display: "swap",
-});
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
-  display: "swap",
-});
-
 function DefaultHeader() {
   return (
     <div className="sr-only" aria-hidden="true">
@@ -180,9 +150,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         )}
         {/* END GTM (HEAD) */}
       </head>
-      <body
-        className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased bg-white`}
-      >
+      <body className="antialiased bg-white">
         <div id="top" />
         <LayoutSlotsRoot footer={<Footer />}>
           <ThemeProvider>

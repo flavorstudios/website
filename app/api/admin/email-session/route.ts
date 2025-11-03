@@ -1,19 +1,27 @@
 import { type NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
-import { logError } from "@/lib/log"
+import { logBreadcrumb, logError } from "@/lib/log"
 import { serverEnv } from "@/env/server"
 
 import { isEmailAllowed } from "@/lib/admin-allowlist"
 
 export function GET() {
+  const bypassEnabled = serverEnv.ADMIN_BYPASS === "true"
   return NextResponse.json({
-    mfaRequired: Boolean(serverEnv.ADMIN_TOTP_SECRET),
+    mfaRequired: bypassEnabled && Boolean(serverEnv.ADMIN_TOTP_SECRET),
   })
 }
 
 export async function POST(req: NextRequest) {
   try {
+    if (serverEnv.ADMIN_BYPASS !== "true") {
+      logBreadcrumb("legacy-admin-login:blocked")
+      return NextResponse.json(
+        { error: "Legacy admin login is disabled." },
+        { status: 403 }
+      )
+    }
     const { email, password, otp } = await req.json()
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password required." }, { status: 400 })
@@ -54,6 +62,9 @@ export async function POST(req: NextRequest) {
     res.cookies.set("admin-session", token, {
       ...cookieOptions,
       maxAge: 60 * 60 * 24,
+    })
+    logBreadcrumb("legacy-admin-login:used", {
+      email: typeof email === "string" ? email.toLowerCase() : "unknown",
     })
     return res
   } catch (err) {

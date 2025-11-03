@@ -75,6 +75,7 @@ export async function awaitAppReady(
     // admin blog sub-route (seen in your CI logs)
     if (url.includes("/admin/dashboard/blog")) {
       candidates.push(
+        "role=heading[name*='Blog' i]",
         "[data-testid='admin-blog-grid']",
         "[data-testid='admin-blog-list']",
         "[data-testid='admin-blog-skeleton']",

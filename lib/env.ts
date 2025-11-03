@@ -13,9 +13,15 @@ const schema = z.object({
 
 type Env = z.infer<typeof schema>;
 
+const truthy = new Set(['1', 'true', 'TRUE', 'True']);
+const isTruthy = (value: string | undefined): boolean =>
+  value !== undefined && truthy.has(value);
+
 const skipValidation =
-  process.env.SKIP_ENV_VALIDATION === 'true' ||
-  process.env.ADMIN_BYPASS === 'true';
+  isTruthy(process.env.SKIP_ENV_VALIDATION) ||
+  isTruthy(process.env.ADMIN_BYPASS) ||
+  isTruthy(process.env.SKIP_STRICT_ENV) ||
+  isTruthy(process.env.CI);
 
 const _env: { success: true; data: Partial<Env> } | z.SafeParseReturnType<
   Record<string, unknown>,

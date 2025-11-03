@@ -32,7 +32,9 @@ To restore the Firebase experience, provide the full set of `NEXT_PUBLIC_FIREBAS
 
 ### Legacy env-based login
 
-The old environment-variable password flow is still available under the “Use legacy admin password (env-based)” disclosure on the login page. It relies on `ADMIN_PASSWORD_HASH` and `ADMIN_JWT_SECRET` and should only be used as a fallback while migrating existing operators.
+The old environment-variable password flow is still available behind a feature flag. To surface the toggle in the UI you must set both `NEXT_PUBLIC_ENABLE_LEGACY_ADMIN_LOGIN=true` and `ADMIN_BYPASS=true`. The server endpoint also returns 403 when `ADMIN_BYPASS` is not explicitly enabled, preventing accidental use in production.
+
+> **Recommendation:** keep both flags `false` in production and rotate the bcrypt hash out of the environment once all admins have been moved to Firebase authentication.
 
 
 ## Email verification & signup hardening

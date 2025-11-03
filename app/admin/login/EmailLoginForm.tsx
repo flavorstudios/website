@@ -99,13 +99,16 @@ export default function EmailLoginForm({
         const data = (await res.json().catch(() => null)) as
           | { error?: string }
           | null
-        const failureMessage = "Authentication failed."
+        const defaultMessage = "Authentication failed."
+        const serverMessage = data?.error?.trim()
+          ? data.error.trim()
+          : defaultMessage
         if (process.env.NODE_ENV !== "production" && data?.error) {
           console.error("Email login failed:", data.error)
         }
-        setError(failureMessage)
+        setError(serverMessage)
         setHasLocalFormError(true)
-        setFormError(failureMessage)
+        setFormError(serverMessage)
         setLoading(false)
         return
       }

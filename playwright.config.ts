@@ -16,6 +16,7 @@ const defaultBaseUrl =
   explicitBaseUrl ?? (isCI ? localBaseUrl : process.env.BASE_URL ?? localBaseUrl);
 
 const storageState = path.join(repoRoot, "e2e/.auth/admin.json");
+const useProdServer = isCI || process.env.E2E_PROD_SERVER === "1";
 
 // ✅ toggle to run only the safe/smoke tests in CI
 // set CI_E2E_SMOKE=1 in the workflow to skip the 2 flaky admin-dashboard tests
@@ -53,18 +54,20 @@ export default defineConfig({
   ],
   globalSetup: path.join(repoRoot, "e2e/setup/global-setup.ts"),
   webServer: {
-    command: "pnpm start:test",
+    command: useProdServer ? "pnpm e2e:serve" : "pnpm start:test",
     url: defaultBaseUrl,
     cwd: repoRoot,
-    reuseExistingServer: !isCI,
+    reuseExistingServer: !isCI && !useProdServer,
     stdout: "pipe",
     stderr: "pipe",
-    timeout: 120_000,
-    env: {
-      ...process.env,
-      NODE_ENV: "test",
-      NEXT_TELEMETRY_DISABLED: "1",
-      E2E: "true",
-    },
+    timeout: 180_000,
+    env: useProdServer
+      ? process.env
+      : {
+          ...process.env,
+          NODE_ENV: "test",
+          NEXT_TELEMETRY_DISABLED: "1",
+          E2E: "true",
+        },
   },
 });

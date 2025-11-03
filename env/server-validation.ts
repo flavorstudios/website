@@ -54,11 +54,8 @@ const truthyFlags = new Set(['1', 'true', 'TRUE', 'True']);
 const isTruthy = (value: string | undefined): boolean =>
   value !== undefined && truthyFlags.has(value);
 
-const skipValidation =
-  isTruthy(process.env.ADMIN_BYPASS) ||
-  isTruthy(process.env.SKIP_ENV_VALIDATION) ||
-  isTruthy(process.env.SKIP_STRICT_ENV) ||
-  isTruthy(process.env.CI);
+const relaxedValidation =
+  process.env.NODE_ENV === 'test' || isTruthy(process.env.ALLOW_INSECURE_ENV);
 
 const { VERCEL_ENV, VERCEL_URL, NODE_ENV } = process.env;
 const NEXT_PUBLIC_BASE_URL = process.env["NEXT_PUBLIC_BASE_URL"];
@@ -89,15 +86,11 @@ const rawServerEnv = allServerKeys.reduce<Record<string, string | undefined>>(
   {},
 );
 
-const _server: z.SafeParseReturnType<ServerEnvShape, ServerEnvShape> = skipValidation
-  ? {
-      success: true as const,
-      data: rawServerEnv as ServerEnvShape,
-    }
-  : serverEnvSchema.safeParse(rawServerEnv);
+const parsedServer: z.SafeParseReturnType<ServerEnvShape, ServerEnvShape> =
+  serverEnvSchema.safeParse(rawServerEnv);
 
-if (!_server.success) {
-  const { fieldErrors } = _server.error.flatten();
+if (!parsedServer.success && !relaxedValidation) {
+  const { fieldErrors } = parsedServer.error.flatten();
   const message = Object.entries(fieldErrors)
     .map(([key, value]) => `${key}: ${value?.join(', ')}`)
     .join('\n');
@@ -159,30 +152,51 @@ export const serverEnv: Record<string, string | undefined> & {
   ADMIN_EMAIL: process.env.ADMIN_EMAIL,
   ADMIN_EMAILS: process.env.ADMIN_EMAILS,
   ADMIN_API_KEY: process.env.ADMIN_API_KEY,
-  ADMIN_JWT_SECRET: _server.data.ADMIN_JWT_SECRET,
+  ADMIN_JWT_SECRET: parsedServer.success
+    ? parsedServer.data.ADMIN_JWT_SECRET
+    : rawServerEnv.ADMIN_JWT_SECRET,
   ADMIN_PASSWORD_HASH: process.env.ADMIN_PASSWORD_HASH,
   ADMIN_SESSION_EXPIRY_DAYS: process.env.ADMIN_SESSION_EXPIRY_DAYS,
   ADMIN_TOTP_SECRET: process.env.ADMIN_TOTP_SECRET,
-  ADMIN_REQUIRE_EMAIL_VERIFICATION:
-    _server.data.ADMIN_REQUIRE_EMAIL_VERIFICATION,
-  ADMIN_DISPOSABLE_DOMAINS: _server.data.ADMIN_DISPOSABLE_DOMAINS,
-  PREVIEW_SECRET: _server.data.PREVIEW_SECRET,
+  ADMIN_REQUIRE_EMAIL_VERIFICATION: parsedServer.success
+    ? parsedServer.data.ADMIN_REQUIRE_EMAIL_VERIFICATION
+    : rawServerEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION,
+  ADMIN_DISPOSABLE_DOMAINS: parsedServer.success
+    ? parsedServer.data.ADMIN_DISPOSABLE_DOMAINS
+    : rawServerEnv.ADMIN_DISPOSABLE_DOMAINS,
+  PREVIEW_SECRET: parsedServer.success
+    ? parsedServer.data.PREVIEW_SECRET
+    : rawServerEnv.PREVIEW_SECRET,
   ANALYZE: process.env.ANALYZE,
-  BASE_URL: _server.data.BASE_URL,
+  BASE_URL: parsedServer.success
+    ? parsedServer.data.BASE_URL
+    : rawServerEnv.BASE_URL,
   BING_API_KEY: process.env.BING_API_KEY,
   CONTACT_REPLY_EMAILS: process.env.CONTACT_REPLY_EMAILS,
-  CRON_SECRET: _server.data.CRON_SECRET,
+  CRON_SECRET: parsedServer.success
+    ? parsedServer.data.CRON_SECRET
+    : rawServerEnv.CRON_SECRET,
   DEBUG_ADMIN: process.env.DEBUG_ADMIN,
-  FIREBASE_SERVICE_ACCOUNT_JSON: _server.data.FIREBASE_SERVICE_ACCOUNT_JSON,
-  FIREBASE_SERVICE_ACCOUNT_KEY: _server.data.FIREBASE_SERVICE_ACCOUNT_KEY,
-  FIREBASE_STORAGE_BUCKET: _server.data.FIREBASE_STORAGE_BUCKET,
+  FFIREBASE_SERVICE_ACCOUNT_JSON: parsedServer.success
+    ? parsedServer.data.FIREBASE_SERVICE_ACCOUNT_JSON
+    : rawServerEnv.FIREBASE_SERVICE_ACCOUNT_JSON,
+  FIREBASE_SERVICE_ACCOUNT_KEY: parsedServer.success
+    ? parsedServer.data.FIREBASE_SERVICE_ACCOUNT_KEY
+    : rawServerEnv.FIREBASE_SERVICE_ACCOUNT_KEY,
+  FIREBASE_STORAGE_BUCKET: parsedServer.success
+    ? parsedServer.data.FIREBASE_STORAGE_BUCKET
+    : rawServerEnv.FIREBASE_STORAGE_BUCKET,
   FUNCTIONS_EMULATOR: process.env.FUNCTIONS_EMULATOR,
   INDEXNOW_KEY: process.env.INDEXNOW_KEY,
   NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
-  NEXT_PUBLIC_BASE_URL: _server.data.NEXT_PUBLIC_BASE_URL,
+  NEXT_PUBLIC_BASE_URL: parsedServer.success
+    ? parsedServer.data.NEXT_PUBLIC_BASE_URL
+    : rawServerEnv.NEXT_PUBLIC_BASE_URL,
   NEXT_PUBLIC_COOKIEYES_ID: process.env.NEXT_PUBLIC_COOKIEYES_ID,
   NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: _server.data.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: parsedServer.success
+    ? parsedServer.data.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    : rawServerEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   NEXT_PUBLIC_GTM_CONTAINER_ID: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID,
   NODE_ENV: process.env.NODE_ENV,
   NOTIFY_NEW_SUBMISSION: process.env.NOTIFY_NEW_SUBMISSION,

@@ -11,7 +11,7 @@ test.describe('Login form', () => {
         await route.fulfill({
           status: 401,
           contentType: 'application/json',
-          body: JSON.stringify({ error: 'Authentication failed.' }),
+          body: JSON.stringify({ error: 'Email not allowed for admin access.' }),
         });
         return;
       }
@@ -26,6 +26,9 @@ test.describe('Login form', () => {
 
     const error = page.getByRole('alert', { name: 'Authentication failed.' });
     await expect(error).toBeVisible();
+    await expect(
+      page.getByText('Email not allowed for admin access.')
+    ).toBeVisible();
     await expect(page.locator('[role="alert"]')).toHaveCount(1);
     // Check that it sits within an aria-live region
     await expect(error.locator('xpath=ancestor::*[@aria-live="assertive"]')).toHaveCount(1);

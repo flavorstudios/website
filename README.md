@@ -219,10 +219,20 @@ Authenticated cron endpoints keep cache and feeds fresh.
 
 ### Environment variables
 
-- `CRON_SECRET` – shared bearer token used to authenticate requests.
-- `BASE_URL` – full URL (including protocol) pointing at the deployed site so scheduled functions can call back into the app.
+1. Copy [`.env.example`](./.env.example) to `.env.local` for local work.
+2. Fill in the required values per environment:
 
-See [.env.local.example](.env.local.example) for other related settings.
+| Stage | Required keys | Notes |
+| --- | --- | --- |
+| Development | `CRON_SECRET`, `PREVIEW_SECRET`, `ADMIN_JWT_SECRET`, `BASE_URL` (defaults to `http://localhost:3000`), `NEXT_PUBLIC_BASE_URL` | Running `pnpm env:check` highlights anything missing without failing. |
+| Preview / Production | Everything above **plus** `FIREBASE_SERVICE_ACCOUNT_KEY` (or `FIREBASE_SERVICE_ACCOUNT_JSON`), `FIREBASE_STORAGE_BUCKET`, `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`, `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`, `NEXT_PUBLIC_FIREBASE_APP_ID` | Ensure `FIREBASE_STORAGE_BUCKET` values match exactly on client and server. |
+
+Use the validation helpers:
+
+- `pnpm env:check` &mdash; prints a summary (exit code `0`).
+- `pnpm env:check -- --strict` &mdash; fails when required entries are missing (matches the build step).
+
+> **CI / Vercel**: configure the required keys above via the project settings or an [Environment Variable Group](https://vercel.com/docs/projects/environment-variables#environment-variable-groups). Optional flags (GTM, CookieYes, SMTP, etc.) may be added later without breaking builds. Never enable `USE_DEFAULT_ENV` in shared environments; it is only for local test fixtures.
 
 ### Jobs
 | Job | Endpoint | Schedule | Code |

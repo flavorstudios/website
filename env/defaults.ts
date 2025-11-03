@@ -43,6 +43,8 @@ const isValueMissing = (value: string | undefined): boolean =>
 const shouldApplyFallbacks = (): boolean =>
   process.env.NODE_ENV === "test" || isTruthy(process.env.USE_DEFAULT_ENV);
 
+const APPLIED_KEYS_TOKEN = "__APPLIED_DEFAULT_ENV_KEYS";
+
 export const applyDefaultEnv = (): string[] => {
   if (!shouldApplyFallbacks()) {
     return [];
@@ -58,10 +60,16 @@ export const applyDefaultEnv = (): string[] => {
     }
   }
 
-  if (appliedKeys.length > 0 && isTruthy(process.env.DEBUG_ENV_FALLBACKS)) {
-    console.warn(
-      `[env] Applied fallback values: ${inspect(appliedKeys, { depth: 0 })}`,
-    );
+  if (appliedKeys.length > 0) {
+    process.env[APPLIED_KEYS_TOKEN] = appliedKeys.join(",");
+
+    if (isTruthy(process.env.DEBUG_ENV_FALLBACKS)) {
+      console.warn(
+        `[env] Applied fallback values: ${inspect(appliedKeys, { depth: 0 })}`,
+      );
+    }
+  } else {
+    delete process.env[APPLIED_KEYS_TOKEN];
   }
 
   return appliedKeys;

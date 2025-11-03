@@ -260,7 +260,7 @@ export default function AdminLoginForm() {
           </div>
           <PageHeader
             title="Admin Login"
-            description="Welcome back! Create, schedule, and manage your stories."
+            description="Build. Schedule. Go live."
             containerClassName="flex-col items-start gap-4"
             headingClassName="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl"
             descriptionClassName="text-base text-slate-600 md:text-lg"

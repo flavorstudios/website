@@ -9,6 +9,7 @@
     "build": "next build",
     "start": "next start",
     "preview": "pnpm run build && pnpm run start",
+    "env:check": "tsx scripts/validate-env.ts --strict=false",
     "start:test": "pnpm exec tsx scripts/start-test.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

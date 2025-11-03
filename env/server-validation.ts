@@ -1,219 +1,136 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-const nonEmptyString = z
-  .string()
-  .transform(value => value.trim())
-  .pipe(z.string().min(1));
+import {
+  clientEnvSchema,
+  collectMissingForTarget,
+  determineStage,
+  envVarDefinitions,
+  firebaseServiceAccountDefinitions,
+  isValueMissing,
+  serverEnvSchema,
+  truthyFlags,
+  type EnvMissingSummary,
+  type EnvStage,
+} from "./definitions";
 
-const optionalNonEmptyString = nonEmptyString.optional();
+const SERVER_TARGET = "server" as const;
 
-const requiredServerKeys = [
-  'BASE_URL',
-  'CRON_SECRET',
-  'PREVIEW_SECRET',
-  'ADMIN_JWT_SECRET',
-] as const;
+const applyDynamicRuntimeDefaults = (): void => {
+  const { NODE_ENV, VERCEL_ENV, VERCEL_URL } = process.env;
 
-const optionalServerKeys = [
-  'NEXT_PUBLIC_BASE_URL',
-  'FIREBASE_SERVICE_ACCOUNT_KEY',
-  'FIREBASE_SERVICE_ACCOUNT_JSON',
-  'FIREBASE_STORAGE_BUCKET',
-  'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
-  'ADMIN_EMAILS',
-  'ADMIN_EMAIL',
-  'ADMIN_REQUIRE_EMAIL_VERIFICATION',
-  'ADMIN_DISPOSABLE_DOMAINS',
-  'E2E',
-] as const;
+  if (NODE_ENV === "test") {
+    return;
+  }
 
-type RequiredServerKey = (typeof requiredServerKeys)[number];
-type OptionalServerKey = (typeof optionalServerKeys)[number];
-
-type ServerEnvShape = Record<RequiredServerKey, string> &
-  Partial<Record<OptionalServerKey, string | undefined>>;
-
-export const serverEnvSchema = z.object({
-  BASE_URL: nonEmptyString,
-  CRON_SECRET: nonEmptyString,
-  PREVIEW_SECRET: nonEmptyString,
-  ADMIN_JWT_SECRET: nonEmptyString,
-  NEXT_PUBLIC_BASE_URL: optionalNonEmptyString,
-  FIREBASE_SERVICE_ACCOUNT_KEY: optionalNonEmptyString,
-  FIREBASE_SERVICE_ACCOUNT_JSON: optionalNonEmptyString,
-  FIREBASE_STORAGE_BUCKET: optionalNonEmptyString,
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: optionalNonEmptyString,
-  ADMIN_EMAILS: optionalNonEmptyString,
-  ADMIN_EMAIL: optionalNonEmptyString,
-  ADMIN_REQUIRE_EMAIL_VERIFICATION: optionalNonEmptyString,
-  ADMIN_DISPOSABLE_DOMAINS: optionalNonEmptyString,
-  E2E: optionalNonEmptyString,
-});
-
-const truthyFlags = new Set(['1', 'true', 'TRUE', 'True']);
-const isTruthy = (value: string | undefined): boolean =>
-  value !== undefined && truthyFlags.has(value);
-
-const relaxedValidation =
-  process.env.NODE_ENV === 'test' || isTruthy(process.env.ALLOW_INSECURE_ENV);
-
-const { VERCEL_ENV, VERCEL_URL, NODE_ENV } = process.env;
-const NEXT_PUBLIC_BASE_URL = process.env["NEXT_PUBLIC_BASE_URL"];
-if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
-  let resolved: string | undefined;
-  if (VERCEL_ENV === 'preview' || VERCEL_ENV === 'production') {
-    if (VERCEL_URL) {
-      resolved = `https://${VERCEL_URL}`;
+  const resolveBaseUrl = (): string | undefined => {
+    if (VERCEL_ENV === "preview" || VERCEL_ENV === "production") {
+      return VERCEL_URL ? `https://${VERCEL_URL}` : undefined;
     }
-  } else if (NODE_ENV === 'development') {
-    resolved = 'http://localhost:3000';
+
+    if (NODE_ENV === "development") {
+      return "http://localhost:3000";
+    }
+
+    return undefined;
+  };
+
+  const publicBaseKey = "NEXT_PUBLIC_BASE_URL";
+  const baseUrlKey = "BASE_URL";
+  const currentPublicBase = process.env[publicBaseKey];
+  const currentBase = process.env[baseUrlKey];
+
+  if (isValueMissing(currentPublicBase)) {
+    const resolved = resolveBaseUrl();
+    if (resolved) {
+      process.env[publicBaseKey] = resolved;
+    }
   }
-  if (resolved) {
-    process.env["NEXT_PUBLIC_BASE_URL"] = resolved;
+
+  if (isValueMissing(currentBase)) {
+    const resolved = process.env[publicBaseKey] ?? resolveBaseUrl();
+    if (resolved) {
+      process.env[baseUrlKey] = resolved;
+    }
   }
-}
-
-const allServerKeys: readonly (RequiredServerKey | OptionalServerKey)[] = [
-  ...requiredServerKeys,
-  ...optionalServerKeys,
-];
-
-const rawServerEnv = allServerKeys.reduce<Record<string, string | undefined>>(
-  (acc, key) => {
-    acc[key] = process.env[key];
-    return acc;
-  },
-  {},
-);
-
-const parsedServer: z.SafeParseReturnType<ServerEnvShape, ServerEnvShape> =
-  serverEnvSchema.safeParse(rawServerEnv);
-
-if (!parsedServer.success && !relaxedValidation) {
-  const { fieldErrors } = parsedServer.error.flatten();
-  const message = Object.entries(fieldErrors)
-    .map(([key, value]) => `${key}: ${value?.join(', ')}`)
-    .join('\n');
-  throw new Error('Invalid server environment variables\n' + message);
-}
-
-export const serverEnv: Record<string, string | undefined> & {
-  ADMIN_AUTH_DISABLED: string | undefined;
-  ADMIN_BYPASS: string | undefined;
-  ADMIN_COOKIE_DOMAIN: string | undefined;
-  ADMIN_DOMAIN: string | undefined;
-  ADMIN_EMAIL: string | undefined;
-  ADMIN_EMAILS: string | undefined;
-  ADMIN_API_KEY: string | undefined;
-  ADMIN_JWT_SECRET: string | undefined;
-  ADMIN_PASSWORD_HASH: string | undefined;
-  ADMIN_SESSION_EXPIRY_DAYS: string | undefined;
-  ADMIN_TOTP_SECRET: string | undefined;
-  ADMIN_REQUIRE_EMAIL_VERIFICATION: string | undefined;
-  ADMIN_DISPOSABLE_DOMAINS: string | undefined;
-  PREVIEW_SECRET: string | undefined;
-  ANALYZE: string | undefined;
-  BASE_URL: string | undefined;
-  BING_API_KEY: string | undefined;
-  CONTACT_REPLY_EMAILS: string | undefined;
-  CRON_SECRET: string | undefined;
-  DEBUG_ADMIN: string | undefined;
-  FIREBASE_SERVICE_ACCOUNT_JSON: string | undefined;
-  FIREBASE_SERVICE_ACCOUNT_KEY: string | undefined;
-  FIREBASE_STORAGE_BUCKET: string | undefined;
-  FUNCTIONS_EMULATOR: string | undefined;
-  INDEXNOW_KEY: string | undefined;
-  NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: string | undefined;
-  NEXT_PUBLIC_BASE_URL: string | undefined;
-  NEXT_PUBLIC_COOKIEYES_ID: string | undefined;
-  NEXT_PUBLIC_FIREBASE_API_KEY: string | undefined;
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: string | undefined;
-  NEXT_PUBLIC_GTM_CONTAINER_ID: string | undefined;
-  NODE_ENV: string | undefined;
-  NOTIFY_NEW_SUBMISSION: string | undefined;
-  PERSPECTIVE_API_KEY: string | undefined;
-  RSS_ADMIN_CONTACT: string | undefined;
-  RSS_MANAGING_EDITOR: string | undefined;
-  SMTP_HOST: string | undefined;
-  SMTP_PASS: string | undefined;
-  SMTP_PORT: string | undefined;
-  SMTP_SECURE: string | undefined;
-  SMTP_USER: string | undefined;
-  VAPID_PRIVATE_KEY: string | undefined;
-  VAPID_PUBLIC_KEY: string | undefined;
-  UPSTASH_REDIS_REST_URL: string | undefined;
-  UPSTASH_REDIS_REST_TOKEN: string | undefined;
-  TEST_MODE: string | undefined;
-} = {
-  ADMIN_AUTH_DISABLED: process.env.ADMIN_AUTH_DISABLED,
-  ADMIN_BYPASS: process.env.ADMIN_BYPASS,
-  ADMIN_COOKIE_DOMAIN: process.env.ADMIN_COOKIE_DOMAIN,
-  ADMIN_DOMAIN: process.env.ADMIN_DOMAIN,
-  ADMIN_EMAIL: process.env.ADMIN_EMAIL,
-  ADMIN_EMAILS: process.env.ADMIN_EMAILS,
-  ADMIN_API_KEY: process.env.ADMIN_API_KEY,
-  ADMIN_JWT_SECRET: parsedServer.success
-    ? parsedServer.data.ADMIN_JWT_SECRET
-    : rawServerEnv.ADMIN_JWT_SECRET,
-  ADMIN_PASSWORD_HASH: process.env.ADMIN_PASSWORD_HASH,
-  ADMIN_SESSION_EXPIRY_DAYS: process.env.ADMIN_SESSION_EXPIRY_DAYS,
-  ADMIN_TOTP_SECRET: process.env.ADMIN_TOTP_SECRET,
-  ADMIN_REQUIRE_EMAIL_VERIFICATION: parsedServer.success
-    ? parsedServer.data.ADMIN_REQUIRE_EMAIL_VERIFICATION
-    : rawServerEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION,
-  ADMIN_DISPOSABLE_DOMAINS: parsedServer.success
-    ? parsedServer.data.ADMIN_DISPOSABLE_DOMAINS
-    : rawServerEnv.ADMIN_DISPOSABLE_DOMAINS,
-  PREVIEW_SECRET: parsedServer.success
-    ? parsedServer.data.PREVIEW_SECRET
-    : rawServerEnv.PREVIEW_SECRET,
-  ANALYZE: process.env.ANALYZE,
-  BASE_URL: parsedServer.success
-    ? parsedServer.data.BASE_URL
-    : rawServerEnv.BASE_URL,
-  BING_API_KEY: process.env.BING_API_KEY,
-  CONTACT_REPLY_EMAILS: process.env.CONTACT_REPLY_EMAILS,
-  CRON_SECRET: parsedServer.success
-    ? parsedServer.data.CRON_SECRET
-    : rawServerEnv.CRON_SECRET,
-  DEBUG_ADMIN: process.env.DEBUG_ADMIN,
-  FFIREBASE_SERVICE_ACCOUNT_JSON: parsedServer.success
-    ? parsedServer.data.FIREBASE_SERVICE_ACCOUNT_JSON
-    : rawServerEnv.FIREBASE_SERVICE_ACCOUNT_JSON,
-  FIREBASE_SERVICE_ACCOUNT_KEY: parsedServer.success
-    ? parsedServer.data.FIREBASE_SERVICE_ACCOUNT_KEY
-    : rawServerEnv.FIREBASE_SERVICE_ACCOUNT_KEY,
-  FIREBASE_STORAGE_BUCKET: parsedServer.success
-    ? parsedServer.data.FIREBASE_STORAGE_BUCKET
-    : rawServerEnv.FIREBASE_STORAGE_BUCKET,
-  FUNCTIONS_EMULATOR: process.env.FUNCTIONS_EMULATOR,
-  INDEXNOW_KEY: process.env.INDEXNOW_KEY,
-  NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
-  NEXT_PUBLIC_BASE_URL: parsedServer.success
-    ? parsedServer.data.NEXT_PUBLIC_BASE_URL
-    : rawServerEnv.NEXT_PUBLIC_BASE_URL,
-  NEXT_PUBLIC_COOKIEYES_ID: process.env.NEXT_PUBLIC_COOKIEYES_ID,
-  NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: parsedServer.success
-    ? parsedServer.data.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-    : rawServerEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  NEXT_PUBLIC_GTM_CONTAINER_ID: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID,
-  NODE_ENV: process.env.NODE_ENV,
-  NOTIFY_NEW_SUBMISSION: process.env.NOTIFY_NEW_SUBMISSION,
-  PERSPECTIVE_API_KEY: process.env.PERSPECTIVE_API_KEY,
-  RSS_ADMIN_CONTACT: process.env.RSS_ADMIN_CONTACT,
-  RSS_MANAGING_EDITOR: process.env.RSS_MANAGING_EDITOR,
-  SMTP_HOST: process.env.SMTP_HOST,
-  SMTP_PASS: process.env.SMTP_PASS,
-  SMTP_PORT: process.env.SMTP_PORT,
-  SMTP_SECURE: process.env.SMTP_SECURE,
-  SMTP_USER: process.env.SMTP_USER,
-  VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
-  VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY,
-  UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
-  UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
-  TEST_MODE: process.env.TEST_MODE,
-  E2E: process.env.E2E,
 };
 
-export type ServerEnv = typeof serverEnv;
+applyDynamicRuntimeDefaults();
+
+const collectServerInput = (): Record<string, string | undefined> => {
+  const entries: Array<[string, string | undefined]> = [];
+
+  for (const definition of envVarDefinitions) {
+    if (!definition.targets[SERVER_TARGET]) {
+      continue;
+    }
+
+    entries.push([definition.name, process.env[definition.name]]);
+  }
+
+return Object.fromEntries(entries);
+};
+
+const serverEnvInput = collectServerInput();
+
+const parsedServer = serverEnvSchema.safeParse(serverEnvInput);
+
+export type ServerEnv = z.infer<typeof serverEnvSchema>;
+
+export const serverEnv: ServerEnv = parsedServer.success
+  ? parsedServer.data
+  : serverEnvSchema.parse(serverEnvInput);
+
+export type ClientEnv = z.infer<typeof clientEnvSchema>;
+
+export const currentStage: EnvStage = determineStage(process.env);
+
+const missingForStage: EnvMissingSummary = collectMissingForTarget(
+  SERVER_TARGET,
+  currentStage,
+  process.env,
+);
+
+const firebaseServiceAccountValues = firebaseServiceAccountDefinitions.map(definition => (
+  serverEnv as Record<string, string | undefined>
+)[definition.name]);
+
+const hasServiceAccount = firebaseServiceAccountValues.some(value => !isValueMissing(value));
+
+const requiresServiceAccount =
+  currentStage === "preview" || currentStage === "production";
+
+const appliedFallbackKeys = (process.env.__APPLIED_DEFAULT_ENV_KEYS ?? "")
+  .split(",")
+  .map(value => value.trim())
+  .filter(Boolean);
+
+const bucketMismatch =
+  !isValueMissing(serverEnv.FIREBASE_STORAGE_BUCKET) &&
+  !isValueMissing(serverEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET) &&
+  serverEnv.FIREBASE_STORAGE_BUCKET !== serverEnv.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+
+const allowRelaxedDefaults =
+  process.env.NODE_ENV === "test" ||
+  truthyFlags.has(process.env.ALLOW_INSECURE_ENV ?? "");
+
+export interface ServerEnvMeta {
+  readonly stage: EnvStage;
+  readonly missingRequiredEnvVars: string[];
+  readonly missingOptionalEnvVars: string[];
+  readonly bucketMismatch: boolean;
+  readonly hasServiceAccount: boolean;
+  readonly requiresServiceAccount: boolean;
+  readonly appliedFallbackKeys: string[];
+  readonly allowRelaxedDefaults: boolean;
+}
+
+export const serverEnvMeta: ServerEnvMeta = {
+  stage: currentStage,
+  missingRequiredEnvVars: missingForStage.missingRequired,
+  missingOptionalEnvVars: missingForStage.missingOptional,
+  bucketMismatch,
+  hasServiceAccount,
+  requiresServiceAccount,
+  appliedFallbackKeys,
+  allowRelaxedDefaults,
+};

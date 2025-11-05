@@ -33,6 +33,18 @@ export function getMissingFirebaseEnv(): string[] {
 }
 
 /**
+ * Provides a human-friendly error message that explains how to resolve
+ * missing Firebase client configuration. Used in UI surfaces and logs.
+ */
+export function formatMissingFirebaseEnvMessage(missing: string[]): string {
+  return [
+    `[Firebase] Missing: ${missing.join(", ")}`,
+    "Populate these NEXT_PUBLIC_* values in .env.local for local development",
+    "or in the Vercel project settings (Environment Variables) before deploying.",
+  ].join(" — ");
+}
+
+/**
  * Dev-only warning helper. Safe in both server and browser contexts.
  */
 export function assertClientEnv(): void {

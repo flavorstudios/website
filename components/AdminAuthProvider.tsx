@@ -11,6 +11,7 @@ import React, {
 import { usePathname, useRouter } from "next/navigation"
 import { onAuthStateChanged, signOut, User } from "firebase/auth"
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
+import { assertClientEnv } from "@/lib/firebase-client-env"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { clientEnv } from "@/env.client"
 import { isE2EEnabled } from "@/lib/e2e-utils"
@@ -81,6 +82,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
   const router = useRouter()
   const pathname = usePathname()
+
+  useEffect(() => {
+    assertClientEnv()
+  }, [])
 
   const readTestEmailVerifiedSync = useCallback(() => {
     if (!shouldUseLocalVerification || typeof window === "undefined") {

@@ -11,19 +11,29 @@ import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import {
   PUBLIC_FIREBASE_CONFIG,
+  assertClientEnv,
+  formatMissingFirebaseEnvMessage,
   getMissingFirebaseEnv,
 } from "./firebase-client-env";
 
 let app: FirebaseApp | null = null;
 export let firebaseInitError: Error | null = null;
+let hasLoggedMissingFirebaseEnv = false;
 
 function initIfNeeded(): void {
   // Never initialize during SSR; only in the browser.
   if (typeof window === "undefined" || app) return;
 
+  assertClientEnv();
+
   const missing = getMissingFirebaseEnv();
   if (missing.length) {
-    firebaseInitError = new Error(`[Firebase] Missing: ${missing.join(", ")}`);
+    const message = formatMissingFirebaseEnvMessage(missing);
+    firebaseInitError = new Error(message);
+    if (!hasLoggedMissingFirebaseEnv && process.env.NODE_ENV !== "production") {
+      console.error(message);
+      hasLoggedMissingFirebaseEnv = true;
+    }
     return;
   }
 
@@ -34,9 +44,9 @@ function initIfNeeded(): void {
     storageBucket: PUBLIC_FIREBASE_CONFIG.storageBucket!,
     messagingSenderId: PUBLIC_FIREBASE_CONFIG.messagingSenderId!,
     appId: PUBLIC_FIREBASE_CONFIG.appId!,
-    ...(PUBLIC_FIREBASE_CONFIG.measurementId && {
-      measurementId: PUBLIC_FIREBASE_CONFIG.measurementId,
-    }),
+    ...(PUBLIC_FIREBASE_CONFIG.measurementId
+      ? { measurementId: PUBLIC_FIREBASE_CONFIG.measurementId }
+      : {}),
   };
 
   app = getApps().length ? getApp() : initializeApp(options);

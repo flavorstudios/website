@@ -15,6 +15,7 @@ import { clientEnv } from "@/env.client"
 
 // --- Firebase Auth (client-only getters) ---
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
+import { assertClientEnv } from "@/lib/firebase-client-env"
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -94,6 +95,10 @@ export default function AdminLoginForm() {
     searchParams.get("reset") === "1"
       ? "Your password has been updated. Please sign in."
       : null
+
+  useEffect(() => {
+    assertClientEnv()
+  }, [])
 
   const finalizeLogin = useCallback(() => {
     if (typeof window !== "undefined") {

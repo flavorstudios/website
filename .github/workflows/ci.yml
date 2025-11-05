@@ -1,4 +1,3 @@
-
 name: CI
 on:
   push:
@@ -10,18 +9,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
+
+      # Install pnpm without pinning a conflicting version.
+      # This respects the version from package.json#packageManager.
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          run_install: false
+
+      # Single Node setup with cache
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.18.1
+          cache: pnpm
+
+      - name: Show tool versions
+        run: |
+          node -v
+          pnpm -v
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Build
         run: pnpm build
+
       - name: Ping Search Engines
         run: node scripts/pingAllSearchEngines.mjs
         env:

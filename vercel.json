@@ -1,13 +1,14 @@
 {
   "version": 2,
+  "framework": "nextjs",
   "functions": {
-    "app/api/**/*": { "runtime": "@vercel/node@22.0.0" }
+    "app/api/**/*": { "runtime": "@vercel/node@20.18.1" }
   },
-  "buildCommand": "pnpm build",
   "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm --filter app build",
   "build": {
     "env": {
-      "NODE_VERSION": "22"
+      "NODE_VERSION": "20.18.1"
     }
   }
 }

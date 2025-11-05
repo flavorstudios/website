@@ -114,10 +114,16 @@ const collectBypassSources = (): string[] => {
   return sources;
 };
 
+/**
+ * Minimal set of client envs required while running in BYPASS mode.
+ * In this mode: any other missing "required" vars are downgraded to optional.
+ */
 const BYPASS_MINIMAL_ENV = [
   "NEXT_PUBLIC_FIREBASE_API_KEY",
   "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
   "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
+  "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+  "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
   "NEXT_PUBLIC_FIREBASE_APP_ID",
 ] as const;
 
@@ -237,6 +243,18 @@ export const runValidation = async (cliOptions: CliOptions = {}): Promise<Valida
     ...clientEnvMeta.missingOptionalEnvVars,
   ]);
 
+  // Downgrade non-essential required vars to "optional" in BYPASS mode.
+  if (mode === "bypass") {
+    const bypassRequired = new Set<string>(BYPASS_MINIMAL_ENV);
+    for (const name of Array.from(missingRequired)) {
+      if (!bypassRequired.has(name)) {
+        missingRequired.delete(name);
+        optionalMissing.add(name);
+      }
+    }
+  }
+
+  // Ensure "required" and "optional" sets are disjoint.
   for (const name of missingRequired) {
     optionalMissing.delete(name);
   }

@@ -36,6 +36,7 @@ yarn-error.log*
 .env*
 # keep sample env file public
 !.env.example
+!.env.local
 !.env.local.example
 !.env.ci
 

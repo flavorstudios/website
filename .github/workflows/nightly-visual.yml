@@ -41,27 +41,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install pnpm on PATH (fallback)
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - name: Setup Node
+      # Canonical toolchain: Node 20.18.1 + pnpm 10.6.2 (no Corepack)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version: "20.18.1"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Activate pnpm
-        run: |
-          PNPM_VERSION=$(node -p "require('./package.json').packageManager?.split('@')[1] ?? ''")
-          if [ -n "$PNPM_VERSION" ]; then
-            corepack prepare "pnpm@${PNPM_VERSION}" --activate
-          else
-            corepack prepare pnpm@9 --activate
-          fi
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.6.2
+          run_install: false
 
       - name: Show tool versions
         run: |
@@ -71,9 +63,6 @@ jobs:
       - name: Configure pnpm store dir for stable caching
         run: pnpm config set store-dir ~/.pnpm-store
 
-      - name: Assert pnpm version
-        run: node .github/scripts/assert-pnpm-version.mjs
-
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
@@ -82,8 +71,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Assert pnpm version
+        run: node .github/scripts/assert-pnpm-version.mjs
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Validate environment (bypass allowed)
+        run: pnpm env:check --strict
 
       - name: Build app for smoke visuals
         env:
@@ -123,27 +118,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install pnpm on PATH (fallback)
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - name: Setup Node
+      # Canonical toolchain: Node 20.18.1 + pnpm 10.6.2 (no Corepack)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version: "20.18.1"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Activate pnpm
-        run: |
-          PNPM_VERSION=$(node -p "require('./package.json').packageManager?.split('@')[1] ?? ''")
-          if [ -n "$PNPM_VERSION" ]; then
-            corepack prepare "pnpm@${PNPM_VERSION}" --activate
-          else
-            corepack prepare pnpm@9 --activate
-          fi
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.6.2
+          run_install: false
 
       - name: Show tool versions
         run: |
@@ -153,9 +140,6 @@ jobs:
       - name: Configure pnpm store dir for stable caching
         run: pnpm config set store-dir ~/.pnpm-store
 
-      - name: Assert pnpm version
-        run: node .github/scripts/assert-pnpm-version.mjs
-
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
@@ -164,8 +148,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Assert pnpm version
+        run: node .github/scripts/assert-pnpm-version.mjs
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Validate environment (bypass allowed)
+        run: pnpm env:check --strict
 
       - name: Build app for visuals
         env:
@@ -184,7 +174,7 @@ jobs:
 
       - name: Run full visual tests
         timeout-minutes: 50
-        run: pnpm -s visual:test
+        run: pnpm run visual:test:ci
 
       - name: Stop app
         if: always()
@@ -207,27 +197,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install pnpm on PATH (fallback)
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
-      - name: Setup Node
+      # Canonical toolchain: Node 20.18.1 + pnpm 10.6.2 (no Corepack)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version: "20.18.1"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Activate pnpm
-        run: |
-          PNPM_VERSION=$(node -p "require('./package.json').packageManager?.split('@')[1] ?? ''")
-          if [ -n "$PNPM_VERSION" ]; then
-            corepack prepare "pnpm@${PNPM_VERSION}" --activate
-          else
-            corepack prepare pnpm@9 --activate
-          fi
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.6.2
+          run_install: false
 
       - name: Show tool versions
         run: |
@@ -237,9 +219,6 @@ jobs:
       - name: Configure pnpm store dir for stable caching
         run: pnpm config set store-dir ~/.pnpm-store
 
-      - name: Assert pnpm version
-        run: node .github/scripts/assert-pnpm-version.mjs
-
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
@@ -248,8 +227,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
+      - name: Assert pnpm version
+        run: node .github/scripts/assert-pnpm-version.mjs
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Validate environment (bypass allowed)
+        run: pnpm env:check --strict
 
       - name: Build app for visual updates
         env:
@@ -271,7 +256,7 @@ jobs:
 
       - name: Verify updated snapshots
         timeout-minutes: 50
-        run: pnpm -s visual:test
+        run: pnpm run visual:test:ci
 
       - name: Commit snapshot changes
         run: |

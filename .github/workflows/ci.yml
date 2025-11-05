@@ -25,21 +25,25 @@ jobs:
       FIREBASE_SERVICE_ACCOUNT_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}
       FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
       NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+
     steps:
       - uses: actions/checkout@v4
 
-      # install pnpm BEFORE setup-node (so cache: pnpm doesn't fail)
-      - name: Install pnpm on PATH
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-
+      # Node + pnpm (stable, cached)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
-          # removed cache: pnpm + cache-dependency-path to avoid post-job path errors
+          node-version: "20.18.1"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.6.2
+          run_install: false
+
+      # Write Firebase service account to a file and expose the path
       - name: Firebase SA to file and export path
         run: |
           set -e
@@ -85,6 +89,10 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # NEW: strict env validation before building (matches Codex plan)
+      - name: Validate environment (strict)
+        run: pnpm env:check --strict
 
       - name: Build
         run: pnpm build

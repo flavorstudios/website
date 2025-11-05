@@ -1,63 +1,47 @@
 "use client";
 
-import { getApp, getApps, initializeApp, type FirebaseApp, type FirebaseOptions } from "firebase/app";
+import {
+  getApp,
+  getApps,
+  initializeApp,
+  type FirebaseApp,
+  type FirebaseOptions,
+} from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
-import { assertClientEnv } from "./firebase-client-env";
-
-const REQUIRED_ENV_VARS = [
-  "NEXT_PUBLIC_FIREBASE_API_KEY",
-  "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
-  "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
-  "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
-  "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
-  "NEXT_PUBLIC_FIREBASE_APP_ID",
-] as const;
-
-type RequiredEnvVar = (typeof REQUIRED_ENV_VARS)[number];
-
-type FirebaseEnv = Record<RequiredEnvVar, string>;
+import {
+  assertClientEnv,
+  PUBLIC_FIREBASE_CONFIG,
+  getMissingFirebaseEnv,
+  formatMissingFirebaseEnvMessage,
+} from "./firebase-client-env";
 
 let app: FirebaseApp | null = null;
 export let firebaseInitError: Error | null = null;
 
-const readFirebaseEnv = (): FirebaseEnv => {
-  const values = Object.create(null) as FirebaseEnv;
-  const missing: RequiredEnvVar[] = [];
-
-  for (const key of REQUIRED_ENV_VARS) {
-    const value = process.env[key];
-    if (typeof value === "string" && value.trim().length > 0) {
-      values[key] = value;
-    } else {
-      missing.push(key);
-    }
-  }
-
-  if (missing.length > 0) {
-    throw new Error(
-      `[Firebase] Missing env: ${missing.join(", ")}. Populate these NEXT_PUBLIC_* values in .env.local for development or your hosting provider (e.g. Vercel) before deploying.`,
-    );
-  }
-
-  return values;
-};
-
 const buildFirebaseConfig = (): FirebaseOptions => {
-  const env = readFirebaseEnv();
+  const missing = getMissingFirebaseEnv();
+  if (missing.length > 0) {
+    throw new Error(formatMissingFirebaseEnvMessage(missing));
+  }
 
-  return {
-    apiKey: env.NEXT_PUBLIC_FIREBASE_API_KEY,
-    authDomain: env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    projectId: env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    storageBucket: env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    appId: env.NEXT_PUBLIC_FIREBASE_APP_ID,
-    ...(process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
-      ? { measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }
-      : {}),
-  } satisfies FirebaseOptions;
+  const { measurementId, ...base } = PUBLIC_FIREBASE_CONFIG;
+
+  const config: FirebaseOptions = {
+    apiKey: base.apiKey,
+    authDomain: base.authDomain,
+    projectId: base.projectId,
+    storageBucket: base.storageBucket,
+    messagingSenderId: base.messagingSenderId,
+    appId: base.appId,
+  };
+
+  if (typeof measurementId === "string" && measurementId.trim().length > 0) {
+    config.measurementId = measurementId;
+  }
+
+  return config;
 };
 
 const ensureBrowserContext = (): void => {
@@ -69,9 +53,7 @@ const ensureBrowserContext = (): void => {
 };
 
 function ensureFirebaseApp(): FirebaseApp {
-  if (app) {
-    return app;
-  }
+  if (app) return app;
 
   if (firebaseInitError) {
     throw firebaseInitError;

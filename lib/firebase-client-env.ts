@@ -38,10 +38,10 @@ export function getMissingFirebaseEnv(): string[] {
  */
 export function formatMissingFirebaseEnvMessage(missing: string[]): string {
   return [
-    `[Firebase] Missing: ${missing.join(", ")}`,
-    "Populate these NEXT_PUBLIC_* values in .env.local for local development",
+    `[Firebase] Missing env: ${missing.join(", ")}`,
+    "→ Populate these NEXT_PUBLIC_* values in .env.local for local development",
     "or in the Vercel project settings (Environment Variables) before deploying.",
-  ].join(" — ");
+  ].join(" ");
 }
 
 /**

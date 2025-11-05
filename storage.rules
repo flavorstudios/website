@@ -10,21 +10,27 @@ service firebase.storage {
     // Admins still control writes.
     match /media/{allPaths=**} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if hasAdminRole() && request.resource.size < 20 * 1024 * 1024;
     }
 
     // Everything else stays admin-only, exactly like before.
     match /{allPaths=**} {
       // Only authenticated admins may access Storage.
       // Admins are identified via custom claims on the auth token.
-      allow read, write: if isAdmin();
+      allow read, write: if hasAdminRole();
     }
 
     // Re-use the same admin check you already had.
     function isAdmin() {
       return request.auth != null && (
-        ('role' in request.auth.token && request.auth.token.role == "admin") ||
-        ('isAdmin' in request.auth.token && request.auth.token.isAdmin == true)
+        request.auth.token.admin == true ||
+        request.auth.token.role == "admin" ||
+        (request.auth.token.roles is list && request.auth.token.roles.hasAny(["admin"])) ||
+        (request.auth.token.roles is map && (
+          ("admin" in request.auth.token.roles && request.auth.token.roles.admin == true) ||
+          ("primary" in request.auth.token.roles && request.auth.token.roles.primary == "admin")
+        )) ||
+        request.auth.token.isAdmin == true
       );
     }
   }

@@ -1,6 +1,5 @@
 "use client"
 import { useState } from "react"
-import { getMessaging, getToken, isSupported } from "firebase/messaging"
 import { getFirebaseApp, firebaseInitError } from "@/lib/firebase"
 import { clientEnv } from "@/env.client"
 
@@ -22,6 +21,8 @@ export default function EnableNotificationsButton() {
       }
 
       // Check browser support for notifications and service worker
+      const { getMessaging, getToken, isSupported } = await import("firebase/messaging")
+      
       const supported = await isSupported()
       if (!supported || !("serviceWorker" in navigator)) {
         setResult("Notifications are not supported in this browser.")

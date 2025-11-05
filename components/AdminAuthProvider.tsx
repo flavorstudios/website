@@ -429,11 +429,20 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     user,
   ])
 
-  const shouldBlockChildren =
-    requiresVerification &&
-    !shouldUseLocalVerification &&
+  const shouldBlockForAuthState =
     isGuardedAdminRoute &&
-    verificationStatus !== "verified"
+    !e2eActive &&
+    !testMode &&
+    !authInitFailed &&
+    !shouldUseLocalVerification &&
+    (loading || (!user && verificationStatus !== "verified"))
+
+  const shouldBlockChildren =
+    (requiresVerification &&
+      !shouldUseLocalVerification &&
+      isGuardedAdminRoute &&
+      verificationStatus !== "verified") ||
+    shouldBlockForAuthState
 
   return (
     <AdminAuthContext.Provider

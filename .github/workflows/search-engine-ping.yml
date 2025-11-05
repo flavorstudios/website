@@ -41,7 +41,7 @@ jobs:
           # Do NOT set "version" if package.json has "packageManager": "pnpm@..."
 
       - name: 🧰 Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         # v4.1.0: https://github.com/actions/setup-node/releases/tag/v4.1.0
         with:
           node-version-file: '.nvmrc'

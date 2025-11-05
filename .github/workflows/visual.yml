@@ -50,7 +50,7 @@ jobs:
 
       # Pin Node and pnpm (replace brittle Corepack sequence)
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.18.1"
           cache: "pnpm"
@@ -127,7 +127,7 @@ jobs:
 
       # Pin Node and pnpm (replace brittle Corepack sequence)
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.18.1"
           cache: "pnpm"
@@ -206,7 +206,7 @@ jobs:
 
       # Pin Node and pnpm (replace brittle Corepack sequence)
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.18.1"
           cache: "pnpm"

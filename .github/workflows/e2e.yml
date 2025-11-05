@@ -57,7 +57,7 @@ jobs:
 
       # ✅ Standard toolchain (no Corepack signature issues)
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20.18.1"
           cache: "pnpm"

@@ -53,6 +53,8 @@ export async function getDynamicCategories(): Promise<Category[]> {
 
 // --------- BLOG POSTS FETCH (returns posts with .categories[] and .commentCount) ---------
 
+const DEFAULT_CATEGORY = "General";
+
 function normalizeCategories(
   categories: unknown,
   fallback: unknown,
@@ -73,7 +75,7 @@ function normalizeCategories(
     }
   }
 
-  return [];
+  return [DEFAULT_CATEGORY];
 }
 
 function extractCollection<T>(value: unknown, key: string): T[] {

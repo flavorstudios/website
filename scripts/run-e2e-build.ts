@@ -5,6 +5,7 @@ const env = {
   ...process.env,
   SKIP_STRICT_ENV: process.env.SKIP_STRICT_ENV ?? '1',
   USE_DEFAULT_ENV: process.env.USE_DEFAULT_ENV ?? '1',
+  E2E: process.env.E2E ?? 'true',
   NEXT_TELEMETRY_DISABLED: process.env.NEXT_TELEMETRY_DISABLED ?? '1',
   NEXT_DISABLE_FONT_OPTIMIZATION: process.env.NEXT_DISABLE_FONT_OPTIMIZATION ?? '1',
 };

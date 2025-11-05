@@ -1,12 +1,13 @@
 {
-  "root": "app",
-  "build": {
-    "command": "pnpm build",
-    "env": {
-      "NODE_VERSION": "20.x"
-    }
+  "version": 2,
+  "functions": {
+    "app/api/**/*": { "runtime": "@vercel/node@22.0.0" }
   },
-  "install": {
-    "command": "pnpm install"
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "build": {
+    "env": {
+      "NODE_VERSION": "22"
+    }
   }
 }

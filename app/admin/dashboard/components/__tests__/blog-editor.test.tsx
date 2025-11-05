@@ -126,7 +126,12 @@ describe("BlogEditor publish flow", () => {
     );
 
     const publishButtons = await screen.findAllByRole("button", { name: /publish/i });
-    await user.click(publishButtons[0]);
+    const publishButton = publishButtons.at(0);
+    expect(publishButton).toBeDefined();
+    if (!publishButton) {
+      throw new Error("publish button not found");
+    }
+    await user.click(publishButton);
 
     await waitFor(() => {
       expect(pushMock).toHaveBeenCalledWith("/blog/test-publish-title");

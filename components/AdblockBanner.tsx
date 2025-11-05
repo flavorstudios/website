@@ -39,8 +39,9 @@ export default function AdblockBanner() {
           'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
         )
         if (focusable.length === 0) return
-        const firstEl = focusable[0]
-        const lastEl = focusable[focusable.length - 1]
+        const firstEl = focusable.item(0)
+        const lastEl = focusable.item(focusable.length - 1)
+        if (!firstEl || !lastEl) return
         if (e.shiftKey) {
           if (document.activeElement === firstEl) {
             e.preventDefault()

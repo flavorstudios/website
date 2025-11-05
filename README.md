@@ -229,8 +229,8 @@ Authenticated cron endpoints keep cache and feeds fresh.
 
 Use the validation helpers:
 
-- `pnpm env:check` &mdash; prints a summary (exit code `0`).
-- `pnpm env:check -- --strict` &mdash; fails when required entries are missing (matches the build step).
+- `pnpm env:check` &mdash; prints a table of missing values (exit code `0`).
+- `pnpm env:check --strict` (or `pnpm env:check:strict`) &mdash; fails when required entries are missing. This is what `pnpm build` runs via `prebuild`.
 
 > **CI / Vercel**: configure the required keys above via the project settings or an [Environment Variable Group](https://vercel.com/docs/projects/environment-variables#environment-variable-groups). Optional flags (GTM, CookieYes, SMTP, etc.) may be added later without breaking builds. Never enable `USE_DEFAULT_ENV` in shared environments; it is only for local test fixtures.
 

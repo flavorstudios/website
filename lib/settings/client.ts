@@ -24,9 +24,14 @@ function sha1(bytes: Uint8Array): Uint8Array {
   const length = bytes.length
   const words = new Array<number>((((length + 8) >> 6) + 1) * 16).fill(0)
   for (let i = 0; i < length; i += 1) {
-    words[i >> 2] |= bytes[i] << ((3 - (i & 3)) * 8)
+    const byte = bytes[i] ?? 0
+    const index = i >> 2
+    const existingWord = words[index] ?? 0
+    words[index] = existingWord | (byte << ((3 - (i & 3)) * 8))
   }
-  words[length >> 2] |= 0x80 << ((3 - (length & 3)) * 8)
+  const finalIndex = length >> 2
+  const finalWord = words[finalIndex] ?? 0
+  words[finalIndex] = finalWord | (0x80 << ((3 - (length & 3)) * 8))
   words[words.length - 1] = length * 8
 
   let h0 = 0x67452301
@@ -37,12 +42,14 @@ function sha1(bytes: Uint8Array): Uint8Array {
 
   const w = new Array<number>(80)
 
+  const readWord = (index: number): number => w[index] ?? 0
+
   for (let i = 0; i < words.length; i += 16) {
     for (let t = 0; t < 16; t += 1) {
       w[t] = words[i + t] ?? 0
     }
     for (let t = 16; t < 80; t += 1) {
-      const val = (w[t - 3] ^ w[t - 8] ^ w[t - 14] ^ w[t - 16]) >>> 0
+      const val = (readWord(t - 3) ^ readWord(t - 8) ^ readWord(t - 14) ^ readWord(t - 16)) >>> 0
       w[t] = ((val << 1) | (val >>> 31)) >>> 0
     }
 
@@ -69,7 +76,8 @@ function sha1(bytes: Uint8Array): Uint8Array {
         k = 0xca62c1d6
       }
 
-      const temp = ((((a << 5) | (a >>> 27)) + f + e + k + w[t]) >>> 0) >>> 0
+      const word = readWord(t)
+      const temp = ((((a << 5) | (a >>> 27)) + f + e + k + word) >>> 0) >>> 0
       e = d
       d = c
       c = ((b << 30) | (b >>> 2)) >>> 0
@@ -87,10 +95,11 @@ function sha1(bytes: Uint8Array): Uint8Array {
   const result = new Uint8Array(20)
   const digestWords = [h0, h1, h2, h3, h4]
   for (let i = 0; i < digestWords.length; i += 1) {
-    result[i * 4] = (digestWords[i] >>> 24) & 0xff
-    result[i * 4 + 1] = (digestWords[i] >>> 16) & 0xff
-    result[i * 4 + 2] = (digestWords[i] >>> 8) & 0xff
-    result[i * 4 + 3] = digestWords[i] & 0xff
+    const word = digestWords[i] ?? 0
+    result[i * 4] = (word >>> 24) & 0xff
+    result[i * 4 + 1] = (word >>> 16) & 0xff
+    result[i * 4 + 2] = (word >>> 8) & 0xff
+    result[i * 4 + 3] = word & 0xff
   }
   return result
 }

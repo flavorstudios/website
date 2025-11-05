@@ -4,6 +4,7 @@ import nodemailer from "nodemailer";
 import { randomUUID } from "node:crypto";
 import { serverEnv } from "@/env/server";
 import { adminDb } from "@/lib/firebase-admin";
+import { normalizeEmail, type NormalizedEmail } from "@/lib/email";
 import { logError } from "@/lib/log";
 
 export type PasswordResetAuditEvent =
@@ -17,13 +18,14 @@ export type PasswordResetLocation = {
   country?: string;
 };
 
-export async function getAdditionalAdminEmails(): Promise<string[]> {
+export async function getAdditionalAdminEmails(): Promise<NormalizedEmail[]> {
   try {
     if (!adminDb) return [];
     const snapshot = await adminDb.collection("admin_users").get();
     return snapshot.docs
-      .map((doc) => (doc.data().email as string | undefined)?.toLowerCase().trim())
-      .filter((email): email is string => !!email);
+      .map((doc) => doc.data().email as string | undefined)
+      .filter((email): email is string => typeof email === "string" && email.length > 0)
+      .map((email) => normalizeEmail(email));
   } catch (error) {
     logError("password-reset:getAdditionalAdminEmails", error);
     return [];

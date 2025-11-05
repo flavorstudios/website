@@ -64,15 +64,20 @@ async function rotateBackups(dir: string, keep: number): Promise<void> {
     const match = file.match(/^(db|storage)-(.*)\.(json|tar)$/);
     if (match) {
       const ts = match[2];
-      groups[ts] = groups[ts] || [];
-      groups[ts].push(file);
+      if (!ts) {
+        continue;
+      }
+      const existing = groups[ts] ?? [];
+      existing.push(file);
+      groups[ts] = existing;
     }
   }
   const timestamps = Object.keys(groups).sort();
   while (timestamps.length > keep) {
     const ts = timestamps.shift();
     if (ts) {
-      for (const f of groups[ts]) {
+      const filesForTimestamp = groups[ts] ?? [];
+      for (const f of filesForTimestamp) {
         await fs.unlink(join(dir, f));
       }
     }

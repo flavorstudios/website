@@ -27,9 +27,11 @@ export function isDisposableEmail(email: string): boolean {
   if (!domain) return false;
   return raw
     .split(",")
-    .map((entry) => entry.trim().toLowerCase())
-    .filter(Boolean)
-    .some((blocked) => domain === blocked || domain.endsWith(`.${blocked}`));
+    .map((entry: string) => entry.trim().toLowerCase())
+    .filter((entry: string) => entry.length > 0)
+    .some(
+      (blocked: string) => domain === blocked || domain.endsWith(`.${blocked}`),
+    );
 }
 
 export function requiresEmailVerification(): boolean {

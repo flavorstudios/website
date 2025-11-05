@@ -63,7 +63,12 @@ describe("content-store blog normalization", () => {
     const { blogStore } = await import("@/lib/content-store");
     const posts = await blogStore.getAll();
 
-    expect(posts[0].categories).toEqual(["Engineering"]);
+    const [firstPost] = posts;
+    expect(firstPost).toBeDefined();
+    if (!firstPost) {
+      throw new Error("expected posts array to contain at least one entry");
+    }
+    expect(firstPost.categories).toEqual(["Engineering"]);
   });
 
   it("returns an empty array when no category values are usable", async () => {
@@ -78,6 +83,11 @@ describe("content-store blog normalization", () => {
     const { blogStore } = await import("@/lib/content-store");
     const posts = await blogStore.getAll();
 
-    expect(posts[0].categories).toEqual([]);
+    const [firstPost] = posts;
+    expect(firstPost).toBeDefined();
+    if (!firstPost) {
+      throw new Error("expected posts array to contain at least one entry");
+    }
+    expect(firstPost.categories).toEqual([]);
   });
 });

@@ -242,6 +242,7 @@ export async function generateRssFeed(): Promise<string> {
       (a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
     );
     const recentItems = allItems.slice(0, 50);
+    const [mostRecent] = recentItems;
 
     // Channel block (all canonical)
     const channel: RSSChannel = {
@@ -250,7 +251,7 @@ export async function generateRssFeed(): Promise<string> {
       link: getCanonicalUrl("/"),
       language: "en-US",
       lastBuildDate: formatRSSDate(new Date()),
-      pubDate: recentItems.length > 0 ? recentItems[0].pubDate : formatRSSDate(new Date()),
+      pubDate: mostRecent?.pubDate ?? formatRSSDate(new Date()),
       ttl: 60,
       image: {
         url: getCanonicalUrl("/placeholder.png"),

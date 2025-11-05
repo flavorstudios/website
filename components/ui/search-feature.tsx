@@ -88,7 +88,9 @@ export function SearchFeature({ triggerClassName, iconClassName }: SearchFeature
   const pathname = usePathname()
   const adminPrefixes =
     clientEnv.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES
-      ? clientEnv.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES.split(",").map((p) => p.trim()).filter(Boolean)
+      ? clientEnv.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES.split(",")
+          .map((prefix: string) => prefix.trim())
+          .filter((prefix: string) => prefix.length > 0)
       : DEFAULT_ADMIN_ROUTE_PREFIXES
   const isAdmin = isAdminRoute(pathname || "/", adminPrefixes)
 

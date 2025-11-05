@@ -14,7 +14,10 @@ function joinUrl(base: string, path: string): string {
   // Support values like "///https://example.com" where extra leading slashes are present
   const absoluteMatch = trimmed.match(/^\/+((?:https?:)?\/\/.*)$/i);
   if (absoluteMatch) {
-    const [, absoluteUrl] = absoluteMatch;
+    const absoluteUrl = absoluteMatch[1];
+    if (!absoluteUrl) {
+      return trimmed;
+    }
     // Ensure protocol-relative values preserve the leading double slash
     if (absoluteUrl.startsWith("//")) {
       try {

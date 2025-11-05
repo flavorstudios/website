@@ -32,7 +32,12 @@ describe("data category normalization", () => {
 
     const posts = await getBlogPosts();
     expect(posts).toHaveLength(1);
-    expect(posts[0].categories).toEqual(["Tech"]);
+    const [firstPost] = posts;
+    expect(firstPost).toBeDefined();
+    if (!firstPost) {
+      throw new Error("expected posts array to contain at least one entry");
+    }
+    expect(firstPost.categories).toEqual(["Tech"]);
   });
 
   it("handles blog API responses nested under a posts key", async () => {
@@ -61,7 +66,12 @@ describe("data category normalization", () => {
 
     const posts = await getBlogPosts();
     expect(posts).toHaveLength(1);
-    expect(posts[0].slug).toBe("post");
+    const [firstPost] = posts;
+    expect(firstPost).toBeDefined();
+    if (!firstPost) {
+      throw new Error("expected posts array to contain at least one entry");
+    }
+    expect(firstPost.slug).toBe("post");
   });
 
   it("uses a trimmed fallback blog category when list is empty", async () => {
@@ -87,7 +97,12 @@ describe("data category normalization", () => {
     global.fetch = fetchMock as unknown as typeof fetch;
 
     const posts = await getBlogPosts();
-    expect(posts[0].categories).toEqual(["General"]);
+    const [firstPost] = posts;
+    expect(firstPost).toBeDefined();
+    if (!firstPost) {
+      throw new Error("expected posts array to contain at least one entry");
+    }
+    expect(firstPost.categories).toEqual(["General"]);
   });
 
   it("returns an empty array when no blog categories are available", async () => {
@@ -113,7 +128,12 @@ describe("data category normalization", () => {
     global.fetch = fetchMock as unknown as typeof fetch;
 
     const posts = await getBlogPosts();
-    expect(posts[0].categories).toEqual([]);
+    const [firstPost] = posts;
+    expect(firstPost).toBeDefined();
+    if (!firstPost) {
+      throw new Error("expected posts array to contain at least one entry");
+    }
+    expect(firstPost.categories).toEqual(["General"]);
   });
 
   it("normalizes video categories the same way", async () => {
@@ -140,7 +160,12 @@ describe("data category normalization", () => {
     global.fetch = fetchMock as unknown as typeof fetch;
 
     const videos = await getVideos();
-    expect(videos[0].categories).toEqual(["Clips"]);
+    const [firstVideo] = videos;
+    expect(firstVideo).toBeDefined();
+    if (!firstVideo) {
+      throw new Error("expected videos array to contain at least one entry");
+    }
+    expect(firstVideo.categories).toEqual(["Clips"]);
   });
 
   it("handles video API responses nested under a videos key", async () => {
@@ -170,6 +195,11 @@ describe("data category normalization", () => {
 
     const videos = await getVideos();
     expect(videos).toHaveLength(1);
-    expect(videos[0].slug).toBe("video");
+    const [firstVideo] = videos;
+    expect(firstVideo).toBeDefined();
+    if (!firstVideo) {
+      throw new Error("expected videos array to contain at least one entry");
+    }
+    expect(firstVideo.slug).toBe("video");
   });
 });

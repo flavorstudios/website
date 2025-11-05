@@ -21,13 +21,22 @@ describe("NotificationsService", () => {
     expect(Array.isArray(firstList.items)).toBe(true);
     expect(firstList.items.length).toBeGreaterThan(0);
 
-    const first = firstList.items[0];
+    const [first] = firstList.items;
+    expect(first).toBeDefined();
+    if (!first) {
+      throw new Error("expected at least one notification to be returned");
+    }
     expect(first.readAt).toBeNull();
 
     await service.markRead(userId, first.id);
 
     const after = await service.list(userId);
-    expect(after.items[0].readAt).toBeInstanceOf(Date);
+    const [afterFirst] = after.items;
+    expect(afterFirst).toBeDefined();
+    if (!afterFirst) {
+      throw new Error("expected at least one notification after markRead");
+    }
+    expect(afterFirst.readAt).toBeInstanceOf(Date);
 
     await service.markAllRead(userId);
 

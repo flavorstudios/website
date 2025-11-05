@@ -18,6 +18,15 @@ const defaultBaseUrl =
 const storageState = path.join(repoRoot, "e2e/.auth/admin.json");
 const useProdServer = isCI || process.env.E2E_PROD_SERVER === "1";
 
+const toWebServerEnv = (
+  source: NodeJS.ProcessEnv,
+): Record<string, string> =>
+  Object.fromEntries(
+    Object.entries(source).filter(
+      (entry): entry is [string, string] => typeof entry[1] === "string",
+    ),
+  );
+
 // ✅ toggle to run only the safe/smoke tests in CI
 // set CI_E2E_SMOKE=1 in the workflow to skip the 2 flaky admin-dashboard tests
 const ciSmokeMode = isCI && process.env.CI_E2E_SMOKE === "1";
@@ -62,9 +71,9 @@ export default defineConfig({
     stderr: "pipe",
     timeout: 180_000,
     env: useProdServer
-      ? process.env
+      ? toWebServerEnv(process.env)
       : {
-          ...process.env,
+          ...toWebServerEnv(process.env),
           NODE_ENV: "test",
           NEXT_TELEMETRY_DISABLED: "1",
           E2E: "true",

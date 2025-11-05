@@ -32,7 +32,11 @@ function filePathToRoute(file: string): string | null {
   if (!match) {
     return null;
   }
-  const segments = match[1]
+  const matchedSegments = match[1];
+  if (typeof matchedSegments !== "string") {
+    return null;
+  }
+  const segments = matchedSegments
     .split("/")
     .map(segmentToRoutePart)
     .filter((part): part is string => part != null);

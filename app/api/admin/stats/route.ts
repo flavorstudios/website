@@ -438,11 +438,13 @@ export async function GET(request: NextRequest) {
     // Calculate month-over-month growth for posts and videos
     let monthlyGrowth = 0;
     if (history && history.length >= 2) {
-      const latest = history[history.length - 1];
-      const prev = history[history.length - 2];
-      const currentTotal = latest.posts + latest.videos;
-      const prevTotal = prev.posts + prev.videos;
-      monthlyGrowth = calculateMoMGrowth(currentTotal, prevTotal);
+      const latest = history.at(-1);
+      const prev = history.at(-2);
+      if (latest && prev) {
+        const currentTotal = latest.posts + latest.videos;
+        const prevTotal = prev.posts + prev.videos;
+        monthlyGrowth = calculateMoMGrowth(currentTotal, prevTotal);
+      }
     } else {
       const nowDate = new Date();
       const startCurrentMonth = new Date(

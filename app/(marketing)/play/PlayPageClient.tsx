@@ -8,11 +8,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RotateCcw, Gamepad2, Trophy, Users, Zap, Bot, Clock, Info } from "lucide-react"
 
 type Player = "X" | "O" | null
+type Board = [
+  Player,
+  Player,
+  Player,
+  Player,
+  Player,
+  Player,
+  Player,
+  Player,
+  Player
+]
 type GameMode = "p2p" | "p2c"
 type Difficulty = "easy" | "medium" | "hard"
 
 interface GameState {
-  board: Player[]
+  board: Board
   currentPlayer: Player
   winner: Player | "tie" | null
   gameMode: GameMode
@@ -24,8 +35,20 @@ interface GameState {
   timeLeft: number
 }
 
+const createEmptyBoard = (): Board => [
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null,
+  null
+]
+
 const INITIAL_STATE: GameState = {
-  board: Array(9).fill(null),
+  board: createEmptyBoard(),
   currentPlayer: "X",
   winner: null,
   gameMode: "p2c",
@@ -74,8 +97,8 @@ export default function PlayPageClient() {
     gameState.turnTimeLimit,
   ])
 
-  const checkWinner = useCallback((board: Player[]): Player | "tie" | null => {
-    const lines = [
+  const checkWinner = useCallback((board: Board): Player | "tie" | null => {
+    const lines: Array<[number, number, number]> = [
       [0, 1, 2],
       [3, 4, 5],
       [6, 7, 8],
@@ -86,27 +109,48 @@ export default function PlayPageClient() {
       [2, 4, 6],
     ]
     for (const [a, b, c] of lines) {
-      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-        return board[a]
+      const first = board[a]
+      const second = board[b]
+      const third = board[c]
+      if (
+        first !== undefined &&
+        first !== null &&
+        second !== undefined &&
+        second !== null &&
+        third !== undefined &&
+        third !== null &&
+        first === second &&
+        first === third
+      ) {
+        return first
       }
     }
     return board.every((cell) => cell !== null) ? "tie" : null
   }, [])
 
   const getComputerMove = useCallback(
-    (board: Player[], difficulty: Difficulty): number => {
-      const availableMoves = board.map((cell, index) => (cell === null ? index : null)).filter((val) => val !== null) as number[]
+    (board: Board, difficulty: Difficulty): number => {
+      const availableMoves = board.reduce<number[]>((acc, cell, index) => {
+        if (cell === null) {
+          acc.push(index)
+        }
+        return acc
+      }, [])
       if (availableMoves.length === 0) return -1
       if (difficulty === "easy") {
-        return availableMoves[Math.floor(Math.random() * availableMoves.length)]!
+        const randomIndex = Math.floor(Math.random() * availableMoves.length)
+        const randomMove = availableMoves[randomIndex]
+        return randomMove ?? -1
       }
       // Medium and Hard: Try to win first, then block, then random
       const checkMove = (player: Player) => {
         for (const move of availableMoves) {
-          const testBoard = [...board]
-          testBoard[move!] = player
+          const testBoard = [...board] as Board
+          const moveIndex = move
+          if (moveIndex === undefined) continue
+          testBoard[moveIndex] = player
           if (checkWinner(testBoard) === player) {
-            return move
+            return moveIndex
           }
         }
         return null
@@ -119,22 +163,35 @@ export default function PlayPageClient() {
       if (difficulty === "hard") {
         const corners = [0, 2, 6, 8].filter((i) => board[i] === null)
         if (corners.length > 0) {
-          return corners[Math.floor(Math.random() * corners.length)]
+          const randomIndex = Math.floor(Math.random() * corners.length)
+          const randomCorner = corners[randomIndex]
+          if (randomCorner !== undefined) {
+            return randomCorner
+          }
         }
       }
-      return availableMoves[Math.floor(Math.random() * availableMoves.length)]!
+      const fallbackIndex = Math.floor(Math.random() * availableMoves.length)
+      const fallbackMove = availableMoves[fallbackIndex]
+      return fallbackMove ?? -1
     },
     [checkWinner]
   )
 
   const makeMove = useCallback(
     (index: number) => {
-      if (gameState.board[index] || gameState.winner || !gameState.isGameActive) return
+      const currentCell = gameState.board[index]
+      if (currentCell === undefined) {
+        return
+      }
+      if (currentCell || gameState.winner || !gameState.isGameActive) return
       if (typeof window !== "undefined" && "vibrate" in navigator) {
         navigator.vibrate(20)
       }
       setGameState((prev) => {
-        const newBoard = [...prev.board]
+        const newBoard = [...prev.board] as Board
+        if (index < 0 || index >= newBoard.length) {
+          return prev
+        }
         newBoard[index] = prev.currentPlayer
         const winner = checkWinner(newBoard)
         const nextPlayer = prev.currentPlayer === "X" ? "O" : "X"
@@ -207,7 +264,7 @@ export default function PlayPageClient() {
     }
     setGameState((prev) => ({
       ...prev,
-      board: Array(9).fill(null),
+      board: createEmptyBoard(),
       currentPlayer: "X",
       winner: null,
       isGameActive: true,
@@ -248,7 +305,7 @@ export default function PlayPageClient() {
     setGameState((prev) => ({
       ...prev,
       gameMode: mode,
-      board: Array(9).fill(null),
+      board: createEmptyBoard(),
       currentPlayer: "X",
       winner: null,
       isGameActive: true,
@@ -279,7 +336,7 @@ export default function PlayPageClient() {
         difficulty,
         turnTimeLimit: newTimeLimit,
         timeLeft: newTimeLimit,
-        board: Array(9).fill(null),
+        board: createEmptyBoard(),
         currentPlayer: "X",
         winner: null,
         isGameActive: true,

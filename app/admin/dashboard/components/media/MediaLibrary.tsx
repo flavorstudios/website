@@ -400,6 +400,9 @@ export default function MediaLibrary({
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
+        if (!entry) {
+          return;
+        }
         if (entry.isIntersecting && !pending && !loading) {
           pending = true;
           void loadMore().finally(() => {
@@ -627,14 +630,16 @@ export default function MediaLibrary({
     if (!showPrev || selectedIndex === null) return;
     const idx = selectedIndex - 1;
     setSelectedIndex(idx);
-    setSelectedItem(filtered[idx]);
+    const previousItem = filtered[idx];
+    setSelectedItem(previousItem ?? null);
   };
 
   const goNext = () => {
     if (!showNext || selectedIndex === null) return;
     const idx = selectedIndex + 1;
     setSelectedIndex(idx);
-    setSelectedItem(filtered[idx]);
+    const nextItem = filtered[idx];
+    setSelectedItem(nextItem ?? null);
   };
 
   return (

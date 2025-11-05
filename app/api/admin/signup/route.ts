@@ -27,7 +27,19 @@ const createErrorResponse = (message: string, status = 400) =>
 
 function getRequestIp(request: NextRequest): string {
   const xfwd = request.headers.get("x-forwarded-for");
-  if (xfwd) return xfwd.split(",")[0].trim();
+  if (xfwd) {
+    const [forwarded] = xfwd
+      .split(",")
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
+    if (forwarded) {
+      return forwarded;
+    }
+  }
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp && realIp.length > 0) {
+    return realIp;
+  }
   return "unknown";
 }
 

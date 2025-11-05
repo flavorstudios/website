@@ -1,15 +1,20 @@
 import "server-only";
 
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { adminAuth, adminDb, ADMIN_BYPASS } from "@/lib/firebase-admin";
 import {
   getAllowedAdminEmails,
   isEmailAllowed,
 } from "@/lib/admin-allowlist";
+import {
+  normalizeEmail as normalizeEmailAddress,
+  type NormalizedEmail,
+} from "@/lib/email";
 import { cookies } from "next/headers";
 import { logError } from "@/lib/log";
 import jwt from "jsonwebtoken";
-import type { UserRole } from "@/lib/role-permissions";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { RolePermissions, UserRole } from "@/lib/role-permissions";
 import { getUserRole } from "@/lib/user-roles";
 import { serverEnv } from "@/env/server";
 import { createHash } from "crypto";
@@ -30,10 +35,16 @@ const VALID_ROLE_NAMES = new Set<UserRole>([
 
 type ClaimsRecord = Record<string, unknown>;
 
-function normalizeEmail(email: unknown): string | null {
-  if (typeof email !== "string") return null;
-  const trimmed = email.trim().toLowerCase();
-  return trimmed.length > 0 ? trimmed : null;
+function normalizeEmailValue(email: unknown): NormalizedEmail | null {
+  if (typeof email !== "string") {
+    return null;
+  }
+
+  try {
+    return normalizeEmailAddress(email);
+  } catch {
+    return null;
+  }
 }
 
 function normalizeRole(role: unknown): UserRole | null {
@@ -118,14 +129,14 @@ export const DISABLE_AUTH =
 
 // Fetch admin emails from Firestore's admin_users collection (lowercased, trimmed).
 const firestoreAdminCache: {
-  emails: string[];
+  emails: NormalizedEmail[];
   expiresAt: number;
 } = {
   emails: [],
   expiresAt: 0,
 };
 
-async function getFirestoreAdminEmails(): Promise<string[]> {
+async function getFirestoreAdminEmails(): Promise<NormalizedEmail[]> {
   const now = Date.now();
   if (firestoreAdminCache.expiresAt > now && firestoreAdminCache.emails.length) {
     return firestoreAdminCache.emails;
@@ -144,8 +155,8 @@ async function getFirestoreAdminEmails(): Promise<string[]> {
     }
     const snap = await adminDb.collection("admin_users").get();
     firestoreAdminCache.emails = snap.docs
-      .map((d) => normalizeEmail(d.data().email) || "")
-      .filter(Boolean);
+      .map((d) => normalizeEmailValue(d.data().email))
+      .filter((value): value is NormalizedEmail => value !== null);
     firestoreAdminCache.expiresAt = now + 30_000;
     return firestoreAdminCache.emails;
   } catch (err) {
@@ -163,13 +174,13 @@ interface AuthorizationResult {
 }
 
 async function resolveAdminAuthorization(
-  decoded: jwt.JwtPayload | import("firebase-admin").auth.DecodedIdToken,
+  decoded: jwt.JwtPayload | DecodedIdToken,
   firestoreEmails: string[]
 ): Promise<AuthorizationResult> {
   const claims = decoded as ClaimsRecord;
   const claimRole = extractRoleFromClaims(claims);
   const claimAllows = hasAdminClaim(claims);
-  const email = normalizeEmail(decoded.email);
+  const email = normalizeEmailValue(decoded.email);
   const allowlistAllows = email ? isEmailAllowed(email, firestoreEmails) : false;
 
   if (!claimAllows && !allowlistAllows) {
@@ -237,7 +248,7 @@ export async function verifyAdminSession(
 
   let decoded:
     | jwt.JwtPayload
-    | import("firebase-admin").auth.DecodedIdToken
+    | DecodedIdToken
     | null = null;
   let firestoreEmails: string[] = [];
 
@@ -293,7 +304,7 @@ export async function verifyAdminSession(
   if (debug) {
     console.log(
       "[admin-auth] Session authorized for email:",
-      normalizeEmail(decoded.email)
+      normalizeEmailValue(decoded.email)
     );
     console.log(
       "[admin-auth] Authorization source:",
@@ -366,7 +377,7 @@ export async function getSessionInfo(
 // Checks if the request has a valid admin session (and optional permission).
 export async function requireAdmin(
   req: NextRequest,
-  permission?: keyof import("./role-permissions").RolePermissions
+  permission?: keyof RolePermissions
 ): Promise<boolean> {
   if (DISABLE_AUTH) {
     if (debug)
@@ -416,7 +427,7 @@ export async function requireAdmin(
 
 // Checks if the current server action context has a valid admin session (with optional permission).
 export async function requireAdminAction(
-  permission?: keyof import("./role-permissions").RolePermissions
+  permission?: keyof RolePermissions
 ): Promise<boolean> {
   if (DISABLE_AUTH) {
     if (debug)

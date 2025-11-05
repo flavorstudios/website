@@ -233,7 +233,10 @@ async function applyFreshMediaToPosts(posts: BlogPost[]): Promise<BlogPost[]> {
       while ((match = re.exec(post.content)) !== null) {
         const full = match[1]; // encoded path
         const mediaId = match[2];
-        if (mediaId && !idToUrl.has(mediaId)) {
+        if (!full || !mediaId) {
+          continue;
+        }
+        if (!idToUrl.has(mediaId)) {
           idToUrl.set(mediaId, decodeURIComponent(full));
         }
       }
@@ -258,7 +261,10 @@ async function applyFreshMediaToPosts(posts: BlogPost[]): Promise<BlogPost[]> {
   const rewriteContent = (html: string): string => {
     return html.replace(
       /(media%2F([0-9A-Za-z_-]{8,})%2F[^"')\s]+)/g,
-      (match, _full, mediaId: string) => {
+      (match, _full, mediaId?: string) => {
+        if (!mediaId) {
+          return match;
+        }
         const replacement = replacements.get(mediaId);
         return replacement ?? match;
       },
@@ -482,7 +488,11 @@ export const blogStore = {
       .limit(1)
       .get();
     if (snap.empty) return null;
-    const normalized = normalizeBlogPost(snap.docs[0].data() as BlogPost);
+    const [firstDoc] = snap.docs;
+    if (!firstDoc) {
+      return null;
+    }
+    const normalized = normalizeBlogPost(firstDoc.data() as BlogPost);
     return ensureFreshMediaForPost(normalized);
   },
 
@@ -748,7 +758,14 @@ export const videoStore = {
       .where("slug", "==", slug)
       .limit(1)
       .get();
-    return snap.empty ? null : (snap.docs[0].data() as Video);
+    if (snap.empty) {
+      return null;
+    }
+    const [firstDoc] = snap.docs;
+    if (!firstDoc) {
+      return null;
+    }
+    return firstDoc.data() as Video;
   },
 
   async create(

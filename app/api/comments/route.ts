@@ -48,7 +48,15 @@ function isRateLimited(ip: string): boolean {
 
 function getRequestIp(request: Request): string {
   const xfwd = request.headers.get("x-forwarded-for");
-  if (xfwd) return xfwd.split(",")[0].trim();
+  if (xfwd) {
+    const [forwarded] = xfwd
+      .split(",")
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
+    if (forwarded) {
+      return forwarded;
+    }
+  }
   return "unknown";
 }
 

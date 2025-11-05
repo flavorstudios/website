@@ -201,7 +201,10 @@ export default function CategoryManager() {
   const debouncedSearch = useDebounce(search, 300)
 
   const parseCSV = (text: string): Partial<Category>[] => {
-    const [headerLine, ...lines] = text.trim().split(/\r?\n/)
+    const trimmed = text.trim()
+    if (!trimmed) return []
+    const [headerLine, ...lines] = trimmed.split(/\r?\n/)
+    if (!headerLine) return []
     const headers = headerLine
       .split(",")
       .map((h) => h.trim().replace(/^"|"$/g, ""))

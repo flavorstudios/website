@@ -69,7 +69,8 @@ function luminance([r, g, b]: [number, number, number]): number {
     const srgb = value / 255
     return srgb <= 0.03928 ? srgb / 12.92 : Math.pow((srgb + 0.055) / 1.055, 2.4)
   })
-  return channel[0] * 0.2126 + channel[1] * 0.7152 + channel[2] * 0.0722
+  const [rChannel = 0, gChannel = 0, bChannel = 0] = channel
+  return rChannel * 0.2126 + gChannel * 0.7152 + bChannel * 0.0722
 }
 
 export function getContrastRatio(color: string, against = "#ffffff"): ContrastResult {

@@ -103,9 +103,12 @@ async function fileUrl(file: any): Promise<{ url: string; expiresAt?: number }> 
 }
 
 /** Derive the object path from a stored URL; fall back to a best guess. */
-function derivePathFromUrlOrGuess(url: string, bucketName: string, fallbackPath: string) {
+function derivePathFromUrlOrGuess(url: string, bucketName: string, fallbackPath: string): string {
   const prefix = `https://storage.googleapis.com/${bucketName}/`;
-  if (url?.startsWith(prefix)) return url.slice(prefix.length).split("?")[0];
+  if (url.startsWith(prefix)) {
+    const [objectPath] = url.slice(prefix.length).split("?");
+    return objectPath ?? fallbackPath;
+  }
   return fallbackPath;
 }
 
@@ -130,8 +133,11 @@ export function extractMediaIds(...inputs: Array<string | undefined | null>): st
     if (!input) continue;
     for (const pattern of patterns) {
       let m: RegExpExecArray | null;
-      while ((m = pattern.exec(input))) {
-        ids.add(m[1]);
+      while ((m = pattern.exec(input)) !== null) {
+        const id = m[1];
+        if (id) {
+          ids.add(id);
+        }
       }
     }
   }
@@ -325,8 +331,8 @@ export async function refreshMediaUrl(id: string): Promise<MediaDoc | null> {
   if (!snap.exists) return null;
   const data = snap.data() as MediaDoc;
 
-  const guessPath = `media/${id}/${data.filename}`;
-  const filePath = derivePathFromUrlOrGuess(data.url, bucket.name, guessPath);
+  const guessPath = data.filename ? `media/${id}/${data.filename}` : `media/${id}`;
+  const filePath = derivePathFromUrlOrGuess(data.url ?? "", bucket.name, guessPath);
   const file = bucket.file(filePath);
 
   const { url, expiresAt } = await fileUrl(file);
@@ -437,7 +443,7 @@ export async function deleteMedia(id: string, force = false): Promise<boolean> {
   const bucket = tryGetBucket();
   if (bucket) {
     const guessPath = `media/${id}/${data.filename}`;
-    const filePath = derivePathFromUrlOrGuess(data.url, bucket.name, guessPath);
+    const filePath = derivePathFromUrlOrGuess(data.url ?? "", bucket.name, guessPath);
     try {
       await bucket.file(filePath).delete();
     } catch {
@@ -466,7 +472,7 @@ export async function cropMedia(
 
   const data = docSnap.data() as MediaDoc;
   const guessPath = `media/${id}/${data.filename}`;
-  const origPath = derivePathFromUrlOrGuess(data.url, bucket.name, guessPath);
+  const origPath = derivePathFromUrlOrGuess(data.url ?? "", bucket.name, guessPath);
 
   const origBuffer = await bucket.file(origPath).download();
 

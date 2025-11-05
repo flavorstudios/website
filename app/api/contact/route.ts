@@ -110,8 +110,8 @@ export async function POST(request: Request) {
     if (notifyEnabled && adminEmailsEnv) {
       const recipients = adminEmailsEnv
         .split(",")
-        .map((e) => e.trim())
-        .filter(Boolean)
+        .map((address: string) => address.trim())
+        .filter((address: string) => address.length > 0)
         .join(",");
       try {
         await transporter.sendMail({

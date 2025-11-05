@@ -46,11 +46,17 @@ const STATUS_OPTIONS = [
   { value: "interview", label: "Interview", class: "bg-purple-100 text-purple-700" },
   { value: "hired", label: "Hired", class: "bg-green-100 text-green-700" },
   { value: "rejected", label: "Rejected", class: "bg-red-100 text-red-700" },
-];
+] as const;
 
-const getStatusInfo = (value?: string, reviewed?: boolean) => {
+type StatusOption = (typeof STATUS_OPTIONS)[number];
+type StatusValue = StatusOption["value"];
+
+const FALLBACK_STATUS: StatusOption =
+  STATUS_OPTIONS[0] ?? { value: "new", label: "New", class: "bg-yellow-100 text-yellow-700" };
+
+const getStatusInfo = (value?: string, reviewed?: boolean): StatusOption => {
   const status = value || (reviewed ? "reviewed" : "new");
-  return STATUS_OPTIONS.find((s) => s.value === status) || STATUS_OPTIONS[0];
+  return STATUS_OPTIONS.find((s) => s.value === status) ?? FALLBACK_STATUS;
 };
 
 export default function Applications() {
@@ -599,7 +605,7 @@ interface ApplicationDialogProps {
 }
 
 function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDialogProps) {
-  const [status, setStatus] = useState(
+  const [status, setStatus] = useState<StatusValue>(
     getStatusInfo(submission.status, submission.reviewed).value
   );
   const [notes, setNotes] = useState(submission.notes || "");
@@ -720,7 +726,7 @@ function ApplicationDialog({ submission, onOpenChange, onSave }: ApplicationDial
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium">Status</label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={(value) => setStatus(value as StatusValue)}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>

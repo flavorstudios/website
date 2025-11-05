@@ -50,7 +50,8 @@ async function readJsonFile<T>(filename: string): Promise<T[]> {
 
   try {
     const data = await fs.readFile(filePath, "utf-8")
-    return JSON.parse(data)
+    const parsed: unknown = JSON.parse(data)
+    return Array.isArray(parsed) ? (parsed as T[]) : []
   } catch {
     return []
   }
@@ -67,8 +68,8 @@ async function getCommentCountByPost(): Promise<Record<string, number>> {
   const comments = await readJsonFile<Comment>("comments.json")
   const counts: Record<string, number> = {}
   for (const c of comments) {
-    if (!counts[c.postId]) counts[c.postId] = 0
-    counts[c.postId] += 1
+    const current = counts[c.postId] ?? 0
+    counts[c.postId] = current + 1
   }
   return counts
 }
@@ -81,7 +82,7 @@ export const blogData = {
     return posts.map((post) => ({
       ...post,
       // If categories missing, fallback to [category]
-      categories: post.categories && post.categories.length > 0 ? post.categories : [post.category],
+      categories: Array.isArray(post.categories) && post.categories.length > 0 ? post.categories : [post.category],
       commentCount: commentCounts[post.id] ?? 0, // <-- Always attach commentCount
       shareCount: typeof post.shareCount === "number" ? post.shareCount : 0,
     }))
@@ -90,16 +91,19 @@ export const blogData = {
   // Accepts either `category` (string) or `categories` (string[])
   async create(post: Omit<BlogPost, "id" | "createdAt" | "updatedAt" | "commentCount" | "shareCount">): Promise<BlogPost> {
     const posts = await this.getAll()
-    const mainCategory =
-      Array.isArray(post.categories) && post.categories.length > 0
-        ? post.categories[0]
-        : post.category
+    const categoriesInput = Array.isArray(post.categories)
+      ? post.categories.filter((value): value is string => typeof value === "string" && value.length > 0)
+      : []
+    const [firstCategory] = categoriesInput
+    const mainCategory = firstCategory ?? post.category ?? ""
     const categories =
-      Array.isArray(post.categories) && post.categories.length > 0
-        ? post.categories
+      categoriesInput.length > 0
+        ? categoriesInput
         : post.category
           ? [post.category]
-          : []
+          : mainCategory
+            ? [mainCategory]
+            : []
 
     const newPost: BlogPost = {
       ...post,
@@ -122,13 +126,23 @@ export const blogData = {
     const index = posts.findIndex((p) => p.id === id)
     if (index === -1) return null
 
-    let updatedCategories: string[] | undefined = posts[index].categories
-    let updatedCategory: string = posts[index].category
+    const existing = posts[index]
+    if (!existing) {
+      return null
+    }
+
+    let updatedCategories: string[] | undefined = Array.isArray(existing.categories)
+      ? existing.categories
+      : undefined
+    let updatedCategory: string = existing.category
 
     // If categories provided in updates, use it
-    if (updates.categories && Array.isArray(updates.categories) && updates.categories.length > 0) {
-      updatedCategories = updates.categories
-      updatedCategory = updates.categories[0]
+    if (Array.isArray(updates.categories) && updates.categories.length > 0) {
+      const [firstUpdate] = updates.categories
+      if (firstUpdate) {
+        updatedCategories = updates.categories
+        updatedCategory = firstUpdate
+      }
     }
     // If only category provided, update both fields for consistency
     else if (typeof updates.category === "string" && updates.category) {
@@ -136,15 +150,16 @@ export const blogData = {
       updatedCategories = [updates.category]
     }
 
-    posts[index] = {
-      ...posts[index],
+    const nextPost: BlogPost = {
+      ...existing,
       ...updates,
       category: updatedCategory,
       categories: updatedCategories,
       updatedAt: new Date().toISOString(),
     }
+    posts[index] = nextPost
     await writeJsonFile("blogs.json", posts)
-    return posts[index]
+    return nextPost
   },
 
   async delete(id: string): Promise<boolean> {
@@ -178,9 +193,19 @@ export const videoData = {
     const videos = await this.getAll()
     const index = videos.findIndex((v) => v.id === id)
     if (index === -1) return null
-    videos[index] = { ...videos[index], ...updates, updatedAt: new Date().toISOString() }
+    const existing = videos[index]
+    if (!existing) {
+      return null
+    }
+    const nextVideo: Video = {
+      ...existing,
+      ...updates,
+      id: existing.id,
+      updatedAt: new Date().toISOString(),
+    }
+    videos[index] = nextVideo
     await writeJsonFile("videos.json", videos)
-    return videos[index]
+    return nextVideo
   },
 
   async delete(id: string): Promise<boolean> {
@@ -201,9 +226,14 @@ export const commentData = {
     const comments = await this.getAll()
     const index = comments.findIndex((c) => c.id === id)
     if (index === -1) return null
-    comments[index].status = status
+    const existing = comments[index]
+    if (!existing) {
+      return null
+    }
+    const nextComment: Comment = { ...existing, status }
+    comments[index] = nextComment
     await writeJsonFile("comments.json", comments)
-    return comments[index]
+    return nextComment
   },
 
   async delete(id: string): Promise<boolean> {

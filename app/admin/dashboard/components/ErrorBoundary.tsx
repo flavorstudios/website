@@ -14,10 +14,10 @@ export class ErrorBoundary extends React.Component<
   static getDerivedStateFromError(error: Error) {
     return { error };
   }
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  override componentDidCatch(error: Error, info: React.ErrorInfo) {
     logClientError('[ui-error]', error, info);
   }
-  render() {
+  override render() {
     if (this.state.error) {
       if (this.props.fallback) {
         return this.props.fallback;

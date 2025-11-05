@@ -52,8 +52,10 @@ const samplePages: PageData[] = [
   },
 ]
 
+const defaultPage: PageData | null = samplePages[0] ?? null
+
 export function PageEditor() {
-  const [selectedPage, setSelectedPage] = useState<PageData | null>(samplePages[0])
+  const [selectedPage, setSelectedPage] = useState<PageData | null>(defaultPage)
   const [previewMode, setPreviewMode] = useState<"desktop" | "tablet" | "mobile">("desktop")
   // Removed: const [isEditing, setIsEditing] = useState(false) // Unused as per lint
 

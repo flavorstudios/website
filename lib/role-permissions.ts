@@ -60,12 +60,29 @@ try {
   console.error("Failed to parse CUSTOM_ROLE_PERMISSIONS", err)
 }
 
+const SUPPORT_FALLBACK: RolePermissions =
+  defaultRolePermissions.support ?? {
+    canManageBlogs: false,
+    canManageVideos: false,
+    canManageMedia: false,
+    canManageComments: true,
+    canManageUsers: false,
+    canViewAnalytics: false,
+    canManageSystem: false,
+    canHandleContacts: true,
+    canManageCategories: false,
+  }
+
 function getPermissions(role: UserRole): RolePermissions {
-  return (
-    customRolePermissions[role] ||
-    defaultRolePermissions[role] ||
-    defaultRolePermissions["support"]
-  )
+  const custom = customRolePermissions[role]
+  if (custom) {
+    return custom
+  }
+  const defaults = defaultRolePermissions[role]
+  if (defaults) {
+    return defaults
+  }
+  return SUPPORT_FALLBACK
 }
 
 export function hasPermission(userRole: UserRole, permission: keyof RolePermissions): boolean {

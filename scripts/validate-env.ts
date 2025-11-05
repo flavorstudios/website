@@ -13,11 +13,11 @@ import {
 } from "../env/definitions";
 
 type CliOptions = {
-  readonly strict: boolean;
+  readonly strict?: boolean;
 };
 
 const parseCliOptions = (argv: readonly string[]): CliOptions => {
-  let strict = true;
+  let strict: boolean | undefined;
 
   for (const arg of argv) {
     if (arg === "--no-strict" || arg === "--strict=false") {
@@ -78,7 +78,7 @@ const maybeLoadEnvFile = (file: string | undefined): void => {
   }
 };
 
-const { strict } = parseCliOptions(process.argv.slice(2));
+const cliOptions = parseCliOptions(process.argv.slice(2));
 
 const preferProductionEnv =
   process.env.NODE_ENV === "production" ||
@@ -120,7 +120,8 @@ if (serverEnvMeta.appliedFallbackKeys.length > 0) {
   );
 }
 
-const strictMode = strict && !serverEnvMeta.allowRelaxedDefaults;
+const strictFlag = cliOptions.strict ?? false;
+const strictMode = strictFlag && !serverEnvMeta.allowRelaxedDefaults;
 
 const serverParse = serverEnvSchema.safeParse(process.env);
 const clientParse = clientEnvSchema.safeParse(process.env);
@@ -128,12 +129,25 @@ const clientParse = clientEnvSchema.safeParse(process.env);
 const serverParseIssues = serverParse.success ? [] : serverParse.error.issues;
 const clientParseIssues = clientParse.success ? [] : clientParse.error.issues;
 
-const clientMissing = clientEnvMeta.missingRequiredEnvVars;
-const serverMissing = serverEnvMeta.missingRequiredEnvVars;
-const optionalMissing = new Set([
+const definitionByName = new Map(
+  envVarDefinitions.map(definition => [definition.name, definition] as const),
+);
+
+const clientMissing = new Set(clientEnvMeta.missingRequiredEnvVars);
+const serverMissing = new Set(serverEnvMeta.missingRequiredEnvVars);
+const missingRequired = new Set<string>([
+  ...clientMissing,
+  ...serverMissing,
+]);
+
+const optionalMissing = new Set<string>([
   ...serverEnvMeta.missingOptionalEnvVars,
   ...clientEnvMeta.missingOptionalEnvVars,
 ]);
+
+for (const name of missingRequired) {
+  optionalMissing.delete(name);
+}
 
 const fatalMessages: string[] = [];
 const warningMessages: string[] = [];
@@ -146,24 +160,14 @@ if (!clientParse.success && !clientEnvMeta.skipClientValidation) {
   warningMessages.push("[env] Invalid client environment variables detected.");
 }
 
-const summaryParts: string[] = [];
-
-if (serverMissing.length > 0) {
-  summaryParts.push(`server: ${serverMissing.join(", ")}`);
-}
-
-if (clientMissing.length > 0) {
-  summaryParts.push(`client: ${clientMissing.join(", ")}`);
-}
-
-const missingDefinitions = new Set<string>([...serverMissing, ...clientMissing]);
-
 if (serverEnvMeta.requiresServiceAccount && !serverEnvMeta.hasServiceAccount) {
   fatalMessages.push(
     "[env] Set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_KEY for admin access.",
   );
-  missingDefinitions.add("FIREBASE_SERVICE_ACCOUNT_JSON");
-  missingDefinitions.add("FIREBASE_SERVICE_ACCOUNT_KEY");
+  missingRequired.add("FIREBASE_SERVICE_ACCOUNT_JSON");
+  missingRequired.add("FIREBASE_SERVICE_ACCOUNT_KEY");
+  optionalMissing.delete("FIREBASE_SERVICE_ACCOUNT_JSON");
+  optionalMissing.delete("FIREBASE_SERVICE_ACCOUNT_KEY");
 }
 
 if (serverEnvMeta.bucketMismatch) {
@@ -187,37 +191,61 @@ if (json) {
   }
 }
 
-if (summaryParts.length > 0) {
-  console.error(
-    `[env] Missing required environment variables (stage=${stage}, strict=${strictMode ? "on" : "off"}): ${summaryParts.join(
-      " | ",
-    )}`,
-  );
-}
+const toRow = (name: string, status: "required" | "optional"): string[] => {
+  const definition = definitionByName.get(name);
 
-if (missingDefinitions.size > 0) {
-  const header = ["Name", "Audience", "Required In", "Description"];
-  const rows = [
-    header,
-    ...envVarDefinitions
-      .filter(definition => missingDefinitions.has(definition.name))
-      .map(definition => [
-        definition.name,
-        formatAudience(definition),
-        definition.requiredIn.length > 0
-          ? definition.requiredIn.join("/")
-          : "optional",
-        definition.description,
-      ]),
+if (!definition) {
+    return [name, "-", "-", status, "Not defined in schema"]; // should not happen
+  }
+
+  const requiredIn =
+    definition.requiredIn.length > 0
+      ? definition.requiredIn.join("/")
+      : "optional";
+
+  const statusLabel = status === "required" ? "required" : "optional (warn)";
+
+  return [
+    definition.name,
+    formatAudience(definition),
+    requiredIn,
+    statusLabel,
+    definition.description,
+  ];
+};
+
+const buildTable = (
+  names: Set<string>,
+  status: "required" | "optional",
+): string | undefined => {
+  if (names.size === 0) {
+    return undefined;
+  }
+
+  const rows: string[][] = [
+    ["Name", "Audience", "Required In", "Status", "Description"],
+    ...Array.from(names)
+      .sort((a, b) => a.localeCompare(b))
+      .map(name => toRow(name, status)),
   ];
 
-  console.error(renderTable(rows));
+  return renderTable(rows);
+};
+
+const requiredTable = buildTable(missingRequired, "required");
+if (requiredTable) {
+  console.error(
+    `[env] Missing required environment variables (stage=${stage}, strict=${strictMode ? "on" : "off"}).`,
+  );
+  console.error(requiredTable);
 }
 
-if (optionalMissing.size > 0) {
-  warningMessages.push(
-    `[env] Missing optional environment variables: ${Array.from(optionalMissing).join(", ")}`,
+const optionalTable = buildTable(optionalMissing, "optional");
+if (optionalTable) {
+  console.warn(
+    `[env] Optional environment variables are unset (${optionalMissing.size} item(s)).`,
   );
+  console.warn(optionalTable);
 }
 
 if (clientEnvMeta.skipClientValidation) {
@@ -237,8 +265,7 @@ for (const warning of warningMessages) {
 }
 
 const shouldFailBuild =
-  strictMode &&
-  (fatalMessages.length > 0 || missingDefinitions.size > 0);
+  strictMode && (fatalMessages.length > 0 || missingRequired.size > 0);
 
 if (shouldFailBuild) {
   fatalMessages.forEach(message => console.error(message));

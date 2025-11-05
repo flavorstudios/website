@@ -87,12 +87,19 @@ describe("blogStore category normalization", () => {
   it("filters invalid categories and trims the primary category", async () => {
     const posts = await blogStore.getAll();
 
-    expect(posts[0].categories).toEqual(["Primary", "Secondary"]);
-    expect(posts[0].category).toBe("Primary");
-    expect(posts[0].commentCount).toBe(0);
-    expect(posts[0].shareCount).toBe(0);
+    const [firstPost, secondPost] = posts;
+    expect(firstPost).toBeDefined();
+    expect(secondPost).toBeDefined();
+    if (!firstPost || !secondPost) {
+      throw new Error("expected posts to contain at least two entries");
+    }
 
-    expect(posts[1].categories).toEqual([]);
-    expect(posts[1].category).toBe("");
+    expect(firstPost.categories).toEqual(["Primary", "Secondary"]);
+    expect(firstPost.category).toBe("Primary");
+    expect(firstPost.commentCount).toBe(0);
+    expect(firstPost.shareCount).toBe(0);
+
+    expect(secondPost.categories).toEqual([]);
+    expect(secondPost.category).toBe("");
   });
 });

@@ -23,12 +23,25 @@ function isPlainRecord(value: unknown): value is Record<string, unknown> {
 
 function buildRolesClaim(
   existing: unknown,
-  activeRole: SupportedRole
-): Record<string, boolean> {
-  const base = isPlainRecord(existing) ? { ...existing } : {};
+  activeRole: SupportedRole,
+): Record<SupportedRole, boolean> {
+  const base: Record<SupportedRole, boolean> = {
+    admin: false,
+    editor: false,
+    support: false,
+  };
+
+  if (isPlainRecord(existing)) {
+    for (const role of SUPPORTED_ROLES) {
+      const value = existing[role];
+      base[role] = typeof value === "boolean" ? value : false;
+    }
+  }
+
   for (const role of SUPPORTED_ROLES) {
     base[role] = role === activeRole;
   }
+
   return base;
 }
 
@@ -102,7 +115,13 @@ export async function revokeRole(
 ): Promise<RevokeRoleResult> {
   const user = (await deps.auth.getUserByEmail(email)) as UserRecord;
   const claims = { ...(user.customClaims || {}) } as Record<string, unknown>;
-  const rolesClaim = isPlainRecord(claims.roles) ? { ...claims.roles } : {};
+  const rolesClaim: Record<SupportedRole, boolean> = isPlainRecord(claims.roles)
+    ? buildRolesClaim(claims.roles, "support")
+    : {
+        admin: false,
+        editor: false,
+        support: true,
+      };
   const timestamp = currentTimestamp(deps.now);
 
   delete claims.admin;

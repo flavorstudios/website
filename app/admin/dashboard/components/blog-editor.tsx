@@ -255,7 +255,9 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
   // Helper to combine scheduled date + time
   const getScheduledDateTime = useCallback(() => {
     if (!scheduledDate || !scheduledTime) return undefined;
-    const [hours, minutes] = scheduledTime.split(":").map(Number);
+    const [hoursString = "", minutesString = ""] = scheduledTime.split(":");
+    const hours = Number(hoursString);
+    const minutes = Number(minutesString);
     const dt = new Date(scheduledDate);
     if (!isNaN(hours)) dt.setHours(hours);
     if (!isNaN(minutes)) dt.setMinutes(minutes);
@@ -305,7 +307,11 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
             if (prev.categories.length > 0) {
               return prev;
             }
-            const defaultSlug = blogCategories[0].slug;
+            const [firstCategory] = blogCategories;
+            if (!firstCategory) {
+              return prev;
+            }
+            const defaultSlug = firstCategory.slug;
             return {
               ...prev,
               category: defaultSlug,

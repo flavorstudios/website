@@ -238,9 +238,13 @@ const MONTH_LABELS = [
   "Dec",
 ];
 
+const postsHistory = E2E_DASHBOARD_HISTORY[0]?.data ?? [];
+const videosHistory = E2E_DASHBOARD_HISTORY[1]?.data ?? [];
+const commentsHistory = E2E_DASHBOARD_HISTORY[2]?.data ?? [];
+
 export const E2E_STATS_HISTORY_MONTHLY = MONTH_LABELS.map((month, index) => ({
   month,
-  posts: E2E_DASHBOARD_HISTORY[0].data[index] ?? 0,
-  videos: E2E_DASHBOARD_HISTORY[1].data[index] ?? 0,
-  comments: E2E_DASHBOARD_HISTORY[2].data[index] ?? 0,
+  posts: postsHistory[index] ?? 0,
+  videos: videosHistory[index] ?? 0,
+  comments: commentsHistory[index] ?? 0,
 }));

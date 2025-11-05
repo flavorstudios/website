@@ -487,20 +487,38 @@ export default function EmailInbox() {
         e.preventDefault()
         if (!filteredMessages.length) return
         if (!selectedMessage) {
-          setSelectedMessage(filteredMessages[0])
+          const firstMessage = filteredMessages.at(0)
+          if (firstMessage) {
+            setSelectedMessage(firstMessage)
+          }
           return
         }
         const idx = filteredMessages.findIndex((m) => m.id === selectedMessage.id)
-        if (idx < filteredMessages.length - 1) setSelectedMessage(filteredMessages[idx + 1])
+        if (idx > -1 && idx < filteredMessages.length - 1) {
+          const nextMessage = filteredMessages[idx + 1]
+          if (nextMessage) {
+            setSelectedMessage(nextMessage)
+          }
+        }
       } else if (key === "arrowup" || key === "k") {
         e.preventDefault()
         if (!selectedMessage) return
         const idx = filteredMessages.findIndex((m) => m.id === selectedMessage.id)
-        if (idx > 0) setSelectedMessage(filteredMessages[idx - 1])
+        if (idx > 0) {
+          const previousMessage = filteredMessages[idx - 1]
+          if (previousMessage) {
+            setSelectedMessage(previousMessage)
+          }
+        }
       } else if (key === "o") {
         e.preventDefault()
         if (selectedMessage) setSelectedMessage(null)
-        else if (filteredMessages.length) setSelectedMessage(filteredMessages[0])
+        else if (filteredMessages.length) {
+          const firstMessage = filteredMessages.at(0)
+          if (firstMessage) {
+            setSelectedMessage(firstMessage)
+          }
+        }
       } else if (key === "/") {
         e.preventDefault()
         searchInputRef.current?.focus()

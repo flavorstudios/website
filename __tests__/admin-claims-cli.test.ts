@@ -129,8 +129,10 @@ beforeEach(async () => {
   }
 });
 
-function ensureSuite(): asserts testEnv is RulesTestEnvironment {
-  if (skipSuite || !testEnv || !firestore) {
+function ensureSuite(
+  env: RulesTestEnvironment | undefined,
+): asserts env is RulesTestEnvironment {
+  if (skipSuite || !env || !firestore) {
     if (requireEmulator) {
       throw new Error(
         "Firestore emulator required but unavailable. Start the emulator or remove FIRESTORE_RULES_REQUIRE_EMULATOR."
@@ -144,10 +146,14 @@ function ensureSuite(): asserts testEnv is RulesTestEnvironment {
 describe("admin claims helpers", () => {
   it("grants roles via custom claims and Firestore", async () => {
     try {
-      ensureSuite();
+      ensureSuite(testEnv);
     } catch (error) {
       if ((error as Error).message === "SKIP") return;
       throw error;
+    }
+
+    if (!firestore) {
+      throw new Error("Firestore emulator unavailable");
     }
 
     const fakeAuth = new FakeAuth([
@@ -186,10 +192,14 @@ describe("admin claims helpers", () => {
 
   it("revokes elevated access and resets support role", async () => {
     try {
-      ensureSuite();
+      ensureSuite(testEnv);
     } catch (error) {
       if ((error as Error).message === "SKIP") return;
       throw error;
+    }
+
+    if (!firestore) {
+      throw new Error("Firestore emulator unavailable");
     }
 
     const fakeAuth = new FakeAuth([
@@ -234,10 +244,14 @@ describe("admin claims helpers", () => {
 
   it("lists Firestore directory entries alongside claim holders", async () => {
     try {
-      ensureSuite();
+      ensureSuite(testEnv);
     } catch (error) {
       if ((error as Error).message === "SKIP") return;
       throw error;
+    }
+
+    if (!firestore) {
+      throw new Error("Firestore emulator unavailable");
     }
 
     const fakeAuth = new FakeAuth([

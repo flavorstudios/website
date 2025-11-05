@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { serverEnv } from "@/env/server";
@@ -8,9 +9,9 @@ import {
   createRequestId,
   getAdditionalAdminEmails,
   logPasswordResetEvent,
-  PasswordResetLocation,
   sendPasswordResetEmail,
 } from "@/lib/admin-password-reset";
+import type { PasswordResetLocation } from "@/lib/admin-password-reset";
 import {
   incrementPasswordResetCounters,
   isPasswordResetEmailRateLimited,
@@ -19,6 +20,7 @@ import {
 import { PASSWORD_RESET_NEUTRAL_MESSAGE, PASSWORD_RESET_RATE_LIMIT_MESSAGE } from "@/lib/password-reset-messages";
 import getClientIp from "@/lib/request-ip";
 import { logError } from "@/lib/log";
+import type { NormalizedEmail } from "@/lib/email";
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -105,7 +107,7 @@ export async function POST(req: NextRequest) {
   const userAgent = req.headers.get("user-agent") || undefined;
   const location = parseLocation(req.headers);
 
-  let additionalEmails: string[] = [];
+  let additionalEmails: NormalizedEmail[] = [];
   try {
     additionalEmails = await getAdditionalAdminEmails();
   } catch (error) {

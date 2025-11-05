@@ -1,5 +1,5 @@
 export class InvalidPreviewTokenError extends Error {
-  name = "InvalidPreviewTokenError";
+  override name = "InvalidPreviewTokenError";
   code = "INVALID_PREVIEW_TOKEN";
 
   constructor(message = "Invalid token.") {
@@ -8,7 +8,7 @@ export class InvalidPreviewTokenError extends Error {
 }
 
 export class ExpiredPreviewTokenError extends Error {
-  name = "ExpiredPreviewTokenError";
+  override name = "ExpiredPreviewTokenError";
   code = "EXPIRED_PREVIEW_TOKEN";
 
   constructor(message = "Preview token expired.") {

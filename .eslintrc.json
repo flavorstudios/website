@@ -15,6 +15,12 @@
     "jsx-a11y/no-noninteractive-element-to-interactive-role": "off",
     "jsx-a11y/heading-has-content": "off",
     "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-floating-promises": "off",
+    "@typescript-eslint/consistent-type-imports": [
+      "warn",
+      { "prefer": "type-imports", "fixStyle": "inline-type-imports" }
+    ],
+    "@typescript-eslint/prefer-readonly": "off",
     "@typescript-eslint/no-unused-vars": "warn",
     "@typescript-eslint/no-unused-expressions": "warn",
     "@typescript-eslint/no-require-imports": "off",
@@ -24,5 +30,39 @@
     "local/no-h1-outside-page": "error",
     "local/no-server-import-in-client": "error"
   },
-  "overrides": []
+  "overrides": [
+    {
+      "files": [
+        "app/api/admin/send-reply/route.ts",
+        "app/api/admin/password-reset/route.ts",
+        "lib/email.ts",
+        "lib/admin-allowlist.ts",
+        "lib/admin-password-reset.ts",
+        "lib/admin-auth.ts"
+      ],
+      "parserOptions": {
+        "project": "./tsconfig.json",
+        "tsconfigRootDir": "."
+      }
+    },
+    {
+      "files": [
+        "app/api/admin/send-reply/route.ts",
+        "app/api/admin/password-reset/route.ts",
+        "lib/email.ts",
+        "lib/admin-allowlist.ts",
+        "lib/admin-password-reset.ts",
+        "lib/admin-auth.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "error",
+        "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/consistent-type-imports": [
+          "error",
+          { "prefer": "type-imports", "fixStyle": "inline-type-imports" }
+        ],
+        "@typescript-eslint/prefer-readonly": "warn"
+      }
+    }
+  ]
 }

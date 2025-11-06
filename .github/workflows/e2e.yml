@@ -19,17 +19,17 @@ jobs:
       SKIP_STRICT_ENV: 1
 
       # --- your existing envs ---
-      BASE_URL: ${{ secrets.BASE_URL }}
-      NEXT_PUBLIC_BASE_URL: ${{ secrets.BASE_URL }}
-      CRON_SECRET: ${{ secrets.CRON_SECRET }}
-      PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET }}
-      ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
+      BASE_URL: ${{ secrets.BASE_URL || 'https://flavorstudios.in' }}
+      NEXT_PUBLIC_BASE_URL: ${{ secrets.BASE_URL || 'https://flavorstudios.in' }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET || 'e2e-placeholder-cron' }}
+      PREVIEW_SECRET: ${{ secrets.PREVIEW_SECRET || 'e2e-placeholder-preview' }}
+      ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET || 'e2e-placeholder-admin-jwt' }}
 
       # --- the ones that were missing in the log ---
       FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
       FIREBASE_SERVICE_ACCOUNT_JSON_B64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON_B64 }}
-      FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+      FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET || 'your-project.appspot.com' }}
+      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET || 'your-project.appspot.com' }}
 
       # write SA here (no VS Code complaints)
       GOOGLE_APPLICATION_CREDENTIALS: /tmp/firebase-sa.json

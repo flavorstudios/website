@@ -369,9 +369,11 @@ export default function DashboardOverview({
           >
             Dashboard data unavailable
           </h2>
-          <p className="mb-3 text-red-600">Unable to load dashboard data. Please try again.</p>
+          <p className="mb-3 text-sm text-red-700">
+            Unable to load dashboard data. Please try again.
+          </p>
           <p
-            className="mb-4 text-xs font-semibold uppercase tracking-wide text-red-500"
+            className="mb-4 text-sm font-semibold uppercase tracking-wide text-red-700"
             data-testid="dashboard-error-code"
           >
             {code}

@@ -65,46 +65,32 @@ function BlogFallback() {
   return (
     <div
       data-testid="blog-fallback"
-      className="space-y-6"
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       aria-busy="true"
       aria-live="polite"
     >
-      <header className="space-y-2">
-        <h1
-          data-testid="page-title"
-          className="text-2xl font-semibold tracking-tight text-foreground"
+      {Array.from({ length: 4 }).map((_, i) => (
+        <article
+          key={i}
+          data-testid="blog-card"
+          className="rounded-xl border border-border bg-card p-4 shadow-sm"
+          aria-hidden="true"
         >
-          Blog
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Manage your blog posts, drafts, and editorial calendar.
-        </p>
-      </header>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <article
-            key={i}
-            data-testid="blog-card"
-            className="rounded-xl border border-border bg-card p-4 shadow-sm"
-            aria-hidden="true"
-          >
-            <div className="mb-4 flex items-start gap-3">
-              <div className="h-12 w-16 flex-shrink-0 animate-pulse rounded bg-muted" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
-                <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
-              </div>
-              <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+          <div className="mb-4 flex items-start gap-3">
+            <div className="h-12 w-16 flex-shrink-0 animate-pulse rounded bg-muted" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
             </div>
-            <div className="space-y-2">
-              <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-              <div className="h-3 w-24 animate-pulse rounded bg-muted" />
-              <div className="h-3 w-16 animate-pulse rounded bg-muted" />
-            </div>
-          </article>
-        ))}
-      </div>
+          <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+          </div>
+          <div className="space-y-2">
+            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-24 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-16 animate-pulse rounded bg-muted" />
+          </div>
+        </article>
+      ))}
     </div>
   );
 }
@@ -132,12 +118,23 @@ export default async function BlogPage(props: AdminBlogPageProps) {
   const resolvedSearchParams = searchParams ?? {};
   const slow = isE2ESlow(resolvedSearchParams);
   return (
-    <>
+    <div className="space-y-6">
+      <header className="space-y-2">
+        <h1
+          data-testid="page-title"
+          className="text-2xl font-semibold tracking-tight text-foreground"
+        >
+          Blog
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Manage your blog posts, drafts, and editorial calendar.
+        </p>
+      </header>
       <Suspense fallback={<BlogFallback />}>
         <E2EGate enabled={slow}>
           <AdminDashboardSectionPage section={SECTION} />
         </E2EGate>
       </Suspense>
-    </>
+    </div>
   );
 }

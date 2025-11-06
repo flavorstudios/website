@@ -1,89 +1,139 @@
 import "server-only";
-import { z } from "zod";
 
-const trimmedString = z
-  .string({ invalid_type_error: "Expected environment variable to be a string" })
-  .transform(value => value.trim())
-  .pipe(z.string().min(1));
+const TRUTHY = new Set(["1", "true", "yes"]);
 
-const envSchema = z
-  .object({
-    BASE_URL: trimmedString,
-    NEXT_PUBLIC_BASE_URL: trimmedString,
-    CRON_SECRET: trimmedString,
-    PREVIEW_SECRET: trimmedString,
-    ADMIN_JWT_SECRET: trimmedString,
-    FIREBASE_STORAGE_BUCKET: trimmedString,
-    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: trimmedString,
-    FIREBASE_SERVICE_ACCOUNT_JSON: trimmedString.optional(),
-    FIREBASE_SERVICE_ACCOUNT_JSON_B64: trimmedString.optional(),
-  })
-  .superRefine((value, ctx) => {
-    if (!value.FIREBASE_SERVICE_ACCOUNT_JSON && !value.FIREBASE_SERVICE_ACCOUNT_JSON_B64) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["FIREBASE_SERVICE_ACCOUNT_JSON"],
-        message: "Set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_JSON_B64",
-      });
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["FIREBASE_SERVICE_ACCOUNT_JSON_B64"],
-        message: "Set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_JSON_B64",
-      });
-    }
-  });
+const isTruthy = (value: string | undefined) =>
+  value ? TRUTHY.has(value.trim().toLowerCase()) : false;
 
-const parsed = envSchema.safeParse({
-  BASE_URL: process.env.BASE_URL,
-  NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL,
-  CRON_SECRET: process.env.CRON_SECRET,
-  PREVIEW_SECRET: process.env.PREVIEW_SECRET,
-  ADMIN_JWT_SECRET: process.env.ADMIN_JWT_SECRET,
-  FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON ?? process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
-  FIREBASE_SERVICE_ACCOUNT_JSON_B64: process.env.FIREBASE_SERVICE_ACCOUNT_JSON_B64,
-});
+const isRelaxed =
+  isTruthy(process.env.SKIP_STRICT_ENV) ||
+  isTruthy(process.env.SKIP_ENV_VALIDATION) ||
+  process.env.NODE_ENV === "test";
 
-if (!parsed.success) {
-  const message = parsed.error.issues
-    .map(issue => {
-      const path = issue.path.join(".") || "unknown";
-      return `${path}: ${issue.message}`;
-    })
-    .join("\n");
-  throw new Error(`Invalid environment configuration\n${message}`);
+const PLACEHOLDERS = {
+  BASE_URL: "http://127.0.0.1:3000",
+  NEXT_PUBLIC_BASE_URL: "http://127.0.0.1:3000",
+  CRON_SECRET: "cron-placeholder",
+  PREVIEW_SECRET: "preview-placeholder",
+  ADMIN_JWT_SECRET: "admin-jwt-placeholder",
+  FIREBASE_STORAGE_BUCKET: "placeholder.appspot.com",
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "placeholder.appspot.com",
+} as const;
+
+type PlaceholderKey = keyof typeof PLACEHOLDERS;
+
+function normalize(value: string | undefined) {
+  return value?.trim() ?? "";
 }
 
-const envValues = parsed.data;
+function readEnv<K extends PlaceholderKey>(name: K): string;
+function readEnv(name: string, options: { required?: boolean; fallback?: string }): string | undefined;
+function readEnv(
+  name: string,
+  options: { required?: boolean; fallback?: string } = { required: true },
+): string | undefined {
+  const raw = normalize(process.env[name]);
+  if (raw) {
+    return raw;
+  }
 
-const firebaseServiceAccountJson = envValues.FIREBASE_SERVICE_ACCOUNT_JSON
-  ? envValues.FIREBASE_SERVICE_ACCOUNT_JSON
-  : envValues.FIREBASE_SERVICE_ACCOUNT_JSON_B64
-  ? Buffer.from(envValues.FIREBASE_SERVICE_ACCOUNT_JSON_B64, "base64").toString("utf8")
-  : undefined;
+  const { required = true, fallback } = options;
+
+  if (!required) {
+    if (fallback) {
+      return fallback;
+    }
+  return undefined;
+  }
+
+if (fallback) {
+    return fallback;
+  }
+
+  if (name in PLACEHOLDERS && isRelaxed) {
+    return PLACEHOLDERS[name as PlaceholderKey];
+  }
+
+  if (isRelaxed) {
+    return "placeholder";
+  }
+
+  throw new Error(`Missing environment variable ${name}`);
+}
+
+function optionalEnv(name: string) {
+  const raw = normalize(process.env[name]);
+  return raw.length > 0 ? raw : undefined;
+}
+
+const baseUrl = readEnv("BASE_URL");
+const nextPublicBaseUrl =
+  optionalEnv("NEXT_PUBLIC_BASE_URL") || baseUrl || PLACEHOLDERS.NEXT_PUBLIC_BASE_URL;
+const cronSecret = readEnv("CRON_SECRET");
+const previewSecret = readEnv("PREVIEW_SECRET");
+const adminJwtSecret = readEnv("ADMIN_JWT_SECRET");
+
+const firebaseStorageBucket =
+  optionalEnv("FIREBASE_STORAGE_BUCKET") ||
+  optionalEnv("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET") ||
+  (isRelaxed ? PLACEHOLDERS.FIREBASE_STORAGE_BUCKET : undefined);
+
+if (!firebaseStorageBucket) {
+  throw new Error("Missing environment variable FIREBASE_STORAGE_BUCKET");
+}
+
+const nextPublicFirebaseStorageBucket =
+  optionalEnv("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET") ||
+  firebaseStorageBucket ||
+  PLACEHOLDERS.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+
+const firebaseServiceAccountJson = optionalEnv("FIREBASE_SERVICE_ACCOUNT_JSON");
+const firebaseServiceAccountJsonB64 = optionalEnv("FIREBASE_SERVICE_ACCOUNT_JSON_B64");
+
+let resolvedServiceAccountJson = firebaseServiceAccountJson;
+
+if (!resolvedServiceAccountJson && firebaseServiceAccountJsonB64) {
+  try {
+    resolvedServiceAccountJson = Buffer.from(
+      firebaseServiceAccountJsonB64,
+      "base64",
+    ).toString("utf8");
+  } catch (error) {
+    throw new Error(
+      `Invalid Firebase service account base64 encoding: ${
+        (error as Error).message ?? "Unknown decode error"
+      }`,
+    );
+  }
+}
+
+if (!resolvedServiceAccountJson && !isRelaxed) {
+  throw new Error("Set FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_JSON_B64");
+}
 
 let firebaseServiceAccount: Record<string, unknown> | undefined;
 
-if (firebaseServiceAccountJson) {
+if (resolvedServiceAccountJson) {
   try {
-    firebaseServiceAccount = JSON.parse(firebaseServiceAccountJson) as Record<string, unknown>;
+    firebaseServiceAccount = JSON.parse(resolvedServiceAccountJson) as Record<string, unknown>;
   } catch (error) {
     throw new Error(
-      `Invalid Firebase service account JSON: ${(error as Error).message ?? "Unknown parse error"}`,
+      `Invalid Firebase service account JSON: ${
+        (error as Error).message ?? "Unknown parse error"
+      }`,
     );
   }
 }
 
 export const env = Object.freeze({
-  baseUrl: envValues.BASE_URL,
-  nextPublicBaseUrl: envValues.NEXT_PUBLIC_BASE_URL,
-  cronSecret: envValues.CRON_SECRET,
-  previewSecret: envValues.PREVIEW_SECRET,
-  adminJwtSecret: envValues.ADMIN_JWT_SECRET,
-  firebaseStorageBucket: envValues.FIREBASE_STORAGE_BUCKET,
-  nextPublicFirebaseStorageBucket: envValues.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  firebaseServiceAccountJson,
+  baseUrl,
+  nextPublicBaseUrl,
+  cronSecret,
+  previewSecret,
+  adminJwtSecret,
+  firebaseStorageBucket,
+  nextPublicFirebaseStorageBucket,
+  firebaseServiceAccountJson: resolvedServiceAccountJson,
   firebaseServiceAccount,
 });
 

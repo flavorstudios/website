@@ -61,9 +61,17 @@ describe("admin allowlist helpers", () => {
     expect(isAdminBypassEnabled()).toBe(false);
     expect(isAdmin("any@example.com")).toBe(false);
 
-    process.env.ADMIN_AUTH_DISABLED = "1";
+    process.env.ADMIN_BYPASS = "1";
+    expect(isAdminBypassEnabled()).toBe(false);
+
+    process.env.ADMIN_BYPASS = "true";
     expect(isAdminBypassEnabled()).toBe(true);
     expect(isAdmin(null)).toBe(true);
+
+    delete process.env.ADMIN_BYPASS;
+    process.env.ADMIN_AUTH_DISABLED = "1";
+    expect(isAdminBypassEnabled()).toBe(true);
+    expect(isAdmin("other@example.com")).toBe(true);
   });
 
   it("describes configured allowlist for diagnostics", () => {

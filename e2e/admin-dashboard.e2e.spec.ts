@@ -27,6 +27,7 @@ test('admin dashboard renders', async ({ page }) => {
   });
   await page.goto('/admin/dashboard');
   await awaitAppReady(page);
+  await expect(page.getByTestId('app-main')).toBeVisible();
   await expect(page.getByTestId('dashboard-loading')).toBeVisible();
   await expect(page.getByText('Total Posts')).toBeVisible();
   await expect(page.getByText('Total Views')).toBeVisible();

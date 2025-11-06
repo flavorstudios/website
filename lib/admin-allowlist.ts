@@ -1,4 +1,4 @@
-const TRUTHY_FLAGS = new Set(["1", "true", "yes"]);
+const TRUTHY_FLAGS = new Set(["1", "true"]);
 
 export type AdminAllowlist = {
   configured: string[];
@@ -6,69 +6,69 @@ export type AdminAllowlist = {
   merged: string[];
 };
 
-const normalizeEmail = (value: string): string => value.trim().toLowerCase();
+const normalizeEmail = (value: string): string =>
+  value.replace(/^['"]+|['"]+$/g, "").trim().toLowerCase();
 
-const stripQuotes = (value: string): string => value.replace(/^['"]+|['"]+$/g, "");
-
-const normalizeList = (values: string[]): string[] => {
-  return Array.from(new Set(values.map(normalizeEmail).filter(Boolean))).sort();
-};
-
-function splitEmails(raw: string | undefined): string[] {
+const splitEmails = (raw: string | undefined): string[] => {
   if (!raw) return [];
   return raw
-    .split(/[,\s]+/)
-    .map((entry) => stripQuotes(entry.trim()))
+    .split(",")
+    .flatMap((entry) => entry.split(/\s+/))
+    .map((entry) => normalizeEmail(entry))
     .filter(Boolean);
-}
+};
+
+const dedupeAndSort = (values: string[]): string[] =>
+  Array.from(new Set(values)).sort();
 
 function readConfiguredEmails(): string[] {
-  const fromList = splitEmails(process.env.ADMIN_EMAILS);
-  const single = splitEmails(process.env.ADMIN_EMAIL);
-  return normalizeList([...fromList, ...single]);
+  const combined = [
+    ...splitEmails(process.env.ADMIN_EMAILS),
+    ...splitEmails(process.env.ADMIN_EMAIL),
+  ];
+  return dedupeAndSort(combined);
 }
 
-function normalizeExtras(extraEmails: string[]): string[] {
-  if (!extraEmails.length) return [];
-  return normalizeList(extraEmails);
-}
+const normalizeExtras = (extraEmails: string[]): string[] =>
+  dedupeAndSort(extraEmails.map(normalizeEmail).filter(Boolean));
 
 export function parseAdminAllowlist(extraEmails: string[] = []): AdminAllowlist {
   const configured = readConfiguredEmails();
   const extras = normalizeExtras(extraEmails);
-  const merged = normalizeList([...configured, ...extras]);
+  const merged = dedupeAndSort([...configured, ...extras]);
   return { configured, extras, merged };
 }
 
 export const ALLOWLIST = parseAdminAllowlist();
 
 export function getAllowedAdminEmails(extraEmails: string[] = []): string[] {
+  if (extraEmails.length === 0) {
+    return ALLOWLIST.merged;
+  }
   return parseAdminAllowlist(extraEmails).merged;
 }
 
 export function getAllowedAdminDomain(): string | null {
   const domain = process.env.ADMIN_DOMAIN ?? "";
-  const normalized = domain.trim().toLowerCase();
+  const normalized = normalizeEmail(domain);
   return normalized.length > 0 ? normalized : null;
 }
 
-function isTruthy(value: string | undefined): boolean {
-  if (!value) return false;
-  return TRUTHY_FLAGS.has(value.trim().toLowerCase());
+function isAdminBypassFlagEnabled(): boolean {
+  const authDisabled = (process.env.ADMIN_AUTH_DISABLED ?? "").trim();
+  const bypass = (process.env.ADMIN_BYPASS ?? "").trim();
+  return authDisabled === "1" || bypass.toLowerCase() === "true";
 }
 
 export function isAdminBypassEnabled(): boolean {
-  return (
-    isTruthy(process.env.ADMIN_AUTH_DISABLED) ||
-    isTruthy(process.env.ADMIN_BYPASS)
-  );
+  return isAdminBypassFlagEnabled();
 }
 
 export function isAdmin(
   email: string | null | undefined,
   extraEmails: string[] = [],
 ): boolean {
-  if (isAdminBypassEnabled()) {
+  if (isAdminBypassFlagEnabled()) {
     return true;
   }
   if (!email) {
@@ -79,17 +79,15 @@ export function isAdmin(
     return false;
   }
 
-  const allowlist = parseAdminAllowlist(extraEmails);
+  const allowlist = extraEmails.length
+    ? parseAdminAllowlist(extraEmails)
+    : ALLOWLIST;
   if (allowlist.merged.includes(normalized)) {
     return true;
   }
 
   const allowedDomain = getAllowedAdminDomain();
-  if (allowedDomain && normalized.endsWith(`@${allowedDomain}`)) {
-    return true;
-  }
-
-  return false;
+  return Boolean(allowedDomain && normalized.endsWith(`@${allowedDomain}`));
 }
 
 export function describeAdminAllowlist(extraEmails: string[] = []): {
@@ -99,10 +97,12 @@ export function describeAdminAllowlist(extraEmails: string[] = []): {
   domain: string | null;
   bypass: boolean;
 } {
-  const snapshot = parseAdminAllowlist(extraEmails);
+  const snapshot = extraEmails.length
+    ? parseAdminAllowlist(extraEmails)
+    : ALLOWLIST;
   return {
     ...snapshot,
     domain: getAllowedAdminDomain(),
-    bypass: isAdminBypassEnabled(),
+    bypass: isAdminBypassFlagEnabled(),
   };
 }

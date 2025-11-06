@@ -6,7 +6,7 @@ const isTruthy = (value: string | undefined) =>
   value ? TRUTHY.has(value.trim().toLowerCase()) : false;
 
 const isTestEnv = process.env.NODE_ENV === "test";
-const isRelaxed = isTestEnv || isTruthy(process.env.SKIP_STRICT_ENV);
+const isRelaxed = isTruthy(process.env.SKIP_STRICT_ENV) || isTestEnv;
 
 const PLACEHOLDERS = {
   BASE_URL: "http://127.0.0.1:3000",
@@ -75,6 +75,17 @@ const adminJwtSecret = readEnv("ADMIN_JWT_SECRET", { placeholderKey: "ADMIN_JWT_
 
 const rawStorageBucket = optionalEnv("FIREBASE_STORAGE_BUCKET");
 const rawPublicStorageBucket = optionalEnv("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET");
+
+if (
+  rawStorageBucket &&
+  rawPublicStorageBucket &&
+  rawStorageBucket !== rawPublicStorageBucket &&
+  !isRelaxed
+) {
+  throw new Error(
+    "FIREBASE_STORAGE_BUCKET and NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET must match",
+  );
+}
 
 let firebaseStorageBucket = rawStorageBucket || rawPublicStorageBucket;
 let nextPublicFirebaseStorageBucket = rawPublicStorageBucket || rawStorageBucket;

@@ -342,6 +342,25 @@ export async function requireAdminAction(
   }
 }
 
+export async function getSessionEmailFromCookies(): Promise<string | null> {
+  if (DISABLE_AUTH) {
+    return "bypass@local";
+  }
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("admin-session")?.value;
+  if (!sessionCookie) {
+    return null;
+  }
+  try {
+    const decoded = await verifyAdminSession(sessionCookie);
+    const email = typeof decoded.email === "string" ? decoded.email : null;
+    return email ? email.trim().toLowerCase() : null;
+  } catch (error) {
+    logError("admin-auth:getSessionEmail", error);
+    return null;
+  }
+}
+
 // Helper: creates a new session cookie from an ID token (used for session refresh).
 export async function createSessionCookieFromIdToken(
   idToken: string,

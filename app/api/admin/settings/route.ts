@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { verifyAdminSession } from "@/lib/admin-auth";
+import { getSessionInfo, isAdmin } from "@/lib/admin-auth";
 import { ADMIN_BYPASS, adminDb } from "@/lib/firebase-admin";
 import { logActivity } from "@/lib/activity-log";
 import { logError } from "@/lib/log";
@@ -36,35 +36,6 @@ function normalizeSettings(data: unknown): UserSettings {
   throw new Error(parsed.error.message);
 }
 
-async function resolveAdminSession(
-  request: NextRequest,
-): Promise<{ ok: true; session: Awaited<ReturnType<typeof verifyAdminSession>> } | { ok: false; response: NextResponse }> {
-  const sessionCookie = request.cookies.get("admin-session")?.value;
-  if (!sessionCookie) {
-    return {
-      ok: false,
-      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-    };
-  }
-
-  try {
-    const session = await verifyAdminSession(sessionCookie);
-    return { ok: true, session };
-  } catch (error) {
-    if (error instanceof Error && error.message === "Unauthorized admin email") {
-      return {
-        ok: false,
-        response: NextResponse.json({ error: "Email not on admin list" }, { status: 401 }),
-      };
-    }
-    logError("admin-settings:api:session", error);
-    return {
-      ok: false,
-      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-    };
-  }
-}
-
 function adminDbUnavailableResponse() {
   return NextResponse.json(
     { error: "Admin settings unavailable", code: "ADMIN_SDK_UNAVAILABLE" },
@@ -73,9 +44,13 @@ function adminDbUnavailableResponse() {
 }
 
 export async function GET(request: NextRequest) {
-  const sessionResult = await resolveAdminSession(request);
-  if (!sessionResult.ok) {
-    return sessionResult.response;
+  const session = await getSessionInfo(request);
+  const email = session?.email ?? null;
+  if (!isAdmin(email)) {
+    return NextResponse.json({ error: "Email not on admin list" }, { status: 401 });
+  }
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   if (!adminDb) {
@@ -89,12 +64,12 @@ export async function GET(request: NextRequest) {
   try {
     const snapshot = await adminDb
       .collection("adminSettings")
-      .doc(sessionResult.session.uid)
+      .doc(session.uid)
       .get();
     const settings = normalizeSettings(snapshot.exists ? snapshot.data() : undefined);
     return NextResponse.json({ settings });
   } catch (error) {
-    logError("admin-settings:api:get", error, { uid: sessionResult.session.uid });
+    logError("admin-settings:api:get", error, { uid: session.uid });
     return NextResponse.json(
       { error: "Failed to fetch settings", code: "FIRESTORE_ERROR" },
       { status: 500 },
@@ -103,9 +78,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const sessionResult = await resolveAdminSession(request);
-  if (!sessionResult.ok) {
-    return sessionResult.response;
+  const session = await getSessionInfo(request);
+  const email = session?.email ?? null;
+  if (!isAdmin(email)) {
+    return NextResponse.json({ error: "Email not on admin list" }, { status: 401 });
+  }
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   if (!adminDb) {
@@ -137,12 +116,12 @@ export async function POST(request: NextRequest) {
   try {
     await adminDb
       .collection("adminSettings")
-      .doc(sessionResult.session.uid)
+      .doc(session.uid)
       .set(parsed.data, { merge: true });
 
     const snapshot = await adminDb
       .collection("adminSettings")
-      .doc(sessionResult.session.uid)
+      .doc(session.uid)
       .get();
     const settings = normalizeSettings(snapshot.exists ? snapshot.data() : parsed.data);
 
@@ -152,7 +131,7 @@ export async function POST(request: NextRequest) {
         title: "Admin settings",
         description: "Updated admin settings",
         status: "success",
-        user: sessionResult.session.email || sessionResult.session.uid,
+        user: session.email || session.uid,
       });
     } catch (activityError) {
       logError("admin-settings:api:activity", activityError);
@@ -160,7 +139,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ settings });
   } catch (error) {
-    logError("admin-settings:api:save", error, { uid: sessionResult.session.uid });
+    logError("admin-settings:api:save", error, { uid: session.uid });
     return NextResponse.json(
       { error: "Failed to save settings", code: "FIRESTORE_ERROR" },
       { status: 500 },

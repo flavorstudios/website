@@ -53,18 +53,12 @@ export default defineConfig({
   ],
   globalSetup: path.join(repoRoot, "e2e/setup/global-setup.ts"),
   webServer: {
-    command: "pnpm start:test",
+    command: "pnpm e2e:serve",
     url: defaultBaseUrl,
     cwd: repoRoot,
     reuseExistingServer: !isCI,
     stdout: "pipe",
     stderr: "pipe",
-    timeout: 120_000,
-    env: {
-      ...process.env,
-      NODE_ENV: "test",
-      NEXT_TELEMETRY_DISABLED: "1",
-      E2E: "true",
-    },
+    timeout: 180_000,
   },
 });

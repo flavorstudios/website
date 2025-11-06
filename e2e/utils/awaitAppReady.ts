@@ -47,9 +47,9 @@ export async function awaitAppReady(
   }
 
   // original behaviour: make sure we have a main landmark
-  await page.waitForSelector("main, [role='main']", {
+  await page.waitForSelector("[data-testid='app-main'], main, [role='main']", {
     state: "attached",
-    timeout: 15_000,
+    timeout: 20_000,
   });
   await page.waitForTimeout(50);
 

@@ -40,6 +40,15 @@ export const getSettingsDocRef = cache((db: Firestore, uid: string) => {
   return db.collection("users").doc(uid).collection("settings").doc("general")
 })
 
+function cloneDefaultUserSettings(): UserSettings {
+  return {
+    profile: { ...DEFAULT_USER_SETTINGS.profile },
+    notifications: JSON.parse(JSON.stringify(DEFAULT_USER_SETTINGS.notifications)) as UserSettings["notifications"],
+    appearance: { ...DEFAULT_USER_SETTINGS.appearance },
+    updatedAt: Date.now(),
+  }
+}
+
 export async function getCurrentAdminUid(): Promise<string> {
   const cookieStore = await cookies()
   const sessionCookie = cookieStore.get("admin-session")?.value
@@ -53,15 +62,18 @@ export async function getCurrentAdminUid(): Promise<string> {
 export async function readUserSettings(db: Firestore, uid: string): Promise<UserSettings | null> {
   const doc = await getSettingsDocRef(db, uid).get()
   if (!doc.exists) return null
-  const data = doc.data() as UserSettings
-  try {
-    return userSettingsSchema.parse(data)
-  } catch {
-    return {
-      ...DEFAULT_USER_SETTINGS,
-      ...data,
-    } as UserSettings
+  const data = doc.data() as Partial<UserSettings>
+  const parsed = userSettingsSchema.safeParse(data)
+  if (parsed.success) {
+    return parsed.data
   }
+  const merged = mergeSettings(cloneDefaultUserSettings(), data)
+  const sanitized: UserSettings = {
+    ...merged,
+    updatedAt: typeof merged.updatedAt === "number" ? merged.updatedAt : Date.now(),
+  }
+  const fallback = userSettingsSchema.safeParse(sanitized)
+  return fallback.success ? fallback.data : sanitized
 }
 
 export async function writeUserSettings(

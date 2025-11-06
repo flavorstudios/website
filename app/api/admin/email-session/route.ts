@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken"
 import { logError } from "@/lib/log"
 import { serverEnv } from "@/env/server"
 
-import { isEmailAllowed } from "@/lib/admin-allowlist"
+import { isAdmin } from "@/lib/admin-allowlist"
 
 export function GET() {
   return NextResponse.json({
@@ -18,8 +18,8 @@ export async function POST(req: NextRequest) {
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password required." }, { status: 400 })
     }
-    if (!isEmailAllowed(email)) {
-      return NextResponse.json({ error: "Authentication failed." }, { status: 401 })
+    if (!isAdmin(email)) {
+      return NextResponse.json({ error: "Email not on admin list" }, { status: 401 })
     }
     if (!serverEnv.ADMIN_PASSWORD_HASH || !serverEnv.ADMIN_JWT_SECRET) {
       logError("email-session: missing ADMIN_PASSWORD_HASH or ADMIN_JWT_SECRET", {})

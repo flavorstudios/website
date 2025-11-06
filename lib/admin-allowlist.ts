@@ -1,32 +1,36 @@
-const TRUTHY = new Set(["1", "true", "TRUE", "True"]);
+const TRUTHY_FLAGS = new Set(["1", "true"]);
 
 const normalizeEmail = (value: string): string => value.trim().toLowerCase();
 
-function getRawAdminEmails(): string {
-  const fromList = process.env.ADMIN_EMAILS ?? "";
-  if (fromList.trim().length > 0) {
-    return fromList;
-  }
-  const single = process.env.ADMIN_EMAIL ?? "";
-  return single.trim();
-}
+const stripQuotes = (value: string): string => value.replace(/^['"]+|['"]+$/g, "");
 
-function splitAdminEmails(raw: string): string[] {
+function splitEmails(raw: string | undefined): string[] {
   if (!raw) return [];
   return raw
-    .split(/[\s,]+/)
-    .map((entry) => normalizeEmail(entry))
+    .split(/[,\s]+/)
+    .map((entry) => stripQuotes(entry.trim()))
+    .map((entry) => (entry ? normalizeEmail(entry) : ""))
     .filter(Boolean);
 }
 
-function normalizeExtraEmails(extraEmails: string[]): string[] {
-  return extraEmails
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean);
+function unique(values: string[]): string[] {
+  return Array.from(new Set(values));
 }
 
-export function getAllowedAdminEmails(): string[] {
-  return splitAdminEmails(getRawAdminEmails());
+function readConfiguredEmails(): string[] {
+  const fromList = splitEmails(process.env.ADMIN_EMAILS);
+  const single = splitEmails(process.env.ADMIN_EMAIL);
+  return unique([...fromList, ...single]);
+}
+
+function normalizeExtras(extraEmails: string[]): string[] {
+  return unique(extraEmails.map((value) => normalizeEmail(value)).filter(Boolean));
+}
+
+export function getAllowedAdminEmails(extraEmails: string[] = []): string[] {
+  const configured = readConfiguredEmails();
+  const extras = normalizeExtras(extraEmails);
+  return unique([...configured, ...extras]);
 }
 
 export function getAllowedAdminDomain(): string | null {
@@ -35,31 +39,58 @@ export function getAllowedAdminDomain(): string | null {
   return normalized.length > 0 ? normalized : null;
 }
 
-export function isEmailAllowed(
-  email: string,
-  extraEmails: string[] = []
-): boolean {
-  if (!email) return false;
-  const normalized = normalizeEmail(email);
-  const allowedEmails = getAllowedAdminEmails();
-  const allowedDomain = getAllowedAdminDomain();
-  const combinedEmails = [
-    ...new Set([...allowedEmails, ...normalizeExtraEmails(extraEmails)]),
-  ];
-  if (combinedEmails.length && combinedEmails.includes(normalized)) {
-    return true;
-  }
-  if (allowedDomain && normalized.endsWith(`@${allowedDomain}`)) {
-    return true;
-  }
-  return false;
+function isTruthy(value: string | undefined): boolean {
+  if (!value) return false;
+  return TRUTHY_FLAGS.has(value.trim().toLowerCase());
 }
 
 export function isAdminBypassEnabled(): boolean {
   return (
-    TRUTHY.has(process.env.ADMIN_AUTH_DISABLED ?? "") ||
-    TRUTHY.has(process.env.ADMIN_BYPASS ?? "") ||
-    TRUTHY.has(process.env.TEST_MODE ?? "") ||
-    TRUTHY.has(process.env.E2E ?? "")
+    isTruthy(process.env.ADMIN_AUTH_DISABLED) ||
+    isTruthy(process.env.ADMIN_BYPASS)
   );
+}
+
+export function isAdmin(
+  email: string | null | undefined,
+  extraEmails: string[] = [],
+): boolean {
+  if (isAdminBypassEnabled()) {
+    return true;
+  }
+  if (!email) {
+    return false;
+  }
+  const normalized = normalizeEmail(email);
+  if (!normalized) {
+    return false;
+  }
+
+  const allowedEmails = getAllowedAdminEmails(extraEmails);
+  if (allowedEmails.includes(normalized)) {
+    return true;
+  }
+
+  const allowedDomain = getAllowedAdminDomain();
+  if (allowedDomain && normalized.endsWith(`@${allowedDomain}`)) {
+    return true;
+  }
+
+  return false;
+}
+
+export function describeAdminAllowlist(extraEmails: string[] = []): {
+  configured: string[];
+  extras: string[];
+  domain: string | null;
+  bypass: boolean;
+} {
+  const configured = readConfiguredEmails();
+  const extras = normalizeExtras(extraEmails);
+  return {
+    configured,
+    extras,
+    domain: getAllowedAdminDomain(),
+    bypass: isAdminBypassEnabled(),
+  };
 }

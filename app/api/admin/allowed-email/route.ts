@@ -7,7 +7,7 @@ import { logError } from "@/lib/log"; // Consistent server logging
 import {
   getAllowedAdminEmails,
   getAllowedAdminDomain,
-  isEmailAllowed,
+  isAdmin,
 } from "@/lib/admin-allowlist";
 
 export async function GET() {
@@ -32,7 +32,7 @@ export async function GET() {
   const userEmail = (decoded.email || "").toLowerCase();
   const adminEmails = getAllowedAdminEmails();
   const adminDomain = getAllowedAdminDomain();
-  const isAllowed = isEmailAllowed(userEmail);
+  const isAllowed = isAdmin(userEmail);
 
   if (!isAllowed) {
     console.warn(

@@ -29,6 +29,13 @@ describe("isAdmin helper", () => {
     expect(isAdmin("second@example.com")).toBe(true);
   });
 
+  it("trims spaces around inputs and allowlist entries", async () => {
+    process.env.ADMIN_EMAILS = " admin@example.com , second@example.com ";
+    const { isAdmin } = await loadModule();
+    expect(isAdmin("  admin@example.com  ")).toBe(true);
+    expect(isAdmin("SECOND@EXAMPLE.COM ")).toBe(true);
+  });
+
   it("falls back to ADMIN_EMAIL when list is missing", async () => {
     delete process.env.ADMIN_EMAILS;
     process.env.ADMIN_EMAIL = "solo@example.com";

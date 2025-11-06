@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { serverEnv } from "@/env/server";
-import { isEmailAllowed } from "@/lib/admin-allowlist";
+import { isAdmin } from "@/lib/admin-allowlist";
 import { adminAuth } from "@/lib/firebase-admin";
 import {
   createRequestId,
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
     logError("password-reset:additionalEmails", error);
   }
 
-  const allowed = isEmailAllowed(normalizedEmail, additionalEmails);
+  const allowed = isAdmin(normalizedEmail, additionalEmails);
 
   const continueUrl = new URL(
     `/api/admin/password-reset/completed?request=${encodeURIComponent(requestId)}`,

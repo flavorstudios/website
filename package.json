@@ -10,6 +10,7 @@
     "start": "next start",
     "preview": "pnpm run build && pnpm run start",
     "start:test": "pnpm exec tsx scripts/start-test.ts",
+    "start:test:prod": "pnpm exec tsx scripts/start-test-prod.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:ci": "pnpm exec tsx scripts/run-test-ci.ts",

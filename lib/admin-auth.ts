@@ -3,9 +3,9 @@ import "server-only";
 import { NextRequest } from "next/server";
 import { adminAuth, adminDb, ADMIN_BYPASS } from "@/lib/firebase-admin";
 import {
-  getAllowedAdminEmails,
+  describeAdminAllowlist,
+  isAdmin,
   isAdminBypassEnabled,
-  isEmailAllowed,
 } from "@/lib/admin-allowlist";
 import { cookies } from "next/headers";
 import { logError } from "@/lib/log";
@@ -33,18 +33,7 @@ function getRequestIp(req: NextRequest): string {
 // or auth is explicitly disabled via environment variable.
 export const DISABLE_AUTH = ADMIN_BYPASS || isAdminBypassEnabled();
 
-export function isAdmin(
-  email?: string | null,
-  extraEmails: string[] = []
-): boolean {
-  if (DISABLE_AUTH) {
-    return true;
-  }
-  if (!email) {
-    return false;
-  }
-  return isEmailAllowed(email, extraEmails);
-}
+export { isAdmin } from "@/lib/admin-allowlist";
 
 // Fetch admin emails from Firestore's admin_users collection (lowercased, trimmed).
 async function getFirestoreAdminEmails(): Promise<string[]> {
@@ -160,8 +149,19 @@ export async function verifyAdminSession(
     );
     console.log(
       "[admin-auth] Allowed emails after merging:",
-      [...getAllowedAdminEmails(), ...firestoreEmails].map((e) => `"${e}"`)
+      "[admin-auth] Configured admin emails:",
+      allowlist.configured.map((e) => `"${e}"`)
     );
+    if (allowlist.extras.length > 0) {
+      console.log(
+        "[admin-auth] Firestore admin emails:",
+        allowlist.extras.map((e) => `"${e}"`)
+      );
+    }
+    if (allowlist.domain) {
+      console.log("[admin-auth] Allowed admin domain:", allowlist.domain);
+    }
+    console.log("[admin-auth] Bypass enabled:", allowlist.bypass);
   }
 
   if (!isAdmin(decoded.email as string, firestoreEmails)) {
@@ -369,16 +369,25 @@ export async function createSessionCookieFromIdToken(
     const firestoreEmails = await getFirestoreAdminEmails();
 
     if (debug) {
-      // ---- THIS IS THE ONLY LINE CHANGED AS REQUESTED ----
+      const allowlist = describeAdminAllowlist(firestoreEmails);
       console.log(
         "[admin-auth] Creating session cookie for email:",
         `"${decoded.email?.trim()?.toLowerCase()}"`
       );
-      // -----------------------------------------------------
       console.log(
-        "[admin-auth] Allowed emails:",
-        [...getAllowedAdminEmails(), ...firestoreEmails].map((e) => `"${e}"`)
+        "[admin-auth] Configured admin emails:",
+        allowlist.configured.map((e) => `"${e}"`)
       );
+      if (allowlist.extras.length > 0) {
+        console.log(
+          "[admin-auth] Firestore admin emails:",
+          allowlist.extras.map((e) => `"${e}"`)
+        );
+      }
+      if (allowlist.domain) {
+        console.log("[admin-auth] Allowed admin domain:", allowlist.domain);
+      }
+      console.log("[admin-auth] Bypass enabled:", allowlist.bypass);
     }
 
     if (!isAdmin(decoded.email as string, firestoreEmails)) {

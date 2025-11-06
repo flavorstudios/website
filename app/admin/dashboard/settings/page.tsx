@@ -52,6 +52,7 @@ export default async function SettingsPage(props: SettingsPageProps) {
   let settings: Awaited<ReturnType<typeof loadSettings>> | null = null
   let loadError: string | null = null
   let loadErrorDetail: string | null = null
+  const isDev = process.env.NODE_ENV !== "production"
   try {
     settings = await loadSettings()
   } catch (error) {
@@ -116,6 +117,24 @@ export default async function SettingsPage(props: SettingsPageProps) {
               <p className="mt-2 text-xs opacity-80">
                 Check the browser console and server logs for details, then reload the page.
               </p>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      window.location.reload()
+                    }
+                  }}
+                  className="inline-flex items-center rounded-md border border-destructive/40 bg-destructive px-3 py-1.5 text-xs font-medium text-destructive-foreground transition-colors hover:bg-destructive/90"
+                >
+                  Reload settings
+                </button>
+                {isDev ? (
+                  <span className="text-xs text-destructive/80">
+                    Refresh to capture a client-side stack trace in the console.
+                  </span>
+                ) : null}
+              </div>
             </div>
           }
         >
@@ -127,11 +146,22 @@ export default async function SettingsPage(props: SettingsPageProps) {
           />
         </ErrorBoundary>
       ) : (
-        <div className="space-y-2 rounded-lg border border-border/50 bg-muted/20 p-6 text-sm text-muted-foreground">
+        <div className="space-y-3 rounded-lg border border-border/50 bg-muted/20 p-6 text-sm text-muted-foreground">
           <p>{loadError}</p>
           {loadErrorDetail ? (
             <p className="text-xs text-muted-foreground/90">{loadErrorDetail}</p>
           ) : null}
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.location.reload()
+              }
+            }}
+            className="inline-flex items-center rounded-md border border-border/60 bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            Retry loading settings
+          </button>
         </div>
       )}
     </div>

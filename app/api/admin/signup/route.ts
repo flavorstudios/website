@@ -19,7 +19,7 @@ import {
   createSessionCookieFromIdToken,
   logAdminAuditFailure,
 } from "@/lib/admin-auth";
-import { isEmailAllowed } from "@/lib/admin-allowlist";
+import { isAdmin, isAdminBypassEnabled } from "@/lib/admin-allowlist";
 import { logError } from "@/lib/log";
 
 const createErrorResponse = (message: string, status = 400) =>
@@ -134,13 +134,12 @@ export async function POST(request: NextRequest) {
     return createErrorResponse("Disposable email domains are not allowed.");
   }
 
-  const bypass =
-    serverEnv.ADMIN_AUTH_DISABLED === "1" || serverEnv.ADMIN_BYPASS === "true";
+  const bypass = isAdminBypassEnabled();
 
   const requiresVerification = requiresEmailVerification();
 
   if (!bypass) {
-    if (!isEmailAllowed(email)) {
+    if (!isAdmin(email)) {
       await logAdminAuditFailure(email, ip, "email-not-allowlisted");
       await incrementSignupEmailAttempts(emailHash);
       await incrementSignupIpAttempts(ip);

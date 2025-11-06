@@ -5,8 +5,8 @@ const TRUTHY = new Set(["1", "true", "yes"]);
 const isTruthy = (value: string | undefined) =>
   value ? TRUTHY.has(value.trim().toLowerCase()) : false;
 
-const isRelaxed =
-  process.env.NODE_ENV === "test" || isTruthy(process.env.SKIP_STRICT_ENV);
+const isTestEnv = process.env.NODE_ENV === "test";
+const isRelaxed = isTestEnv || isTruthy(process.env.SKIP_STRICT_ENV);
 
 const PLACEHOLDERS = {
   BASE_URL: "http://127.0.0.1:3000",
@@ -24,39 +24,38 @@ function normalize(value: string | undefined) {
   return value?.trim() ?? "";
 }
 
-function readEnv<K extends PlaceholderKey>(name: K): string;
-function readEnv(name: string, options: { required?: boolean; fallback?: string }): string | undefined;
+function placeholderFor(name: string, key?: PlaceholderKey): string {
+  if (key) return PLACEHOLDERS[key];
+  if (Object.hasOwn(PLACEHOLDERS, name)) {
+    return PLACEHOLDERS[name as PlaceholderKey];
+  }
+  return "placeholder";
+}
+
 function readEnv(
   name: string,
-  options: { required?: boolean; fallback?: string } = { required: true },
+  options: { required?: boolean; fallback?: string; placeholderKey?: PlaceholderKey } = {},
 ): string | undefined {
   const raw = normalize(process.env[name]);
   if (raw) {
     return raw;
   }
 
-  const { required = true, fallback } = options;
+  const { required = true, fallback, placeholderKey } = options;
 
   if (!required) {
-    if (fallback) {
-      return fallback;
-    }
-    return undefined;
+    return fallback;
+  }
+
+  if (!isRelaxed) {
+    throw new Error(`Missing environment variable ${name}`);
   }
 
   if (fallback) {
     return fallback;
   }
 
-  if (name in PLACEHOLDERS && isRelaxed) {
-    return PLACEHOLDERS[name as PlaceholderKey];
-  }
-
-  if (isRelaxed) {
-    return "placeholder";
-  }
-
-  throw new Error(`Missing environment variable ${name}`);
+  return placeholderFor(name, placeholderKey);
 }
 
 function optionalEnv(name: string) {
@@ -64,26 +63,35 @@ function optionalEnv(name: string) {
   return raw.length > 0 ? raw : undefined;
 }
 
-const baseUrl = readEnv("BASE_URL");
+const baseUrl = readEnv("BASE_URL", { placeholderKey: "BASE_URL" });
 const nextPublicBaseUrl =
-  optionalEnv("NEXT_PUBLIC_BASE_URL") || baseUrl || PLACEHOLDERS.NEXT_PUBLIC_BASE_URL;
-const cronSecret = readEnv("CRON_SECRET");
-const previewSecret = readEnv("PREVIEW_SECRET");
-const adminJwtSecret = readEnv("ADMIN_JWT_SECRET");
+  optionalEnv("NEXT_PUBLIC_BASE_URL") ||
+  baseUrl ||
+  (isRelaxed ? PLACEHOLDERS.NEXT_PUBLIC_BASE_URL : undefined);
 
-const firebaseStorageBucket =
-  optionalEnv("FIREBASE_STORAGE_BUCKET") ||
-  optionalEnv("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET") ||
-  (isRelaxed ? PLACEHOLDERS.FIREBASE_STORAGE_BUCKET : undefined);
+const cronSecret = readEnv("CRON_SECRET", { placeholderKey: "CRON_SECRET" });
+const previewSecret = readEnv("PREVIEW_SECRET", { placeholderKey: "PREVIEW_SECRET" });
+const adminJwtSecret = readEnv("ADMIN_JWT_SECRET", { placeholderKey: "ADMIN_JWT_SECRET" });
+
+const rawStorageBucket = optionalEnv("FIREBASE_STORAGE_BUCKET");
+const rawPublicStorageBucket = optionalEnv("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET");
+
+let firebaseStorageBucket = rawStorageBucket || rawPublicStorageBucket;
+let nextPublicFirebaseStorageBucket = rawPublicStorageBucket || rawStorageBucket;
 
 if (!firebaseStorageBucket) {
-  throw new Error("Missing environment variable FIREBASE_STORAGE_BUCKET");
+  if (isRelaxed) {
+    firebaseStorageBucket = PLACEHOLDERS.FIREBASE_STORAGE_BUCKET;
+  } else {
+    throw new Error("Missing environment variable FIREBASE_STORAGE_BUCKET");
+  }
 }
 
-const nextPublicFirebaseStorageBucket =
-  optionalEnv("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET") ||
-  firebaseStorageBucket ||
-  PLACEHOLDERS.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+if (!nextPublicFirebaseStorageBucket) {
+  nextPublicFirebaseStorageBucket = isRelaxed
+    ? PLACEHOLDERS.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    : firebaseStorageBucket;
+}
 
 const firebaseServiceAccountJson = optionalEnv("FIREBASE_SERVICE_ACCOUNT_JSON");
 const firebaseServiceAccountJsonB64 = optionalEnv("FIREBASE_SERVICE_ACCOUNT_JSON_B64");
@@ -97,11 +105,14 @@ if (!resolvedServiceAccountJson && firebaseServiceAccountJsonB64) {
       "base64",
     ).toString("utf8");
   } catch (error) {
-    throw new Error(
-      `Invalid Firebase service account base64 encoding: ${
-        (error as Error).message ?? "Unknown decode error"
-      }`,
-    );
+    if (!isRelaxed) {
+      throw new Error(
+        `Invalid Firebase service account base64 encoding: ${
+          (error as Error).message ?? "Unknown decode error"
+        }`,
+      );
+    }
+    resolvedServiceAccountJson = undefined;
   }
 }
 
@@ -113,13 +124,19 @@ let firebaseServiceAccount: Record<string, unknown> | undefined;
 
 if (resolvedServiceAccountJson) {
   try {
-    firebaseServiceAccount = JSON.parse(resolvedServiceAccountJson) as Record<string, unknown>;
+    firebaseServiceAccount = JSON.parse(
+      resolvedServiceAccountJson,
+    ) as Record<string, unknown>;
   } catch (error) {
-    throw new Error(
-      `Invalid Firebase service account JSON: ${
-        (error as Error).message ?? "Unknown parse error"
-      }`,
-    );
+    if (!isRelaxed) {
+      throw new Error(
+        `Invalid Firebase service account JSON: ${
+          (error as Error).message ?? "Unknown parse error"
+        }`,
+      );
+    }
+    resolvedServiceAccountJson = undefined;
+    firebaseServiceAccount = undefined;
   }
 }
 

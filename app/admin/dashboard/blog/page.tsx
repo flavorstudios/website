@@ -3,8 +3,6 @@ import type { SectionId } from "../sections";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { Suspense } from "react";
-import { unwrapPageProps } from "@/types/next";
-import type { PageProps } from "@/types/next";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,25 +39,6 @@ export const metadata = getMetadata({
 
 const SECTION: SectionId = "blogs";
 
-/**
- * Small async “gate” that suspends rendering briefly in E2E mode so
- * Suspense fallback (skeletons) is guaranteed to show up first.
- */
-async function E2EGate({
-  children,
-  enabled,
-  delayMs = 1200,
-}: {
-  children: React.ReactNode;
-  enabled: boolean;
-  delayMs?: number;
-}) {
-  if (enabled) {
-    await new Promise((r) => setTimeout(r, delayMs));
-  }
-  return <>{children}</>;
-}
-
 /** Lightweight skeletons the tests can assert against */
 function BlogFallback() {
   return (
@@ -82,7 +61,7 @@ function BlogFallback() {
               <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
               <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
             </div>
-          <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+            <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
           </div>
           <div className="space-y-2">
             <div className="h-3 w-20 animate-pulse rounded bg-muted" />
@@ -95,28 +74,7 @@ function BlogFallback() {
   );
 }
 
-/** Helper: is E2E slow-mode requested? */
-function isE2ESlow(searchParams?: {
-  [key: string]: string | string[] | undefined;
-}) {
-  // Enabled if NEXT_PUBLIC_E2E=1/true OR query ?e2e_slow=1
-  const envOn =
-    process.env.NEXT_PUBLIC_E2E === "1" ||
-    process.env.NEXT_PUBLIC_E2E === "true";
-  const q = searchParams?.e2e_slow;
-  const qOn = Array.isArray(q) ? q.includes("1") : q === "1";
-  return envOn || qOn;
-}
-
-type AdminBlogPageProps = PageProps<
-  Record<string, never>,
-  { [key: string]: string | string[] | undefined }
->;
-
-export default async function BlogPage(props: AdminBlogPageProps) {
-  const { searchParams } = await unwrapPageProps(props);
-  const resolvedSearchParams = searchParams ?? {};
-  const slow = isE2ESlow(resolvedSearchParams);
+export default function BlogPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
@@ -131,9 +89,7 @@ export default async function BlogPage(props: AdminBlogPageProps) {
         </p>
       </header>
       <Suspense fallback={<BlogFallback />}>
-        <E2EGate enabled={slow}>
-          <AdminDashboardSectionPage section={SECTION} />
-        </E2EGate>
+        <AdminDashboardSectionPage section={SECTION} />
       </Suspense>
     </div>
   );

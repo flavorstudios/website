@@ -19,9 +19,7 @@ const remoteImagePatterns = imageDomains.map((hostname) => ({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true, // Add this for best practice, optional
-  experimental: {
-    allowedDevOrigins: ["http://127.0.0.1:3000", "http://localhost:3000"],
-  },
+  allowedDevOrigins: ["http://127.0.0.1:3000", "http://localhost:3000"],
   eslint: { ignoreDuringBuilds: false },
   images: {
     // Next.js image optimization is enabled.

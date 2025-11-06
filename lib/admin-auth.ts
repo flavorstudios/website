@@ -3,6 +3,7 @@ import "server-only";
 import { NextRequest } from "next/server";
 import { adminAuth, adminDb, ADMIN_BYPASS } from "@/lib/firebase-admin";
 import {
+  ALLOWLIST,
   describeAdminAllowlist,
   isAdmin,
   isAdminBypassEnabled,
@@ -38,7 +39,7 @@ export { isAdmin } from "@/lib/admin-allowlist";
 // Fetch admin emails from Firestore's admin_users collection (lowercased, trimmed).
 async function getFirestoreAdminEmails(): Promise<string[]> {
   try {
-  if (!adminDb) {
+    if (!adminDb) {
       if (debug) {
         console.warn(
           "[admin-auth] adminDb unavailable; skipping Firestore admin_users lookup."
@@ -143,25 +144,32 @@ export async function verifyAdminSession(
   }
 
   if (debug) {
+    const allowlistSnapshot = describeAdminAllowlist(firestoreEmails);
     console.log(
       "[admin-auth] Email from session:",
       `"${decoded.email?.trim?.().toLowerCase?.()}"`
     );
     console.log(
       "[admin-auth] Allowed emails after merging:",
-      "[admin-auth] Configured admin emails:",
-      allowlist.configured.map((e) => `"${e}"`)
+      allowlistSnapshot.merged.map((e) => `"${e}"`)
     );
-    if (allowlist.extras.length > 0) {
+    console.log(
+      "[admin-auth] Configured admin emails:",
+      ALLOWLIST.configured.map((e) => `"${e}"`)
+    );
+    if (allowlistSnapshot.extras.length > 0) {
       console.log(
         "[admin-auth] Firestore admin emails:",
-        allowlist.extras.map((e) => `"${e}"`)
+        allowlistSnapshot.extras.map((e) => `"${e}"`)
       );
     }
-    if (allowlist.domain) {
-      console.log("[admin-auth] Allowed admin domain:", allowlist.domain);
+    if (allowlistSnapshot.domain) {
+      console.log("[admin-auth] Allowed admin domain:", allowlistSnapshot.domain);
     }
-    console.log("[admin-auth] Bypass enabled:", allowlist.bypass);
+    console.log(
+      "[admin-auth] Bypass enabled:",
+      allowlistSnapshot.bypass
+    );
   }
 
   if (!isAdmin(decoded.email as string, firestoreEmails)) {

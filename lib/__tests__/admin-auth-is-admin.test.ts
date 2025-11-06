@@ -29,6 +29,14 @@ describe("isAdmin helper", () => {
     expect(isAdmin("second@example.com")).toBe(true);
   });
 
+  it("handles comma-separated lists with mixed casing and spaces", async () => {
+    process.env.ADMIN_EMAILS = "Admin@example.com, second@example.com , THIRD@EXAMPLE.COM";
+    const { isAdmin } = await loadModule();
+    expect(isAdmin("admin@example.com")).toBe(true);
+    expect(isAdmin(" second@example.com ")).toBe(true);
+    expect(isAdmin("third@example.com")).toBe(true);
+  });
+
   it("trims spaces around inputs and allowlist entries", async () => {
     process.env.ADMIN_EMAILS = " admin@example.com , second@example.com ";
     const { isAdmin } = await loadModule();

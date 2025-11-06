@@ -73,7 +73,12 @@ describe("admin allowlist helpers", () => {
     const info = describeAdminAllowlist(["firestore@example.com"]);
     expect(info.configured).toEqual(["admin@example.com"]);
     expect(info.extras).toEqual(["firestore@example.com"]);
+    expect(info.merged).toEqual([
+      "admin@example.com",
+      "firestore@example.com",
+    ]);
     expect(info.domain).toBe("example.com");
     expect(info.bypass).toBe(false);
+    
   });
 });

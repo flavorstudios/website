@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 import { adminAuth, adminDb, ADMIN_BYPASS } from "@/lib/firebase-admin";
 import {
   getAllowedAdminEmails,
+  isAdminBypassEnabled,
   isEmailAllowed,
 } from "@/lib/admin-allowlist";
 import { cookies } from "next/headers";
@@ -30,13 +31,25 @@ function getRequestIp(req: NextRequest): string {
 
 // Combined flag to short-circuit all auth checks when either bypass is enabled
 // or auth is explicitly disabled via environment variable.
-export const DISABLE_AUTH =
-  ADMIN_BYPASS || serverEnv.ADMIN_AUTH_DISABLED === "1" || isE2E;
+export const DISABLE_AUTH = ADMIN_BYPASS || isAdminBypassEnabled();
+
+export function isAdmin(
+  email?: string | null,
+  extraEmails: string[] = []
+): boolean {
+  if (DISABLE_AUTH) {
+    return true;
+  }
+  if (!email) {
+    return false;
+  }
+  return isEmailAllowed(email, extraEmails);
+}
 
 // Fetch admin emails from Firestore's admin_users collection (lowercased, trimmed).
 async function getFirestoreAdminEmails(): Promise<string[]> {
   try {
-    if (!adminDb) {
+  if (!adminDb) {
       if (debug) {
         console.warn(
           "[admin-auth] adminDb unavailable; skipping Firestore admin_users lookup."
@@ -151,7 +164,7 @@ export async function verifyAdminSession(
     );
   }
 
-  if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
+  if (!isAdmin(decoded.email as string, firestoreEmails)) {
     logError(
       "admin-auth: verifyAdminSession (unauthorized email)",
       decoded.email || ""
@@ -368,7 +381,7 @@ export async function createSessionCookieFromIdToken(
       );
     }
 
-    if (!isEmailAllowed(decoded.email as string, firestoreEmails)) {
+    if (!isAdmin(decoded.email as string, firestoreEmails)) {
       logError(
         "admin-auth: createSessionCookieFromIdToken (unauthorized email)",
         decoded.email || ""

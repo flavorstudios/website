@@ -6,9 +6,7 @@ const isTruthy = (value: string | undefined) =>
   value ? TRUTHY.has(value.trim().toLowerCase()) : false;
 
 const isRelaxed =
-  isTruthy(process.env.SKIP_STRICT_ENV) ||
-  isTruthy(process.env.SKIP_ENV_VALIDATION) ||
-  process.env.NODE_ENV === "test";
+  process.env.NODE_ENV === "test" || isTruthy(process.env.SKIP_STRICT_ENV);
 
 const PLACEHOLDERS = {
   BASE_URL: "http://127.0.0.1:3000",
@@ -43,10 +41,10 @@ function readEnv(
     if (fallback) {
       return fallback;
     }
-  return undefined;
+    return undefined;
   }
 
-if (fallback) {
+  if (fallback) {
     return fallback;
   }
 

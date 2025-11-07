@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/admin/page-header";
+import { HeadingLevelBoundary } from "@/components/admin/heading-context";
 import type { RevalidateEnvironment, RevalidateHistoryItem, RevalidateScope } from "@/types/revalidate";
 
 const HEADER_ENV_ID = "system-tools-env";
@@ -175,58 +176,60 @@ export default function SystemToolsPage() {
         }
       />
 
-      <main className="mx-auto max-w-5xl px-4 pb-0 pt-6 lg:px-6">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-          <AnimatePresence mode="wait">
+      <HeadingLevelBoundary>
+        <main className="mx-auto max-w-5xl px-4 pb-0 pt-6 lg:px-6">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`card-${env}`}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <RevalidateCard
+                  env={env}
+                  onEnvChange={setEnv}
+                  onRunStart={handleRunStart}
+                  onRunComplete={handleRunComplete}
+                  onScheduleClick={handleScheduleClick}
+                  lastRunSummary={lastRunSummary}
+                />
+                {savedSchedule ? (
+                  <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-4 text-xs text-muted-foreground">
+                    <p>
+                      Next scheduled run: {formatRecurrence(savedSchedule)} starting {" "}
+                      {new Date(savedSchedule.startTime).toLocaleString()} on {" "}
+                      <span className="font-medium">{savedSchedule.env}</span>.
+                    </p>
+                  </div>
+                ) : null}
+              </motion.div>
+            </AnimatePresence>
+
             <motion.div
-              key={`card-${env}`}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
+              transition={{ duration: 0.3, delay: 0.05 }}
             >
-              <RevalidateCard
-                env={env}
-                onEnvChange={setEnv}
-                onRunStart={handleRunStart}
-                onRunComplete={handleRunComplete}
-                onScheduleClick={handleScheduleClick}
-                lastRunSummary={lastRunSummary}
-              />
-              {savedSchedule ? (
-                <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-4 text-xs text-muted-foreground">
-                  <p>
-                    Next scheduled run: {formatRecurrence(savedSchedule)} starting {" "}
-                    {new Date(savedSchedule.startTime).toLocaleString()} on {" "}
-                    <span className="font-medium">{savedSchedule.env}</span>.
-                  </p>
-                </div>
-              ) : null}
+              <StatusPanel history={history} loading={loading || refreshing} onRefresh={refreshHistory} />
             </motion.div>
-          </AnimatePresence>
+          </div>
+        </main>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.05 }}
-          >
-            <StatusPanel history={history} loading={loading || refreshing} onRefresh={refreshHistory} />
-          </motion.div>
-        </div>
-      </main>
-
-      <ScheduleDrawer
-        open={scheduleOpen}
-        onOpenChange={setScheduleOpen}
-        initialEnv={scheduleDefaults.env}
-        initialScope={scheduleDefaults.scope}
-        initialRoutes={scheduleDefaults.routes}
-        initialTags={scheduleDefaults.tags}
-        onSave={(form) => {
-          setSavedSchedule(form);
-        }}
-      />
+        <ScheduleDrawer
+          open={scheduleOpen}
+          onOpenChange={setScheduleOpen}
+          initialEnv={scheduleDefaults.env}
+          initialScope={scheduleDefaults.scope}
+          initialRoutes={scheduleDefaults.routes}
+          initialTags={scheduleDefaults.tags}
+          onSave={(form) => {
+            setSavedSchedule(form);
+          }}
+        />
+      </HeadingLevelBoundary>
     </div>
   );
 }

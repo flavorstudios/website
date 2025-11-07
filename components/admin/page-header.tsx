@@ -1,7 +1,10 @@
+"use client";
+
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import type { WithDataAttributes } from "@/types/dom";
+import { useHeadingLevel } from "@/components/admin/heading-context";
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -32,17 +35,23 @@ type PageHeaderProps = PageHeaderBaseProps & {
   headingProps?: HeadingProps;
 };
 
-type HeadingTagProps = {
+type HeadingTagProps = HeadingProps & {
   level: HeadingLevel;
   children: React.ReactNode;
   className?: string;
   id?: string;
 };
 
-const HeadingTag = ({ level, children, className, id }: HeadingTagProps) => {
+const HeadingTag = ({
+  level,
+  children,
+  className,
+  id,
+  ...headingProps
+}: HeadingTagProps) => {
   const Tag = (`h${level}`) as keyof React.JSX.IntrinsicElements;
   return (
-    <Tag id={id} className={className}>
+    <Tag id={id} className={className} {...headingProps}>
       {children}
     </Tag>
   );
@@ -52,7 +61,7 @@ export function PageHeader({
   title,
   description,
   actions,
-  level = 1,
+  level,
   className,
   headingId,
   headingClassName,
@@ -61,7 +70,8 @@ export function PageHeader({
   headingProps,
   ...headerProps
 }: PageHeaderProps) {
-  const headingLevel = level ?? 1;
+  const inheritedLevel = useHeadingLevel();
+  const headingLevel = (level ?? inheritedLevel) as HeadingLevel;
   const defaultHeadingClasses: Record<HeadingLevel, string> = {
     1: "text-2xl font-semibold tracking-tight",
     2: "text-xl font-semibold tracking-tight",

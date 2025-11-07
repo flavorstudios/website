@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { BlogCardSkeleton } from "@/components/BlogCardSkeleton";
 import { PageHeader } from "@/components/admin/page-header";
+import { HeadingLevelBoundary } from "@/components/admin/heading-context";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { getMetadata } from "@/lib/seo-utils";
 
@@ -79,13 +80,15 @@ export default function BlogPage() {
         descriptionClassName="text-sm text-muted-foreground"
         headingProps={{ "data-testid": "page-title" }}
       />
-      <Suspense fallback={<BlogFallback headingId={HEADING_ID} />}>
-        <AdminDashboardSectionPage
-          section={SECTION}
-          suppressHeading
-          headingId={HEADING_ID}
-        />
-      </Suspense>
+      <HeadingLevelBoundary>
+        <Suspense fallback={<BlogFallback headingId={HEADING_ID} />}>
+          <AdminDashboardSectionPage
+            section={SECTION}
+            suppressHeading
+            headingId={HEADING_ID}
+          />
+        </Suspense>
+      </HeadingLevelBoundary>
     </div>
   );
 }

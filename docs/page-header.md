@@ -1,46 +1,35 @@
-# Admin Page Header Guidelines
+# Admin Page Heading Guidelines
 
-The admin area uses a single-owner policy for `<h1>` elements so each route exposes exactly one level-one heading for SEO and accessibility. Use the utilities described below whenever you add or update admin pages.
+The admin surface owns **exactly one** semantic `<h1>` per route. To make that
+simple and consistent we standardize on the `PageHeader` component and the
+`HeadingLevelBoundary` context helpers.
 
-## Default pattern for dashboard sections
+## Owning the `<h1>`
 
-For dashboard-style routes (blog posts, videos, media, etc.) render the [`AdminSectionPage`](../components/admin/dashboard/AdminSectionPage.tsx) component and pass the section identifier:
+- Route files (`app/admin/.../page.tsx`) render the canonical `<PageHeader>`
+  with no `level` prop. The surrounding layout provides the base heading level
+  and `PageHeader` automatically resolves to `<h1>` for the first heading.
+- After the top-level header, wrap the remainder of the page in
+  `<HeadingLevelBoundary>`. Any nested `PageHeader` (or components that rely on
+  the heading context) will automatically render as `<h2>` without additional
+  props.
 
-```tsx
-import { AdminSectionPage } from "@/components/admin/dashboard/AdminSectionPage";
-import type { SectionId } from "@/app/admin/dashboard/sections";
+## Secondary headings
 
-const SECTION: SectionId = "blogs";
-
-export default function AdminBlogsPage() {
-  return <AdminSectionPage section={SECTION} />;
-}
-```
-
-`AdminSectionPage` renders the canonical `<PageHeader>` as an `<h1>` and forwards the identifier to `AdminDashboardSectionPage` with `suppressHeading` so the underlying dashboard shell does not emit a second `<h1>`. The helper also wires `aria-labelledby` to keep the main region accessible.
-
-## Customising the heading
-
-`AdminSectionPage` reads the title and description from `SECTION_HEADINGS` and `SECTION_DESCRIPTIONS`. Override them only when you have a real content change:
-
-```tsx
-<AdminSectionPage
-  section="media"
-  title="Asset Review"
-  description="Moderate uploads before publishing."
-/>
-```
-
-Avoid duplicating `<PageHeader>` manually—doing so will reintroduce multiple `<h1>` elements.
-
-## Secondary sections
-
-Inside dashboard widgets use `<PageHeader level={2}>` or native `<h2>`/`<h3>` tags. The [`PageHeader`](../components/admin/page-header.tsx) component accepts a `level` prop that defaults to `1`; always set `level={2}` (or higher) for nested sections.
+- Inside page sections, call `PageHeader` without a `level` prop. The heading
+  context demotes it to the next semantic level (usually `<h2>`).
+- For plain HTML headings, read the current level via `useHeadingLevel()` and
+  increment it manually if you are not using `PageHeader`.
 
 ## Adding new pages
 
-1. Import `AdminSectionPage` and supply the `SectionId` for the area you are exposing.
-2. If the page needs bespoke actions, render them via the `actions` slot on `PageHeader` inside the section component—not by creating another `<h1>`.
-3. Run `pnpm lint`, `pnpm test`, and the Playwright heading spec to ensure the guardrail scripts remain green.
+1. Import and render `PageHeader` at the top of the page component for the
+   visible title.
+2. Immediately wrap the rest of the layout in `<HeadingLevelBoundary>` so
+   subsections default to `<h2>`.
+3. Avoid hard-coding `<h1>` in reusable widgets. If you need a prominent title
+   inside a card or dialog, use `PageHeader` or `<h2>`/`<h3>` depending on the
+   inherited level.
 
-Following this pattern keeps the admin shell accessible and prevents regressions that would surface in the single-H1 checks that run in CI (`pnpm check:single-h1`).
+Following this pattern keeps the DOM accessible, prevents duplicate level-one
+headings, and ensures the admin shell looks consistent across routes.

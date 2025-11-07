@@ -64,16 +64,35 @@ jest.mock("@/lib/log-client", () => ({
   logClientError: jest.fn(),
 }));
 
-jest.mock("@/app/admin/dashboard/components", () => ({
-  DashboardOverview: () => null,
-  BlogManager: () => null,
-  VideoManager: () => null,
-  CommentManager: () => null,
-  SystemTools: () => null,
-  UserManagement: () => null,
-  CategoryManager: () => null,
-  EmailInbox: () => null,
-  MediaLibrary: () => null,
-  CareerApplications: () => null,
-  SystemSettings: () => null,
-}));
+jest.mock("@/app/admin/dashboard/components", () => {
+  const React = require("react");
+  const { PageHeader } = require("@/components/admin/page-header");
+
+  const createSection = (title: string) => {
+    const Component = () =>
+      React.createElement(
+        "div",
+        { "data-testid": `mock-section-${title.toLowerCase().replace(/[^a-z]+/g, "-")}` },
+        React.createElement(PageHeader, {
+          title,
+          description: "Mock admin section",
+        })
+      );
+    Component.displayName = `Mock${title.replace(/\s+/g, "")}`;
+    return Component;
+  };
+
+  return {
+    DashboardOverview: createSection("Overview"),
+    BlogManager: createSection("Blog Manager"),
+    VideoManager: createSection("Video Manager"),
+    CommentManager: createSection("Comments"),
+    SystemTools: createSection("System Tools"),
+    UserManagement: createSection("User Management"),
+    CategoryManager: createSection("Categories"),
+    EmailInbox: createSection("Email Inbox"),
+    MediaLibrary: createSection("Media Library"),
+    CareerApplications: createSection("Applications"),
+    SystemSettings: createSection("Settings"),
+  };
+});

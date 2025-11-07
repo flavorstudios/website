@@ -23,7 +23,7 @@
     "e2e": "pnpm exec playwright test",
     "test:e2e:smoke": "pnpm exec playwright test e2e/accessibility-smoke.e2e.spec.ts",
     "ci": "pnpm typecheck && pnpm lint && pnpm build && pnpm check:single-h1 && pnpm test",
-    "check:single-h1": "tsx scripts/check-single-h1.ts",
+    "check:single-h1": "tsx scripts/check-single-h1.tsx",
     "visual:update": "pnpm exec playwright test e2e/admin-login-legal-visual.e2e.spec.ts --update-snapshots",
     "visual:test": "pnpm exec playwright test e2e/admin-login-legal-visual.e2e.spec.ts",
     "visual:test:smoke": "pnpm exec playwright test e2e/admin-login-legal-visual.e2e.spec.ts --project=chromium-light --grep=mobile",

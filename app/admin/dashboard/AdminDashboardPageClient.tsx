@@ -26,6 +26,7 @@ import { SectionId } from "./sections";
 import type { HeadingLevel } from "./page-heading";
 import { SECTION_DESCRIPTIONS, SECTION_HEADINGS } from "./section-metadata";
 import { PageHeader } from "@/components/admin/page-header";
+import { HeadingLevelBoundary } from "@/components/admin/heading-context";
 import {
   Dialog,
   DialogContent,
@@ -240,6 +241,9 @@ export default function AdminDashboardPageClient({
   );
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const mainWrapperRef = useRef<HTMLDivElement | null>(null);
+  const nestedHeadingLevel = (headingLevel >= 6
+    ? 6
+    : ((headingLevel + 1) as HeadingLevel)) as HeadingLevel;
 
   const navigateToSection = useCallback(
     (section: SectionId, href?: string) => {
@@ -645,41 +649,43 @@ export default function AdminDashboardPageClient({
                     />
                   ) : null}
 
-                  {/* Online/Offline indicator */}
-                  {!isOnline && (
-                    <Alert className="mb-4 border-amber-200 bg-amber-50">
-                      <AlertDescription className="text-amber-800 text-sm">
-                        You’re offline. Changes will sync when you’re back online.
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                  <HeadingLevelBoundary level={nestedHeadingLevel}>
+                    {/* Online/Offline indicator */}
+                    {!isOnline && (
+                      <Alert className="mb-4 border-amber-200 bg-amber-50">
+                        <AlertDescription className="text-amber-800 text-sm">
+                          You’re offline. Changes will sync when you’re back online.
+                        </AlertDescription>
+                      </Alert>
+                    )}
 
-                  {error && (
-                    <Alert variant="destructive" className="mb-4 border-red-200 bg-red-50">
-                      <AlertDescription className="text-red-700 text-sm">
-                        {error}
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                    {error && (
+                      <Alert variant="destructive" className="mb-4 border-red-200 bg-red-50">
+                        <AlertDescription className="text-red-700 text-sm">
+                          {error}
+                        </AlertDescription>
+                      </Alert>
+                    )}
 
-                  <ErrorBoundary>
-                    <Suspense
-                      fallback={
-                        activeSection === "blogs" ? (
-                          <BlogSectionFallback />
-                        ) : (
-                          <Spinner />
-                        )
-                      }
-                    >
-                      {renderContent()}
-                    </Suspense>
-                  </ErrorBoundary>
+                    <ErrorBoundary>
+                      <Suspense
+                        fallback={
+                          activeSection === "blogs" ? (
+                            <BlogSectionFallback />
+                          ) : (
+                            <Spinner />
+                          )
+                        }
+                      >
+                        {renderContent()}
+                      </Suspense>
+                    </ErrorBoundary>
 
-                  {/* ARIA live region for section changes */}
-                  <div className="sr-only" aria-live="polite">
-                    Now viewing {sectionHeading} section
-                  </div>
+                    {/* ARIA live region for section changes */}
+                    <div className="sr-only" aria-live="polite">
+                      Now viewing {sectionHeading} section
+                    </div>
+                  </HeadingLevelBoundary>
                 </div>
               </section>
 

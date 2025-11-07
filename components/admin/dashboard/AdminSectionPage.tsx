@@ -2,6 +2,7 @@ import { AdminDashboardSectionPage } from "@/app/admin/dashboard/AdminDashboardS
 import { SECTION_DESCRIPTIONS, SECTION_HEADINGS } from "@/app/admin/dashboard/section-metadata";
 import type { SectionId } from "@/app/admin/dashboard/sections";
 import { PageHeader } from "@/components/admin/page-header";
+import { HeadingLevelBoundary } from "@/components/admin/heading-context";
 
 interface AdminSectionPageProps {
   section: SectionId;
@@ -33,11 +34,13 @@ export function AdminSectionPage({
         headingClassName="text-3xl font-semibold tracking-tight text-foreground"
         descriptionClassName="text-sm text-muted-foreground"
       />
-      <AdminDashboardSectionPage
-        section={section}
-        suppressHeading
-        headingId={resolvedHeadingId}
-      />
+      <HeadingLevelBoundary>
+        <AdminDashboardSectionPage
+          section={section}
+          suppressHeading
+          headingId={resolvedHeadingId}
+        />
+      </HeadingLevelBoundary>
     </div>
   );
 }

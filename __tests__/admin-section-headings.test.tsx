@@ -6,6 +6,29 @@ import { render, screen } from "@testing-library/react";
 import { SECTION_HEADINGS } from "@/app/admin/dashboard/section-metadata";
 import type { SectionId } from "@/app/admin/dashboard/sections";
 
+jest.mock("@/app/(admin)/system-tools/RevalidateCard", () => ({
+  __esModule: true,
+  default: () => <div data-testid="mock-revalidate-card" />,
+}));
+
+jest.mock("@/app/(admin)/system-tools/StatusPanel", () => ({
+  __esModule: true,
+  default: () => <div data-testid="mock-status-panel" />,
+}));
+
+jest.mock("@/app/(admin)/system-tools/ScheduleDrawer", () => ({
+  __esModule: true,
+  default: () => <div data-testid="mock-schedule-drawer" />,
+}));
+
+const nextNavigation = jest.requireMock("next/navigation") as {
+  usePathname: jest.Mock;
+};
+
+nextNavigation.usePathname = jest.fn(() => "/");
+
+const usePathname = nextNavigation.usePathname;
+
 type PageModule = { default: React.ComponentType<unknown> };
 
 type RouteCase = {
@@ -56,6 +79,11 @@ const ADMIN_ROUTE_CASES: RouteCase[] = [
     loader: () => import("@/app/admin/users/page"),
   },
   {
+    route: "/admin/system-tools",
+    section: "system",
+    loader: () => import("@/app/(admin)/system-tools/page"),
+  },
+  {
     route: "/admin/dashboard/system",
     section: "system",
     loader: () => import("@/app/admin/dashboard/system/page"),
@@ -67,12 +95,14 @@ describe("admin route headings", () => {
     (global.fetch as unknown) = jest.fn(() =>
       Promise.resolve({ ok: true, json: async () => ({}) })
     );
+    usePathname.mockReturnValue("/");
   });
 
   it.each(ADMIN_ROUTE_CASES)(
     "renders exactly one h1 on %s",
-    async ({ loader, section }) => {
+    async ({ loader, section, route }) => {
       const { default: Page } = await loader();
+      usePathname.mockReturnValue(route);
       render(<Page />);
 
       const headings = screen.getAllByRole("heading", { level: 1 });

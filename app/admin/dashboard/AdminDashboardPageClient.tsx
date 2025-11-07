@@ -23,6 +23,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import Spinner from "@/components/ui/spinner";
 import MobileNav from "./components/mobile-nav";
 import { SectionId } from "./sections";
+import type { HeadingLevel } from "./page-heading";
+import { SECTION_DESCRIPTIONS, SECTION_HEADINGS } from "./section-metadata";
 import { PageHeader } from "@/components/admin/page-header";
 import {
   Dialog,
@@ -184,33 +186,6 @@ const NAV: { id: SectionId; href: string; title: string }[] = [
   { id: "system", href: "/admin/dashboard/system", title: "System Tools" },
 ] as const;
 
-export const SECTION_HEADINGS: Record<SectionId, string> = {
-  overview: "Admin Dashboard",
-  blogs: "Blog Posts",
-  videos: "Videos",
-  media: "Media Manager",
-  categories: "Categories",
-  comments: "Comments & Reviews",
-  applications: "Applications",
-  inbox: "Email Inbox",
-  users: "Users",
-  settings: "Settings",
-  system: "System Tools",
-};
-
-export const SECTION_DESCRIPTIONS: Record<SectionId, string> = {
-  overview: "Monitor studio performance and recent activity at a glance.",
-  blogs: "Manage your blog posts, drafts, and editorial calendar.",
-  videos: "Manage your YouTube content and upcoming releases.",
-  media: "Organize and review your uploaded media assets before publishing.",
-  categories: "Maintain categories to improve content discovery.",
-  comments: "Moderate community feedback and respond quickly.",
-  applications: "Manage all user submissions and job applications.",
-  inbox: "Stay on top of studio email and automated alerts.",
-  users: "Manage teammate profiles, roles, and permissions.",
-  settings: "Configure integrations and admin preferences.",
-  system: "Access deployment and maintenance utilities.",
-};
 const validSection = (s: string | null): s is SectionId =>
   !!s && NAV.some((n) => n.id === s);
 
@@ -232,18 +207,18 @@ function resolveSectionFromPath(pathname: string | null | undefined): SectionId 
   return (match?.id as SectionId) ?? "overview";
 }
 
-// ----------------------------------------------------------------------------
-
-type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
-
 interface AdminDashboardPageClientProps {
   initialSection?: string;
   headingLevel?: HeadingLevel;
+  suppressHeading?: boolean;
+  headingId?: string;
 }
 
 export default function AdminDashboardPageClient({
   initialSection = "overview",
   headingLevel = 1,
+  suppressHeading = false,
+  headingId: headingIdProp,
 }: AdminDashboardPageClientProps) {
   const search = useSearchParams();
   const pathname = usePathname();
@@ -546,7 +521,10 @@ export default function AdminDashboardPageClient({
   const sectionHeading = SECTION_HEADINGS[activeSection] ?? currentNavTitle;
   const sectionDescription =
     SECTION_DESCRIPTIONS[activeSection] ?? "Manage your studio operations.";
-  const headingId = useId();
+  const generatedHeadingId = useId();
+  const resolvedHeadingId = suppressHeading
+    ? headingIdProp ?? undefined
+    : headingIdProp ?? generatedHeadingId;
 
   // Keep document title in sync with the active section
   useEffect(() => {
@@ -646,22 +624,24 @@ export default function AdminDashboardPageClient({
                 tabIndex={-1}
                 className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden px-4 pt-4
                            pb-[calc(var(--mobile-nav-h,64px)+env(safe-area-inset-bottom,0px))] lg:pb-6"
-                aria-labelledby={headingId}
+                aria-labelledby={resolvedHeadingId}
                 aria-hidden={isMobile && sidebarOpen ? true : undefined}
                 role="region"
               >
                 <div className="max-w-7xl mx-auto">
-                  <PageHeader
-                    headingId={headingId}
-                    className="mb-8"
-                    containerClassName="flex-col"
-                    headingClassName="text-3xl font-semibold tracking-tight text-foreground"
-                    title={sectionHeading}
-                    description={sectionDescription}
-                    data-testid="dashboard-heading"
-                    level={headingLevel}
-                    headingProps={{ "data-testid": "dashboard-title" }}
-                  />
+                  {!suppressHeading ? (
+                    <PageHeader
+                      headingId={resolvedHeadingId}
+                      className="mb-8"
+                      containerClassName="flex-col"
+                      headingClassName="text-3xl font-semibold tracking-tight text-foreground"
+                      title={sectionHeading}
+                      description={sectionDescription}
+                      data-testid="dashboard-heading"
+                      level={headingLevel}
+                      headingProps={{ "data-testid": "dashboard-title" }}
+                    />
+                  ) : null}
 
                   {/* Online/Offline indicator */}
                   {!isOnline && (

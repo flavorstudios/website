@@ -27,6 +27,12 @@ function collectHtmlFiles(dir: string): string[] {
 async function main() {
   const roots = [".next/server/app/(admin)", ".next/server/app/admin"];
   const files = roots.flatMap((root) => collectHtmlFiles(root));
+  if (files.length === 0) {
+    console.warn(
+      "[check-single-h1] No admin HTML files found. Run `pnpm build` before this check.",
+    );
+    return;
+  }
   let failed = false;
   for (const f of files) {
     const html = readFileSync(f, "utf8");

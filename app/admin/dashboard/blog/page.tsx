@@ -1,8 +1,11 @@
+import { Suspense } from "react";
+
+import { PageHeader } from "@/components/admin/page-header";
 import { AdminDashboardSectionPage } from "../AdminDashboardSectionPage";
+import { SECTION_DESCRIPTIONS, SECTION_HEADINGS } from "../section-metadata";
 import type { SectionId } from "../sections";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
-import { Suspense } from "react";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -39,15 +42,17 @@ export const metadata = getMetadata({
 
 const SECTION: SectionId = "blogs";
 
+const HEADING_ID = "blog-page-title";
+
 /** Lightweight skeletons the tests can assert against */
-function BlogFallback() {
+function BlogFallback({ headingId }: { headingId: string }) {
   return (
     <div
       data-testid="blog-fallback"
       className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       aria-busy="true"
       aria-live="polite"
-      aria-labelledby="blog-page-title"
+      aria-labelledby={headingId}
     >
       {Array.from({ length: 4 }).map((_, i) => (
         <article
@@ -76,22 +81,27 @@ function BlogFallback() {
 }
 
 export default function BlogPage() {
+  const title = SECTION_HEADINGS[SECTION];
+  const description = SECTION_DESCRIPTIONS[SECTION];
+
   return (
     <div className="space-y-6">
-      <header className="space-y-2">
-        <h1
-          id="blog-page-title"
-          data-testid="page-title"
-          className="text-2xl font-semibold tracking-tight text-foreground"
-        >
-          Blog
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Manage your blog posts, drafts, and editorial calendar.
-        </p>
-      </header>
-      <Suspense fallback={<BlogFallback />}>
-        <AdminDashboardSectionPage section={SECTION} />
+      <PageHeader
+        headingId={HEADING_ID}
+        title={title}
+        description={description}
+        className="mb-2"
+        containerClassName="flex-col"
+        headingClassName="text-3xl font-semibold tracking-tight text-foreground"
+        descriptionClassName="text-sm text-muted-foreground"
+        headingProps={{ "data-testid": "page-title" }}
+      />
+      <Suspense fallback={<BlogFallback headingId={HEADING_ID} />}>
+        <AdminDashboardSectionPage
+          section={SECTION}
+          suppressHeading
+          headingId={HEADING_ID}
+        />
       </Suspense>
     </div>
   );

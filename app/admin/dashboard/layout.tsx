@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import AdminAuthGuard from "@/components/AdminAuthGuard";
+import { E2EReadyFlag } from "@/components/E2EReadyFlag";
 import { isClientE2EEnabled } from "@/lib/e2e-utils";
 
 const E2E_RUNTIME_ENABLED =
@@ -54,6 +55,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     <main role="main" data-testid="app-main" className="min-h-screen">
       <div data-testid="admin-dashboard-root" className="h-full">
         <AdminAuthGuard>
+          <E2EReadyFlag />
           <AdminE2EEmailGuard />
           {children}
         </AdminAuthGuard>

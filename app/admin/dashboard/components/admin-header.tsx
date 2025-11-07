@@ -36,14 +36,9 @@ export function AdminHeader({
   onSearch,
 }: AdminHeaderProps) {
   const [avatar, setAvatar] = useState<string>("")
-  const [uiReady, setUiReady] = useState(false)
   const toggleRef = useRef<HTMLButtonElement | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
-
-  useEffect(() => {
-    setUiReady(true)
-  }, [])
 
   // Load avatar from user settings (kept – used by UserMenu)
   useEffect(() => {
@@ -180,7 +175,6 @@ export function AdminHeader({
             />
           </div>
         </div>
-        {uiReady ? <span data-testid="ui-ready" className="hidden" aria-hidden="true" /> : null}
       </div>
   )
 }

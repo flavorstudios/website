@@ -1,4 +1,4 @@
-import { AdminDashboardSectionPage } from "@/components/admin/dashboard/AdminDashboardSectionPage";
+import { AdminSectionPage } from "@/components/admin/dashboard/AdminSectionPage";
 import type { SectionId } from "../dashboard/sections";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
@@ -39,5 +39,5 @@ export const metadata = getMetadata({
 const SECTION: SectionId = "applications";
 
 export default function AdminApplicationsPage() {
-  return <AdminDashboardSectionPage section={SECTION} />;
+  return <AdminSectionPage section={SECTION} />;
 }

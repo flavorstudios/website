@@ -1,8 +1,10 @@
-import AdminCommentsPageClient from "./AdminCommentsPageClient";
+import { AdminSectionPage } from "@/components/admin/dashboard/AdminSectionPage";
+import type { SectionId } from "../dashboard/sections";
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export default function AdminCommentsPage() {
-  return <AdminCommentsPageClient />;
+  const section: SectionId = "comments";
+  return <AdminSectionPage section={section} />;
 }

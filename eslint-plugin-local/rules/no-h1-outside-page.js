@@ -9,16 +9,26 @@ const ALLOWED_COMPONENT_FILES = new Set([
   "components/admin/page-header.tsx",
   "app/admin/dashboard/AdminDashboardPageClient.tsx",
   "app/admin/dashboard/components/blog-editor.tsx",
-  "app/admin/comments/AdminCommentsPageClient.tsx",
   "app/admin/login/AdminLoginForm.tsx",
   "app/admin/forgot-password/ForgotPasswordForm.tsx",
   "app/admin/verify-email/VerifyEmailClient.tsx",
   "app/admin/search/AdminSearchPageClient.tsx",
+  "components/admin/dashboard/AdminSectionPage.tsx",
 ]);
 
 function isAllowedComponent(filename) {
   const normalized = filename.split(path.sep).join("/");
-  return ALLOWED_COMPONENT_FILES.has(normalized);
+  if (ALLOWED_COMPONENT_FILES.has(normalized)) {
+    return true;
+  }
+
+  for (const allowed of ALLOWED_COMPONENT_FILES) {
+    if (normalized.endsWith(allowed)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function isLevelOne(attribute) {

@@ -1,12 +1,13 @@
+import { Suspense } from "react";
+
+import { BlogCardSkeleton } from "@/components/BlogCardSkeleton";
 import { PageHeader } from "@/components/admin/page-header";
+import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { getMetadata } from "@/lib/seo-utils";
+
 import { AdminDashboardSectionPage } from "../AdminDashboardSectionPage";
 import { SECTION_DESCRIPTIONS, SECTION_HEADINGS } from "../section-metadata";
 import type { SectionId } from "../sections";
-import { getMetadata } from "@/lib/seo-utils";
-import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
-import { Suspense } from "react";
-import { BlogCardSkeleton } from "@/components/BlogCardSkeleton";
-import { getBlogOverview } from "@/lib/blog-data";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -62,15 +63,9 @@ function BlogFallback({ headingId }: { headingId: string }) {
   );
 }
 
-export default async function BlogPage() {
+export default function BlogPage() {
   const title = SECTION_HEADINGS[SECTION];
   const description = SECTION_DESCRIPTIONS[SECTION];
-
-  // Kick off a lightweight server-side fetch so that Next.js renders the
-  // route-level loading.tsx fallback in E2E/CI where the admin APIs are
-  // intentionally slow or unavailable. The helper is CI-safe and never loads
-  // the Admin SDK when NEXT_PUBLIC_E2E is set.
-  await getBlogOverview();
 
   return (
     <div className="space-y-6">

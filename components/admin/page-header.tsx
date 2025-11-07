@@ -7,6 +7,7 @@ import type { WithDataAttributes } from "@/types/dom";
 import { useHeadingLevel } from "@/components/admin/heading-context";
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+type HeadingTagName = `h${HeadingLevel}`;
 
 type DataAttributes = {
   [key in `data-${string}`]?: string | number | undefined;
@@ -49,7 +50,7 @@ const HeadingTag = ({
   id,
   ...headingProps
 }: HeadingTagProps) => {
-  const Tag = (`h${level}`) as keyof React.JSX.IntrinsicElements;
+  const Tag = (`h${level}` as HeadingTagName);
   return (
     <Tag id={id} className={className} {...headingProps}>
       {children}

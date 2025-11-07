@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 export default function SettingsError({
   error,
@@ -13,33 +13,30 @@ export default function SettingsError({
     console.error("[settings:error]", error?.digest, error);
   }, [error]);
 
+  const handleRetry = useCallback(() => {
+    if (reset) {
+      reset();
+      return;
+    }
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
+  }, [reset]);
+
   return (
-    <div className="mx-auto max-w-3xl space-y-4 p-6" role="alert">
-      <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-6 text-destructive">
-        <p className="font-semibold">Unable to render admin settings.</p>
-        <p className="mt-2 text-sm opacity-80">
-          Please try again or contact support. Ref: {error?.digest ?? "N/A"}
+    <div className="mx-auto max-w-xl p-6" role="alert">
+      <div className="rounded-lg border border-border/60 bg-muted/20 p-6 text-sm text-muted-foreground">
+        <p className="font-medium text-foreground">Unable to load admin settings.</p>
+        <p className="mt-2 text-xs text-muted-foreground/80">
+          Please try again. Reference: {error?.digest ?? "N/A"}
         </p>
         <button
           type="button"
-          onClick={() => {
-            if (typeof window !== "undefined") {
-              window.location.reload();
-            }
-          }}
-          className="mt-4 inline-flex rounded bg-destructive px-3 py-1 text-sm font-medium text-destructive-foreground"
+          onClick={handleRetry}
+          className="mt-4 inline-flex items-center rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-colors hover:bg-foreground/90"
         >
-          Try again
+          Retry
         </button>
-        {reset ? (
-          <button
-            type="button"
-            onClick={reset}
-            className="ml-3 inline-flex rounded border border-destructive px-3 py-1 text-sm font-medium"
-          >
-            Reset page
-          </button>
-        ) : null}
       </div>
     </div>
   );

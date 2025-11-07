@@ -1,6 +1,5 @@
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
-import { SettingsTabs } from "@/components/admin/settings/SettingsTabs";
 import { PageHeader } from "@/components/admin/page-header";
 import { loadSettings } from "./actions";
 import { SettingsAccessError } from "./errors";
@@ -9,9 +8,9 @@ import { getAdminAuth } from "@/lib/firebase-admin";
 import { unwrapPageProps } from "@/types/next";
 import type { PageProps } from "@/types/next";
 import { logError } from "@/lib/log";
-import { ErrorBoundary } from "../components/ErrorBoundary";
 import type { SettingsErrorCode } from "./errors";
 import { getSessionEmailFromCookies, isAdmin } from "@/lib/admin-auth";
+import { SettingsClient, SettingsLoadErrorBanner } from "./SettingsClient";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -83,65 +82,6 @@ function SettingsUnauthorized() {
   );
 }
 
-function SettingsLoadErrorBanner({
-  message,
-  detail,
-  showDetail,
-}: {
-  message: string;
-  detail?: string | null;
-  showDetail: boolean;
-}) {
-  return (
-    <div className="space-y-3 rounded-lg border border-border/50 bg-muted/20 p-6 text-sm text-muted-foreground">
-      <p>{message}</p>
-      {showDetail && detail ? (
-        <p className="text-xs text-muted-foreground/90">{detail}</p>
-      ) : null}
-      <button
-        type="button"
-        onClick={() => {
-          if (typeof window !== "undefined") {
-            window.location.reload();
-          }
-        }}
-        className="inline-flex items-center rounded-md border border-border/60 bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-      >
-        Retry loading settings
-      </button>
-    </div>
-  );
-}
-
-function SettingsRenderError({ showDevHint }: { showDevHint: boolean }) {
-  return (
-    <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-6 text-sm text-destructive">
-      <p className="font-medium">The settings interface failed to render.</p>
-      <p className="mt-2 text-xs opacity-80">
-        Check the browser console and server logs for details, then reload the page.
-      </p>
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={() => {
-            if (typeof window !== "undefined") {
-              window.location.reload();
-            }
-          }}
-          className="inline-flex items-center rounded-md border border-destructive/40 bg-destructive px-3 py-1.5 text-xs font-medium text-destructive-foreground transition-colors hover:bg-destructive/90"
-        >
-          Reload settings
-        </button>
-        {showDevHint ? (
-          <span className="text-xs text-destructive/80">
-            Refresh to capture a client-side stack trace in the console.
-          </span>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
 type SettingsPageProps = PageProps<Record<string, never>, { tab?: string | string[] }>;
 
 type LoadErrorState = {
@@ -181,14 +121,18 @@ export default async function SettingsPage(props: SettingsPageProps) {
     }
   }
 
+  const header = (
+    <PageHeader
+      level={1}
+      title="Settings"
+      description="Manage your profile, notifications, and appearance preferences"
+    />
+  );
+
   if (!settings || loadError) {
     return (
       <div className="mx-auto max-w-5xl space-y-6 p-6 pb-24">
-        <PageHeader
-          level={1}
-          title="Settings"
-          description="Manage your profile, notifications, and appearance preferences"
-        />
+        {header}
         <SettingsLoadErrorBanner
           message={(loadError ?? { message: DEFAULT_LOAD_ERROR }).message}
           detail={loadError?.detail ?? null}
@@ -205,25 +149,25 @@ export default async function SettingsPage(props: SettingsPageProps) {
     const auth = getAdminAuth();
     const record = await auth.getUser(uid);
     emailVerified = record.emailVerified ?? false;
-    providerLocked = record.providerData.some((provider) => provider.providerId !== "password");
-  } catch {
-    // ignore admin auth failures; fall back to defaults
+    providerLocked = (record.providerData ?? []).some(
+      (provider) => provider.providerId !== "password",
+    );
+  } catch (error) {
+    logError("admin-settings:page:auth", error);
+    emailVerified = false;
+    providerLocked = false;
+  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 p-6 pb-24">
-      <PageHeader
-        level={1}
-        title="Settings"
-        description="Manage your profile, notifications, and appearance preferences"
+      {header}
+      <SettingsClient
+        initialTab={tab}
+        settings={settings}
+        showDevHint={showDetail}
+        emailVerified={emailVerified}
+        providerLocked={providerLocked}
       />
-      <ErrorBoundary fallback={<SettingsRenderError showDevHint={showDetail} />}>
-        <SettingsTabs
-          initialTab={tab}
-          profile={{ ...settings.profile, emailVerified, providerLocked }}
-          notifications={settings.notifications}
-          appearance={settings.appearance}
-        />
-      </ErrorBoundary>
     </div>
   );
 }

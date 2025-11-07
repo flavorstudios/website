@@ -52,10 +52,12 @@ function AdminE2EEmailGuard() {
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <main role="main" data-testid="app-main" className="min-h-screen">
-      <AdminAuthGuard>
-        <AdminE2EEmailGuard />
-        {children}
-      </AdminAuthGuard>
+      <div data-testid="admin-dashboard-root" className="h-full">
+        <AdminAuthGuard>
+          <AdminE2EEmailGuard />
+          {children}
+        </AdminAuthGuard>
+      </div>
     </main>
   );
 }

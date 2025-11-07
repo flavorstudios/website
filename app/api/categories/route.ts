@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       (m) => m.default,
     );
 
-    const type = context.request.nextUrl.searchParams.get("type");
+    const type = request.nextUrl.searchParams.get("type");
     const { blog = [], watch = [] } = siteData.CATEGORIES;
 
     if (type === "blog") {

@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   const context = createRequestContext(request);
 
   try {
-    const { searchParams } = context.request.nextUrl;
+    const { searchParams } = request.nextUrl;
     const authorParam = searchParams.get("author");
     const startDateParam = searchParams.get("startDate");
     const endDateParam = searchParams.get("endDate");

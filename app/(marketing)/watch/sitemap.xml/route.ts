@@ -1,4 +1,4 @@
-/import { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 import { generateSitemapXML, SitemapUrl } from "@/lib/sitemap-utils";
 import { serverEnv } from "@/env/server";
 import { canonicalBaseUrl } from "@/lib/base-url";

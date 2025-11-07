@@ -20,7 +20,6 @@ type CommentCreateInput = {
 };
 
 declare global {
-  // eslint-disable-next-line no-var
   var __commentRateMap: Map<string, RateInfo> | undefined;
 }
 
@@ -67,7 +66,7 @@ export async function GET(request: NextRequest) {
   const context = createRequestContext(request);
 
   try {
-    const { searchParams } = context.request.nextUrl;
+    const { searchParams } = request.nextUrl;
     const postId = searchParams.get("postId");
     const postType = (searchParams.get("postType") as PostType) || "blog";
 

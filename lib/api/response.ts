@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import type { NextResponseInit } from "next/server";
 
 import { createCorsHeaders, type CorsOptions } from "@/lib/api/cors";
 import { createRequestContext, type RequestContext } from "@/lib/api/request-context";
@@ -31,7 +30,11 @@ const mergeHeaders = (
   return result;
 };
 
-export type JsonResponseOptions = NextResponseInit & {
+type NextResponseOptions = NonNullable<
+  Parameters<typeof NextResponse.json>[1]
+>;
+
+export type JsonResponseOptions = NextResponseOptions & {
   cacheControl?: string | null;
   cors?: CorsOptions;
 };
@@ -49,15 +52,17 @@ export const jsonResponse = <T>(
   body: T,
   options: JsonResponseOptions = {},
 ): NextResponse => {
-  const headers = baseHeaders(context, options.cors);
-  if (options.cacheControl !== undefined && options.cacheControl !== null) {
-    headers.set("Cache-Control", options.cacheControl);
+  const { cacheControl, cors, ...responseInit } = options;
+  const headers = baseHeaders(context, cors);
+  if (cacheControl !== undefined && cacheControl !== null) {
+    headers.set("Cache-Control", cacheControl);
   }
-  const merged = mergeHeaders(headers, options.headers);
-  return NextResponse.json(body, {
-    ...options,
+  const merged = mergeHeaders(headers, responseInit.headers);
+  const init: NextResponseOptions = {
+    ...responseInit,
     headers: merged,
-  });
+  };
+  return NextResponse.json(body, init);
 };
 
 export const textResponse = (
@@ -65,15 +70,17 @@ export const textResponse = (
   body: string,
   options: JsonResponseOptions = {},
 ): NextResponse => {
-  const headers = baseHeaders(context, options.cors);
-  if (options.cacheControl !== undefined && options.cacheControl !== null) {
-    headers.set("Cache-Control", options.cacheControl);
+  const { cacheControl, cors, ...responseInit } = options;
+  const headers = baseHeaders(context, cors);
+  if (cacheControl !== undefined && cacheControl !== null) {
+    headers.set("Cache-Control", cacheControl);
   }
-  const merged = mergeHeaders(headers, options.headers);
-  return new NextResponse(body, {
-    ...options,
+  const merged = mergeHeaders(headers, responseInit.headers);
+  const init: NextResponseOptions = {
+    ...responseInit,
     headers: merged,
-  });
+  };
+  return new NextResponse(body, init);
 };
 
 export const errorResponse = (

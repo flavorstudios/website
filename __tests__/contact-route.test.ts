@@ -97,8 +97,9 @@ describe("app/api/contact", () => {
 
   it("treats submissions as unflagged when moderation cannot run", async () => {
     const { POST } = await import("@/app/api/contact/route");
+    const { NextRequest } = await import("next/server");
 
-    const request = new Request("http://localhost/api/contact", {
+    const request = new NextRequest("http://localhost/api/contact", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({

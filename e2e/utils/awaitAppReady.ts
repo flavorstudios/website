@@ -28,7 +28,10 @@ export async function awaitAppReady(
   // If we can see it, we can return early (unless the caller asked for a custom selector)
   let adminRootReady = false;
   try {
-    const adminRoot = page.getByTestId("admin-dashboard-root");
+    const adminRoot = page
+      .getByRole("main")
+      .locator('[data-testid="admin-dashboard-root"]')
+      .first();
     await adminRoot.waitFor({ state: "attached", timeout: 15_000 });
     adminRootReady = true;
 
@@ -47,10 +50,10 @@ export async function awaitAppReady(
   }
 
   // original behaviour: make sure we have a main landmark
-  await page.waitForSelector("[data-testid='app-main'], main, [role='main']", {
-    state: "attached",
-    timeout: 20_000,
-  });
+  const mainLandmark = await page
+    .locator("[data-testid='app-main'], main, [role='main']")
+    .first();
+  await mainLandmark.waitFor({ state: "attached", timeout: 20_000 });
   await page.waitForTimeout(50);
 
   const url = page.url();
@@ -111,4 +114,16 @@ export async function awaitAppReady(
   } catch {
     // ok to ignore: page is probably one of the "error" test pages
   }
+
+  // Ensure custom web fonts have finished loading before assertions that depend on layout.
+  await page
+    .evaluate(() => {
+      const fonts = (document as Document & {
+        fonts?: { ready?: Promise<unknown> };
+      }).fonts;
+      return fonts?.ready ?? null;
+    })
+    .catch(() => {
+      // Older browsers or test mocks may not expose document.fonts; ignore quietly.
+    });
 }

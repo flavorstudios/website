@@ -1,125 +1,121 @@
-// app/api/blogs/route.ts
-
-import { type NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import {
   blogStore,
   getFallbackBlogPosts,
   isFallbackResult,
-} from "@/lib/content-store"; // Firestore-backed store
-import { formatPublicBlogSummary } from "@/lib/formatters"; // Summary formatter
-import { logBreadcrumb, logError } from "@/lib/log"; // Add error logging
-import { BlogPost } from "@/lib/content-store";
+BlogPost,
+} from "@/lib/content-store";
+import { formatPublicBlogSummary } from "@/lib/formatters";
+import { logBreadcrumb, logError } from "@/lib/log";
+import {
+  createRequestContext,
+  errorResponse,
+  jsonResponse,
+} from "@/lib/api/response";
+import { handleOptionsRequest } from "@/lib/api/cors";
 
 function parseDate(value: string | null): Date | null {
   if (!value) return null;
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : d;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+export function OPTIONS(request: NextRequest) {
+  return handleOptionsRequest(request, { allowMethods: ["GET"] });
 }
 
 export async function GET(request: NextRequest) {
+  const context = createRequestContext(request);
+
   try {
-    const { searchParams } = request.nextUrl;
-    const authorParam = searchParams.get("author"); // "all" or author id/name
+    const { searchParams } = context.request.nextUrl;
+    const authorParam = searchParams.get("author");
     const startDateParam = searchParams.get("startDate");
     const endDateParam = searchParams.get("endDate");
 
     const startDate = parseDate(startDateParam);
     const endDateRaw = parseDate(endDateParam);
-    // Make endDate inclusive through end-of-day
     const endDate = endDateRaw
       ? new Date(new Date(endDateRaw).setHours(23, 59, 59, 999))
       : null;
 
-    // Fetch all blogs from Firestore (via blogStore)
     const blogs = await blogStore.getAll();
     const usingFallback = isFallbackResult(blogs);
 
-    // Only published blogs (same as before)
     let published: BlogPost[] = blogs.filter(
-      (b: BlogPost) => b.status === "published",
+      (blog: BlogPost) => blog.status === "published",
     );
 
-    // Author filter (supports id or name; also handles author object)
     if (authorParam && authorParam !== "all") {
-      const a = authorParam.toLowerCase();
-      published = published.filter((b: BlogPost) => {
-        const post = b as unknown as {
+      const normalized = authorParam.toLowerCase();
+      published = published.filter((post: BlogPost) => {
+        const potential = post as unknown as {
           authorId?: string;
           author?: string | { id?: string; name?: string };
         };
         const byId =
-          typeof post.authorId === "string" &&
-          post.authorId.toLowerCase() === a;
+          typeof potential.authorId === "string" &&
+          potential.authorId.toLowerCase() === normalized;
         const byName =
-          typeof post.author === "string" &&
-          post.author.toLowerCase() === a;
+          typeof potential.author === "string" &&
+          potential.author.toLowerCase() === normalized;
         const byObjId =
-          typeof post.author === "object" &&
-          typeof post.author?.id === "string" &&
-          post.author.id.toLowerCase() === a;
+          typeof potential.author === "object" &&
+          typeof potential.author?.id === "string" &&
+          potential.author.id.toLowerCase() === normalized;
         const byObjName =
-          typeof post.author === "object" &&
-          typeof post.author?.name === "string" &&
-          post.author.name.toLowerCase() === a;
+          typeof potential.author === "object" &&
+          typeof potential.author?.name === "string" &&
+          potential.author.name.toLowerCase() === normalized;
         return byId || byName || byObjId || byObjName;
       });
     }
 
-    // Date range filters (inclusive)
     if (startDate) {
       published = published.filter(
-        (b: BlogPost) => b.publishedAt && new Date(b.publishedAt) >= startDate,
+        (post: BlogPost) => post.publishedAt && new Date(post.publishedAt) >= startDate,
       );
     }
     if (endDate) {
       published = published.filter(
-        (b: BlogPost) => b.publishedAt && new Date(b.publishedAt) <= endDate,
+        (post: BlogPost) => post.publishedAt && new Date(post.publishedAt) <= endDate,
       );
     }
 
-    // Format for the public API response using summary shape
     const result = await Promise.all(
       published.map((blog) => formatPublicBlogSummary(blog)),
     );
 
-    // Send response with cache headers
     if (usingFallback) {
-      logBreadcrumb("api/blogs:GET:fallback-response", {
+      logBreadcrumb("api/blogs:get:fallback", {
+        requestId: context.requestId,
         reason: "store-fallback",
       });
     }
 
-    const res = NextResponse.json(result);
-    res.headers.set("Cache-Control", "public, max-age=300");
-    return res;
+    return jsonResponse(context, result);
   } catch (error) {
-    // Log error using the helper for diagnostics
-    try {
-      logError("blogs:GET", error);
-    } catch {
-      // no-op if logger throws
-    }
+    logError("blogs:get", error, { requestId: context.requestId });
 
     const fallbackBlogs = getFallbackBlogPosts();
     if (fallbackBlogs.length > 0) {
-      logBreadcrumb("api/blogs:GET:fallback-response", {
+      logBreadcrumb("api/blogs:get:fallback", {
+        requestId: context.requestId,
         reason: "handler-error",
       });
       const publishedFallback = fallbackBlogs.filter(
-        (b: BlogPost) => b.status === "published",
+        (blog: BlogPost) => blog.status === "published",
       );
       const result = await Promise.all(
         publishedFallback.map((blog) => formatPublicBlogSummary(blog)),
       );
-      const res = NextResponse.json(result);
-      res.headers.set("Cache-Control", "public, max-age=300");
-      return res;
+      return jsonResponse(context, result);
     }
 
-    // Return a safe error response
-    return NextResponse.json(
+    return errorResponse(
+      context,
       { error: "Failed to fetch published blogs." },
-      { status: 500 },
+      500,
     );
   }
 }

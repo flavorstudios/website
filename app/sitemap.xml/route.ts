@@ -1,19 +1,12 @@
-// app/sitemap.xml/route.ts
-
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getStaticPages, generateSitemapXML, SitemapUrl } from "@/lib/sitemap-utils";
-// import { blogStore, videoStore } from "@/lib/comment-store"; // No longer needed!
-import { SITE_URL } from "@/lib/constants";
 import { serverEnv } from "@/env/server";
+import { canonicalBaseUrl } from "@/lib/base-url";
+import { createRequestContext, textResponse } from "@/lib/api/response";
+import { logError } from "@/lib/log";
 
-// Prefer env variable, fallback to SITE_URL or the default
-const BASE_URL =
-  serverEnv.NEXT_PUBLIC_BASE_URL ||
-  serverEnv.BASE_URL ||
-  SITE_URL ||
-  "https://flavorstudios.in";
+const BASE_URL = canonicalBaseUrl();
 
-// No more canonicalization here; just return as-is
 function toSitemapPage(page: Omit<SitemapUrl, "url"> & { url: string }): SitemapUrl {
   return { ...page, url: page.url };
 }
@@ -28,67 +21,65 @@ interface ContentPage {
 
 export const revalidate = 3600;
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const context = createRequestContext(request);
   const skipFetch =
     serverEnv.NODE_ENV === "test" ||
     serverEnv.TEST_MODE === "true" ||
     process.env.TEST_MODE === "true";
+
   try {
-    // --- Fetch published blogs and videos via PUBLIC API ---
     let blogs: ContentPage[] = [];
     let videos: ContentPage[] = [];
     
     if (!skipFetch) {
       try {
         const res = await fetch(`${BASE_URL}/api/blogs`, {
-          next: { tags: ["feeds"], revalidate: 3600 },
+          cache: "no-store",
         });
         if (res.ok) {
           blogs = await res.json();
         }
-      } catch (err) {
-        console.error("Failed to fetch blogs for sitemap:", err);
+      } catch (error) {
+        logError("sitemap:blogs", error, { requestId: context.requestId });
       }
-    try {
+
+      try {
         const res = await fetch(`${BASE_URL}/api/videos`, {
-          next: { tags: ["feeds"], revalidate: 3600 },
+          cache: "no-store",
         });
         if (res.ok) {
           videos = await res.json();
         }
-      } catch (err) {
-        console.error("Failed to fetch videos for sitemap:", err);
+      } catch (error) {
+        logError("sitemap:videos", error, { requestId: context.requestId });
       }
     }
 
-    // Blogs (relative URLs only!)
     const blogPages: SitemapUrl[] = (blogs as ContentPage[])
-      .filter((b) => b.slug && b.status === "published")
+      .filter((blog) => blog.slug && blog.status === "published")
       .map((blog) =>
         toSitemapPage({
           url: `/blog/${blog.slug}`,
           changefreq: "weekly",
           priority: "0.8",
           lastmod: blog.updatedAt || blog.publishedAt || blog.createdAt,
-        })
+        }),
       );
 
-    // Videos (relative URLs only!)
     const videoPages: SitemapUrl[] = (videos as ContentPage[])
-      .filter((v) => v.slug && v.status === "published")
+      .filter((video) => video.slug && video.status === "published")
       .map((video) =>
         toSitemapPage({
           url: `/watch/${video.slug}`,
           changefreq: "weekly",
           priority: "0.8",
           lastmod: video.updatedAt || video.publishedAt || video.createdAt,
-        })
+        }),
       );
 
-    // Static pages (all relative URLs)
     const staticPages: SitemapUrl[] = getStaticPages().map(toSitemapPage);
 
-    // Deduplicate URLs (by relative path)
     const seen = new Set<string>();
     const allPages: SitemapUrl[] = [...staticPages, ...blogPages, ...videoPages].filter((page) => {
       if (seen.has(page.url)) return false;
@@ -96,22 +87,17 @@ export async function GET() {
       return true;
     });
 
-    // Generate XML using robust joinUrl logic inside generateSitemapXML
     const xml = generateSitemapXML(BASE_URL, allPages);
 
-    return new NextResponse(xml, {
+    return textResponse(context, xml, {
       status: 200,
+      cacheControl: "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
       headers: {
         "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
       },
     });
   } catch (error) {
-    if (skipFetch) {
-      console.warn("Sitemap generation skipped or failed:", error);
-    } else {
-      console.error("Sitemap generation failed:", error);
-    }
+    logError("sitemap:get", error, { requestId: context.requestId });
     const now = new Date().toISOString();
     const fallbackXml = generateSitemapXML(BASE_URL, [
       { url: "/", changefreq: "daily", priority: "1.0", lastmod: now },
@@ -119,11 +105,12 @@ export async function GET() {
       { url: "/watch", changefreq: "daily", priority: "0.9", lastmod: now },
       { url: "/blog", changefreq: "daily", priority: "0.9", lastmod: now },
     ]);
-    return new NextResponse(fallbackXml, {
+
+    return textResponse(context, fallbackXml, {
       status: 200,
+      cacheControl: "public, max-age=1800, s-maxage=1800, stale-while-revalidate=3600",
       headers: {
         "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=1800, s-maxage=1800, stale-while-revalidate=3600",
       },
     });
   }

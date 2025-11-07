@@ -1,25 +1,14 @@
-// app/watch/sitemap.xml/route.ts
-
-import { NextResponse } from "next/server";
-// import { videoStore } from "@/lib/comment-store"; // No longer needed!
+/import { NextRequest } from "next/server";
 import { generateSitemapXML, SitemapUrl } from "@/lib/sitemap-utils";
-import { SITE_URL } from "@/lib/constants";
 import { serverEnv } from "@/env/server";
+import { canonicalBaseUrl } from "@/lib/base-url";
+import { createRequestContext, textResponse } from "@/lib/api/response";
+import { logError } from "@/lib/log";
 
-const BASE_URL =
-  serverEnv.NEXT_PUBLIC_BASE_URL ||
-  serverEnv.BASE_URL ||
-  SITE_URL ||
-  "https://flavorstudios.in";
+const BASE_URL = canonicalBaseUrl();
 
-// Use *relative* paths for the sitemap, not canonical URLs!
-function toSitemapPage(
-  page: Omit<SitemapUrl, "url"> & { url: string }
-): SitemapUrl {
-  return {
-    ...page,
-    url: page.url,
-  };
+function toSitemapPage(page: Omit<SitemapUrl, "url"> & { url: string }): SitemapUrl {
+  return { ...page, url: page.url };
 }
 
 interface ContentPage {
@@ -30,26 +19,26 @@ interface ContentPage {
   createdAt?: string;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const context = createRequestContext(request);
   const skipFetch =
     serverEnv.NODE_ENV === "test" ||
     serverEnv.TEST_MODE === "true" ||
     process.env.TEST_MODE === "true";
+
   try {
-    // --- Fetch videos via PUBLIC API ---
     let videos: ContentPage[] = [];
     if (!skipFetch) {
       try {
-        const res = await fetch(`${BASE_URL}/api/videos`);
+        const res = await fetch(`${BASE_URL}/api/videos`, { cache: "no-store" });
         if (res.ok) {
           videos = await res.json();
         }
-      } catch (err) {
-        console.error("Failed to fetch videos for sitemap:", err);
+      } catch (error) {
+        logError("watch-sitemap:videos", error, { requestId: context.requestId });
       }
     }
 
-    // Always include the root /watch page
     const videoPages: SitemapUrl[] = [
       toSitemapPage({
         url: "/watch",
@@ -59,9 +48,8 @@ export async function GET() {
       }),
     ];
 
-    // Add each published video
-    if (Array.isArray(videos) && videos.length > 0) {
-      for (const video of videos as ContentPage[]) {
+    if (Array.isArray(videos)) {
+      for (const video of videos) {
         if (
           video.slug &&
           video.slug !== "watch" &&
@@ -73,36 +61,31 @@ export async function GET() {
               changefreq: "weekly",
               priority: "0.8",
               lastmod: video.updatedAt || video.publishedAt || video.createdAt,
-            })
+            }),
           );
         }
       }
     }
 
     const xml = generateSitemapXML(BASE_URL, videoPages);
-
-    return new NextResponse(xml, {
+    return textResponse(context, xml, {
       status: 200,
+      cacheControl: "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
       headers: {
         "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
       },
     });
   } catch (error) {
-    if (skipFetch) {
-      console.warn("Video sitemap generation skipped or failed:", error);
-    } else {
-      console.error("Video sitemap generation failed:", error);
-    }
+    logError("watch-sitemap:get", error, { requestId: context.requestId });
     const now = new Date().toISOString();
     const fallbackXml = generateSitemapXML(BASE_URL, [
       { url: "/watch", changefreq: "weekly", priority: "0.5", lastmod: now },
     ]);
-    return new NextResponse(fallbackXml, {
+    return textResponse(context, fallbackXml, {
       status: 200,
+      cacheControl: "public, max-age=1800, s-maxage=1800, stale-while-revalidate=3600",
       headers: {
         "Content-Type": "application/xml; charset=utf-8",
-        "Cache-Control": "public, max-age=1800, s-maxage=1800, stale-while-revalidate=3600",
       },
     });
   }

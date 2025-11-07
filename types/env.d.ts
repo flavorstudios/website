@@ -13,6 +13,7 @@ declare global {
       FIREBASE_SERVICE_ACCOUNT_JSON?: string;
       FIREBASE_SERVICE_ACCOUNT_JSON_B64?: string;
       FIREBASE_SERVICE_ACCOUNT_KEY?: string;
+      CORS_ALLOWED_ORIGINS?: string;
     }
   }
 }

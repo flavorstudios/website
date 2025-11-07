@@ -2,10 +2,9 @@
 
 import type { Category } from "@/types/category" // <-- Unified type!
 import type { PublicBlogSummary } from "@/lib/types"
-import { serverEnv } from "@/env/server"
-import { SITE_URL } from "@/lib/constants"
+import { canonicalBaseUrl } from "@/lib/base-url"
 
-const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL
+const baseUrl = canonicalBaseUrl()
 
 export type BlogPost = PublicBlogSummary
 

@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { getBaseHostname } from "./env";
 
 const repoRoot = path.dirname(fileURLToPath(import.meta.url));
 
@@ -14,15 +15,6 @@ function resolveAuthDir() {
 
 function resolveStoragePath() {
   return path.join(resolveAuthDir(), "admin.json");
-}
-
-function parseDomainFromBaseUrl(baseUrl: string) {
-  try {
-    const url = new URL(baseUrl);
-    return url.hostname || "127.0.0.1";
-  } catch {
-    return "127.0.0.1";
-  }
 }
 
 // original helper (keep)
@@ -54,9 +46,7 @@ function buildAdminSessionCookie(domain: string) {
 }
 
 export async function ensureAdminAuthState(baseUrl?: string) {
-  const domain = parseDomainFromBaseUrl(
-    baseUrl ?? process.env.BASE_URL ?? "http://127.0.0.1:3000"
-  );
+  const domain = getBaseHostname(baseUrl);
 
   const authDir = resolveAuthDir();
   await mkdir(authDir, { recursive: true });

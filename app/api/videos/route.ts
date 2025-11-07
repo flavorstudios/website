@@ -1,29 +1,37 @@
-// app/api/videos/route.ts
+import { NextRequest } from "next/server";
+import { videoStore } from "@/lib/content-store";
+import { formatPublicVideo } from "@/lib/formatters";
+import type { Video } from "@/lib/content-store";
+import {
+  createRequestContext,
+  errorResponse,
+  jsonResponse,
+} from "@/lib/api/response";
+import { handleOptionsRequest } from "@/lib/api/cors";
+import { logError } from "@/lib/log";
 
-import { NextResponse } from "next/server";
-import { videoStore } from "@/lib/content-store"; // Firestore store
-import { formatPublicVideo } from "@/lib/formatters"; // Helper for safe public output
-import type { Video } from "@/lib/content-store"; // Import Video type
+export function OPTIONS(request: NextRequest) {
+  return handleOptionsRequest(request, { allowMethods: ["GET"] });
+}
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const context = createRequestContext(request);
   try {
-    // Fetch all videos from Firestore
     const videos = await videoStore.getAll();
-
-    // Only published videos for the public API
-    const published = videos.filter((v: Video) => v.status === "published");
+    const published = videos.filter((video: Video) => video.status === "published");
     const result = published.map(formatPublicVideo);
 
-    // JSON response, cache for 5 minutes
-    const res = NextResponse.json(result);
-    res.headers.set("Cache-Control", "public, max-age=300");
-    return res;
+    return jsonResponse(context, result, {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    });
   } catch (error) {
-    // Log details server-side only
-    console.error("Failed to fetch published videos:", error);
-    return NextResponse.json(
+    logError("videos:get", error, { requestId: context.requestId });
+    return errorResponse(
+      context,
       { error: "Failed to fetch published videos." },
-      { status: 500 }
+      500,
     );
   }
 }

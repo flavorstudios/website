@@ -79,6 +79,7 @@ export const serverEnv: Record<string, string | undefined> & {
   UPSTASH_REDIS_REST_URL: string | undefined;
   UPSTASH_REDIS_REST_TOKEN: string | undefined;
   TEST_MODE: string | undefined;
+  CORS_ALLOWED_ORIGINS: string | undefined;
 } = {
   ADMIN_AUTH_DISABLED: process.env.ADMIN_AUTH_DISABLED,
   ADMIN_BYPASS: process.env.ADMIN_BYPASS,
@@ -127,6 +128,7 @@ export const serverEnv: Record<string, string | undefined> & {
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
   TEST_MODE: process.env.TEST_MODE,
+  CORS_ALLOWED_ORIGINS: process.env.CORS_ALLOWED_ORIGINS,
 };
 
 export type ServerEnv = typeof serverEnv;

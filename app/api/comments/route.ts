@@ -1,8 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { commentStore } from "@/lib/comment-store";
 import type { Comment } from "@/lib/comment-store";
+import { handleOptionsRequest } from "@/lib/api/cors";
+import {
+  createRequestContext,
+  errorResponse,
+  jsonResponse,
+  type RequestContext,
+} from "@/lib/api/response";
+import { logBreadcrumb, logError } from "@/lib/log";
 
-// --- Types ---
 type RateInfo = { count: number; lastAttempt: number };
 type PostType = "blog" | "video";
 type CommentCreateInput = {
@@ -12,31 +19,31 @@ type CommentCreateInput = {
   content: string;
 };
 
-// --- Global declaration to avoid `any` on globalThis ---
 declare global {
+  // eslint-disable-next-line no-var
   var __commentRateMap: Map<string, RateInfo> | undefined;
 }
 
-// --- In-memory per-IP rate limiter (safe for single server, dev, Vercel Hobby) ---
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_WINDOW = 60 * 1000;
 const MAX_COMMENTS = 5;
 
 const rateMap: Map<string, RateInfo> =
   globalThis.__commentRateMap ?? (globalThis.__commentRateMap = new Map());
 
-function recordAttempt(ip: string) {
+const recordAttempt = (ip: string) => {
   const now = Date.now();
   const info = rateMap.get(ip);
   if (!info || now - info.lastAttempt > RATE_LIMIT_WINDOW) {
     rateMap.set(ip, { count: 1, lastAttempt: now });
-  } else {
-    info.count += 1;
-    info.lastAttempt = now;
-    rateMap.set(ip, info);
+  return;
   }
-}
 
-function isRateLimited(ip: string): boolean {
+info.count += 1;
+  info.lastAttempt = now;
+  rateMap.set(ip, info);
+};
+
+const isRateLimited = (ip: string): boolean => {
   const info = rateMap.get(ip);
   if (!info) return false;
   if (Date.now() - info.lastAttempt > RATE_LIMIT_WINDOW) {
@@ -44,22 +51,32 @@ function isRateLimited(ip: string): boolean {
     return false;
   }
   return info.count > MAX_COMMENTS;
-}
+};
 
-function getRequestIp(request: Request): string {
-  const xfwd = request.headers.get("x-forwarded-for");
+const getRequestIp = (context: RequestContext): string => {
+  const xfwd = context.headers.get("x-forwarded-for");
   if (xfwd) return xfwd.split(",")[0].trim();
   return "unknown";
+  };
+
+export function OPTIONS(request: NextRequest) {
+  return handleOptionsRequest(request, { allowMethods: ["GET", "POST"] });
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const context = createRequestContext(request);
+
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = context.request.nextUrl;
     const postId = searchParams.get("postId");
     const postType = (searchParams.get("postType") as PostType) || "blog";
 
     if (!postId) {
-      return NextResponse.json({ error: "postId is required" }, { status: 400 });
+      return jsonResponse(
+        context,
+        { error: "postId is required" },
+        { status: 400 },
+      );
     }
 
     const comments = await commentStore.getByPost(postId, postType);
@@ -72,38 +89,44 @@ export async function GET(request: Request) {
       status: c.status,
     }));
 
-    const res = NextResponse.json(result);
-    res.headers.set("Cache-Control", "public, max-age=60");
-    return res;
+    return jsonResponse(context, result, {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    });
   } catch (error) {
-    console.error("Failed to fetch comments:", error);
-    return NextResponse.json(
+    logError("comments:get", error, { requestId: context.requestId });
+    return errorResponse(
+      context,
       { error: "Failed to fetch comments" },
-      { status: 500 }
+      500,
     );
   }
 }
 
-export async function POST(request: Request) {
-  try {
-    const body: unknown = await request.json();
-    const data = body as CommentCreateInput;
+export async function POST(request: NextRequest) {
+  const context = createRequestContext(request);
 
-    const { postId, author, content } = data;
-    const postType: PostType = data.postType || "blog";
+    try {
+    const body: CommentCreateInput = (await request.json()) as CommentCreateInput;
+    const { postId, author, content } = body;
+    const postType: PostType = body.postType || "blog";
 
     if (!postId || !author || !content) {
-      return NextResponse.json(
+      return jsonResponse(
+        context,
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // --- Rate limiting before comment creation ---
-    const ip = getRequestIp(request);
+    const ip = getRequestIp(context);
     if (isRateLimited(ip)) {
-      console.warn(`[Comments API] Rate limit exceeded for IP: ${ip}`);
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      logBreadcrumb("comments:rate-limited", {
+        requestId: context.requestId,
+        ip,
+      });
+      return jsonResponse(context, { error: "Too many requests" }, { status: 429 });
     }
     recordAttempt(ip);
 
@@ -115,11 +138,10 @@ export async function POST(request: Request) {
       website: "",
       content,
       parentId: null,
-      ip: request.headers.get("x-forwarded-for") ?? "",
-      userAgent: request.headers.get("user-agent") ?? "",
+      ip,
+      userAgent: context.headers.get("user-agent") ?? "",
     });
 
-    // If the comment isn't pending (shouldn't happen unless moderation logic is changed), force it
     if (comment.status !== "pending") {
       await commentStore.updateStatus(postId, comment.id, "pending");
       comment.status = "pending";
@@ -127,15 +149,17 @@ export async function POST(request: Request) {
 
     const { id, createdAt, status } = comment;
 
-    return NextResponse.json(
+    return jsonResponse(
+      context,
       { id, author, content, createdAt, status },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
-    console.error("Failed to create comment:", error);
-    return NextResponse.json(
+    logError("comments:create", error, { requestId: context.requestId });
+    return errorResponse(
+      context,
       { error: "Failed to create comment" },
-      { status: 500 }
+      500,
     );
   }
 }

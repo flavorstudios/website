@@ -25,6 +25,7 @@ const optionalServerKeys = [
   'ADMIN_REQUIRE_EMAIL_VERIFICATION',
   'ADMIN_DISPOSABLE_DOMAINS',
   'E2E',
+  'CORS_ALLOWED_ORIGINS',
 ] as const;
 
 type RequiredServerKey = (typeof requiredServerKeys)[number];
@@ -48,6 +49,7 @@ export const serverEnvSchema = z.object({
   ADMIN_REQUIRE_EMAIL_VERIFICATION: optionalNonEmptyString,
   ADMIN_DISPOSABLE_DOMAINS: optionalNonEmptyString,
   E2E: optionalNonEmptyString,
+  CORS_ALLOWED_ORIGINS: optionalNonEmptyString,
 });
 
 const truthyFlags = new Set(['1', 'true', 'TRUE', 'True']);
@@ -151,6 +153,8 @@ export const serverEnv: Record<string, string | undefined> & {
   UPSTASH_REDIS_REST_URL: string | undefined;
   UPSTASH_REDIS_REST_TOKEN: string | undefined;
   TEST_MODE: string | undefined;
+  E2E: string | undefined;
+  CORS_ALLOWED_ORIGINS: string | undefined;
 } = {
   ADMIN_AUTH_DISABLED: process.env.ADMIN_AUTH_DISABLED,
   ADMIN_BYPASS: process.env.ADMIN_BYPASS,
@@ -200,6 +204,7 @@ export const serverEnv: Record<string, string | undefined> & {
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
   TEST_MODE: process.env.TEST_MODE,
   E2E: process.env.E2E,
+  CORS_ALLOWED_ORIGINS: process.env.CORS_ALLOWED_ORIGINS,
 };
 
 export type ServerEnv = typeof serverEnv;

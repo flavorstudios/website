@@ -1,14 +1,8 @@
 import type { PublicBlogDetail, PublicBlogSummary } from "@/lib/types"
-import { serverEnv } from "@/env/server"
-import { SITE_URL } from "@/lib/constants"
+import { canonicalBaseUrl } from "@/lib/base-url"
 
 function buildApiUrl(path: string): string {
-  const base =
-    serverEnv.NEXT_PUBLIC_BASE_URL ||
-    serverEnv.BASE_URL ||
-    (process.env.NODE_ENV === "development"
-      ? "http://localhost:3000"
-      : SITE_URL)
+  const base = canonicalBaseUrl()
 
   try {
     return new URL(path, base).toString()
@@ -21,6 +15,7 @@ export async function getBlogPost(key: string): Promise<PublicBlogDetail | null>
   try {
     const encodedKey = encodeURIComponent(key)
     const response = await fetch(buildApiUrl(`/api/blogs/${encodedKey}`), {
+      cache: "no-store",
       next: { revalidate: 300 },
     })
 

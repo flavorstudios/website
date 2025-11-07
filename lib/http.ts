@@ -15,7 +15,7 @@ export class HttpError extends Error {
 export async function fetchJson<T>(
   input: RequestInfo | URL,
   init: RequestInit = {},
-  opts: { retry?: number; timeoutMs?: number } = {}
+  opts: { retry?: number; timeoutMs?: number; requestId?: string } = {}
 ): Promise<T> {
   const retry = opts.retry ?? 0;
   const timeoutMs = opts.timeoutMs ?? 15000;
@@ -63,6 +63,9 @@ export async function fetchJson<T>(
       if (!headers.has('Accept')) {
         headers.set('Accept', 'application/json');
       }
+      if (opts.requestId && !headers.has('x-request-id')) {
+        headers.set('X-Request-ID', opts.requestId);
+      }
 
       if (ctrl.signal.aborted) {
         throw ctrl.signal.reason ?? new Error('The operation was aborted.');
@@ -71,6 +74,7 @@ export async function fetchJson<T>(
       const res = await fetch(input, {
         ...init,
         credentials: init.credentials ?? 'include',
+        cache: init.cache ?? 'no-store',
         headers,
         signal: ctrl.signal,
       });

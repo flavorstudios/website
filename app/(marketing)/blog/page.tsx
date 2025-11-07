@@ -28,6 +28,7 @@ import { formatDate } from "@/lib/date"; // <-- Added import
 import { authors } from "@/lib/authors"; // <-- NEW
 import { DateRangePicker } from "@/components/ui/date-range-picker"; // <-- NEW
 import { serverEnv } from "@/env/server";
+import { canonicalBaseUrl } from "@/lib/base-url";
 import { normalizeSlug } from "@/lib/slugify";
 import { unwrapPageProps } from "@/types/next";
 import type { PageProps } from "@/types/next";
@@ -135,7 +136,7 @@ async function getBlogData({
   endDate?: string;
 }) {
   try {
-    const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL;
+    const baseUrl = canonicalBaseUrl();
     const params = new URLSearchParams();
     if (author && author !== "all") params.set("author", author);
     if (startDate) params.set("startDate", startDate);
@@ -145,6 +146,7 @@ async function getBlogData({
 
     const [postsRes, { blogCategories }] = await Promise.all([
       fetch(`${baseUrl}/api/blogs${query ? `?${query}` : ""}`, {
+        cache: "no-store",
         next: { revalidate: 300 },
       }),
       getDynamicCategories("blog"),

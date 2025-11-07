@@ -1,8 +1,16 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import nodemailer from "nodemailer";
 import { z } from "zod";
 import { serverEnv } from "@/env/server";
+import { handleOptionsRequest } from "@/lib/api/cors";
+import {
+  createRequestContext,
+  errorResponse,
+  jsonResponse,
+  type RequestContext,
+} from "@/lib/api/response";
+import { logError } from "@/lib/log";
 
 const PERSPECTIVE_API_KEY = serverEnv.PERSPECTIVE_API_KEY;
 const THRESHOLD = 0.7;
@@ -22,7 +30,6 @@ const transporter = nodemailer.createTransport({
     : undefined,
 });
 
-// ✅ Zod schema for validation
 const contactSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
@@ -37,11 +44,15 @@ type ModerationScores = {
   threat: number;
 };
 
-async function moderateText(text: string): Promise<ModerationScores | null> {
+async function moderateText(
+  text: string,
+  context: RequestContext,
+): Promise<ModerationScores | null> {
   if (!PERSPECTIVE_API_KEY) {
-    console.warn(
-      "[PerspectiveAPI] API key not configured; skipping automated moderation.",
-    );
+    logError("contact:moderate:config", undefined, {
+      requestId: context.requestId,
+      message: "Perspective API key not configured; skipping moderation",
+    });
     return null;
   }
 
@@ -50,15 +61,27 @@ async function moderateText(text: string): Promise<ModerationScores | null> {
       `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_API_KEY}`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Request-ID": context.requestId,
+        },
+        cache: "no-store",
         body: JSON.stringify({
           comment: { text },
           requestedAttributes: { TOXICITY: {}, INSULT: {}, THREAT: {} },
           doNotStore: true,
         }),
-      }
+      },
     );
-    if (!res.ok) return null;
+
+    if (!res.ok) {
+      logError("contact:moderate:response", undefined, {
+        requestId: context.requestId,
+        status: res.status,
+      });
+      return null;
+    }
+
     const data = await res.json();
     return {
       toxicity: data.attributeScores?.TOXICITY?.summaryScore.value ?? 0,
@@ -66,26 +89,32 @@ async function moderateText(text: string): Promise<ModerationScores | null> {
       threat: data.attributeScores?.THREAT?.summaryScore.value ?? 0,
     };
   } catch (error) {
-    console.error("[PerspectiveAPI]", error);
+    logError("contact:moderate:error", error, { requestId: context.requestId });
     return null;
   }
 }
 
-export async function POST(request: Request) {
+export function OPTIONS(request: NextRequest) {
+  return handleOptionsRequest(request, { allowMethods: ["POST"] });
+}
+
+export async function POST(request: NextRequest) {
+  const context = createRequestContext(request);
+
   try {
-    // Validate input using zod
     const body = await request.json();
     const parsed = contactSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
+      return jsonResponse(
+        context,
         { error: "Invalid request", details: parsed.error.flatten() },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const { firstName, lastName, email, subject, message } = parsed.data;
 
-    const scores = await moderateText(message);
+    const scores = await moderateText(message, context);
     const flagged = scores
       ? scores.toxicity > THRESHOLD ||
         scores.insult > THRESHOLD ||
@@ -106,13 +135,13 @@ export async function POST(request: Request) {
       scores: scores || null,
     });
 
-    // === Notify all admins if enabled ===
     if (notifyEnabled && adminEmailsEnv) {
       const recipients = adminEmailsEnv
         .split(",")
-        .map((e) => e.trim())
+        .map((value) => value.trim())
         .filter(Boolean)
         .join(",");
+
       try {
         await transporter.sendMail({
           from: serverEnv.SMTP_USER,
@@ -120,15 +149,14 @@ export async function POST(request: Request) {
           subject: `New contact submission: ${subject}`,
           text: `${firstName} ${lastName} <${email}> wrote:\n\n${message}`,
         });
-      } catch (err) {
-        console.error('[CONTACT_NOTIFY_ERROR]', err);
-        // Don't block user if email fails
+      } catch (error) {
+        logError("contact:notify", error, { requestId: context.requestId });
       }
     }
 
-    return NextResponse.json({ success: true, flagged });
+    return jsonResponse(context, { success: true, flagged });
   } catch (error) {
-    console.error("[CONTACT_POST_ERROR]", error);
-    return NextResponse.json({ error: "Failed to submit message" }, { status: 500 });
+    logError("contact:post", error, { requestId: context.requestId });
+    return errorResponse(context, { error: "Failed to submit message" }, 500);
   }
 }

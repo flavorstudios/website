@@ -13,6 +13,8 @@ import {
 import { getStorage } from "firebase-admin/storage"
 import type { Bucket, File } from "@google-cloud/storage"
 import { logError } from "@/lib/log"
+import { ADMIN_BYPASS } from "@/lib/firebase-admin"
+import { isE2EEnabled } from "@/lib/e2e-utils"
 
 export * from "./common"
 
@@ -52,11 +54,23 @@ function cloneDefaultUserSettings(): UserSettings {
 export async function getCurrentAdminUid(): Promise<string> {
   const cookieStore = await cookies()
   const sessionCookie = cookieStore.get("admin-session")?.value
-  if (!sessionCookie) throw new Error("Missing admin session")
+  if (!sessionCookie) {
+    if (ADMIN_BYPASS || isE2EEnabled()) {
+      return "bypass"
+    }
+    throw new Error("Missing admin session")
+  }
   const { verifyAdminSession } = await import("@/lib/admin-auth")
-  const session = await verifyAdminSession(sessionCookie)
-  if (!session?.uid) throw new Error("Missing admin uid")
-  return session.uid as string
+  try {
+    const session = await verifyAdminSession(sessionCookie)
+    if (!session?.uid) throw new Error("Missing admin uid")
+    return session.uid as string
+  } catch (error) {
+    if (ADMIN_BYPASS || isE2EEnabled()) {
+      return "bypass"
+    }
+    throw error
+  }
 }
 
 export async function readUserSettings(db: Firestore, uid: string): Promise<UserSettings | null> {

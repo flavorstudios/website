@@ -22,7 +22,6 @@ const config = [
       "functions",
       "firebase",
       "scripts",
-      "__tests__",
       "test-results",
       "Patches",
       "types/jest/index.d.ts",

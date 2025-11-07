@@ -1,10 +1,9 @@
 // lib/categories.ts
 
 import type { Category } from "@/types/category" // Use the shared type
-import { serverEnv } from "@/env/server"
-import { SITE_URL } from "@/lib/constants"
+import { canonicalBaseUrl } from "@/lib/base-url"
 
-const baseUrl = serverEnv.NEXT_PUBLIC_BASE_URL || SITE_URL
+const baseUrl = canonicalBaseUrl()
 
 // --------- CATEGORY FETCH (DEPRECATED, MERGES BLOG & VIDEO) ---------
 

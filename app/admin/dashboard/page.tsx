@@ -189,7 +189,8 @@ export default async function AdminDashboardPage() {
 
   return (
     <HydrationBoundary state={dehydratedState}>
-      <div data-testid="admin-dashboard-root">
+      <div data-testid="admin-dashboard-shell">
+        {/* Keep the root test id unique; layout already exposes admin-dashboard-root for Playwright. */}
         {ciLike ? (
           <div data-testid="admin-dashboard-e2e-env" className="sr-only">
             admin-dashboard-e2e

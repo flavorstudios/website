@@ -161,6 +161,7 @@ export default function ContactPageClient() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify({
           firstName: formData.firstName,
           lastName: formData.lastName,

@@ -10,6 +10,23 @@ After updating `ADMIN_EMAILS` or `ADMIN_EMAIL` in Vercel, trigger a new deployme
 
 * The admin password must be provided as `ADMIN_PASSWORD_HASH` (bcrypt). `ADMIN_PASSWORD` is ignored.
 
+## E2E admin authentication (CI & local)
+
+Playwright runs with `NEXT_PUBLIC_E2E=1`, `ADMIN_AUTH_DISABLED=1`, and `ADMIN_BYPASS=true` so the server can mint a synthetic admin session when Firebase Admin credentials are unavailable. The bypass keeps admin pages rendering in CI while still exercising the dashboard shell.
+
+* Server logic returns a deterministic `uid: "bypass"` admin whenever the bypass flags are set or when E2E helpers detect the test environment.
+* The E2E harness writes a storage state in `e2e/.auth/admin.json` and primes the `admin-session=playwright` cookie using the Playwright `baseURL` hostname. This prevents domain mismatches between `localhost` and `127.0.0.1` during CI runs.
+* When running locally without Firebase Admin, export `ADMIN_BYPASS=true` (or `E2E=1`) and start Playwright with the dashboard-focused commands below. The UI will show non-fatal banners instead of throwing when Firestore is missing.
+
+Common Playwright commands while iterating on the admin dashboard:
+
+```bash
+pnpm exec playwright test -g "admin dashboard" --headed --project=chromium-light --trace on
+pnpm exec playwright show-trace test-results/**/trace.zip
+```
+
+Unset the bypass flags and provide real Firebase credentials to exercise end-to-end auth flows.
+
 ## Firebase email login (recommended)
 
 The admin UI now surfaces Firebase email/password login by default. The full onboarding flow is:

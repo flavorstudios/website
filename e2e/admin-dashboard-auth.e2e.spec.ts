@@ -1,5 +1,6 @@
 import { test, expect } from "./test-setup";
 import { awaitAppReady } from "./utils/awaitAppReady";
+import { primeAdminSession } from "./utils/auth";
 
 const CI_ALLOWED_CONSOLE_ERRORS = [
   // client/admin auth complains in CI because we don’t pass public Firebase keys
@@ -25,10 +26,7 @@ test("logs in via cookie and loads dashboard without console errors", async ({
   });
 
   // Fake login by setting the admin-session cookie
-  await context.addCookies([
-    { name: "admin-session", value: "playwright", domain: "127.0.0.1", path: "/" },
-    { name: "admin-session", value: "playwright", domain: "localhost", path: "/" },
-  ]);
+  await primeAdminSession(context);
 
   // go to the dashboard
   await page.goto("/admin/dashboard");
@@ -37,9 +35,12 @@ test("logs in via cookie and loads dashboard without console errors", async ({
   await awaitAppReady(page, { admin: true });
 
   // deterministic anchor for CI/e2e (rendered by the page when CI-like)
-  await expect(page.getByTestId("admin-dashboard-root")).toBeAttached({
-    timeout: 15_000,
-  });
+  // Scope the locator to the <main> landmark so strict mode never sees duplicate roots.
+  const dashboardRoot = page
+    .getByRole("main")
+    .locator('[data-testid="admin-dashboard-root"]')
+    .first();
+  await expect(dashboardRoot).toBeVisible({ timeout: 15_000 });
 
   // in CI we allow the known noisy errors only
   const isCI = process.env.CI === "true" || process.env.CI === "1";

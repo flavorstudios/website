@@ -1,21 +1,46 @@
-// app/api/comments/submit/route.ts
-
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { serverEnv } from "@/env/server";
+import { handleOptionsRequest } from "@/lib/api/cors";
+import {
+  createRequestContext,
+  errorResponse,
+  jsonResponse,
+  type RequestContext,
+} from "@/lib/api/response";
+import { logError } from "@/lib/log";
 
-// --- CONFIG ---
-const PERSPECTIVE_API_KEY = serverEnv.PERSPECTIVE_API_KEY!;
-const THRESHOLD = 0.75; // Moderation strictness
+const PERSPECTIVE_API_KEY = serverEnv.PERSPECTIVE_API_KEY;
+const THRESHOLD = 0.75;
 
-// --- Moderate comment using Perspective API ---
-async function moderateComment(text: string) {
+type ModerationScores = {
+  toxicity: number;
+  insult: number;
+  threat: number;
+};
+
+async function moderateComment(
+  text: string,
+  context: RequestContext,
+): Promise<ModerationScores | null> {
+  if (!PERSPECTIVE_API_KEY) {
+    logError("comments:moderate:config", undefined, {
+      requestId: context.requestId,
+      message: "Perspective API key not configured",
+    });
+    return null;
+  }
+
   try {
     const response = await fetch(
       `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_API_KEY}`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Request-ID": context.requestId,
+        },
+        cache: "no-store",
         body: JSON.stringify({
           comment: { text },
           requestedAttributes: {
@@ -25,58 +50,75 @@ async function moderateComment(text: string) {
           },
           doNotStore: true,
         }),
-      }
+      },
     );
 
     if (!response.ok) {
-      // Perspective API failed, return scores as null for fail-safe handling
+      logError("comments:moderate:response", undefined, {
+        requestId: context.requestId,
+        status: response.status,
+      });
       return null;
     }
 
     const data = await response.json();
-    const scores = {
+    return {
       toxicity: data.attributeScores?.TOXICITY?.summaryScore.value ?? 0,
       insult: data.attributeScores?.INSULT?.summaryScore.value ?? 0,
       threat: data.attributeScores?.THREAT?.summaryScore.value ?? 0,
     };
-
-    return scores;
   } catch (error) {
-    // On error, return null to signal moderation issue
-    console.error("[PERSPECTIVE_API_ERROR]", error);
+    logError("comments:moderate:error", error, {
+      requestId: context.requestId,
+    });
     return null;
   }
 }
 
-// --- Handle POST (Comment Submission) ---
-export async function POST(request: Request) {
+export function OPTIONS(request: NextRequest) {
+  return handleOptionsRequest(request, { allowMethods: ["POST"] });
+}
+
+export async function POST(request: NextRequest) {
+  const context = createRequestContext(request);
+
   try {
     const {
       author,
-      email,      // Optional for public
+      email,
       website,
       content,
       postId,
-      postType,   // "blog" or "video"
+      postType,
       parentId,
       ip,
       userAgent,
-    } = await request.json();
+    } = (await request.json()) as {
+      author?: string;
+      email?: string;
+      website?: string;
+      content?: string;
+      postId?: string;
+      postType?: string;
+      parentId?: string;
+      ip?: string;
+      userAgent?: string;
+    };
 
-    // Required fields check
     if (!author || !content || !postId || !postType) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+      return jsonResponse(
+        context,
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
     }
 
-    // Moderate content
-    const scores = await moderateComment(content);
+    const scores = await moderateComment(content, context);
 
-    // Decide status
     let isFlagged: boolean;
     let status: "approved" | "pending";
 
     if (!scores) {
-      // If moderation fails, default to pending/manual review
       isFlagged = true;
       status = "pending";
     } else {
@@ -87,8 +129,15 @@ export async function POST(request: Request) {
       status = isFlagged ? "pending" : "approved";
     }
 
-    // Firestore doc structure
-    const newComment = {
+    const db = getAdminDb();
+    const ref = db
+      .collection("comments")
+      .doc(postId)
+      .collection("entries")
+      .doc();
+
+    await ref.set({
+      id: ref.id,
       author: author || "Anonymous",
       email: email || "",
       website: website || "",
@@ -99,29 +148,16 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
       ip: ip || "",
       userAgent: userAgent || "",
-      flagged: isFlagged, // <-- Persist flagged status!
+      flagged: isFlagged,
       status,
       scores: scores || {
         toxicity: null,
         insult: null,
         threat: null,
       },
-    };
-
-    // Store in Firestore
-    const db = getAdminDb();
-    const ref = db
-      .collection("comments")
-      .doc(postId)
-      .collection("entries")
-      .doc();
-
-    await ref.set({
-      ...newComment,
-      id: ref.id,
     });
 
-    return NextResponse.json({
+    return jsonResponse(context, {
       success: true,
       status,
       flagged: isFlagged,
@@ -131,8 +167,8 @@ export async function POST(request: Request) {
         ? "Comment submitted but flagged for moderation."
         : "Comment submitted successfully.",
     });
-  } catch (err) {
-    console.error("[COMMENT_SUBMIT_ERROR]", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  } catch (error) {
+    logError("comments:submit", error, { requestId: context.requestId });
+    return errorResponse(context, { error: "Server error" }, 500);
   }
 }

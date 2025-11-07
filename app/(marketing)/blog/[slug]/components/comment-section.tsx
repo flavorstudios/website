@@ -42,7 +42,9 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   const fetchComments = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/comments?postId=${postId}&postType=blog`)
+      const response = await fetch(`/api/comments?postId=${postId}&postType=blog`, {
+        cache: "no-store",
+      })
       if (response.ok) {
         const data = (await response.json()) as Comment[] | { comments?: Comment[] }
         let normalizedComments: Comment[] = []
@@ -91,6 +93,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
         headers: {
           "Content-Type": "application/json",
         },
+        cache: "no-store",
         body: JSON.stringify({
           postId,
           postType: "blog",

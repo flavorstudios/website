@@ -5,6 +5,7 @@ import { getCanonicalUrl } from "@/lib/seo-utils";
 import fs from "fs";
 import path from "path";
 import { serverEnv } from "@/env/server";
+import { canonicalBaseUrl } from "@/lib/base-url";
 import type { BlogPost } from "@/lib/content-store";
 
 // ---- Video interface with categories? ----
@@ -177,11 +178,7 @@ ${xmlItems}
 export async function generateRssFeed(): Promise<string> {
   try {
     // --- Fetch blogs and videos via PUBLIC API ---
-    const baseUrl =
-      serverEnv.NEXT_PUBLIC_BASE_URL ||
-      serverEnv.BASE_URL ||
-      SITE_URL ||
-      "https://flavorstudios.in";
+    const baseUrl = canonicalBaseUrl();
 
     const [blogsRes, videosRes] = await Promise.all([
       fetch(`${baseUrl}/api/blogs`, {

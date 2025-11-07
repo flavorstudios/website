@@ -71,12 +71,12 @@ describe("isAdmin helper", () => {
   it("only treats ADMIN_BYPASS=true as bypass", async () => {
     process.env.ADMIN_EMAILS = "";
     process.env.ADMIN_BYPASS = "1";
-    let adminModule = await loadModule();
-    expect(adminModule.isAdmin("user@example.com")).toBe(false);
+    const firstLoad = await loadModule();
+    expect(firstLoad.isAdmin("user@example.com")).toBe(false);
 
     jest.resetModules();
     process.env.ADMIN_BYPASS = "true";
-    adminModule = await loadModule();
-    expect(adminModule.isAdmin("user@example.com")).toBe(true);
+    const secondLoad = await loadModule();
+    expect(secondLoad.isAdmin("user@example.com")).toBe(true);
   });
 });

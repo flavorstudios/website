@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { serverEnv } from "@/env/server";
+import { resolveRequestBaseUrl } from "@/lib/base-url";
 import { isAdmin } from "@/lib/admin-allowlist";
 import { adminAuth } from "@/lib/firebase-admin";
 import {
@@ -29,12 +30,7 @@ const MIN_DURATION_MS = 400;
 export const dynamic = "force-dynamic";
 
 function resolveBaseUrl(req: NextRequest): string {
-  return (
-    serverEnv.BASE_URL ||
-    serverEnv.NEXT_PUBLIC_BASE_URL ||
-    req.nextUrl.origin ||
-    "http://127.0.0.1:3000"
-  );
+  return resolveRequestBaseUrl(req);
 }
 
 function parseLocation(headers: Headers): PasswordResetLocation {

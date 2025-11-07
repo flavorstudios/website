@@ -34,6 +34,8 @@ import {
   readRuntimeTimezones,
 } from "@/lib/settings/timezones"
 
+const AUTO_TIMEZONE_VALUE = "__auto__"
+
 interface ProfileFormProps {
   initialValues: ProfileSettingsInput & {
     emailVerified?: boolean
@@ -115,6 +117,10 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
     },
     [],
   )
+
+  const timezoneValue = form.watch("timezone") ?? ""
+  const timezoneSelectValue =
+    timezoneValue.trim().length === 0 ? AUTO_TIMEZONE_VALUE : timezoneValue
 
   const sendVerification = () => {
     if (verificationCooldown && verificationCooldown > Date.now()) return
@@ -252,14 +258,22 @@ export function ProfileForm({ initialValues }: ProfileFormProps) {
           <div className="space-y-2">
             <Label htmlFor="timezone">Timezone</Label>
             <Select
-              value={form.watch("timezone") ?? ""}
-              onValueChange={(value) => form.setValue("timezone", value, { shouldDirty: true })}
+              value={timezoneSelectValue}
+              onValueChange={(value) =>
+                form.setValue(
+                  "timezone",
+                  value === AUTO_TIMEZONE_VALUE ? "" : value,
+                  {
+                    shouldDirty: true,
+                  },
+                )
+              }
             >
               <SelectTrigger id="timezone">
                 <SelectValue placeholder="Select timezone" />
               </SelectTrigger>
               <SelectContent className="max-h-64">
-                <SelectItem value="">Auto</SelectItem>
+                <SelectItem value={AUTO_TIMEZONE_VALUE}>Auto</SelectItem>
                 {timezones.map((zone) => (
                   <SelectItem key={zone} value={zone}>
                     {zone}

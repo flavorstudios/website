@@ -26,6 +26,19 @@ export const testNoMocks = test.extend<TestFixtures>({
 });
 
 test.beforeEach(async ({ page, useGlobalMocks }) => {
+  const ignoredConsolePatterns = [/ADMIN_SDK_UNAVAILABLE/];
+
+  page.on('console', (message) => {
+    const text = message.text();
+    if (ignoredConsolePatterns.some((pattern) => pattern.test(text))) {
+      return;
+    }
+
+    if (message.type() === 'error') {
+      console.error(`[console.${message.type()}] ${text}`);
+    }
+  });
+  
   if (useGlobalMocks) {
     await applyGlobalMocks(page);
   }

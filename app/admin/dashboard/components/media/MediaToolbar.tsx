@@ -12,6 +12,8 @@ import { Star } from "lucide-react";
 
 import type { TypeFilter, SortBy, DateFilter, UsageFilter, SortOrder } from "@/types/media";
 
+const ALL_TAGS_OPTION = "__all__";
+
 interface Props {
   search: string;
   onSearchChange: (val: string) => void;
@@ -124,12 +126,15 @@ export default function MediaToolbar({
         </Select>
 
         {availableTags.length > 0 && (
-          <Select value={tagFilter} onValueChange={onTagFilter}>
+          <Select
+            value={tagFilter === "" ? ALL_TAGS_OPTION : tagFilter}
+            onValueChange={(val) => onTagFilter(val === ALL_TAGS_OPTION ? "" : val)}
+          >
             <SelectTrigger className="w-full sm:w-36" aria-label="Tag">
               <SelectValue placeholder="Tag" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Tags</SelectItem>
+              <SelectItem value={ALL_TAGS_OPTION}>All Tags</SelectItem>
               {availableTags.map((tag) => (
                 <SelectItem key={tag} value={tag}>
                   {tag}

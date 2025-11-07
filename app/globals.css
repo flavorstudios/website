@@ -109,6 +109,26 @@ body {
   bottom: 0;
 }
 
+html.e2e-no-motion *,
+html.e2e-no-motion *::before,
+html.e2e-no-motion *::after {
+  animation-duration: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0s !important;
+  scroll-behavior: auto !important;
+}
+
+body.e2e-no-motion {
+  scroll-behavior: auto !important;
+}
+
+html.e2e-no-motion .animate-spin,
+html.e2e-no-motion .animate-pulse,
+body.e2e-no-motion .animate-spin,
+body.e2e-no-motion .animate-pulse {
+  animation: none !important;
+}
+
 .login-legal-bar {
   display: flex;
   align-items: center;

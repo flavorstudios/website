@@ -17,21 +17,30 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutProps) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [isMobile, setIsMobile] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") {
+      return true
+    }
+    return window.innerWidth < 768
+  })
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window === "undefined") {
+      return false
+    }
+    return window.innerWidth >= 768
+  })
 
   useEffect(() => {
-    setMounted(true)
+    const computeIsMobile = () => window.innerWidth < 768
 
     const handleResize = () => {
-      const mobile = window.innerWidth < 768
+      const mobile = computeIsMobile()
       setIsMobile(mobile)
-      setSidebarOpen(!mobile) // open sidebar on desktop, closed on mobile by default
+      setSidebarOpen(mobile ? false : true)
     }
 
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isMobile) {
+      if (e.key === "Escape" && computeIsMobile()) {
         setSidebarOpen(false)
       }
     }
@@ -44,7 +53,7 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
       window.removeEventListener("resize", handleResize)
       window.removeEventListener("keydown", handleKey)
     }
-  }, [isMobile])
+  }, [])
 
   // Expose sidebar width globally so body-portaled overlays can read it
   useEffect(() => {
@@ -64,24 +73,6 @@ const AdminLayout = ({ children, activeSection, setActiveSection }: AdminLayoutP
     } catch (error) {
       logClientError("Logout failed:", error)
     }
-  }
-
-  if (!mounted) {
-    return (
-      <div
-        className="min-h-screen bg-background flex items-center justify-center"
-        role="status"
-        aria-busy="true"
-      >
-        <p className="sr-only" aria-hidden="true">
-          Loading Admin Dashboard
-        </p>
-        <div className="flex items-center space-x-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <span className="text-lg font-medium text-foreground">Loading Admin Dashboard...</span>
-        </div>
-      </div>
-    )
   }
 
   return (

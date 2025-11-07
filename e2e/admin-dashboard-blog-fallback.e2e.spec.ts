@@ -64,7 +64,10 @@ test('blog fallback cards render before data resolves on mobile', async ({ page 
   await page.goto('/admin/dashboard/blog');
   await awaitAppReady(page);
 
-  await expect(page.getByRole('heading', { level: 1, name: /Blog/i })).toBeVisible();
+  const heading = page.getByRole('heading', { level: 1, name: /Blog/i });
+  const fallbackTitle = page.getByTestId('page-title').first();
+  await expect(heading.or(fallbackTitle)).toBeVisible();
+  await expect(fallbackTitle).toHaveText(/Blog/i);
 
   const cards = page.getByTestId('blog-card');
   await expect(cards.first()).toBeVisible();

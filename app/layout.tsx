@@ -15,6 +15,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Footer } from "@/components/footer";
 import { AfterMainSlot, FooterSlot, HeaderSlot, LayoutSlotsRoot } from "@/components/layout-slots";
 import { SkipLink } from "@/components/skip-link";
+import { E2EMotionProvider } from "@/components/e2e/E2EMotionProvider";
 
 import { getMetadata, getSchema } from "@/lib/seo-utils";
 import {
@@ -130,6 +131,17 @@ function DefaultHeader() {
 export default function RootLayout({ children }: { children: ReactNode }) {
   // GTM env flag
   const gtmId = serverEnv.NEXT_PUBLIC_GTM_CONTAINER_ID || "";
+  const truthyFlags = new Set(["1", "true", "TRUE", "True"]);
+  const isTruthy = (value: string | undefined) => (value ? truthyFlags.has(value) : false);
+  const e2eMotionDisabled =
+    isTruthy(serverEnv.E2E) ||
+    isTruthy(process.env.NEXT_PUBLIC_E2E) ||
+    isTruthy(process.env.E2E) ||
+    isTruthy(process.env.TEST_MODE);
+  const htmlClassName = e2eMotionDisabled ? "e2e-no-motion" : undefined;
+  const bodyClassName = `${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased bg-white${
+    e2eMotionDisabled ? " e2e-no-motion" : ""
+  }`;
 
   return (
     <html
@@ -137,6 +149,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       style={{ fontFamily: "'Poppins', sans-serif" }}
       suppressHydrationWarning
       data-app-env={serverEnv.NODE_ENV}
+      className={htmlClassName}
+      data-e2e-motion={e2eMotionDisabled ? "true" : undefined}
     >
       <head>
         {/* Meta viewport fallback for bots/legacy */}
@@ -180,50 +194,50 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         )}
         {/* END GTM (HEAD) */}
       </head>
-      <body
-        className={`${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased bg-white`}
-      >
+      <body className={bodyClassName}>
         <div id="top" />
         <LayoutSlotsRoot footer={<Footer />}>
           <ThemeProvider>
-            <SkipLink targetId="main-content" />
+            <E2EMotionProvider>
+              <SkipLink targetId="main-content" />
 
-            {/* GTM (NOSCRIPT) — only if container id is provided */}
-            {gtmId && (
-              <noscript>
-                <iframe
-                  src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
-                  height="0"
-                  width="0"
-                  style={{ display: "none", visibility: "hidden" }}
-                  title="Google Tag Manager NoScript"
-                />
-              </noscript>
-            )}
-            {/* END GTM (NOSCRIPT) */}
+              {/* GTM (NOSCRIPT) — only if container id is provided */}
+              {gtmId && (
+                <noscript>
+                  <iframe
+                    src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+                    height="0"
+                    width="0"
+                    style={{ display: "none", visibility: "hidden" }}
+                    title="Google Tag Manager NoScript"
+                  />
+                </noscript>
+              )}
+              {/* END GTM (NOSCRIPT) */}
 
-            <div className="flex min-h-screen flex-col">
-              <header role="banner" className="w-full">
-                <HeaderSlot fallback={<DefaultHeader />} />
-              </header>
+              <div className="flex min-h-screen flex-col">
+                <header role="banner" className="w-full">
+                  <HeaderSlot fallback={<DefaultHeader />} />
+                </header>
 
-              <main
-                id="main-content"
-                role="main"
-                tabIndex={-1}
-                className="flex-1 focus-visible:outline-none"
-              >
-                {children}
-              </main>
+                <main
+                  id="main-content"
+                  role="main"
+                  tabIndex={-1}
+                  className="flex-1 focus-visible:outline-none"
+                >
+                  {children}
+                </main>
 
-              <footer role="contentinfo" className="w-full">
-                <FooterSlot fallback={<Footer />} />
-              </footer>
-            </div>
+                <footer role="contentinfo" className="w-full">
+                  <FooterSlot fallback={<Footer />} />
+                </footer>
+              </div>
 
-            <AfterMainSlot />
+              <AfterMainSlot />
 
-            <Toaster />
+              <Toaster />
+            </E2EMotionProvider>
           </ThemeProvider>
         </LayoutSlotsRoot>
       </body>

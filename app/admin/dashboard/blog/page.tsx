@@ -47,6 +47,7 @@ function BlogFallback() {
       className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
       aria-busy="true"
       aria-live="polite"
+      aria-labelledby="blog-page-title"
     >
       {Array.from({ length: 4 }).map((_, i) => (
         <article
@@ -79,6 +80,7 @@ export default function BlogPage() {
     <div className="space-y-6">
       <header className="space-y-2">
         <h1
+          id="blog-page-title"
           data-testid="page-title"
           className="text-2xl font-semibold tracking-tight text-foreground"
         >

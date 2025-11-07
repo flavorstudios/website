@@ -25,6 +25,35 @@ pnpm exec playwright test -g "admin dashboard" --headed --project=chromium-light
 pnpm exec playwright show-trace test-results/**/trace.zip
 ```
 
+### Running the chromium-light suite locally
+
+1. Ensure the app is built and running with the same flags CI uses:
+
+   ```bash
+   pnpm -s build
+   NEXT_PUBLIC_E2E=1 ADMIN_AUTH_DISABLED=1 ADMIN_BYPASS=true pnpm -s start:test:prod
+   ```
+
+2. In another terminal, execute the Playwright project that fails in CI:
+
+   ```bash
+   pnpm exec playwright test --project=chromium-light --max-failures=1 --reporter=list
+   ```
+
+   The `pnpm e2e --project=chromium-light --max-failures=1 --reporter=list` shortcut is equivalent.
+
+3. To iterate on a single spec, append the file path:
+
+   ```bash
+   pnpm exec playwright test e2e/admin-dashboard-error.e2e.spec.ts --project=chromium-light --headed
+   ```
+
+### Motion-free E2E runs
+
+When `NEXT_PUBLIC_E2E`, `E2E`, or `TEST_MODE` is truthy the root `<html>` element receives the `e2e-no-motion` class and all CSS animations/transitions collapse to zero duration. The Playwright harness also wraps the app in a Framer Motion `MotionConfig` with `reducedMotion="always"` so animated mounts keep a stable DOM for mobile viewport tests.
+
+The class is applied globally by `app/layout.tsx` and styled in `app/globals.css`. You can inspect the DOM in the running app to confirm the flag is active (`document.documentElement.dataset.e2eMotion === 'true'`).
+
 Unset the bypass flags and provide real Firebase credentials to exercise end-to-end auth flows.
 
 ## Firebase email login (recommended)

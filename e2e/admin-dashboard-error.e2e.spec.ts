@@ -61,8 +61,9 @@ test('shows network error when dashboard data fails to load', async ({ page }) =
   await expect(page.getByTestId('dashboard-error-code')).toHaveText('DASHLOAD_5XX');
 
   // Open sidebar (button is expected elsewhere in the layout)
-  const openSidebarButton = page.getByLabel('Open sidebar');
-  await expect(openSidebarButton).toBeVisible();
+  const openSidebarButton = page.getByTestId('open-sidebar');
+  await openSidebarButton.waitFor({ state: 'visible' });
+  await expect(openSidebarButton).toBeEnabled();
   await openSidebarButton.click();
 
   await page.waitForSelector('#app-sidebar', { state: 'visible' });

@@ -1,7 +1,7 @@
 import type { SectionId } from "./sections";
 
 export const SECTION_HEADINGS: Record<SectionId, string> = {
-  overview: "Admin Dashboard",
+  overview: "Dashboard Overview",
   blogs: "Blog Posts",
   videos: "Videos",
   media: "Media Manager",
@@ -15,7 +15,7 @@ export const SECTION_HEADINGS: Record<SectionId, string> = {
 };
 
 export const SECTION_DESCRIPTIONS: Record<SectionId, string> = {
-  overview: "Monitor studio performance and recent activity at a glance.",
+  overview: "Track activity, performance, and quick actions for your studio.",
   blogs: "Manage your blog posts, drafts, and editorial calendar.",
   videos: "Manage your YouTube content and upcoming releases.",
   media: "Organize and review your uploaded media assets before publishing.",

@@ -38,6 +38,8 @@ import type { LucideIcon } from "lucide-react";
 import { fetcher } from "@/lib/fetcher";
 import { useRole } from "../contexts/role-context";
 import { SectionId } from "../sections";
+import type { HeadingLevel } from "../page-heading";
+import { SECTION_HEADINGS, SECTION_DESCRIPTIONS } from "../section-metadata";
 import { HttpError } from "@/lib/http";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -123,10 +125,16 @@ const quickActions: QuickAction[] = [
 
 interface DashboardOverviewProps {
   onNavigateSection?: (section: SectionId, href: string) => void;
+  headingId?: string;
+  headingLevel?: HeadingLevel;
+  showHeading?: boolean;
 }
 
 export default function DashboardOverview({
   onNavigateSection,
+  headingId,
+  headingLevel,
+  showHeading = true,
 }: DashboardOverviewProps) {
   useEffect(() => {
     if (typeof window !== "undefined" && !(window as any).Chart) {
@@ -399,17 +407,24 @@ export default function DashboardOverview({
         ? "text-red-700"
         : "text-gray-700";
 
+  const headingTitle = SECTION_HEADINGS.overview;
+  const headingDescription = SECTION_DESCRIPTIONS.overview;
+  const resolvedHeadingLevel = headingLevel ?? 2;
+
   return (
     <div className="space-y-6" aria-busy={isInitialLoading || statsQuery.isFetching}>
-      <PageHeader
-        level={2}
-        className="mb-4"
-        containerClassName="flex-col"
-        headingClassName="text-2xl font-semibold text-foreground"
-        descriptionClassName="text-sm text-muted-foreground"
-        title="Dashboard Overview"
-        description="Track activity, performance, and quick actions for your studio"
-      />
+      {showHeading ? (
+        <PageHeader
+          level={resolvedHeadingLevel}
+          className="mb-4"
+          containerClassName="flex-col"
+          headingClassName="text-2xl font-semibold text-foreground"
+          descriptionClassName="text-sm text-muted-foreground"
+          title={headingTitle}
+          description={headingDescription}
+          headingId={headingId}
+        />
+      ) : null}
       {showBlogUnavailable && (
         <Alert
           variant="destructive"

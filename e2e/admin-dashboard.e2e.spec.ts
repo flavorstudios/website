@@ -29,7 +29,7 @@ test('admin dashboard renders', async ({ page }) => {
   await awaitAppReady(page);
   const pageHeading = page.locator('h1');
   await expect(pageHeading).toHaveCount(1);
-  await expect(pageHeading).toHaveText('Admin Dashboard');
+  await expect(pageHeading).toHaveText('Dashboard Overview');
   await expect(page.getByTestId('app-main')).toBeVisible();
   await expect(page.getByTestId('dashboard-loading')).toBeVisible();
   await expect(page.getByText('Total Posts')).toBeVisible();

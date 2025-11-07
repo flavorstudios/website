@@ -538,6 +538,7 @@ export default function AdminDashboardPageClient({
           <DashboardOverview
             key="overview"
             onNavigateSection={navigateToSection}
+            showHeading={false}
           />
         );
       case "blogs":
@@ -565,6 +566,7 @@ export default function AdminDashboardPageClient({
           <DashboardOverview
             key="overview-fallback"
             onNavigateSection={navigateToSection}
+            showHeading={false}
           />
         );
     }

@@ -1,11 +1,12 @@
-import { Suspense } from "react";
-
 import { PageHeader } from "@/components/admin/page-header";
 import { AdminDashboardSectionPage } from "../AdminDashboardSectionPage";
 import { SECTION_DESCRIPTIONS, SECTION_HEADINGS } from "../section-metadata";
 import type { SectionId } from "../sections";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { Suspense } from "react";
+import { BlogCardSkeleton } from "@/components/BlogCardSkeleton";
+import { getBlogOverview } from "@/lib/blog-data";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -55,34 +56,21 @@ function BlogFallback({ headingId }: { headingId: string }) {
       aria-labelledby={headingId}
     >
       {Array.from({ length: 4 }).map((_, i) => (
-        <article
-          key={i}
-          data-testid="blog-card"
-          className="rounded-xl border border-border bg-card p-4 shadow-sm"
-          aria-hidden="true"
-        >
-          <div className="mb-4 flex items-start gap-3">
-            <div className="h-12 w-16 flex-shrink-0 animate-pulse rounded bg-muted" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
-              <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
-            </div>
-            <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
-          </div>
-          <div className="space-y-2">
-            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-24 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-16 animate-pulse rounded bg-muted" />
-          </div>
-        </article>
+        <BlogCardSkeleton key={i} data-testid="blog-card" aria-hidden="true" />
       ))}
     </div>
   );
 }
 
-export default function BlogPage() {
+export default async function BlogPage() {
   const title = SECTION_HEADINGS[SECTION];
   const description = SECTION_DESCRIPTIONS[SECTION];
+
+  // Kick off a lightweight server-side fetch so that Next.js renders the
+  // route-level loading.tsx fallback in E2E/CI where the admin APIs are
+  // intentionally slow or unavailable. The helper is CI-safe and never loads
+  // the Admin SDK when NEXT_PUBLIC_E2E is set.
+  await getBlogOverview();
 
   return (
     <div className="space-y-6">

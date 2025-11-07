@@ -64,7 +64,7 @@ test('admin nav tabs render correct content', async ({ page }) => {
   await awaitAppReady(page);
 
   const sections = [
-    { label: 'Dashboard', expected: 'Admin Dashboard', path: '/admin/dashboard' },
+    { label: 'Dashboard', expected: 'Dashboard Overview', path: '/admin/dashboard' },
     { label: 'Blog Posts', expected: 'Blog Posts', path: '/admin/dashboard/blog-posts' },
     { label: 'Videos', expected: 'Videos', path: '/admin/dashboard/videos' },
     { label: 'Media', expected: 'Media Manager', path: '/admin/dashboard/media' },

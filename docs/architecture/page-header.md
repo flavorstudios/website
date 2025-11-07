@@ -30,6 +30,11 @@ const HEADING_ID = "my-page-title";
 The `headingId` wire-up keeps `aria-labelledby` accurate while avoiding a
 second `<h1>` inside the dashboard shell.
 
+- The dashboard overview section inherits the layout heading inside
+  `AdminDashboardPageClient`. If you render `DashboardOverview` in isolation
+  (for example in Storybook or a custom shell), pass `showHeading` so it can
+  render its own `<PageHeader>` without reintroducing duplicates in production.
+
 ## Secondary headings
 
 - Secondary panels within the dashboard should demote their headings to `h2` or

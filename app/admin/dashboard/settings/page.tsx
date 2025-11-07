@@ -84,7 +84,9 @@ function SettingsUnauthorized() {
   );
 }
 
-type SettingsPageProps = PageProps<Record<string, never>, { tab?: string | string[] }>;
+type SettingsSearchParams = { tab?: string | string[] };
+
+type SettingsPageProps = PageProps<Record<string, never>, SettingsSearchParams>;
 
 type LoadErrorState = {
   message: string;
@@ -98,10 +100,9 @@ export default async function SettingsPage(props: SettingsPageProps) {
   }
 
   const { searchParams } = await unwrapPageProps(props);
-  const resolvedSearchParams = searchParams ?? {};
-  const tab = Array.isArray(resolvedSearchParams.tab)
-    ? resolvedSearchParams.tab[0]
-    : resolvedSearchParams.tab;
+  const resolvedSearchParams: SettingsSearchParams = searchParams ?? {};
+  const tabParam = resolvedSearchParams.tab;
+  const tab = Array.isArray(tabParam) ? tabParam[0] : tabParam;
   const showDetail = process.env.NODE_ENV !== "production";
 
   let settings: Awaited<ReturnType<typeof loadSettings>> | null = null;

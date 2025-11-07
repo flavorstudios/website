@@ -24,5 +24,15 @@
     "local/no-h1-outside-page": "error",
     "local/no-server-import-in-client": "error"
   },
-  "overrides": []
+  "overrides": [
+    {
+      "files": [
+        "**/*.test.{ts,tsx,js,jsx}",
+        "**/__tests__/**/*.{ts,tsx,js,jsx}"
+      ],
+      "rules": {
+        "@next/next/no-assign-module-variable": "off"
+      }
+    }
+  ]
 }

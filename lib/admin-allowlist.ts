@@ -1,5 +1,3 @@
-const TRUTHY_FLAGS = new Set(["1", "true"]);
-
 export type AdminAllowlist = {
   configured: string[];
   extras: string[];

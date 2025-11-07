@@ -73,7 +73,9 @@ function SettingsUnauthorized() {
         </p>
         <a
           href="/admin/dashboard"
-          className="mt-4 inline-flex items-center rounded-md border border-border/60 bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+          className={
+            "mt-4 inline-flex items-center rounded-md border border-border/60 bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+          }
         >
           Return to dashboard
         </a>

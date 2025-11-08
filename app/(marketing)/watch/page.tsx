@@ -15,7 +15,6 @@ import { getDynamicCategories } from "@/lib/dynamic-categories";
 import { canonicalBaseUrl } from "@/lib/base-url";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { formatDate } from "@/lib/date";
-import { serverEnv } from "@/env/server";
 type Category = { name: string; slug: string };
 
 export const metadata = getMetadata({

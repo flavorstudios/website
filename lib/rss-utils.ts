@@ -1,6 +1,6 @@
 // lib/rss-utils.ts
 
-import { SITE_URL, SITE_NAME } from "@/lib/constants";
+import { SITE_NAME } from "@/lib/constants";
 import { getCanonicalUrl } from "@/lib/seo-utils";
 import fs from "fs";
 import path from "path";

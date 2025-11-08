@@ -39,9 +39,6 @@
     --ring: 222.2 84% 4.9%;
     --radius: 0.75rem;
 
-    /* Sidebar defaults */
-    --sidebar-w: 280px;
-
     /* Font role variables (all mapped to Poppins) */
     --fs-body: var(--font-poppins);
     --fs-heading: var(--font-poppins);
@@ -103,10 +100,7 @@ body {
 #overlay {
   position: fixed;
   z-index: 40;
-  left: var(--sidebar-w, 16rem);
-  right: 0;
-  top: 0;
-  bottom: 0;
+  inset: 0;
 }
 
 html.e2e-no-motion *,

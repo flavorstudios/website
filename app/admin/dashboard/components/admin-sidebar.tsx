@@ -27,6 +27,7 @@ import useMediaQuery from "@/hooks/use-media-query"
 import { ADMIN_HEADER_HEIGHT } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 import { SectionId } from "../sections"
+import { useAdminShellVariant } from "@/components/admin/admin-shell-context"
 
 interface AdminSidebarProps {
   /** Optional id so aria-controls can point to the landmark directly */
@@ -55,6 +56,10 @@ export function AdminSidebar({
   setSidebarOpen,
   onNavigateSection,
 }: AdminSidebarProps) {
+  const variant = useAdminShellVariant()
+  if (variant !== "dashboard") {
+    return null
+  }
   const { accessibleSections } = useRole()
   const isMobile = useMediaQuery("(max-width: 767px)")
   const pathname = usePathname()

@@ -410,6 +410,10 @@ export default function AdminDashboardPageClient({
 
   // --- Sync sidebar width globally for responsive layout -------------------
   useEffect(() => {
+    if (shellVariant !== "dashboard") {
+      return;
+    }
+    
     const root = document.documentElement;
     const width = isMobile
       ? sidebarOpen
@@ -422,7 +426,7 @@ export default function AdminDashboardPageClient({
     return () => {
       root.style.removeProperty("--sidebar-w");
     };
-  }, [sidebarOpen, isMobile]);
+  }, [sidebarOpen, isMobile, shellVariant]);
 
   // --- Lock root scroll when mobile sidebar is open ------------------------
   useEffect(() => {
@@ -584,7 +588,9 @@ export default function AdminDashboardPageClient({
           <div
             className={cn(
               "admin-shell grid min-h-screen supports-[height:100dvh]:min-h-[100dvh]",
-              "grid-cols-1 lg:grid-cols-[var(--sidebar-w,16rem)_1fr]",
+              shellVariant === "dashboard"
+                ? "grid-cols-1 lg:grid-cols-[var(--sidebar-w,16rem)_1fr]"
+                : "grid-cols-1",
               "transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden"
             )}
             data-admin-shell-variant={shellVariant}

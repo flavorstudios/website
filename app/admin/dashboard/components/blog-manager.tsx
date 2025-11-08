@@ -60,7 +60,6 @@ import type { CategoryData } from "@/lib/dynamic-categories";
 import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions/blog";
 import { cn } from "@/lib/utils";
 import { Pagination } from "@/components/admin/Pagination";
-import { PageHeader } from "@/components/admin/page-header";
 import { fetcher } from "@/lib/fetcher";
 import { useDebounce } from "@/hooks/use-debounce";
 import useMediaQuery from "@/hooks/use-media-query";
@@ -493,20 +492,40 @@ export default function BlogManager() {
     return () => window.removeEventListener("keydown", onKey);
   }, [handleRevalidateBlog, handleCreatePost]);
 
-  const managementDescription =
-    "Manage your blog posts, drafts, and editorial calendar."
+  const headerActions = (
+      <div className="flex flex-wrap items-center justify-end gap-2" aria-label="Blog management actions">
+        <Button
+          onClick={handleRevalidateBlog}
+          disabled={isRevalidating}
+          size="sm"
+          className="rounded-xl px-4 flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white"
+          aria-label="Refresh blog posts"
+          title="Refresh blog posts"
+          data-testid="refresh"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRevalidating ? "animate-spin" : ""}`} />
+          {isRevalidating ? "Refreshing..." : "Refresh"}
+        </Button>
+        <Button
+          onClick={handleCreatePost}
+          size="sm"
+          className="rounded-xl px-4 flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow"
+          aria-label="New Post"
+          title="New Post"
+          data-testid="new-post"
+        >
+          <PlusCircle className="h-4 w-4" />
+          New Post
+        </Button>
+      </div>
+    )
 
   if (loading) {
     return (
       <div className="space-y-4">
-        <PageHeader
-          level={2}
-          className="mb-0"
-          containerClassName="flex-col"
-          title="Blog Management"
-          description={managementDescription}
-          headingProps={{ "data-testid": "page-title" }}
-        />
+        <p className="sr-only" aria-live="polite">
+          Loading blog management tools
+        </p>
         <div className="mt-4 space-y-4">
           <div className="sm:hidden space-y-3" data-testid="blog-card-list">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -582,42 +601,7 @@ export default function BlogManager() {
   // --- Main UI ---
   return (
     <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}> 
-      {/* Header with right-aligned action buttons */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <PageHeader
-          level={2}
-          className="mb-0"
-          containerClassName="flex-col"
-          title="Blog Management"
-          description={managementDescription}
-          headingProps={{ "data-testid": "page-title" }}
-        />
-        <div className="flex flex-shrink-0 gap-2">
-          <Button
-            onClick={handleRevalidateBlog}
-            disabled={isRevalidating}
-            size="sm"
-            className="rounded-xl px-4 flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white"
-            aria-label="Refresh blog posts"
-            title="Refresh blog posts"
-            data-testid="refresh"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRevalidating ? "animate-spin" : ""}`} />
-            {isRevalidating ? "Refreshing..." : "Refresh"}
-          </Button>
-          <Button
-            onClick={handleCreatePost}
-            size="sm"
-            className="rounded-xl px-4 flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow"
-            aria-label="New Post"
-            title="New Post"
-            data-testid="new-post"
-          >
-            <PlusCircle className="h-4 w-4" />
-            New Post
-          </Button>
-        </div>
-      </div>
+      {headerActions}
 
       {categoryErrorMessage && (
         <Alert variant="destructive" role="status">

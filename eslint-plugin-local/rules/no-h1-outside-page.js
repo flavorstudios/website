@@ -13,7 +13,6 @@ const ALLOWED_COMPONENT_FILES = new Set([
   "app/admin/forgot-password/ForgotPasswordForm.tsx",
   "app/admin/verify-email/VerifyEmailClient.tsx",
   "app/admin/search/AdminSearchPageClient.tsx",
-  "components/admin/dashboard/AdminSectionPage.tsx",
 ]);
 
 function isAllowedComponent(filename) {

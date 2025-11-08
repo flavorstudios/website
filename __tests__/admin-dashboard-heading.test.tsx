@@ -7,7 +7,6 @@ import "./helpers/mock-admin-dashboard";
 
 describe("AdminDashboardPageClient heading structure", () => {
   beforeEach(() => {
-    jest.resetModules();
     (global.fetch as unknown) = jest.fn(() =>
       Promise.resolve({ ok: true, json: async () => ({}) })
     );

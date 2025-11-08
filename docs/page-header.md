@@ -10,7 +10,8 @@ simple and consistent we standardize on the `PageHeader` component and the
   with no `level` prop. The surrounding layout provides the base heading level
   and `PageHeader` automatically resolves to `<h1>` for the first heading.
 - The admin layout (`app/admin/layout.tsx`) wraps every page in
-  `<HeadingLevelRoot>` so the inherited level resets to 1 at the top of each
+  `<HeadingRoot>` (an alias of `<HeadingLevelRoot>`) so the inherited level
+  resets to 1 at the top of each
   route.
 - After the top-level header, wrap the remainder of the page in
   `<HeadingLevelBoundary>`. Any nested `PageHeader` (or components that rely on

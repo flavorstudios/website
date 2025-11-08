@@ -25,7 +25,6 @@ const ALLOWED_LEVEL_ONE_COMPONENTS = new Set([
   "app/admin/forgot-password/ForgotPasswordForm.tsx",
   "app/admin/verify-email/VerifyEmailClient.tsx",
   "app/admin/search/AdminSearchPageClient.tsx",
-  "components/admin/dashboard/AdminSectionPage.tsx",
 ]);
 
 const COMPONENT_H1_ALLOWLIST = new Set([

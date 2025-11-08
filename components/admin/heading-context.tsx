@@ -40,3 +40,5 @@ export function HeadingLevelRoot({ children }: { children: ReactNode }) {
     <HeadingLevelContext.Provider value={1}>{children}</HeadingLevelContext.Provider>
   );
 }
+
+export const HeadingRoot = HeadingLevelRoot;

@@ -1,6 +1,7 @@
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { PageHeader } from "@/components/admin/page-header";
+import { HeadingLevelBoundary } from "@/components/admin/heading-context";
 import { loadSettings } from "./actions";
 import { SettingsAccessError } from "./errors";
 import { getCurrentAdminUid } from "@/lib/settings/server";
@@ -122,9 +123,10 @@ export default async function SettingsPage(props: SettingsPageProps) {
     }
   }
 
+  const headingId = "admin-settings-heading";
   const header = (
     <PageHeader
-      level={1}
+      headingId={headingId}
       title="Settings"
       description="Manage your profile, notifications, and appearance preferences"
     />
@@ -134,11 +136,13 @@ export default async function SettingsPage(props: SettingsPageProps) {
     return (
       <div className="space-y-6">
         {header}
-        <SettingsLoadErrorBanner
-          message={(loadError ?? { message: DEFAULT_LOAD_ERROR }).message}
-          detail={loadError?.detail ?? null}
-          showDetail={showDetail}
-        />
+        <HeadingLevelBoundary>
+          <SettingsLoadErrorBanner
+            message={(loadError ?? { message: DEFAULT_LOAD_ERROR }).message}
+            detail={loadError?.detail ?? null}
+            showDetail={showDetail}
+          />
+        </HeadingLevelBoundary>
       </div>
     );
   }
@@ -162,13 +166,15 @@ export default async function SettingsPage(props: SettingsPageProps) {
   return (
     <div className="space-y-6">
       {header}
-      <SettingsClient
-        initialTab={tab}
-        settings={settings}
-        showDevHint={showDetail}
-        emailVerified={emailVerified}
-        providerLocked={providerLocked}
-      />
+      <HeadingLevelBoundary>
+        <SettingsClient
+          initialTab={tab}
+          settings={settings}
+          showDevHint={showDetail}
+          emailVerified={emailVerified}
+          providerLocked={providerLocked}
+        />
+      </HeadingLevelBoundary>
     </div>
   );
 }

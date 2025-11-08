@@ -1,5 +1,15 @@
-import { AdminSectionPage } from "@/components/admin/dashboard/AdminSectionPage"
+import { AdminDashboardSectionPage } from "@/app/admin/dashboard/AdminDashboardSectionPage"
+import {
+  SECTION_DESCRIPTIONS,
+  SECTION_HEADINGS,
+} from "@/app/admin/dashboard/section-metadata"
 import type { SectionId } from "../dashboard/sections"
+import { AdminShellProvider } from "@/components/admin/admin-shell-context"
+import {
+  HeadingLevelBoundary,
+  HeadingLevelRoot,
+} from "@/components/admin/heading-context"
+import { PageHeader } from "@/components/admin/page-header"
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -7,5 +17,30 @@ export const dynamic = 'force-dynamic'
 const SECTION: SectionId = "inbox"
 
 export default function AdminEmailInboxPage() {
-  return <AdminSectionPage section={SECTION} />
+  const headingId = "admin-email-inbox-heading"
+  const title = SECTION_HEADINGS[SECTION]
+  const description = SECTION_DESCRIPTIONS[SECTION]
+
+  return (
+    <HeadingLevelRoot>
+      <PageHeader
+        headingId={headingId}
+        title={title}
+        description={description}
+        className="mb-2"
+        containerClassName="flex-col"
+        headingClassName="text-3xl font-semibold tracking-tight text-foreground"
+        descriptionClassName="text-sm text-muted-foreground"
+      />
+      <AdminShellProvider variant="dashboard">
+        <HeadingLevelBoundary>
+          <AdminDashboardSectionPage
+            section={SECTION}
+            suppressHeading
+            headingId={headingId}
+          />
+        </HeadingLevelBoundary>
+      </AdminShellProvider>
+    </HeadingLevelRoot>
+  )
 }

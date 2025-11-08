@@ -8,23 +8,29 @@ pages with the same page header layout.
 
 - Use `<PageHeader>` for the visible page title. It defaults to `h1` and accepts
   optional `level` when a section needs an `h2+`.
-- `AdminDashboardSectionPage` renders the canonical `<PageHeader>` when
-  `suppressHeading` is not set. This is the recommended path for most admin
-  pages.
-- When you need to manage the heading yourself (for example to wrap the page in
-  Suspense or to customise spacing), render `<PageHeader>` directly in the
-  route and pass `suppressHeading` plus `headingId` through to
+- Wrap the route body in `<HeadingRoot>` (or rely on the layout-provided
+  `<HeadingLevelRoot>`) and immediately render the canonical `<PageHeader>`.
+- After the header, wrap interactive content in `<HeadingLevelBoundary>` and
+  pass `suppressHeading` plus `headingId` through to
   `AdminDashboardSectionPage`:
 
 ```tsx
-const HEADING_ID = "my-page-title";
+const HEADING_ID = "admin-media-heading";
 
-<PageHeader headingId={HEADING_ID} title="Media Library" />
-<AdminDashboardSectionPage
-  section="media"
-  suppressHeading
-  headingId={HEADING_ID}
-/>
+return (
+  <HeadingRoot>
+    <PageHeader headingId={HEADING_ID} title="Media Library" />
+    <AdminShellProvider variant="dashboard">
+      <HeadingLevelBoundary>
+        <AdminDashboardSectionPage
+          section="media"
+          suppressHeading
+          headingId={HEADING_ID}
+        />
+      </HeadingLevelBoundary>
+    </AdminShellProvider>
+  </HeadingRoot>
+);
 ```
 
 The `headingId` wire-up keeps `aria-labelledby` accurate while avoiding a
@@ -47,11 +53,13 @@ second `<h1>` inside the dashboard shell.
 
 - `__tests__/admin-dashboard-heading.test.tsx` renders the dashboard shell and
   asserts the overview page exposes a single `<h1>`.
+- `src/__tests__/admin-single-h1.test.tsx` renders each admin route and confirms
+  that exactly one level-one heading is present, including hidden headings.
 - Playwright checks `/admin/dashboard` for exactly one `<h1>` and confirms the
   visible title text.
-- CI runs `pnpm check:single-h1` after every build. The script inspects the
-  compiled admin HTML and fails the build if any page emits zero or multiple
-  `<h1>` elements.
+- CI runs `pnpm check:single-h1` after every build. The script renders the admin
+  routes on the server and fails if a page emits zero or multiple `<h1>` or any
+  `role="heading" aria-level="1"` duplicates.
 
 Following this convention keeps the admin layout predictable and prevents new
 double-heading regressions.

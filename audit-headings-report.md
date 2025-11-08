@@ -17,7 +17,6 @@ Result (warnings only): 【f7b260†L1-L16】
 | Severity | File | Reason |
 | --- | --- | --- |
 | WARN | app/(admin)/system-tools/page.tsx | Expected `PageHeader level={1}` usage in the page client. |
-| WARN | components/admin/dashboard/AdminSectionPage.tsx | Shared helper renders the canonical level-one `PageHeader`. |
 | WARN | app/admin/dashboard/components/blog-editor.tsx | Blog editor client owns the single `PageHeader`. |
 | WARN | app/admin/dashboard/settings/page.tsx | SSR fallback keeps its own `PageHeader level={1}`. |
 | WARN | app/admin/forgot-password/ForgotPasswordForm.tsx | Auth form renders the canonical heading. |

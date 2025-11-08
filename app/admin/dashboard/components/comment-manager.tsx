@@ -17,9 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
-import { Slider } from "@/components/ui/slider"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,7 +50,6 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { formatDate } from "@/lib/date"
 import CommentBulkActions from "@/components/admin/comment/CommentBulkActions"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { logClientError } from "@/lib/log-client"
 
 const QUICK_REPLIES = [
@@ -100,6 +97,9 @@ const COMMENT_TABS: readonly CommentTab[] = [
 const isCommentTab = (value: string): value is CommentTab =>
   COMMENT_TABS.includes(value as CommentTab)
 
+const REFRESH_INTERVAL = 60_000
+const PAGE_SIZE = 10
+
 export default function CommentManager() {
   const [comments, setComments] = useState<Comment[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -112,24 +112,11 @@ export default function CommentManager() {
     }
   }
   const [deleteTargets, setDeleteTargets] = useState<{ id: string; postId: string }[] | null>(null)
-  const [showFlaggedOnly, setShowFlaggedOnly] = useState(false)
   const [postTypeFilter, setPostTypeFilter] = useState<"all" | "blog" | "video">("all")
-  const [sortBy, setSortBy] = useState<"date" | "toxicity">("date")
-  const [sortDirection, setSortDirection] = useState<"desc" | "asc">("desc")
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [autoRefresh, setAutoRefresh] = useState(true)
-  const [refreshInterval, setRefreshInterval] = useState(60000)
   const [replyTarget, setReplyTarget] = useState<Comment | null>(null)
   const [replyContent, setReplyContent] = useState("")
   const [replyLoading, setReplyLoading] = useState(false)
-  const [toxicityRange, setToxicityRange] = useState<[number, number]>([0, 1])
-  const [autoApprove, setAutoApprove] = useState(false)
-  const [autoApproveThreshold, setAutoApproveThreshold] = useState(0.2)
-  const [autoSpam, setAutoSpam] = useState(false)
-  const [autoSpamThreshold, setAutoSpamThreshold] = useState(0.8)
   const { toast } = useToast()
 
   const loadComments = useCallback(async () => {
@@ -151,10 +138,9 @@ export default function CommentManager() {
   }, [loadComments])
 
   useEffect(() => {
-    if (!autoRefresh) return
-    const interval = setInterval(loadComments, refreshInterval)
+    const interval = setInterval(loadComments, REFRESH_INTERVAL)
     return () => clearInterval(interval)
-  }, [autoRefresh, refreshInterval, loadComments])
+  }, [loadComments])
 
   const updateCommentStatus = useCallback(
     async (id: string, postId: string, status: Comment["status"]) => {
@@ -185,22 +171,6 @@ export default function CommentManager() {
     },
     [loadComments, toast]
   )
-
-  useEffect(() => {
-    if (!autoApprove) return
-    const pending = comments.filter(
-      (c) => c.status === "pending" && (c.scores?.toxicity ?? 1) <= autoApproveThreshold
-    )
-    pending.forEach((c) => updateCommentStatus(c.id, c.postId, "approved"))
-  }, [comments, autoApprove, autoApproveThreshold, updateCommentStatus])
-
-  useEffect(() => {
-    if (!autoSpam) return
-    const pending = comments.filter(
-      (c) => c.status === "pending" && (c.scores?.toxicity ?? 0) >= autoSpamThreshold
-    )
-    pending.forEach((c) => updateCommentStatus(c.id, c.postId, "spam"))
-  }, [comments, autoSpam, autoSpamThreshold, updateCommentStatus])
 
   const deleteComment = async (id: string, postId: string) => {
     setDeleteTargets([{ id, postId }])
@@ -405,226 +375,23 @@ export default function CommentManager() {
         : activeTab === "flagged"
         ? Boolean(comment.flagged)
         : comment.status === activeTab
-    const matchesFlagged =
-      activeTab === "flagged"
-        ? true
-        : showFlaggedOnly
-        ? Boolean(comment.flagged)
-        : true
     const matchesType = postTypeFilter === "all" || comment.postType === postTypeFilter
-    const matchesDate =
-      (!startDate || new Date(comment.createdAt) >= new Date(startDate)) &&
-      (!endDate || new Date(comment.createdAt) <= new Date(endDate))
-    const matchesToxicity =
-      comment.scores
-        ? comment.scores.toxicity >= toxicityRange[0] &&
-          comment.scores.toxicity <= toxicityRange[1]
-        : true
-    return (
-      matchesSearch &&
-      matchesTab &&
-      matchesFlagged &&
-      matchesType &&
-      matchesDate &&
-      matchesToxicity
-    )
+    return matchesSearch && matchesTab && matchesType
   })
 
-  const sortedComments = [...filteredComments].sort((a, b) => {
-    const aVal =
-      sortBy === "date"
-        ? new Date(a.createdAt).getTime()
-        : a.scores?.toxicity ?? 0
-    const bVal =
-      sortBy === "date"
-        ? new Date(b.createdAt).getTime()
-        : b.scores?.toxicity ?? 0
-    return sortDirection === "desc" ? bVal - aVal : aVal - bVal
-  })
+  const sortedComments = [...filteredComments].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
 
-  const totalPages = Math.max(1, Math.ceil(sortedComments.length / pageSize))
+  const totalPages = Math.max(1, Math.ceil(sortedComments.length / PAGE_SIZE))
   const paginatedComments = sortedComments.slice(
-    (page - 1) * pageSize,
-    page * pageSize
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
   )
 
   useEffect(() => {
     setPage(1)
-  }, [
-    searchTerm,
-    activeTab,
-    showFlaggedOnly,
-    postTypeFilter,
-    startDate,
-    endDate,
-    toxicityRange,
-    pageSize,
-  ])
-
-  const FilterControls = () => (
-    <div className="flex flex-wrap items-center gap-2">
-      <Select
-        value={postTypeFilter}
-        onValueChange={(v) => setPostTypeFilter(v as "all" | "blog" | "video")}
-      >
-        <SelectTrigger className="w-[120px]">
-          <SelectValue placeholder="Type" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All types</SelectItem>
-          <SelectItem value="blog">Blog</SelectItem>
-          <SelectItem value="video">Video</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select value={sortBy} onValueChange={(v) => setSortBy(v as "date" | "toxicity")}>
-        <SelectTrigger className="w-[130px]">
-          <SelectValue placeholder="Sort by" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="date">Date</SelectItem>
-          <SelectItem value="toxicity">Toxicity</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select
-        value={sortDirection}
-        onValueChange={(v) => setSortDirection(v as "desc" | "asc")}
-      >
-        <SelectTrigger className="w-[110px]">
-          <SelectValue placeholder="Order" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="desc">Desc</SelectItem>
-          <SelectItem value="asc">Asc</SelectItem>
-        </SelectContent>
-      </Select>
-      <Input
-        type="date"
-        value={startDate}
-        onChange={(e) => setStartDate(e.target.value)}
-        className="w-[150px]"
-        aria-label="Start date"
-      />
-      <Input
-        type="date"
-        value={endDate}
-        onChange={(e) => setEndDate(e.target.value)}
-        className="w-[150px]"
-        aria-label="End date"
-      />
-      <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
-        <SelectTrigger className="w-[130px]">
-          <SelectValue placeholder="Page size" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="10">10 / page</SelectItem>
-          <SelectItem value="25">25 / page</SelectItem>
-          <SelectItem value="50">50 / page</SelectItem>
-        </SelectContent>
-      </Select>
-      <div className="flex items-center space-x-2 pl-2">
-        <Checkbox
-          id="flagged-only"
-          checked={showFlaggedOnly}
-          onCheckedChange={(v) => setShowFlaggedOnly(Boolean(v))}
-        />
-        <Label htmlFor="flagged-only" className="text-sm">
-          Flagged
-        </Label>
-      </div>
-      <div className="flex items-center space-x-2 pl-2">
-        <Switch
-          id="auto-refresh"
-          checked={autoRefresh}
-          onCheckedChange={(v) => setAutoRefresh(Boolean(v))}
-        />
-        <Label htmlFor="auto-refresh" className="text-sm">
-          Auto
-        </Label>
-      </div>
-      {autoRefresh && (
-        <Select
-          value={String(refreshInterval)}
-          onValueChange={(v) => setRefreshInterval(Number(v))}
-        >
-          <SelectTrigger className="w-[110px]">
-            <SelectValue placeholder="Interval" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="30000">30s</SelectItem>
-            <SelectItem value="60000">1m</SelectItem>
-            <SelectItem value="300000">5m</SelectItem>
-          </SelectContent>
-        </Select>
-      )}
-      <div className="flex items-center space-x-2 pl-2">
-        <Label htmlFor="toxicity-range" className="text-sm">
-          Toxicity
-        </Label>
-        <div className="w-32">
-          <Slider
-            id="toxicity-range"
-            min={0}
-            max={1}
-            step={0.01}
-            value={toxicityRange}
-            onValueChange={(v) => setToxicityRange(v as [number, number])}
-          />
-          <div className="flex justify-between text-xs text-gray-500">
-            <span>{toxicityRange[0].toFixed(2)}</span>
-            <span>{toxicityRange[1].toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
-      <div className="flex items-center space-x-2 pl-2">
-        <Switch
-          id="auto-approve"
-          checked={autoApprove}
-          onCheckedChange={(v) => setAutoApprove(Boolean(v))}
-        />
-        <Label htmlFor="auto-approve" className="text-sm">
-          Auto approve
-        </Label>
-      </div>
-      {autoApprove && (
-        <Input
-          type="number"
-          step="0.01"
-          min="0"
-          max="1"
-          value={autoApproveThreshold}
-          onChange={(e) =>
-            setAutoApproveThreshold(parseFloat(e.target.value))
-          }
-          className="w-[90px]"
-          aria-label="Auto-approve toxicity threshold"
-        />
-      )}
-      <div className="flex items-center space-x-2 pl-2">
-        <Switch
-          id="auto-spam"
-          checked={autoSpam}
-          onCheckedChange={(v) => setAutoSpam(Boolean(v))}
-        />
-        <Label htmlFor="auto-spam" className="text-sm">
-          Auto spam
-        </Label>
-      </div>
-      {autoSpam && (
-        <Input
-          type="number"
-          step="0.01"
-          min="0"
-          max="1"
-          value={autoSpamThreshold}
-          onChange={(e) =>
-            setAutoSpamThreshold(parseFloat(e.target.value))
-          }
-          className="w-[90px]"
-          aria-label="Auto-spam toxicity threshold"
-        />
-      )}
-    </div>
-  )
+  }, [searchTerm, activeTab, postTypeFilter])
 
   if (loading) {
     return (
@@ -645,36 +412,30 @@ export default function CommentManager() {
             Keep the conversation healthy
           </span>
         </div>
-        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
-        {/* Responsive search input */}
-        <div className="relative w-full sm:w-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 h-4 w-4" />
-          <Input
-            placeholder="Search comments..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 w-full sm:w-64"
-            aria-label="Search comments"
-          />
-        </div>
-        <div className="hidden sm:block">
-            <FilterControls />
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 h-4 w-4" />
+            <Input
+              placeholder="Search comments..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10"
+              aria-label="Search comments"
+            />
           </div>
-          <div className="sm:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button
-                  size="sm"
-                  className="bg-orange-700 hover:bg-orange-800 text-white"
-                >
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="space-y-4 p-4">
-                <FilterControls />
-              </SheetContent>
-            </Sheet>
-          </div>
+          <Select
+            value={postTypeFilter}
+            onValueChange={(v) => setPostTypeFilter(v as "all" | "blog" | "video")}
+          >
+            <SelectTrigger className="w-full md:w-[180px]">
+              <SelectValue placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All types</SelectItem>
+              <SelectItem value="blog">Blog</SelectItem>
+              <SelectItem value="video">Video</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </section>
 

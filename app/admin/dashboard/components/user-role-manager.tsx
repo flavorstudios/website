@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import type { UserRole } from "@/lib/role-permissions"
-import { PageHeader } from "@/components/admin/page-header"
 import { logClientError } from "@/lib/log-client"
 
 export function UserRoleManager() {
@@ -42,14 +41,9 @@ export function UserRoleManager() {
 
   return (
     <div className="space-y-6">
-      {/* Page Heading and Subheading */}
-      <PageHeader
-        level={2}
-        className="mb-4"
-        containerClassName="flex-col"
-        title="User management"
-        description="Manage all users, roles, and permissions"
-      />
+      <p className="sr-only" aria-live="polite">
+        User management tools
+      </p>
       <Card>
         <CardHeader>
           <CardTitle>Change User Role</CardTitle>

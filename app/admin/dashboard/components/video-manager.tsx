@@ -32,7 +32,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { PageHeader } from "@/components/admin/page-header";
 import { VideoForm } from "@/components/ui/video-form";
 import {
   Info,
@@ -948,54 +947,48 @@ export default function VideoManager() {
     return { total: videos.length, published, draft, unlisted };
   }, [videos]);
 
+  const headerActions = (
+    <div className="flex flex-wrap items-center justify-end gap-2" aria-label="Video management actions">
+      <Button
+        variant={viewMode === "table" ? "default" : "outline"}
+        size="icon"
+        onClick={() => setViewMode("table")}
+        aria-label="Table view"
+        title="Table view"
+      >
+        <List className="h-4 w-4" />
+      </Button>
+      <Button
+        variant={viewMode === "grid" ? "default" : "outline"}
+        size="icon"
+        onClick={() => setViewMode("grid")}
+        aria-label="Grid view"
+        title="Grid view"
+      >
+        <LayoutGrid className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        onClick={exportCSV}
+        aria-label="Export videos to CSV"
+        title="Export videos to CSV"
+      >
+        Export CSV
+      </Button>
+      <Button
+        onClick={() => setShowCreateForm(true)}
+        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+        aria-label="Add new video"
+        title="Add new video"
+      >
+        Add New Video
+      </Button>
+    </div>
+  );
+
   return (
     <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}> 
-      {/* Header */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <PageHeader
-          level={2}
-          className="mb-0"
-          containerClassName="flex-col"
-          title="Video Manager"
-          description="Coordinate releases and keep metadata tidy."
-        />
-        <div className="flex flex-shrink-0 flex-wrap gap-2">
-          <Button
-            variant={viewMode === "table" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("table")}
-            aria-label="Table view"
-            title="Table view"
-          >
-            <List className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "grid" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("grid")}
-            aria-label="Grid view"
-            title="Grid view"
-          >
-            <LayoutGrid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            onClick={exportCSV}
-            aria-label="Export videos to CSV"
-            title="Export videos to CSV"
-          >
-            Export CSV
-          </Button>
-          <Button
-            onClick={() => setShowCreateForm(true)}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-            aria-label="Add new video"
-            title="Add new video"
-          >
-            Add New Video
-          </Button>
-        </div>
-      </div>
+      {headerActions}
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

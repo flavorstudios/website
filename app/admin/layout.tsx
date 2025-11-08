@@ -9,6 +9,7 @@ import { AdminAuthProvider } from "@/components/AdminAuthProvider";
 import { TooltipProvider } from "@/components/ui/tooltip"; // <-- TooltipProvider import added
 import DevTools from "./_dev-tools"; // mounts dev fetch logger in development
 import ReactQueryProvider from "@/components/ReactQueryProvider"; // Added: React Query provider
+import { HeadingLevelRoot } from "@/components/admin/heading-context";
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -73,9 +74,11 @@ export default function AdminLayout({
       <DevTools />
       <AdminAuthProvider>
         <ReactQueryProvider>
-          <TooltipProvider>{children}</TooltipProvider>
+          <TooltipProvider>
+            <HeadingLevelRoot>{children}</HeadingLevelRoot>
+          </TooltipProvider>
         </ReactQueryProvider>
       </AdminAuthProvider>
-      </LayoutSlots>
+    </LayoutSlots>
   );
 }

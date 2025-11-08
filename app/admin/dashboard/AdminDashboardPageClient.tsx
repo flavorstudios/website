@@ -38,6 +38,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { cn } from "@/lib/utils";
 import { E2E_DASHBOARD_HISTORY } from "@/lib/e2e-fixtures";
 import { isClientE2EEnabled } from "@/lib/e2e-utils";
+import { useAdminShellVariant } from "@/components/admin/admin-shell-context";
 
 const BlogSectionFallback = () => (
   <div className="space-y-4" data-testid="blog-card-skeletons">
@@ -166,11 +167,6 @@ const CareerApplications = dynamic(
   { ssr: false, loading: () => <Spinner /> }
 );
 // ✨ Settings (lazy-loaded)
-const SystemSettings = dynamic(
-  () => import("./components").then((m) => m.SystemSettings),
-  { ssr: false, loading: () => <Spinner /> }
-);
-
 // ---- Route map (reused) ----------------------------------------------------
 const NAV: { id: SectionId; href: string; title: string }[] = [
   { id: "overview", href: "/admin/dashboard", title: "Overview" },
@@ -221,6 +217,7 @@ export default function AdminDashboardPageClient({
   suppressHeading = false,
   headingId: headingIdProp,
 }: AdminDashboardPageClientProps) {
+  const shellVariant = useAdminShellVariant();
   const search = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -564,7 +561,7 @@ export default function AdminDashboardPageClient({
       case "users":
         return <UserManagement key="users" />;
       case "settings":
-        return <SystemSettings key="settings" />;
+        return null;
       default:
         return (
           <DashboardOverview
@@ -590,6 +587,7 @@ export default function AdminDashboardPageClient({
               "grid-cols-1 lg:grid-cols-[var(--sidebar-w,16rem)_1fr]",
               "transition-[grid-template-columns] duration-200 ease-out overflow-x-hidden"
             )}
+            data-admin-shell-variant={shellVariant}
             data-sidebar-open={isMobile && sidebarOpen ? "true" : "false"}
           >
             <AdminSidebar

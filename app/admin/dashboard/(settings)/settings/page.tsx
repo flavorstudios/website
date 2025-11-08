@@ -132,7 +132,7 @@ export default async function SettingsPage(props: SettingsPageProps) {
 
   if (!settings || loadError) {
     return (
-      <div className="mx-auto max-w-5xl space-y-6 p-6 pb-24">
+      <div className="space-y-6">
         {header}
         <SettingsLoadErrorBanner
           message={(loadError ?? { message: DEFAULT_LOAD_ERROR }).message}
@@ -160,7 +160,7 @@ export default async function SettingsPage(props: SettingsPageProps) {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6 pb-24">
+    <div className="space-y-6">
       {header}
       <SettingsClient
         initialTab={tab}

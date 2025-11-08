@@ -17,7 +17,7 @@ import {
   rollbackSettings,
   sendTestNotification,
   updateNotifications,
-} from "@/app/admin/dashboard/settings/actions"
+} from "@/app/admin/dashboard/(settings)/settings/actions"
 
 interface NotificationsFormProps {
   initialValues: NotificationsSettingsInput

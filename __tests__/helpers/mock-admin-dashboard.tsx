@@ -93,6 +93,5 @@ jest.mock("@/app/admin/dashboard/components", () => {
     EmailInbox: createSection("Email Inbox"),
     MediaLibrary: createSection("Media Library"),
     CareerApplications: createSection("Applications"),
-    SystemSettings: createSection("Settings"),
   };
 });

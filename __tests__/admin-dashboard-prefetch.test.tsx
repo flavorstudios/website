@@ -55,7 +55,7 @@ describe("Admin dashboard prefetch fallback", () => {
   });
 
   it("defers dashboard query to the client when Admin SDK is unavailable", async () => {
-    const { default: AdminDashboardPage } = await import("@/app/admin/dashboard/page");
+    const { default: AdminDashboardPage } = await import("@/app/admin/dashboard/(dashboard)/page");
 
     const element = await AdminDashboardPage();
     const state = (element as { props: { state: any } }).props.state;

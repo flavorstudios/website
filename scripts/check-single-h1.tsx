@@ -1,5 +1,6 @@
 import React from "react";
 import { renderToString } from "react-dom/server";
+import { load } from "cheerio";
 import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import {
   PathnameContext,
@@ -64,6 +65,11 @@ const ADMIN_ROUTES: RouteCase[] = [
     loader: () => import("@/app/admin/email/page"),
   },
   {
+    route: "/admin/email-inbox",
+    pathname: "/admin/email-inbox",
+    loader: () => import("@/app/admin/email-inbox/page"),
+  },
+  {
     route: "/admin/users",
     pathname: "/admin/users",
     loader: () => import("@/app/admin/users/page"),
@@ -100,21 +106,23 @@ async function main() {
 
   for (const route of ADMIN_ROUTES) {
     const html = await renderRoute(route);
-    const matches = [...html.matchAll(/<h1\b/gi)];
-    if (matches.length !== 1) {
+    const $ = load(html);
+    const h1Count = $("h1").length;
+    const roleLevelOneCount = $('[role="heading"][aria-level="1"]').length;
+
+    if (h1Count !== 1 || roleLevelOneCount > 0) {
       failed = true;
       console.error(
-        `[check-single-h1] Expected exactly one <h1> for ${route.route}, found ${matches.length}`,
+        `[check-single-h1] Expected exactly one <h1> and zero role="heading" aria-level="1" entries for ${route.route}. Found <h1>=${h1Count}, aria-level-1=${roleLevelOneCount}`,
       );
-      matches.forEach((match) => {
-        const index = match.index ?? 0;
-        const start = Math.max(0, index - 200);
-        const end = Math.min(html.length, index + 200);
-        const snippet = html.slice(start, end).replace(/\s+/g, " ");
-        console.error(`  snippet: ${snippet}`);
+      $("h1, [role='heading'][aria-level='1']").each((_idx, el) => {
+        const snippet = $.html(el)?.replace(/\s+/g, " ") ?? "(unknown heading)";
+        console.error(`  element: ${snippet}`);
       });
     } else {
-      console.log(`[check-single-h1] ${route.route} rendered exactly one <h1>`);
+      console.log(
+        `[check-single-h1] ${route.route} rendered exactly one <h1> (aria-level-1 roles: ${roleLevelOneCount})`,
+      );
     }
   }
 

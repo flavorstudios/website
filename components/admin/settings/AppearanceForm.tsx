@@ -19,7 +19,7 @@ import {
   resetAppearance,
   rollbackSettings,
   updateAppearance,
-} from "@/app/admin/dashboard/settings/actions"
+} from "@/app/admin/dashboard/(settings)/settings/actions"
 import { getContrastRatio } from "@/lib/settings/client"
 
 interface AppearanceFormProps {

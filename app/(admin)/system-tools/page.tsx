@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/admin/page-header";
-import { HeadingLevelBoundary } from "@/components/admin/heading-context";
+import { HeadingLevelBoundary, HeadingLevelRoot } from "@/components/admin/heading-context";
 import type { RevalidateEnvironment, RevalidateHistoryItem, RevalidateScope } from "@/types/revalidate";
 
 const HEADER_ENV_ID = "system-tools-env";
@@ -139,98 +139,99 @@ export default function SystemToolsPage() {
   );
 
   return (
-    <div className="pb-12">
-      <PageHeader
-        level={1}
-        title="System Tools"
-        description="Access deployment and maintenance utilities."
-        className="sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:backdrop-blur"
-        containerClassName="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-5 lg:flex-row lg:items-center lg:justify-between lg:px-6"
-        headingClassName="text-2xl font-semibold tracking-tight text-foreground"
-        descriptionClassName="text-sm text-muted-foreground"
-        actions={
-          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-            <div className="flex flex-col gap-1">
-              <Label htmlFor={HEADER_ENV_ID} className="text-xs uppercase tracking-wide text-muted-foreground">
-                Environment
-              </Label>
-              <Select value={env} onValueChange={(value) => setEnv(value as RevalidateEnvironment)}>
-                <SelectTrigger id={HEADER_ENV_ID} className="h-10 w-full min-w-[160px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="staging">Staging</SelectItem>
-                  <SelectItem value="production">
-                    <div className="flex items-center gap-2">
-                      Production <Badge variant="destructive">guarded</Badge>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+    <HeadingLevelRoot>
+      <div className="pb-12">
+        <PageHeader
+          title="System Tools"
+          description="Access deployment and maintenance utilities."
+          className="sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur supports-[backdrop-filter]:backdrop-blur"
+          containerClassName="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-5 lg:flex-row lg:items-center lg:justify-between lg:px-6"
+          headingClassName="text-2xl font-semibold tracking-tight text-foreground"
+          descriptionClassName="text-sm text-muted-foreground"
+          actions={
+            <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+              <div className="flex flex-col gap-1">
+                <Label htmlFor={HEADER_ENV_ID} className="text-xs uppercase tracking-wide text-muted-foreground">
+                  Environment
+                </Label>
+                <Select value={env} onValueChange={(value) => setEnv(value as RevalidateEnvironment)}>
+                  <SelectTrigger id={HEADER_ENV_ID} className="h-10 w-full min-w-[160px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="production">
+                      <div className="flex items-center gap-2">
+                        Production <Badge variant="destructive">guarded</Badge>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-3 py-2 text-xs text-muted-foreground">
+                <History className="h-4 w-4" />
+                <span>{headerLastRun}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-3 py-2 text-xs text-muted-foreground">
-              <History className="h-4 w-4" />
-              <span>{headerLastRun}</span>
-            </div>
-          </div>
-        }
-      />
+          }
+        />
 
-      <HeadingLevelBoundary>
-        <main className="mx-auto max-w-5xl px-4 pb-0 pt-6 lg:px-6">
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-            <AnimatePresence mode="wait">
+        <HeadingLevelBoundary>
+          <main className="mx-auto max-w-5xl px-4 pb-0 pt-6 lg:px-6">
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`card-${env}`}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
+                  <RevalidateCard
+                    env={env}
+                    onEnvChange={setEnv}
+                    onRunStart={handleRunStart}
+                    onRunComplete={handleRunComplete}
+                    onScheduleClick={handleScheduleClick}
+                    lastRunSummary={lastRunSummary}
+                  />
+                  {savedSchedule ? (
+                    <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-4 text-xs text-muted-foreground">
+                      <p>
+                        Next scheduled run: {formatRecurrence(savedSchedule)} starting {" "}
+                        {new Date(savedSchedule.startTime).toLocaleString()} on {" "}
+                        <span className="font-medium">{savedSchedule.env}</span>.
+                      </p>
+                    </div>
+                  ) : null}
+                </motion.div>
+              </AnimatePresence>
+
               <motion.div
-                key={`card-${env}`}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
+                transition={{ duration: 0.3, delay: 0.05 }}
               >
-                <RevalidateCard
-                  env={env}
-                  onEnvChange={setEnv}
-                  onRunStart={handleRunStart}
-                  onRunComplete={handleRunComplete}
-                  onScheduleClick={handleScheduleClick}
-                  lastRunSummary={lastRunSummary}
-                />
-                {savedSchedule ? (
-                  <div className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-4 text-xs text-muted-foreground">
-                    <p>
-                      Next scheduled run: {formatRecurrence(savedSchedule)} starting {" "}
-                      {new Date(savedSchedule.startTime).toLocaleString()} on {" "}
-                      <span className="font-medium">{savedSchedule.env}</span>.
-                    </p>
-                  </div>
-                ) : null}
+                <StatusPanel history={history} loading={loading || refreshing} onRefresh={refreshHistory} />
               </motion.div>
-            </AnimatePresence>
+            </div>
+          </main>
 
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.05 }}
-            >
-              <StatusPanel history={history} loading={loading || refreshing} onRefresh={refreshHistory} />
-            </motion.div>
-          </div>
-        </main>
-
-        <ScheduleDrawer
-          open={scheduleOpen}
-          onOpenChange={setScheduleOpen}
-          initialEnv={scheduleDefaults.env}
-          initialScope={scheduleDefaults.scope}
-          initialRoutes={scheduleDefaults.routes}
-          initialTags={scheduleDefaults.tags}
-          onSave={(form) => {
-            setSavedSchedule(form);
-          }}
-        />
-      </HeadingLevelBoundary>
-    </div>
+          <ScheduleDrawer
+            open={scheduleOpen}
+            onOpenChange={setScheduleOpen}
+            initialEnv={scheduleDefaults.env}
+            initialScope={scheduleDefaults.scope}
+            initialRoutes={scheduleDefaults.routes}
+            initialTags={scheduleDefaults.tags}
+            onSave={(form) => {
+              setSavedSchedule(form);
+            }}
+          />
+        </HeadingLevelBoundary>
+      </div>
+    </HeadingLevelRoot>
   );
 }
 

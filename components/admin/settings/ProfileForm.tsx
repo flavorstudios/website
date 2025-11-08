@@ -24,7 +24,7 @@ import {
   sendEmailVerification,
   updateProfile,
   uploadAvatar,
-} from "@/app/admin/dashboard/settings/actions"
+} from "@/app/admin/dashboard/(settings)/settings/actions"
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth"
 import { FirebaseError } from "firebase/app"

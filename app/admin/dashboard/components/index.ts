@@ -8,7 +8,6 @@ import CategoryManager from "@/components/admin/category/CategoryManager";
 import EmailInbox from "./email-inbox";
 import MediaLibrary from "./media/MediaLibrary";
 import CareerApplications from "./career-applications";
-import SystemSettings from "./system-settings";
 import { clientEnv } from "@/env.client";
 
 export {
@@ -22,7 +21,6 @@ export {
   EmailInbox,
   MediaLibrary,
   CareerApplications,
-  SystemSettings,
 };
 
 if (clientEnv.NODE_ENV !== "production") {
@@ -37,7 +35,6 @@ if (clientEnv.NODE_ENV !== "production") {
     EmailInbox,
     MediaLibrary,
     CareerApplications,
-    SystemSettings,
   } as const;
 
   for (const [name, component] of Object.entries(components)) {

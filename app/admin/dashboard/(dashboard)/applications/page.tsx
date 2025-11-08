@@ -1,5 +1,5 @@
-import { AdminDashboardSectionPage } from "../AdminDashboardSectionPage"
-import type { SectionId } from "../sections"
+import { AdminDashboardSectionPage } from "@/app/admin/dashboard/AdminDashboardSectionPage"
+import type { SectionId } from "@/app/admin/dashboard/sections"
 import { getMetadata } from "@/lib/seo-utils"
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants"
 
@@ -7,14 +7,14 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export const metadata = getMetadata({
-  title: `Email Inbox – ${SITE_NAME} Admin`,
-  description: `View and manage contact form submissions for ${SITE_NAME}.`,
-  path: "/admin/dashboard/inbox",
+  title: `Applications – ${SITE_NAME} Admin`,
+  description: `View and manage submissions for ${SITE_NAME}.`,
+  path: "/admin/dashboard/applications",
   robots: "noindex, nofollow",
   openGraph: {
-    title: `Email Inbox – ${SITE_NAME} Admin`,
-    description: `View and manage contact form submissions for ${SITE_NAME}.`,
-    url: `${SITE_URL}/admin/dashboard/inbox`,
+    title: `Applications – ${SITE_NAME} Admin`,
+    description: `View and manage submissions for ${SITE_NAME}.`,
+    url: `${SITE_URL}/admin/dashboard/applications`,
     siteName: SITE_NAME,
     type: "website",
     images: [
@@ -30,14 +30,14 @@ export const metadata = getMetadata({
     card: "summary_large_image",
     site: SITE_BRAND_TWITTER,
     creator: SITE_BRAND_TWITTER,
-    title: `Email Inbox – ${SITE_NAME} Admin`,
-    description: `View and manage contact form submissions for ${SITE_NAME}.`,
+    title: `Applications – ${SITE_NAME} Admin`,
+    description: `View and manage submissions for ${SITE_NAME}.`,
     images: [`${SITE_URL}/cover.jpg`],
   },
 })
 
-const SECTION: SectionId = "inbox"
+const SECTION: SectionId = "applications"
 
-export default function InboxPage() {
+export default function ApplicationsPage() {
   return <AdminDashboardSectionPage section={SECTION} />
 }

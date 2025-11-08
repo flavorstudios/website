@@ -74,6 +74,11 @@ const ADMIN_ROUTE_CASES: RouteCase[] = [
     loader: () => import("@/app/admin/email/page"),
   },
   {
+    route: "/admin/email-inbox",
+    section: "inbox",
+    loader: () => import("@/app/admin/email-inbox/page"),
+  },
+  {
     route: "/admin/users",
     section: "users",
     loader: () => import("@/app/admin/users/page"),
@@ -86,7 +91,7 @@ const ADMIN_ROUTE_CASES: RouteCase[] = [
   {
     route: "/admin/dashboard/system",
     section: "system",
-    loader: () => import("@/app/admin/dashboard/system/page"),
+    loader: () => import("@/app/admin/dashboard/(dashboard)/system/page"),
   },
 ];
 
@@ -105,7 +110,7 @@ describe("admin route headings", () => {
       usePathname.mockReturnValue(route);
       render(<Page />);
 
-      const headings = screen.getAllByRole("heading", { level: 1 });
+      const headings = await screen.findAllByRole("heading", { level: 1 });
       expect(headings).toHaveLength(1);
       expect(headings[0]).toHaveTextContent(SECTION_HEADINGS[section]);
     }

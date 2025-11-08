@@ -6,9 +6,9 @@ import { HeadingLevelBoundary } from "@/components/admin/heading-context";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 import { getMetadata } from "@/lib/seo-utils";
 
-import { AdminDashboardSectionPage } from "../AdminDashboardSectionPage";
-import { SECTION_DESCRIPTIONS, SECTION_HEADINGS } from "../section-metadata";
-import type { SectionId } from "../sections";
+import { AdminDashboardSectionPage } from "@/app/admin/dashboard/AdminDashboardSectionPage";
+import { SECTION_DESCRIPTIONS, SECTION_HEADINGS } from "@/app/admin/dashboard/section-metadata";
+import type { SectionId } from "@/app/admin/dashboard/sections";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

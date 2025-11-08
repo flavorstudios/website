@@ -1,5 +1,5 @@
-import { AdminDashboardSectionPage } from "../AdminDashboardSectionPage";
-import type { SectionId } from "../sections";
+import { AdminDashboardSectionPage } from "@/app/admin/dashboard/AdminDashboardSectionPage";
+import type { SectionId } from "@/app/admin/dashboard/sections";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
 

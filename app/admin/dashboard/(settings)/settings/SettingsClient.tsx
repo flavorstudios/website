@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { SettingsTabs } from "@/components/admin/settings/SettingsTabs";
 import type { UserSettings } from "@/lib/schemas/settings";
-import { ErrorBoundary } from "../components/ErrorBoundary";
+import { ErrorBoundary } from "@/app/admin/dashboard/components/ErrorBoundary";
 
 interface SettingsClientProps {
   initialTab?: string | null;

@@ -1,5 +1,5 @@
 /* eslint-disable local/no-h1-outside-page */
-import { BlogCardSkeleton } from "./_components/BlogCardSkeleton";
+import { BlogCardSkeleton } from "../../blog/_components/BlogCardSkeleton";
 
 const SKELETON_COUNT = 3;
 

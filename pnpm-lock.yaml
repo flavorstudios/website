@@ -278,7 +278,7 @@ importers:
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.10.2
-        version: 4.10.2(playwright-core@1.54.2)
+        version: 4.10.2(playwright-core@1.56.1)
       '@firebase/rules-unit-testing':
         specifier: ^3.0.0
         version: 3.0.4(firebase@11.10.0)
@@ -364,8 +364,8 @@ importers:
         specifier: ^12.8.1
         version: 12.8.1
       playwright:
-        specifier: ^1.54.2
-        version: 1.54.2
+        specifier: ^1.56.1
+        version: 1.56.1
       postcss:
         specifier: ^8.5.0
         version: 8.5.6
@@ -5869,8 +5869,18 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  playwright-core@1.56.1:
+    resolution: {integrity: sha512-hutraynyn31F+Bifme+Ps9Vq59hKuUCz7H1kDOcBs+2oGguKkWTU50bBWrtz34OUWmIwpBTWDxaRPXrIXkgvmQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   playwright@1.54.2:
     resolution: {integrity: sha512-Hu/BMoA1NAdRUuulyvQC0pEqZ4vQbGfn8f7wPXcnqQmM+zct9UliKxsIkLNmz/ku7LElUNqmaiv1TG/aL5ACsw==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.56.1:
+    resolution: {integrity: sha512-aFi5B0WovBHTEvpM3DzXTUaeN6eN0qWnTkKx4NQaH4Wvcmc153PdaY2UBdSYKaGYw+UyWXSVyxDUg5DoPEttjw==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -7185,10 +7195,10 @@ snapshots:
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
 
-  '@axe-core/playwright@4.10.2(playwright-core@1.54.2)':
+  '@axe-core/playwright@4.10.2(playwright-core@1.56.1)':
     dependencies:
       axe-core: 4.10.3
-      playwright-core: 1.54.2
+      playwright-core: 1.56.1
 
   '@babel/code-frame@7.27.1':
     dependencies:
@@ -13680,9 +13690,17 @@ snapshots:
 
   playwright-core@1.54.2: {}
 
+  playwright-core@1.56.1: {}
+
   playwright@1.54.2:
     dependencies:
       playwright-core: 1.54.2
+    optionalDependencies:
+      fsevents: 2.3.2
+
+  playwright@1.56.1:
+    dependencies:
+      playwright-core: 1.56.1
     optionalDependencies:
       fsevents: 2.3.2
 

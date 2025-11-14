@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest } from "next/server";
 
 import { serverEnv } from "@/env/server";
 import {
@@ -21,9 +21,19 @@ import {
 } from "@/lib/admin-auth";
 import { isAdmin, isAdminBypassEnabled } from "@/lib/admin-allowlist";
 import { logError } from "@/lib/log";
+import {
+  createRequestContext,
+  errorResponse,
+  jsonResponse,
+  type RequestContext,
+} from "@/lib/api/response";
+import { adminCookieOptions } from "@/lib/admin-auth";
 
-const createErrorResponse = (message: string, status = 400) =>
-  NextResponse.json({ error: message }, { status });
+const createErrorResponse = (
+  context: RequestContext,
+  message: string,
+  status = 400,
+) => errorResponse(context, { error: message }, status);
 
 function getRequestIp(request: NextRequest): string {
   const xfwd = request.headers.get("x-forwarded-for");
@@ -85,20 +95,25 @@ async function triggerVerificationEmail(idToken: string) {
 }
 
 export async function POST(request: NextRequest) {
+  const context = createRequestContext(request);
   const ip = getRequestIp(request);
 
   if (await isSignupIpRateLimited(ip)) {
     await logAdminAuditFailure(null, ip, "signup-rate-limit-ip");
-    return createErrorResponse("Too many signup attempts. Try again later.", 429);
+    return createErrorResponse(
+      context,
+      "Too many signup attempts. Try again later.",
+      429,
+    );
   }
 
   let body: unknown;
   try {
     body = await request.json();
   } catch (err) {
-    logError("admin-signup:invalid-json", err);
+    logError("admin-signup:invalid-json", err, { requestId: context.requestId });
     await incrementSignupIpAttempts(ip);
-    return createErrorResponse("Invalid request payload.");
+    return createErrorResponse(context, "Invalid request payload.");
   }
 
   const parseResult = signupSchema.safeParse(body);
@@ -116,7 +131,7 @@ export async function POST(request: NextRequest) {
       await incrementSignupEmailAttempts(hash);
     }
     await incrementSignupIpAttempts(ip);
-    return createErrorResponse(firstError);
+    return createErrorResponse(context, firstError);
   }
 
   const { email, password, name, marketingOptIn } = parseResult.data;
@@ -124,14 +139,18 @@ export async function POST(request: NextRequest) {
 
   if (await isSignupEmailRateLimited(emailHash)) {
     await logAdminAuditFailure(email, ip, "signup-rate-limit-email");
-    return createErrorResponse("Too many signup attempts for this email.", 429);
+    return createErrorResponse(
+      context,
+      "Too many signup attempts for this email.",
+      429,
+    );
   }
 
   if (isDisposableEmail(email)) {
     await logAdminAuditFailure(email, ip, "disposable-email");
     await incrementSignupEmailAttempts(emailHash);
     await incrementSignupIpAttempts(ip);
-    return createErrorResponse("Disposable email domains are not allowed.");
+    return createErrorResponse(context, "Disposable email domains are not allowed.");
   }
 
   const bypass = isAdminBypassEnabled();
@@ -143,7 +162,11 @@ export async function POST(request: NextRequest) {
       await logAdminAuditFailure(email, ip, "email-not-allowlisted");
       await incrementSignupEmailAttempts(emailHash);
       await incrementSignupIpAttempts(ip);
-      return createErrorResponse("Email is not allowed for admin access.", 403);
+      return createErrorResponse(
+        context,
+        "Email is not allowed for admin access.",
+        403,
+      );
     }
   }
 
@@ -175,33 +198,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const cookieDomain =
-      serverEnv.NODE_ENV === "production"
-        ? serverEnv.ADMIN_COOKIE_DOMAIN
-        : undefined;
-
-    const cookieOptions = {
-      httpOnly: true,
-      secure: serverEnv.NODE_ENV === "production",
-      sameSite: "lax" as const,
-      path: "/",
-      ...(cookieDomain ? { domain: cookieDomain } : {}),
-    };
-
     const redirectTo = requiresVerification
       ? "/admin/verify-email"
       : "/admin/dashboard";
 
-    const response = NextResponse.json({
+    const response = jsonResponse(context, {
       ok: true,
       requiresVerification,
       redirectTo,
     });
 
-    response.cookies.set("admin-session", sessionCookie, {
-      ...cookieOptions,
-      maxAge: requiresVerification ? 60 * 60 * 2 : 60 * 60 * 24,
-    });
+    response.cookies.set(
+      "admin-session",
+      sessionCookie,
+      adminCookieOptions({
+        maxAge: requiresVerification ? 60 * 60 * 2 : 60 * 60 * 24,
+      }),
+    );
 
     await resetSignupLimits(ip, emailHash);
 
@@ -216,13 +229,13 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (err) {
-    logError("admin-signup:error", err);
+    logError("admin-signup:error", err, { requestId: context.requestId });
     await incrementSignupEmailAttempts(emailHash);
     await incrementSignupIpAttempts(ip);
     const message =
       err instanceof Error && err.message.includes("EMAIL_EXISTS")
         ? "An account with this email already exists."
         : "Unable to create account.";
-    return createErrorResponse(message, 400);
+    return createErrorResponse(context, message, 400);
   }
 }

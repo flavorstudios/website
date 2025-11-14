@@ -26,6 +26,7 @@ import {
   SITE_DESCRIPTION, // ✅ Use constant only
 } from "@/lib/constants";
 import { serverEnv } from "@/env/server";
+import { isTestMode } from "@/config/flags";
 import Script from "next/script"; // for GTM + bootstrap
 
 // --- SEO Default Metadata (App Router global metadata) ---
@@ -137,7 +138,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     isTruthy(serverEnv.E2E) ||
     isTruthy(process.env.NEXT_PUBLIC_E2E) ||
     isTruthy(process.env.E2E) ||
-    isTruthy(process.env.TEST_MODE);
+    isTestMode();
   const htmlClassName = e2eMotionDisabled ? "e2e-no-motion" : undefined;
   const bodyClassName = `${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased bg-white${
     e2eMotionDisabled ? " e2e-no-motion" : ""

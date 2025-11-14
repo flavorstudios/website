@@ -24,22 +24,16 @@ import {
 import { logError } from "@/lib/log";
 import crypto from "crypto";
 import { ValidateSessionPing } from "@/components/ValidateSessionPing";
-import { env } from "@/src/env";
 import { unwrapPageProps } from "@/types/next";
 import type { PreviewPageContext } from "@/types/route-params";
+import { resolveHeadersBaseUrl } from "@/lib/base-url";
 
 async function getPost(id: string): Promise<BlogPost | null> {
   return blogStore.getById(id);
 }
 
-async function validateSessionViaApi(reqHeaders: Headers) {
-  const forwardedHost = reqHeaders.get("x-forwarded-host") ?? undefined;
-  const host = reqHeaders.get("host") ?? forwardedHost;
-  const prefersHttp = host?.startsWith("localhost") || host?.startsWith("127.0.0.1");
-  const proto = reqHeaders.get("x-forwarded-proto") ?? (prefersHttp ? "http" : "https");
-
-  const fallbackOrigin = env.nextPublicBaseUrl || env.baseUrl || "http://127.0.0.1:3000";
-  const origin = host ? `${proto}://${host}` : fallbackOrigin;
+async function validateSessionViaApi(reqHeaders: Headers, requestId: string) {
+  const origin = resolveHeadersBaseUrl(reqHeaders);
 
   try {
     const cookieStore = await cookies();
@@ -49,7 +43,10 @@ async function validateSessionViaApi(reqHeaders: Headers) {
       .join("; ");
 
     await fetch(new URL("/api/admin/validate-session", origin).toString(), {
-      headers: serializedCookies ? { cookie: serializedCookies } : undefined,
+      headers: {
+        ...(serializedCookies ? { cookie: serializedCookies } : {}),
+        "X-Request-ID": requestId,
+      },
       cache: "no-store",
     });
   } catch {
@@ -123,7 +120,7 @@ export default async function PreviewPage(props: PreviewPageProps) {
     process.env.NEXT_PUBLIC_E2E === "true" ||
     process.env.NEXT_PUBLIC_E2E === "1";
 
-    await validateSessionViaApi(reqHeaders);
+    await validateSessionViaApi(reqHeaders, requestId);
 
   function renderGuardedMessage(message: ReactNode, heading = "Admin Preview") {
     const title = typeof heading === "string" && heading.trim() ? heading : "Admin Preview";

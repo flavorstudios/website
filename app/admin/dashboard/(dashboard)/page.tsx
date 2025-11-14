@@ -14,6 +14,8 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { isAdminSdkAvailable, ADMIN_BYPASS } from "@/lib/firebase-admin";
 import { isCiLike } from "@/lib/env/is-ci-like";
+import { isTestMode } from "@/config/flags";
+import { resolveHeadersBaseUrl } from "@/lib/base-url";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -49,27 +51,6 @@ export const metadata = getMetadata({
   },
   // No schema for admin/noindex pages
 });
-
-function resolveRequestOrigin(headerList: {
-  get(name: string): string | null;
-}): string {
-  const forwardedProto =
-    headerList.get("x-forwarded-proto")?.split(",")[0]?.trim() ?? null;
-  const forwardedHost =
-    headerList.get("x-forwarded-host")?.split(",")[0]?.trim() ?? null;
-  const host = forwardedHost ?? headerList.get("host");
-
-  if (host) {
-    const proto =
-      forwardedProto ??
-      (host.startsWith("localhost") || host.startsWith("127.0.0.1")
-        ? "http"
-        : "https");
-    return `${proto}://${host}`;
-  }
-
-  return process.env.NEXT_PUBLIC_BASE_URL ?? SITE_URL;
-}
 
 async function prefetchDashboard(
   qc: QueryClient,
@@ -125,7 +106,7 @@ const SECTION: SectionId = "overview";
 export default async function AdminDashboardPage() {
   const h = await headers();
   const cookie = h.get("cookie") ?? "";
-  const origin = resolveRequestOrigin(h);
+  const origin = resolveHeadersBaseUrl(h);
   const ciLike = isCiLike();
 
   const reqHeaders = new Headers();
@@ -153,7 +134,7 @@ export default async function AdminDashboardPage() {
   const disableServerPrefetch =
     ciLike ||
     process.env.E2E === "true" ||
-    process.env.TEST_MODE === "true" ||
+    isTestMode() ||
     process.env.ADMIN_DISABLE_SSR_PREFETCH === "true";
 
   let shouldServerPrefetch =

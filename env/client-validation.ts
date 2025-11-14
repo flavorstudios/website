@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { isTestMode } from '@/config/flags';
 
 const optionalNonEmptyString = z.preprocess(
   value => {
@@ -65,8 +66,8 @@ const rawClientEnv = {
     process.env.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS,
   NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION:
     process.env.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION,
-    NEXT_PUBLIC_TEST_MODE: process.env.NEXT_PUBLIC_TEST_MODE,
-  TEST_MODE: process.env.TEST_MODE,
+  NEXT_PUBLIC_TEST_MODE: process.env.NEXT_PUBLIC_TEST_MODE,
+  TEST_MODE: undefined,
 };
 
 export type ClientEnvShape = z.infer<typeof clientEnvSchema>;
@@ -101,41 +102,14 @@ const baseClientValues: ClientEnvShape = {
   ...parsedData,
 };
 
-const firebasePublicConfigKeys: (keyof ClientEnvShape)[] = [
-  'NEXT_PUBLIC_FIREBASE_API_KEY',
-  'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
-  'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
-  'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
-  'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
-  'NEXT_PUBLIC_FIREBASE_APP_ID',
-];
-
 const isRawValueMissing = (value: unknown): boolean =>
   value === undefined ||
   value === null ||
   (typeof value === 'string' && value.length === 0);
 
-const firebaseConfigMissing = firebasePublicConfigKeys.some(key =>
-  isRawValueMissing(baseClientValues[key])
-);
-
-const hasExplicitPublicTestMode =
-  baseClientValues.NEXT_PUBLIC_TEST_MODE !== undefined;
-
-const derivedTestMode =
-  (hasExplicitPublicTestMode
-    ? baseClientValues.NEXT_PUBLIC_TEST_MODE === 'true'
-    : baseClientValues.TEST_MODE === 'true') ||
-  baseClientValues.NODE_ENV === 'test' ||
-  firebaseConfigMissing;
-
-const resolvedTestModeValue = hasExplicitPublicTestMode
-  ? baseClientValues.NEXT_PUBLIC_TEST_MODE
-  : baseClientValues.TEST_MODE;
-
 const clientValues: ClientEnvShape = {
   ...baseClientValues,
-  TEST_MODE: derivedTestMode ? 'true' : resolvedTestModeValue,
+  TEST_MODE: isTestMode() ? 'true' : 'false',
 };
 
 const requiredClientEnvVars: (keyof ClientEnvShape)[] = [];

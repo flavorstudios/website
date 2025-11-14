@@ -1,27 +1,35 @@
 // app/api/admin/google-session/route.ts
 
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 import { getAdminAuth, getAdminDb, getAllowedAdminEmails } from "@/lib/firebase-admin";
-import { requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
+import { adminCookieOptions, requireAdmin, verifyAdminSession } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Centralized logging
 import { serverEnv } from "@/env/server";
+import {
+  createRequestContext,
+  errorResponse,
+  jsonResponse,
+} from "@/lib/api/response";
 
 const debug = serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
+export async function POST(req: NextRequest) {
+  const context = createRequestContext(req);
   try {
     if (await requireAdmin(req)) {
       if (debug) {
         console.log("google-session: User already logged in as admin.");
       }
-      return NextResponse.json({ ok: true, message: "Already logged in." });
+      return jsonResponse(context, { ok: true, message: "Already logged in." });
     }
 
     const { idToken } = await req.json();
 
     if (!idToken) {
-      logError("google-session: Missing ID token in request.", {});
-      return NextResponse.json({ error: "Missing ID token." }, { status: 400 });
+      logError("google-session:missing-id-token", undefined, {
+        requestId: context.requestId,
+      });
+      return errorResponse(context, { error: "Missing ID token." }, 400);
     }
 
     // --- Verify Firebase ID token with revocation checks ---
@@ -30,12 +38,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     try {
       auth = getAdminAuth();
     } catch (err) {
-      logError("google-session: Admin SDK unavailable", err);
+      logError("google-session:admin-sdk", err, { requestId: context.requestId });
       const message =
         err instanceof Error
           ? err.message
           : "FIREBASE_SERVICE_ACCOUNT_KEY missing or invalid";
-      return NextResponse.json({ error: message }, { status: 500 });
+      return errorResponse(context, { error: message }, 500);
     }
     try {
       decoded = await auth.verifyIdToken(idToken, true);
@@ -49,11 +57,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         "code" in err &&
         (err as { code?: string }).code === "auth/id-token-revoked"
       ) {
-        logError("google-session: Token revoked for email", (err as { email?: string })?.email || {});
-        return NextResponse.json({ error: "Token revoked" }, { status: 401 });
+        logError(
+          "google-session:token-revoked",
+          err,
+          { requestId: context.requestId },
+        );
+        return errorResponse(context, { error: "Token revoked" }, 401);
       }
-      logError("google-session: verifyIdToken failed", err);
-      return NextResponse.json({ error: "Authentication failed." }, { status: 401 });
+      logError("google-session:verify-id-token", err, {
+        requestId: context.requestId,
+      });
+      return errorResponse(context, { error: "Authentication failed." }, 401);
     }
 
     // --- NEW: log raw admin email envs before building the allowlist ---
@@ -66,8 +80,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     if (allowedAdminEmails.length === 0) {
       const message = "No admin emails configured";
       // Ensure we fail fast even when DEBUG_ADMIN is enabled
-      logError(`google-session: ${message}`, {});
-      return NextResponse.json({ error: message }, { status: 500 });
+      logError(`google-session:${message}`, undefined, {
+        requestId: context.requestId,
+      });
+      return errorResponse(context, { error: message }, 500);
     }
 
     // --- Log normalized email and allowed admin emails for debug ---
@@ -85,12 +101,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         console.log("google-session: Admin email authorized:", decoded.email);
       }
     } catch (err: unknown) {
-      logError("google-session: admin email unauthorized", err);
+      logError("google-session:unauthorized-email", err, {
+        requestId: context.requestId,
+      });
       console.warn("[Auth] Denied Google sign-in for", decoded.email);
       if (err instanceof Error && err.message === "Unauthorized admin email") {
-        return NextResponse.json({ error: "Email not on admin list" }, { status: 401 });
+        return errorResponse(context, { error: "Email not on admin list" }, 401);
       }
-      return NextResponse.json({ error: "Authentication failed." }, { status: 500 });
+      return errorResponse(context, { error: "Authentication failed." }, 500);
     }
 
     // --- Determine session expiry (in days) from env ---
@@ -100,23 +118,17 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn });
     const expiryDate = new Date(Date.now() + expiresIn);
 
-    const cookieDomain =
-      serverEnv.NODE_ENV === "production" ? serverEnv.ADMIN_COOKIE_DOMAIN : undefined;
-
-    const cookieOptions = {
-      httpOnly: true,
-      secure: serverEnv.NODE_ENV === "production",
-      sameSite: "lax" as const, // use "none" with secure: true if you have cross-site flows
-      path: "/",
-      ...(cookieDomain ? { domain: cookieDomain } : {}),
-    };
-
     // Set secure cookie attributes for admin-session
-    const res = NextResponse.json({ ok: true, expiresAt: expiryDate.toISOString(), expiryDays });
-    res.cookies.set("admin-session", sessionCookie, {
-      ...cookieOptions,
-      maxAge: Math.floor(expiresIn / 1000), // seconds
+    const res = jsonResponse(context, {
+      ok: true,
+      expiresAt: expiryDate.toISOString(),
+      expiryDays,
     });
+    res.cookies.set(
+      "admin-session",
+      sessionCookie,
+      adminCookieOptions({ maxAge: Math.floor(expiresIn / 1000) }),
+    );
 
     // --- LOGGING: Cookie issued for admin ---
     if (debug) {
@@ -132,12 +144,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         ip: req.headers.get("x-forwarded-for") || "",
       });
     } catch (logErr: unknown) {
-      logError("google-session: failed to record login event", logErr);
+      logError("google-session:login-event", logErr, {
+        requestId: context.requestId,
+      });
     }
 
     return res;
   } catch (err: unknown) {
-    logError("google-session: final catch", err);
-    return NextResponse.json({ error: "Authentication failed." }, { status: 500 });
+    logError("google-session:error", err, { requestId: context.requestId });
+    return errorResponse(context, { error: "Authentication failed." }, 500);
   }
 }

@@ -28,6 +28,7 @@ import {
   writeUserSettings,
 } from "@/lib/settings/server"
 import { serverEnv } from "@/env/server"
+import { isTestMode } from "@/config/flags"
 import { SITE_NAME, SITE_URL } from "@/lib/constants"
 import { logError } from "@/lib/log"
 import { SettingsAccessError } from "./errors"
@@ -76,7 +77,7 @@ const ROLLBACK_TTL = 1000 * 60 * 5
 let cachedTransporter: nodemailer.Transporter | null = null
 
 function getTransporter(): nodemailer.Transporter | null {
-  if (serverEnv.TEST_MODE === "true") {
+  if (isTestMode()) {
     return null
   }
   if (!serverEnv.SMTP_HOST) {

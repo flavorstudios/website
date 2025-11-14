@@ -16,6 +16,7 @@ import {
   type SignupFormInput,
 } from "@/lib/admin-signup-shared";
 import { clientEnv } from "@/env.client";
+import { isTestMode } from "@/config/flags";
 import { useAdminAuth } from "@/components/AdminAuthProvider";
 
 type FieldErrors = Partial<Record<"name" | "email" | "password", string>>;
@@ -41,7 +42,7 @@ export default function SignupForm() {
   );
 
   const { setTestEmailVerified } = useAdminAuth();
-  const testMode = clientEnv.TEST_MODE === "true";
+  const testMode = isTestMode();
   const requiresVerification =
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
 

@@ -3,7 +3,7 @@
 import { createContext, useContext } from "react"
 import type { ReactNode } from "react"
 
-export type AdminShellVariant = "dashboard" | "settings"
+export type AdminShellVariant = "dashboard"
 
 type AdminShellContextValue = {
   variant: AdminShellVariant

@@ -1,7 +1,14 @@
-import { NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import nodemailer from "nodemailer";
 import { serverEnv } from "@/env/server";
+import { handleOptionsRequest } from "@/lib/api/cors";
+import {
+  createRequestContext,
+  errorResponse,
+  jsonResponse,
+} from "@/lib/api/response";
+import { logError } from "@/lib/log";
 
 const notifyEnabled = serverEnv.NOTIFY_NEW_SUBMISSION === "true";
 const adminEmailsEnv = serverEnv.ADMIN_EMAILS;
@@ -18,7 +25,12 @@ const transporter = nodemailer.createTransport({
     : undefined,
 });
 
-export async function POST(request: Request) {
+export function OPTIONS(request: NextRequest) {
+  return handleOptionsRequest(request, { allowMethods: ["POST"] });
+}
+
+export async function POST(request: NextRequest) {
+  const context = createRequestContext(request);
   try {
     const {
       firstName = "",
@@ -30,7 +42,7 @@ export async function POST(request: Request) {
     } = await request.json();
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      return errorResponse(context, { error: "Email is required" }, 400);
     }
 
     const data = {
@@ -63,14 +75,14 @@ export async function POST(request: Request) {
           text: `${firstName} ${lastName} <${email}> applied.\nSkills: ${skills}\nPortfolio: ${portfolio}\n\n${message}`,
         });
       } catch (err) {
-        console.error("[CAREER_NOTIFY_ERROR]", err);
+        logError("career:notify", err, { requestId: context.requestId });
         // Do not fail the request if notification email fails
       }
     }
 
-    return NextResponse.json({ success: true });
+    return jsonResponse(context, { success: true });
   } catch (err) {
-    console.error("[CAREER_SUBMISSION_ERROR]", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    logError("career:submit", err, { requestId: context.requestId });
+    return errorResponse(context, { error: "Server error" }, 500);
   }
 }

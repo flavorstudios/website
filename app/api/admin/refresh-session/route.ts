@@ -1,10 +1,15 @@
 // app/api/admin/refresh-session/route.ts
 
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 import { createRefreshSession } from "@/lib/admin-auth";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 import { createHash } from "crypto";
+import {
+  createRequestContext,
+  errorResponse,
+  jsonResponse,
+} from "@/lib/api/response";
 
 /**
  * POST /api/admin/refresh-session
@@ -18,12 +23,13 @@ import { createHash } from "crypto";
  * - No admin emails are ever leaked client-side.
  */
 export async function POST(req: NextRequest) {
+  const context = createRequestContext(req);
   try {
     const { refreshToken } = await req.json();
 
     if (!refreshToken) {
       // The helper clears cookies if needed, so just respond
-      return NextResponse.json({ error: "Missing refresh token." }, { status: 401 });
+      return errorResponse(context, { error: "Missing refresh token." }, 401);
     }
 
     const db = getAdminDb();
@@ -34,7 +40,7 @@ export async function POST(req: NextRequest) {
     // Lookup the refresh token in Firestore by its hash
     const doc = await db.collection("refreshTokens").doc(tokenHash).get();
     if (!doc.exists) {
-      return NextResponse.json({ error: "Invalid refresh token" }, { status: 401 });
+      return errorResponse(context, { error: "Invalid refresh token" }, 401);
     }
     const { uid } = doc.data() as { uid: string };
 
@@ -45,9 +51,9 @@ export async function POST(req: NextRequest) {
     // Delete the old refresh token hash (one-time use)
     await db.collection("refreshTokens").doc(tokenHash).delete();
 
-    return NextResponse.json({ ok: true, refreshToken: newRefreshToken });
+    return jsonResponse(context, { ok: true, refreshToken: newRefreshToken });
   } catch (error) {
-    logError("refresh-session: final catch", error);
-    return NextResponse.json({ error: "Session refresh failed." }, { status: 401 });
+    logError("refresh-session:error", error, { requestId: context.requestId });
+    return errorResponse(context, { error: "Session refresh failed." }, 401);
   }
 }

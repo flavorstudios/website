@@ -96,7 +96,7 @@ describe("admin layout variants", () => {
     expect(document.querySelector('[data-admin-shell-variant="dashboard"]')).not.toBeNull()
   })
 
-  it("renders settings without the sidebar and keeps tabs interactive", async () => {
+  it("renders settings within the dashboard shell and keeps tabs interactive", async () => {
     const { default: SettingsLayout } = await import("@/app/admin/dashboard/(settings)/layout")
     const { default: SettingsPage } = await import("@/app/admin/dashboard/(settings)/settings/page")
 
@@ -104,9 +104,9 @@ describe("admin layout variants", () => {
 
     render(<SettingsLayout>{page}</SettingsLayout>)
 
-    expect(screen.queryByTestId("admin-sidebar")).toBeNull()
+    expect(await screen.findByTestId("admin-sidebar")).toBeInTheDocument()
     await waitFor(() => {
-      expect(document.querySelector('[data-admin-shell-variant="settings"]')).not.toBeNull()
+      expect(document.querySelector('[data-admin-shell-variant="dashboard"]')).not.toBeNull()
     })
     const tabs = screen.getAllByRole("tab")
     expect(tabs).toHaveLength(3)

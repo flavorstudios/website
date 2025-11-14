@@ -10,6 +10,11 @@ const { ANALYZE } = process.env;
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: ANALYZE === 'true' });
 
+const isProd = process.env.NODE_ENV === 'production';
+if (isProd && process.env.NEXT_PUBLIC_TEST_MODE === '1') {
+  throw new Error('Refusing to build production with NEXT_PUBLIC_TEST_MODE=1');
+}
+
 const remoteImagePatterns = imageDomains.map((hostname) => ({
   protocol: 'https',
   hostname,

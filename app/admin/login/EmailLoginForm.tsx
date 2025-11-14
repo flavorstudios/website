@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import useSWR from "swr"
 import { clientEnv } from "@/env.client"
+import { isTestMode } from "@/config/flags"
 type EmailLoginFormProps = {
   error: string
   setError: Dispatch<SetStateAction<string>>
@@ -33,7 +34,7 @@ export default function EmailLoginForm({
   errorMessageId,
 }: EmailLoginFormProps) {
   const router = useRouter()
-  const isTestMode = clientEnv.TEST_MODE === "true"
+  const testMode = isTestMode()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [otp, setOtp] = useState("")
@@ -112,7 +113,7 @@ export default function EmailLoginForm({
       setError("")
       setFormError(null)
       setHasLocalFormError(false)
-      if (isTestMode && typeof window !== "undefined") {
+      if (testMode && typeof window !== "undefined") {
         window.location.assign("/admin/dashboard")
         return
       }

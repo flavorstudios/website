@@ -1,12 +1,17 @@
 // app/api/admin/logout/route.ts
 
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server";
 import { getAdminAuth } from "@/lib/firebase-admin";
-import { requireAdmin } from "@/lib/admin-auth";
+import { adminCookieOptions, requireAdmin } from "@/lib/admin-auth";
 import { logError } from "@/lib/log"; // Consistent logging
-import { serverEnv } from "@/env/server";
+import {
+  createRequestContext,
+  errorResponse,
+  jsonResponse,
+} from "@/lib/api/response";
 
 export async function POST(req: NextRequest) {
+  const context = createRequestContext(req);
   try {
     // Get the current session cookie
     const sessionCookie = req.cookies.get("admin-session")?.value;
@@ -19,22 +24,21 @@ export async function POST(req: NextRequest) {
         await auth.revokeRefreshTokens(decoded.uid);
       } catch (err) {
         // If verification fails, just proceed to clear cookie (user is already logged out or token is invalid)
-        logError("logout: revokeTokens verification failed", err);
+        logError("logout:revokeTokens", err, { requestId: context.requestId });
       }
     }
 
     // Remove the admin-session cookie
-    const res = NextResponse.json({ ok: true, message: "Logged out" });
-    res.cookies.set("admin-session", "", {
-      httpOnly: true,
-      secure: serverEnv.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 0,
-      path: "/",
-    });
+    const res = jsonResponse(context, { ok: true, message: "Logged out" });
+    res.cookies.set("admin-session", "", adminCookieOptions({ maxAge: 0 }));
+    res.cookies.set("admin-refresh-token", "", adminCookieOptions({ maxAge: 0 }));
     return res;
   } catch (err) {
-    logError("logout: final catch", err);
-    return NextResponse.json({ ok: false, message: "Logout failed" }, { status: 500 });
+    logError("logout:error", err, { requestId: context.requestId });
+    return errorResponse(
+      context,
+      { ok: false, message: "Logout failed" },
+      500,
+    );
   }
 }

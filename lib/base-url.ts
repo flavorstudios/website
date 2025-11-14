@@ -65,6 +65,20 @@ export const resolveRequestBaseUrl = (
   return canonicalBaseUrl();
 };
 
+export const resolveHeadersBaseUrl = (headersInit?: Headers | HeadersInit): string => {
+  if (!headersInit) {
+    return canonicalBaseUrl();
+  }
+
+  const headers = headersInit instanceof Headers ? headersInit : new Headers(headersInit);
+  try {
+    const request = new Request("http://localhost", { headers });
+    return resolveRequestBaseUrl(request);
+  } catch {
+    return canonicalBaseUrl();
+  }
+};
+
 export const allowedOrigins = (): Set<string> => {
   const origins = new Set<string>();
   for (const origin of [...gatherConfiguredOrigins(), ...DEV_ORIGINS]) {

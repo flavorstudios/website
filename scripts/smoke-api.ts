@@ -5,13 +5,45 @@ import crypto from "node:crypto";
 interface Endpoint {
   method: string;
   path: string;
-  body?: Record<string, unknown>;
   description: string;
+  body?: Record<string, unknown>;
   expectJson?: boolean;
+  requiresAuth?: boolean;
+  expectStatus?: number;
+  skipIfEnvMissing?: string;
+  headers?: Record<string, string>;
 }
 
-const DEFAULT_BASE_URL = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-const baseUrl = process.argv[2] || DEFAULT_BASE_URL;
+const DEFAULT_BASE_URL =
+  process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+type CliOptions = {
+  baseUrl: string;
+  adminCookie: string;
+};
+
+function parseArgs(argv: string[]): CliOptions {
+  let baseUrl = DEFAULT_BASE_URL;
+  let adminCookie = process.env.ADMIN_COOKIE || "";
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (!arg.startsWith("--") && baseUrl === DEFAULT_BASE_URL) {
+      baseUrl = arg;
+      continue;
+    }
+    if (arg === "--admin-cookie") {
+      adminCookie = argv[i + 1] || "";
+      i += 1;
+      continue;
+    }
+  }
+
+  return { baseUrl, adminCookie };
+}
+
+const { baseUrl, adminCookie } = parseArgs(process.argv.slice(2));
+const hasAdminCookie = Boolean(adminCookie);
 
 const endpoints: Endpoint[] = [
   { method: "GET", path: "/api/blogs", description: "List published blogs", expectJson: true },
@@ -43,6 +75,51 @@ const endpoints: Endpoint[] = [
       postType: "blog",
     },
   },
+  {
+    method: "POST",
+    path: "/api/career",
+    description: "Submit career interest",
+    expectJson: true,
+    body: {
+      firstName: "Smoke",
+      lastName: "Test",
+      email: "smoke-career@example.com",
+      skills: "Testing, QA",
+      portfolio: "https://example.com",
+      message: "Synthetic career submission triggered by scripts/smoke-api.ts.",
+    },
+  },
+  {
+    method: "POST",
+    path: "/api/indexnow",
+    description: "Trigger IndexNow ping",
+    expectJson: true,
+    body: {
+      url: "https://example.com/synthetic",
+    },
+    skipIfEnvMissing: "INDEXNOW_KEY",
+  },
+  {
+    method: "GET",
+    path: "/api/admin/validate-session",
+    description: "Validate admin session",
+    expectJson: true,
+    requiresAuth: true,
+  },
+  {
+    method: "GET",
+    path: "/api/admin/settings",
+    description: "Fetch admin settings",
+    expectJson: true,
+    requiresAuth: true,
+  },
+  {
+    method: "POST",
+    path: "/api/admin/init",
+    description: "Initialize admin stats",
+    expectJson: true,
+    requiresAuth: true,
+  },  
 ];
 
 function prettyDuration(ms: number): string {
@@ -54,6 +131,20 @@ async function run() {
   console.log("--------------------------------------");
 
   for (const endpoint of endpoints) {
+    if (endpoint.skipIfEnvMissing && !process.env[endpoint.skipIfEnvMissing]) {
+      console.log(
+        `${endpoint.method.padEnd(6)} ${endpoint.path.padEnd(40)} SKIP --   Missing ${endpoint.skipIfEnvMissing}`,
+      );
+      continue;
+    }
+
+    if (endpoint.requiresAuth && !hasAdminCookie) {
+      console.log(
+        `${endpoint.method.padEnd(6)} ${endpoint.path.padEnd(40)} SKIP --   Requires admin cookie (--admin-cookie)`,
+      );
+      continue;
+    }
+
     const url = new URL(endpoint.path, baseUrl);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
@@ -61,19 +152,30 @@ async function run() {
     const start = performance.now();
 
     try {
+      const headers: Record<string, string> = {
+        "X-Request-ID": requestId,
+      };
+      if (endpoint.body) {
+        headers["Content-Type"] = "application/json";
+      }
+      if (endpoint.requiresAuth && hasAdminCookie) {
+        headers.Cookie = adminCookie;
+      }
+      if (endpoint.headers) {
+        Object.assign(headers, endpoint.headers);
+      }
+
       const res = await fetch(url, {
         method: endpoint.method,
         cache: "no-store",
-        headers: {
-          "Content-Type": endpoint.body ? "application/json" : "application/json",
-          "X-Request-ID": requestId,
-        },
+        headers,
         body: endpoint.body ? JSON.stringify(endpoint.body) : undefined,
         signal: controller.signal,
       });
       const duration = performance.now() - start;
       let jsonValid = false;
       let bodySnippet = "";
+      const expectStatus = endpoint.expectStatus ?? 200;
 
       if (endpoint.expectJson) {
         try {
@@ -88,11 +190,12 @@ async function run() {
         bodySnippet = await res.clone().text().then((text) => text.slice(0, 120));
       }
 
+      const statusMatch = res.status === expectStatus;
       console.log(
         `${endpoint.method.padEnd(6)} ${endpoint.path.padEnd(40)} ${res.status.toString().padEnd(4)} ${prettyDuration(duration).padStart(6)} ` +
           `${jsonValid ? "JSON" : "TEXT"} – ${endpoint.description}`,
       );
-      if (!res.ok || !jsonValid) {
+      if (!statusMatch || (endpoint.expectJson && !jsonValid)) {
         console.log(`  ↳ Response snippet: ${bodySnippet}`);
       }
     } catch (error) {

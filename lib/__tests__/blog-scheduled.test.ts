@@ -58,7 +58,7 @@ describe("blogStore scheduled posts", () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
-    process.env.TEST_MODE = "true";
+    process.env.NEXT_PUBLIC_TEST_MODE = "1";
   });
 
   it("preserves scheduledFor across updates", async () => {

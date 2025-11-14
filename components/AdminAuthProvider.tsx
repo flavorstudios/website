@@ -14,6 +14,7 @@ import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { clientEnv } from "@/env.client"
 import { isE2EEnabled } from "@/lib/e2e-utils"
+import { isTestMode } from "@/config/flags"
 
 const TEST_EMAIL_VERIFIED_STORAGE_KEY = "admin-test-email-verified"
 const TEST_EMAIL_VERIFIED_EVENT_NAME = "admin-test-email-verified-change"
@@ -54,7 +55,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   })
   const requiresVerification =
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true"
-  const envTestMode = clientEnv.TEST_MODE === "true"
+  const envTestMode = isTestMode()
   const testMode = (testModeOverride ?? envTestMode) || authInitFailed
   const shouldUseLocalVerification =
     requiresVerification && (testMode || e2eActive)

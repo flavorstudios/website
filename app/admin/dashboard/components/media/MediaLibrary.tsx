@@ -16,8 +16,7 @@ import type {
   SortOrder,
 } from "@/types/media";
 import { useToast } from "@/hooks/use-toast";
-import { clientEnv } from "@/env.client";
-import { isClientE2EEnabled } from "@/lib/e2e-utils";
+import { isTestMode } from "@/config/flags";
 
 const isDesktopWidth = () =>
   typeof window !== "undefined" &&
@@ -25,7 +24,7 @@ const isDesktopWidth = () =>
   window.matchMedia("(min-width: 768px)").matches;
 
 const shouldForceListView = () =>
-  isDesktopWidth() || (typeof window === "undefined" && clientEnv.TEST_MODE === "true");
+  isDesktopWidth() || (typeof window === "undefined" && isTestMode());
 
 interface MediaLibraryProps {
   onSelect?: (url: string) => void;
@@ -134,7 +133,9 @@ export default function MediaLibrary({
   detailsOpen,
   onDetailsOpenChange,
 }: MediaLibraryProps) {
-  if (isClientE2EEnabled()) {
+  const testMode = isTestMode();
+
+  if (testMode) {
     return (
       <MediaLibraryE2ETable
         onSelect={onSelect}
@@ -390,7 +391,7 @@ export default function MediaLibrary({
   }, []);
 
   useEffect(() => {
-    if (clientEnv.TEST_MODE === "true") return;
+    if (isTestMode()) return;
     if (!initialized) return;
     const node = loadMoreRef.current;
     if (!node || cursor === null) return;

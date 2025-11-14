@@ -134,7 +134,7 @@ jobs:
           NODE_ENV: test
           NEXT_TELEMETRY_DISABLED: '1'
           E2E: 'true'
-          TEST_MODE: 'true'
+          NEXT_PUBLIC_TEST_MODE: '1'
           ADMIN_AUTH_DISABLED: '1'
           ADMIN_BYPASS: 'true'
           NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION: 'false'

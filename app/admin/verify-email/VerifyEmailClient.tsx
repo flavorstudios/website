@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { getFirebaseAuth } from "@/lib/firebase";
 import { clientEnv } from "@/env.client";
 import { useAdminAuth } from "@/components/AdminAuthProvider";
-import { isClientE2EEnabled } from "@/lib/e2e-utils";
+import { isTestMode } from "@/config/flags";
 import { PageHeader } from "@/components/admin/page-header";
 
 type StatusMessage = {
@@ -26,7 +26,7 @@ export default function VerifyEmailClient() {
 
   const requireVerification =
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
-  const testMode = clientEnv.TEST_MODE === "true" || isClientE2EEnabled();
+  const testMode = isTestMode();
 
   const waitForNextFrame = useCallback(
     () =>

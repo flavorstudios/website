@@ -13,6 +13,7 @@ import {
 } from "@/lib/media";
 import type { BlogPost } from "@/lib/types";
 import { ensureHtmlContent } from "@/lib/html-content";
+import { isTestMode } from "@/config/flags";
 
 export type { BlogPost };
 
@@ -320,10 +321,7 @@ function getDbOrNull(): Firestore | null {
   try {
     return getAdminDb();
   } catch (err) {
-    if (
-      process.env.ADMIN_BYPASS === "true" ||
-      process.env.TEST_MODE === "true"
-    ) {
+    if (process.env.ADMIN_BYPASS === "true" || isTestMode()) {
       // Avoid noisy error logs in bypass or test modes
       console.debug("Firebase Admin Firestore unavailable:", err);
     } else {

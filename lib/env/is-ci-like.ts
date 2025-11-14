@@ -1,3 +1,5 @@
+import { isTestMode } from "@/config/flags";
+
 const TRUTHY = new Set(["1", "true", "TRUE", "True"]);
 
 const isTruthy = (value?: string | null): boolean => {
@@ -10,7 +12,7 @@ export function isCiLike(): boolean {
   return (
     isTruthy(env.CI) ||
     isTruthy(env.E2E) ||
-    isTruthy(env.TEST_MODE) ||
+    isTestMode() ||
     isTruthy(env.SKIP_STRICT_ENV) ||
     isTruthy(env.ADMIN_BYPASS) ||
     isTruthy(env.NEXT_PUBLIC_E2E)

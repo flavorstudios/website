@@ -50,7 +50,7 @@ pnpm exec playwright show-trace test-results/**/trace.zip
 
 ### Motion-free E2E runs
 
-When `NEXT_PUBLIC_E2E`, `E2E`, or `TEST_MODE` is truthy the root `<html>` element receives the `e2e-no-motion` class and all CSS animations/transitions collapse to zero duration. The Playwright harness also wraps the app in a Framer Motion `MotionConfig` with `reducedMotion="always"` so animated mounts keep a stable DOM for mobile viewport tests.
+When `NEXT_PUBLIC_E2E`, `E2E`, or the explicit `NEXT_PUBLIC_TEST_MODE=1` flag (in non-production builds) is set the root `<html>` element receives the `e2e-no-motion` class and all CSS animations/transitions collapse to zero duration. The Playwright harness also wraps the app in a Framer Motion `MotionConfig` with `reducedMotion="always"` so animated mounts keep a stable DOM for mobile viewport tests.
 
 The class is applied globally by `app/layout.tsx` and styled in `app/globals.css`. You can inspect the DOM in the running app to confirm the flag is active (`document.documentElement.dataset.e2eMotion === 'true'`).
 
@@ -68,13 +68,13 @@ The admin UI now surfaces Firebase email/password login by default. The full onb
 
 ### Firebase-less / test mode
 
-When any required public Firebase config (`NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`, `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`, `NEXT_PUBLIC_FIREBASE_APP_ID`) is missing, or when `NODE_ENV === test`, the client automatically enters **test mode**. In this mode:
+Enable **test mode** explicitly by exporting `NEXT_PUBLIC_TEST_MODE=1` when running the dashboard in development or test environments. Production builds refuse to honor the flag so it cannot leak into live deployments. In this mode:
 
-* `clientEnv.TEST_MODE` is forced to `'true'` so the UI can detect the degraded experience.
+* `isTestMode()` resolves to `true`, allowing the UI to detect the degraded experience.
 * The admin login defaults to the legacy env-based flow and hides the toggle that normally reveals it.
 * Firebase email login short-circuits network calls to satisfy Playwright mocks without loading Firebase in the browser.
 
-To restore the Firebase experience, provide the full set of `NEXT_PUBLIC_FIREBASE_*` variables (and their server-side counterparts) and deploy with `TEST_MODE` unset or explicitly set to `'false'`. The toggle will reappear once the config is complete.
+To restore the Firebase experience, remove `NEXT_PUBLIC_TEST_MODE` (or set it to any value other than `1`) and redeploy with valid Firebase credentials. The toggle will reappear once the config is complete.
 
 ### Legacy env-based login
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
 import { clientEnv } from "@/env.client"
+import { isTestMode } from "@/config/flags"
 import { getFirebaseAuth } from "@/lib/firebase"
 import {
   signInWithEmailAndPassword,
@@ -25,7 +26,7 @@ type FirebaseEmailLoginFormProps = {
 
 const requiresVerification =
   !process.env.E2E && clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true"
-const isTestMode = clientEnv.TEST_MODE === "true"
+const testModeEnabled = isTestMode()
 
 const getFriendlyErrorMessage = (error: unknown): string => {
   if (error instanceof FirebaseError) {
@@ -76,7 +77,7 @@ export default function FirebaseEmailLoginForm({
     setInfoNotice(null)
 
     try {
-      if (isTestMode) {
+      if (testModeEnabled) {
         const response = await fetch("/api/admin/email-login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

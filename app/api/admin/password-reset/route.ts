@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { serverEnv } from "@/env/server";
 import { resolveRequestBaseUrl } from "@/lib/base-url";
 import { isAdmin } from "@/lib/admin-allowlist";
 import { adminAuth } from "@/lib/firebase-admin";
@@ -20,6 +19,7 @@ import {
 import { PASSWORD_RESET_NEUTRAL_MESSAGE, PASSWORD_RESET_RATE_LIMIT_MESSAGE } from "@/lib/password-reset-messages";
 import getClientIp from "@/lib/request-ip";
 import { logError } from "@/lib/log";
+import { isTestMode } from "@/config/flags";
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
   ).toString();
 
   let firebaseLink: string | null = null;
-  if (allowed && adminAuth && serverEnv.TEST_MODE !== "true") {
+  if (allowed && adminAuth && !isTestMode()) {
     try {
       firebaseLink = await adminAuth.generatePasswordResetLink(rawEmail, {
         url: continueUrl,
@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
     message: PASSWORD_RESET_NEUTRAL_MESSAGE,
   };
 
-  if (serverEnv.TEST_MODE === "true") {
+  if (isTestMode()) {
     responseBody.requestId = requestId;
     responseBody.emailLink = emailLink;
   }

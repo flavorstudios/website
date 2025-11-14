@@ -56,7 +56,6 @@ if (typeof globalThis.TextDecoder === 'undefined') {
   });
 }
 
-process.env.TEST_MODE = 'true';
 process.env['NEXT_PUBLIC_BASE_URL'] = 'http://localhost';
 process.env['NEXT_PUBLIC_FIREBASE_API_KEY'] = 'test';
 process.env['NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN'] = 'test';
@@ -93,7 +92,7 @@ process.env.NEXT_PUBLIC_CUSTOM_ROLE_PERMISSIONS =
 process.env.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION =
   process.env.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION ?? 'false';
 process.env.NEXT_PUBLIC_TEST_MODE =
-  process.env.NEXT_PUBLIC_TEST_MODE ?? 'true';
+  process.env.NEXT_PUBLIC_TEST_MODE ?? '1';
 
 jest.mock('@/components/ui/calendar', () => ({
   Calendar: ({ onSelect }: { onSelect?: (date: Date) => void }) =>

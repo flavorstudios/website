@@ -3,6 +3,7 @@ import "server-only";
 import nodemailer from "nodemailer";
 import { randomUUID } from "node:crypto";
 import { serverEnv } from "@/env/server";
+import { isTestMode } from "@/config/flags";
 import { adminDb } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 
@@ -68,7 +69,7 @@ export async function sendPasswordResetEmail({
   location,
   timestamp,
 }: PasswordResetEmailContext): Promise<void> {
-  if (serverEnv.TEST_MODE === "true") {
+  if (isTestMode()) {
     return;
   }
 

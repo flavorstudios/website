@@ -20,6 +20,7 @@ const web: Config = {
     '<rootDir>/functions/',
   ],
   moduleNameMapper: {
+    '^@/config/(.*)$': '<rootDir>/src/config/$1',
     '^@/(.*)$': '<rootDir>/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '^.+\\.(svg|png|jpg|jpeg|gif|webp)$': '<rootDir>/test/__mocks__/fileMock.js',

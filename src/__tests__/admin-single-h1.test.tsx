@@ -6,10 +6,6 @@ import { render, screen, act } from "@testing-library/react";
 import { AdminRouteFactories } from "@/test-utils/adminRoutes";
 import { SECTION_HEADINGS } from "@/app/admin/dashboard/section-metadata";
 
-declare global {
-  var fetch: typeof global.fetch;
-}
-
 process.env.ADMIN_BYPASS = "true";
 
 jest.mock("next/navigation", () => {
@@ -134,9 +130,12 @@ const ROUTE_CASES: Array<[
 
 describe("admin routes expose a single level-one heading", () => {
   beforeEach(() => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({ ok: true, json: async () => ({}) }) as any,
-    ) as any;
+    const mockResponse = {
+      ok: true,
+      json: async () => ({}),
+    } as unknown as Response;
+
+    globalThis.fetch = jest.fn(async () => mockResponse) as unknown as typeof fetch;
   });
 
   it.each(ROUTE_CASES)(

@@ -12,6 +12,7 @@ import FirebaseEmailLoginForm from "./FirebaseEmailLoginForm"
 import EmailLoginForm from "./EmailLoginForm"
 import useAuthError from "@/hooks/useAuthError"
 import { clientEnv } from "@/env.client"
+import { isTestMode } from "@/config/flags"
 
 // --- Firebase Auth (client-only getters) ---
 import { getFirebaseAuth, firebaseInitError } from "@/lib/firebase"
@@ -71,8 +72,8 @@ const GoogleIcon = () => (
 export default function AdminLoginForm() {
   const { error, setError, clearError } = useAuthError()
   const [loading, setLoading] = useState(false)
-  const isTestMode = clientEnv.TEST_MODE === "true"
-  const [showLegacyLogin, setShowLegacyLogin] = useState(() => isTestMode)
+  const testMode = isTestMode()
+  const [showLegacyLogin, setShowLegacyLogin] = useState(() => testMode)
   const router = useRouter()
   const searchParams = useSearchParams()
   const firebaseErrorMessage = (firebaseInitError as Error | null | undefined)?.message
@@ -104,13 +105,13 @@ export default function AdminLoginForm() {
           // ignore and fallback to navigation below
         }
       }
-      if (clientEnv.TEST_MODE === "true") {
+      if (testMode) {
         window.location.assign("/admin/dashboard")
         return
       }
       router.push("/admin/dashboard")
     }
-  }, [router])
+  }, [router, testMode])
 
   // --- FIX: Always call hooks first, never after a conditional return ---
   useEffect(() => {

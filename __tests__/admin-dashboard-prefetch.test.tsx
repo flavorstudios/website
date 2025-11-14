@@ -44,7 +44,7 @@ describe("Admin dashboard prefetch fallback", () => {
   const originalFetch = global.fetch;
   const originalEnv = {
     E2E: process.env.E2E,
-    TEST_MODE: process.env.TEST_MODE,
+    NEXT_PUBLIC_TEST_MODE: process.env.NEXT_PUBLIC_TEST_MODE,
     ADMIN_DISABLE_SSR_PREFETCH: process.env.ADMIN_DISABLE_SSR_PREFETCH,
   };
 
@@ -59,7 +59,7 @@ describe("Admin dashboard prefetch fallback", () => {
     mockIsAdminSdkAvailable.mockReturnValue(false);
     (global.fetch as unknown) = jest.fn();
     process.env.E2E = "false";
-    process.env.TEST_MODE = "false";
+    process.env.NEXT_PUBLIC_TEST_MODE = "0";
     process.env.ADMIN_DISABLE_SSR_PREFETCH = "false";
   });
 
@@ -67,8 +67,9 @@ describe("Admin dashboard prefetch fallback", () => {
     global.fetch = originalFetch;
     if (originalEnv.E2E === undefined) delete process.env.E2E;
     else process.env.E2E = originalEnv.E2E;
-    if (originalEnv.TEST_MODE === undefined) delete process.env.TEST_MODE;
-    else process.env.TEST_MODE = originalEnv.TEST_MODE;
+    if (originalEnv.NEXT_PUBLIC_TEST_MODE === undefined)
+      delete process.env.NEXT_PUBLIC_TEST_MODE;
+    else process.env.NEXT_PUBLIC_TEST_MODE = originalEnv.NEXT_PUBLIC_TEST_MODE;
     if (originalEnv.ADMIN_DISABLE_SSR_PREFETCH === undefined)
       delete process.env.ADMIN_DISABLE_SSR_PREFETCH;
     else

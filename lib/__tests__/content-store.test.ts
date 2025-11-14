@@ -24,7 +24,7 @@ describe("content-store blog normalization", () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
-    process.env.TEST_MODE = "true";
+    process.env.NEXT_PUBLIC_TEST_MODE = "1";
   });
 
   function mockFirestore(posts: BlogPost[]) {

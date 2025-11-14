@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,6 +19,7 @@ import {
   Loader2,
 } from "lucide-react";
 import useSWR from "swr";
+import useSWRInfinite from "swr/infinite";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,13 +60,19 @@ import type { BlogPost } from "@/lib/content-store";
 import type { CategoryData } from "@/lib/dynamic-categories";
 import { revalidateBlogAndAdminDashboard } from "@/app/admin/actions/blog";
 import { cn } from "@/lib/utils";
-import { Pagination } from "@/components/admin/Pagination";
 import { fetcher } from "@/lib/fetcher";
 import { useDebounce } from "@/hooks/use-debounce";
 import useMediaQuery from "@/hooks/use-media-query";
 import { formatDate } from "@/lib/date";
 import { logClientError } from "@/lib/log-client";
 import { usePreviewNavigation } from "@/components/admin/blog/usePreviewNavigation";
+import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
+import {
+  fetchAdminBlogPosts,
+  type AdminBlogListResponse,
+} from "@/lib/admin/blog-posts-client";
+
+const PAGE_SIZE = DEFAULT_PAGE_SIZE;
 
 export default function BlogManager() {
   const { toast } = useToast();
@@ -80,7 +87,9 @@ export default function BlogManager() {
   const [deleteTargets, setDeleteTargets] = useState<string[] | null>(null);
 
   // New: track a pending bulk publish/unpublish action for confirmation
-  const [bulkAction, setBulkAction] = useState<null | "publish" | "unpublish">(null);
+  const [bulkAction, setBulkAction] = useState<null | "publish" | "unpublish">(
+    null,
+  );
 
   const isMobile = useMediaQuery("(max-width: 639px)");
   const [filtersOpen, setFiltersOpen] = useState(!isMobile);
@@ -89,27 +98,21 @@ export default function BlogManager() {
   }, [isMobile]);
 
   // ---- Read filters/pagination from URL ----
-  const search = searchParams.get("search") ?? "";
+  const search = searchParams.get("q") ?? "";
   const category = searchParams.get("category") ?? "all";
-  const status = searchParams.get("status") ?? "all";
+  const status = searchParams.get("status") ?? "published";
   const sortBy = searchParams.get("sort") ?? "date";
   const sortDir = searchParams.get("sortDir") ?? "desc";
   const author = searchParams.get("author") ?? "";
-  const from = searchParams.get("from") ?? "";
-  const to = searchParams.get("to") ?? "";
-  const currentPage = parseInt(searchParams.get("page") ?? "1", 10) || 1;
-  const perPage = parseInt(searchParams.get("perPage") ?? "10", 10) || 10;
 
   const [searchInput, setSearchInput] = useState(search);
   const debouncedSearch = useDebounce(searchInput, 500);
   const [authorInput, setAuthorInput] = useState(author);
   const debouncedAuthor = useDebounce(authorInput, 500);
-  const [fromInput, setFromInput] = useState(from);
-  const [toInput, setToInput] = useState(to);
 
   useEffect(() => {
     if (debouncedSearch !== search) {
-      setParams({ search: debouncedSearch, page: "1" });
+      setParams({ q: debouncedSearch });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch]);
@@ -120,7 +123,7 @@ export default function BlogManager() {
 
   useEffect(() => {
     if (debouncedAuthor !== author) {
-      setParams({ author: debouncedAuthor, page: "1" });
+      setParams({ author: debouncedAuthor });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedAuthor]);
@@ -130,90 +133,124 @@ export default function BlogManager() {
   }, [author]);
 
   useEffect(() => {
-    setFromInput(from);
-  }, [from]);
-
-  useEffect(() => {
-    setToInput(to);
-  }, [to]);
+    setSelected(new Set());
+    void setSize(1);
+  }, [search, author, category, status, sortBy, sortDir, setSize]);
 
   // Helper to push updated query params
   const setParams = (overrides: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
-    // current values as baseline
-    params.set("search", search);
-    params.set("category", category);
-    params.set("status", status);
-    params.set("sort", sortBy);
-    params.set("sortDir", sortDir);
-    params.set("author", author);
-    params.set("from", from);
-    params.set("to", to);
-    params.set("page", String(currentPage));
-    params.set("perPage", String(perPage));
-    // apply overrides
-    Object.entries(overrides).forEach(([k, v]) => params.set(k, v));
-    router.push(`?${params.toString()}`);
+    const baseline: Record<string, string> = {
+      q: search,
+      category,
+      status,
+      sort: sortBy,
+      sortDir,
+      author,
+    };
+
+    const applyValue = (key: string, value: string) => {
+      const trimmed = value.trim();
+      const shouldRemove =
+        trimmed === "" ||
+        (key === "category" && trimmed === "all") ||
+        (key === "status" && trimmed === "published") ||
+        (key === "sort" && trimmed === "date") ||
+        (key === "sortDir" && trimmed === "desc");
+
+      if (shouldRemove) {
+        params.delete(key);
+        return;
+      }
+
+      params.set(key, trimmed);
+    };
+
+    Object.entries(baseline).forEach(([key, value]) => applyValue(key, value));
+    Object.entries(overrides).forEach(([key, value]) => applyValue(key, value));
+
+    const query = params.toString();
+    if (query) {
+      router.push(`?${query}`);
+    } else if (typeof window !== "undefined") {
+      router.push(window.location.pathname);
+    }
   };
 
   const handleSearchChange = (value: string) => setSearchInput(value);
-  const handleCategoryChange = (value: string) => setParams({ category: value, page: "1" });
-  const handleStatusChange = (value: string) => setParams({ status: value, page: "1" });
-  const handleSortChange = (value: string) => setParams({ sort: value, page: "1" });
+  const handleCategoryChange = (value: string) =>
+    setParams({ category: value });
+  const handleStatusChange = (value: string) => setParams({ status: value });
+  const handleSortChange = (value: string) => setParams({ sort: value });
   const handleSortDirToggle = () =>
-    setParams({ sortDir: sortDir === "asc" ? "desc" : "asc", page: "1" });
-  const handlePerPageChange = (value: string) => setParams({ perPage: value, page: "1" });
-  const handlePageChange = (page: number) => setParams({ page: page.toString() });
+    setParams({ sortDir: sortDir === "asc" ? "desc" : "asc" });
   const handleAuthorChange = (value: string) => setAuthorInput(value);
-  const handleFromDateChange = (value: string) => {
-    setFromInput(value);
-    setParams({ from: value, page: "1" });
-  };
-  const handleToDateChange = (value: string) => {
-    setToInput(value);
-    setParams({ to: value, page: "1" });
-  };
 
   const clearFilters = () => {
     setSearchInput("");
     setAuthorInput("");
-    setFromInput("");
-    setToInput("");
     setParams({
-      search: "",
+      q: "",
       category: "all",
-      status: "all",
+      status: "published",
       sort: "date",
       sortDir: "desc",
       author: "",
-      from: "",
-      to: "",
-      page: "1",
-      perPage: String(perPage),
     });
   };
 
-  // SWR data sources (server-driven filtering/sorting/pagination)
+  const getKey = useCallback(
+    (pageIndex: number, previousPageData: AdminBlogListResponse | null) => {
+      if (pageIndex > 0 && !previousPageData?.nextCursor) {
+        return null;
+      }
+
+      const cursor = pageIndex === 0 ? undefined : previousPageData?.nextCursor;
+      return [
+        "admin-blog-posts",
+        search,
+        author,
+        category,
+        status,
+        sortBy,
+        sortDir,
+        cursor ?? null,
+      ] as const;
+    },
+    [search, author, category, status, sortBy, sortDir],
+  );
+
   const {
-    data: postsData,
+    data: postPages,
     error: postsError,
     isLoading: postsLoading,
+    isValidating: postsValidating,
+    size,
+    setSize,
     mutate: mutatePosts,
-  } = useSWR<{ posts: BlogPost[]; total: number }>(
-    `/api/admin/blogs?search=${encodeURIComponent(search)}&author=${encodeURIComponent(
-      author,
-    )}&category=${encodeURIComponent(category)}&status=${encodeURIComponent(
-      status,
-    )}&sort=${encodeURIComponent(sortBy)}&sortDir=${encodeURIComponent(
-      sortDir,
-    )}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(
-      to,
-    )}&page=${encodeURIComponent(String(currentPage))}&perPage=${encodeURIComponent(
-      String(perPage),
-    )}`,
-    fetcher,
+  } = useSWRInfinite<AdminBlogListResponse>(
+    getKey,
+    async ([
+      ,
+      searchValue,
+      authorValue,
+      categoryValue,
+      statusValue,
+      sortValue,
+      sortDirValue,
+      cursor,
+    ]) =>
+      fetchAdminBlogPosts({
+        q: searchValue || undefined,
+        author: authorValue || undefined,
+        category: categoryValue !== "all" ? categoryValue : undefined,
+        status: statusValue,
+        sort: sortValue,
+        sortDir: (sortDirValue as "asc" | "desc") ?? "desc",
+        cursor: cursor ?? undefined,
+        limit: PAGE_SIZE,
+      }),
     {
-      // remove polling; rely on SSE
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
       dedupingInterval: 5000,
@@ -252,8 +289,8 @@ export default function BlogManager() {
               typeof c.count === "number"
                 ? c.count
                 : typeof c.postCount === "number"
-                ? c.postCount
-                : 0,
+                  ? c.postCount
+                  : 0,
             tooltip: c.tooltip,
           }),
         ),
@@ -291,21 +328,61 @@ export default function BlogManager() {
     };
   }, [mutatePosts, mutateCategories]);
 
-  const loading = postsLoading || categoriesLoading;
+  const pages = postPages ?? [];
+  const currentPosts = pages.flatMap((page) => page.items);
+  const totalPostsCount =
+    pages.length > 0 && typeof pages[0]?.total === "number"
+      ? (pages[0]?.total as number)
+      : currentPosts.length;
+  const lastPage = pages.length > 0 ? pages[pages.length - 1] : null;
+  const hasNextPage = Boolean(lastPage?.nextCursor);
+  const isLoadingMore = postsValidating && size > pages.length;
+  const loading = (postsLoading && pages.length === 0) || categoriesLoading;
   const displayError = postsError ? "Failed to load blog posts." : null;
 
   const hasActiveFilters =
-    Boolean(search || author || from || to) || category !== "all" || status !== "all";
-  const currentPosts = postsData?.posts ?? [];
-  const totalPostsCount =
-    typeof postsData?.total === "number" ? postsData.total : postsData?.posts?.length ?? 0;
+    Boolean(search || author) || category !== "all" || status !== "published";
+
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMore = useCallback(() => {
+    if (!hasNextPage || isLoadingMore) {
+      return;
+    }
+    void setSize((previous) => previous + 1);
+  }, [hasNextPage, isLoadingMore, setSize]);
+
+  const sentinelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      observerRef.current?.disconnect();
+
+      if (!node || !hasNextPage) {
+        observerRef.current = null;
+        return;
+      }
+
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          const [entry] = entries;
+          if (entry?.isIntersecting) {
+            loadMore();
+          }
+        },
+        { rootMargin: "200px" },
+      );
+
+      observerRef.current.observe(node);
+    },
+    [hasNextPage, loadMore],
+  );
+
+  useEffect(() => () => observerRef.current?.disconnect(), []);
 
   const categoryErrorMessage =
     categoriesError instanceof Error
       ? categoriesError.message
       : categoriesError
-      ? "Failed to load categories."
-      : null;
+        ? "Failed to load categories."
+        : null;
   const refreshData = useCallback(async () => {
     await Promise.all([mutatePosts(), mutateCategories()]);
   }, [mutatePosts, mutateCategories]);
@@ -348,7 +425,11 @@ export default function BlogManager() {
             return { id, ok: true as const };
           }
           const data = await res.json().catch(() => ({}));
-          return { id, ok: false as const, error: data.error || "Failed to delete" };
+          return {
+            id,
+            ok: false as const,
+            error: data.error || "Failed to delete",
+          };
         } catch (err) {
           logClientError("Delete failed", err);
           return { id, ok: false as const, error: "Failed to delete" };
@@ -360,7 +441,9 @@ export default function BlogManager() {
     const firstError = results.find((r) => !r.ok)?.error;
 
     if (successCount > 0) {
-      toast(successCount === 1 ? "Post deleted" : `${successCount} posts deleted`);
+      toast(
+        successCount === 1 ? "Post deleted" : `${successCount} posts deleted`,
+      );
     }
     if (firstError) {
       toast(firstError);
@@ -433,7 +516,8 @@ export default function BlogManager() {
     });
   };
 
-  const allSelected = currentPosts.length > 0 && currentPosts.every((p) => selected.has(p.id));
+  const allSelected =
+    currentPosts.length > 0 && currentPosts.every((p) => selected.has(p.id));
 
   const toggleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -450,9 +534,9 @@ export default function BlogManager() {
     const csv = [
       header.join(","),
       ...rows.map((p) =>
-        [p.title, p.slug, p.status, p.author, p.publishedAt || ""].map((v) =>
-          `"${String(v).replace(/"/g, '""')}"`,
-        ).join(","),
+        [p.title, p.slug, p.status, p.author, p.publishedAt || ""]
+          .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+          .join(","),
       ),
     ].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -493,32 +577,37 @@ export default function BlogManager() {
   }, [handleRevalidateBlog, handleCreatePost]);
 
   const headerActions = (
-      <div className="flex flex-wrap items-center justify-end gap-2" aria-label="Blog management actions">
-        <Button
-          onClick={handleRevalidateBlog}
-          disabled={isRevalidating}
-          size="sm"
-          className="rounded-xl px-4 flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white"
-          aria-label="Refresh blog posts"
-          title="Refresh blog posts"
-          data-testid="refresh"
-        >
-          <RefreshCw className={`h-4 w-4 ${isRevalidating ? "animate-spin" : ""}`} />
-          {isRevalidating ? "Refreshing..." : "Refresh"}
-        </Button>
-        <Button
-          onClick={handleCreatePost}
-          size="sm"
-          className="rounded-xl px-4 flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow"
-          aria-label="New Post"
-          title="New Post"
-          data-testid="new-post"
-        >
-          <PlusCircle className="h-4 w-4" />
-          New Post
-        </Button>
-      </div>
-    )
+      <div
+      className="flex flex-wrap items-center justify-end gap-2"
+      aria-label="Blog management actions"
+    >
+      <Button
+        onClick={handleRevalidateBlog}
+        disabled={isRevalidating}
+        size="sm"
+        className="rounded-xl px-4 flex items-center gap-2 bg-orange-700 hover:bg-orange-800 text-white"
+        aria-label="Refresh blog posts"
+        title="Refresh blog posts"
+        data-testid="refresh"
+      >
+        <RefreshCw
+          className={`h-4 w-4 ${isRevalidating ? "animate-spin" : ""}`}
+        />
+        {isRevalidating ? "Refreshing..." : "Refresh"}
+      </Button>
+      <Button
+        onClick={handleCreatePost}
+        size="sm"
+        className="rounded-xl px-4 flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow"
+        aria-label="New Post"
+        title="New Post"
+        data-testid="new-post"
+      >
+        <PlusCircle className="h-4 w-4" />
+        New Post
+      </Button>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -529,8 +618,14 @@ export default function BlogManager() {
         <div className="mt-4 space-y-4">
           <div className="sm:hidden space-y-3" data-testid="blog-card-list">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <div className="h-4 w-4 rounded border border-muted bg-muted/60 animate-pulse" aria-hidden="true" />
-              <div className="h-3 w-20 rounded bg-muted animate-pulse" aria-hidden="true" />
+              <div
+                className="h-4 w-4 rounded border border-muted bg-muted/60 animate-pulse"
+                aria-hidden="true"
+              />
+              <div
+                className="h-3 w-20 rounded bg-muted animate-pulse"
+                aria-hidden="true"
+              />
             </div>
 
             {Array.from({ length: 3 }).map((_, index) => (
@@ -554,8 +649,14 @@ export default function BlogManager() {
                         />
 
                         <div className="min-w-0 flex-1 space-y-2">
-                          <div className="h-4 w-3/4 rounded bg-muted animate-pulse" aria-hidden="true" />
-                          <div className="h-3 w-1/2 rounded bg-muted animate-pulse" aria-hidden="true" />
+                          <div
+                            className="h-4 w-3/4 rounded bg-muted animate-pulse"
+                            aria-hidden="true"
+                          />
+                          <div
+                            className="h-3 w-1/2 rounded bg-muted animate-pulse"
+                            aria-hidden="true"
+                          />
                         </div>
                       </div>
 
@@ -566,10 +667,22 @@ export default function BlogManager() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <div className="h-3 w-16 rounded bg-muted animate-pulse" aria-hidden="true" />
-                      <div className="h-3 w-3 rounded-full bg-muted animate-pulse" aria-hidden="true" />
-                      <div className="h-3 w-12 rounded bg-muted animate-pulse" aria-hidden="true" />
-                      <div className="h-5 w-16 rounded-full bg-muted animate-pulse" aria-hidden="true" />
+                      <div
+                        className="h-3 w-16 rounded bg-muted animate-pulse"
+                        aria-hidden="true"
+                      />
+                      <div
+                        className="h-3 w-3 rounded-full bg-muted animate-pulse"
+                        aria-hidden="true"
+                      />
+                      <div
+                        className="h-3 w-12 rounded bg-muted animate-pulse"
+                        aria-hidden="true"
+                      />
+                      <div
+                        className="h-5 w-16 rounded-full bg-muted animate-pulse"
+                        aria-hidden="true"
+                      />
                     </div>
                   </div>
                 </div>
@@ -591,7 +704,11 @@ export default function BlogManager() {
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
         <p className="text-lg text-gray-800">{displayError}</p>
-        <Button onClick={refreshData} className="mt-6" aria-label="Retry loading">
+        <Button
+          onClick={refreshData}
+          className="mt-6"
+          aria-label="Retry loading"
+        >
           Retry
         </Button>
       </div>
@@ -600,13 +717,14 @@ export default function BlogManager() {
 
   // --- Main UI ---
   return (
-    <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}> 
+    <div className={cn("space-y-6", selected.size > 0 && "pb-20 sm:pb-6")}>
       {headerActions}
 
       {categoryErrorMessage && (
         <Alert variant="destructive" role="status">
           <AlertDescription>
-            {categoryErrorMessage || 'Failed to load categories. Filters may be limited until the feed recovers.'}
+            {categoryErrorMessage ||
+              "Failed to load categories. Filters may be limited until the feed recovers."}
           </AlertDescription>
         </Alert>
       )}
@@ -627,7 +745,10 @@ export default function BlogManager() {
           </Button>
         )}
         {(!isMobile || filtersOpen) && (
-          <div id="blog-filters" className="flex flex-wrap items-center gap-4">
+          <div
+            id="blog-filters"
+            className="flex flex-wrap items-center gap-3 sm:gap-4"
+          >
             <Input
               placeholder="Search title..."
               value={searchInput}
@@ -642,20 +763,6 @@ export default function BlogManager() {
               className="w-full sm:w-40"
               aria-label="Filter by author"
             />
-            <Input
-              type="date"
-              value={fromInput}
-              onChange={(e) => handleFromDateChange(e.target.value)}
-              className="w-full sm:w-40"
-              aria-label="From date"
-            />
-            <Input
-              type="date"
-              value={toInput}
-              onChange={(e) => handleToDateChange(e.target.value)}
-              className="w-full sm:w-40"
-              aria-label="To date"
-            />
             <CategoryDropdown
               categories={categories}
               selectedCategory={category}
@@ -669,9 +776,9 @@ export default function BlogManager() {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="published">Published</SelectItem>
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="published">Published</SelectItem>
                 <SelectItem value="scheduled">Scheduled</SelectItem>
               </SelectContent>
             </Select>
@@ -699,16 +806,6 @@ export default function BlogManager() {
                 <SortDesc className="h-4 w-4" />
               )}
             </Button>
-            <Select value={String(perPage)} onValueChange={handlePerPageChange}>
-              <SelectTrigger className="w-full sm:w-40" aria-label="Posts per page">
-                <SelectValue placeholder="Per page" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10 / page</SelectItem>
-                <SelectItem value="20">20 / page</SelectItem>
-                <SelectItem value="50">50 / page</SelectItem>
-              </SelectContent>
-            </Select>
             <Button
               variant="ghost"
               size="sm"
@@ -732,10 +829,15 @@ export default function BlogManager() {
         {/* Table or Empty State */}
         {currentPosts.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-muted-foreground/30 bg-muted/40 py-16 text-center">
-            <AlertCircle className="h-10 w-10 text-muted-foreground" aria-hidden="true" />
+            <AlertCircle
+              className="h-10 w-10 text-muted-foreground"
+              aria-hidden="true"
+            />
             <div className="space-y-1">
               <p className="text-lg font-semibold text-foreground">
-                {hasActiveFilters ? "No posts match your filters" : "No blog posts yet"}
+                {hasActiveFilters
+                  ? "No posts match your filters"
+                  : "No blog posts yet"}
               </p>
               <p className="text-sm text-muted-foreground">
                 {hasActiveFilters
@@ -744,12 +846,21 @@ export default function BlogManager() {
               </p>
             </div>
             {!hasActiveFilters ? (
-              <Button onClick={handleCreatePost} size="sm" aria-label="Create your first post">
+              <Button
+                onClick={handleCreatePost}
+                size="sm"
+                aria-label="Create your first post"
+              >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Create your first post
               </Button>
             ) : (
-              <Button variant="outline" size="sm" onClick={clearFilters} aria-label="Clear filters">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearFilters}
+                aria-label="Clear filters"
+              >
                 Clear filters
               </Button>
             )}
@@ -802,7 +913,7 @@ export default function BlogManager() {
                               >
                                 {post.title}
                               </Link>
-                            <p className="mt-1 text-xs text-muted-foreground">
+                              <p className="mt-1 text-xs text-muted-foreground">
                                 {formatDate(post.publishedAt || post.createdAt)}
                               </p>
                             </div>
@@ -818,13 +929,19 @@ export default function BlogManager() {
                                 aria-haspopup="menu"
                                 data-testid="blog-card-actions"
                               >
-                                <MoreVertical className="h-4 w-4" aria-hidden="true" />
+                                <MoreVertical
+                                  className="h-4 w-4"
+                                  aria-hidden="true"
+                                />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" sideOffset={4}>
                               <DropdownMenuItem asChild>
                                 <Link href={`/admin/blog/edit?id=${post.id}`}>
-                                  <Pencil className="mr-2 h-4 w-4" aria-hidden="true" />
+                                  <Pencil
+                                    className="mr-2 h-4 w-4"
+                                    aria-hidden="true"
+                                  />
                                   <span>Edit</span>
                                 </Link>
                               </DropdownMenuItem>
@@ -836,10 +953,16 @@ export default function BlogManager() {
                                 disabled={previewLoadingId === post.id}
                               >
                                 {previewLoadingId === post.id ? (
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                                  <Loader2
+                                    className="mr-2 h-4 w-4 animate-spin"
+                                    aria-hidden="true"
+                                  />
                                 ) : (
-                                  <Eye className="mr-2 h-4 w-4" aria-hidden="true" />
-                                  )}
+                                  <Eye
+                                    className="mr-2 h-4 w-4"
+                                    aria-hidden="true"
+                                  />
+                                )}
                                 <span>
                                   {previewLoadingId === post.id
                                     ? "Loading preview…"
@@ -854,11 +977,19 @@ export default function BlogManager() {
                                 }}
                               >
                                 {isPublished ? (
-                                  <Archive className="mr-2 h-4 w-4" aria-hidden="true" />
+                                  <Archive
+                                    className="mr-2 h-4 w-4"
+                                    aria-hidden="true"
+                                  />
                                 ) : (
-                                  <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
+                                  <Upload
+                                    className="mr-2 h-4 w-4"
+                                    aria-hidden="true"
+                                  />
                                 )}
-                                <span>{isPublished ? "Unpublish" : "Publish"}</span>
+                                <span>
+                                  {isPublished ? "Unpublish" : "Publish"}
+                                </span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onSelect={(event) => {
@@ -866,18 +997,23 @@ export default function BlogManager() {
                                   deletePost(post.id);
                                 }}
                               >
-                                <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                                <Trash2
+                                  className="mr-2 h-4 w-4"
+                                  aria-hidden="true"
+                                />
                                 <span>Delete</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
 
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                           <span className="font-medium">{post.author}</span>
                           <span aria-hidden="true">•</span>
                           <span>{post.status}</span>
-                          <BlogStatusBadge status={post.status as BlogPost["status"]} />
+                          <BlogStatusBadge
+                            status={post.status as BlogPost["status"]}
+                          />
                         </div>
                       </div>
                     </div>
@@ -899,17 +1035,59 @@ export default function BlogManager() {
           </>
         )}
 
-        {/* Pagination (server-driven) */}
-        <Pagination
-          currentPage={currentPage}
-          totalCount={totalPostsCount}
-          perPage={perPage}
-          onPageChange={handlePageChange}
-        />
+        {currentPosts.length > 0 && (
+          <div
+            className="flex flex-col items-center justify-center gap-2 pt-4"
+            aria-live="polite"
+          >
+            {hasNextPage ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadMore}
+                  disabled={isLoadingMore}
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2
+                        className="mr-2 h-4 w-4 animate-spin"
+                        aria-hidden="true"
+                      />
+                      Loading more…
+                    </>
+                  ) : (
+                    <>Load more posts</>
+                  )}
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Posts load automatically as you reach the end of the list.
+                </p>
+              </>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                You’ve reached the end of the results.
+              </p>
+            )}
+            <div ref={sentinelRef} className="h-px w-full" aria-hidden="true" />
+          </div>
+        )}
+        {isLoadingMore && currentPosts.length === 0 && (
+          <div className="flex justify-center py-4" aria-live="polite">
+            <Loader2
+              className="h-5 w-5 animate-spin text-muted-foreground"
+              aria-hidden="true"
+            />
+            <span className="sr-only">Loading more posts…</span>
+          </div>
+        )}
 
         {/* Delete Confirmation Modal */}
         {deleteTargets && (
-          <AlertDialog open onOpenChange={(open) => !open && setDeleteTargets(null)}>
+          <AlertDialog
+            open
+            onOpenChange={(open) => !open && setDeleteTargets(null)}
+          >
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
@@ -917,12 +1095,16 @@ export default function BlogManager() {
                 </AlertDialogTitle>
               </AlertDialogHeader>
               <p>
-                Are you sure you want to delete {deleteTargets.length > 1 ? "these" : "this"} post
-                {deleteTargets.length > 1 ? "s" : ""}? This action cannot be undone.
+                Are you sure you want to delete{" "}
+                {deleteTargets.length > 1 ? "these" : "this"} post
+                {deleteTargets.length > 1 ? "s" : ""}? This action cannot be
+                undone.
               </p>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+                <AlertDialogAction onClick={confirmDelete}>
+                  Delete
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -930,11 +1112,16 @@ export default function BlogManager() {
 
         {/* Publish/Unpublish Confirmation Modal */}
         {bulkAction && (
-          <AlertDialog open onOpenChange={(open) => !open && setBulkAction(null)}>
+          <AlertDialog
+            open
+            onOpenChange={(open) => !open && setBulkAction(null)}
+          >
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  {bulkAction === "publish" ? "Publish selected posts?" : "Unpublish selected posts?"}
+                  {bulkAction === "publish"
+                    ? "Publish selected posts?"
+                    : "Unpublish selected posts?"}
                 </AlertDialogTitle>
               </AlertDialogHeader>
               <p>

@@ -1,31 +1,33 @@
-import { z } from 'zod';
+import { z } from "zod";
+import { isTestMode } from '@/config/flags';
 
 const nonEmptyString = z
   .string()
-  .transform(value => value.trim())
+  .transform((value) => value.trim())
   .pipe(z.string().min(1));
 
 const optionalNonEmptyString = nonEmptyString.optional();
 
 const requiredServerKeys = [
-  'BASE_URL',
-  'CRON_SECRET',
-  'PREVIEW_SECRET',
-  'ADMIN_JWT_SECRET',
+  "BASE_URL",
+  "CRON_SECRET",
+  "PREVIEW_SECRET",
+  "ADMIN_JWT_SECRET",
 ] as const;
 
 const optionalServerKeys = [
-  'NEXT_PUBLIC_BASE_URL',
-  'FIREBASE_SERVICE_ACCOUNT_KEY',
-  'FIREBASE_SERVICE_ACCOUNT_JSON',
-  'FIREBASE_STORAGE_BUCKET',
-  'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
-  'ADMIN_EMAILS',
-  'ADMIN_EMAIL',
-  'ADMIN_REQUIRE_EMAIL_VERIFICATION',
-  'ADMIN_DISPOSABLE_DOMAINS',
-  'E2E',
-  'CORS_ALLOWED_ORIGINS',
+  "NEXT_PUBLIC_BASE_URL",
+  "FIREBASE_SERVICE_ACCOUNT_KEY",
+  "FIREBASE_SERVICE_ACCOUNT_JSON",
+  "FIREBASE_STORAGE_BUCKET",
+  "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+  "ADMIN_EMAILS",
+  "ADMIN_EMAIL",
+  "ADMIN_REQUIRE_EMAIL_VERIFICATION",
+  "ADMIN_DISPOSABLE_DOMAINS",
+  "E2E",
+  "CORS_ALLOWED_ORIGINS",
+  "USE_DEMO_CONTENT",
 ] as const;
 
 type RequiredServerKey = (typeof requiredServerKeys)[number];
@@ -50,9 +52,10 @@ export const serverEnvSchema = z.object({
   ADMIN_DISPOSABLE_DOMAINS: optionalNonEmptyString,
   E2E: optionalNonEmptyString,
   CORS_ALLOWED_ORIGINS: optionalNonEmptyString,
+  USE_DEMO_CONTENT: optionalNonEmptyString,
 });
 
-const truthyFlags = new Set(['1', 'true', 'TRUE', 'True']);
+const truthyFlags = new Set(["1", "true", "TRUE", "True"]);
 const isTruthy = (value: string | undefined): boolean =>
   value !== undefined && truthyFlags.has(value);
 
@@ -64,14 +67,14 @@ const skipValidation =
 
 const { VERCEL_ENV, VERCEL_URL, NODE_ENV } = process.env;
 const NEXT_PUBLIC_BASE_URL = process.env["NEXT_PUBLIC_BASE_URL"];
-if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== 'test') {
+if (!NEXT_PUBLIC_BASE_URL && NODE_ENV !== "test") {
   let resolved: string | undefined;
-  if (VERCEL_ENV === 'preview' || VERCEL_ENV === 'production') {
+  if (VERCEL_ENV === "preview" || VERCEL_ENV === "production") {
     if (VERCEL_URL) {
       resolved = `https://${VERCEL_URL}`;
     }
-  } else if (NODE_ENV === 'development') {
-    resolved = 'http://localhost:3000';
+  } else if (NODE_ENV === "development") {
+    resolved = "http://localhost:3000";
   }
   if (resolved) {
     process.env["NEXT_PUBLIC_BASE_URL"] = resolved;
@@ -91,19 +94,20 @@ const rawServerEnv = allServerKeys.reduce<Record<string, string | undefined>>(
   {},
 );
 
-const _server: z.SafeParseReturnType<ServerEnvShape, ServerEnvShape> = skipValidation
-  ? {
-      success: true as const,
-      data: rawServerEnv as ServerEnvShape,
-    }
-  : serverEnvSchema.safeParse(rawServerEnv);
+const _server: z.SafeParseReturnType<ServerEnvShape, ServerEnvShape> =
+  skipValidation
+    ? {
+        success: true as const,
+        data: rawServerEnv as ServerEnvShape,
+      }
+    : serverEnvSchema.safeParse(rawServerEnv);
 
 if (!_server.success) {
   const { fieldErrors } = _server.error.flatten();
   const message = Object.entries(fieldErrors)
-    .map(([key, value]) => `${key}: ${value?.join(', ')}`)
-    .join('\n');
-  throw new Error('Invalid server environment variables\n' + message);
+    .map(([key, value]) => `${key}: ${value?.join(", ")}`)
+    .join("\n");
+  throw new Error("Invalid server environment variables\n" + message);
 }
 
 export const serverEnv: Record<string, string | undefined> & {
@@ -182,11 +186,13 @@ export const serverEnv: Record<string, string | undefined> & {
   FIREBASE_STORAGE_BUCKET: _server.data.FIREBASE_STORAGE_BUCKET,
   FUNCTIONS_EMULATOR: process.env.FUNCTIONS_EMULATOR,
   INDEXNOW_KEY: process.env.INDEXNOW_KEY,
-  NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
+  NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES:
+    process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
   NEXT_PUBLIC_BASE_URL: _server.data.NEXT_PUBLIC_BASE_URL,
   NEXT_PUBLIC_COOKIEYES_ID: process.env.NEXT_PUBLIC_COOKIEYES_ID,
   NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: _server.data.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:
+    _server.data.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   NEXT_PUBLIC_GTM_CONTAINER_ID: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID,
   NODE_ENV: process.env.NODE_ENV,
   NOTIFY_NEW_SUBMISSION: process.env.NOTIFY_NEW_SUBMISSION,
@@ -202,9 +208,10 @@ export const serverEnv: Record<string, string | undefined> & {
   VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY,
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
-  TEST_MODE: process.env.TEST_MODE,
+  TEST_MODE: isTestMode() ? 'true' : 'false',
   E2E: process.env.E2E,
   CORS_ALLOWED_ORIGINS: process.env.CORS_ALLOWED_ORIGINS,
+  USE_DEMO_CONTENT: process.env.USE_DEMO_CONTENT,
 };
 
 export type ServerEnv = typeof serverEnv;

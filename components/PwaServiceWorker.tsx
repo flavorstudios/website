@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { clientEnv } from '@/env.client';
+import { isTestMode } from '@/config/flags';
 
 export default function PwaServiceWorker() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  const isTestMode = clientEnv.TEST_MODE === 'true';
+  const testMode = isTestMode();
   const isE2E =
     clientEnv.NEXT_PUBLIC_E2E === 'true' || clientEnv.NEXT_PUBLIC_E2E === '1';
 
   useEffect(() => {
-    if (isTestMode || isE2E) {
+    if (testMode || isE2E) {
       return;
     }
 
@@ -64,7 +65,7 @@ export default function PwaServiceWorker() {
         navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
       };
     }
-  }, [isE2E, isTestMode]);
+  }, [isE2E, testMode]);
 
   // Trigger update by sending SKIP_WAITING to the waiting SW
   const handleUpdate = () => {

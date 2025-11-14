@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 
 const tinyPng = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAEklEQVR4nGNgYGBgAAAABAABJzQnCgAAAABJRU5ErkJggg==",
-  "base64"
+  "base64",
 );
 
 const jsonResponse = (data: unknown) => ({
@@ -20,7 +20,7 @@ export async function applyGlobalMocks(page: Page) {
         "cache-control": "max-age=600",
       },
       body: tinyPng,
-    })
+    }),
   );
 
   await page.route("**/*storage.googleapis.com/**", (route) =>
@@ -31,13 +31,15 @@ export async function applyGlobalMocks(page: Page) {
         "cache-control": "max-age=600",
       },
       body: tinyPng,
-    })
+    }),
   );
 
-  await page.route("**/api/cron/**", (route) => route.fulfill(jsonResponse({ ok: true })));
+  await page.route("**/api/cron/**", (route) =>
+    route.fulfill(jsonResponse({ ok: true })),
+  );
 
   await page.route("**/api/admin/user-role**", (route) =>
-    route.fulfill(jsonResponse({ role: "admin" }))
+    route.fulfill(jsonResponse({ role: "admin" })),
   );
 
   await page.route("**/api/admin/stats**", (route) =>
@@ -51,12 +53,12 @@ export async function applyGlobalMocks(page: Page) {
         publishedPosts: 7,
         featuredVideos: 2,
         monthlyGrowth: 6,
-      })
-    )
+      }),
+    ),
   );
 
   await page.route("**/api/admin/activity**", (route) =>
-    route.fulfill(jsonResponse({ activities: [] }))
+    route.fulfill(jsonResponse({ activities: [] })),
   );
 
   await page.route("**/api/admin/analytics/**", (route) =>
@@ -65,21 +67,23 @@ export async function applyGlobalMocks(page: Page) {
         posts: 2,
         videos: 1,
         totals: { posts: 2, videos: 1 },
-      })
-    )
+      }),
+    ),
   );
 
   await page.route("**/api/admin/blog/list**", (route) =>
-    route.fulfill(jsonResponse({
-      items: [
-        {
-          id: "b1",
-          title: "Hello from E2E",
-          slug: "hello-from-e2e",
-          status: "published",
-        },
-      ],
-    }))
+    route.fulfill(
+      jsonResponse({
+        items: [
+          {
+            id: "b1",
+            title: "Hello from E2E",
+            slug: "hello-from-e2e",
+            status: "published",
+          },
+        ],
+      }),
+    ),
   );
 
   await page.route("**/api/admin/blogs*", async (route) => {
@@ -90,7 +94,7 @@ export async function applyGlobalMocks(page: Page) {
 
     await route.fulfill(
       jsonResponse({
-        posts: [
+        items: [
           {
             id: "b1",
             title: "Hello from E2E",
@@ -101,18 +105,21 @@ export async function applyGlobalMocks(page: Page) {
             updatedAt: new Date().toISOString(),
           },
         ],
+        nextCursor: null,
         total: 1,
-      })
+      }),
     );
   });
 
   await page.route("**/api/admin/categories**", (route) =>
-    route.fulfill(jsonResponse({
-      categories: [
-        { id: "cat-1", name: "All", slug: "all" },
-        { id: "cat-2", name: "News", slug: "news" },
-      ],
-    }))
+    route.fulfill(
+      jsonResponse({
+        categories: [
+          { id: "cat-1", name: "All", slug: "all" },
+          { id: "cat-2", name: "News", slug: "news" },
+        ],
+      }),
+    ),
   );
 
   await page.route("**/api/admin/media**", (route) => {
@@ -136,16 +143,16 @@ export async function applyGlobalMocks(page: Page) {
       jsonResponse({
         items: pagedItems,
         nextPage: pageParam >= 2 ? null : pageParam + 1,
-      })
+      }),
     );
   });
 
   await page.route("**/api/admin/media/presign**", (route) =>
-    route.fulfill(jsonResponse({ url: "https://example.com/upload" }))
+    route.fulfill(jsonResponse({ url: "https://example.com/upload" })),
   );
 
   await page.route("**/api/admin/media/upload**", (route) =>
-    route.fulfill(jsonResponse({ success: true }))
+    route.fulfill(jsonResponse({ success: true })),
   );
 
   await page.route("**/api/media/list**", (route) =>
@@ -166,12 +173,12 @@ export async function applyGlobalMocks(page: Page) {
           },
         ],
         cursor: null,
-      })
-    )
+      }),
+    ),
   );
 
   await page.route("**/api/admin/notifications**", (route) =>
-    route.fulfill(jsonResponse({ notifications: [] }))
+    route.fulfill(jsonResponse({ notifications: [] })),
   );
 
   await page.route("**/api/admin/blogs/stream", (route) =>
@@ -179,7 +186,7 @@ export async function applyGlobalMocks(page: Page) {
       status: 200,
       headers: { "content-type": "text/event-stream" },
       body: "",
-    })
+    }),
   );
   
   await page.route("**/api/admin/notifications/stream", (route) =>
@@ -187,6 +194,6 @@ export async function applyGlobalMocks(page: Page) {
       status: 200,
       headers: { "content-type": "text/event-stream" },
       body: "",
-    })
+    }),
   );
 }

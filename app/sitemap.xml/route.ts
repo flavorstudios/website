@@ -4,6 +4,7 @@ import { serverEnv } from "@/env/server";
 import { canonicalBaseUrl } from "@/lib/base-url";
 import { createRequestContext, textResponse } from "@/lib/api/response";
 import { logError } from "@/lib/log";
+import { isTestMode } from "@/config/flags";
 
 const BASE_URL = canonicalBaseUrl();
 
@@ -23,10 +24,7 @@ export const revalidate = 3600;
 
 export async function GET(request: NextRequest) {
   const context = createRequestContext(request);
-  const skipFetch =
-    serverEnv.NODE_ENV === "test" ||
-    serverEnv.TEST_MODE === "true" ||
-    process.env.TEST_MODE === "true";
+  const skipFetch = serverEnv.NODE_ENV === "test" || isTestMode();
 
   try {
     let blogs: ContentPage[] = [];

@@ -5,14 +5,12 @@ import { generateRssFeed } from "@/lib/rss-utils"; // Correctly imports your RSS
 import { SITE_NAME } from "@/lib/constants"; // SITE_NAME imported for fallback title.
 import { getCanonicalUrl } from "@/lib/seo-utils"; // For canonicalizing fallback URLs.
 import { serverEnv } from "@/env/server";
+import { isTestMode } from "@/config/flags";
 
 export const revalidate = 3600;
 
 export async function GET() {
-  const skipFetch =
-    serverEnv.NODE_ENV === "test" ||
-    serverEnv.TEST_MODE === "true" ||
-    process.env.TEST_MODE === "true";
+  const skipFetch = serverEnv.NODE_ENV === "test" || isTestMode();
 
   const canonicalSiteUrl = getCanonicalUrl("/");
   const now = new Date().toUTCString();

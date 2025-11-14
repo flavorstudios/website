@@ -1,7 +1,16 @@
 // app/admin/dashboard/AdminDashboardPageClient.tsx
 "use client";
 
-import { useState, useEffect, useCallback, Suspense, useMemo, useRef, useId } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  Suspense,
+  useMemo,
+  useRef,
+  useId,
+  type ReactNode,
+} from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { signOut } from "firebase/auth";
@@ -209,6 +218,7 @@ interface AdminDashboardPageClientProps {
   headingLevel?: HeadingLevel;
   suppressHeading?: boolean;
   headingId?: string;
+  customSections?: Partial<Record<SectionId, ReactNode>>;
 }
 
 export default function AdminDashboardPageClient({
@@ -216,6 +226,7 @@ export default function AdminDashboardPageClient({
   headingLevel = 1,
   suppressHeading = false,
   headingId: headingIdProp,
+  customSections,
 }: AdminDashboardPageClientProps) {
   const shellVariant = useAdminShellVariant();
   const search = useSearchParams();
@@ -537,6 +548,11 @@ export default function AdminDashboardPageClient({
   }, [sectionHeading]);
 
   const renderContent = () => {
+    const custom = customSections?.[activeSection];
+    if (custom) {
+      return custom;
+    }
+    
     switch (activeSection) {
       case "overview":
         return (

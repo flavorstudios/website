@@ -11,7 +11,7 @@ const env = {
   PORT: '3000',
 
   NEXT_PUBLIC_BASE_URL: 'http://127.0.0.1:3000',
-  NEXT_PUBLIC_E2E: 'true',
+  NEXT_PUBLIC_E2E: '1',
   BASE_URL: 'http://127.0.0.1:3000',
   NEXTAUTH_URL: 'http://127.0.0.1:3000',
 
@@ -33,8 +33,7 @@ const env = {
   NEXT_TELEMETRY_DISABLED: '1',
   NODE_ENV: 'production' satisfies NodeJS.ProcessEnv['NODE_ENV'],
   NEXT_DISABLE_MINIFY: 'true',
-  NEXT_PUBLIC_TEST_MODE: 'true',
-  TEST_MODE: 'true',
+  NEXT_PUBLIC_TEST_MODE: '1',
   NEXT_DISABLE_FONT_DOWNLOADS: '1',
   E2E: 'true',
   NODE_OPTIONS: `--require ${fontMockPath}`,

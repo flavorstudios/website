@@ -1,17 +1,18 @@
 import { isTestLikeEnv } from "../lib/env/is-test-like";
+import { isTestMode } from "@/config/flags";
 
 const baseUrlKey = "NEXT_PUBLIC_BASE_URL";
 const { VERCEL_ENV, VERCEL_URL, NODE_ENV } = process.env;
 let baseUrl = process.env[baseUrlKey];
 
-if (!baseUrl && NODE_ENV !== 'test') {
+if (!baseUrl && NODE_ENV !== "test") {
   let resolved: string | undefined;
-  if (VERCEL_ENV === 'preview' || VERCEL_ENV === 'production') {
+  if (VERCEL_ENV === "preview" || VERCEL_ENV === "production") {
     if (VERCEL_URL) {
       resolved = `https://${VERCEL_URL}`;
     }
-  } else if (NODE_ENV === 'development') {
-    resolved = 'http://localhost:3000';
+  } else if (NODE_ENV === "development") {
+    resolved = "http://localhost:3000";
   }
 
   if (resolved) {
@@ -80,6 +81,7 @@ export const serverEnv: Record<string, string | undefined> & {
   UPSTASH_REDIS_REST_TOKEN: string | undefined;
   TEST_MODE: string | undefined;
   CORS_ALLOWED_ORIGINS: string | undefined;
+  USE_DEMO_CONTENT: string | undefined;
 } = {
   ADMIN_AUTH_DISABLED: process.env.ADMIN_AUTH_DISABLED,
   ADMIN_BYPASS: process.env.ADMIN_BYPASS,
@@ -107,11 +109,13 @@ export const serverEnv: Record<string, string | undefined> & {
   FIREBASE_STORAGE_BUCKET: process.env.FIREBASE_STORAGE_BUCKET,
   FUNCTIONS_EMULATOR: process.env.FUNCTIONS_EMULATOR,
   INDEXNOW_KEY: process.env.INDEXNOW_KEY,
-  NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES: process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
+  NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES:
+    process.env.NEXT_PUBLIC_ADMIN_ROUTE_PREFIXES,
   NEXT_PUBLIC_BASE_URL: baseUrl,
   NEXT_PUBLIC_COOKIEYES_ID: process.env.NEXT_PUBLIC_COOKIEYES_ID,
   NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET:
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   NEXT_PUBLIC_GTM_CONTAINER_ID: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID,
   NODE_ENV: process.env.NODE_ENV,
   NOTIFY_NEW_SUBMISSION: process.env.NOTIFY_NEW_SUBMISSION,
@@ -127,8 +131,9 @@ export const serverEnv: Record<string, string | undefined> & {
   VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY,
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
-  TEST_MODE: process.env.TEST_MODE,
+  TEST_MODE: isTestMode() ? "true" : "false",
   CORS_ALLOWED_ORIGINS: process.env.CORS_ALLOWED_ORIGINS,
+  USE_DEMO_CONTENT: process.env.USE_DEMO_CONTENT,
 };
 
 export type ServerEnv = typeof serverEnv;

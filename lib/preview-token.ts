@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { serverEnv } from "@/env/server";
+import { isTestMode } from "@/config/flags";
 import {
   ExpiredPreviewTokenError,
   InvalidPreviewTokenError,
@@ -25,8 +26,7 @@ function getSecret(throwOnMissing = true): string | undefined {
   const DEFAULT_PREVIEW_SECRET = "test-secret";
   const envSecret = process.env.PREVIEW_SECRET || serverEnv.PREVIEW_SECRET;
   const nodeEnv = process.env.NODE_ENV || serverEnv.NODE_ENV;
-  const testModeEnabled =
-    process.env.TEST_MODE === "true" || serverEnv.TEST_MODE === "true";
+  const testModeEnabled = isTestMode();
   const adminAuthDisabled =
     process.env.ADMIN_AUTH_DISABLED === "1" || serverEnv.ADMIN_AUTH_DISABLED === "1";
   const isNonProduction = nodeEnv ? nodeEnv !== "production" : false;

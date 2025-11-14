@@ -12,6 +12,7 @@ import { logError } from "@/lib/log";
 import type { SettingsErrorCode } from "./errors";
 import { getSessionEmailFromCookies, isAdmin } from "@/lib/admin-auth";
 import { SettingsClient, SettingsLoadErrorBanner } from "./SettingsClient";
+import AdminDashboardPageClient from "@/app/admin/dashboard/AdminDashboardPageClient";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -134,16 +135,25 @@ export default async function SettingsPage(props: SettingsPageProps) {
 
   if (!settings || loadError) {
     return (
-      <div className="space-y-6">
-        {header}
-        <HeadingLevelBoundary>
-          <SettingsLoadErrorBanner
-            message={(loadError ?? { message: DEFAULT_LOAD_ERROR }).message}
-            detail={loadError?.detail ?? null}
-            showDetail={showDetail}
-          />
-        </HeadingLevelBoundary>
-      </div>
+      <AdminDashboardPageClient
+        initialSection="settings"
+        suppressHeading
+        headingId={headingId}
+        customSections={{
+          settings: (
+            <div className="space-y-6">
+              {header}
+              <HeadingLevelBoundary>
+                <SettingsLoadErrorBanner
+                  message={(loadError ?? { message: DEFAULT_LOAD_ERROR }).message}
+                  detail={loadError?.detail ?? null}
+                  showDetail={showDetail}
+                />
+              </HeadingLevelBoundary>
+            </div>
+          ),
+        }}
+      />
     );
   }
 
@@ -164,17 +174,26 @@ export default async function SettingsPage(props: SettingsPageProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {header}
-      <HeadingLevelBoundary>
-        <SettingsClient
-          initialTab={tab}
-          settings={settings}
-          showDevHint={showDetail}
-          emailVerified={emailVerified}
-          providerLocked={providerLocked}
-        />
-      </HeadingLevelBoundary>
-    </div>
+    <AdminDashboardPageClient
+      initialSection="settings"
+      suppressHeading
+      headingId={headingId}
+      customSections={{
+        settings: (
+          <div className="space-y-6">
+            {header}
+            <HeadingLevelBoundary>
+              <SettingsClient
+                initialTab={tab}
+                settings={settings}
+                showDevHint={showDetail}
+                emailVerified={emailVerified}
+                providerLocked={providerLocked}
+              />
+            </HeadingLevelBoundary>
+          </div>
+        ),
+      }}
+    />
   );
 }

@@ -16,6 +16,36 @@ import { getUserRole } from "@/lib/user-roles";
 import { serverEnv } from "@/env/server";
 import { createHash } from "crypto";
 
+type AdminCookieOptions = {
+  httpOnly: true;
+  secure: boolean;
+  sameSite: "lax" | "strict" | "none";
+  path: string;
+  domain?: string;
+  maxAge?: number;
+};
+
+const baseAdminCookieOptions = (): AdminCookieOptions => {
+  const secure = serverEnv.NODE_ENV === "production";
+  const domain = secure ? serverEnv.ADMIN_COOKIE_DOMAIN : undefined;
+  return {
+    httpOnly: true,
+    secure,
+    sameSite: "lax",
+    path: "/",
+    ...(domain ? { domain } : {}),
+  };
+};
+
+export const adminCookieOptions = (
+  overrides: Partial<AdminCookieOptions> = {},
+): AdminCookieOptions => {
+  return {
+    ...baseAdminCookieOptions(),
+    ...overrides,
+  };
+};
+
 const isE2E = process.env.E2E === "true" || process.env.E2E === "1";
 const requireEmailVerification =
   !isE2E && serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === "true";
@@ -373,11 +403,7 @@ export async function createSessionCookieFromIdToken(
       );
     const cookieStore = await cookies();
     cookieStore.set("admin-session", "bypass", {
-      httpOnly: true,
-      secure: serverEnv.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 2,
-      path: "/",
+      ...adminCookieOptions({ maxAge: 60 * 60 * 2 }),
     });
     return "bypass";
   }
@@ -478,11 +504,7 @@ export async function createRefreshSession(uid: string): Promise<string> {
       path: "/",
     });
     cookieStore.set("admin-refresh-token", "bypass-refresh", {
-      httpOnly: true,
-      secure: serverEnv.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 30,
-      path: "/",
+      ...adminCookieOptions({ maxAge: 60 * 60 * 24 * 30 }),
     });
     return "bypass-refresh";
   }
@@ -535,18 +557,10 @@ export async function createRefreshSession(uid: string): Promise<string> {
     // Set cookies (server context)
     const cookieStore = await cookies();
     cookieStore.set("admin-session", sessionCookie, {
-      httpOnly: true,
-      secure: serverEnv.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 2,
-      path: "/",
+      ...adminCookieOptions({ maxAge: 60 * 60 * 2 }),
     });
     cookieStore.set("admin-refresh-token", refreshToken, {
-      httpOnly: true,
-      secure: serverEnv.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 30,
-      path: "/",
+      ...adminCookieOptions({ maxAge: 60 * 60 * 24 * 30 }),
     });
 
     return refreshToken;

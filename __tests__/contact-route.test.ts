@@ -1,3 +1,5 @@
+import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
+
 jest.mock("next/server", () => ({
   NextResponse: {
     json: jest.fn((data: unknown, init?: { status?: number }) => {
@@ -41,8 +43,12 @@ jest.mock("@/lib/firebase-admin", () => ({
 describe("app/api/contact", () => {
   const originalFetch = global.fetch;
   const fetchMock = jest.fn();
-  const originalApiKey = process.env.PERSPECTIVE_API_KEY;
-  const originalSkipValidation = process.env.SKIP_ENV_VALIDATION;
+  const originalEnv = snapshotEnv([
+    'PERSPECTIVE_API_KEY',
+    'SKIP_ENV_VALIDATION',
+    'CRON_SECRET',
+    'PREVIEW_SECRET',
+  ]);
   const responseCtor = Response as unknown as {
     json?: typeof Response.json;
   };
@@ -54,10 +60,11 @@ describe("app/api/contact", () => {
     fetchMock.mockReset();
     global.fetch = fetchMock as unknown as typeof fetch;
 
-    delete process.env.PERSPECTIVE_API_KEY;
-    process.env.SKIP_ENV_VALIDATION = "true";
-    process.env.CRON_SECRET = process.env.CRON_SECRET ?? "test-cron";
-    process.env.PREVIEW_SECRET = process.env.PREVIEW_SECRET ?? "test-preview";
+    restoreEnv(originalEnv);
+    setEnv('PERSPECTIVE_API_KEY', undefined);
+    setEnv('SKIP_ENV_VALIDATION', 'true');
+    setEnv('CRON_SECRET', process.env.CRON_SECRET ?? 'test-cron');
+    setEnv('PREVIEW_SECRET', process.env.PREVIEW_SECRET ?? 'test-preview');
 
     if (typeof responseCtor.json !== "function") {
       responseCtor.json = (data: unknown, init?: ResponseInit) => {
@@ -76,17 +83,7 @@ describe("app/api/contact", () => {
 
   afterAll(() => {
     global.fetch = originalFetch;
-    if (originalApiKey === undefined) {
-      delete process.env.PERSPECTIVE_API_KEY;
-    } else {
-      process.env.PERSPECTIVE_API_KEY = originalApiKey;
-    }
-
-    if (originalSkipValidation === undefined) {
-      delete process.env.SKIP_ENV_VALIDATION;
-    } else {
-      process.env.SKIP_ENV_VALIDATION = originalSkipValidation;
-    }
+    restoreEnv(originalEnv);
 
     if (originalResponseJson) {
       responseCtor.json = originalResponseJson;

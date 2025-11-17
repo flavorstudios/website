@@ -4,12 +4,24 @@ import { mkdtempSync, writeFileSync, readdirSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 
-process.env.CRON_SECRET = "test-secret";
-process.env.BASE_URL = "http://localhost:3000";
-const tmpBackupDir = mkdtempSync(join(tmpdir(), "backup-"));
-process.env.BACKUP_DIR = tmpBackupDir;
-process.env.GOOGLE_APPLICATION_CREDENTIALS = join(tmpBackupDir, "creds.json");
-writeFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, "{}");
+import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
+
+const trackedKeys = [
+  'CRON_SECRET',
+  'BASE_URL',
+  'BACKUP_DIR',
+  'GOOGLE_APPLICATION_CREDENTIALS',
+  'BACKUP_RETENTION',
+];
+
+const originalEnv = snapshotEnv(trackedKeys);
+const tmpBackupDir = mkdtempSync(join(tmpdir(), 'backup-'));
+
+setEnv('CRON_SECRET', 'test-secret');
+setEnv('BASE_URL', 'http://localhost:3000');
+setEnv('BACKUP_DIR', tmpBackupDir);
+setEnv('GOOGLE_APPLICATION_CREDENTIALS', join(tmpBackupDir, 'creds.json'));
+writeFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS!, '{}');
 
 jest.mock("next/cache", () => ({
   revalidatePath: () => {},
@@ -114,7 +126,7 @@ describe("cron endpoints", () => {
   });
 
   it("rotates old backups", async () => {
-    process.env.BACKUP_RETENTION = "1";
+    setEnv('BACKUP_RETENTION', '1');
     await backup(authReq());
     await backup(authReq());
     const files = readdirSync(tmpBackupDir);
@@ -173,5 +185,9 @@ describe("cron endpoints", () => {
     expect(consoleSpy).toHaveBeenCalled();
     fetchMock.mockRestore();
     consoleSpy.mockRestore();
+  });
+
+  afterAll(() => {
+    restoreEnv(originalEnv);
   });
 });

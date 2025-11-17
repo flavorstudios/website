@@ -1,4 +1,5 @@
 import type { BlogPost, Video } from "@/lib/types";
+import { getAdminBlogFixtures } from "@/lib/admin/blog-fixtures";
 
 export type E2ENotification = {
   id: string;
@@ -30,60 +31,7 @@ type FixturesState = {
   notifications: E2ENotification[];
 };
 
-const baseBlogPosts: BlogPost[] = [
-  {
-    id: "blog-e2e-1",
-    title: "Flavor Studios Launches New Anthology Series",
-    slug: "flavor-studios-launches-new-anthology-series",
-    content:
-      "<p>We are thrilled to debut a twelve-episode anthology showcasing emerging directors from our global collective. Expect dazzling visual experiments and heartfelt storytelling.</p>",
-    excerpt:
-      "We just announced a new anthology series that highlights the directors shaping Flavor Studios' next chapter.",
-    status: "published",
-    category: "Announcements",
-    categories: ["Announcements", "Studios"],
-    tags: ["news", "release"],
-    featuredImage: "/cover.jpg",
-    seoTitle: "New Anthology Series Announcement",
-    seoDescription: "Flavor Studios introduces a new anthology with bold directors and original stories.",
-    author: "Flavor Studios Editorial",
-    publishedAt: "2024-01-15T10:00:00.000Z",
-    createdAt: "2024-01-10T09:00:00.000Z",
-    updatedAt: "2024-01-20T14:30:00.000Z",
-    views: 1824,
-    readTime: "6 min",
-    commentCount: 8,
-    shareCount: 34,
-    schemaType: "Article",
-    openGraphImage: "/cover.jpg",
-  },
-  {
-    id: "blog-e2e-2",
-    title: "Production Update: Episode 7 Storyboards",
-    slug: "production-update-episode-7-storyboards",
-    content:
-      "<p>Storyboard artist Hana gives a peek behind the scenes of Episode 7, revealing how we merge hand-drawn layouts with volumetric lighting.</p>",
-    excerpt:
-      "Hana walks through the storyboard process for Episode 7 and how the team iterates fast without losing detail.",
-    status: "published",
-    category: "Production",
-    categories: ["Production"],
-    tags: ["behind-the-scenes", "storyboard"],
-    featuredImage: "/cover.jpg",
-    seoTitle: "Episode 7 Storyboard Deep Dive",
-    seoDescription: "Inside the storyboard workflows powering Flavor Studios' Episode 7.",
-    author: "Hana Ito",
-    publishedAt: "2024-02-05T16:00:00.000Z",
-    createdAt: "2024-02-02T09:30:00.000Z",
-    updatedAt: "2024-02-06T11:15:00.000Z",
-    views: 956,
-    readTime: "5 min",
-    commentCount: 3,
-    shareCount: 11,
-    schemaType: "Article",
-    openGraphImage: "/cover.jpg",
-  },
-];
+const baseBlogPosts: BlogPost[] = getAdminBlogFixtures();
 
 const baseVideos: FixturesState["videos"] = [
   {

@@ -833,6 +833,20 @@ export default function BlogManager() {
           </div>
         )}
 
+        <div
+          className="flex flex-wrap items-center justify-between text-sm text-muted-foreground"
+          aria-live="polite"
+        >
+          <span data-testid="blog-total-count">
+            Showing {currentPosts.length} of {totalPostsCount} posts
+          </span>
+          {hasActiveFilters && (
+            <span className="text-xs" data-testid="blog-filter-indicator">
+              Filters active
+            </span>
+          )}
+        </div>
+
         {/* Bulk Actions */}
         <BlogBulkActions
           count={selected.size}

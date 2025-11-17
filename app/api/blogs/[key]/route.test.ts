@@ -7,6 +7,7 @@ import {
   getFallbackBlogPostById,
   isFallbackResult,
 } from "@/lib/content-store";
+import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
 
 jest.mock("@/lib/content-store", () => {
   const actual = jest.requireActual<typeof import("@/lib/content-store")>(
@@ -48,6 +49,8 @@ describe("GET /api/blogs/:key", () => {
     schemaType: "Article",
   };
 
+  const originalEnv = snapshotEnv(['ACCEPT_ID_FALLBACK']);
+
   beforeEach(() => {
     (blogStore.getBySlug as jest.Mock).mockReset();
     (blogStore.getById as jest.Mock).mockReset();
@@ -57,7 +60,8 @@ describe("GET /api/blogs/:key", () => {
     (getFallbackBlogPostBySlug as jest.Mock).mockReturnValue(null);
     (getFallbackBlogPostById as jest.Mock).mockReturnValue(null);
     (isFallbackResult as jest.Mock).mockReturnValue(false);
-    delete process.env.ACCEPT_ID_FALLBACK;
+    restoreEnv(originalEnv);
+    setEnv('ACCEPT_ID_FALLBACK', undefined);
   });
 
   it("returns content for slug", async () => {
@@ -76,7 +80,7 @@ describe("GET /api/blogs/:key", () => {
   it("falls back to id when allowed", async () => {
     (blogStore.getBySlug as jest.Mock).mockResolvedValue(null);
     (blogStore.getById as jest.Mock).mockResolvedValue(mockPost);
-    process.env.ACCEPT_ID_FALLBACK = "true";
+    setEnv('ACCEPT_ID_FALLBACK', 'true');
 
     const { GET } = await import("./route");
 
@@ -134,7 +138,7 @@ describe("GET /api/blogs/:key", () => {
   it("returns 404 for id when fallback disabled", async () => {
     (blogStore.getBySlug as jest.Mock).mockResolvedValue(null);
     (blogStore.getById as jest.Mock).mockResolvedValue(mockPost);
-    process.env.ACCEPT_ID_FALLBACK = "false";
+    setEnv('ACCEPT_ID_FALLBACK', 'false');
 
     const { GET } = await import("./route");
 
@@ -208,5 +212,8 @@ it("returns scheduled fallback content when publish time has passed", async () =
     } finally {
       jest.useRealTimers();
     }
+  });
+  afterAll(() => {
+    restoreEnv(originalEnv);
   });
 });

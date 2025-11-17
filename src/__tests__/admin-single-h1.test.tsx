@@ -5,8 +5,14 @@ import { render, screen, act } from "@testing-library/react";
 
 import { AdminRouteFactories } from "@/test-utils/adminRoutes";
 import { SECTION_HEADINGS } from "@/app/admin/dashboard/section-metadata";
+import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
 
-process.env.ADMIN_BYPASS = "true";
+const originalEnv = snapshotEnv(['ADMIN_BYPASS']);
+setEnv('ADMIN_BYPASS', "true");
+
+afterAll(() => {
+  restoreEnv(originalEnv);
+});
 
 jest.mock("next/navigation", () => {
   const actual = jest.requireActual("next/navigation");

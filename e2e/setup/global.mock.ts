@@ -11,6 +11,10 @@ const jsonResponse = (data: unknown) => ({
   body: JSON.stringify(data),
 });
 
+const truthy = (value: string | undefined) => value === "true" || value === "1";
+const skipAdminBlogMock =
+  truthy(process.env.E2E) || truthy(process.env.NEXT_PUBLIC_E2E) || truthy(process.env.ADMIN_BYPASS);
+
 export async function applyGlobalMocks(page: Page) {
   await page.route("**/*firebasestorage.app/**", (route) =>
     route.fulfill({
@@ -86,30 +90,32 @@ export async function applyGlobalMocks(page: Page) {
     ),
   );
 
-  await page.route("**/api/admin/blogs*", async (route) => {
-    const url = new URL(route.request().url());
-    if (!url.pathname.endsWith("/api/admin/blogs")) {
-      return route.fallback();
-    }
+  if (!skipAdminBlogMock) {
+    await page.route("**/api/admin/blogs*", async (route) => {
+      const url = new URL(route.request().url());
+      if (!url.pathname.endsWith("/api/admin/blogs")) {
+        return route.fallback();
+      }
 
-    await route.fulfill(
-      jsonResponse({
-        items: [
-          {
-            id: "b1",
-            title: "Hello from E2E",
-            slug: "hello-from-e2e",
-            status: "published",
-            author: "Playwright",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        ],
-        nextCursor: null,
-        total: 1,
-      }),
-    );
-  });
+      await route.fulfill(
+        jsonResponse({
+          items: [
+            {
+              id: "b1",
+              title: "Hello from E2E",
+              slug: "hello-from-e2e",
+              status: "published",
+              author: "Playwright",
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+          nextCursor: null,
+          total: 1,
+        }),
+      );
+    });
+  }
 
   await page.route("**/api/admin/categories**", (route) =>
     route.fulfill(

@@ -1,5 +1,7 @@
 import type { ServiceAccount } from "firebase-admin";
 
+import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
+
 // Mocks for firebase-admin functions to avoid requiring valid credentials
 jest.mock("firebase-admin/app", () => ({
   cert: jest.fn(() => ({})),
@@ -20,30 +22,37 @@ describe("firebase-admin env loading", () => {
     clientEmail: "demo@demo.iam.gserviceaccount.com",
   } as unknown as ServiceAccount;
 
+  const originalEnv = snapshotEnv([
+    'FIREBASE_SERVICE_ACCOUNT_KEY',
+    'FIREBASE_SERVICE_ACCOUNT_JSON',
+    'ADMIN_BYPASS',
+  ]);
+
   beforeEach(() => {
     jest.clearAllMocks();
     // Clear env vars before each run
-    delete process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-    delete process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-    delete process.env.ADMIN_BYPASS;
+    restoreEnv(originalEnv);
+    setEnv('FIREBASE_SERVICE_ACCOUNT_KEY', undefined);
+    setEnv('FIREBASE_SERVICE_ACCOUNT_JSON', undefined);
+    setEnv('ADMIN_BYPASS', undefined);
   });
 
   it("initializes with FIREBASE_SERVICE_ACCOUNT_KEY", async () => {
-    process.env.FIREBASE_SERVICE_ACCOUNT_KEY = JSON.stringify(serviceAccount);
+    setEnv('FIREBASE_SERVICE_ACCOUNT_KEY', JSON.stringify(serviceAccount));
     jest.resetModules();
     const { isAdminSdkAvailable } = await import("../firebase-admin");
     expect(isAdminSdkAvailable()).toBe(true);
   });
 
   it("initializes with FIREBASE_SERVICE_ACCOUNT_JSON", async () => {
-    process.env.FIREBASE_SERVICE_ACCOUNT_JSON = JSON.stringify(serviceAccount);
+    setEnv('FIREBASE_SERVICE_ACCOUNT_JSON', JSON.stringify(serviceAccount));
     jest.resetModules();
     const { isAdminSdkAvailable } = await import("../firebase-admin");
     expect(isAdminSdkAvailable()).toBe(true);
   });
 
   it("returns admin auth and db instances when credentials are set", async () => {
-    process.env.FIREBASE_SERVICE_ACCOUNT_KEY = JSON.stringify(serviceAccount);
+    setEnv('FIREBASE_SERVICE_ACCOUNT_KEY', JSON.stringify(serviceAccount));
     jest.resetModules();
     const { getAdminAuth, getAdminDb } = await import("../firebase-admin");
     const auth = getAdminAuth();
@@ -64,7 +73,7 @@ describe("firebase-admin env loading", () => {
   });
 
   it("throws descriptive errors when ADMIN_BYPASS is enabled", async () => {
-    process.env.FIREBASE_SERVICE_ACCOUNT_KEY = JSON.stringify(serviceAccount);
+    setEnv('FIREBASE_SERVICE_ACCOUNT_KEY', JSON.stringify(serviceAccount));
     jest.resetModules();
     jest.doMock("@/env/server", () => ({
       serverEnv: {
@@ -86,5 +95,8 @@ describe("firebase-admin env loading", () => {
     expect(() => getAdminDb()).toThrow(
       /Admin features unavailable: FIREBASE_SERVICE_ACCOUNT_KEY\/FIREBASE_SERVICE_ACCOUNT_JSON missing\/invalid or ADMIN_BYPASS enabled\./
     );
+  });
+  afterAll(() => {
+    restoreEnv(originalEnv);
   });
 });

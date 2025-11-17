@@ -16,23 +16,19 @@ test("blog fallback cards render before data resolves on mobile", async ({
   // slow down ONLY the first blogs request to simulate "data still loading"
   await page.route(BLOGS_API_GLOB, async (route) => {
     if (!blogRequestResolved) {
-      // simulate slow backend
       await new Promise((resolve) => setTimeout(resolve, 4000));
       blogRequestResolved = true;
+      const realResponse = await route.fetch();
+      const body = await realResponse.body();
       await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ items: [], nextCursor: null, total: 0 }),
+        status: realResponse.status(),
+        headers: realResponse.headers(),
+        body,
       });
       return;
     }
 
-    // subsequent calls: return fast so the page can hydrate/retry
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ items: [], nextCursor: null, total: 0 }),
-    });
+    await route.fallback();
   });
 
   await page.route("**/api/admin/categories?type=blog**", async (route) => {

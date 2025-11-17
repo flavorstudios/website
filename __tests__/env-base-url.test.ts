@@ -1,35 +1,45 @@
 /** @jest-environment node */
 
+import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
+
+const trackedKeys = [
+  'NODE_ENV',
+  'NEXT_PUBLIC_BASE_URL',
+  'VERCEL_ENV',
+  'VERCEL_URL',
+  'CRON_SECRET',
+  'PREVIEW_SECRET',
+  'BASE_URL',
+  'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
+  'ADMIN_BYPASS',
+];
+
 const setNodeEnv = (value: string | undefined) => {
-  if (typeof value === "undefined") {
-    Reflect.deleteProperty(process.env, "NODE_ENV");
-  } else {
-    Reflect.set(process.env, "NODE_ENV", value);
-  }
+  setEnv('NODE_ENV', value);
 };
 
 describe("server env bootstrap", () => {
-  const originalEnv = process.env;
+  const originalEnv = snapshotEnv(trackedKeys);
 
   beforeEach(() => {
     jest.resetModules();
-    process.env = { ...originalEnv } as NodeJS.ProcessEnv;
-    delete process.env.NEXT_PUBLIC_BASE_URL;
-    delete process.env.VERCEL_ENV;
-    delete process.env.VERCEL_URL;
-    process.env.CRON_SECRET = "cron-secret";
-    process.env.PREVIEW_SECRET = "preview-secret";
-    process.env.BASE_URL = "https://api.flavor.test";
-    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = "bucket";
+    restoreEnv(originalEnv);
+    setEnv('NEXT_PUBLIC_BASE_URL', undefined);
+    setEnv('VERCEL_ENV', undefined);
+    setEnv('VERCEL_URL', undefined);
+    setEnv('CRON_SECRET', 'cron-secret');
+    setEnv('PREVIEW_SECRET', 'preview-secret');
+    setEnv('BASE_URL', 'https://api.flavor.test');
+    setEnv('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET', 'bucket');
   });
 
   afterEach(() => {
-    process.env = originalEnv;
+    restoreEnv(originalEnv);
   });
 
   it("derives NEXT_PUBLIC_BASE_URL for preview deployments", async () => {
-    process.env.VERCEL_ENV = "preview";
-    process.env.VERCEL_URL = "preview.flavor.test";
+    setEnv('VERCEL_ENV', 'preview');
+    setEnv('VERCEL_URL', 'preview.flavor.test');
     setNodeEnv("production");
 
     await import("../env/server-validation");
@@ -48,11 +58,11 @@ describe("server env bootstrap", () => {
   });
 
   it("skips validation when ADMIN_BYPASS is enabled", async () => {
-    process.env.ADMIN_BYPASS = "true";
-    delete process.env.BASE_URL;
-    delete process.env.CRON_SECRET;
-    delete process.env.PREVIEW_SECRET;
-    delete process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+    setEnv('ADMIN_BYPASS', 'true');
+    setEnv('BASE_URL', undefined);
+    setEnv('CRON_SECRET', undefined);
+    setEnv('PREVIEW_SECRET', undefined);
+    setEnv('NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET', undefined);
 
     await expect(import("../env/server-validation")).resolves.toBeDefined();
   });

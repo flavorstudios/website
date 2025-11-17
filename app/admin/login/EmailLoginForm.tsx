@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import useSWR from "swr"
-import { clientEnv } from "@/env.client"
 import { isTestMode } from "@/config/flags"
 type EmailLoginFormProps = {
   error: string

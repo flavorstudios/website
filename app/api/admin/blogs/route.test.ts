@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { NextRequest } from "next/server";
+import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
 import { logActivity } from "@/lib/activity-log";
 
 jest.mock("@/lib/activity-log", () => ({ logActivity: jest.fn() }));
@@ -110,6 +111,8 @@ const mockPosts = [
   },
 ];
 
+const originalEnv = snapshotEnv(['USE_DEMO_CONTENT']);
+
 beforeEach(() => {
   if (!process.env.DEBUG) {
     infoSpy = jest.spyOn(console, "info").mockImplementation(() => {});
@@ -125,7 +128,8 @@ beforeEach(() => {
   const { hasE2EBypass } = require("@/lib/e2e-utils");
   hasE2EBypass.mockReturnValue(false);
 
-  delete process.env.USE_DEMO_CONTENT;
+  restoreEnv(originalEnv);
+  setEnv('USE_DEMO_CONTENT', undefined);
 });
 
 afterEach(() => {
@@ -134,7 +138,7 @@ afterEach(() => {
 });
 
 afterAll(() => {
-  delete process.env.USE_DEMO_CONTENT;
+  restoreEnv(originalEnv);
 });
 
 describe("POST /api/admin/blogs", () => {
@@ -227,7 +231,7 @@ describe("GET /api/admin/blogs", () => {
     const { getE2EBlogPosts } = require("@/lib/e2e-fixtures");
     const { hasE2EBypass } = require("@/lib/e2e-utils");
 
-    process.env.USE_DEMO_CONTENT = "true";
+    setEnv('USE_DEMO_CONTENT', 'true');
     hasE2EBypass.mockReturnValue(true);
     blogStore.getAll.mockResolvedValue([]);
     getE2EBlogPosts.mockReturnValue([mockPosts[0]]);

@@ -1,3 +1,5 @@
+import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
+
 const mockRequireAdmin = jest.fn<Promise<boolean>, unknown[]>(async () => true);
 const mockHeaders = jest.fn(() => new Headers({ cookie: "admin-session=test", host: "localhost:3000" }));
 const mockIsAdminSdkAvailable = jest.fn(() => false);
@@ -42,11 +44,11 @@ jest.mock("@/lib/env/is-ci-like", () => ({
 
 describe("Admin dashboard prefetch fallback", () => {
   const originalFetch = global.fetch;
-  const originalEnv = {
-    E2E: process.env.E2E,
-    NEXT_PUBLIC_TEST_MODE: process.env.NEXT_PUBLIC_TEST_MODE,
-    ADMIN_DISABLE_SSR_PREFETCH: process.env.ADMIN_DISABLE_SSR_PREFETCH,
-  };
+  const originalEnv = snapshotEnv([
+    'E2E',
+    'NEXT_PUBLIC_TEST_MODE',
+    'ADMIN_DISABLE_SSR_PREFETCH',
+  ]);
 
   beforeEach(() => {
     mockRequireAdmin.mockReset();
@@ -58,22 +60,14 @@ describe("Admin dashboard prefetch fallback", () => {
     mockIsAdminSdkAvailable.mockReset();
     mockIsAdminSdkAvailable.mockReturnValue(false);
     (global.fetch as unknown) = jest.fn();
-    process.env.E2E = "false";
-    process.env.NEXT_PUBLIC_TEST_MODE = "0";
-    process.env.ADMIN_DISABLE_SSR_PREFETCH = "false";
+    setEnv('E2E', 'false');
+    setEnv('NEXT_PUBLIC_TEST_MODE', '0');
+    setEnv('ADMIN_DISABLE_SSR_PREFETCH', 'false');
   });
 
   afterAll(() => {
     global.fetch = originalFetch;
-    if (originalEnv.E2E === undefined) delete process.env.E2E;
-    else process.env.E2E = originalEnv.E2E;
-    if (originalEnv.NEXT_PUBLIC_TEST_MODE === undefined)
-      delete process.env.NEXT_PUBLIC_TEST_MODE;
-    else process.env.NEXT_PUBLIC_TEST_MODE = originalEnv.NEXT_PUBLIC_TEST_MODE;
-    if (originalEnv.ADMIN_DISABLE_SSR_PREFETCH === undefined)
-      delete process.env.ADMIN_DISABLE_SSR_PREFETCH;
-    else
-      process.env.ADMIN_DISABLE_SSR_PREFETCH = originalEnv.ADMIN_DISABLE_SSR_PREFETCH;
+    restoreEnv(originalEnv);
   });
 
   it("defers dashboard query to the client when Admin SDK is unavailable", async () => {

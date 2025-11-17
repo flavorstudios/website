@@ -159,3 +159,9 @@ export function getAdminDb(): Firestore {
 /* ------------------------------------------------------------------ */
 export const safeAdminDb = adminDb;
 export const safeAdminAuth = adminAuth;
+
+if (!isAdminSdkAvailable()) {
+  logger.info(
+    "[Firebase Admin] SDK unavailable or bypassed. Admin APIs will serve deterministic fixtures when permitted.",
+  );
+}

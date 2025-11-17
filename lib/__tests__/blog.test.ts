@@ -1,3 +1,5 @@
+import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
+
 export {};
 
 jest.mock("@/env/server", () => ({
@@ -11,23 +13,15 @@ jest.mock("@/lib/constants", () => ({
   SITE_URL: "https://example.com",
 }))
 
-const setProcessEnv = (key: string, value: string | undefined) => {
-  if (typeof value === "undefined") {
-    Reflect.deleteProperty(process.env, key)
-  } else {
-    Reflect.set(process.env, key, value)
-  }
-}
-
 describe("lib/blog", () => {
-  const originalNodeEnv = process.env.NODE_ENV
+  const originalEnv = snapshotEnv(["NODE_ENV"])
 
   beforeEach(() => {
-    setProcessEnv("NODE_ENV", "test")
+    setEnv("NODE_ENV", "test")
   })
 
   afterEach(() => {
-    setProcessEnv("NODE_ENV", originalNodeEnv)
+    restoreEnv(originalEnv)
     jest.resetModules()
     jest.restoreAllMocks()
   })

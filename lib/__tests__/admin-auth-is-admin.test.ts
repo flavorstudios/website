@@ -1,8 +1,15 @@
+import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
+
 describe("isAdmin helper", () => {
-  const originalEnv = { ...process.env };
+  const originalEnv = snapshotEnv([
+    'ADMIN_EMAILS',
+    'ADMIN_EMAIL',
+    'ADMIN_BYPASS',
+    'ADMIN_AUTH_DISABLED',
+  ]);
 
   afterEach(() => {
-    process.env = { ...originalEnv };
+    restoreEnv(originalEnv);
     jest.resetModules();
   });
 
@@ -16,7 +23,7 @@ describe("isAdmin helper", () => {
   };
 
   it("matches emails case-insensitively", async () => {
-    process.env.ADMIN_EMAILS = "Admin@example.com";
+    setEnv('ADMIN_EMAILS', "Admin@example.com");
     const { isAdmin } = await loadModule();
     expect(isAdmin("admin@example.com")).toBe(true);
     expect(isAdmin("ADMIN@EXAMPLE.COM")).toBe(true);
@@ -24,13 +31,13 @@ describe("isAdmin helper", () => {
   });
 
   it("splits whitespace-separated lists", async () => {
-    process.env.ADMIN_EMAILS = "first@example.com second@example.com";
+    setEnv('ADMIN_EMAILS', "first@example.com second@example.com");
     const { isAdmin } = await loadModule();
     expect(isAdmin("second@example.com")).toBe(true);
   });
 
   it("handles comma-separated lists with mixed casing and spaces", async () => {
-    process.env.ADMIN_EMAILS = "Admin@example.com, second@example.com , THIRD@EXAMPLE.COM";
+    setEnv('ADMIN_EMAILS', "Admin@example.com, second@example.com , THIRD@EXAMPLE.COM");
     const { isAdmin } = await loadModule();
     expect(isAdmin("admin@example.com")).toBe(true);
     expect(isAdmin(" second@example.com ")).toBe(true);
@@ -38,22 +45,22 @@ describe("isAdmin helper", () => {
   });
 
   it("trims spaces around inputs and allowlist entries", async () => {
-    process.env.ADMIN_EMAILS = " admin@example.com , second@example.com ";
+    setEnv('ADMIN_EMAILS', " admin@example.com , second@example.com ");
     const { isAdmin } = await loadModule();
     expect(isAdmin("  admin@example.com  ")).toBe(true);
     expect(isAdmin("SECOND@EXAMPLE.COM ")).toBe(true);
   });
 
   it("falls back to ADMIN_EMAIL when list is missing", async () => {
-    delete process.env.ADMIN_EMAILS;
-    process.env.ADMIN_EMAIL = "solo@example.com";
+    setEnv('ADMIN_EMAILS', undefined);
+    setEnv('ADMIN_EMAIL', "solo@example.com");
     const { isAdmin } = await loadModule();
     expect(isAdmin("solo@example.com")).toBe(true);
     expect(isAdmin("other@example.com")).toBe(false);
   });
 
   it("allows extra emails provided at runtime", async () => {
-    process.env.ADMIN_EMAILS = "first@example.com";
+    setEnv('ADMIN_EMAILS', "first@example.com");
     const { isAdmin } = await loadModule();
     expect(isAdmin("firestore@example.com", ["firestore@example.com"])).toBe(
       true,
@@ -61,21 +68,21 @@ describe("isAdmin helper", () => {
   });
 
   it("respects bypass flags", async () => {
-    process.env.ADMIN_EMAILS = "";
-    process.env.ADMIN_AUTH_DISABLED = "1";
+    setEnv('ADMIN_EMAILS', "");
+    setEnv('ADMIN_AUTH_DISABLED', "1");
     const { isAdmin } = await loadModule();
     expect(isAdmin(null)).toBe(true);
     expect(isAdmin("anyone@example.com")).toBe(true);
   });
 
   it("only treats ADMIN_BYPASS=true as bypass", async () => {
-    process.env.ADMIN_EMAILS = "";
-    process.env.ADMIN_BYPASS = "1";
+    setEnv('ADMIN_EMAILS', "");
+    setEnv('ADMIN_BYPASS', "1");
     const firstLoad = await loadModule();
     expect(firstLoad.isAdmin("user@example.com")).toBe(false);
 
     jest.resetModules();
-    process.env.ADMIN_BYPASS = "true";
+    setEnv('ADMIN_BYPASS', "true");
     const secondLoad = await loadModule();
     expect(secondLoad.isAdmin("user@example.com")).toBe(true);
   });

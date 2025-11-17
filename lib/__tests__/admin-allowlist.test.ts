@@ -5,18 +5,25 @@ import {
   isAdmin,
   isAdminBypassEnabled,
 } from "../admin-allowlist";
+import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
 
 describe("admin allowlist helpers", () => {
-  const originalEnv = { ...process.env };
+  const originalEnv = snapshotEnv([
+    'ADMIN_EMAILS',
+    'ADMIN_EMAIL',
+    'ADMIN_DOMAIN',
+    'ADMIN_BYPASS',
+    'ADMIN_AUTH_DISABLED',
+  ]);
 
   afterEach(() => {
-    process.env = { ...originalEnv };
+    restoreEnv(originalEnv);
     jest.resetModules();
   });
 
   it("normalizes emails from ADMIN_EMAILS and ADMIN_EMAIL", () => {
-    process.env.ADMIN_EMAILS = "Admin@example.com second@example.com";
-    process.env.ADMIN_EMAIL = "third@example.com";
+    setEnv('ADMIN_EMAILS', "Admin@example.com second@example.com");
+    setEnv('ADMIN_EMAIL', "third@example.com");
 
     expect(getAllowedAdminEmails()).toEqual([
       "admin@example.com",
@@ -30,23 +37,22 @@ describe("admin allowlist helpers", () => {
   });
 
   it("accepts comma and whitespace separators", () => {
-    process.env.ADMIN_EMAILS = "first@example.com, second@example.com\nthird@example.com";
+    setEnv('ADMIN_EMAILS', "first@example.com, second@example.com\nthird@example.com");
 
     expect(isAdmin("second@example.com")).toBe(true);
     expect(isAdmin("third@example.com")).toBe(true);
   });
 
   it("supports single ADMIN_EMAIL fallback", () => {
-
-    delete process.env.ADMIN_EMAILS;
-    process.env.ADMIN_EMAIL = "solo@example.com";
+    setEnv('ADMIN_EMAILS', undefined);
+    setEnv('ADMIN_EMAIL', "solo@example.com");
 
     expect(getAllowedAdminEmails()).toEqual(["solo@example.com"]);
     expect(isAdmin("solo@example.com")).toBe(true);
   });
 
   it("allows domain-based access when configured", () => {
-    process.env.ADMIN_DOMAIN = "example.com";
+    setEnv('ADMIN_DOMAIN', "example.com");
 
     expect(getAllowedAdminDomain()).toBe("example.com");
     expect(isAdmin("user@example.com")).toBe(true);
@@ -54,29 +60,29 @@ describe("admin allowlist helpers", () => {
   });
 
   it("only enables bypass when explicit flags are set", () => {
-    delete process.env.ADMIN_EMAILS;
-    delete process.env.ADMIN_EMAIL;
-    delete process.env.ADMIN_DOMAIN;
+    setEnv('ADMIN_EMAILS', undefined);
+    setEnv('ADMIN_EMAIL', undefined);
+    setEnv('ADMIN_DOMAIN', undefined);
 
     expect(isAdminBypassEnabled()).toBe(false);
     expect(isAdmin("any@example.com")).toBe(false);
 
-    process.env.ADMIN_BYPASS = "1";
+    setEnv('ADMIN_BYPASS', "1");
     expect(isAdminBypassEnabled()).toBe(false);
 
-    process.env.ADMIN_BYPASS = "true";
+    setEnv('ADMIN_BYPASS', "true");
     expect(isAdminBypassEnabled()).toBe(true);
     expect(isAdmin(null)).toBe(true);
 
-    delete process.env.ADMIN_BYPASS;
-    process.env.ADMIN_AUTH_DISABLED = "1";
+    setEnv('ADMIN_BYPASS', undefined);
+    setEnv('ADMIN_AUTH_DISABLED', "1");
     expect(isAdminBypassEnabled()).toBe(true);
     expect(isAdmin("other@example.com")).toBe(true);
   });
 
   it("describes configured allowlist for diagnostics", () => {
-    process.env.ADMIN_EMAILS = "admin@example.com";
-    process.env.ADMIN_DOMAIN = "example.com";
+    setEnv('ADMIN_EMAILS', "admin@example.com");
+    setEnv('ADMIN_DOMAIN', "example.com");
 
     const info = describeAdminAllowlist(["firestore@example.com"]);
     expect(info.configured).toEqual(["admin@example.com"]);

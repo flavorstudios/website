@@ -176,4 +176,7 @@
 
 ## Test Run
 
-* `pnpm e2e` *(fails in this container: Playwright's browser install hits apt 403s behind the sandbox proxy.)* Logs: `256de4†L1-L24`.
+* `pnpm e2e` *(fails in this container: Playwright's browser install hits apt 403s behind the sandbox proxy.)* Logs: `256de4†L1-L24`.### e2e/admin-blog-infinite-scroll.e2e.spec.ts · e2e/admin-dashboard-blog-fallback.e2e.spec.ts
+- **Root cause:** The admin blogs API still executes `blogStore.getAll()` even when `ADMIN_BYPASS`/`E2E` disables the Firebase Admin SDK, so `/api/admin/blogs` always throws `ADMIN_DB_UNAVAILABLE` during CI. Because the test opts out of the shared Playwright mocks it expects to intercept the request itself, but those intercepts only see browser requests—server-initiated prefetches and client retries continue to hit the real route and return 503s, leaving `table tbody tr` empty and the fallback loader stuck.
+- **Fix:** Teach `/api/admin/blogs` to switch to deterministic fixtures whenever `ADMIN_BYPASS`, `E2E`, or `USE_DEMO_CONTENT` is set, and seed that fixture with the 60-post dataset used by the tests so we no longer need ad-hoc mocks. For the fallback spec, wrap the first `fetch` in a delayed `route.fetch()` call instead of returning a hard-coded body so the component still hydrates with whatever the server sent once the delay finishes.
+- **Follow-up:** Update `lib/e2e-fixtures` to expose `getAdminBlogFixtures({ total })`, update the shared Playwright `applyGlobalMocks` helper to reuse that fixture, and keep the new dataset in sync with the table’s default `DEFAULT_PAGE_SIZE` so the spec can assert the first 25 rows without counting failures.

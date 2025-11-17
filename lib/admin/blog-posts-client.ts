@@ -1,6 +1,12 @@
 import type { BlogPost } from "@/lib/content-store";
 import { fetchJson } from "@/lib/http";
 import { clampPageSize, DEFAULT_PAGE_SIZE } from "@/lib/pagination";
+import {
+  filterAndPaginateAdminBlogs,
+  getAdminBlogFixtures,
+  parseAdminBlogQuery,
+} from "@/lib/admin/blog-fixtures";
+import { isClientE2EEnabled } from "@/lib/e2e-utils";
 
 export interface AdminBlogQueryParams {
   q?: string;
@@ -31,9 +37,7 @@ function appendIfDefined(
   }
 }
 
-export async function fetchAdminBlogPosts(
-  query: AdminBlogQueryParams,
-): Promise<AdminBlogListResponse> {
+function buildQueryString(query: AdminBlogQueryParams): string {
   const params = new URLSearchParams();
   const {
     q,
@@ -70,6 +74,30 @@ export async function fetchAdminBlogPosts(
     params.set("limit", String(clampedLimit));
   }
 
-  const url = `/api/admin/blogs?${params.toString()}`;
-  return fetchJson<AdminBlogListResponse>(url, { cache: "no-store" });
+  return params.toString();
+}
+
+function buildFixtureResponse(queryString: string): AdminBlogListResponse {
+  const { filters } = parseAdminBlogQuery(new URLSearchParams(queryString));
+  return filterAndPaginateAdminBlogs(getAdminBlogFixtures(), filters);
+}
+
+export async function fetchAdminBlogPosts(
+  query: AdminBlogQueryParams,
+): Promise<AdminBlogListResponse> {
+  const queryString = buildQueryString(query);
+  const url = `/api/admin/blogs?${queryString}`;
+
+  try {
+    return await fetchJson<AdminBlogListResponse>(url, { cache: "no-store" });
+  } catch (error) {
+    if (isClientE2EEnabled()) {
+      console.warn(
+        "[admin-blog] Falling back to deterministic fixtures due to fetch error",
+        error,
+      );
+      return buildFixtureResponse(queryString);
+    }
+    throw error;
+  }
 }

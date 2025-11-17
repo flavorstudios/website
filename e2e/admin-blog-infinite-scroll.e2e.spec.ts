@@ -2,6 +2,7 @@ import { getAdminBlogFixtures } from "@/lib/admin/blog-fixtures";
 import { DEFAULT_PAGE_SIZE } from "@/lib/pagination";
 import { test, expect } from "./test-setup";
 import { awaitAppReady } from "./utils/awaitAppReady";
+import { waitForAdminBlogTableToLoad } from "./utils/adminBlog";
 
 const fixtures = getAdminBlogFixtures();
 const totalDrafts = fixtures.filter((post) => post.status === "draft").length;
@@ -57,10 +58,10 @@ test("blog manager supports infinite scroll with filters", async ({ page }) => {
   );
   await expect(page.getByLabel("From date")).toHaveCount(0);
 
-  const rows = page.locator("table tbody tr");
+  const rows = await waitForAdminBlogTableToLoad(page);
   await expect(rows).toHaveCount(Math.min(pageSize, fixtures.length));
   await expect(
-    rows.first().getByRole("link", { name: "Post 1" }),
+    rows.first().getByRole("link", { name: "Post 59" }),
   ).toBeVisible();
 
   const loadMoreButton = page.getByRole("button", { name: /Load more posts/i });

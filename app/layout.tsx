@@ -8,7 +8,6 @@ export const runtime = 'nodejs'
 
 import type { ReactNode } from "react";
 import "./globals.css";
-import { Inter, JetBrains_Mono as JetBrainsMono, Lora, Poppins } from "next/font/google";
 
 import Toaster from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -92,35 +91,6 @@ const orgSchema = getSchema({
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-// next/font: load fonts with CSS variables exposed to globals.css
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const lora = Lora({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-lora",
-  display: "swap",
-});
-
-const jetbrains = JetBrainsMono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-jetbrains",
-  display: "swap",
-});
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-poppins",
-  display: "swap",
-});
-
 function DefaultHeader() {
   return (
     <div className="sr-only" aria-hidden="true">
@@ -140,9 +110,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     isTruthy(process.env.E2E) ||
     isTestMode();
   const htmlClassName = e2eMotionDisabled ? "e2e-no-motion" : undefined;
-  const bodyClassName = `${inter.variable} ${lora.variable} ${jetbrains.variable} ${poppins.variable} antialiased bg-white${
-    e2eMotionDisabled ? " e2e-no-motion" : ""
-  }`;
+  const bodyClassName = `antialiased bg-white${e2eMotionDisabled ? " e2e-no-motion" : ""}`;
 
   return (
     <html
@@ -159,7 +127,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
 

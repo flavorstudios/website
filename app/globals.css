@@ -39,10 +39,10 @@
     --ring: 222.2 84% 4.9%;
     --radius: 0.75rem;
 
-    /* Font role variables (all mapped to Poppins) */
-    --fs-body: var(--font-poppins);
-    --fs-heading: var(--font-poppins);
-    --fs-code: var(--font-poppins);
+    /* Font role variables */
+    --fs-body: 'Poppins','Inter','Segoe UI','Roboto','Helvetica Neue',sans-serif;
+    --fs-heading: 'Poppins','Inter','Segoe UI','Roboto','Helvetica Neue',sans-serif;
+    --fs-code: 'JetBrains Mono','SFMono-Regular','Consolas','Liberation Mono','Courier New',monospace;
   }
 
   .dark {

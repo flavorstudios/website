@@ -132,11 +132,6 @@ export default function BlogManager() {
     setAuthorInput(author);
   }, [author]);
 
-  useEffect(() => {
-    setSelected(new Set());
-    void setSize(1);
-  }, [search, author, category, status, sortBy, sortDir, setSize]);
-
   // Helper to push updated query params
   const setParams = (overrides: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -230,32 +225,53 @@ export default function BlogManager() {
     mutate: mutatePosts,
   } = useSWRInfinite<AdminBlogListResponse>(
     getKey,
-    async ([
-      ,
-      searchValue,
-      authorValue,
-      categoryValue,
-      statusValue,
-      sortValue,
-      sortDirValue,
-      cursor,
-    ]) =>
-      fetchAdminBlogPosts({
-        q: searchValue || undefined,
-        author: authorValue || undefined,
-        category: categoryValue !== "all" ? categoryValue : undefined,
-        status: statusValue,
-        sort: sortValue,
-        sortDir: (sortDirValue as "asc" | "desc") ?? "desc",
-        cursor: cursor ?? undefined,
+    async (key) => {
+      const [
+        ,
+        searchValue,
+        authorValue,
+        categoryValue,
+        statusValue,
+        sortValue,
+        sortDirValue,
+        cursorValue,
+      ] = key;
+
+      const normalizedSearch = typeof searchValue === "string" ? searchValue : "";
+      const normalizedAuthor = typeof authorValue === "string" ? authorValue : "";
+      const normalizedCategory =
+        typeof categoryValue === "string" ? categoryValue : "all";
+      const normalizedStatus = typeof statusValue === "string" ? statusValue : "published";
+      const normalizedSort = typeof sortValue === "string" ? sortValue : "date";
+      const normalizedSortDir =
+        sortDirValue === "asc" || sortDirValue === "desc" ? sortDirValue : "desc";
+      const normalizedCursor = typeof cursorValue === "string" ? cursorValue : null;
+
+      return fetchAdminBlogPosts({
+        q: normalizedSearch || undefined,
+        author: normalizedAuthor || undefined,
+        category:
+          normalizedCategory && normalizedCategory !== "all"
+            ? normalizedCategory
+            : undefined,
+        status: normalizedStatus,
+        sort: normalizedSort,
+        sortDir: normalizedSortDir,
+        cursor: normalizedCursor ?? undefined,
         limit: PAGE_SIZE,
-      }),
+      });
+    },
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: true,
       dedupingInterval: 5000,
     },
   );
+
+  useEffect(() => {
+    setSelected(new Set());
+    void setSize(1);
+  }, [search, author, category, status, sortBy, sortDir, setSize]);
 
   const {
     data: categoriesData,

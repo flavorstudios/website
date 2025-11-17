@@ -1,4 +1,4 @@
-import imageDomains from "@/config/image-domains.json" assert { type: "json" };
+import { IMAGE_DOMAINS } from "@/config/image-domains";
 import { SITE_URL } from "@/lib/constants";
 
 const siteUrl = new URL(SITE_URL);
@@ -6,7 +6,7 @@ const siteOrigin = siteUrl.origin;
 const siteHostname = siteUrl.hostname;
 
 /** Domains that Next.js is configured to optimise. */
-export const ALLOWED_IMAGE_DOMAINS = imageDomains as string[];
+export const ALLOWED_IMAGE_DOMAINS = IMAGE_DOMAINS;
 
 const PROTOCOL_REGEX = /^[a-zA-Z][a-zA-Z\d+\-.]*:/;
 

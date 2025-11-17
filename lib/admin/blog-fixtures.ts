@@ -143,6 +143,11 @@ export function parseAdminBlogQuery(searchParams: URLSearchParams): ParsedAdminB
   };
 }
 
+type BlogAuthorMetadata = {
+  authorId?: unknown;
+  author?: unknown;
+};
+
 export function filterAndPaginateAdminBlogs(
   blogs: BlogPost[],
   filters: AdminBlogFilters,
@@ -185,12 +190,10 @@ export function filterAndPaginateAdminBlogs(
     }
 
     if (normalizedAuthor) {
-      const rawBlog = blog as Record<string, unknown>;
+      const rawBlog: BlogAuthorMetadata = blog;
       const authorCandidates = [
         typeof blog.author === "string" ? blog.author.toLowerCase() : null,
-        typeof rawBlog.authorId === "string"
-          ? (rawBlog.authorId as string).toLowerCase()
-          : null,
+        typeof rawBlog.authorId === "string" ? rawBlog.authorId.toLowerCase() : null,
         typeof rawBlog.author === "object" && rawBlog.author !== null
           ? typeof (rawBlog.author as { id?: unknown }).id === "string"
             ? ((rawBlog.author as { id?: string }).id ?? "").toLowerCase()

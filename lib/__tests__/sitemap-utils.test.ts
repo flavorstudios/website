@@ -70,7 +70,7 @@ describe("fetchDynamicContent", () => {
       .spyOn(globalThis as unknown as { fetch: typeof fetch }, "fetch")
       .mockImplementation((input: RequestInfo | URL) => {
         const url = typeof input === "string" ? input : input.toString()
-        if (url.endsWith("/api/blogs")) {
+        if (url.endsWith("/posts")) {
           return Promise.resolve(blogResponse)
         }
         if (url.endsWith("/api/videos")) {
@@ -85,6 +85,10 @@ describe("fetchDynamicContent", () => {
 
     const result = await fetchDynamicContent(baseUrl)
 
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining(`/posts`),
+      expect.objectContaining({ cache: "no-store" }),
+    )
     expect(fetchSpy).toHaveBeenCalledWith(
       `${baseUrl}/api/videos`,
       expect.objectContaining({ cache: "no-store" }),
@@ -129,7 +133,7 @@ describe("fetchDynamicContent", () => {
       .spyOn(globalThis as unknown as { fetch: typeof fetch }, "fetch")
       .mockImplementation((input: RequestInfo | URL) => {
         const url = typeof input === "string" ? input : input.toString()
-        if (url.endsWith("/api/blogs")) {
+        if (url.endsWith("/posts")) {
           return Promise.resolve(blogResponse)
         }
         if (url.endsWith("/api/videos")) {

@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import { serverEnv } from "@/env/server";
 import { canonicalBaseUrl } from "@/lib/base-url";
+import { buildExternalApiUrl } from "@/lib/api/external";
 import type { BlogPost } from "@/lib/content-store";
 
 // ---- Video interface with categories? ----
@@ -181,7 +182,7 @@ export async function generateRssFeed(): Promise<string> {
     const baseUrl = canonicalBaseUrl();
 
     const [blogsRes, videosRes] = await Promise.all([
-      fetch(`${baseUrl}/api/blogs`, {
+      fetch(buildExternalApiUrl(`/posts`), {
         next: { tags: ["feeds"], revalidate: 3600 },
       }),
       fetch(`${baseUrl}/api/videos`, {

@@ -1,5 +1,7 @@
 packages:
   - .
+  - backend
+  - shared
 onlyBuiltDependencies:
   - '@firebase/util'
   - esbuild

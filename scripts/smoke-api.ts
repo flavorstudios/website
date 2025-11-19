@@ -46,7 +46,7 @@ const { baseUrl, adminCookie } = parseArgs(process.argv.slice(2));
 const hasAdminCookie = Boolean(adminCookie);
 
 const endpoints: Endpoint[] = [
-  { method: "GET", path: "/api/blogs", description: "List published blogs", expectJson: true },
+  { method: "GET", path: "/posts", description: "List published blogs", expectJson: true },
   { method: "GET", path: "/api/videos", description: "List published videos", expectJson: true },
   { method: "GET", path: "/api/categories", description: "Category index", expectJson: true },
   { method: "GET", path: "/api/comments?postId=test&postType=blog", description: "Comments listing", expectJson: true },

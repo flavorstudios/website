@@ -22,6 +22,7 @@ const web: Config = {
   moduleNameMapper: {
     '^@/config/(.*)$': '<rootDir>/src/config/$1',
     '^@/(.*)$': '<rootDir>/$1',
+    '^@website/shared$': '<rootDir>/shared/src',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '^.+\\.(svg|png|jpg|jpeg|gif|webp)$': '<rootDir>/test/__mocks__/fileMock.js',
     '^server-only$': '<rootDir>/test/__mocks__/server-only.js',

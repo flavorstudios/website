@@ -3,6 +3,7 @@
 import type { Category } from "@/types/category" // <-- Unified type!
 import type { PublicBlogSummary } from "@/lib/types"
 import { canonicalBaseUrl } from "@/lib/base-url"
+import { buildExternalApiUrl } from "@/lib/api/external"
 
 const baseUrl = canonicalBaseUrl()
 
@@ -94,7 +95,7 @@ function extractCollection<T>(value: unknown, key: string): T[] {
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
   try {
-    const response = await fetch(`${baseUrl}/api/blogs`, { cache: "no-store" }); // <-- Codex update
+    const response = await fetch(buildExternalApiUrl(`/posts`), { cache: "no-store" });
     if (response.ok) {
       const posts = await response.json();
       const blogPosts = extractCollection<BlogPost>(posts, "posts");

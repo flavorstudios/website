@@ -27,7 +27,7 @@ import type { PublicBlogSummary } from "@/lib/types";
 import { formatDate } from "@/lib/date"; // <-- Added import
 import { authors } from "@/lib/authors"; // <-- NEW
 import { DateRangePicker } from "@/components/ui/date-range-picker"; // <-- NEW
-import { canonicalBaseUrl } from "@/lib/base-url";
+import { buildExternalApiUrl } from "@/lib/api/external";
 import { normalizeSlug } from "@/lib/slugify";
 import { unwrapPageProps } from "@/types/next";
 import type { PageProps } from "@/types/next";
@@ -135,7 +135,6 @@ async function getBlogData({
   endDate?: string;
 }) {
   try {
-    const baseUrl = canonicalBaseUrl();
     const params = new URLSearchParams();
     if (author && author !== "all") params.set("author", author);
     if (startDate) params.set("startDate", startDate);
@@ -143,8 +142,10 @@ async function getBlogData({
 
     const query = params.toString();
 
+    const postsEndpoint = buildExternalApiUrl(`/posts${query ? `?${query}` : ""}`);
+
     const [postsRes, { blogCategories }] = await Promise.all([
-      fetch(`${baseUrl}/api/blogs${query ? `?${query}` : ""}`, {
+      fetch(postsEndpoint, {
         cache: "no-store",
         next: { revalidate: 300 },
       }),

@@ -19,7 +19,8 @@ This is the official website of **Flavor Studios** | Your source for Anime News 
    | Scope | Variable(s) | Purpose |
    | ----- | ----------- | ------- |
    | Server | `BASE_URL` | Canonical site origin used by RSS, webhooks, and metadata helpers. |
-   | Client | `NEXT_PUBLIC_BASE_URL` | Exposes the canonical origin to the app router. |
+  | Client | `NEXT_PUBLIC_BASE_URL` | Exposes the canonical origin to the app router. |
+  | Client | `NEXT_PUBLIC_API_BASE_URL` | Points server components and client fetchers to the Cloud Run backend. |
    | Server | `CRON_SECRET` | Shared secret for scheduled job routes. |
    | Server | `PREVIEW_SECRET` | Protects unpublished preview routes. |
    | Server | `ADMIN_JWT_SECRET` | Signs and verifies password-based admin sessions. |
@@ -38,6 +39,36 @@ This is the official website of **Flavor Studios** | Your source for Anime News 
 - Full PWA (Progressive Web App) support: offline, installable, works across mobile & desktop
 - Clean, modern UI with custom animations and accessibility
 - Anime news, original videos, blog, and more
+
+## Standalone backend & deployment
+
+The `backend/` folder hosts a lightweight Express server that exposes the shared `GET /posts` endpoint used by the web app.
+
+1. Install dependencies and build the shared package:
+
+   ```bash
+   pnpm install
+   pnpm --filter @website/shared run build
+   pnpm --dir backend run build
+   ```
+
+2. Containerize the backend with the provided multi-stage Dockerfile:
+
+   ```bash
+   docker build -t gcr.io/<project>/next-backend -f Dockerfile .
+   ```
+
+3. Deploy to Cloud Run (replace `<project>` and `<region>` with your values):
+
+   ```bash
+   gcloud builds submit --tag gcr.io/<project>/next-backend
+   gcloud run deploy next-backend \
+     --image gcr.io/<project>/next-backend \
+     --region=<region> \
+     --allow-unauthenticated
+   ```
+
+4. Expose the URL via `NEXT_PUBLIC_API_BASE_URL` in Vercel (or your hosting provider) so that every fetch to `/posts` is routed through Cloud Run.
 - Built with OCD-level organization and best coding practices
 
 ---

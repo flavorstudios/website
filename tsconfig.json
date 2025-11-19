@@ -24,6 +24,7 @@
     "paths": {
       "@/config/*": ["src/config/*"],
       "@/*": ["*"],
+      "@website/shared": ["shared/src"],
       "jest-axe": ["types/jest-axe"],
       "expect": ["types/expect"],
       "pretty-format": ["types/pretty-format"],

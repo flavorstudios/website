@@ -1,5 +1,7 @@
 // lib/sitemap-utils.ts
 
+import { buildExternalApiUrl } from "@/lib/api/external";
+
 export interface SitemapUrl {
   url: string;
   priority: string; // e.g. "0.5", "1.0"
@@ -196,7 +198,7 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
   // --- Fetch Blogs ---
   try {
     // Endpoint updated as per Codex suggestion
-    const blogsResponse = await fetch(joinUrl(baseUrl, "/api/blogs"), {
+    const blogsResponse = await fetch(buildExternalApiUrl(`/posts`), {
       cache: "no-store",
       headers: { "Cache-Control": "no-cache" }
     });

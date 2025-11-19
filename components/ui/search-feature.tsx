@@ -37,6 +37,11 @@ interface SearchResults {
   videos: Video[]
 }
 
+const postsEndpoint =
+  process.env.NEXT_PUBLIC_API_BASE_URL && process.env.NEXT_PUBLIC_API_BASE_URL.trim().length > 0
+    ? `${process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, "")}/posts`
+    : "/api/posts"
+
 // Debounce hook
 function useDebounce(value: string, delay: number) {
   const [debouncedValue, setDebouncedValue] = useState(value)
@@ -101,7 +106,7 @@ export function SearchFeature({ triggerClassName, iconClassName }: SearchFeature
     setIsLoading(true)
     try {
       const [blogsResponse, videosResponse] = await Promise.allSettled([
-        fetch("/api/blogs"),
+        fetch(postsEndpoint),
         fetch("/api/videos"),
       ])
       let blogs: PublicBlogSummary[] = []

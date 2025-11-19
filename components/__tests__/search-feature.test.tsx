@@ -35,7 +35,7 @@ describe("SearchFeature", () => {
     }
 
     const fetchMock = jest.fn((input: RequestInfo | URL) => {
-      if (typeof input === "string" && input.includes("/api/blogs")) {
+      if (typeof input === "string" && input.includes("/posts")) {
         return Promise.resolve(
           new Response(JSON.stringify([blogResult]), {
             status: 200,
@@ -80,7 +80,7 @@ describe("SearchFeature", () => {
       "/blog/build-developer-velocity-without-burnout",
     )
 
-    expect(fetchMock).toHaveBeenCalledWith("/api/blogs")
+    expect(fetchMock).toHaveBeenCalledWith("/api/posts")
     expect(fetchMock).toHaveBeenCalledWith("/api/videos")
   })
 })

@@ -1,14 +1,18 @@
 import type { PublicBlogDetail, PublicBlogSummary } from "@/lib/types"
+import { buildExternalApiUrl } from "@/lib/api/external"
 import { canonicalBaseUrl } from "@/lib/base-url"
 
 function buildApiUrl(path: string): string {
-  const base = canonicalBaseUrl()
-
-  try {
-    return new URL(path, base).toString()
-  } catch {
-    return path
+  if (path.startsWith("/api/")) {
+    const base = canonicalBaseUrl()
+    try {
+      return new URL(path, base).toString()
+    } catch {
+      return path
+    }
   }
+
+  return buildExternalApiUrl(path)
 }
 
 export async function getBlogPost(key: string): Promise<PublicBlogDetail | null> {
@@ -43,7 +47,7 @@ export async function getBlogPost(key: string): Promise<PublicBlogDetail | null>
 export const blogStore = {
   async getAllPosts(): Promise<PublicBlogSummary[]> {
     try {
-      const response = await fetch(buildApiUrl(`/api/blogs`), {
+      const response = await fetch(buildApiUrl(`/posts`), {
         cache: "no-store",
       })
 

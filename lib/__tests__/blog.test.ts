@@ -41,7 +41,7 @@ describe("lib/blog", () => {
     await getBlogPost("post")
 
     expect(fetchMock).toHaveBeenCalledWith(
-      `${SITE_URL}/api/blogs/post`,
+      expect.stringContaining(`/posts/post`),
       expect.objectContaining({ next: { revalidate: 300 } }),
     )
   })

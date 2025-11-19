@@ -10,6 +10,7 @@ import {
   errorResponse,
   jsonResponse,
 } from "@/lib/api/response";
+import { ADMIN_VERIFIED_COOKIE } from "@/shared/admin-cookies";
 
 const debug = serverEnv.DEBUG_ADMIN === "true" || serverEnv.NODE_ENV !== "production";
 
@@ -127,6 +128,11 @@ export async function POST(req: NextRequest) {
     res.cookies.set(
       "admin-session",
       sessionCookie,
+      adminCookieOptions({ maxAge: Math.floor(expiresIn / 1000) }),
+    );
+    res.cookies.set(
+      ADMIN_VERIFIED_COOKIE,
+      "true",
       adminCookieOptions({ maxAge: Math.floor(expiresIn / 1000) }),
     );
 

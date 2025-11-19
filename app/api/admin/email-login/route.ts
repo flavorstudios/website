@@ -8,6 +8,7 @@ import {
   errorResponse,
   jsonResponse,
 } from "@/lib/api/response";
+import { ADMIN_VERIFIED_COOKIE } from "@/shared/admin-cookies";
 
 export async function POST(req: NextRequest) {
   const context = createRequestContext(req);
@@ -37,6 +38,11 @@ export async function POST(req: NextRequest) {
     response.cookies.set(
       "admin-session",
       sessionCookie,
+      adminCookieOptions({ maxAge: Math.floor(expiresIn / 1000) }),
+    );
+    response.cookies.set(
+      ADMIN_VERIFIED_COOKIE,
+      "true",
       adminCookieOptions({ maxAge: Math.floor(expiresIn / 1000) }),
     );
 

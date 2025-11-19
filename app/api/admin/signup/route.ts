@@ -28,6 +28,7 @@ import {
   type RequestContext,
 } from "@/lib/api/response";
 import { adminCookieOptions } from "@/lib/admin-auth";
+import { ADMIN_VERIFIED_COOKIE } from "@/shared/admin-cookies";
 
 const createErrorResponse = (
   context: RequestContext,
@@ -208,12 +209,18 @@ export async function POST(request: NextRequest) {
       redirectTo,
     });
 
+    const sessionMaxAge = requiresVerification ? 60 * 60 * 2 : 60 * 60 * 24;
     response.cookies.set(
       "admin-session",
       sessionCookie,
       adminCookieOptions({
-        maxAge: requiresVerification ? 60 * 60 * 2 : 60 * 60 * 24,
+        maxAge: sessionMaxAge,
       }),
+    );
+    response.cookies.set(
+      ADMIN_VERIFIED_COOKIE,
+      requiresVerification ? "false" : "true",
+      adminCookieOptions({ maxAge: sessionMaxAge }),
     );
 
     await resetSignupLimits(ip, emailHash);

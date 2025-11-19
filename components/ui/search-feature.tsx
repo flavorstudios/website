@@ -21,6 +21,7 @@ import { formatDate } from "@/lib/date" // <-- Added
 import type { PublicBlogSummary } from "@/lib/types"
 import { clientEnv } from "@/env.client"
 import { cn } from "@/lib/utils"
+import { buildExternalApiUrl } from "@/lib/api/external"
 
 interface Video {
   id: string
@@ -37,10 +38,8 @@ interface SearchResults {
   videos: Video[]
 }
 
-const postsEndpoint =
-  process.env.NEXT_PUBLIC_API_BASE_URL && process.env.NEXT_PUBLIC_API_BASE_URL.trim().length > 0
-    ? `${process.env.NEXT_PUBLIC_API_BASE_URL.replace(/\/$/, "")}/posts`
-    : "/api/posts"
+const postsEndpoint = buildExternalApiUrl(`/posts`)
+const videosEndpoint = buildExternalApiUrl(`/videos`)
 
 // Debounce hook
 function useDebounce(value: string, delay: number) {
@@ -107,7 +106,7 @@ export function SearchFeature({ triggerClassName, iconClassName }: SearchFeature
     try {
       const [blogsResponse, videosResponse] = await Promise.allSettled([
         fetch(postsEndpoint),
-        fetch("/api/videos"),
+        fetch(videosEndpoint),
       ])
       let blogs: PublicBlogSummary[] = []
       let videos: Video[] = []

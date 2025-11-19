@@ -73,7 +73,7 @@ describe("fetchDynamicContent", () => {
         if (url.endsWith("/posts")) {
           return Promise.resolve(blogResponse)
         }
-        if (url.endsWith("/api/videos")) {
+        if (url.endsWith("/videos")) {
           return Promise.resolve(videoResponse)
         }
         return Promise.resolve({
@@ -90,7 +90,7 @@ describe("fetchDynamicContent", () => {
       expect.objectContaining({ cache: "no-store" }),
     )
     expect(fetchSpy).toHaveBeenCalledWith(
-      `${baseUrl}/api/videos`,
+      expect.stringContaining(`/videos`),
       expect.objectContaining({ cache: "no-store" }),
     )
 
@@ -136,7 +136,7 @@ describe("fetchDynamicContent", () => {
         if (url.endsWith("/posts")) {
           return Promise.resolve(blogResponse)
         }
-        if (url.endsWith("/api/videos")) {
+        if (url.endsWith("/videos")) {
           return Promise.resolve(videoResponse)
         }
         return Promise.resolve({

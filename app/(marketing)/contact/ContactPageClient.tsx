@@ -29,6 +29,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { buildExternalApiUrl } from "@/lib/api/external";
 
 export default function ContactPageClient() {
   const [formData, setFormData] = useState({
@@ -158,7 +159,7 @@ export default function ContactPageClient() {
     setSubmitStatus("idle");
 
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch(buildExternalApiUrl(`/contact`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         cache: "no-store",

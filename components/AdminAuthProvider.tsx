@@ -49,6 +49,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     () => ({ user: null, version: 0 })
   )
   const user = userSnapshot.user
+  const userVersion = userSnapshot.version
   const [loading, setLoading] = useState(() => !e2eActive)
   const [error, setError] = useState<string | null>(null)
   const [authInitFailed, setAuthInitFailed] = useState(() =>
@@ -138,6 +139,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     shouldUseLocalVerification,
     testEmailVerified,
     user,
+    userVersion,
   ])
 
   const isGuardedAdminRoute = useMemo(() => {

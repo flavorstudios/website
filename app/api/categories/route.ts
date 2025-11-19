@@ -8,6 +8,8 @@ import {
 } from "@/lib/api/response";
 import { logError } from "@/lib/log";
 
+const externalBackendBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+
 function format(arr: Partial<Category>[], type: "blog" | "video"): Category[] {
   return (arr || [])
     .filter((category) => category.isActive)
@@ -27,6 +29,17 @@ export function OPTIONS(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const context = createRequestContext(request);
+  if (externalBackendBase) {
+    const suffix = request.nextUrl.search || "";
+    return jsonResponse(
+      context,
+      {
+        error: "This route moved to the standalone backend.",
+        next: `${externalBackendBase}/categories${suffix}`,
+      },
+      { status: 410 },
+    );
+  }
   try {
     const siteData = await import("@/content-data/categories.json").then(
       (m) => m.default,

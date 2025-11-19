@@ -1,15 +1,42 @@
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 
-import { SearchFeature } from "@/components/ui/search-feature"
 import type { PublicBlogSummary } from "@/lib/types"
+
+type SearchFeatureComponent = typeof import("@/components/ui/search-feature") extends { SearchFeature: infer T }
+  ? T
+  : never
+
+const originalApiBase = process.env.NEXT_PUBLIC_API_BASE_URL
+if (!process.env.NEXT_PUBLIC_API_BASE_URL) {
+  process.env.NEXT_PUBLIC_API_BASE_URL = "https://api.example.com"
+}
 
 describe("SearchFeature", () => {
   const originalFetch = global.fetch
+  const originalWarn = console.warn
+  let SearchFeature: SearchFeatureComponent
+
+  beforeAll(() => {
+    jest.spyOn(console, "warn").mockImplementation((...args: Parameters<typeof console.warn>) => {
+      if (typeof args[0] === "string" && args[0].includes("Missing optional client env var")) {
+        return
+      }
+      originalWarn(...args)
+    })
+    return import("@/components/ui/search-feature").then((mod) => {
+      SearchFeature = mod.SearchFeature
+    })
+  })
 
   afterEach(() => {
     global.fetch = originalFetch
-    jest.restoreAllMocks()
+    jest.clearAllMocks()
+  })
+
+  afterAll(() => {
+    console.warn = originalWarn
+    process.env.NEXT_PUBLIC_API_BASE_URL = originalApiBase
   })
 
   it("shows blog results returned from the API", async () => {
@@ -44,7 +71,7 @@ describe("SearchFeature", () => {
         )
       }
 
-      if (typeof input === "string" && input.includes("/api/videos")) {
+      if (typeof input === "string" && input.includes("/videos")) {
         return Promise.resolve(
           new Response(JSON.stringify([]), {
             status: 200,
@@ -80,7 +107,7 @@ describe("SearchFeature", () => {
       "/blog/build-developer-velocity-without-burnout",
     )
 
-    expect(fetchMock).toHaveBeenCalledWith("/api/posts")
-    expect(fetchMock).toHaveBeenCalledWith("/api/videos")
+    expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("/posts"))
+    expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("/videos"))
   })
 })

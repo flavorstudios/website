@@ -1,5 +1,10 @@
 import { FALLBACK_POSTS } from "./data/fallback-posts";
-import type { BlogPostRecord, GetPostsFilters, PublicPostSummary } from "./types";
+import type {
+  BlogPostRecord,
+  GetPostsFilters,
+  PublicPostDetail,
+  PublicPostSummary,
+} from "./types";
 
 function normalizeCategories(categories?: unknown, fallback?: unknown): string[] {
   const normalized = Array.isArray(categories)
@@ -54,6 +59,21 @@ function formatPostSummary(post: BlogPostRecord): PublicPostSummary {
     shareCount: typeof post.shareCount === "number" ? post.shareCount : 0,
     views: post.views,
     readTime: post.readTime,
+    tags: Array.isArray(post.tags) ? post.tags : undefined,
+  };
+}
+
+function formatPostDetail(post: BlogPostRecord): PublicPostDetail {
+  const summary = formatPostSummary(post);
+  return {
+    ...summary,
+    content: typeof post.content === "string" ? post.content : "",
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
+    seoTitle: post.seoTitle,
+    seoDescription: post.seoDescription,
+    schemaType: post.schemaType,
+    openGraphImage: post.openGraphImage,
   };
 }
 
@@ -91,4 +111,15 @@ export async function getPosts(filters: GetPostsFilters = {}): Promise<PublicPos
   );
 
   return filtered.map((post) => formatPostSummary(post));
+}
+
+export async function getPostBySlug(slug: string): Promise<PublicPostDetail | null> {
+  const normalizedSlug = slug.trim().toLowerCase();
+  if (!normalizedSlug) {
+    return null;
+  }
+  const match = FALLBACK_POSTS.find(
+    (post) => post.slug?.toLowerCase() === normalizedSlug || post.id === slug,
+  );
+  return match ? formatPostDetail(match) : null;
 }

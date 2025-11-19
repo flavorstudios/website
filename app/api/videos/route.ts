@@ -10,12 +10,24 @@ import {
 import { handleOptionsRequest } from "@/lib/api/cors";
 import { logError } from "@/lib/log";
 
+const externalBackendBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+
 export function OPTIONS(request: NextRequest) {
   return handleOptionsRequest(request, { allowMethods: ["GET"] });
 }
 
 export async function GET(request: NextRequest) {
   const context = createRequestContext(request);
+  if (externalBackendBase) {
+    return jsonResponse(
+      context,
+      {
+        error: "This route moved to the standalone backend.",
+        next: `${externalBackendBase}/videos`,
+      },
+      { status: 410 },
+    );
+  }
   try {
     const videos = await videoStore.getAll();
     const published = videos.filter((video: Video) => video.status === "published");

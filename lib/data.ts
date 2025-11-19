@@ -2,10 +2,7 @@
 
 import type { Category } from "@/types/category" // <-- Unified type!
 import type { PublicBlogSummary } from "@/lib/types"
-import { canonicalBaseUrl } from "@/lib/base-url"
 import { buildExternalApiUrl } from "@/lib/api/external"
-
-const baseUrl = canonicalBaseUrl()
 
 export type BlogPost = PublicBlogSummary
 
@@ -33,7 +30,7 @@ export interface Video {
  */
 export async function getDynamicCategories(): Promise<Category[]> {
   try {
-    const response = await fetch(`${baseUrl}/api/categories`, { cache: "no-store" });
+    const response = await fetch(buildExternalApiUrl(`/categories`), { cache: "no-store" });
     if (response.ok) {
       const data = await response.json();
       // API (modern): { blogCategories, videoCategories }
@@ -117,7 +114,7 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 
 export async function getVideos(): Promise<Video[]> {
   try {
-    const response = await fetch(`${baseUrl}/api/videos`, { cache: "no-store" }); // <-- Codex update
+    const response = await fetch(buildExternalApiUrl(`/videos`), { cache: "no-store" });
     if (response.ok) {
       const videos = await response.json();
       const videoItems = extractCollection<Video>(videos, "videos");

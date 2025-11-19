@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getSessionInfo, isAdmin } from "@/lib/admin-auth";
-import { ADMIN_BYPASS, adminDb } from "@/lib/firebase-admin";
+import { adminDb } from "@/lib/firebase-admin";
 import { logActivity } from "@/lib/activity-log";
 import { logError } from "@/lib/log";
 import {
@@ -11,6 +11,10 @@ import {
   mergeSettings,
 } from "@/lib/settings/common";
 import { userSettingsSchema, type UserSettings } from "@/lib/schemas/settings";
+import {
+  buildAdminSettingsFixture,
+  shouldUseAdminSettingsFixtures,
+} from "@/lib/admin/settings-fixture-guard";
 
 function cloneDefaultSettings(): UserSettings {
   return {
@@ -53,10 +57,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  if (shouldUseAdminSettingsFixtures()) {
+    return NextResponse.json({ settings: buildAdminSettingsFixture() });
+  }
+
   if (!adminDb) {
-    if (ADMIN_BYPASS) {
-      return NextResponse.json({ settings: cloneDefaultSettings() });
-    }
     logError("admin-settings:api:get:adminDb", new Error("Admin Firestore unavailable"));
     return adminDbUnavailableResponse();
   }
@@ -87,10 +92,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  if (shouldUseAdminSettingsFixtures()) {
+    return NextResponse.json({ settings: buildAdminSettingsFixture() });
+  }
+
   if (!adminDb) {
-    if (ADMIN_BYPASS) {
-      return NextResponse.json({ settings: cloneDefaultSettings() });
-    }
     logError("admin-settings:api:post:adminDb", new Error("Admin Firestore unavailable"));
     return adminDbUnavailableResponse();
   }

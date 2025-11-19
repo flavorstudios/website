@@ -10,6 +10,20 @@ import {
 } from "@/lib/api/response";
 import { logBreadcrumb, logError } from "@/lib/log";
 
+const externalBackendBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+
+function respondWithExternalRedirect(context: RequestContext, path: string) {
+  if (!externalBackendBase) return null;
+  return jsonResponse(
+    context,
+    {
+      error: "This route is served by the standalone backend.",
+      next: `${externalBackendBase}${path}`,
+    },
+    { status: 410 },
+  );
+}
+
 type RateInfo = { count: number; lastAttempt: number };
 type PostType = "blog" | "video";
 type CommentCreateInput = {
@@ -65,6 +79,11 @@ export function OPTIONS(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const context = createRequestContext(request);
 
+  const redirect = respondWithExternalRedirect(context, `/comments${request.nextUrl.search}`);
+  if (redirect) {
+    return redirect;
+  }
+
   try {
     const { searchParams } = request.nextUrl;
     const postId = searchParams.get("postId");
@@ -105,6 +124,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const context = createRequestContext(request);
+
+  const redirect = respondWithExternalRedirect(context, "/comments");
+  if (redirect) {
+    return redirect;
+  }
 
     try {
     const body: CommentCreateInput = (await request.json()) as CommentCreateInput;

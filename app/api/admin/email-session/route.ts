@@ -11,6 +11,7 @@ import {
   errorResponse,
   jsonResponse,
 } from "@/lib/api/response";
+import { ADMIN_VERIFIED_COOKIE } from "@/shared/admin-cookies";
 
 export function GET(request: NextRequest) {
   const context = createRequestContext(request);
@@ -59,6 +60,11 @@ export async function POST(req: NextRequest) {
     res.cookies.set(
       "admin-session",
       token,
+      adminCookieOptions({ maxAge: 60 * 60 * 24 }),
+    );
+    res.cookies.set(
+      ADMIN_VERIFIED_COOKIE,
+      "true",
       adminCookieOptions({ maxAge: 60 * 60 * 24 }),
     );
     return res;

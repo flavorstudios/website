@@ -14,6 +14,8 @@ import {
 } from "@/lib/api/response";
 import { handleOptionsRequest } from "@/lib/api/cors";
 
+const externalBackendBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+
 function parseDate(value: string | null): Date | null {
   if (!value) return null;
   const parsed = new Date(value);
@@ -26,6 +28,17 @@ export function OPTIONS(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const context = createRequestContext(request);
+
+  if (externalBackendBase) {
+    return jsonResponse(
+      context,
+      {
+        error: "This route moved to the standalone backend.",
+        next: `${externalBackendBase}/posts`,
+      },
+      { status: 410 },
+    );
+  }
 
   try {
     const { searchParams } = request.nextUrl;

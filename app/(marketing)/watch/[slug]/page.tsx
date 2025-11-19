@@ -4,6 +4,7 @@ import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
 import { canonicalBaseUrl } from "@/lib/base-url";
+import { buildExternalApiUrl } from "@/lib/api/external";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -54,7 +55,7 @@ function toIsoDuration(duration: string): string | undefined {
 // --- Fetch video utility ---
 async function getVideo(slug: string): Promise<Video | null> {
   try {
-    const response = await fetch(`${canonicalBaseUrl()}/api/videos`, {
+    const response = await fetch(buildExternalApiUrl(`/videos`), {
       cache: "no-store",
     });
     if (!response.ok) {

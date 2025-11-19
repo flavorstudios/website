@@ -15,6 +15,7 @@ import type { UserRole } from "@/lib/role-permissions";
 import { getUserRole } from "@/lib/user-roles";
 import { serverEnv } from "@/env/server";
 import { createHash } from "crypto";
+import { ADMIN_VERIFIED_COOKIE } from "@/shared/admin-cookies";
 
 type AdminCookieOptions = {
   httpOnly: true;
@@ -506,6 +507,9 @@ export async function createRefreshSession(uid: string): Promise<string> {
     cookieStore.set("admin-refresh-token", "bypass-refresh", {
       ...adminCookieOptions({ maxAge: 60 * 60 * 24 * 30 }),
     });
+    cookieStore.set(ADMIN_VERIFIED_COOKIE, "true", {
+      ...adminCookieOptions({ maxAge: 60 * 60 * 2 }),
+    });
     return "bypass-refresh";
   }
 
@@ -561,6 +565,9 @@ export async function createRefreshSession(uid: string): Promise<string> {
     });
     cookieStore.set("admin-refresh-token", refreshToken, {
       ...adminCookieOptions({ maxAge: 60 * 60 * 24 * 30 }),
+    });
+    cookieStore.set(ADMIN_VERIFIED_COOKIE, "true", {
+      ...adminCookieOptions({ maxAge: 60 * 60 * 2 }),
     });
 
     return refreshToken;

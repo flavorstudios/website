@@ -1,0 +1,1 @@
+export const ADMIN_VERIFIED_COOKIE = "admin-email-verified"

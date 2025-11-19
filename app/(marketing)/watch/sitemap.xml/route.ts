@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { generateSitemapXML, SitemapUrl } from "@/lib/sitemap-utils";
 import { serverEnv } from "@/env/server";
 import { canonicalBaseUrl } from "@/lib/base-url";
+import { buildExternalApiUrl } from "@/lib/api/external";
 import { createRequestContext, textResponse } from "@/lib/api/response";
 import { logError } from "@/lib/log";
 import { isTestMode } from "@/config/flags";
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
     let videos: ContentPage[] = [];
     if (!skipFetch) {
       try {
-        const res = await fetch(`${BASE_URL}/api/videos`, { cache: "no-store" });
+        const res = await fetch(buildExternalApiUrl(`/videos`), { cache: "no-store" });
         if (res.ok) {
           videos = await res.json();
         }

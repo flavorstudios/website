@@ -27,7 +27,7 @@ describe('getBlogPost server fetch', () => {
         const { getBlogPost } = await import('@/lib/blog');
         const post = await getBlogPost(slug);
         expect(post).toEqual({ slug });
-        const expectedPath = `/api/blogs/${encodeURIComponent(slug)}`;
+        const expectedPath = `/posts/${encodeURIComponent(slug)}`;
         const expected = base
           ? `${base}${expectedPath}`
           : expect.stringContaining(expectedPath);

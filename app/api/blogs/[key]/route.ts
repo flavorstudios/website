@@ -11,6 +11,8 @@ import { logBreadcrumb, logError } from "@/lib/log";
 import { normalizeSlug } from "@/lib/slugify";
 import type { RouteContext } from "@/types/route";
 
+const externalBackendBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+
 function isPostPubliclyVisible(post: BlogPost | null): post is BlogPost {
   if (!post) return false;
   if (post.status === "published") return true;
@@ -33,6 +35,16 @@ export async function GET(
   { params }: RouteContext<{ key: string }>,
 ) {
   const { key } = await params;
+  if (externalBackendBase) {
+    const encoded = encodeURIComponent(key);
+    return NextResponse.json(
+      {
+        error: "This route moved to the standalone backend.",
+        next: `${externalBackendBase}/posts/${encoded}`,
+      },
+      { status: 410 },
+    );
+  }
   let normalizedKey: string | null = null;
   try {
     normalizedKey = normalizeSlug(key);

@@ -9,6 +9,7 @@ import {
   errorResponse,
   jsonResponse,
 } from "@/lib/api/response";
+import { ADMIN_VERIFIED_COOKIE } from "@/shared/admin-cookies";
 
 export async function POST(req: NextRequest) {
   const context = createRequestContext(req);
@@ -32,6 +33,7 @@ export async function POST(req: NextRequest) {
     const res = jsonResponse(context, { ok: true, message: "Logged out" });
     res.cookies.set("admin-session", "", adminCookieOptions({ maxAge: 0 }));
     res.cookies.set("admin-refresh-token", "", adminCookieOptions({ maxAge: 0 }));
+    res.cookies.set(ADMIN_VERIFIED_COOKIE, "", adminCookieOptions({ maxAge: 0 }));
     return res;
   } catch (err) {
     logError("logout:error", err, { requestId: context.requestId });

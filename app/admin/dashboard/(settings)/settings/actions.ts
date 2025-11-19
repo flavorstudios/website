@@ -32,8 +32,21 @@ import { isTestMode } from "@/config/flags"
 import { SITE_NAME, SITE_URL } from "@/lib/constants"
 import { logError } from "@/lib/log"
 import { SettingsAccessError } from "./errors"
+import {
+  buildAdminSettingsFixture,
+  shouldUseAdminSettingsFixtures,
+} from "@/lib/admin/settings-fixture-guard"
+
+const SETTINGS_READ_ONLY_MESSAGE =
+  "Admin settings are read-only in this environment. Configure FIREBASE_SERVICE_ACCOUNT_KEY or FIREBASE_SERVICE_ACCOUNT_JSON to enable persistence."
 
 function requireSettingsDb(context: string, meta?: Record<string, unknown>) {
+  if (shouldUseAdminSettingsFixtures()) {
+    throw new SettingsAccessError(
+      "ADMIN_SDK_UNAVAILABLE",
+      SETTINGS_READ_ONLY_MESSAGE,
+    )
+  }
   try {
     return getAdminDb()
   } catch (error) {
@@ -47,6 +60,12 @@ function requireSettingsDb(context: string, meta?: Record<string, unknown>) {
 }
 
 function requireSettingsAuth(context: string, meta?: Record<string, unknown>) {
+  if (shouldUseAdminSettingsFixtures()) {
+    throw new SettingsAccessError(
+      "ADMIN_SDK_UNAVAILABLE",
+      SETTINGS_READ_ONLY_MESSAGE,
+    )
+  }
   try {
     return getAdminAuth()
   } catch (error) {
@@ -177,6 +196,9 @@ async function ensureAdmin(context = "admin-settings"): Promise<string> {
 
 export async function loadSettings(): Promise<UserSettings> {
   const uid = await ensureAdmin("admin-settings:loadSettings")
+  if (shouldUseAdminSettingsFixtures()) {
+    return buildAdminSettingsFixture()
+  }
   const db = requireSettingsDb("admin-settings:loadSettings", { uid })
 
   try {
@@ -317,6 +339,12 @@ export async function updateProfile(input: ProfileSettingsInput) {
 
 export async function uploadAvatar(formData: FormData) {
   const uid = await ensureAdmin("admin-settings:uploadAvatar")
+  if (shouldUseAdminSettingsFixtures()) {
+    throw new SettingsAccessError(
+      "ADMIN_SDK_UNAVAILABLE",
+      SETTINGS_READ_ONLY_MESSAGE,
+    )
+  }
   const file = formData.get("file")
   if (!(file instanceof File)) {
     throw new Error("Avatar file is required")

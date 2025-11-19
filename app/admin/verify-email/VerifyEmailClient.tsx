@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useId } from "react";
+import type { User } from "firebase/auth";
 import { Loader2, MailCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,8 @@ export default function VerifyEmailClient() {
   const [status, setStatus] = useState<StatusMessage | null>(null);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
+  const [sessionSynced, setSessionSynced] = useState(false);
+  const [sessionSyncing, setSessionSyncing] = useState(false);
   const {
     testEmailVerified,
     setTestEmailVerified,
@@ -29,6 +32,43 @@ export default function VerifyEmailClient() {
   const requireVerification =
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
   const testMode = isTestMode();
+
+  const syncServerSession = useCallback(
+    async (user: User | null) => {
+      if (testMode) {
+        return true;
+      }
+      if (!user) {
+        return false;
+      }
+      if (sessionSynced || sessionSyncing) {
+        return sessionSynced;
+      }
+      setSessionSyncing(true);
+      try {
+        const idToken = await user.getIdToken(true);
+        const response = await fetch("/api/admin/email-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ idToken }),
+        });
+        if (!response.ok) {
+          return false;
+        }
+        setSessionSynced(true);
+        return true;
+      } catch (error) {
+        if (process.env.NODE_ENV !== "production") {
+          console.error("verify-email: session sync failed", error);
+        }
+        return false;
+      } finally {
+        setSessionSyncing(false);
+      }
+    },
+    [sessionSynced, sessionSyncing, testMode]
+  );
 
   const evaluateVerification = useCallback(async () => {
     if (testMode) {
@@ -63,9 +103,12 @@ export default function VerifyEmailClient() {
         return;
       }
       if (user.emailVerified || !requireVerification) {
+        const synced = await syncServerSession(user);
         setStatus({
-          tone: "success",
-          message: "Email verified! Redirecting to the dashboard…",
+          tone: synced ? "success" : "error",
+          message: synced
+            ? "Email verified! Redirecting to the dashboard…"
+            : "Email verified, but we couldn't refresh your session. Please sign in again.",
         });
         return;
       }
@@ -86,6 +129,7 @@ export default function VerifyEmailClient() {
   }, [
     refreshCurrentUser,
     requireVerification,
+    syncServerSession,
     testEmailVerified,
     testMode,
   ]);
@@ -147,9 +191,12 @@ export default function VerifyEmailClient() {
         return;
       }
       if (refreshedUser.emailVerified) {
+        const synced = await syncServerSession(refreshedUser);
         setStatus({
-          tone: "success",
-          message: "Email already verified! Redirecting to the dashboard…",
+          tone: synced ? "success" : "error",
+          message: synced
+            ? "Email already verified! Redirecting to the dashboard…"
+            : "Email verified, but we couldn't refresh your session. Please sign in again.",
         });
         return;
       }
@@ -227,7 +274,11 @@ export default function VerifyEmailClient() {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Button onClick={handleResend} disabled={sending || loading} type="button">
+        <Button
+          onClick={handleResend}
+          disabled={sending || loading || sessionSyncing}
+          type="button"
+        >
           {sending && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
           Resend verification email
         </Button>
@@ -235,7 +286,7 @@ export default function VerifyEmailClient() {
           onClick={handleCheck}
           variant="secondary"
           type="button"
-          disabled={loading}
+          disabled={loading || sessionSyncing}
           aria-label="I have verified"
         >
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}

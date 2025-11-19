@@ -7,6 +7,7 @@ import {
   isRateLimited,
   resetAttempts,
 } from '@/lib/rate-limit';
+import { ADMIN_VERIFIED_COOKIE } from '@/shared/admin-cookies';
 
 function getRequestIp(request: NextRequest): string {
   const xfwd = request.headers.get('x-forwarded-for');
@@ -17,6 +18,8 @@ function getRequestIp(request: NextRequest): string {
 export async function middleware(request: NextRequest) {
   const { pathname, hostname } = request.nextUrl;
   const isE2E = process.env.E2E === 'true';
+  const requiresEmailVerification =
+    serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === 'true';
 
   // E2E: Bypass auth for admin routes on localhost or with a special cookie.
   if (isE2E && (pathname.startsWith('/admin') || pathname.startsWith('/api/admin'))) {
@@ -76,12 +79,27 @@ export async function middleware(request: NextRequest) {
     pathname === '/admin/login' ||
     pathname === '/admin/login/' ||
     pathname.startsWith('/admin/login?');
+    const isVerifyRoute =
+    pathname === '/admin/verify-email' ||
+    pathname === '/admin/verify-email/' ||
+    pathname.startsWith('/admin/verify-email?');
+  const isSignupPage =
+    pathname === '/admin/signup' ||
+    pathname === '/admin/signup/' ||
+    pathname.startsWith('/admin/signup?');
+  const isForgotPasswordPage =
+    pathname === '/admin/forgot-password' ||
+    pathname === '/admin/forgot-password/' ||
+    pathname.startsWith('/admin/forgot-password?');
 
   // --- All /admin routes
   if (isAdminRequest) {
     const sessionCookie = request.cookies.get('admin-session')?.value || '';
     const isPreviewRoute = pathname.startsWith('/admin/preview');
     const previewToken = request.nextUrl.searchParams.get('token');
+    const verifiedCookie = request.cookies.get(ADMIN_VERIFIED_COOKIE)?.value;
+    const knownVerified = verifiedCookie === 'true';
+    const knownUnverified = verifiedCookie === 'false';
 
     if (isPreviewRoute && previewToken) {
       return nextWithAdminHeaders();
@@ -96,6 +114,11 @@ export async function middleware(request: NextRequest) {
     if (isLoginPage) {
       if (sessionCookie) {
         await resetAttempts(ip);
+        if (requiresEmailVerification && knownUnverified) {
+          return redirectWithAdminHeaders(
+            new URL('/admin/verify-email', request.url),
+          );
+        }
         return redirectWithAdminHeaders(
           new URL('/admin/dashboard', request.url),
         );
@@ -107,6 +130,29 @@ export async function middleware(request: NextRequest) {
     if (!sessionCookie) {
       await incrementAttempts(ip);
       return redirectWithAdminHeaders(new URL('/admin/login', request.url));
+    }
+
+    if (
+      requiresEmailVerification &&
+      knownUnverified &&
+      !isVerifyRoute &&
+      !isPreviewRoute &&
+      !isSignupPage &&
+      !isForgotPasswordPage
+    ) {
+      return redirectWithAdminHeaders(
+        new URL('/admin/verify-email', request.url),
+      );
+    }
+
+    if (
+      requiresEmailVerification &&
+      knownVerified &&
+      isVerifyRoute
+    ) {
+      return redirectWithAdminHeaders(
+        new URL('/admin/dashboard', request.url),
+      );
     }
 
     await resetAttempts(ip);

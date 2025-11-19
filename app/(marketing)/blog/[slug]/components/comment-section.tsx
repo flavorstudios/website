@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { MessageCircle, Send, User, Clock, AlertCircle, CheckCircle } from "lucide-react"
 import { formatDate } from "@/lib/date"
+import { buildExternalApiUrl } from "@/lib/api/external"
 
 interface Comment {
   id: string
@@ -42,7 +43,10 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   const fetchComments = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/comments?postId=${postId}&postType=blog`, {
+      const url = new URL(buildExternalApiUrl(`/comments`))
+      url.searchParams.set("postId", postId)
+      url.searchParams.set("postType", "blog")
+      const response = await fetch(url, {
         cache: "no-store",
       })
       if (response.ok) {
@@ -88,7 +92,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
         setSavedName(name)
       }
 
-      const response = await fetch("/api/comments", {
+      const response = await fetch(buildExternalApiUrl(`/comments`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

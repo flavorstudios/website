@@ -9,6 +9,7 @@ import { Play, Eye, Calendar, Youtube, Clock, Video } from "lucide-react"
 import { useState, useEffect, useCallback } from "react"
 import type { Category } from "@/types/category"
 import { formatDate } from "@/lib/date" // <-- Consistent date formatting
+import { buildExternalApiUrl } from "@/lib/api/external"
 
 interface VideoType {
   id: string
@@ -40,8 +41,8 @@ export function WatchPageClient({
     try {
       setLoading(true)
       const [videosResponse, categoriesResponse] = await Promise.all([
-        fetch("/api/videos", { cache: "no-store" }),
-        fetch("/api/categories?type=video", { cache: "no-store" }),
+        fetch(buildExternalApiUrl(`/videos`), { cache: "no-store" }),
+        fetch(buildExternalApiUrl(`/categories?type=video`), { cache: "no-store" }),
       ])
 
       if (videosResponse.ok) {

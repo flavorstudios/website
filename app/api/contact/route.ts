@@ -12,6 +12,20 @@ import {
 } from "@/lib/api/response";
 import { logError } from "@/lib/log";
 
+const externalBackendBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+
+function respondWithExternalRedirect(context: RequestContext) {
+  if (!externalBackendBase) return null;
+  return jsonResponse(
+    context,
+    {
+      error: "This route now lives on the standalone backend.",
+      next: `${externalBackendBase}/contact`,
+    },
+    { status: 410 },
+  );
+}
+
 const PERSPECTIVE_API_KEY = serverEnv.PERSPECTIVE_API_KEY;
 const THRESHOLD = 0.7;
 
@@ -100,6 +114,11 @@ export function OPTIONS(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const context = createRequestContext(request);
+
+  const redirect = respondWithExternalRedirect(context);
+  if (redirect) {
+    return redirect;
+  }
 
   try {
     const body = await request.json();

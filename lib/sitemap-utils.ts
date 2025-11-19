@@ -239,7 +239,7 @@ export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]
 
   // --- Fetch Videos ---
   try {
-    const videosResponse = await fetch(joinUrl(baseUrl, "/api/videos"), {
+    const videosResponse = await fetch(buildExternalApiUrl(`/videos`), {
       cache: "no-store",
       headers: { "Cache-Control": "no-cache" }
     });

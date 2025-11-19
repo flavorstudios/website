@@ -1,11 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState, useId } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2, MailCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { getFirebaseAuth } from "@/lib/firebase";
 import { clientEnv } from "@/env.client";
 import { useAdminAuth } from "@/components/AdminAuthProvider";
 import { isTestMode } from "@/config/flags";
@@ -17,68 +15,22 @@ type StatusMessage = {
 };
 
 export default function VerifyEmailClient() {
-  const router = useRouter();
   const [status, setStatus] = useState<StatusMessage | null>(null);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const { testEmailVerified, setTestEmailVerified } = useAdminAuth();
+  const {
+    testEmailVerified,
+    setTestEmailVerified,
+    refreshCurrentUser,
+    accessState,
+  } = useAdminAuth();
   const headingId = useId();
 
   const requireVerification =
     clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
   const testMode = isTestMode();
 
-  const waitForNextFrame = useCallback(
-    () =>
-      new Promise<void>((resolve) => {
-        if (typeof window === "undefined") {
-          resolve();
-          return;
-        }
-        if (typeof window.requestAnimationFrame === "function") {
-          window.requestAnimationFrame(() => resolve());
-        } else {
-          window.setTimeout(() => resolve(), 0);
-        }
-      }),
-    []
-  );
-
-  const startRedirect = useCallback(
-    (
-      path: string,
-      options?: {
-        delayMs?: number;
-        onBeforeNavigate?: () => void;
-      }
-    ) => {
-      void (async () => {
-        await waitForNextFrame();
-        options?.onBeforeNavigate?.();
-        if (options?.delayMs && options.delayMs > 0) {
-          await new Promise<void>((resolve) => {
-            const schedule = () => resolve();
-            if (typeof window !== "undefined") {
-              window.setTimeout(schedule, options.delayMs);
-            } else {
-              setTimeout(schedule, options.delayMs);
-            }
-          });
-        }
-        router.replace(path);
-      })();
-    },
-    [router, waitForNextFrame]
-  );
-
-  const refreshUser = useCallback(async () => {
-    let shouldResetLoading = true;
-
-    const scheduleRedirect = (path: string) => {
-      shouldResetLoading = false;
-      startRedirect(path);
-    };
-
+  const evaluateVerification = useCallback(async () => {
     if (testMode) {
       const verified =
         testEmailVerified ??
@@ -88,9 +40,9 @@ export default function VerifyEmailClient() {
       if (verified) {
         setStatus({
           tone: "success",
-          message: "Email verified! Redirecting to the dashboard…",
+          message:
+            "Test mode: verification marked complete. Redirecting to the dashboard…",
         });
-        scheduleRedirect("/admin/dashboard");
       } else {
         setStatus({
           tone: "neutral",
@@ -98,31 +50,29 @@ export default function VerifyEmailClient() {
             "Test mode: set admin-test-email-verified to true in localStorage or click “I have verified” once ready.",
         });
       }
-      if (shouldResetLoading) {
-        setLoading(false);
-      }
       return;
     }
 
     try {
-      const auth = getFirebaseAuth();
-      const user = auth.currentUser;
+      const user = await refreshCurrentUser();
       if (!user) {
-        scheduleRedirect("/admin/login");
+        setStatus({
+          tone: "error",
+          message: "Your session has expired. Please sign in again.",
+        });
         return;
       }
-      await user.reload();
       if (user.emailVerified || !requireVerification) {
         setStatus({
           tone: "success",
           message: "Email verified! Redirecting to the dashboard…",
         });
-        scheduleRedirect("/admin/dashboard");
         return;
       }
       setStatus({
         tone: "neutral",
-        message: "We sent a verification link to your inbox. Once verified, click “I have verified” to continue.",
+        message:
+          "We sent a verification link to your inbox. Once verified, click “I have verified” to continue.",
       });
     } catch (error) {
       if (process.env.NODE_ENV !== "production") {
@@ -132,17 +82,22 @@ export default function VerifyEmailClient() {
         tone: "error",
         message: "We couldn't verify your status. Please try again shortly.",
       });
-    } finally {
-      if (shouldResetLoading) {
-        setLoading(false);
-      }
     }
   }, [
+    refreshCurrentUser,
     requireVerification,
-    startRedirect,
-    testMode,
     testEmailVerified,
+    testMode,
   ]);
+
+  const runStatusCheck = useCallback(async () => {
+    setLoading(true);
+    try {
+      await evaluateVerification();
+    } finally {
+      setLoading(false);
+    }
+  }, [evaluateVerification]);
 
   useEffect(() => {
     if (!testMode || typeof window === "undefined") {
@@ -155,8 +110,22 @@ export default function VerifyEmailClient() {
   }, [testMode]);
 
   useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
+    void runStatusCheck();
+  }, [runStatusCheck]);
+
+  useEffect(() => {
+    if (accessState === "authenticated_verified") {
+      setStatus({
+        tone: "success",
+        message: "Email verified! Redirecting to the dashboard…",
+      });
+    } else if (accessState === "unauthenticated") {
+      setStatus({
+        tone: "error",
+        message: "You need to sign in again. Redirecting to the login page…",
+      });
+    }
+  }, [accessState]);
 
   const handleResend = async () => {
     if (testMode) {
@@ -167,30 +136,25 @@ export default function VerifyEmailClient() {
       });
       return;
     }
-    let shouldResetSending = true;
     try {
       setSending(true);
-      const auth = getFirebaseAuth();
-      const user = auth.currentUser;
-      if (!user) {
-        shouldResetSending = false;
-        startRedirect("/admin/login");
+      const refreshedUser = await refreshCurrentUser();
+      if (!refreshedUser) {
+        setStatus({
+          tone: "error",
+          message: "Your session expired. Please log in again.",
+        });
         return;
       }
-      await user.reload();
-      if (user.emailVerified) {
-        shouldResetSending = false;
-        startRedirect("/admin/dashboard", {
-        delayMs: 75,
-        onBeforeNavigate: () => {
-          setLoading(false);
-        },
-      });
-      setLoading(true);
+      if (refreshedUser.emailVerified) {
+        setStatus({
+          tone: "success",
+          message: "Email already verified! Redirecting to the dashboard…",
+        });
         return;
       }
       const { sendEmailVerification } = await import("firebase/auth");
-      await sendEmailVerification(user);
+      await sendEmailVerification(refreshedUser);
       setStatus({
         tone: "success",
         message: "Verification email sent. Check your inbox and spam folder.",
@@ -204,9 +168,7 @@ export default function VerifyEmailClient() {
         message: "Failed to send verification email. Try again in a minute.",
       });
     } finally {
-      if (shouldResetSending) {
-        setSending(false);
-      }
+      setSending(false);
     }
   };
 
@@ -223,11 +185,10 @@ export default function VerifyEmailClient() {
         tone: "success",
         message: "Test mode: verification marked complete. Redirecting…",
       });
-      startRedirect("/admin/dashboard", { delayMs: 150 });
+      setLoading(false);
       return;
     }
-    setLoading(true);
-    await refreshUser();
+    await runStatusCheck();
   };
 
   return (

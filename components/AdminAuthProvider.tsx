@@ -4,7 +4,6 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useState,
 } from "react"
@@ -21,6 +20,12 @@ const TEST_EMAIL_VERIFIED_EVENT_NAME = "admin-test-email-verified-change"
 const TEST_MODE_OVERRIDE_STORAGE_KEY = "admin-test-mode"
 const TEST_MODE_OVERRIDE_EVENT_NAME = "admin-test-mode-change"
 
+type AdminAccessState =
+  | "loading"
+  | "unauthenticated"
+  | "authenticated_unverified"
+  | "authenticated_verified"
+
 // ---- Define Context Shape ----
 interface AdminAuthContextType {
   user: User | null
@@ -29,6 +34,9 @@ interface AdminAuthContextType {
   signOutAdmin: () => Promise<void>
   testEmailVerified: boolean | null
   setTestEmailVerified: (value: boolean | null) => void
+  refreshCurrentUser: () => Promise<User | null>
+  accessState: AdminAccessState
+  requiresVerification: boolean
 }
 
 // ---- Create Context ----
@@ -37,7 +45,10 @@ const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefin
 // ---- Provider Implementation ----
 export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const e2eActive = isE2EEnabled()
-  const [user, setUser] = useState<User | null>(null)
+  const [userSnapshot, setUserSnapshot] = useState<{ user: User | null; version: number }>(
+    () => ({ user: null, version: 0 })
+  )
+  const user = userSnapshot.user
   const [loading, setLoading] = useState(() => !e2eActive)
   const [error, setError] = useState<string | null>(null)
   const [authInitFailed, setAuthInitFailed] = useState(() =>
@@ -83,6 +94,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
 
+  const commitUser = useCallback((next: User | null) => {
+    setUserSnapshot((prev) => ({ user: next, version: prev.version + 1 }))
+  }, [])
+
   const readTestEmailVerifiedSync = useCallback(() => {
     if (!shouldUseLocalVerification || typeof window === "undefined") {
       return shouldUseLocalVerification && e2eActive ? false : null
@@ -94,38 +109,36 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     return stored === "true"
   }, [shouldUseLocalVerification, e2eActive])
 
-  type VerificationStatus = "pending" | "verified" | "unverified"
-
-  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>(
-    () => {
-      if (!requiresVerification) {
-        return "verified"
-      }
-      if (shouldUseLocalVerification) {
-        const syncValue = readTestEmailVerifiedSync()
-        const effectiveValue =
-          syncValue !== null ? syncValue : testEmailVerified
-        if (effectiveValue === true) {
-          return "verified"
-        }
-        if (effectiveValue === false) {
-          return "unverified"
-        }
-        return "pending"
-      }
-      if (loading) {
-        return "pending"
-      }
-      if (!user) {
-        return "verified"
-      }
-      return user.emailVerified ? "verified" : "unverified"
+  const accessState = useMemo<AdminAccessState>(() => {
+    if (loading) {
+      return "loading"
     }
-  )
 
-  const updateVerificationStatus = useCallback((next: VerificationStatus) => {
-    setVerificationStatus((current) => (current === next ? current : next))
-  }, [])
+  if (!requiresVerification) {
+      return user ? "authenticated_verified" : "unauthenticated"
+    }
+
+  if (shouldUseLocalVerification) {
+      const syncValue = readTestEmailVerifiedSync()
+      const effectiveValue = syncValue ?? testEmailVerified
+      return effectiveValue ? "authenticated_verified" : "authenticated_unverified"
+    }
+
+    if (!user) {
+      return "unauthenticated"
+    }
+
+    return user.emailVerified
+      ? "authenticated_verified"
+      : "authenticated_unverified"
+  }, [
+    loading,
+    readTestEmailVerifiedSync,
+    requiresVerification,
+    shouldUseLocalVerification,
+    testEmailVerified,
+    user,
+  ])
 
   const isGuardedAdminRoute = useMemo(() => {
     if (!pathname?.startsWith("/admin")) {
@@ -156,7 +169,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }
       if (typeof window !== "undefined") {
         if (value === null) {
-        window.localStorage.removeItem(TEST_EMAIL_VERIFIED_STORAGE_KEY)
+          window.localStorage.removeItem(TEST_EMAIL_VERIFIED_STORAGE_KEY)
         } else {
           window.localStorage.setItem(
             TEST_EMAIL_VERIFIED_STORAGE_KEY,
@@ -318,7 +331,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(
       auth,
       (firebaseUser) => {
-        setUser(firebaseUser)
+        commitUser(firebaseUser)
         setLoading(false)
       },
       (err) => {
@@ -333,6 +346,25 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe()
   }, [authInitFailed, firebaseErrorMessage, testModeOverride])
 
+  const refreshCurrentUser = useCallback(async () => {
+    try {
+      const auth = getFirebaseAuth()
+      const current = auth.currentUser
+      if (!current) {
+        commitUser(null)
+        return null
+      }
+      await current.reload()
+      commitUser(auth.currentUser)
+      return auth.currentUser
+    } catch (err) {
+      if (clientEnv.NODE_ENV !== "production") {
+        console.error("[AdminAuthProvider] Failed to refresh current user:", err)
+      }
+      throw err
+    }
+  }, [commitUser])
+
   // --- Codex Update: Also call /api/admin/logout after Firebase signOut
   const signOutAdmin = async () => {
     setLoading(true)
@@ -340,7 +372,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const auth = getFirebaseAuth()
       await signOut(auth)
-      setUser(null)
+      commitUser(null)
       persistTestEmailVerified(null)
       // Call backend to clear the admin-session cookie server-side
       await fetch("/api/admin/logout", { method: "POST" })
@@ -354,82 +386,49 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  useLayoutEffect(() => {
-    if (!requiresVerification) {
-      updateVerificationStatus("verified")
-      if (pathname?.startsWith("/admin/verify-email")) {
-        router.replace("/admin/dashboard")
+  useEffect(() => {
+    if (!pathname?.startsWith("/admin")) {
+      return
+    }
+
+    if (accessState === "loading") {
+      return
+    }
+
+    const isVerifyRoute = pathname.startsWith("/admin/verify-email")
+    const isLoginRoute = pathname.startsWith("/admin/login")
+    const isForgotPasswordRoute = pathname.startsWith("/admin/forgot-password")
+    const isSignupRoute = pathname.startsWith("/admin/signup")
+    const isPreviewRoute = pathname.startsWith("/admin/preview")
+
+    if (isPreviewRoute) {
+      return
+    }
+
+    let nextPath: string | null = null
+
+    if (accessState === "unauthenticated") {
+      if (!isLoginRoute && !isSignupRoute && !isForgotPasswordRoute) {
+        nextPath = "/admin/login"
       }
-      return
-    }
-
-    if (shouldUseLocalVerification) {
-      const syncValue = readTestEmailVerifiedSync()
-      const effectiveValue =
-        syncValue !== null ? syncValue : testEmailVerified ?? false
-
-      if (effectiveValue) {
-        updateVerificationStatus("verified")
-        if (pathname?.startsWith("/admin/verify-email")) {
-          router.replace("/admin/dashboard")
-        }
-        return
+    } else if (accessState === "authenticated_unverified") {
+      if (!isVerifyRoute) {
+        nextPath = "/admin/verify-email"
       }
-
-      updateVerificationStatus("unverified")
-      if (
-        pathname &&
-        !pathname.startsWith("/admin/verify-email") &&
-        pathname !== "/admin/signup"
-      ) {
-        router.replace("/admin/verify-email")
+    } else if (accessState === "authenticated_verified") {
+      if (isVerifyRoute) {
+        nextPath = "/admin/dashboard"
       }
-      return
     }
 
-    if (loading) {
-      updateVerificationStatus("pending")
-      return
+    if (nextPath && nextPath !== pathname) {
+      router.replace(nextPath)
     }
-
-    if (!user) {
-      updateVerificationStatus("verified")
-      return
-    }
-
-    if (user.emailVerified) {
-      updateVerificationStatus("verified")
-      if (pathname?.startsWith("/admin/verify-email")) {
-        router.replace("/admin/dashboard")
-      }
-      return
-    }
-
-    updateVerificationStatus("unverified")
-    if (
-      pathname &&
-      !pathname.startsWith("/admin/verify-email") &&
-      pathname !== "/admin/signup"
-    ) {
-      router.replace("/admin/verify-email")
-    }
-  }, [
-    loading,
-    pathname,
-    readTestEmailVerifiedSync,
-    requiresVerification,
-    router,
-    shouldUseLocalVerification,
-    testEmailVerified,
-    updateVerificationStatus,
-    user,
-  ])
+  }, [accessState, pathname, router])
 
   const shouldBlockChildren =
-    requiresVerification &&
-    !shouldUseLocalVerification &&
     isGuardedAdminRoute &&
-    verificationStatus !== "verified"
+    (accessState === "loading" || accessState === "authenticated_unverified")
 
   return (
     <AdminAuthContext.Provider
@@ -440,6 +439,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         signOutAdmin,
         testEmailVerified,
         setTestEmailVerified: persistTestEmailVerified,
+        refreshCurrentUser,
+        accessState,
+        requiresVerification,
       }}
     >
       {error && (

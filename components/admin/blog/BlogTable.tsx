@@ -226,6 +226,7 @@ export default function BlogTable({
               ref={el => {
                 rowRefs.current[idx] = el
               }}
+              data-testid="blog-table-row"
               tabIndex={0}
               onKeyDown={e => {
                 if (e.key === "ArrowDown") {

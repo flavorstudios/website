@@ -18,6 +18,16 @@ Playwright runs with `NEXT_PUBLIC_E2E=1`, `ADMIN_AUTH_DISABLED=1`, and `ADMIN_BY
 * The E2E harness writes a storage state in `e2e/.auth/admin.json` and primes the `admin-session=playwright` cookie using the Playwright `baseURL` hostname. This prevents domain mismatches between `localhost` and `127.0.0.1` during CI runs.
 * When running locally without Firebase Admin, export `ADMIN_BYPASS=true` (or `E2E=1`) and start Playwright with the dashboard-focused commands below. The UI will show non-fatal banners instead of throwing when Firestore is missing.
 
+### Default CI/Test flags
+
+`pnpm e2e` automatically injects the server flags that keep admin routes reachable in Playwright:
+
+* `ADMIN_BYPASS=true` and `ADMIN_AUTH_DISABLED=1` short-circuit all auth checks so `/admin/dashboard` never redirects to `/admin/login` during automated runs.
+* `E2E=1` and `NEXT_PUBLIC_E2E=1` enable the motion-safe UI, mock email verification, and deterministic fixtures across client components.
+* The command also seeds non-secret Firebase client config (`NEXT_PUBLIC_FIREBASE_*`) with placeholder strings so `lib/firebase` can initialise without throwing contrast banners about missing environment variables.
+
+Override any of these by exporting your own values before running Playwright if you need to exercise the real Firebase stack locally.
+
 Common Playwright commands while iterating on the admin dashboard:
 
 ```bash

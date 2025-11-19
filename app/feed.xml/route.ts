@@ -1,6 +1,5 @@
-import { redirect } from "next/navigation"
+import { permanentRedirect } from "next/navigation";
 
 export async function GET() {
-  // Redirect to the main RSS feed
-  redirect("/rss.xml")
+  permanentRedirect("/rss.xml");
 }

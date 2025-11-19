@@ -3,6 +3,7 @@ export { getVideos, getVideoBySlug } from "./videos";
 export { getCategories } from "./categories";
 export { getCommentsForPost, addComment } from "./comments";
 export { submitContactMessage } from "./contact";
+export { submitCareerApplication, listCareerApplications } from "./career";
 export type {
   GetPostsFilters,
   PublicPostSummary,
@@ -12,4 +13,5 @@ export type {
   CreateCommentInput,
   CommentRecord,
   ContactSubmission,
+  CareerSubmission,
 } from "./types";

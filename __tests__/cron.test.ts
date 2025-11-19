@@ -23,11 +23,6 @@ setEnv('BACKUP_DIR', tmpBackupDir);
 setEnv('GOOGLE_APPLICATION_CREDENTIALS', join(tmpBackupDir, 'creds.json'));
 writeFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS!, '{}');
 
-jest.mock("next/cache", () => ({
-  revalidatePath: () => {},
-  revalidateTag: () => {},
-}));
-
 describe("cron endpoints", () => {
   let revalidate: any;
   let buildSitemap: any;
@@ -86,15 +81,28 @@ describe("cron endpoints", () => {
   });
 
   it("builds rss when authorized", async () => {
+    const fetchSpy = jest
+      .spyOn(global, "fetch" as any)
+      .mockImplementation(() => Promise.resolve(new Response(JSON.stringify([]), { status: 200 })));
     const res = await buildRss(authReq());
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data).toEqual({
       ok: true,
       job: "build-rss",
-      artifacts: ["/rss.xml"],
+      artifacts: expect.arrayContaining([
+        expect.objectContaining({
+          path: "/rss.xml",
+          variant: "all",
+          items: expect.any(Number),
+          bytes: expect.any(Number),
+          lastModified: expect.any(String),
+        }),
+      ]),
       timestamp: expect.any(String),
     });
+    expect(data.artifacts).toHaveLength(3);
+    fetchSpy.mockRestore();
   });
 
   it("rolls up analytics when authorized", async () => {

@@ -6,6 +6,7 @@ export const viewport = {
 
 export const runtime = 'nodejs'
 
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 
@@ -51,9 +52,19 @@ const baseMetadata = getMetadata({
   },
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   ...baseMetadata,
   metadataBase: new URL(SITE_URL),
+  alternates: {
+    canonical: SITE_URL,
+    types: {
+      "application/rss+xml": [
+        { url: "/rss.xml", title: `${SITE_NAME} RSS Feed` },
+        { url: "/rss/blog.xml", title: `${SITE_NAME} Blog Feed` },
+        { url: "/rss/videos.xml", title: `${SITE_NAME} Video Feed` },
+      ],
+    },
+  },
   manifest: "/manifest.webmanifest",
   icons: {
     icon: "/favicon.ico",

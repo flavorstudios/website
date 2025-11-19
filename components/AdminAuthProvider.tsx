@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { clientEnv } from "@/env.client"
 import { isE2EEnabled } from "@/lib/e2e-utils"
 import { isTestMode } from "@/config/flags"
+import { syncAdminSession } from "@/lib/admin-session-sync"
 
 const TEST_EMAIL_VERIFIED_STORAGE_KEY = "admin-test-email-verified"
 const TEST_EMAIL_VERIFIED_EVENT_NAME = "admin-test-email-verified-change"
@@ -26,6 +27,8 @@ type AdminAccessState =
   | "authenticated_unverified"
   | "authenticated_verified"
 
+type ServerVerificationState = "unknown" | "unverified" | "verified"
+
 // ---- Define Context Shape ----
 interface AdminAuthContextType {
   user: User | null
@@ -37,6 +40,9 @@ interface AdminAuthContextType {
   refreshCurrentUser: () => Promise<User | null>
   accessState: AdminAccessState
   requiresVerification: boolean
+  serverVerification: ServerVerificationState
+  sessionSyncing: boolean
+  syncServerSession: () => Promise<boolean>
 }
 
 // ---- Create Context ----
@@ -55,6 +61,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [authInitFailed, setAuthInitFailed] = useState(() =>
     Boolean(firebaseInitError)
   )
+  const [serverVerification, setServerVerification] =
+    useState<ServerVerificationState>("unknown")
+  const [sessionSyncing, setSessionSyncing] = useState(false)
   const [testModeOverride, setTestModeOverride] = useState<boolean | null>(() => {
     if (typeof window === "undefined") {
       return null
@@ -367,6 +376,38 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [commitUser])
 
+  const syncServerSession = useCallback(async () => {
+    if (!requiresVerification || shouldUseLocalVerification) {
+      setServerVerification("verified")
+      return true
+    }
+
+    if (!user || sessionSyncing) {
+      return false
+    }
+
+    setSessionSyncing(true)
+    try {
+      const synced = await syncAdminSession(user)
+      if (synced) {
+        setServerVerification("verified")
+      }
+      return synced
+    } catch (error) {
+      if (clientEnv.NODE_ENV !== "production") {
+        console.error("[AdminAuthProvider] Session sync failed", error)
+      }
+      return false
+    } finally {
+      setSessionSyncing(false)
+    }
+  }, [
+    requiresVerification,
+    sessionSyncing,
+    shouldUseLocalVerification,
+    user,
+  ])
+
   // --- Codex Update: Also call /api/admin/logout after Firebase signOut
   const signOutAdmin = async () => {
     setLoading(true)
@@ -376,6 +417,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       await signOut(auth)
       commitUser(null)
       persistTestEmailVerified(null)
+      setServerVerification("unknown")
       // Call backend to clear the admin-session cookie server-side
       await fetch("/api/admin/logout", { method: "POST" })
     } catch (err: unknown) {
@@ -418,7 +460,10 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         nextPath = "/admin/verify-email"
       }
     } else if (accessState === "authenticated_verified") {
-      if (isVerifyRoute) {
+      if (
+        isVerifyRoute &&
+        (!requiresVerification || serverVerification === "verified")
+      ) {
         nextPath = "/admin/dashboard"
       }
     }
@@ -426,11 +471,86 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     if (nextPath && nextPath !== pathname) {
       router.replace(nextPath)
     }
-  }, [accessState, pathname, router])
+  }, [
+    accessState,
+    pathname,
+    requiresVerification,
+    router,
+    serverVerification,
+  ])
 
   const shouldBlockChildren =
     isGuardedAdminRoute &&
     (accessState === "loading" || accessState === "authenticated_unverified")
+
+  useEffect(() => {
+    if (!requiresVerification || shouldUseLocalVerification) {
+      setServerVerification("verified")
+      return
+    }
+
+    if (!user) {
+      setServerVerification("unknown")
+      return
+    }
+
+    let cancelled = false
+
+    const fetchServerState = async () => {
+      try {
+        const response = await fetch("/api/admin/verification-status", {
+          credentials: "include",
+          cache: "no-store",
+        })
+        if (!response.ok) {
+          if (!cancelled) {
+            setServerVerification("unknown")
+          }
+          return
+        }
+        const data = (await response.json()) as {
+          serverStateKnown: boolean
+          serverVerified: boolean
+        }
+        if (cancelled) {
+          return
+        }
+        if (data.serverStateKnown) {
+          setServerVerification(data.serverVerified ? "verified" : "unverified")
+        } else {
+          setServerVerification("unknown")
+        }
+      } catch {
+        if (!cancelled) {
+          setServerVerification("unknown")
+        }
+      }
+    }
+
+    fetchServerState()
+    return () => {
+      cancelled = true
+    }
+  }, [requiresVerification, shouldUseLocalVerification, user, userVersion])
+
+  useEffect(() => {
+    if (
+      !requiresVerification ||
+      shouldUseLocalVerification ||
+      accessState !== "authenticated_verified" ||
+      serverVerification === "verified"
+    ) {
+      return
+    }
+
+    void syncServerSession()
+  }, [
+    accessState,
+    requiresVerification,
+    serverVerification,
+    shouldUseLocalVerification,
+    syncServerSession,
+  ])
 
   return (
     <AdminAuthContext.Provider
@@ -444,6 +564,9 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         refreshCurrentUser,
         accessState,
         requiresVerification,
+        serverVerification,
+        sessionSyncing,
+        syncServerSession,
       }}
     >
       {error && (

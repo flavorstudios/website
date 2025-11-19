@@ -22,6 +22,7 @@ type CliOptions = {
 
 function parseArgs(argv: string[]): CliOptions {
   let backendBase = DEFAULT_BACKEND_BASE;
+  const positional: string[] = [];
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === "--backend-base") {
@@ -29,11 +30,15 @@ function parseArgs(argv: string[]): CliOptions {
       i += 1;
       continue;
     }
-  }
-  if (!arg.startsWith("--") && backendBase === DEFAULT_BACKEND_BASE) {
-      backendBase = arg;
+  if (arg.startsWith("--")) {
+      continue;
     }
-    return { backendBase };
+    positional.push(arg);
+  }
+  if (positional.length > 0) {
+    backendBase = positional[positional.length - 1];
+  }
+  return { backendBase };
 }
 
 const { backendBase } = parseArgs(process.argv.slice(2));

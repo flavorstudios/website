@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { UserPlus, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { buildExternalApiUrl } from "@/lib/api/external";
 
 export default function TalentForm() {
   const [formData, setFormData] = useState({
@@ -47,9 +48,10 @@ export default function TalentForm() {
     setSubmitStatus("idle");
 
     try {
-      const res = await fetch("/api/career", {
+      const res = await fetch(buildExternalApiUrl(`/career`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        cache: "no-store",
         body: JSON.stringify(formData),
       });
 

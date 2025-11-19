@@ -5,6 +5,15 @@ import React from 'react';
 import { webcrypto } from 'crypto';
 import { TextDecoder, TextEncoder } from 'util';
 
+jest.mock('next/cache', () => {
+  const passthrough = <T extends (...args: any[]) => any>(fn: T) => fn;
+  return {
+    revalidatePath: jest.fn(),
+    revalidateTag: jest.fn(),
+    unstable_cache: (fn: (...args: any[]) => Promise<any> | any) => passthrough(fn),
+  };
+});
+
 // Mock next/navigation for App Router so components using useRouter() render in tests
 jest.mock('next/navigation', () => {
   const params = new URLSearchParams();

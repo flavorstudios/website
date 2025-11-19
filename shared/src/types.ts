@@ -133,6 +133,17 @@ export interface ContactSubmission {
   createdAt: string;
 }
 
+export interface CareerSubmission {
+  id: string;
+  firstName: string;
+  lastName?: string;
+  email: string;
+  skills?: string;
+  portfolio?: string;
+  message?: string;
+  createdAt: string;
+}
+
 export interface GetPostsFilters {
   author?: string | null;
   startDate?: Date | string | null;

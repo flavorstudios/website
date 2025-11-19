@@ -9,6 +9,7 @@ import {
   getVideoBySlug,
   getVideos,
   submitContactMessage,
+  submitCareerApplication,
 } from "@website/shared";
 
 const PORT = Number(process.env.PORT || 4000);
@@ -134,6 +135,25 @@ app.post("/contact", async (req, res) => {
   } catch (error) {
     console.error("Failed to submit contact message", error);
     res.status(400).json({ error: (error as Error).message || "Failed to submit contact message" });
+  }
+});
+
+app.post("/career", async (req, res) => {
+  try {
+    const submission = await submitCareerApplication({
+      firstName: req.body?.firstName,
+      lastName: req.body?.lastName,
+      email: req.body?.email,
+      skills: req.body?.skills,
+      portfolio: req.body?.portfolio,
+      message: req.body?.message,
+    });
+    res.status(202).json({ status: "queued", submission });
+  } catch (error) {
+    console.error("Failed to submit career application", error);
+    res.status(400).json({
+      error: (error as Error).message || "Failed to submit career application",
+    });
   }
 });
 

@@ -6,5 +6,5 @@ export const revalidate = 0;
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return createRssResponse("all", `${SITE_NAME} feed fallback`);
+  return createRssResponse("videos", `${SITE_NAME} video feed fallback`);
 }

@@ -13,6 +13,22 @@ import { logError } from "@/lib/log";
 const PERSPECTIVE_API_KEY = serverEnv.PERSPECTIVE_API_KEY;
 const THRESHOLD = 0.75;
 
+const externalBackendBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+
+function respondWithExternalRedirect(context: RequestContext) {
+  if (!externalBackendBase) {
+    return null;
+  }
+  return jsonResponse(
+    context,
+    {
+      error: "This route moved to the standalone backend.",
+      next: `${externalBackendBase}/comments`,
+    },
+    { status: 410 },
+  );
+}
+
 type ModerationScores = {
   toxicity: number;
   insult: number;
@@ -81,6 +97,11 @@ export function OPTIONS(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const context = createRequestContext(request);
+
+  const redirect = respondWithExternalRedirect(context);
+  if (redirect) {
+    return redirect;
+  }
 
   try {
     const {

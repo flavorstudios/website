@@ -1,6 +1,12 @@
 import React, { useEffect } from 'react'
 import { act, render } from '@testing-library/react'
 
+const mockSyncAdminSession = jest.fn()
+
+jest.mock('@/lib/admin-session-sync', () => ({
+  syncAdminSession: (...args: unknown[]) => mockSyncAdminSession(...args),
+}))
+
 describe('AdminAuthProvider access state', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -8,6 +14,11 @@ describe('AdminAuthProvider access state', () => {
     process.env.NEXT_PUBLIC_TEST_MODE = '0'
     process.env.NEXT_PUBLIC_E2E = 'false'
     process.env.E2E = 'false'
+    mockSyncAdminSession.mockResolvedValue(true)
+    ;(global as any).fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ serverStateKnown: true, serverVerified: false }),
+    })
   })
 
   it('promotes access state when the same user reference becomes verified', async () => {

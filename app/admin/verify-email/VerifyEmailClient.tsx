@@ -1,11 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState, useId } from "react";
-import type { User } from "firebase/auth";
 import { Loader2, MailCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { clientEnv } from "@/env.client";
 import { useAdminAuth } from "@/components/AdminAuthProvider";
 import { isTestMode } from "@/config/flags";
 import { PageHeader } from "@/components/admin/page-header";
@@ -19,56 +17,18 @@ export default function VerifyEmailClient() {
   const [status, setStatus] = useState<StatusMessage | null>(null);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const [sessionSynced, setSessionSynced] = useState(false);
-  const [sessionSyncing, setSessionSyncing] = useState(false);
   const {
     testEmailVerified,
     setTestEmailVerified,
     refreshCurrentUser,
     accessState,
+    requiresVerification,
+    syncServerSession,
+    sessionSyncing,
+    serverVerification,
   } = useAdminAuth();
   const headingId = useId();
-
-  const requireVerification =
-    clientEnv.NEXT_PUBLIC_REQUIRE_ADMIN_EMAIL_VERIFICATION === "true";
   const testMode = isTestMode();
-
-  const syncServerSession = useCallback(
-    async (user: User | null) => {
-      if (testMode) {
-        return true;
-      }
-      if (!user) {
-        return false;
-      }
-      if (sessionSynced || sessionSyncing) {
-        return sessionSynced;
-      }
-      setSessionSyncing(true);
-      try {
-        const idToken = await user.getIdToken(true);
-        const response = await fetch("/api/admin/email-login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ idToken }),
-        });
-        if (!response.ok) {
-          return false;
-        }
-        setSessionSynced(true);
-        return true;
-      } catch (error) {
-        if (process.env.NODE_ENV !== "production") {
-          console.error("verify-email: session sync failed", error);
-        }
-        return false;
-      } finally {
-        setSessionSyncing(false);
-      }
-    },
-    [sessionSynced, sessionSyncing, testMode]
-  );
 
   const evaluateVerification = useCallback(async () => {
     if (testMode) {
@@ -102,8 +62,17 @@ export default function VerifyEmailClient() {
         });
         return;
       }
-      if (user.emailVerified || !requireVerification) {
-        const synced = await syncServerSession(user);
+      if (user.emailVerified || !requiresVerification) {
+        if (!requiresVerification) {
+          setStatus({
+            tone: "success",
+            message: "Email verified! Redirecting to the dashboard…",
+          });
+          return;
+        }
+
+        const synced =
+          serverVerification === "verified" || (await syncServerSession());
         setStatus({
           tone: synced ? "success" : "error",
           message: synced
@@ -128,7 +97,8 @@ export default function VerifyEmailClient() {
     }
   }, [
     refreshCurrentUser,
-    requireVerification,
+    requiresVerification,
+    serverVerification,
     syncServerSession,
     testEmailVerified,
     testMode,
@@ -158,18 +128,24 @@ export default function VerifyEmailClient() {
   }, [runStatusCheck]);
 
   useEffect(() => {
-    if (accessState === "authenticated_verified") {
-      setStatus({
-        tone: "success",
-        message: "Email verified! Redirecting to the dashboard…",
-      });
-    } else if (accessState === "unauthenticated") {
+    if (accessState === "unauthenticated") {
       setStatus({
         tone: "error",
         message: "You need to sign in again. Redirecting to the login page…",
       });
+      return;
     }
-  }, [accessState]);
+
+    if (
+      accessState === "authenticated_verified" &&
+      (!requiresVerification || serverVerification === "verified")
+    ) {
+      setStatus({
+        tone: "success",
+        message: "Email verified! Redirecting to the dashboard…",
+      });
+    }
+  }, [accessState, requiresVerification, serverVerification]);
 
   const handleResend = async () => {
     if (testMode) {
@@ -191,7 +167,8 @@ export default function VerifyEmailClient() {
         return;
       }
       if (refreshedUser.emailVerified) {
-        const synced = await syncServerSession(refreshedUser);
+        const synced =
+          serverVerification === "verified" || (await syncServerSession());
         setStatus({
           tone: synced ? "success" : "error",
           message: synced

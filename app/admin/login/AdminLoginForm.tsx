@@ -149,9 +149,16 @@ export default function AdminLoginForm() {
   // --- Show Firebase env error, if present ---
   if (firebaseInitError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f8fd]">
-        <Alert variant="destructive" className="max-w-md mx-auto">
-          <AlertDescription>{firebaseErrorMessage}</AlertDescription>
+      <div className="min-h-screen flex items-center justify-center bg-[#f5f8fd] p-4">
+        <Alert
+          variant="destructive"
+          className="mx-auto max-w-md border-red-300 bg-red-50/95 text-red-900 shadow-sm"
+          role="status"
+          aria-live="polite"
+        >
+          <AlertDescription className="text-sm font-medium text-red-900">
+            {firebaseErrorMessage}
+          </AlertDescription>
         </Alert>
       </div>
     )

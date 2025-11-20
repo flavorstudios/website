@@ -1,3 +1,4 @@
+import { load } from "cheerio";
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { type NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
@@ -27,6 +28,23 @@ function parseOptionalIsoDate(
     throw new Error(`Invalid ${field} timestamp`);
   }
   return date.toISOString();
+}
+
+const MAX_CONTENT_LENGTH = 50_000;
+
+function toPlainText(html: unknown) {
+  if (typeof html !== "string") {
+    return "";
+  }
+
+  const limitedHtml = html.length > MAX_CONTENT_LENGTH
+    ? html.slice(0, MAX_CONTENT_LENGTH)
+    : html;
+
+  const $ = load(limitedHtml, { decodeEntities: true });
+  const body = $("body");
+  const text = body.length ? body.text() : $.text();
+  return text.trim();
 }
 
 // GET: Fetch all blogs for admin dashboard (with filtering, sorting, pagination)
@@ -81,6 +99,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (typeof blogData.title !== "string" || typeof blogData.content !== "string") {
+      return NextResponse.json(
+        { error: "Title and content must be strings" },
+        { status: 400 },
+      );
+    }
+
+    if (blogData.content.length > MAX_CONTENT_LENGTH) {
+      return NextResponse.json(
+        { error: `Content exceeds maximum length of ${MAX_CONTENT_LENGTH} characters` },
+        { status: 413 },
+      );
+    }
+
     // Generate a safe slug
     const slug =
       blogData.slug ||
@@ -90,10 +122,7 @@ export async function POST(request: NextRequest) {
         .replace(/(^-|-$)/g, "");
 
     // Always strip HTML for the excerpt!
-    const plain =
-      typeof blogData.content === "string"
-        ? blogData.content.replace(/<[^>]*>/g, "")
-        : "";
+    const plain = toPlainText(blogData.content);
     const generatedExcerpt =
       plain.length > 160 ? plain.substring(0, 160) + "..." : plain;
     const excerpt = blogData.excerpt || generatedExcerpt;

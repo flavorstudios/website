@@ -387,9 +387,13 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
     setSessionSyncing(true)
     try {
-      const synced = await syncAdminSession(user)
+      const { synced, emailVerified } = await syncAdminSession(user)
       if (synced) {
-        setServerVerification("verified")
+        if (emailVerified === false) {
+          setServerVerification("unverified")
+        } else {
+          setServerVerification("verified")
+        }
       }
       return synced
     } catch (error) {

@@ -2,6 +2,7 @@ import { type NextRequest } from "next/server";
 
 import { serverEnv } from "@/env/server";
 import { adminCookieOptions, createSessionCookieFromIdToken } from "@/lib/admin-auth";
+import { adminAuth } from "@/lib/firebase-admin";
 import { logError } from "@/lib/log";
 import {
   createRequestContext,
@@ -32,9 +33,15 @@ export async function POST(req: NextRequest) {
       Number.isNaN(expiryDaysEnv) || expiryDaysEnv <= 0 ? 1 : expiryDaysEnv;
     const expiresIn = 60 * 60 * 24 * expiryDays * 1000;
 
-    const sessionCookie = await createSessionCookieFromIdToken(idToken, expiresIn);
+    const [sessionCookie, decodedToken] = await Promise.all([
+      createSessionCookieFromIdToken(idToken, expiresIn),
+      adminAuth?.verifyIdToken(idToken).catch(() => null),
+    ]);
 
-    const response = jsonResponse(context, { ok: true });
+    const emailVerified =
+      decodedToken?.email_verified ?? decodedToken?.emailVerified ?? false;
+
+    const response = jsonResponse(context, { ok: true, emailVerified });
     response.cookies.set(
       "admin-session",
       sessionCookie,
@@ -42,7 +49,7 @@ export async function POST(req: NextRequest) {
     );
     response.cookies.set(
       ADMIN_VERIFIED_COOKIE,
-      "true",
+      emailVerified ? "true" : "false",
       adminCookieOptions({ maxAge: Math.floor(expiresIn / 1000) }),
     );
 

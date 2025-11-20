@@ -3,7 +3,6 @@
 import { getMetadata, getCanonicalUrl, getSchema } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { StructuredData } from "@/components/StructuredData";
-import { canonicalBaseUrl } from "@/lib/base-url";
 import { buildExternalApiUrl } from "@/lib/api/external";
 
 import { Card, CardContent } from "@/components/ui/card";

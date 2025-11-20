@@ -17,7 +17,11 @@ export function htmlToPlainText(html: unknown): string {
     return "";
   }
 
-  const $ = load(`<div>${sanitized}</div>`, { decodeEntities: true });
+  // Cheerio@1 parses HTML with parse5, which decodes entities by default. The
+  // legacy `decodeEntities` option was removed from the public options surface,
+  // so we rely on the default behavior and keep the API signature compatible
+  // with newer Cheerio versions.
+  const $ = load(`<div>${sanitized}</div>`);
   const text = $("div").text();
 
   return normalizeWhitespace(text);

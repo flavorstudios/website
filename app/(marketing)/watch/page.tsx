@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Play, Eye, Calendar, Youtube, Clock, Video, Star, ArrowRight } from "lucide-react";
 import { getDynamicCategories } from "@/lib/dynamic-categories";
-import { canonicalBaseUrl } from "@/lib/base-url";
 import { buildExternalApiUrl } from "@/lib/api/external";
 import { CategoryTabs } from "@/components/ui/category-tabs";
 import { formatDate } from "@/lib/date";
@@ -77,7 +76,6 @@ type VideoType = {
 
 async function getWatchData() {
   try {
-    const baseUrl = canonicalBaseUrl();
     const [videosRes, { videoCategories }] = await Promise.all([
       fetch(buildExternalApiUrl(`/videos`), {
         cache: "no-store",

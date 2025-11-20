@@ -192,7 +192,7 @@ export function getStaticPages(): SitemapUrl[] {
 }
 
 // ---- DYNAMIC CONTENT: Blogs and Videos (extendable) ----
-export async function fetchDynamicContent(baseUrl: string): Promise<SitemapUrl[]> {
+export async function fetchDynamicContent(): Promise<SitemapUrl[]> {
   const dynamicPages: SitemapUrl[] = [];
 
   // --- Fetch Blogs ---

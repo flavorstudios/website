@@ -40,17 +40,19 @@ export function logError(
   meta?: Record<string, unknown>,
 ) {
   const time = new Date().toISOString();
-  const metaString = meta ? ` ${safeStringify(meta)}` : "";
-  const base = `[${time}] [${context}]${metaString}`;
+  const payload: Record<string, unknown> = { timestamp: time, context };
+
+  if (meta && Object.keys(meta).length > 0) {
+    payload.meta = meta;
+  }
 
   if (typeof error === "undefined") {
-    console.error(base);
+    console.error(payload);
     return;
   }
 
   const errorPart = formatError(error);
-  const message = errorPart ? `${base} ${errorPart}` : base;
-  console.error(message);
+  console.error({ ...payload, error: errorPart });
 }
 
 export function logBreadcrumb(
@@ -58,6 +60,11 @@ export function logBreadcrumb(
   meta?: Record<string, unknown>,
 ) {
   const time = new Date().toISOString();
-  const metaString = meta ? ` ${safeStringify(meta)}` : "";
-  console.info(`[${time}] [${context}]${metaString}`);
+  const payload: Record<string, unknown> = { timestamp: time, context };
+
+  if (meta && Object.keys(meta).length > 0) {
+    payload.meta = meta;
+  }
+
+  console.info(payload);
 }

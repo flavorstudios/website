@@ -32,8 +32,6 @@ describe("fetchDynamicContent", () => {
   })
 
   it("requests videos from the public API endpoint", async () => {
-    const baseUrl = "https://flavorstudios.in"
-
     const blogResponse = {
       ok: true,
       status: 200,
@@ -83,7 +81,7 @@ describe("fetchDynamicContent", () => {
         } as unknown as Response)
       })
 
-    const result = await fetchDynamicContent(baseUrl)
+    const result = await fetchDynamicContent()
 
     expect(fetchSpy).toHaveBeenCalledWith(
       expect.stringContaining(`/posts`),
@@ -102,8 +100,6 @@ describe("fetchDynamicContent", () => {
   })
   
   it("supports APIs that return nested post/video collections", async () => {
-    const baseUrl = "https://flavorstudios.in"
-
     const blogResponse = {
       ok: true,
       status: 200,
@@ -146,7 +142,7 @@ describe("fetchDynamicContent", () => {
         } as unknown as Response)
       })
 
-    const result = await fetchDynamicContent(baseUrl)
+    const result = await fetchDynamicContent()
 
     expect(result).toEqual(
       expect.arrayContaining([

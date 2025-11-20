@@ -35,7 +35,6 @@ describe("lib/blog", () => {
         json: async () => ({ id: "post", slug: "post" }),
       } as unknown as Response)
 
-    const { SITE_URL } = await import("@/lib/constants")
     const { getBlogPost } = await import("@/lib/blog")
 
     await getBlogPost("post")

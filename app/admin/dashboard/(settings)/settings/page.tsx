@@ -13,6 +13,7 @@ import type { SettingsErrorCode } from "./errors";
 import { getSessionEmailFromCookies, isAdmin } from "@/lib/admin-auth";
 import { SettingsClient, SettingsLoadErrorBanner } from "./SettingsClient";
 import AdminDashboardPageClient from "@/app/admin/dashboard/AdminDashboardPageClient";
+import { shouldUseAdminSettingsFixtures } from "@/lib/admin/settings-fixture-guard";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -159,18 +160,23 @@ export default async function SettingsPage(props: SettingsPageProps) {
 
   let emailVerified = false;
   let providerLocked = false;
-  try {
-    const uid = await getCurrentAdminUid();
-    const auth = getAdminAuth();
-    const record = await auth.getUser(uid);
-    emailVerified = record.emailVerified ?? false;
-    providerLocked = (record.providerData ?? []).some(
-      (provider) => provider.providerId !== "password",
-    );
-  } catch (error) {
-    logError("admin-settings:page:auth", error);
-    emailVerified = false;
+  if (fixturesMode) {
+    emailVerified = true;
     providerLocked = false;
+  } else {
+    try {
+      const uid = await getCurrentAdminUid();
+      const auth = getAdminAuth();
+      const record = await auth.getUser(uid);
+      emailVerified = record.emailVerified ?? false;
+      providerLocked = (record.providerData ?? []).some(
+        (provider) => provider.providerId !== "password",
+      );
+    } catch (error) {
+      logError("admin-settings:page:auth", error);
+      emailVerified = false;
+      providerLocked = false;
+    }
   }
 
   return (

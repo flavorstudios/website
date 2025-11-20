@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { isE2EEnabled } from "@/lib/e2e-utils";
 
 function setReadyAttribute(el: Element | null, ready: "0" | "1") {
   if (!el) return;
@@ -9,6 +10,7 @@ function setReadyAttribute(el: Element | null, ready: "0" | "1") {
 
 export function E2EReadyFlag() {
   const markerRef = useRef<HTMLSpanElement | null>(null);
+  const initialReady = isE2EEnabled();
 
   useEffect(() => {
     const marker = markerRef.current;
@@ -41,6 +43,12 @@ export function E2EReadyFlag() {
   }, []);
 
   return (
-    <span ref={markerRef} data-testid="ui-ready" data-ready="0" hidden aria-hidden="true" />
+    <span
+      ref={markerRef}
+      data-testid="ui-ready"
+      data-ready={initialReady ? "1" : "0"}
+      hidden
+      aria-hidden="true"
+    />
   );
 }

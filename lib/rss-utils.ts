@@ -1,4 +1,5 @@
 import { DOCS_URL } from "@/lib/constants";
+import { htmlToPlainText } from "@/lib/sanitize/text";
 
 export interface RssImage {
   url: string;
@@ -45,7 +46,7 @@ export interface RssItem {
 
 export function stripHtml(html?: string | null): string {
   if (!html) return "";
-  return html.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+  return htmlToPlainText(html);
 }
 
 export function truncateDescription(text?: string | null, maxLength = 280): string {

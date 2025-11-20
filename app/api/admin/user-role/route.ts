@@ -97,9 +97,9 @@ export async function POST(req: NextRequest) {
 
     // Success audit log
     if (serverEnv.DEBUG_ADMIN === "true") {
-      console.log(`[user-role:post] Set role for ${uid}: ${role}`);
+      console.log("[user-role:post] Set role", { uid, role });
     }
-    console.log(`[user-role] Admin ${adminUid} set role for ${uid}: ${role}`);
+    console.log("[user-role] Admin updated role", { adminUid, uid, role });
     return NextResponse.json({ ok: true });
   } catch (err) {
     logError("user-role:post", err);

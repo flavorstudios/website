@@ -170,7 +170,7 @@ async function fetchPosts(): Promise<PublicPostSummary[]> {
       next: { revalidate: FEED_REVALIDATE_SECONDS, tags: [FEED_CACHE_TAG, "posts"] },
     });
     if (!response.ok) {
-      console.error(`[RSS] Failed to fetch posts: ${response.status}`);
+      console.error("[RSS] Failed to fetch posts", response.status);
       return [];
     }
     const data = (await response.json()) as unknown;
@@ -188,7 +188,7 @@ async function fetchVideos(): Promise<PublicVideo[]> {
       next: { revalidate: FEED_REVALIDATE_SECONDS, tags: [FEED_CACHE_TAG, "videos"] },
     });
     if (!response.ok) {
-      console.error(`[RSS] Failed to fetch videos: ${response.status}`);
+      console.error("[RSS] Failed to fetch videos", response.status);
       return [];
     }
     const data = (await response.json()) as unknown;

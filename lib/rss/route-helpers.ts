@@ -16,7 +16,7 @@ export async function createRssResponse(variant: FeedVariant, fallbackDescriptio
     const snapshot = await getRssFeedSnapshot(variant);
     return respondWithXml(snapshot.xml, snapshot.lastModified, SUCCESS_CACHE_CONTROL, snapshot.itemCount);
   } catch (error) {
-    console.error(`[RSS] Failed to render ${variant} feed`, error);
+    console.error("[RSS] Failed to render feed", variant, error);
     const fallbackXml = buildMinimalFeed(getFeedSelfPath(variant), fallbackDescription);
     const lastModified = new Date().toUTCString();
     return respondWithXml(fallbackXml, lastModified, FALLBACK_CACHE_CONTROL, 0);

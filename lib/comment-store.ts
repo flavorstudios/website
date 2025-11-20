@@ -74,7 +74,7 @@ export const commentStore = {
         ...(doc.data() as FirestoreCommentDoc),
       })) as Comment[];
     } catch (error) {
-      console.error(`Failed to fetch comments for post ${postId}:`, error);
+      console.error("Failed to fetch comments for post %s:", String(postId), error);
       throw new Error("Failed to fetch comments for this post");
     }
   },
@@ -189,7 +189,11 @@ export const commentStore = {
       if (!doc.exists) return null;
       return { id: doc.id, ...(doc.data() as FirestoreCommentDoc) } as Comment;
     } catch (error) {
-      console.error(`Failed to update status for comment ${commentId}:`, error);
+      console.error(
+        "Failed to update status for comment %s:",
+        String(commentId),
+        error,
+      );
       throw new Error("Failed to update comment status");
     }
   },

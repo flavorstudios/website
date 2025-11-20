@@ -58,7 +58,11 @@ async function getVideo(slug: string): Promise<Video | null> {
       cache: "no-store",
     });
     if (!response.ok) {
-      console.error(`Failed to fetch videos: ${response.status} ${response.statusText}`);
+      console.error(
+        "Failed to fetch videos",
+        response.status,
+        response.statusText,
+      );
       return null;
     }
     const data = await response.json();

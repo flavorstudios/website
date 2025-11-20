@@ -59,7 +59,7 @@ export async function handleCron<T>(
       durationMs: duration,
       error: errorMessage,
     });
-    console.error(`${job} cron failed`, err);
+    console.error("Cron job failed", { job, error: err });
     return NextResponse.json(
       { error: `Failed to ${job}` },
       { status: 500 }

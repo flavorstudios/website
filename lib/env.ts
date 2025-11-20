@@ -47,7 +47,7 @@ if (!_env.success) {
     .map(([key, value]) => `${key}: ${value?.join(', ')}`)
     .join('\n');
   if (process.env.NODE_ENV === 'production') {
-    console.error('Invalid environment variables\n' + message);
+    console.error('Invalid environment variables', message);
     process.exit(1);
   }
   throw new Error('Invalid environment variables\n' + message);

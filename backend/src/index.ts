@@ -158,5 +158,5 @@ app.post("/career", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Backend listening on port ${PORT}`);
+  console.log("Backend listening on port", PORT);
 });

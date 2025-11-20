@@ -26,7 +26,7 @@ export async function getUserRole(uid: string, email?: string): Promise<UserRole
 
     if (!doc.exists) {
       if (serverEnv.NODE_ENV !== "production") {
-        console.warn(`[getUserRole] No role document found for UID: ${uid}`);
+        console.warn("[getUserRole] No role document found for UID:", uid);
       }
       if (email) {
         const normalized = email.trim().toLowerCase();
@@ -38,7 +38,8 @@ export async function getUserRole(uid: string, email?: string): Promise<UserRole
         ) {
           if (serverEnv.NODE_ENV !== "production") {
             console.warn(
-              `[getUserRole] Defaulting to admin based on allowed email ${email}`
+              "[getUserRole] Defaulting to admin based on allowed email",
+              email,
             );
           }
           return "admin";
@@ -57,9 +58,11 @@ export async function getUserRole(uid: string, email?: string): Promise<UserRole
     }
 
     if (serverEnv.NODE_ENV !== "production") {
-      console.warn(
-        `[getUserRole] Unrecognized role value "${data?.role}" (normalized: "${normalizedRole}") for UID: ${uid}`
-      );
+      console.warn("[getUserRole] Unrecognized role value", {
+        role: data?.role,
+        normalizedRole,
+        uid,
+      });
     }
     return "support";
   } catch (err) {
@@ -83,7 +86,7 @@ export async function setUserRole(uid: string, role: UserRole): Promise<void> {
       .doc(uid)
       .set({ role: role.toLowerCase() }, { merge: true });
     if (serverEnv.NODE_ENV !== "production") {
-      console.log(`[setUserRole] Set role "${role}" for UID: ${uid}`);
+      console.log("[setUserRole] Set role", { role, uid });
     }
   } catch (err) {
     console.error("[setUserRole] Failed to set user role:", err);

@@ -38,16 +38,20 @@ async function post(path: string, body?: unknown) {
       });
       if (!res.ok) {
         const text = await res.text();
-        console.error(`scheduler:post ${path}`, `HTTP ${res.status} ${text}`);
+        console.error(
+          "scheduler:post request failed",
+          path,
+          `HTTP ${res.status} ${text}`,
+        );
         if (attempt === maxAttempts) {
           throw new Error(`Request failed with status ${res.status}`);
         }
         } else {
-        console.log(path, res.status);
+        console.log("scheduler:post response", { path, status: res.status });
         return;
       }
     } catch (err) {
-      console.error(`scheduler:post ${path}`, err);
+      console.error("scheduler:post error", path, err);
       if (attempt === maxAttempts) {
         throw err;
       }

@@ -105,10 +105,10 @@ if (!nextPublicFirebaseStorageBucket) {
 }
 
 const firebaseServiceAccountJson = optionalEnv("FIREBASE_SERVICE_ACCOUNT_JSON");
-const firebaseServiceAccountKey = optionalEnv("FIREBASE_SERVICE_ACCOUNT_KEY");
 const firebaseServiceAccountJsonB64 = optionalEnv("FIREBASE_SERVICE_ACCOUNT_JSON_B64");
+const firebaseServiceAccountKey = optionalEnv("FIREBASE_SERVICE_ACCOUNT_KEY");
 
-let resolvedServiceAccountJson = firebaseServiceAccountJson || firebaseServiceAccountKey;
+let resolvedServiceAccountJson = firebaseServiceAccountJson;
 
 if (!resolvedServiceAccountJson && firebaseServiceAccountJsonB64) {
   try {
@@ -126,6 +126,10 @@ if (!resolvedServiceAccountJson && firebaseServiceAccountJsonB64) {
     }
     resolvedServiceAccountJson = undefined;
   }
+}
+
+if (!resolvedServiceAccountJson && firebaseServiceAccountKey) {
+  resolvedServiceAccountJson = firebaseServiceAccountKey;
 }
 
 if (!resolvedServiceAccountJson && !isRelaxed) {

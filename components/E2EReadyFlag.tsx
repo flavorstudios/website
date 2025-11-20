@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 function setReadyAttribute(el: Element | null, ready: "0" | "1") {
   if (!el) return;
@@ -8,13 +8,17 @@ function setReadyAttribute(el: Element | null, ready: "0" | "1") {
 }
 
 export function E2EReadyFlag() {
-  useEffect(() => {
-    const marker = document.querySelector("[data-testid=\"ui-ready\"]");
-    if (!marker) {
-      return;
-    }
+  const markerRef = useRef<HTMLSpanElement | null>(null);
 
-    const markReady = () => setReadyAttribute(marker, "1");
+  useEffect(() => {
+    const marker = markerRef.current;
+    if (!marker) return undefined;
+
+    let cancelled = false;
+
+    const markReady = () => {
+      if (!cancelled) setReadyAttribute(marker, "1");
+    };
 
     try {
       const fonts = (document as Document & {
@@ -23,20 +27,20 @@ export function E2EReadyFlag() {
 
       if (fonts?.ready) {
         fonts.ready.then(markReady).catch(markReady);
-        return () => {
-          setReadyAttribute(marker, "0");
-        };
+        } else {
+        requestAnimationFrame(markReady);
       }
     } catch {
-      // Ignore font readiness errors.
+      requestAnimationFrame(markReady);
     }
 
-    markReady();
-
     return () => {
+      cancelled = true;
       setReadyAttribute(marker, "0");
     };
   }, []);
 
-  return <span data-testid="ui-ready" data-ready="0" hidden aria-hidden="true" />;
+  return (
+    <span ref={markerRef} data-testid="ui-ready" data-ready="0" hidden aria-hidden="true" />
+  );
 }

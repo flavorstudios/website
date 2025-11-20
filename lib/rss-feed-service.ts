@@ -44,21 +44,27 @@ export interface FeedSnapshot {
   selfPath: string;
 }
 
-const fetchFeedSnapshot = unstable_cache(
-  async (variant: FeedVariant): Promise<FeedSnapshot> => {
-    const content = await fetchFeedContent(variant);
-    return composeFeedSnapshotFromData({ variant, ...content });
+const feedSnapshotCache: Record<FeedVariant, () => Promise<FeedSnapshot>> = FEED_VARIANTS.reduce(
+  (acc, variant) => {
+    acc[variant] = unstable_cache(
+      async (): Promise<FeedSnapshot> => {
+        const content = await fetchFeedContent(variant);
+        return composeFeedSnapshotFromData({ variant, ...content });
+      },
+      ["rss-feed", variant],
+      { tags: [FEED_CACHE_TAG], revalidate: FEED_REVALIDATE_SECONDS },
+    );
+    return acc;
   },
-  ["rss-feed"],
-  { tags: [FEED_CACHE_TAG], revalidate: FEED_REVALIDATE_SECONDS },
+  {} as Record<FeedVariant, () => Promise<FeedSnapshot>>,
 );
 
 export async function getRssFeedSnapshot(variant: FeedVariant = "all"): Promise<FeedSnapshot> {
-  return fetchFeedSnapshot(variant);
+  return feedSnapshotCache[variant]();
 }
 
 export async function warmFeedCache(variant: FeedVariant): Promise<FeedSnapshot> {
-  return fetchFeedSnapshot(variant);
+  return feedSnapshotCache[variant]();
 }
 
 export function getFeedVariants(): FeedVariant[] {

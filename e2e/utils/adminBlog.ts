@@ -20,6 +20,6 @@ export async function waitForAdminBlogTableToLoad(page: Page): Promise<Locator> 
   const rows = page.locator(
     '[data-testid="blog-table-row"], [data-testid="blog-card"]',
   );
-  await expect(rows).not.toHaveCount(0, { timeout: 10_000 });
+  await expect(rows.first()).toBeVisible({ timeout: 15_000 });
   return rows;
 }

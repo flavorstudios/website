@@ -116,6 +116,16 @@ export default function VerifyEmailClient() {
   }, [evaluateVerification]);
 
   useEffect(() => {
+    // Auto-run a verification check on mount so freshly verified users
+    // don't need to click "I have verified" to refresh their session.
+    if (testMode) {
+      void evaluateVerification();
+      return;
+    }
+    void runStatusCheck();
+  }, [evaluateVerification, runStatusCheck, testMode]);
+
+  useEffect(() => {
     if (!testMode || typeof window === "undefined") {
       return;
     }
@@ -124,10 +134,6 @@ export default function VerifyEmailClient() {
       window.localStorage.setItem("admin-test-email-verified", "false");
     }
   }, [testMode]);
-
-  useEffect(() => {
-    void runStatusCheck();
-  }, [runStatusCheck]);
 
   useEffect(() => {
     if (accessState === "unauthenticated") {

@@ -105,6 +105,7 @@ export default async function SettingsPage(props: SettingsPageProps) {
   const tabParam = resolvedSearchParams.tab;
   const tab = Array.isArray(tabParam) ? tabParam[0] : tabParam;
   const showDetail = process.env.NODE_ENV !== "production";
+  const fixturesEnabled = shouldUseAdminSettingsFixtures();
 
   let settings: Awaited<ReturnType<typeof loadSettings>> | null = null;
   let loadError: LoadErrorState | null = null;
@@ -160,7 +161,7 @@ export default async function SettingsPage(props: SettingsPageProps) {
 
   let emailVerified = false;
   let providerLocked = false;
-  if (fixturesMode) {
+  if (fixturesEnabled) {
     emailVerified = true;
     providerLocked = false;
   } else {

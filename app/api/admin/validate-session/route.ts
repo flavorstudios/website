@@ -23,7 +23,8 @@ export async function GET(req: NextRequest) {
       }
       logBreadcrumb("validate-session: unauthorized", {
           requestId: context.requestId,
-        });
+      });
+      return errorResponse(context, { error: "Unauthorized" }, 401);
     }
 
     return jsonResponse(context, { ok: true });

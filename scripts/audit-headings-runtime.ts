@@ -184,11 +184,11 @@ async function readSSRHtml(route: string) {
     if (existsSync(candidate)) {
       try {
         const html = await readFile(candidate, "utf8");
-        const match = html.match(/<h1[\s\S]*?<\/h1>/gi) || [];
-        return {
-          count: match.length,
-          headings: match.map((node) => node.replace(/<[^>]+>/g, "").trim()),
-        };
+        const $ = loadHtml(html);
+        const headings = $("h1")
+          .map((_, el) => $(el).text().trim())
+          .toArray();
+        return { count: headings.length, headings };
       } catch {
         // ignore
       }

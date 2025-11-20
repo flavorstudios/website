@@ -11,6 +11,7 @@ import {
   updateE2EBlogPost,
 } from "@/lib/e2e-fixtures";
 import { HttpError } from "@/lib/http";
+import { extractPlainTextFromHtml } from "@/lib/html-text";
 
 // lazy loader so CI/e2e doesn’t pay for Firestore/content-store on every cold hit
 type ContentStoreModule = typeof import("@/lib/content-store");
@@ -64,9 +65,7 @@ export async function POST(request: NextRequest) {
       excerpt:
         typeof payload?.excerpt === "string" && payload.excerpt.trim().length > 0
           ? payload.excerpt
-          : (payload?.content || "")
-              .replace(/<[^>]*>/g, "")
-              .slice(0, 160),
+          : extractPlainTextFromHtml(payload?.content || "").slice(0, 160),
       status,
       category: payload?.category || "Announcements",
       categories: Array.isArray(payload?.categories)

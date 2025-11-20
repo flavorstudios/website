@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         });
         results.push({ job, status: res.status });
       } catch (err) {
-        console.error(`Failed job ${job}`, err);
+        console.error("Failed maintenance job", { job, error: err });
         results.push({ job, status: 500 });
       }
     }

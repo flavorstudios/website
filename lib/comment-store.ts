@@ -213,7 +213,7 @@ export const commentStore = {
       if (!doc.exists) return null;
       return { id: doc.id, ...(doc.data() as FirestoreCommentDoc) } as Comment;
     } catch (error) {
-      console.error(`Failed to update flag for comment ${commentId}:`, error);
+      console.error("Failed to update flag for comment", { commentId, error });
       throw new Error("Failed to update comment flag");
     }
   },
@@ -231,7 +231,7 @@ export const commentStore = {
       await ref.delete();
       return true;
     } catch (error) {
-      console.error(`Failed to delete comment ${commentId}:`, error);
+      console.error("Failed to delete comment", { commentId, error });
       return false;
     }
   },

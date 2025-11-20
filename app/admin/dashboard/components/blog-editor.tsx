@@ -38,6 +38,7 @@ import type {
   BlogPost as StoreBlogPost,
   BlogRevision,
 } from "@/lib/content-store";
+import { extractPlainTextFromHtml } from "@/lib/html-text";
 import type { RichTextEditorProps } from "./rich-text-editor";
 import type { MediaPickerDialogProps } from "./media/MediaPickerDialog";
 import { clientEnv } from "@/env.client";
@@ -351,7 +352,7 @@ export function BlogEditor({ initialPost }: { initialPost?: Partial<BlogPost> })
 
   // Auto-generate excerpt + derived fields (idempotent)
   useEffect(() => {
-    const text = post.content.replace(/<[^>]*>/g, "");
+    const text = extractPlainTextFromHtml(post.content);
     const words = text.trim().split(/\s+/).filter((w) => w.length > 0);
     const wc = words.length;
     const rt = `${Math.max(1, Math.ceil(wc / 200))} min read`;

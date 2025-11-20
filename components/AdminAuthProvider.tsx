@@ -148,7 +148,6 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     shouldUseLocalVerification,
     testEmailVerified,
     user,
-    userVersion,
   ])
 
   const isGuardedAdminRoute = useMemo(() => {
@@ -355,7 +354,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }
     )
     return () => unsubscribe()
-  }, [authInitFailed, firebaseErrorMessage, testModeOverride])
+  }, [authInitFailed, commitUser, firebaseErrorMessage, testModeOverride])
 
   const refreshCurrentUser = useCallback(async () => {
     try {

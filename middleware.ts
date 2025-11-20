@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { serverEnv } from '@/env/server';
+import { isE2EEnabled } from '@/lib/e2e-utils';
 import {
   incrementAttempts,
   isRateLimited,
@@ -16,21 +17,17 @@ function getRequestIp(request: NextRequest): string {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname, hostname } = request.nextUrl;
-  const isE2E = process.env.E2E === 'true';
+  const { pathname } = request.nextUrl;
+  const isE2E = isE2EEnabled();
   const requiresEmailVerification =
     serverEnv.ADMIN_REQUIRE_EMAIL_VERIFICATION === 'true';
 
-  // E2E: Bypass auth for admin routes on localhost or with a special cookie.
+  // E2E: Bypass auth for admin routes. CI runs behind arbitrary hostnames,
+  // so avoid depending on localhost or a special cookie.
   if (isE2E && (pathname.startsWith('/admin') || pathname.startsWith('/api/admin'))) {
-    const isLocal = hostname === '127.0.0.1' || hostname === 'localhost';
-    const hasE2ECookie = request.cookies.has('e2e-admin');
-
-    if (isLocal || hasE2ECookie) {
-      const response = NextResponse.next();
-      response.headers.set('X-E2E-Authenticated', 'true');
-      return response;
-    }
+    const response = NextResponse.next();
+    response.headers.set('X-E2E-Authenticated', 'true');
+    return response;
   }
 
   // The rest of the original middleware...

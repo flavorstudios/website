@@ -1,4 +1,3 @@
-import { load } from "cheerio";
 import { requireAdmin, getSessionInfo } from "@/lib/admin-auth";
 import { type NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
@@ -12,6 +11,7 @@ import {
   parseAdminBlogQuery,
 } from "@/lib/admin/blog-fixtures";
 import { shouldUseAdminBlogFixtures } from "@/lib/admin/blog-fixture-guard";
+import { htmlToPlainText } from "@/lib/sanitize/text";
 
 function parseOptionalIsoDate(
   value: unknown,
@@ -31,20 +31,29 @@ function parseOptionalIsoDate(
 }
 
 const MAX_CONTENT_LENGTH = 50_000;
+const MAX_EXCERPT_LENGTH = 160;
 
-function toPlainText(html: unknown) {
-  if (typeof html !== "string") {
-    return "";
-  }
+function sanitizeExcerpt(value: unknown) {
+  if (typeof value !== "string") return "";
+  const plain = htmlToPlainText(value.slice(0, MAX_CONTENT_LENGTH));
+  if (!plain) return "";
+  return plain.length > MAX_EXCERPT_LENGTH
+    ? `${plain.slice(0, MAX_EXCERPT_LENGTH)}...`
+    : plain;
+}
 
-  const limitedHtml = html.length > MAX_CONTENT_LENGTH
-    ? html.slice(0, MAX_CONTENT_LENGTH)
-    : html;
+function sanitizeSlug(value: unknown, fallbackTitle: string) {
+  const source = typeof value === "string" && value.trim().length > 0
+    ? value
+    : fallbackTitle;
 
-  const $ = load(limitedHtml, { decodeEntities: true });
-  const body = $("body");
-  const text = body.length ? body.text() : $.text();
-  return text.trim();
+  const normalized = source
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 100);
+
+  return normalized || "post";
 }
 
 // GET: Fetch all blogs for admin dashboard (with filtering, sorting, pagination)
@@ -113,19 +122,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate a safe slug
-    const slug =
-      blogData.slug ||
-      blogData.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
+    const slug = sanitizeSlug(blogData.slug, blogData.title);
 
-    // Always strip HTML for the excerpt!
-    const plain = toPlainText(blogData.content);
-    const generatedExcerpt =
-      plain.length > 160 ? plain.substring(0, 160) + "..." : plain;
-    const excerpt = blogData.excerpt || generatedExcerpt;
+    const primaryCategory = typeof blogData.category === "string"
+      ? blogData.category.trim()
+      : "";
+
+    const categories = Array.isArray(blogData.categories)
+      ? blogData.categories
+          .map((category: unknown) => String(category ?? "").trim())
+          .filter(Boolean)
+      : [primaryCategory || "Episodes"];
+
+    const tags = Array.isArray(blogData.tags)
+      ? blogData.tags.map((tag: unknown) => String(tag ?? "").trim()).filter(Boolean)
+      : [];
+
+    // Always strip HTML for the excerpt using a safe parser
+    const generatedExcerpt = sanitizeExcerpt(blogData.content);
+    const excerpt = sanitizeExcerpt(blogData.excerpt) || generatedExcerpt;
 
     // Create the blog post
     let scheduledForIso: string | undefined;
@@ -165,11 +180,9 @@ export async function POST(request: NextRequest) {
       content: blogData.content,
       excerpt,
       status,
-      category: blogData.category || "Episodes",
-      categories: Array.isArray(blogData.categories)
-        ? blogData.categories
-        : [blogData.category || "Episodes"],
-      tags: blogData.tags || [],
+      category: primaryCategory || "Episodes",
+      categories,
+      tags,
       featuredImage: blogData.featuredImage || "",
       seoTitle: blogData.seoTitle || blogData.title,
       seoDescription: blogData.seoDescription || excerpt,

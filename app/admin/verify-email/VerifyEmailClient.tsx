@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, useId } from "react";
 import { Loader2, MailCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { useAdminAuth } from "@/components/AdminAuthProvider";
@@ -29,6 +30,7 @@ export default function VerifyEmailClient() {
   } = useAdminAuth();
   const headingId = useId();
   const testMode = isTestMode();
+  const router = useRouter();
 
   const evaluateVerification = useCallback(async () => {
     if (testMode) {
@@ -146,6 +148,26 @@ export default function VerifyEmailClient() {
       });
     }
   }, [accessState, requiresVerification, serverVerification]);
+
+  // Ensure verified users leave the verification page and that server cookies are refreshed.
+  useEffect(() => {
+    if (accessState !== "authenticated_verified") return;
+
+    if (!requiresVerification || serverVerification === "verified") {
+      router.replace("/admin/dashboard");
+      return;
+    }
+
+    if (serverVerification === "unknown") {
+      void syncServerSession();
+    }
+  }, [
+    accessState,
+    requiresVerification,
+    router,
+    serverVerification,
+    syncServerSession,
+  ]);
 
   const handleResend = async () => {
     if (testMode) {

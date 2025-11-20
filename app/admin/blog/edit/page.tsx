@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { blogStore } from "@/lib/content-store";
 import { getMetadata } from "@/lib/seo-utils";
 import { SITE_NAME, SITE_URL, SITE_BRAND_TWITTER } from "@/lib/constants";
+import { htmlToPlainText } from "@/lib/sanitize/text";
 import BlogEditorPageClient from "./BlogEditorPageClient";
 import type { BlogPost as StoreBlogPost } from "@/lib/content-store";
 import type { BlogPost as EditorBlogPost } from "@/app/admin/dashboard/components/blog-editor";
@@ -38,10 +39,10 @@ export const metadata = getMetadata({
   },
 });
 
-// Utility: strip HTML to get word count
+// Utility: strip HTML to get word count without unsafe regex
 function computeWordCount(html: string): number {
-  const text = html.replace(/<[^>]*>/g, " ").trim();
-  return text ? text.split(/\s+/).length : 0;
+  const plain = htmlToPlainText(html.slice(0, 50_000));
+  return plain ? plain.split(/\s+/).length : 0;
 }
 
 export default async function BlogEditPage(props: BlogEditPageProps) {

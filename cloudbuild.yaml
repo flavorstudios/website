@@ -1,5 +1,6 @@
 steps:
-  - name: gcr.io/cloud-builders/docker
+  - id: build-backend-image
+    name: gcr.io/cloud-builders/docker
     args:
       - build
       - '-f'
@@ -7,5 +8,6 @@ steps:
       - '-t'
       - gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA
       - .
+    dir: '.'
 images:
   - gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA

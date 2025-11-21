@@ -6,9 +6,10 @@ ENV PATH="$PNPM_HOME:$PATH"
 WORKDIR /app
 
 FROM base AS deps
-WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY backend/package.json backend/tsconfig.json ./backend/
+COPY shared/package.json shared/tsconfig.json ./shared/
+RUN pnpm install --filter next-backend... --filter @website/shared... --prod=false
 COPY shared/package.json shared/tsconfig.json ./shared/
 RUN pnpm install --frozen-lockfile --filter ./backend... --filter @website/shared... --prod=false
 

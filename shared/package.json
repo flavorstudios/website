@@ -11,7 +11,8 @@
     "clean": "rimraf dist",
     "prepare": "pnpm run build"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3"
   }

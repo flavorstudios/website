@@ -36,7 +36,10 @@
     "test:cron": "tsx scripts/test-cron.ts",
     "cron:logs": "tsx scripts/query-cron-logs.ts",
     "preinstall": "npx -y only-allow pnpm",
-    "analyze": "ANALYZE=true next build"
+    "analyze": "ANALYZE=true next build",
+    "backend:build": "pnpm --filter ./backend... run build",
+    "backend:dev": "pnpm --filter ./backend... run dev",
+    "backend:start": "pnpm --filter ./backend... run start"
   },
   "trustedDependencies": [
     "@firebase/util",

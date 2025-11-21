@@ -6,6 +6,6 @@ steps:
       - --file=backend/Dockerfile
       - --tag=gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA
       - .
-    dir: .
+    dir: ..
 images:
   - gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA

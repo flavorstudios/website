@@ -14,3 +14,22 @@ firebase-debug.log
 *.local
 .git
 .gitignore
+
+# Editor / IDE settings
+.vscode
+.idea
+
+# Tests / coverage / tooling caches
+coverage
+**/.turbo
+**/.cache
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Env files (keep secrets out of the image)
+.env
+.env.*
+.env.local
+.env.development.local
+.env.production.local

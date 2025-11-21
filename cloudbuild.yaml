@@ -3,10 +3,8 @@ steps:
     name: gcr.io/cloud-builders/docker
     args:
       - build
-      - "-f"
-      - backend/Dockerfile
-      - "-t"
-      - gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA
+      - --file=backend/Dockerfile
+      - --tag=gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA
       - .
     dir: .
 images:

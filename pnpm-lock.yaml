@@ -280,8 +280,8 @@ importers:
         version: 3.25.76
     devDependencies:
       '@axe-core/playwright':
-        specifier: ^4.10.2
-        version: 4.10.2(playwright-core@1.54.2)
+        specifier: ^4.11.0
+        version: 4.11.0(playwright-core@1.54.2)
       '@firebase/rules-unit-testing':
         specifier: ^3.0.0
         version: 3.0.4(firebase@11.10.0)
@@ -447,8 +447,8 @@ packages:
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
 
-  '@axe-core/playwright@4.10.2':
-    resolution: {integrity: sha512-6/b5BJjG6hDaRNtgzLIfKr5DfwyiLHO4+ByTLB0cJgWSM8Ll7KqtdblIS6bEkwSF642/Ex91vNqIl3GLXGlceg==}
+  '@axe-core/playwright@4.11.0':
+    resolution: {integrity: sha512-70vBT/Ylqpm65RQz2iCG2o0JJCEG/WCNyefTr2xcOcr1CoSee60gNQYUMZZ7YukoKkFLv26I/jjlsvwwp532oQ==}
     peerDependencies:
       playwright-core: '>= 1.0.0'
 
@@ -3462,6 +3462,10 @@ packages:
 
   axe-core@4.10.3:
     resolution: {integrity: sha512-Xm7bpRXnDSX2YE2YFfBk2FnF0ep6tmG7xPh8iHee8MIcrgq762Nkce856dYtJYLkuIoYZvGfTs/PbZhideTcEg==}
+    engines: {node: '>=4'}
+
+  axe-core@4.11.0:
+    resolution: {integrity: sha512-ilYanEU8vxxBexpJd8cWM4ElSQq4QctCLKih0TSfjIfCQTeyH/6zVrmIJfLPrKTKJRbiG+cfnZbQIjAlJmF1jQ==}
     engines: {node: '>=4'}
 
   axe-core@4.9.1:
@@ -7256,9 +7260,9 @@ snapshots:
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
 
-  '@axe-core/playwright@4.10.2(playwright-core@1.54.2)':
+  '@axe-core/playwright@4.11.0(playwright-core@1.54.2)':
     dependencies:
-      axe-core: 4.10.3
+      axe-core: 4.11.0
       playwright-core: 1.54.2
 
   '@babel/code-frame@7.27.1':
@@ -10736,6 +10740,8 @@ snapshots:
 
   axe-core@4.10.3: {}
 
+  axe-core@4.11.0: {}
+
   axe-core@4.9.1: {}
 
   axios@1.11.0:
@@ -13220,7 +13226,7 @@ snapshots:
     dependencies:
       '@paulirish/trace_engine': 0.0.53
       '@sentry/node': 7.120.4
-      axe-core: 4.10.3
+      axe-core: 4.11.0
       chrome-launcher: 1.2.0
       configstore: 5.0.1
       csp_evaluator: 1.1.5

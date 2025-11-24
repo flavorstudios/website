@@ -141,7 +141,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.10.2",
+    "@axe-core/playwright": "^4.11.0",
     "@firebase/rules-unit-testing": "^3.0.0",
     "@lhci/cli": "^0.15.1",
     "@next/bundle-analyzer": "15.4.6",

@@ -21,7 +21,7 @@ jobs:
       SKIP_STRICT_ENV: 1
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         # v4.2.2: https://github.com/actions/checkout/releases/tag/v4.2.2
 
       # ✅ Make sure pnpm store dir exists BEFORE setup-node tries to cache it

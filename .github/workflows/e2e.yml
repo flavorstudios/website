@@ -41,7 +41,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         # v4.2.2: https://github.com/actions/checkout/releases/tag/v4.2.2
 
       # ✅ Fallback to ensure pnpm is on PATH even if Corepack has issues

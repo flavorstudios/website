@@ -21,7 +21,7 @@ jobs:
       FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
       NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # install pnpm BEFORE setup-node (so cache: pnpm doesn't fail)
       - name: Install pnpm on PATH

@@ -68,7 +68,8 @@ async function moderateText(
   if (!PERSPECTIVE_API_KEY) {
     logError("contact:moderate:config", undefined, {
       requestId: context.requestId,
-      message: "Perspective API key not configured; skipping moderation",
+      message:
+        "Perspective API key missing; intentionally skipping moderation but continuing request",
     });
     return null;
   }
@@ -115,7 +116,7 @@ export function OPTIONS(request: NextRequest) {
   return handleOptionsRequest(request, { allowMethods: ["POST"] });
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest | Request) {
   const context = createRequestContext(request);
 
   const redirect = respondWithExternalRedirect(context);

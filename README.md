@@ -11,7 +11,7 @@ This is the official website of **Flavor Studios** | Your source for Anime News 
 1. Copy the example environment file:
 
    ```bash
-   cp .env.local.example .env.local
+   cp env.example .env.local
    ```
 
 2. Set the required environment variables in `.env.local` (the build fails fast when any are missing):
@@ -19,12 +19,12 @@ This is the official website of **Flavor Studios** | Your source for Anime News 
    | Scope | Variable(s) | Purpose |
    | ----- | ----------- | ------- |
    | Server | `BASE_URL` | Canonical site origin used by RSS, webhooks, and metadata helpers. |
-  | Client | `NEXT_PUBLIC_BASE_URL` | Exposes the canonical origin to the app router. |
-  | Client | `NEXT_PUBLIC_API_BASE_URL` | Points server components and client fetchers to the Cloud Run backend. |
+   | Client | `NEXT_PUBLIC_BASE_URL` | Exposes the canonical origin to the app router. |
+   | Client | `NEXT_PUBLIC_API_BASE_URL` | Points server components and client fetchers to the Cloud Run backend. |
    | Server | `CRON_SECRET` | Shared secret for scheduled job routes. |
    | Server | `PREVIEW_SECRET` | Protects unpublished preview routes. |
    | Server | `ADMIN_JWT_SECRET` | Signs and verifies password-based admin sessions. |
-   | Server | `FIREBASE_SERVICE_ACCOUNT_KEY` **or** `FIREBASE_SERVICE_ACCOUNT_JSON` | Loads Firebase Admin credentials; provide exactly one. |
+    | Server | `FIREBASE_SERVICE_ACCOUNT_KEY` **or** `FIREBASE_SERVICE_ACCOUNT_JSON` | Loads Firebase Admin credentials; provide exactly one. |
    | Server | `FIREBASE_STORAGE_BUCKET` | Primary Cloud Storage bucket (must match the public bucket). |
    | Client | `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Public bucket used by client SDKs; must equal the server value. |
    | Server | `ADMIN_EMAILS` **or** `ADMIN_EMAIL` | Allowed admin login addresses (comma-separated). |

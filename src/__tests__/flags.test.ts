@@ -40,4 +40,12 @@ describe('isTestMode', () => {
     });
     expect(isTestMode()).toBe(false);
   });
+
+  it.each([' 1', '1 ', 'TRUE'])('ignores non-literal 1 values: %s', async (value) => {
+    const { isTestMode } = await loadFlags({
+      NODE_ENV: 'development',
+      NEXT_PUBLIC_TEST_MODE: value,
+    });
+    expect(isTestMode()).toBe(false);
+  });
 });

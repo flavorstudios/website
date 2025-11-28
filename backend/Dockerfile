@@ -10,7 +10,7 @@ WORKDIR /app
 FROM base AS deps
 WORKDIR /app
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY shared/package.json ./shared/package.json
+COPY shared ./shared
 RUN pnpm fetch --filter @website/shared --filter .
 RUN pnpm install --frozen-lockfile --recursive --filter @website/shared --filter . --prod=false
 

@@ -24,12 +24,16 @@ export interface InputProps
     VariantProps<typeof inputVariants> {}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = "text", variantSize, ...props }, ref) => {
+  ({ className, type = "text", variantSize, placeholder, ...props }, ref) => {
+    const resolvedPlaceholder =
+      placeholder ?? (type === "date" ? "mm/dd/yyyy" : undefined)
+
     return (
       <input
         type={type}
         className={cn(inputVariants({ variantSize, className }))}
         ref={ref}
+        placeholder={resolvedPlaceholder}
         {...props}
       />
     )

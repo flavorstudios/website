@@ -7,7 +7,7 @@
 
 ## Step-by-step Implementation
 1. **Verify environment variables**
-   - Copy `.env.example` to `.env.local` and fill `BASE_URL`, `CRON_SECRET`, `BACKUP_DIR`, `GOOGLE_APPLICATION_CREDENTIALS`, and optional tuning knobs (`CRON_MAX_ATTEMPTS`, `CRON_TIMEOUT_MS`, `BACKUP_RETENTION`).
+   - Copy `.env.local.example` to `.env.local` and fill `BASE_URL`, `CRON_SECRET`, `BACKUP_DIR`, `GOOGLE_APPLICATION_CREDENTIALS`, and optional tuning knobs (`CRON_MAX_ATTEMPTS`, `CRON_TIMEOUT_MS`, `BACKUP_RETENTION`).
    - For Firebase Functions, run `firebase functions:secrets:set CRON_SECRET` and `firebase functions:secrets:set BASE_URL` so scheduled functions have the same values.
 2. **Deploy Firebase Scheduled Functions**
    - Run `cd functions && npm install && npm run build` if dependencies changed.
@@ -25,7 +25,7 @@
    - No infrastructure changes required; ensure the hosting platform supports long-lived HTTP responses (Firebase Hosting + Cloud Run proxy does).
    - Document that SSE connections are in-memory; scale horizontally with sticky sessions or upgrade to a pub/sub broker when needed.
 7. **Documentation & tooling**
-   - Ship the audit, setup, and test plan docs along with `.env.example` updates and the new `pnpm test:jobs` script.
+   - Ship the audit, setup, and test plan docs along with `.env.local.example` updates and the new `pnpm test:jobs` script.
 
 ## Rollback Strategy
 1. Revert `.env` updates and remove scheduler jobs with `gcloud scheduler jobs delete <name>` if the change misfires.

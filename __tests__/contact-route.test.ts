@@ -141,4 +141,39 @@ describe("app/api/contact", () => {
       next: "https://api.example.com/contact",
     });
   });
+
+  it("returns validation errors for invalid payloads", async () => {
+    setEnv("NEXT_PUBLIC_API_BASE_URL", undefined);
+
+    const { POST } = await import("@/app/api/contact/route");
+    const request = new Request("http://localhost/api/contact", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        firstName: "",
+        email: "not-an-email",
+        message: "",
+      }),
+    });
+
+    const response = await POST(request);
+    const payload = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(payload).toEqual(
+      expect.objectContaining({
+        error: "Invalid request",
+        details: {
+          fieldErrors: expect.objectContaining({
+            firstName: ["First name is required"],
+            email: ["Invalid email"],
+            message: ["Message is required"],
+            lastName: ["Required"],
+            subject: ["Required"],
+          }),
+          formErrors: [],
+        },
+      }),
+    );
+  });
 });

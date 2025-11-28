@@ -92,7 +92,15 @@ function withinDateRange(
 export async function getPosts(filters: GetPostsFilters = {}): Promise<PublicPostSummary[]> {
   const authorFilter = filters.author?.toLowerCase();
   const startDate = parseDateInput(filters.startDate);
+  if (filters.startDate !== undefined && filters.startDate !== null && !startDate) {
+    throw new Error("Invalid startDate");
+  }
+
   const endDateRaw = parseDateInput(filters.endDate);
+  if (filters.endDate !== undefined && filters.endDate !== null && !endDateRaw) {
+    throw new Error("Invalid endDate");
+  }
+
   const endDate = endDateRaw
     ? new Date(new Date(endDateRaw).setHours(23, 59, 59, 999))
     : null;

@@ -90,25 +90,28 @@ This project requires **Node.js 22**. The root `.nvmrc` pins the version locally
    ```bash
    git clone https://github.com/flavorstudios/flavorstudios-website.git
    cd flavorstudios-website
-Set up your environment and install dependencies:
+   ```
 
-bash
-Copy
-Edit
-cp .env.example .env.local  # create local env file (ignored by Git)
-pnpm install  # or `npm install`
-Common development scripts:
+2. **Set up your environment and install dependencies:**
 
-bash
-Copy
-Edit
-pnpm dev          # start the local development server
-pnpm lint         # run eslint checks
-pnpm test:unit    # run Jest unit/integration tests (e.g. validate session)
-pnpm test:functions  # run Firebase Functions tests in Node
-pnpm e2e          # run end-to-end Playwright tests (admin dashboard login). Installs browsers and builds automatically.automatically.
-pnpm build  # create an optimized production build
-pnpm start  # run the production server
+   ```bash
+   cp .env.local.example .env.local  # create local env file (ignored by Git)
+   pnpm install  # or `npm install`
+   ```
+
+   > Server-only variables (no `NEXT_PUBLIC_` prefix) stay on the server, while `NEXT_PUBLIC_*` variables are exposed to the client bundle. Both live together in `.env.local`, and `.env.local.example` lists the expected keys.
+
+3. **Common development scripts:**
+
+   ```bash
+   pnpm dev             # start the local development server
+   pnpm lint            # run eslint checks
+   pnpm test:unit       # run Jest unit/integration tests (e.g. validate session)
+   pnpm test:functions  # run Firebase Functions tests in Node
+   pnpm e2e             # run end-to-end Playwright tests (admin dashboard login). Installs browsers and builds automatically.
+   pnpm build           # create an optimized production build
+   pnpm start           # run the production server
+   ```
 
 > Tip: set `SKIP_ENV_VALIDATION=true` or `ADMIN_BYPASS=true` to bypass the
 > Firebase Admin env check when admin features aren't needed. This also
@@ -133,7 +136,7 @@ requires several environment variables, all of which must be present in your
 settings:
 In production these values are provided via Vercel, and any `.env*`
 files are git-ignored so they can't override the deployed configuration. Use
-`.env.example` as a template for local development:
+`.env.local.example` as a template for local development:
 
 NEXT_PUBLIC_FIREBASE_API_KEY
 
@@ -154,7 +157,7 @@ scss
 Copy
 Edit
 [Firebase] Missing Firebase environment variable(s): NEXT_PUBLIC_FIREBASE_API_KEY, ...
-Use `.env.example` as a reference for the correct variable names and structure.
+Use `.env.local.example` as a reference for the correct variable names and structure.
 
 ### Firebase Admin configuration (server only)
 

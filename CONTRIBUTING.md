@@ -6,7 +6,7 @@ Flavor Studios welcomes contributions that keep the site secure, accessible, and
 
 - **Node.js / pnpm** – We support Node.js `22.x` (see `.nvmrc`) and pnpm `10.x`. Install Node via [nvm](https://github.com/nvm-sh/nvm), run `nvm use`, and execute `corepack enable` so `pnpm` resolves to the project-pinned version declared in `package.json`.
 - **Tooling verification** – After switching Node versions run `node -v` and `pnpm -v` to confirm the toolchain matches CI. The GitHub workflow enables Corepack to guarantee the same versions.
-- **Environment variables** – Copy `.env.example` to `.env.local` and populate the values you need. Secrets must never be committed; the `.gitignore` rules already block accidental check-ins. The `scripts/validate-env.ts` script runs automatically during `pnpm build` to ensure required variables are present without failing on optional ones.
+- **Environment variables** – Copy `.env.local.example` to `.env.local` and populate the values you need. Secrets must never be committed; the `.gitignore` rules already block accidental check-ins. The `scripts/validate-env.ts` script runs automatically during `pnpm build` to ensure required variables are present without failing on optional ones.
 - **Firebase emulators** – Run `pnpm dlx firebase-tools emulators:start` to launch local services when exercising Firestore/Storage flows.
 
 ## Common tasks

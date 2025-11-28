@@ -94,9 +94,7 @@ describe("app/api/contact", () => {
 
   it("treats submissions as unflagged when moderation cannot run", async () => {
     const { POST } = await import("@/app/api/contact/route");
-    const { NextRequest } = await import("next/server");
-
-    const request = new NextRequest("http://localhost/api/contact", {
+    const request = new Request("http://localhost/api/contact", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
@@ -122,5 +120,25 @@ describe("app/api/contact", () => {
         scores: null,
       }),
     );
+  });
+
+  it("returns redirect details when external backend is configured", async () => {
+    setEnv("NEXT_PUBLIC_API_BASE_URL", "https://api.example.com/");
+
+    const { POST } = await import("@/app/api/contact/route");
+    const request = new Request("http://localhost/api/contact", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: "ignored" }),
+    });
+
+    const response = await POST(request);
+    const payload = await response.json();
+
+    expect(response.status).toBe(410);
+    expect(payload).toEqual({
+      error: "This route now lives on the standalone backend.",
+      next: "https://api.example.com/contact",
+    });
   });
 });

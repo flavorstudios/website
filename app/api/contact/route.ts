@@ -12,7 +12,10 @@ import {
 } from "@/lib/api/response";
 import { logError } from "@/lib/log";
 
-const externalBackendBase = process.env.NEXT_PUBLIC_API_BASE_URL?.trim().replace(/\/$/, "") || "";
+const rawExternalBackendBase = process.env.NEXT_PUBLIC_API_BASE_URL;
+const externalBackendBase = rawExternalBackendBase
+  ? rawExternalBackendBase.trim().replace(/\/$/, "")
+  : "";
 
 function respondWithExternalRedirect(context: RequestContext) {
   if (!externalBackendBase) return null;

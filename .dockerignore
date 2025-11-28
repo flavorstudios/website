@@ -10,6 +10,10 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 pnpm-debug.log
+# Keep workspace manifests in the context for Docker builds
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!package.json
 firebase-debug.log
 *.local
 .git

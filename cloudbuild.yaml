@@ -6,6 +6,7 @@ steps:
       - --file=backend/Dockerfile
       - --tag=gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA
       - .
-    dir: ..
+    # Build from the repo root so pnpm workspace files are included in the context.
+    dir: .
 images:
   - gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA

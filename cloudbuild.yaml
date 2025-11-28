@@ -3,11 +3,12 @@ steps:
     name: gcr.io/cloud-builders/docker
     args:
       - build
-      - --file=Dockerfile
+      - --file=backend/Dockerfile
       - --tag=gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA
-      - ..
-    # Run inside backend/ but send the repository root (..) as the Docker context so
-    # pnpm workspace manifests are available to Dockerfile COPY commands.
-    dir: backend
+      - .
+    # Use the repository root as the build context so the workspace manifests
+    # (pnpm-lock.yaml, pnpm-workspace.yaml, package.json) are available to COPY
+    # directives inside backend/Dockerfile.
+    dir: .
 images:
   - gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA

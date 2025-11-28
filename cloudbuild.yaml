@@ -3,6 +3,7 @@ steps:
     name: gcr.io/cloud-builders/docker
     # Run from the repo root so the Docker build context includes the workspace manifests
     dir: .
+    # The final '.' sets the Docker context to the repo root so pnpm-lock.yaml and pnpm-workspace.yaml are available
     args:
       - build
       - --file=backend/Dockerfile

@@ -8,7 +8,7 @@ RUN corepack enable && mkdir -p "${PNPM_HOME}" && chmod 0777 "${PNPM_HOME}"
 WORKDIR /app
 
 FROM base AS deps
-# Workspace manifests
+# Workspace manifests (available because the build context is the repo root)
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 # Package specific manifests
 COPY backend/package.json ./backend/package.json

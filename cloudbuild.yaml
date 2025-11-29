@@ -1,7 +1,8 @@
 steps:
   - id: build-backend-image
     name: gcr.io/cloud-builders/docker
-    dir: .
+    # Always run from the checked-out workspace root so the Docker context has all manifests
+    dir: /workspace
     args:
       - build
       - --file=backend/Dockerfile

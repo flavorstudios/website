@@ -1,12 +1,12 @@
 steps:
   - id: build-backend-image
     name: gcr.io/cloud-builders/docker
-    # Run from the repo root so the Docker build context includes the workspace manifests
-    dir: .
-    # The final '.' sets the Docker context to the repo root so pnpm-lock.yaml and pnpm-workspace.yaml are available
+    # Run from the backend directory so the Docker build context matches the backend workspace layout
+    dir: backend
+    # The final '.' sets the Docker context to the backend folder
     args:
       - build
-      - --file=backend/Dockerfile
+      - --file=Dockerfile
       - --tag=gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA
       - .
 images:

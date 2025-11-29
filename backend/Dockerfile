@@ -13,23 +13,20 @@ WORKDIR /app
 
 # Workspace manifests first for better caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY tsconfig.json ./tsconfig.json
 COPY shared/package.json ./shared/package.json
-COPY backend/package.json ./backend/package.json
-COPY backend/tsconfig.json ./backend/tsconfig.json
-COPY backend/shared/package.json ./backend/shared/package.json
-COPY backend/shared/tsconfig.json ./backend/shared/tsconfig.json
+COPY shared/tsconfig.json ./shared/tsconfig.json
 
 # Fetch and install dependencies for the whole workspace
-RUN pnpm fetch --filter @website/shared --filter ./backend... --filter .
+RUN pnpm fetch --filter @website/shared --filter next-backend
 COPY shared ./shared
-COPY backend/shared/src ./backend/shared/src
-COPY backend/src ./backend/src
-COPY tsconfig.json ./tsconfig.json
-RUN pnpm install --frozen-lockfile --recursive --filter @website/shared --filter ./backend... --filter . --prod=false
+COPY src ./src
+COPY shared/src ./shared/src
+RUN pnpm install --frozen-lockfile --recursive --filter @website/shared --filter next-backend --prod=false
 
 # Build shared and backend
 RUN pnpm --filter @website/shared run build
-RUN pnpm --filter ./backend... run build
+RUN pnpm --filter next-backend run build
 
 # Prune dev dependencies while keeping workspace layout intact
 FROM builder AS pruner
@@ -43,10 +40,10 @@ WORKDIR /app
 RUN useradd --create-home --shell /bin/bash appuser
 
 COPY --from=pruner /app/node_modules ./node_modules
-COPY --from=pruner /app/backend ./backend
+COPY --from=pruner /app/dist ./dist
 COPY --from=pruner /app/shared ./shared
+COPY --from=pruner /app/package.json ./package.json
 
 USER appuser
 EXPOSE 8080
-WORKDIR /app/backend
 CMD ["node", "dist/index.js"]

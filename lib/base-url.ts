@@ -47,18 +47,22 @@ export const resolveRequestBaseUrl = (
   request?: NextRequest | Request,
 ): string => {
   if (request) {
-    const headers = request.headers;
-    const forwardedProto = headers.get("x-forwarded-proto");
+    const headers = "headers" in request ? request.headers : undefined;
+    const forwardedProto = headers?.get?.("x-forwarded-proto");
     const forwardedHost =
-      headers.get("x-forwarded-host") ?? headers.get("host") ?? undefined;
+      headers?.get?.("x-forwarded-host") ?? headers?.get?.("host") ?? undefined;
     if (forwardedProto && forwardedHost) {
       return `${forwardedProto}://${forwardedHost}`;
     }
-    try {
-      const url = new URL(request.url);
-      return `${url.protocol}//${url.host}`;
-    } catch {
-      // ignore parsing errors and fall back to canonical base url
+
+    const requestUrl = "url" in request ? request.url : undefined;
+    if (requestUrl) {
+      try {
+        const url = new URL(requestUrl);
+        return `${url.protocol}//${url.host}`;
+      } catch {
+        // ignore parsing errors and fall back to canonical base url
+      }
     }
   }
 

@@ -24,7 +24,11 @@ This is the official website of **Flavor Studios** | Your source for Anime News 
    | Server | `CRON_SECRET` | Shared secret for scheduled job routes. |
    | Server | `PREVIEW_SECRET` | Protects unpublished preview routes. |
    | Server | `ADMIN_JWT_SECRET` | Signs and verifies password-based admin sessions. |
-    | Server | `FIREBASE_SERVICE_ACCOUNT_KEY` **or** `FIREBASE_SERVICE_ACCOUNT_JSON` | Loads Firebase Admin credentials; provide exactly one. |
+<<<<<<< ours
+   | Server | `FIREBASE_SERVICE_ACCOUNT_KEY`, `FIREBASE_SERVICE_ACCOUNT_JSON`, or `FIREBASE_SERVICE_ACCOUNT_JSON_B64` | Loads Firebase Admin credentials; provide exactly one (use the base64 form for CI secrets that reject JSON formatting). |
+=======
+   | Server | `FIREBASE_SERVICE_ACCOUNT_KEY` **or** `FIREBASE_SERVICE_ACCOUNT_JSON` | Loads Firebase Admin credentials; provide exactly one. |
+>>>>>>> theirs
    | Server | `FIREBASE_STORAGE_BUCKET` | Primary Cloud Storage bucket (must match the public bucket). |
    | Client | `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Public bucket used by client SDKs; must equal the server value. |
    | Server | `ADMIN_EMAILS` **or** `ADMIN_EMAIL` | Allowed admin login addresses (comma-separated). |
@@ -164,7 +168,7 @@ Use `.env.local.example` as a reference for the correct variable names and struc
 To use admin-only features (e.g., the dashboard or preview pages) in production,
 you must also supply Firebase Admin credentials:
 
-`FIREBASE_SERVICE_ACCOUNT_KEY` – service account JSON as a single-line string. `FIREBASE_SERVICE_ACCOUNT_JSON` may be used instead; only one is required.
+`FIREBASE_SERVICE_ACCOUNT_KEY` – service account JSON as a single-line string. `FIREBASE_SERVICE_ACCOUNT_JSON` may be used instead; only one is required. `FIREBASE_SERVICE_ACCOUNT_JSON_B64` is the base64-encoded form, which is handy for CI/Vercel secrets that reject multiline JSON.
 - `FIREBASE_STORAGE_BUCKET` – must match the client `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`.
 - `ADMIN_EMAIL` or `ADMIN_EMAILS` – comma-separated list of allowed admin logins.
 `ADMIN_API_KEY` (optional) – server-only key for programmatic access to `/api/admin/*` routes. Browser requests rely on session cookies and do **not** require an API key.
@@ -178,7 +182,7 @@ environment check during build. Cron features are disabled when validation is
 skipped.
 
 `pnpm build` runs `scripts/validate-env.ts` to verify this configuration. The build
-fails unless either `FIREBASE_SERVICE_ACCOUNT_KEY` or `FIREBASE_SERVICE_ACCOUNT_JSON`
+fails unless one of `FIREBASE_SERVICE_ACCOUNT_KEY`, `FIREBASE_SERVICE_ACCOUNT_JSON`, or `FIREBASE_SERVICE_ACCOUNT_JSON_B64`
 is set and `FIREBASE_STORAGE_BUCKET` matches `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`.
 
 Add them to `.env.local`, for example:

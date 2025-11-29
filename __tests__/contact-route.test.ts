@@ -1,4 +1,4 @@
-import { restoreEnv, setEnv, snapshotEnv } from '@/test-utils/env';
+import { restoreEnv, setEnv, snapshotEnv, withEnv } from '@/test-utils/env';
 
 jest.mock("next/server", () => ({
   NextResponse: {
@@ -140,6 +140,28 @@ describe("app/api/contact", () => {
       error: "This route now lives on the standalone backend.",
       next: "https://api.example.com/contact",
     });
+  });
+
+  it("redirects to the external backend using respondWithExternalRedirect", async () => {
+    await withEnv({ NEXT_PUBLIC_API_BASE_URL: "https://redirect.example.com/" }, async () => {
+      const { POST } = await import("@/app/api/contact/route");
+      const request = new Request("http://localhost/api/contact", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ message: "redirect me" }),
+      });
+
+      const response = await POST(request);
+      const payload = await response.json();
+
+      expect(response.status).toBe(410);
+      expect(payload).toEqual({
+        error: "This route now lives on the standalone backend.",
+        next: "https://redirect.example.com/contact",
+      });
+    });
+
+    expect(process.env.NEXT_PUBLIC_API_BASE_URL).toBeUndefined();
   });
 
   it("returns validation errors for invalid payloads", async () => {

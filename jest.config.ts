@@ -30,6 +30,21 @@ const web: Config = {
   testTimeout: 30000,
 };
 
+const backend: Config = {
+  displayName: 'backend',
+  rootDir: '<rootDir>/backend',
+  testEnvironment: 'node',
+  preset: 'ts-jest',
+  testMatch: ['<rootDir>/src/**/*.test.ts'],
+  moduleNameMapper: {
+    '^@website/shared$': '<rootDir>/shared/src',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+  transform: {
+    '^.+\\.(t|j)sx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }],
+  },
+};
+
 const functions: Config = {
   displayName: 'functions',
   rootDir: '<rootDir>/functions',
@@ -49,7 +64,7 @@ const functions: Config = {
 };
 
 const config: Config = {
-  projects: [web, functions],
+  projects: [web, backend, functions],
 };
 
 export default config;

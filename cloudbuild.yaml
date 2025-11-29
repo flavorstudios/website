@@ -1,8 +1,8 @@
 steps:
   - id: build-backend-image
     name: gcr.io/cloud-builders/docker
-    # Always run from the checked-out workspace root so the Docker context has all manifests
-    dir: /workspace
+    # Run from the repository root so the Docker context includes pnpm manifests and workspace files
+    dir: /workspace/website
     args:
       - build
       - --file=backend/Dockerfile

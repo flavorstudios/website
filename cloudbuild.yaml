@@ -1,12 +1,10 @@
 steps:
   - id: build-backend-image
     name: gcr.io/cloud-builders/docker
-    # Run from the backend directory so the Docker build context matches the backend workspace layout
-    dir: backend
-    # The final '.' sets the Docker context to the backend folder
+    dir: .
     args:
       - build
-      - --file=Dockerfile
+      - --file=backend/Dockerfile
       - --tag=gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA
       - .
 images:

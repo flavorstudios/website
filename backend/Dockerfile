@@ -7,20 +7,25 @@ ENV PATH="${PNPM_HOME}:${PATH}"
 RUN corepack enable && mkdir -p "${PNPM_HOME}" && chmod 0777 "${PNPM_HOME}"
 WORKDIR /app
 
-# Install all dependencies and build in a single, consistent workspace
+# Install all dependencies and build in a single, consistent workspace rooted at /app
 FROM base AS builder
 WORKDIR /app
 
 # Workspace manifests first for better caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY tsconfig.json ./tsconfig.json
+COPY backend/package.json ./backend/package.json
+COPY backend/tsconfig.json ./backend/tsconfig.json
 COPY shared/package.json ./shared/package.json
 COPY shared/tsconfig.json ./shared/tsconfig.json
 
-# Fetch and install dependencies for the whole workspace
+# Fetch and install dependencies for the required workspaces only
 RUN pnpm --workspace-root fetch --filter @website/shared --filter next-backend
-COPY shared/src ./shared/src
-COPY src ./src
+
+# Copy sources needed for the filtered install and builds
+COPY shared ./shared
+COPY backend ./backend
+
 RUN pnpm --workspace-root install --frozen-lockfile --recursive --filter @website/shared --filter next-backend --prod=false
 
 # Build shared and backend
@@ -40,11 +45,12 @@ RUN useradd --create-home --shell /bin/bash appuser
 
 COPY --from=pruner /app/node_modules ./node_modules
 COPY --from=pruner /app/shared ./shared
+COPY --from=pruner /app/backend ./backend
 COPY --from=pruner /app/package.json ./package.json
 COPY --from=pruner /app/tsconfig.json ./tsconfig.json
-COPY --from=pruner /app/dist ./dist
+COPY --from=pruner /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 
 USER appuser
 EXPOSE 8080
-WORKDIR /app
+WORKDIR /app/backend
 CMD ["node", "dist/index.js"]

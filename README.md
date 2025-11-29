@@ -24,11 +24,7 @@ This is the official website of **Flavor Studios** | Your source for Anime News 
    | Server | `CRON_SECRET` | Shared secret for scheduled job routes. |
    | Server | `PREVIEW_SECRET` | Protects unpublished preview routes. |
    | Server | `ADMIN_JWT_SECRET` | Signs and verifies password-based admin sessions. |
-<<<<<<< ours
    | Server | `FIREBASE_SERVICE_ACCOUNT_KEY`, `FIREBASE_SERVICE_ACCOUNT_JSON`, or `FIREBASE_SERVICE_ACCOUNT_JSON_B64` | Loads Firebase Admin credentials; provide exactly one (use the base64 form for CI secrets that reject JSON formatting). |
-=======
-   | Server | `FIREBASE_SERVICE_ACCOUNT_KEY` **or** `FIREBASE_SERVICE_ACCOUNT_JSON` | Loads Firebase Admin credentials; provide exactly one. |
->>>>>>> theirs
    | Server | `FIREBASE_STORAGE_BUCKET` | Primary Cloud Storage bucket (must match the public bucket). |
    | Client | `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Public bucket used by client SDKs; must equal the server value. |
    | Server | `ADMIN_EMAILS` **or** `ADMIN_EMAIL` | Allowed admin login addresses (comma-separated). |

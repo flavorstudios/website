@@ -35,6 +35,18 @@ describe('middleware admin verification routing', () => {
     process.env.ADMIN_AUTH_DISABLED = '0'
   })
 
+  it('redirects sessions without a verification cookie to the verify page', async () => {
+    const { middleware } = await import('../middleware')
+    const request = buildRequest('/admin/dashboard', 'admin-session=test')
+
+    const response = await middleware(request)
+
+    expect(response?.status).toBe(307)
+    expect(response?.headers.get('location')).toBe(
+      'http://localhost/admin/verify-email'
+    )
+  })
+
   it('redirects unverified sessions away from protected admin routes', async () => {
     const { middleware } = await import('../middleware')
     const request = buildRequest(

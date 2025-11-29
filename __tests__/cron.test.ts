@@ -1,6 +1,6 @@
 /** @jest-environment node */
 
-import { mkdtempSync, writeFileSync, readdirSync } from "fs";
+import { mkdtempSync, readdirSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
 
@@ -15,13 +15,8 @@ const trackedKeys = [
 ];
 
 const originalEnv = snapshotEnv(trackedKeys);
-const tmpBackupDir = mkdtempSync(join(tmpdir(), 'backup-'));
 
-setEnv('CRON_SECRET', 'test-secret');
-setEnv('BASE_URL', 'http://localhost:3000');
-setEnv('BACKUP_DIR', tmpBackupDir);
-setEnv('GOOGLE_APPLICATION_CREDENTIALS', join(tmpBackupDir, 'creds.json'));
-writeFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS!, '{}');
+let tmpBackupDir: string;
 
 describe("cron endpoints", () => {
   let revalidate: any;
@@ -33,6 +28,14 @@ describe("cron endpoints", () => {
   let NextRequest: any;
 
   beforeAll(async () => {
+    tmpBackupDir = mkdtempSync(join(tmpdir(), 'backup-'));
+
+    setEnv('CRON_SECRET', 'test-secret');
+    setEnv('BASE_URL', 'http://localhost:3000');
+    setEnv('BACKUP_DIR', tmpBackupDir);
+    setEnv('GOOGLE_APPLICATION_CREDENTIALS', join(tmpBackupDir, 'creds.json'));
+    writeFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS!, '{}');
+
     NextRequest = (await import("next/server")).NextRequest;
     revalidate = (await import("@/app/api/cron/revalidate/route")).POST;
     buildSitemap = (await import("@/app/api/internal/build-sitemap/route")).POST;
@@ -197,5 +200,8 @@ describe("cron endpoints", () => {
 
   afterAll(() => {
     restoreEnv(originalEnv);
+    if (tmpBackupDir) {
+      rmSync(tmpBackupDir, { recursive: true, force: true });
+    }
   });
 });

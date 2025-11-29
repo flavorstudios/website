@@ -19,11 +19,10 @@ export async function GET(req: NextRequest) {
     const ok = await requireAdmin(req);
     if (!ok) {
       if (debug) {
-        logBreadcrumb("validate-session: unauthorized");
-      }
-      logBreadcrumb("validate-session: unauthorized", {
+        logBreadcrumb("validate-session: unauthorized", {
           requestId: context.requestId,
-      });
+        });
+      }
       return errorResponse(context, { error: "Unauthorized" }, 401);
     }
 

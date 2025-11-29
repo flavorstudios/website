@@ -76,7 +76,7 @@ export async function middleware(request: NextRequest) {
     pathname === '/admin/login' ||
     pathname === '/admin/login/' ||
     pathname.startsWith('/admin/login?');
-    const isVerifyRoute =
+  const isVerifyRoute =
     pathname === '/admin/verify-email' ||
     pathname === '/admin/verify-email/' ||
     pathname.startsWith('/admin/verify-email?');
@@ -97,6 +97,7 @@ export async function middleware(request: NextRequest) {
     const verifiedCookie = request.cookies.get(ADMIN_VERIFIED_COOKIE)?.value;
     const knownVerified = verifiedCookie === 'true';
     const knownUnverified = verifiedCookie === 'false';
+    const verificationUnknown = verifiedCookie === undefined;
 
     if (isPreviewRoute && previewToken) {
       return nextWithAdminHeaders();
@@ -131,7 +132,7 @@ export async function middleware(request: NextRequest) {
 
     if (
       requiresEmailVerification &&
-      knownUnverified &&
+      (knownUnverified || verificationUnknown) &&
       !isVerifyRoute &&
       !isPreviewRoute &&
       !isSignupPage &&

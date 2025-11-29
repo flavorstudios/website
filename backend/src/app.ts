@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import {
   addComment,
@@ -27,11 +27,11 @@ export function createApp() {
 
   app.use(express.json());
 
-  app.get("/healthz", (_req, res) => {
+  app.get("/healthz", (_req: Request, res: Response) => {
     res.json({ status: "ok" });
   });
 
-  app.get("/posts", async (req, res) => {
+  app.get("/posts", async (req: Request, res: Response) => {
     try {
       const posts = await getPosts({
         author: typeof req.query.author === "string" ? req.query.author : undefined,
@@ -45,7 +45,7 @@ export function createApp() {
     }
   });
 
-  app.get("/posts/:slug", async (req, res) => {
+  app.get("/posts/:slug", async (req: Request, res: Response) => {
     try {
       const post = await getPostBySlug(req.params.slug);
       if (!post) {
@@ -59,7 +59,7 @@ export function createApp() {
     }
   });
 
-  app.get("/videos", async (_req, res) => {
+  app.get("/videos", async (_req: Request, res: Response) => {
     try {
       const videos = await getVideos();
       res.json(videos);
@@ -69,7 +69,7 @@ export function createApp() {
     }
   });
 
-  app.get("/videos/:slug", async (req, res) => {
+  app.get("/videos/:slug", async (req: Request, res: Response) => {
     try {
       const video = await getVideoBySlug(req.params.slug);
       if (!video) {
@@ -83,7 +83,7 @@ export function createApp() {
     }
   });
 
-  app.get("/categories", async (req, res) => {
+  app.get("/categories", async (req: Request, res: Response) => {
     try {
       const typeQuery = typeof req.query.type === "string" ? req.query.type : undefined;
       const categories = await getCategories(typeQuery as "blog" | "video" | "all" | undefined);
@@ -94,7 +94,7 @@ export function createApp() {
     }
   });
 
-  app.get("/comments", async (req, res) => {
+  app.get("/comments", async (req: Request, res: Response) => {
     try {
       const postId = typeof req.query.postId === "string" ? req.query.postId : "";
       if (!postId) {
@@ -110,7 +110,7 @@ export function createApp() {
     }
   });
 
-  app.post("/comments", async (req, res) => {
+  app.post("/comments", async (req: Request, res: Response) => {
     try {
       const comment = await addComment({
         postId: req.body?.postId,
@@ -125,7 +125,7 @@ export function createApp() {
     }
   });
 
-  app.post("/contact", async (req, res) => {
+  app.post("/contact", async (req: Request, res: Response) => {
     try {
       const submission = await submitContactMessage({
         firstName: req.body?.firstName,
@@ -142,7 +142,7 @@ export function createApp() {
     }
   });
 
-  app.post("/career", async (req, res) => {
+  app.post("/career", async (req: Request, res: Response) => {
     try {
       const submission = await submitCareerApplication({
         firstName: req.body?.firstName,

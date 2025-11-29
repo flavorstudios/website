@@ -108,7 +108,7 @@ const firebaseServiceAccountJson = optionalEnv("FIREBASE_SERVICE_ACCOUNT_JSON");
 const firebaseServiceAccountJsonB64 = optionalEnv("FIREBASE_SERVICE_ACCOUNT_JSON_B64");
 const firebaseServiceAccountKey = optionalEnv("FIREBASE_SERVICE_ACCOUNT_KEY");
 
-let resolvedServiceAccountJson = firebaseServiceAccountJson;
+let resolvedServiceAccountJson = firebaseServiceAccountJson || firebaseServiceAccountKey;
 
 if (!resolvedServiceAccountJson && firebaseServiceAccountJsonB64) {
   try {
@@ -126,10 +126,6 @@ if (!resolvedServiceAccountJson && firebaseServiceAccountJsonB64) {
     }
     resolvedServiceAccountJson = undefined;
   }
-}
-
-if (!resolvedServiceAccountJson && firebaseServiceAccountKey) {
-  resolvedServiceAccountJson = firebaseServiceAccountKey;
 }
 
 if (!resolvedServiceAccountJson && !isRelaxed) {

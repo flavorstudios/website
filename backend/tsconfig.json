@@ -12,7 +12,7 @@
     "resolveJsonModule": true,
     "baseUrl": "./",
     "paths": {
-      "@website/shared": ["./shared/src"]
+      "@website/shared": ["./shared/dist"]
     }
   },
   "include": ["src"]

@@ -11,7 +11,7 @@
     "resolveJsonModule": true,
     "baseUrl": "./",
     "paths": {
-      "@website/shared": ["./shared/dist"]
+      "@website/shared": ["../shared/dist"]
     },
     "types": ["node", "jest"],
     "skipLibCheck": true

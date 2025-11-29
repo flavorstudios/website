@@ -2,7 +2,6 @@ import { NextRequest } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import nodemailer from "nodemailer";
 import { z } from "zod";
-import { serverEnv } from "@/env/server";
 import { handleOptionsRequest } from "@/lib/api/cors";
 import {
   createRequestContext,
@@ -29,23 +28,7 @@ function respondWithExternalRedirect(context: RequestContext) {
   );
 }
 
-const PERSPECTIVE_API_KEY = serverEnv.PERSPECTIVE_API_KEY;
 const THRESHOLD = 0.7;
-
-const notifyEnabled = serverEnv.NOTIFY_NEW_SUBMISSION === "true";
-const adminEmailsEnv = serverEnv.ADMIN_EMAILS;
-
-const transporter = nodemailer.createTransport({
-  host: serverEnv.SMTP_HOST,
-  port: Number(serverEnv.SMTP_PORT || 587),
-  secure: serverEnv.SMTP_SECURE === "true",
-  auth: serverEnv.SMTP_USER
-    ? {
-        user: serverEnv.SMTP_USER,
-        pass: serverEnv.SMTP_PASS,
-      }
-    : undefined,
-});
 
 const contactSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -64,8 +47,9 @@ type ModerationScores = {
 async function moderateText(
   text: string,
   context: RequestContext,
+  perspectiveApiKey?: string,
 ): Promise<ModerationScores | null> {
-  if (!PERSPECTIVE_API_KEY) {
+  if (!perspectiveApiKey) {
     logError("contact:moderate:config", undefined, {
       requestId: context.requestId,
       message:
@@ -76,7 +60,7 @@ async function moderateText(
 
   try {
     const res = await fetch(
-      `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${PERSPECTIVE_API_KEY}`,
+      `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${perspectiveApiKey}`,
       {
         method: "POST",
         headers: {
@@ -124,6 +108,23 @@ export async function POST(request: NextRequest | Request) {
     return redirect;
   }
 
+  const { serverEnv } = await import("@/env/server");
+
+  const notifyEnabled = serverEnv.NOTIFY_NEW_SUBMISSION === "true";
+  const adminEmailsEnv = serverEnv.ADMIN_EMAILS;
+
+  const transporter = nodemailer.createTransport({
+    host: serverEnv.SMTP_HOST,
+    port: Number(serverEnv.SMTP_PORT || 587),
+    secure: serverEnv.SMTP_SECURE === "true",
+    auth: serverEnv.SMTP_USER
+      ? {
+          user: serverEnv.SMTP_USER,
+          pass: serverEnv.SMTP_PASS,
+        }
+      : undefined,
+  });
+
   try {
     const body = await request.json();
     const parsed = contactSchema.safeParse(body);
@@ -137,7 +138,11 @@ export async function POST(request: NextRequest | Request) {
 
     const { firstName, lastName, email, subject, message } = parsed.data;
 
-    const scores = await moderateText(message, context);
+    const scores = await moderateText(
+      message,
+      context,
+      serverEnv.PERSPECTIVE_API_KEY,
+    );
     const flagged = scores
       ? scores.toxicity > THRESHOLD ||
         scores.insult > THRESHOLD ||

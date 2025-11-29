@@ -403,8 +403,8 @@ importers:
   backend:
     dependencies:
       '@website/shared':
-        specifier: file:./shared
-        version: file:backend/shared
+        specifier: workspace:*
+        version: link:../shared
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -3275,9 +3275,6 @@ packages:
 
   '@vitest/utils@2.1.9':
     resolution: {integrity: sha512-v0psaMSkNJ3A2NMrUEHFRzJtDPFn+/VWZ5WxImB21T9fjucJRmS7xCS3ppEnARb9y11OAzaD+P2Ps+b+BGX5iQ==}
-
-  '@website/shared@file:backend/shared':
-    resolution: {directory: backend/shared, type: directory}
 
   abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -10541,8 +10538,6 @@ snapshots:
       '@vitest/pretty-format': 2.1.9
       loupe: 3.2.0
       tinyrainbow: 1.2.0
-
-  '@website/shared@file:backend/shared': {}
 
   abort-controller@3.0.0:
     dependencies:

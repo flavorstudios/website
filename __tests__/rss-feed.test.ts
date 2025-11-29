@@ -115,21 +115,30 @@ describe("rss feed service", () => {
   it("filters unpublished content and respects variants", async () => {
     const posts = [
       createPost({ id: "p1", slug: "live", publishedAt: "2024-01-02T00:00:00Z" }),
-      createPost({ id: "p2", slug: "draft", publishedAt: undefined }),
+      createPost({ id: "p2", slug: "older", publishedAt: "2023-12-31T12:00:00Z" }),
+      createPost({ id: "p3", slug: "draft", publishedAt: undefined }),
     ];
     const videos = [
       createVideo({ id: "v1", slug: "public-video", publishedAt: "2024-01-03T00:00:00Z" }),
       createVideo({ id: "v2", slug: "future-video", publishedAt: "2999-01-01T00:00:00Z" }),
     ];
 
-    const snapshot = composeFeedSnapshotFromData({ variant: "blog", posts, videos });
+    const snapshot = composeFeedSnapshotFromData({ variant: "all", posts, videos });
     const parsed = await parseStringPromise<ParsedRssDocument>(snapshot.xml, parserOptions);
     const channel = parsed.rss.channel;
     const items = asArray(channel.item);
 
-    expect(items).toHaveLength(1);
-    expect(channel.link).toBe("https://flavorstudios.in/blog");
-    expect(channel["atom:link"].$.href).toBe("https://flavorstudios.in/rss/blog.xml");
+    expect(items).toHaveLength(3);
+    expect(channel.link).toBe("https://flavorstudios.in");
+    expect(channel["atom:link"].$.href).toBe("https://flavorstudios.in/rss.xml");
+
+    const links = items.map((item) => item.link);
+    expect(links).not.toContain("https://flavorstudios.in/blog/draft");
+    expect(links).not.toContain("https://flavorstudios.in/watch/future-video");
+
+    const timestamps = items.map((item) => new Date(item.pubDate).getTime());
+    expect(timestamps).toEqual([...timestamps].sort((a, b) => b - a));
+    expect(links[0]).toBe("https://flavorstudios.in/watch/public-video");
   });
 
   it("produces valid fallback XML", async () => {

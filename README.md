@@ -95,11 +95,11 @@ This project requires **Node.js 22**. The root `.nvmrc` pins the version locally
 2. **Set up your environment and install dependencies:**
 
    ```bash
-   cp .env.local.example .env.local  # create local env file (ignored by Git)
+   cp env.example .env.local  # create local env file (ignored by Git)
    pnpm install  # or `npm install`
    ```
 
-   > Server-only variables (no `NEXT_PUBLIC_` prefix) stay on the server, while `NEXT_PUBLIC_*` variables are exposed to the client bundle. Both live together in `.env.local`, and `.env.local.example` lists the expected keys.
+   > Server-only variables (no `NEXT_PUBLIC_` prefix) stay on the server, while `NEXT_PUBLIC_*` variables are exposed to the client bundle. Both live together in `.env.local`, and `env.example` lists the expected keys.
 
 3. **Common development scripts:**
 
@@ -136,7 +136,7 @@ requires several environment variables, all of which must be present in your
 settings:
 In production these values are provided via Vercel, and any `.env*`
 files are git-ignored so they can't override the deployed configuration. Use
-`.env.local.example` as a template for local development:
+`env.example` as a template for local development:
 
 NEXT_PUBLIC_FIREBASE_API_KEY
 
@@ -157,7 +157,7 @@ scss
 Copy
 Edit
 [Firebase] Missing Firebase environment variable(s): NEXT_PUBLIC_FIREBASE_API_KEY, ...
-Use `.env.local.example` as a reference for the correct variable names and structure.
+Use `env.example` as a reference for the correct variable names and structure.
 
 ### Firebase Admin configuration (server only)
 
@@ -238,7 +238,7 @@ Authenticated cron endpoints keep cache and feeds fresh.
 - `CRON_SECRET` – shared bearer token used to authenticate requests.
 - `BASE_URL` – full URL (including protocol) pointing at the deployed site so scheduled functions can call back into the app.
 
-See [.env.local.example](.env.local.example) for other related settings.
+See [env.example](env.example) for other related settings.
 
 ### Jobs
 | Job | Endpoint | Schedule | Code |

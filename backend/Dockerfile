@@ -44,11 +44,10 @@ WORKDIR /app
 RUN useradd --create-home --shell /bin/bash appuser
 
 COPY --from=pruner /app/node_modules ./node_modules
-COPY --from=pruner /app/shared ./shared
-COPY --from=pruner /app/backend ./backend
-COPY --from=pruner /app/package.json ./package.json
-COPY --from=pruner /app/tsconfig.json ./tsconfig.json
-COPY --from=pruner /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY --from=pruner /app/shared/dist ./shared/dist
+COPY --from=pruner /app/shared/package.json ./shared/package.json
+COPY --from=pruner /app/backend/dist ./backend/dist
+COPY --from=pruner /app/backend/package.json ./backend/package.json
 
 USER appuser
 EXPOSE 8080

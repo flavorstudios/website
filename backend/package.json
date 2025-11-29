@@ -12,7 +12,7 @@
     "@website/shared": "file:./shared",
     "cors": "^2.8.5",
     "express": "^4.21.2",
-    "firebase-admin": "^13.4.0"
+    "firebase-admin": "^13.6.0"
   },
   "devDependencies": {
     "tsx": "^4.20.3",

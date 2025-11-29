@@ -24,12 +24,11 @@ RUN pnpm install --frozen-lockfile --recursive --filter @website/shared --filter
 
 # Build shared and backend
 RUN pnpm --filter @website/shared run build
-RUN pnpm --filter . run build
+RUN pnpm --filter next-backend run build
 
 # Prune dev dependencies while keeping workspace layout intact
 FROM builder AS pruner
-RUN pnpm prune --filter . --prod
-RUN pnpm prune --filter @website/shared --prod
+RUN pnpm prune --prod
 
 FROM node:${NODE_VERSION}-slim AS runner
 ENV NODE_ENV=production

@@ -298,7 +298,7 @@ function getVariantConfig(variant: FeedVariant): FeedVariantConfig {
         variant,
         title: `${SITE_NAME} Videos`,
         description: `${SITE_NAME} video premieres, trailers, and creator commentary in one feed.`,
-        channelPath: "/videos",
+        channelPath: "/watch",
         selfPath: "/rss/videos.xml",
       };
     default:

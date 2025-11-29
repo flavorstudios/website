@@ -7,30 +7,27 @@ ENV PATH="${PNPM_HOME}:${PATH}"
 RUN corepack enable && mkdir -p "${PNPM_HOME}" && chmod 0777 "${PNPM_HOME}"
 WORKDIR /app
 
-FROM base AS deps
-WORKDIR /app
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY shared ./shared
-RUN pnpm fetch --filter @website/shared --filter .
-RUN pnpm install --frozen-lockfile --recursive --filter @website/shared --filter . --prod=false
-
+# Install all dependencies and build in a single, consistent workspace
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/package.json ./package.json
-COPY --from=deps /app/shared/package.json ./shared/package.json
+
+# Workspace manifests first for better caching
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY shared/package.json ./shared/package.json
+
+# Fetch and install dependencies for the whole workspace
+RUN pnpm fetch --filter @website/shared --filter .
 COPY shared ./shared
 COPY src ./src
 COPY tsconfig.json ./tsconfig.json
+RUN pnpm install --frozen-lockfile --recursive --filter @website/shared --filter . --prod=false
+
+# Build shared and backend
 RUN pnpm --filter @website/shared run build
 RUN pnpm --filter . run build
 
-FROM base AS pruner
-WORKDIR /app
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/shared ./shared
-COPY --from=builder /app/dist ./dist
+# Prune dev dependencies while keeping workspace layout intact
+FROM builder AS pruner
 RUN pnpm prune --filter . --prod
 RUN pnpm prune --filter @website/shared --prod
 

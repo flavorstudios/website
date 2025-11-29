@@ -138,4 +138,21 @@ describe("rss feed service", () => {
     expect(parsed.rss.channel.link).toBe("https://flavorstudios.in");
     expect(parsed.rss.channel.item).toBeUndefined();
   });
+
+  it("points the videos feed to the watch page", async () => {
+    const videos = [
+      createVideo({
+        id: "video-2",
+        slug: "feature-video",
+        publishedAt: "2024-02-01T00:00:00Z",
+      }),
+    ];
+
+    const snapshot = composeFeedSnapshotFromData({ variant: "videos", posts: [], videos });
+    const parsed = await parseStringPromise<ParsedRssDocument>(snapshot.xml, parserOptions);
+    const channel = parsed.rss.channel;
+
+    expect(channel.link).toBe("https://flavorstudios.in/watch");
+    expect(channel["atom:link"].$.href).toBe("https://flavorstudios.in/rss/videos.xml");
+  });
 });

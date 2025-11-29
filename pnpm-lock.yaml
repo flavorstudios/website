@@ -426,7 +426,7 @@ importers:
         version: 30.0.0
       '@types/node':
         specifier: ^24.1.0
-        version: 24.1.4
+        version: 24.1.0
       tsx:
         specifier: ^4.20.3
         version: 4.20.3

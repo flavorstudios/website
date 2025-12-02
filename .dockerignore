@@ -1,7 +1,6 @@
 # Node / workspace artifacts we do not need in the image context
 node_modules
-backend/node_modules
-shared/node_modules
+**/node_modules
 **/.next
 **/dist
 .pnpm-store
@@ -17,11 +16,13 @@ pnpm-debug.log
 !pnpm-workspace.yaml
 !package.json
 !tsconfig.json
-!backend/package.json
-!backend/tsconfig.json
+!backend/**
+!shared/**
 !backend/Dockerfile
-!shared/package.json
-!shared/tsconfig.json
+
+# Re-exclude nested dependency folders we explicitly brought back above
+backend/node_modules
+shared/node_modules
 
 firebase-debug.log
 *.local

@@ -15,13 +15,29 @@ import {
 export function createApp() {
   const app = express();
 
-  const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS?.split(/[,\s]+/).filter(Boolean);
-  const origin = allowedOrigins && allowedOrigins.length > 0 ? allowedOrigins : true;
+  const allowedOrigins =
+    process.env.CORS_ALLOWED_ORIGINS?.split(/[,\s]+/).filter(Boolean) ?? [];
+
+  if (allowedOrigins.length === 0) {
+    throw new Error("CORS_ALLOWED_ORIGINS must be set to a comma-separated list of allowed origins");
+  }
+
+  const isOriginAllowed = (origin: string | undefined) => {
+    if (!origin) return false; // Reject requests without an origin when credentials are required
+    return allowedOrigins.includes(origin);
+  };
 
   app.use(
     cors({
-      origin,
+      origin(origin, callback) {
+        if (isOriginAllowed(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Origin not allowed by CORS"));
+        }
+      },
       credentials: true,
+      optionsSuccessStatus: 204,
     }),
   );
 

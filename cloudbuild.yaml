@@ -1,6 +1,7 @@
 steps:
   - id: build-backend-image
     name: gcr.io/cloud-builders/docker
+    dir: .
     # Use the monorepo root as the build context so the workspace lockfile is available to Docker
     args:
       - build

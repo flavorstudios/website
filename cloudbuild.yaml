@@ -1,12 +1,12 @@
 steps:
   - id: build-backend-image
     name: gcr.io/cloud-builders/docker
-    # Run from the repository root so the Docker context includes pnpm manifests and workspace files
-    dir: .
+    # Build from the backend directory but send the monorepo root as context so lockfiles are available
+    dir: backend
     args:
       - build
-      - --file=backend/Dockerfile
+      - --file=./Dockerfile
       - --tag=gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA
-      - .
+      - ..
 images:
   - gcr.io/$PROJECT_ID/website-backend:$COMMIT_SHA

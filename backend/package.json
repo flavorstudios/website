@@ -9,7 +9,11 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+<<<<<<< ours
     "@website/shared": "workspace:*",
+=======
+    "@website/shared": "file:./shared",
+>>>>>>> theirs
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "firebase-admin": "^13.4.0"

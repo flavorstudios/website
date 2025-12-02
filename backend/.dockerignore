@@ -1,6 +1,9 @@
 node_modules
 shared/node_modules
+<<<<<<< ours
 **/.next
+=======
+>>>>>>> theirs
 **/dist
 .pnpm-store
 .pnp.*
@@ -9,6 +12,7 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 pnpm-debug.log
+<<<<<<< ours
 firebase-debug.log
 *.local
 .git
@@ -27,10 +31,15 @@ coverage
 *.tsbuildinfo
 
 # Keep workspace manifests in the context for Docker builds
+=======
+>>>>>>> theirs
 !pnpm-lock.yaml
 !pnpm-workspace.yaml
 !package.json
 !shared/package.json
+<<<<<<< ours
 !tsconfig.json
 !shared/tsconfig.json
 !Dockerfile
+=======
+>>>>>>> theirs

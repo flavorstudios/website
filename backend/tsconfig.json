@@ -11,6 +11,7 @@
     "resolveJsonModule": true,
     "baseUrl": "./",
     "paths": {
+<<<<<<< ours
       "@website/shared": ["../shared/dist"]
     },
     "types": ["node", "jest"],
@@ -21,4 +22,10 @@
     "**/*.test.ts",
     "**/__tests__/**"
   ]
+=======
+      "@website/shared": ["./shared/src"]
+    }
+  },
+  "include": ["src"]
+>>>>>>> theirs
 }
